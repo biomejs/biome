@@ -109,6 +109,35 @@ pub fn assert_function_query_was_not_run<Db, Q, QDb, I, R>(
     }
 }
 
+/// Returns the position of the first `WillExecute` event for the given tracked
+/// function and input.
+///
+/// This is useful for tests that need to assert query execution order rather
+/// than only whether a query ran.
+pub fn function_query_will_execute_position<Db, Q, QDb, I, R>(
+    db: &Db,
+    query: Q,
+    input: I,
+    events: &[Event],
+) -> Option<usize>
+where
+    Db: salsa::Database,
+    Q: Fn(QDb, I) -> R,
+    I: salsa::plumbing::AsId,
+{
+    let input_id = input.as_id();
+    let query_name = query_name(&query);
+
+    events.iter().position(|event| {
+        if let salsa::EventKind::WillExecute { database_key } = event.kind {
+            db.ingredient_debug_name(database_key.ingredient_index()) == query_name
+                && database_key.key_index() == input_id
+        } else {
+            false
+        }
+    })
+}
+
 fn find_will_execute_event<'a, Q, I>(
     db: &dyn salsa::Database,
     query: Q,

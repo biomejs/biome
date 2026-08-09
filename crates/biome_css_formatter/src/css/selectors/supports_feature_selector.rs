@@ -22,7 +22,7 @@ impl FormatNodeRule<CssSupportsFeatureSelector> for FormatCssSupportsFeatureSele
         write!(
             f,
             [group(&format_args![
-                selector_token.format(),
+                selector_token.format()?.with_text_case(CssCase::Preserve),
                 l_paren_token.format(),
                 soft_block_indent_with_maybe_space(&selector.format(), should_insert_space),
                 r_paren_token.format()

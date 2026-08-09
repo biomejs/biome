@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/emphasis/issue-17286.md
+---
+
+# Input
+
+```md
+Note: With {"NO\_PROPAGATE"}, the client is expected to honour the {"errors"} in
+the _response_ and prevent developers from reading a `null` produced by an
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-Note: With {"NO_PROPAGATE"}, the client is expected to honour the {"errors"} in
++Note: With {"NO\_PROPAGATE"}, the client is expected to honour the {"errors"} in
+ the _response_ and prevent developers from reading a `null` produced by an
+```
+
+# Output
+
+```md
+Note: With {"NO\_PROPAGATE"}, the client is expected to honour the {"errors"} in
+the _response_ and prevent developers from reading a `null` produced by an
+```

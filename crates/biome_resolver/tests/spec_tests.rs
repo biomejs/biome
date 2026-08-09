@@ -523,6 +523,72 @@ fn test_resolve_type_definitions_from_another_type_definition() {
 }
 
 #[test]
+fn test_resolve_self_reference_without_exports_field() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve(
+            "next/dist/request",
+            Utf8Path::new(&format!("{base_dir}/node_modules/next")),
+            &fs,
+            &options
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/next/dist/request.d.ts"
+        )))
+    );
+}
+
+/// A package with an `exports` field may reference itself by name, but only
+/// through the subpaths listed in the `exports` map.
+#[test]
+fn test_resolve_self_reference_with_exports_field() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve(
+            "swr/_internal",
+            Utf8Path::new(&format!("{base_dir}/node_modules/swr/dist/index")),
+            &fs,
+            &options
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/swr/dist/_internal/index.d.mts"
+        )))
+    );
+
+    // A subpath that is not listed in the `exports` map must not fall back to
+    // the file on disk.
+    assert_eq!(
+        resolve(
+            "swr/dist/index/index.js",
+            Utf8Path::new(&format!("{base_dir}/node_modules/swr/dist/index")),
+            &fs,
+            &options
+        ),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
 fn test_resolve_type_definitions_with_custom_type_roots() {
     let base_dir = get_fixtures_path("resolver_cases_6");
     let fs = OsFileSystem::new(base_dir.clone());

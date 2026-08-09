@@ -145,7 +145,7 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
         if self.should_hug {
             write!(f, [format_node])?;
         } else {
-            write!(f, [align(2, &format_node)])?;
+            write!(f, [align("  ", &format_node)])?;
         }
 
         // There are a few special cases for nodes which handle their own

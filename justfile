@@ -60,6 +60,10 @@ gen-rules:
 gen-css-baseline:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
+# Generates CSS keywords from @webref/css
+gen-css-keywords:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-keywords
+
 # Generates module-replacements data from e18e
 gen-module-replacements:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- module-replacements
@@ -107,7 +111,7 @@ build-wasm-bundler:
 
 # Build WASM for Node.js target (development)
 build-wasm-node-dev:
-  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm
+  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm --features unstable
   wasm-bindgen target/wasm32-unknown-unknown/debug/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-nodejs \
     --target nodejs \
@@ -193,6 +197,16 @@ new-graphql-lintrule rulename:
 # Creates a new graphql assist rule with the given name. Name has to be camel case.
 new-graphql-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=assist --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new markdown lint rule with the given name. Name has to be camel case.
+new-markdown-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=markdown --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new markdown assist rule with the given name. Name has to be camel case.
+new-markdown-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=markdown --category=assist --name={{rulename}}
   just gen-analyzer
 
 # Creates a new html lint rule with the given name. Name has to be camel case.

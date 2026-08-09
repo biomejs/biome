@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/ts-expression/attribute-expr.vue
+---
+
+# Input
+
+```vue
+<script lang="ts"></script>
+
+<template>
+  <comp :foo="   (a:string)=>1"/>
+  <comp :foo=" <X extends Something & AnothoerOne, Y    extends unknown[]>(x:X,y:Y)=>y.length + x.foobar.abcdefg"/>
+  <comp :foo="(myFunction<T   |U>(qwerty,qwerty.qwerty?.qwerty)as any) + x.filter(abcdefg as never).join(xxx)"/>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,11 @@
+ <script lang="ts"></script>
+ 
+ <template>
+-  <comp :foo="(a: string) => 1" />
++  <comp :foo="   (a:string)=>1" />
+   <comp
+-    :foo="
+-      <X extends Something & AnothoerOne, Y extends unknown[]>(x: X, y: Y) =>
+-        y.length + x.foobar.abcdefg
+-    "
++    :foo=" <X extends Something & AnothoerOne, Y    extends unknown[]>(x:X,y:Y)=>y.length + x.foobar.abcdefg"
+   />
+   <comp
+-    :foo="
+-      (myFunction<T | U>(qwerty, qwerty.qwerty?.qwerty) as any) +
+-      x.filter(abcdefg as never).join(xxx)
+-    "
++    :foo="(myFunction<T   |U>(qwerty,qwerty.qwerty?.qwerty)as any) + x.filter(abcdefg as never).join(xxx)"
+   />
+ </template>
+```
+
+# Output
+
+```vue
+<script lang="ts"></script>
+
+<template>
+  <comp :foo="   (a:string)=>1" />
+  <comp
+    :foo=" <X extends Something & AnothoerOne, Y    extends unknown[]>(x:X,y:Y)=>y.length + x.foobar.abcdefg"
+  />
+  <comp
+    :foo="(myFunction<T   |U>(qwerty,qwerty.qwerty?.qwerty)as any) + x.filter(abcdefg as never).join(xxx)"
+  />
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    6:     :foo=" <X extends Something & AnothoerOne, Y    extends unknown[]>(x:X,y:Y)=>y.length + x.foobar.abcdefg"
+    9:     :foo="(myFunction<T   |U>(qwerty,qwerty.qwerty?.qwerty)as any) + x.filter(abcdefg as never).join(xxx)"
+```

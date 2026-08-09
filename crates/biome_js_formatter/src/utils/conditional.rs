@@ -79,7 +79,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
             let is_consequent_nested = consequent.syntax().kind() == syntax.kind();
             let consequent = format_with(|f| {
                 if indent_style.is_space() {
-                    write!(f, [align(2, &consequent)])
+                    write!(f, [align("  ", &consequent)])
                 } else {
                     write!(f, [indent(&consequent)])
                 }
@@ -110,7 +110,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
             )?;
             let alternate = format_with(|f| {
                 if indent_style.is_space() {
-                    write!(f, [align(2, &alternate)])
+                    write!(f, [align("  ", &alternate)])
                 } else {
                     write!(f, [indent(&alternate)])
                 }
@@ -487,7 +487,7 @@ impl Format<JsFormatContext> for FormatConditionalTest<'_> {
 
         if self.layout.is_nested_alternate() {
             if indent_style.is_space() {
-                write!(f, [align(2, &format_inner)])
+                write!(f, [align("  ", &format_inner)])
             } else {
                 write!(f, [indent(&format_inner)])
             }

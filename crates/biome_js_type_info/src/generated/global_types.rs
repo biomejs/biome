@@ -4,10 +4,23 @@
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
+    crate::globals::ARRAY_ID_GLOBAL_TYPE_ID,
+    crate::globals::ARRAY_FILTER_ID_GLOBAL_TYPE_ID,
+    crate::globals::ARRAY_FOREACH_ID_GLOBAL_TYPE_ID,
+    crate::globals::ARRAY_MAP_ID_GLOBAL_TYPE_ID,
+    crate::globals::REGEXP_ID_GLOBAL_TYPE_ID,
+    crate::globals::REGEXP_EXEC_ID_GLOBAL_TYPE_ID,
+    crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID,
+    crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
+    crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID,
     crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+    crate::globals::DATE_ID_GLOBAL_TYPE_ID,
+    crate::globals::MAP_ID_GLOBAL_TYPE_ID,
+    crate::globals::SET_ID_GLOBAL_TYPE_ID,
+    crate::globals::WEAK_MAP_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID,
@@ -17,6 +30,118 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 pub(crate) fn set_generated_global_type_data(
     builder: &mut crate::globals_builder::GlobalsResolverBuilder,
 ) {
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Array")),
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("filter")),
+                ty: crate::globals::GLOBAL_ARRAY_FILTER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("forEach")),
+                ty: crate::globals::GLOBAL_ARRAY_FOREACH_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("map")),
+                ty: crate::globals::GLOBAL_ARRAY_MAP_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Array.prototype.filter")),
+        parameters: Box::new([crate::FunctionParameter::Pattern(
+            crate::PatternFunctionParameter {
+                bindings: Box::default(),
+                ty: crate::globals::GLOBAL_CONDITIONAL_CALLBACK_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_FILTER_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Array.prototype.forEach")),
+        parameters: Box::new([crate::FunctionParameter::Pattern(
+            crate::PatternFunctionParameter {
+                bindings: Box::default(),
+                ty: crate::globals::GLOBAL_VOID_CALLBACK_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_VOID_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::new([crate::globals::GLOBAL_U_ID.into()]),
+        name: Some(biome_rowan::Text::new_static("Array.prototype.map")),
+        parameters: Box::new([crate::FunctionParameter::Pattern(
+            crate::PatternFunctionParameter {
+                bindings: Box::default(),
+                ty: crate::globals::GLOBAL_MAP_CALLBACK_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ARRAY_U_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_MAP_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("RegExp")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([crate::TypeMember {
+            kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("exec")),
+            ty: crate::globals::GLOBAL_REGEXP_EXEC_ID.into(),
+        }]),
+    }));
+    builder.set_type_data(crate::globals::REGEXP_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("RegExp.exec")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_REGEXP_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::REGEXP_EXEC_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Symbol")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("dispose")),
+                ty: crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "asyncDispose",
+                )),
+                ty: crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Symbol;
+    builder.set_type_data(crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Symbol;
+    builder.set_type_data(crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Interface(Box::new(crate::Interface {
         name: biome_rowan::Text::new_static("Disposable"),
         type_parameters: Box::default(),
@@ -60,6 +185,44 @@ pub(crate) fn set_generated_global_type_data(
         crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
         data,
     );
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Date")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([]),
+    }));
+    builder.set_type_data(crate::globals::DATE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Map")),
+        type_parameters: Box::new([
+            crate::globals::GLOBAL_T_ID.into(),
+            crate::globals::GLOBAL_U_ID.into(),
+        ]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([]),
+    }));
+    builder.set_type_data(crate::globals::MAP_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Set")),
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([]),
+    }));
+    builder.set_type_data(crate::globals::SET_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("WeakMap")),
+        type_parameters: Box::new([
+            crate::globals::GLOBAL_T_ID.into(),
+            crate::globals::GLOBAL_U_ID.into(),
+        ]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([]),
+    }));
+    builder.set_type_data(crate::globals::WEAK_MAP_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("Error")),
         type_parameters: Box::default(),

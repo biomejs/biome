@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule stores CSS values that can span multiple tokens.")]
+
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};

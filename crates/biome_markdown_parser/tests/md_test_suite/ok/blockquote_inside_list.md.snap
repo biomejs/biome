@@ -22,7 +22,7 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
@@ -200,7 +200,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..84
+0: MD_ROOT@0..84
   0: (empty)
   1: MD_BLOCK_LIST@0..84
     0: MD_BULLET_LIST_ITEM@0..54

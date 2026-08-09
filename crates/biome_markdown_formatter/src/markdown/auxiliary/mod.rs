@@ -3,8 +3,8 @@
 pub(crate) mod autolink;
 pub(crate) mod bullet;
 pub(crate) mod bullet_list_item;
+pub(crate) mod code_content;
 pub(crate) mod continuation_indent;
-pub(crate) mod document;
 pub(crate) mod entity_reference;
 pub(crate) mod fenced_code_block;
 pub(crate) mod hard_line;
@@ -34,6 +34,7 @@ pub(crate) mod quote_prefix;
 pub(crate) mod reference_image;
 pub(crate) mod reference_link;
 pub(crate) mod reference_link_label;
+pub(crate) mod root;
 pub(crate) mod setext_header;
 pub(crate) mod textual;
 pub(crate) mod thematic_break_block;

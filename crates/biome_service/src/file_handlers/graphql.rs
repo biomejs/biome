@@ -1,7 +1,8 @@
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
-    EditorCapabilities, EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults,
-    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    EditorCapabilities, EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult,
+    LintParams, LintResults, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    format_on_type_noop, matches_on_type_char,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -14,7 +15,7 @@ use crate::settings::{
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::FixFileMode;
-use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
+use crate::workspace::{CodeAction, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
 };
@@ -32,11 +33,12 @@ use biome_graphql_analyze::analyze;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
-use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
-use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
+use biome_graphql_syntax::{
+    GraphqlLanguage, GraphqlRoot, GraphqlSyntaxKind, GraphqlSyntaxNode, TextRange, TextSize,
+};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
-use either::Either;
 use std::borrow::Cow;
 use tracing::{debug_span, info, trace_span};
 
@@ -379,7 +381,7 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -438,12 +440,39 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_graphql_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: GraphqlSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let formatting_root = root_node
+        .ancestors()
+        .find(|node: &GraphqlSyntaxNode| {
+            node.parent()
+                .is_some_and(|parent| parent.kind() == GraphqlSyntaxKind::GRAPHQL_ROOT)
+        })
+        .unwrap_or(root_node);
+
+    let printed = biome_graphql_formatter::format_range(
+        options,
+        &tree,
+        formatting_root.text_trimmed_range(),
+    )?;
     Ok(printed)
 }
 
@@ -584,7 +613,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// If applies all the safe fixes to the given syntax tree.
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: GraphqlRoot = params.parsed_source.tree(&params.workspace_db);
 
     // Compute final rules (taking `overrides` into account)
@@ -629,7 +658,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             let mut pending_actions = Vec::new();
 
             let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
-                process_fix_all.collect_signal(signal, &mut pending_actions)
+                if params.collect_final_diagnostics {
+                    process_fix_all.collect_signal(signal, &mut pending_actions)
+                } else {
+                    process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                }
             });
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -641,22 +674,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             })?;
 
             if result.is_none() {
-                return process_fix_all.finish(
-                    || {
-                        Ok(if params.should_format {
-                            Either::Left(format_node(
-                                params.settings.format_options::<GraphqlLanguage>(
-                                    params.biome_path,
-                                    &params.document_file_source,
-                                ),
-                                tree.syntax(),
-                            ))
-                        } else {
-                            Either::Right(tree.syntax().to_string())
-                        })
-                    },
-                    params.embeds_initial_indent,
-                );
+                return Ok(Some(
+                    process_fix_all.finish(tree.syntax().as_send().unwrap()),
+                ));
             }
         }
     }
@@ -690,26 +710,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     }
 
     // Phase 2: all rules for final diagnostics
-    {
+    if params.collect_final_diagnostics {
         let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             process_fix_all.collect_diagnostic_only(signal)
         });
     }
 
-    process_fix_all.finish(
-        || {
-            Ok(if params.should_format {
-                Either::Left(format_node(
-                    params.settings.format_options::<GraphqlLanguage>(
-                        params.biome_path,
-                        &params.document_file_source,
-                    ),
-                    tree.syntax(),
-                ))
-            } else {
-                Either::Right(tree.syntax().to_string())
-            })
-        },
-        params.embeds_initial_indent,
-    )
+    Ok(Some(
+        process_fix_all.finish(tree.syntax().as_send().unwrap()),
+    ))
 }

@@ -24,7 +24,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteClassDirective {
@@ -59,7 +59,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@42..43 "<" [] [],
                 slash_token: SLASH@43..44 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@44..47 "div" [] [],
+                    value_token: DIV_KW@44..47 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@47..48 ">" [] [],
             },
@@ -68,7 +68,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@48..50 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@50..57 "button" [] [Whitespace(" ")],
+                    value_token: BUTTON_KW@50..57 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteClassDirective {
@@ -103,7 +103,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@91..92 "<" [] [],
                 slash_token: SLASH@92..93 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@93..99 "button" [] [],
+                    value_token: BUTTON_KW@93..99 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@99..100 ">" [] [],
             },
@@ -125,7 +125,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..29
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..28
           0: SVELTE_CLASS_DIRECTIVE@5..28
             0: CLASS_KW@5..10 "class" [] []
@@ -149,13 +149,13 @@ HtmlRoot {
         0: L_ANGLE@42..43 "<" [] []
         1: SLASH@43..44 "/" [] []
         2: HTML_TAG_NAME@44..47
-          0: HTML_LITERAL@44..47 "div" [] []
+          0: DIV_KW@44..47 "div" [] []
         3: R_ANGLE@47..48 ">" [] []
     1: HTML_ELEMENT@48..100
       0: HTML_OPENING_ELEMENT@48..85
         0: L_ANGLE@48..50 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@50..57
-          0: HTML_LITERAL@50..57 "button" [] [Whitespace(" ")]
+          0: BUTTON_KW@50..57 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@57..84
           0: SVELTE_CLASS_DIRECTIVE@57..84
             0: CLASS_KW@57..62 "class" [] []
@@ -179,7 +179,7 @@ HtmlRoot {
         0: L_ANGLE@91..92 "<" [] []
         1: SLASH@92..93 "/" [] []
         2: HTML_TAG_NAME@93..99
-          0: HTML_LITERAL@93..99 "button" [] []
+          0: BUTTON_KW@93..99 "button" [] []
         3: R_ANGLE@99..100 ">" [] []
   4: EOF@100..101 "" [Newline("\n")] []
 

@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/link/parser-regression/issue-6078.md
+---
+
+# Input
+
+```md
+[](http://example.com/path?a=1&amp;b=2&c=3)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-[](http://example.com/path?a=1&b=2&=3)
++[](http://example.com/path?a=1&amp;b=2&c=3)
+```
+
+# Output
+
+```md
+[](http://example.com/path?a=1&amp;b=2&c=3)
+```

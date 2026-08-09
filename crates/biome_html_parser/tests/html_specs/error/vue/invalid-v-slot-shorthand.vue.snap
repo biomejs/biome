@@ -23,7 +23,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..10 "template" [] [Whitespace(" ")],
+                    value_token: TEMPLATE_KW@1..10 "template" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     VueBogusDirective {
@@ -61,7 +61,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@37..38 "<" [] [],
                 slash_token: SLASH@38..39 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@39..47 "template" [] [],
+                    value_token: TEMPLATE_KW@39..47 "template" [] [],
                 },
                 r_angle_token: R_ANGLE@47..48 ">" [] [],
             },
@@ -83,7 +83,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..37
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..10
-          0: HTML_LITERAL@1..10 "template" [] [Whitespace(" ")]
+          0: TEMPLATE_KW@1..10 "template" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@10..36
           0: VUE_BOGUS_DIRECTIVE@10..12
             0: HASH@10..12 "#" [] [Whitespace(" ")]
@@ -107,7 +107,7 @@ HtmlRoot {
         0: L_ANGLE@37..38 "<" [] []
         1: SLASH@38..39 "/" [] []
         2: HTML_TAG_NAME@39..47
-          0: HTML_LITERAL@39..47 "template" [] []
+          0: TEMPLATE_KW@39..47 "template" [] []
         3: R_ANGLE@47..48 ">" [] []
   4: EOF@48..49 "" [Newline("\n")] []
 

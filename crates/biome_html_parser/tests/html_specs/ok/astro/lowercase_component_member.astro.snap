@@ -36,11 +36,11 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
                 name: HtmlMemberName {
                     object: HtmlComponentName {
-                        value_token: HTML_LITERAL@19..23 "Data" [] [],
+                        value_token: HTML_COMPONENT_LITERAL@19..23 "Data" [] [],
                     },
                     dot_token: DOT@23..24 "." [] [],
-                    member: HtmlTagName {
-                        value_token: HTML_LITERAL@24..30 "Client" [] [],
+                    member: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@24..30 "Client" [] [],
                     },
                 },
                 attributes: HtmlAttributeList [],
@@ -50,8 +50,14 @@ HtmlRoot {
             closing_element: HtmlClosingElement {
                 l_angle_token: L_ANGLE@31..32 "<" [] [],
                 slash_token: SLASH@32..33 "/" [] [],
-                name: HtmlComponentName {
-                    value_token: HTML_LITERAL@33..44 "Data.Client" [] [],
+                name: HtmlMemberName {
+                    object: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@33..37 "Data" [] [],
+                    },
+                    dot_token: DOT@37..38 "." [] [],
+                    member: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@38..44 "Client" [] [],
+                    },
                 },
                 r_angle_token: R_ANGLE@44..45 ">" [] [],
             },
@@ -60,11 +66,11 @@ HtmlRoot {
             l_angle_token: L_ANGLE@45..47 "<" [Newline("\n")] [],
             name: HtmlMemberName {
                 object: HtmlComponentName {
-                    value_token: HTML_LITERAL@47..51 "form" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@47..51 "form" [] [],
                 },
                 dot_token: DOT@51..52 "." [] [],
-                member: HtmlTagName {
-                    value_token: HTML_LITERAL@52..58 "Field" [] [Whitespace(" ")],
+                member: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@52..58 "Field" [] [Whitespace(" ")],
                 },
             },
             attributes: HtmlAttributeList [
@@ -87,11 +93,11 @@ HtmlRoot {
             l_angle_token: L_ANGLE@73..75 "<" [Newline("\n")] [],
             name: HtmlMemberName {
                 object: HtmlComponentName {
-                    value_token: HTML_LITERAL@75..79 "form" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@75..79 "form" [] [],
                 },
                 dot_token: DOT@79..80 "." [] [],
-                member: HtmlTagName {
-                    value_token: HTML_LITERAL@80..86 "Field" [] [Whitespace(" ")],
+                member: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@80..86 "Field" [] [Whitespace(" ")],
                 },
             },
             attributes: HtmlAttributeList [
@@ -114,11 +120,11 @@ HtmlRoot {
             l_angle_token: L_ANGLE@109..111 "<" [Newline("\n")] [],
             name: HtmlMemberName {
                 object: HtmlComponentName {
-                    value_token: HTML_LITERAL@111..114 "foo" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@111..114 "foo" [] [],
                 },
                 dot_token: DOT@114..115 "." [] [],
-                member: HtmlTagName {
-                    value_token: HTML_LITERAL@115..119 "Bar" [] [Whitespace(" ")],
+                member: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@115..119 "Bar" [] [Whitespace(" ")],
                 },
             },
             attributes: HtmlAttributeList [
@@ -159,27 +165,31 @@ HtmlRoot {
         0: L_ANGLE@17..19 "<" [Newline("\n")] []
         1: HTML_MEMBER_NAME@19..30
           0: HTML_COMPONENT_NAME@19..23
-            0: HTML_LITERAL@19..23 "Data" [] []
+            0: HTML_COMPONENT_LITERAL@19..23 "Data" [] []
           1: DOT@23..24 "." [] []
-          2: HTML_TAG_NAME@24..30
-            0: HTML_LITERAL@24..30 "Client" [] []
+          2: HTML_COMPONENT_NAME@24..30
+            0: HTML_COMPONENT_LITERAL@24..30 "Client" [] []
         2: HTML_ATTRIBUTE_LIST@30..30
         3: R_ANGLE@30..31 ">" [] []
       1: HTML_ELEMENT_LIST@31..31
       2: HTML_CLOSING_ELEMENT@31..45
         0: L_ANGLE@31..32 "<" [] []
         1: SLASH@32..33 "/" [] []
-        2: HTML_COMPONENT_NAME@33..44
-          0: HTML_LITERAL@33..44 "Data.Client" [] []
+        2: HTML_MEMBER_NAME@33..44
+          0: HTML_COMPONENT_NAME@33..37
+            0: HTML_COMPONENT_LITERAL@33..37 "Data" [] []
+          1: DOT@37..38 "." [] []
+          2: HTML_COMPONENT_NAME@38..44
+            0: HTML_COMPONENT_LITERAL@38..44 "Client" [] []
         3: R_ANGLE@44..45 ">" [] []
     1: HTML_SELF_CLOSING_ELEMENT@45..73
       0: L_ANGLE@45..47 "<" [Newline("\n")] []
       1: HTML_MEMBER_NAME@47..58
         0: HTML_COMPONENT_NAME@47..51
-          0: HTML_LITERAL@47..51 "form" [] []
+          0: HTML_COMPONENT_LITERAL@47..51 "form" [] []
         1: DOT@51..52 "." [] []
-        2: HTML_TAG_NAME@52..58
-          0: HTML_LITERAL@52..58 "Field" [] [Whitespace(" ")]
+        2: HTML_COMPONENT_NAME@52..58
+          0: HTML_COMPONENT_LITERAL@52..58 "Field" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@58..71
         0: HTML_ATTRIBUTE@58..71
           0: HTML_ATTRIBUTE_NAME@58..62
@@ -194,10 +204,10 @@ HtmlRoot {
       0: L_ANGLE@73..75 "<" [Newline("\n")] []
       1: HTML_MEMBER_NAME@75..86
         0: HTML_COMPONENT_NAME@75..79
-          0: HTML_LITERAL@75..79 "form" [] []
+          0: HTML_COMPONENT_LITERAL@75..79 "form" [] []
         1: DOT@79..80 "." [] []
-        2: HTML_TAG_NAME@80..86
-          0: HTML_LITERAL@80..86 "Field" [] [Whitespace(" ")]
+        2: HTML_COMPONENT_NAME@80..86
+          0: HTML_COMPONENT_LITERAL@80..86 "Field" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@86..107
         0: HTML_ATTRIBUTE@86..107
           0: HTML_ATTRIBUTE_NAME@86..98
@@ -212,10 +222,10 @@ HtmlRoot {
       0: L_ANGLE@109..111 "<" [Newline("\n")] []
       1: HTML_MEMBER_NAME@111..119
         0: HTML_COMPONENT_NAME@111..114
-          0: HTML_LITERAL@111..114 "foo" [] []
+          0: HTML_COMPONENT_LITERAL@111..114 "foo" [] []
         1: DOT@114..115 "." [] []
-        2: HTML_TAG_NAME@115..119
-          0: HTML_LITERAL@115..119 "Bar" [] [Whitespace(" ")]
+        2: HTML_COMPONENT_NAME@115..119
+          0: HTML_COMPONENT_LITERAL@115..119 "Bar" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@119..141
         0: HTML_ATTRIBUTE@119..141
           0: HTML_ATTRIBUTE_NAME@119..132

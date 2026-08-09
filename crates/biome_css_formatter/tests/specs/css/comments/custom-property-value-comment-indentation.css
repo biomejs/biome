@@ -1,0 +1,13 @@
+:root {
+	--main-font-stack:
+		/* Why does this comment get placed without indentation? */
+		system-ui,
+		/* Comment 1 */
+		-apple-system,
+		BlinkMacSystemFont,
+		/* Comment 2 */
+		"Segoe UI",
+		Roboto, Ubuntu,
+		/* Comment 3 */
+		sans-serif;
+}

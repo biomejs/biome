@@ -27,7 +27,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..8 "article" [] [],
+                    value_token: ARTICLE_KW@1..8 "article" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@8..9 ">" [] [],
@@ -46,7 +46,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@26..28 "<" [Newline("\n")] [],
                 slash_token: SLASH@28..29 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@29..36 "article" [] [],
+                    value_token: ARTICLE_KW@29..36 "article" [] [],
                 },
                 r_angle_token: R_ANGLE@36..37 ">" [] [],
             },
@@ -87,7 +87,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..9
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..8
-          0: HTML_LITERAL@1..8 "article" [] []
+          0: ARTICLE_KW@1..8 "article" [] []
         2: HTML_ATTRIBUTE_LIST@8..8
         3: R_ANGLE@8..9 ">" [] []
       1: HTML_ELEMENT_LIST@9..26
@@ -101,7 +101,7 @@ HtmlRoot {
         0: L_ANGLE@26..28 "<" [Newline("\n")] []
         1: SLASH@28..29 "/" [] []
         2: HTML_TAG_NAME@29..36
-          0: HTML_LITERAL@29..36 "article" [] []
+          0: ARTICLE_KW@29..36 "article" [] []
         3: R_ANGLE@36..37 ">" [] []
     1: SVELTE_HTML_BLOCK@37..54
       0: SV_CURLY_AT@37..41 "{@" [Newline("\n"), Newline("\n")] []

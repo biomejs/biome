@@ -55,9 +55,9 @@ checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
 name = "anyhow"
-version = "1.0.103"
+version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
+checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "approx"
@@ -114,15 +114,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
-name = "bincode"
-version = "1.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "biome_analyze"
 version = "0.5.7"
 dependencies = [
@@ -141,7 +132,8 @@ dependencies = [
  "enumflags2",
  "indexmap",
  "insta",
- "rustc-hash 2.1.2",
+ "parking_lot",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
 ]
@@ -216,7 +208,10 @@ dependencies = [
  "biome_json_syntax",
  "biome_languages",
  "biome_lsp",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_migrate",
+ "biome_module_graph",
  "biome_package",
  "biome_resolver",
  "biome_rowan",
@@ -237,7 +232,7 @@ dependencies = [
  "rayon",
  "regex",
  "reqwest",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "self_update",
  "serde",
  "serde_json",
@@ -271,6 +266,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_markdown_formatter",
  "biome_plugin_loader",
  "biome_resolver",
  "biome_rowan",
@@ -282,7 +278,7 @@ dependencies = [
  "insta",
  "mimalloc",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "tests_macros",
@@ -304,6 +300,8 @@ dependencies = [
  "biome_js_syntax",
  "biome_json_analyze",
  "biome_json_syntax",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_string_case",
  "proc-macro2",
  "pulldown-cmark",
@@ -316,6 +314,7 @@ version = "0.5.7"
 dependencies = [
  "biome_markup",
  "biome_text_size",
+ "codspeed-criterion-compat",
  "schemars",
  "serde",
  "termcolor",
@@ -329,7 +328,7 @@ name = "biome_control_flow"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -363,7 +362,7 @@ dependencies = [
  "mimalloc",
  "phf 0.13.1",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "tests_macros",
@@ -448,7 +447,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "camino",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "salsa",
 ]
 
@@ -456,11 +455,16 @@ dependencies = [
 name = "biome_css_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_console",
  "biome_css_factory",
  "biome_css_parser",
+ "biome_diagnostics",
+ "biome_formatter",
  "biome_rowan",
  "biome_string_case",
+ "biome_unicode_table",
  "camino",
+ "insta",
  "schemars",
  "serde",
 ]
@@ -575,7 +579,7 @@ dependencies = [
  "drop_bomb",
  "indexmap",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "unicode-width 0.1.12",
@@ -616,7 +620,7 @@ dependencies = [
  "parking_lot",
  "path-absolutize",
  "rayon",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -659,7 +663,7 @@ dependencies = [
  "filetime",
  "insta",
  "jiff",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "tests_macros",
@@ -731,7 +735,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -827,7 +831,7 @@ dependencies = [
  "path-absolutize",
  "rand 0.8.5",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -861,11 +865,14 @@ dependencies = [
  "biome_html_syntax",
  "biome_languages",
  "biome_module_graph",
+ "biome_parser",
  "biome_project_layout",
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
  "camino",
@@ -910,6 +917,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
+ "biome_unicode_table",
  "camino",
  "codspeed-criterion-compat",
  "countme",
@@ -917,6 +925,7 @@ dependencies = [
  "mimalloc",
  "schemars",
  "serde",
+ "serde_json",
  "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
@@ -954,6 +963,7 @@ dependencies = [
  "biome_aria",
  "biome_html_factory",
  "biome_html_parser",
+ "biome_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -990,6 +1000,7 @@ dependencies = [
  "biome_parser",
  "biome_plugin_loader",
  "biome_project_layout",
+ "biome_react_compiler",
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
@@ -1013,7 +1024,7 @@ dependencies = [
  "phf 0.13.1",
  "regex",
  "roaring",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "salsa",
  "schemars",
  "serde",
@@ -1094,7 +1105,7 @@ dependencies = [
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1114,7 +1125,7 @@ dependencies = [
  "biome_text_size",
  "boa_engine",
  "camino",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -1133,7 +1144,7 @@ dependencies = [
  "camino",
  "insta",
  "rust-lapper",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "salsa",
  "smallvec",
 ]
@@ -1176,12 +1187,12 @@ dependencies = [
 name = "biome_js_type_info"
 version = "0.0.1"
 dependencies = [
+ "biome_db",
  "biome_formatter",
  "biome_js_formatter",
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
- "biome_js_type_info_macros",
  "biome_languages",
  "biome_resolver",
  "biome_rowan",
@@ -1189,7 +1200,8 @@ dependencies = [
  "camino",
  "hashbrown 0.15.5",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+ "salsa",
 ]
 
 [[package]]
@@ -1241,7 +1253,7 @@ dependencies = [
  "insta",
  "mimalloc",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "tests_macros",
  "tikv-jemallocator",
 ]
@@ -1328,7 +1340,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "indexmap",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "static_assertions",
 ]
 
@@ -1353,7 +1365,7 @@ name = "biome_line_index"
 version = "0.1.0"
 dependencies = [
  "biome_text_size",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -1380,7 +1392,7 @@ dependencies = [
  "futures",
  "papaya",
  "parking_lot",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "salsa",
  "serde",
  "serde_json",
@@ -1399,9 +1411,35 @@ dependencies = [
  "anyhow",
  "biome_line_index",
  "biome_text_size",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "tower",
  "tower-lsp-server",
+]
+
+[[package]]
+name = "biome_markdown_analyze"
+version = "0.1.0"
+dependencies = [
+ "biome_analyze",
+ "biome_analyze_macros",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_languages",
+ "biome_markdown_factory",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
+ "biome_rowan",
+ "biome_rule_options",
+ "biome_suppression",
+ "biome_test_utils",
+ "camino",
+ "filetime",
+ "insta",
+ "schemars",
+ "serde",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1417,6 +1455,8 @@ name = "biome_markdown_formatter"
 version = "0.0.1"
 dependencies = [
  "biome_configuration",
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
@@ -1502,7 +1542,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "tests_macros",
 ]
 
@@ -1548,7 +1588,8 @@ dependencies = [
  "mimalloc",
  "once_cell",
  "papaya",
- "rustc-hash 2.1.2",
+ "parking_lot",
+ "rustc-hash 2.1.3",
  "salsa",
  "schemars",
  "serde",
@@ -1587,7 +1628,7 @@ dependencies = [
  "indexmap",
  "insta",
  "mimalloc",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde",
  "static_assertions",
  "tests_macros",
@@ -1637,7 +1678,7 @@ dependencies = [
  "insta",
  "libc",
  "papaya",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1653,7 +1694,27 @@ dependencies = [
  "biome_rowan",
  "camino",
  "papaya",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "biome_react_compiler"
+version = "0.0.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_line_index",
+ "biome_rowan",
+ "indexmap",
+ "react_compiler",
+ "react_compiler_ast",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+ "serde_json",
 ]
 
 [[package]]
@@ -1682,7 +1743,7 @@ dependencies = [
  "iai",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1701,10 +1762,11 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_string_case",
+ "biome_unicode_table",
  "camino",
  "enumflags2",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1719,22 +1781,38 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_console",
+ "biome_css_analyze",
+ "biome_css_parser",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
+ "biome_graphql_analyze",
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_parser",
  "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_json_analyze",
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_markdown_analyze",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
  "biome_module_graph",
  "biome_project_layout",
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "biome_text_edit",
  "biome_workspace_db",
  "camino",
 ]
@@ -1782,6 +1860,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_markdown_analyze",
  "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
@@ -1802,23 +1881,27 @@ dependencies = [
  "biome_yaml_syntax",
  "bpaf",
  "camino",
+ "codspeed-divan-compat",
  "crossbeam",
  "either",
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
  "insta",
+ "mimalloc",
  "notify",
  "papaya",
  "parking_lot",
  "rayon",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "salsa",
  "schemars",
  "serde",
  "serde_json",
  "smallvec",
+ "static_assertions",
+ "tikv-jemallocator",
  "tokio",
  "tracing",
  "web-time",
@@ -1987,6 +2070,7 @@ name = "biome_workspace_db"
 version = "0.1.0"
 dependencies = [
  "biome_db",
+ "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
@@ -1994,6 +2078,7 @@ dependencies = [
  "biome_languages",
  "biome_module_graph",
  "biome_parser",
+ "biome_project_layout",
  "biome_rowan",
  "biome_unicode_table",
  "boxcar",
@@ -2048,11 +2133,13 @@ dependencies = [
  "biome_unicode_table",
  "biome_yaml_factory",
  "biome_yaml_syntax",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
- "tracing",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -2100,7 +2187,7 @@ dependencies = [
  "boa_string",
  "indexmap",
  "num-bigint",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -2141,7 +2228,7 @@ dependencies = [
  "portable-atomic",
  "rand 0.9.3",
  "regress",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "ryu-js",
  "serde",
  "serde_json",
@@ -2179,7 +2266,7 @@ dependencies = [
  "indexmap",
  "once_cell",
  "phf 0.13.1",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "static_assertions",
 ]
 
@@ -2212,7 +2299,7 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "regress",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -2224,7 +2311,7 @@ dependencies = [
  "fast-float2",
  "itoa",
  "paste",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "ryu-js",
  "static_assertions",
 ]
@@ -2243,9 +2330,9 @@ checksum = "36f64beae40a84da1b4b26ff2761a5b895c12adc41dc25aaee1c4f2bbfe97a6e"
 
 [[package]]
 name = "bpaf"
-version = "0.9.26"
+version = "0.9.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b86829876e7e200161a5aa6ea688d46c32d64d70ee3100127790dde84688d6e"
+checksum = "c670d65eea33846872d5ccf668c00a94c5c67dbdcc0289ea1c362671ce1ddb82"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
@@ -2314,9 +2401,9 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "camino"
-version = "1.2.4"
+version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f2d30e4173c4026932d51d31d6b0613b1fd3014bf3f9f8943d4ba139c437ba0"
+checksum = "bb1307f12aa967b5a58416e87b3653360e0fd614a016b6e970db08fecbb1b80d"
 dependencies = [
  "serde_core",
 ]
@@ -2344,10 +2431,11 @@ checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
 
 [[package]]
 name = "cc"
-version = "1.2.10"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13208fcbb66eaeffe09b99fffbe1af420f00a7b35aa99ad683dfc1aa76145229"
+checksum = "9066c49992464636f92905fa096ec58baaa4d57ec19a5c096c68d3e25ef3d136"
 dependencies = [
+ "find-msvc-tools",
  "jobserver",
  "libc",
  "shlex",
@@ -2429,35 +2517,17 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "codspeed"
-version = "3.0.5"
+version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35584c5fcba8059780748866387fb97c5a203bcfc563fc3d0790af406727a117"
-dependencies = [
- "anyhow",
- "bincode",
- "colored 2.2.0",
- "glob",
- "libc",
- "nix 0.29.0",
- "serde",
- "serde_json",
- "statrs",
- "uuid",
-]
-
-[[package]]
-name = "codspeed"
-version = "4.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b684e94583e85a5ca7e1a6454a89d76a5121240f2fb67eb564129d9bafdb9db0"
+checksum = "7083f253260bcb4aaa3b4aa4c52973703dabc1a85c2f193997e2689aafa8a919"
 dependencies = [
  "anyhow",
  "cc",
- "colored 2.2.0",
- "getrandom 0.2.15",
+ "colored",
+ "getrandom 0.4.2",
  "glob",
  "libc",
- "nix 0.31.2",
+ "nix",
  "serde",
  "serde_json",
  "statrs",
@@ -2465,26 +2535,28 @@ dependencies = [
 
 [[package]]
 name = "codspeed-criterion-compat"
-version = "3.0.5"
+version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78f6c1c6bed5fd84d319e8b0889da051daa361c79b7709c9394dfe1a882bba67"
+checksum = "d9f24251445188c69d50f10179d795424bd71b533b7e3f84fc03f26893b01af0"
 dependencies = [
- "codspeed 3.0.5",
+ "clap",
+ "codspeed",
  "codspeed-criterion-compat-walltime",
- "colored 2.2.0",
+ "colored",
+ "regex",
 ]
 
 [[package]]
 name = "codspeed-criterion-compat-walltime"
-version = "3.0.5"
+version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c989289ce6b1cbde72ed560496cb8fbf5aa14d5ef5666f168e7f87751038352e"
+checksum = "5c38205d56e2cb4fe04b708de7f9653a3f1b89edbe3a20b28f21e9e525e9e061"
 dependencies = [
  "anes",
  "cast",
  "ciborium",
  "clap",
- "codspeed 3.0.5",
+ "codspeed",
  "criterion-plot",
  "is-terminal",
  "itertools 0.10.5",
@@ -2503,12 +2575,12 @@ dependencies = [
 
 [[package]]
 name = "codspeed-divan-compat"
-version = "4.4.1"
+version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89e4bf8c7793c170fd0fcf3be97b9032b2ae39c2b9e8818aba3cc10ca0f0c6c0"
+checksum = "bc1065d507e1cbab731a7976db4cef7e47e49b87b4dbc0a925df07d343558420"
 dependencies = [
  "clap",
- "codspeed 4.4.1",
+ "codspeed",
  "codspeed-divan-compat-macros",
  "codspeed-divan-compat-walltime",
  "regex",
@@ -2516,9 +2588,9 @@ dependencies = [
 
 [[package]]
 name = "codspeed-divan-compat-macros"
-version = "4.4.1"
+version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78aae02f2a278588e16e8ca62ea1915b8ab30f8230a09926671bba19ede801a4"
+checksum = "2fd05482a95823ffe421e8a9ba24fa22a6a30d594e2c60455cbb43a41bf2d8fa"
 dependencies = [
  "divan-macros",
  "itertools 0.14.0",
@@ -2530,27 +2602,17 @@ dependencies = [
 
 [[package]]
 name = "codspeed-divan-compat-walltime"
-version = "4.4.1"
+version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59ffd32c0c59ab8b674b15be65ba7c59aebac047036cfa7fa1e11bc2c178b81f"
+checksum = "d2f8eae75b8fa85357020a404899c4280d590c9fd1c47640b3ce53106c62d2ee"
 dependencies = [
  "cfg-if",
  "clap",
- "codspeed 4.4.1",
+ "codspeed",
  "condtype",
  "divan-macros",
  "libc",
  "regex-lite",
-]
-
-[[package]]
-name = "colored"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
-dependencies = [
- "lazy_static",
- "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2713,9 +2775,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.18"
+version = "0.9.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
+checksum = "2d6914041f254d6e9176c01941b21115dcfb7089e55135a35411081bd106ef3f"
 dependencies = [
  "crossbeam-utils",
 ]
@@ -3086,6 +3148,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "find-msvc-tools"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26b73573e6edcd2af0cdf47bd6cb58f0b3839491263c314eaad1ccf24430e1de"
+
+[[package]]
 name = "fixedbitset"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3393,9 +3461,9 @@ checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
 
 [[package]]
 name = "globset"
-version = "0.4.18"
+version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52dfc19153a48bde0cbd630453615c8151bce3a5adfac7a0aebfbf0a1e1f57e3"
+checksum = "e47d37d2ae4464254884b60ab7071be2b876a9c35b696bd018ddcc76847309cd"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -3525,6 +3593,12 @@ name = "hermit-abi"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
+
+[[package]]
+name = "hmac-sha256"
+version = "1.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec9d92d097f4749b64e8cc33d924d9f40a2d4eb91402b458014b781f5733d60f"
 
 [[package]]
 name = "htmlize"
@@ -4059,11 +4133,12 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 
 [[package]]
 name = "jiff"
-version = "0.2.31"
+version = "0.2.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ccfe6121cbe750cf81efa362d85c0bde7ea298ec43092d3a193baca59cdbd634"
+checksum = "668b7183bd07af9a4885f5c35b0cc5c83c4607a913c16b7e17291832910d2dcc"
 dependencies = [
  "defmt",
+ "jiff-core",
  "jiff-static",
  "jiff-tzdb-platform",
  "log",
@@ -4074,11 +4149,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "jiff-static"
-version = "0.2.31"
+name = "jiff-core"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e165e897f662d428f3cd3828a919dbe067c2d42bb1031eede74ef9d27ecdedd2"
+checksum = "7feca88439efe53da3754500c1851dedf3cb36c524dd5cf8225cc0794de95d09"
 dependencies = [
+ "defmt",
+]
+
+[[package]]
+name = "jiff-static"
+version = "0.2.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a69dcb3a21cfb32ce1cd056169337ca284af0766dd766e7878819b251a49204"
+dependencies = [
+ "jiff-core",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -4160,9 +4245,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
-version = "0.2.186"
+version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
+checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "libgit2-sys"
@@ -4340,18 +4425,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c012d14ef788ab066a347d19e3dda699916c92293b05b85ba2c76b8c82d2830"
 dependencies = [
  "uuid",
-]
-
-[[package]]
-name = "nix"
-version = "0.29.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
-dependencies = [
- "bitflags 2.9.3",
- "cfg-if",
- "cfg_aliases",
- "libc",
 ]
 
 [[package]]
@@ -4793,9 +4866,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-crate"
-version = "3.3.0"
+version = "3.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edce586971a4dfaa28950c6f18ed55e0406c1ab88bbce2c6f6293a7aaba73d35"
+checksum = "e67ba7e9b2b56446f1d419b1d807906278ffa1a658a8a5d8a39dcb1f5a78614f"
 dependencies = [
  "toml_edit",
 ]
@@ -4824,9 +4897,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.106"
+version = "1.0.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
+checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
 ]
@@ -4916,7 +4989,7 @@ dependencies = [
  "pin-project-lite",
  "quinn-proto",
  "quinn-udp",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "rustls",
  "socket2",
  "thiserror 2.0.17",
@@ -4936,7 +5009,7 @@ dependencies = [
  "lru-slab",
  "rand 0.9.3",
  "ring",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "rustls",
  "rustls-pki-types",
  "slab",
@@ -4962,9 +5035,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.45"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+checksum = "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
 dependencies = [
  "proc-macro2",
 ]
@@ -5083,6 +5156,158 @@ dependencies = [
 ]
 
 [[package]]
+name = "react_compiler"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_ast",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_inference",
+ "react_compiler_lowering",
+ "react_compiler_optimization",
+ "react_compiler_reactive_scopes",
+ "react_compiler_ssa",
+ "react_compiler_typeinference",
+ "react_compiler_validation",
+ "rustc-hash 2.1.3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_ast"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "rustc-hash 2.1.3",
+ "serde",
+ "serde-transcode",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_diagnostics"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "rustc-hash 2.1.3",
+ "serde",
+]
+
+[[package]]
+name = "react_compiler_hir"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "rustc-hash 2.1.3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_inference"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_lowering",
+ "react_compiler_optimization",
+ "react_compiler_ssa",
+ "react_compiler_utils",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_lowering"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_ast",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_optimization"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_lowering",
+ "react_compiler_ssa",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_reactive_scopes"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "hmac-sha256",
+ "indexmap",
+ "react_compiler_ast",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_ssa"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_typeinference"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_ssa",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_utils"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_validation"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5124,9 +5349,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.12.4"
+version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1292b7759ae1cb9ec195452d1390a074f0cd8541ab7a5a8c31cd6db45d4a6ba"
+checksum = "f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -5136,9 +5361,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.13"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5276caf25ac86c8d810222b3dbb938e512c55c6831a10f3e6ed1c93b84041f1c"
+checksum = "8fcfdb36bda0c880c5931cdc7a2bcdc8ba4556847b9d912bca70bc94708711ad"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -5240,30 +5465,19 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_css_analyze",
- "biome_css_parser",
- "biome_css_semantic",
  "biome_css_syntax",
  "biome_diagnostics",
- "biome_fs",
  "biome_graphql_analyze",
- "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_html_analyze",
- "biome_html_parser",
  "biome_html_syntax",
  "biome_js_analyze",
- "biome_js_parser",
  "biome_js_syntax",
  "biome_json_analyze",
- "biome_json_parser",
  "biome_json_syntax",
- "biome_languages",
- "biome_module_graph",
- "biome_project_layout",
- "biome_rowan",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_ruledoc_utils",
- "biome_service",
- "camino",
  "pulldown-cmark",
 ]
 
@@ -5290,9 +5504,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc-hash"
-version = "2.1.2"
+version = "2.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94300abf3f1ae2e2b8ffb7b58043de3d399c73fa6f4b73826402a5c457614dbe"
+checksum = "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d"
 
 [[package]]
 name = "rustc_version"
@@ -5387,7 +5601,7 @@ dependencies = [
  "parking_lot",
  "portable-atomic",
  "rayon",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "salsa-macro-rules",
  "salsa-macros",
  "smallvec",
@@ -5434,9 +5648,9 @@ dependencies = [
 
 [[package]]
 name = "schemars"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2b42f36aa1cd011945615b92222f6bf73c599a102a300334cd7f8dbeec726cc"
+checksum = "687274d293b6cdc6e73e0fee520bf2049650090d7164f87672d212a3c530cf4a"
 dependencies = [
  "dyn-clone",
  "indexmap",
@@ -5449,14 +5663,14 @@ dependencies = [
 
 [[package]]
 name = "schemars_derive"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d115b50f4aaeea07e79c1912f645c7513d81715d0420f8bc77a18c6260b307f"
+checksum = "d98c67716b46af2f0b8cf752abc930f6f9aecfbf671ecfb531db8a31dbe4e2ba"
 dependencies = [
  "proc-macro2",
  "quote",
  "serde_derive_internals",
- "syn 2.0.106",
+ "syn 3.0.3",
 ]
 
 [[package]]
@@ -5540,12 +5754,21 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "serde"
-version = "1.0.228"
+version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
 dependencies = [
  "serde_core",
  "serde_derive",
+]
+
+[[package]]
+name = "serde-transcode"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "590c0e25c2a5bb6e85bf5c1bce768ceb86b316e7a01bdf07d2cb4ec2271990e2"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -5561,40 +5784,40 @@ dependencies = [
 
 [[package]]
 name = "serde_core"
-version = "1.0.228"
+version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
+checksum = "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.228"
+version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
+checksum = "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.106",
+ "syn 3.0.3",
 ]
 
 [[package]]
 name = "serde_derive_internals"
-version = "0.29.1"
+version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18d26a20a969b9e3fdf2fc2d9f21eda6c40e2de84c9408bb5d3b05d499aae711"
+checksum = "f852137cce035d6a4df67ccce505ff6b3e9fd3a10e3e52b24dc71e650bb1a9bd"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.106",
+ "syn 3.0.3",
 ]
 
 [[package]]
 name = "serde_json"
-version = "1.0.150"
+version = "1.0.151"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8014e44b4736ed0538adeecded0fce2a272f22dc9578a7eb6b2d9993c74cfb9"
+checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
 dependencies = [
  "itoa",
  "memchr",
@@ -5683,9 +5906,9 @@ dependencies = [
 
 [[package]]
 name = "shlex"
-version = "1.3.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
+checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
 name = "signal-hook-registry"
@@ -5840,6 +6063,17 @@ name = "syn"
 version = "2.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ede7c438028d4436d71104916910f5bb611972c5cfd7f89b8300a8186e6fada6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "syn"
+version = "3.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "53e9bae58849f64dfa4f5d5ae372c8341f7305f82a3868709269343628b659a3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6142,17 +6376,11 @@ dependencies = [
  "indexmap",
  "serde_core",
  "serde_spanned",
- "toml_datetime 1.1.1+spec-1.1.0",
+ "toml_datetime",
  "toml_parser",
  "toml_writer",
- "winnow 1.0.1",
+ "winnow",
 ]
-
-[[package]]
-name = "toml_datetime"
-version = "0.6.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22cddaf88f4fbc13c51aebbf5f8eceb5c7c5a9da2ac40a13519eb5b0a0e8f11c"
 
 [[package]]
 name = "toml_datetime"
@@ -6165,13 +6393,14 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.22.27"
+version = "0.25.13+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41fe8c660ae4257887cf66394862d21dbca4a6ddd26f04a3560410406a2f819a"
+checksum = "6975367e4d2ef766d86af01ffad14b622fecc8d4357a998fbc4deb6e9bacaf9b"
 dependencies = [
  "indexmap",
- "toml_datetime 0.6.11",
- "winnow 0.7.12",
+ "toml_datetime",
+ "toml_parser",
+ "winnow",
 ]
 
 [[package]]
@@ -6180,7 +6409,7 @@ version = "1.1.2+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2abe9b86193656635d2411dc43050282ca48aa31c2451210f4202550afb7526"
 dependencies = [
- "winnow 1.0.1",
+ "winnow",
 ]
 
 [[package]]
@@ -7215,18 +7444,12 @@ checksum = "271414315aff87387382ec3d271b52d7ae78726f5d44ac98b4f4030c91880486"
 
 [[package]]
 name = "winnow"
-version = "0.7.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3edebf492c8125044983378ecb5766203ad3b4c2f7a922bd7dd207f6d443e95"
-dependencies = [
- "memchr",
-]
-
-[[package]]
-name = "winnow"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09dac053f1cd375980747450bfc7250c264eaae0583872e845c0c7cd578872b5"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "wit-bindgen"
@@ -7385,6 +7608,8 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_rowan",
  "biome_service",
  "biome_string_case",
@@ -7419,7 +7644,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "camino",
- "colored 3.1.1",
+ "colored",
  "indicatif 0.18.4",
  "pico-args",
  "regex",

@@ -28,12 +28,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBulletListItem::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_CONTINUATION_INDENT => {
-                    let $pattern = unsafe { $crate::MdContinuationIndent::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_CODE_CONTENT => {
+                    let $pattern = unsafe { $crate::MdCodeContent::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_DOCUMENT => {
-                    let $pattern = unsafe { $crate::MdDocument::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_CONTINUATION_INDENT => {
+                    let $pattern = unsafe { $crate::MdContinuationIndent::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_ENTITY_REFERENCE => {
@@ -151,6 +151,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_REFERENCE_LINK_LABEL => {
                     let $pattern = unsafe { $crate::MdReferenceLinkLabel::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_ROOT => {
+                    let $pattern = unsafe { $crate::MdRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_SETEXT_HEADER => {

@@ -138,7 +138,7 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
             }
 
             let argument = directive.arg()?;
-            let argument = argument.arg().ok()?;
+            let argument = argument.arg()?;
             let static_argument = argument.as_vue_static_argument()?;
             let name_token = static_argument.name_token().ok()?;
 
@@ -153,7 +153,7 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
         // Shorthand bind: :foo
         AnyVueDirective::VueVBindShorthandDirective(directive) => {
             let argument = directive.arg().ok()?;
-            let argument = argument.arg().ok()?;
+            let argument = argument.arg()?;
             let static_argument = argument.as_vue_static_argument()?;
             let name_token = static_argument.name_token().ok()?;
 

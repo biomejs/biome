@@ -15,7 +15,7 @@ This is another paragraph.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdParagraph {
@@ -46,7 +46,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..55
+0: MD_ROOT@0..55
   0: (empty)
   1: MD_BLOCK_LIST@0..55
     0: MD_PARAGRAPH@0..28

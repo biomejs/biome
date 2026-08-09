@@ -3,7 +3,92 @@ use std::cell::OnceCell;
 use std::marker::PhantomData;
 use std::ops::Deref;
 
-use crate::Buffer;
+use crate::{Buffer, FormatWithRule};
+
+/// Temporarily changes formatter context while preserving an item's formatting rule.
+///
+/// Implementations must return enough state from [`Self::enter`] for
+/// [`Self::exit`] to restore the context, including when formatting returns an error.
+///
+/// Prefer [`crate::FormatRuleWithOptions`] when the selected rule directly owns
+/// the option. Use scoped options when an option must pass through an existing
+/// [`FormatWithRule`] wrapper, such as a generated node union, without replacing
+/// its rule.
+pub trait FormatScopedOptions<Context, Item> {
+    /// State required to restore the context after formatting.
+    type Restore;
+
+    /// Updates the context before formatting `item`.
+    fn enter(&self, item: &Item, context: &mut Context) -> Self::Restore;
+
+    /// Restores the context after formatting `item`, including after a formatting error.
+    fn exit(&self, restore: Self::Restore, context: &mut Context);
+}
+
+/// Formats an item with temporary context options while preserving its rule.
+#[derive(Debug, Clone, Copy)]
+pub struct FormatWithScopedOptions<Formatted, Options> {
+    formatted: Formatted,
+    options: Options,
+}
+
+impl<Formatted, Options, Context> Format<Context> for FormatWithScopedOptions<Formatted, Options>
+where
+    Formatted: FormatWithRule<Context>,
+    Options: FormatScopedOptions<Context, Formatted::Item>,
+{
+    #[inline(always)]
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        let restore = self.options.enter(self.formatted.item(), f.context_mut());
+        let result = self.formatted.fmt(f);
+        self.options.exit(restore, f.context_mut());
+        result
+    }
+}
+
+impl<Formatted, Options, Context> FormatWithRule<Context>
+    for FormatWithScopedOptions<Formatted, Options>
+where
+    Formatted: FormatWithRule<Context>,
+    Options: FormatScopedOptions<Context, Formatted::Item>,
+{
+    type Item = Formatted::Item;
+
+    fn item(&self) -> &Self::Item {
+        self.formatted.item()
+    }
+}
+
+/// Adds temporary context options to an existing formatted item.
+pub trait FormatScopedOptionsExt<Context>: FormatWithRule<Context> + Sized {
+    /// Wraps this item without replacing its formatting rule.
+    ///
+    /// Apply rule-specific options before calling this method because the
+    /// returned wrapper only preserves [`FormatWithRule`]. Chained scopes are
+    /// nested: the first scope in the chain is closest to the formatted item
+    /// and takes precedence when multiple scopes modify the same context state.
+    ///
+    /// ```rust,ignore
+    /// node.format().with_scoped_options(options)
+    /// ```
+    fn with_scoped_options<Options>(
+        self,
+        options: Options,
+    ) -> FormatWithScopedOptions<Self, Options>
+    where
+        Options: FormatScopedOptions<Context, Self::Item>,
+    {
+        FormatWithScopedOptions {
+            formatted: self,
+            options,
+        }
+    }
+}
+
+impl<Formatted, Context> FormatScopedOptionsExt<Context> for Formatted where
+    Formatted: FormatWithRule<Context>
+{
+}
 
 /// Utility trait that allows memorizing the output of a [Format].
 /// Useful to avoid re-formatting the same object twice.
@@ -170,5 +255,186 @@ where
             Ok(None) => Ok(()),
             Err(err) => Err(*err),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        FormatContext, FormatError, FormatRefWithRule, FormatRule, SimpleFormatOptions,
+        TransformSourceMap, format,
+    };
+    use std::cell::Cell;
+    use std::rc::Rc;
+
+    #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+    enum Mode {
+        Outer,
+        Middle,
+        Inner,
+    }
+
+    impl Mode {
+        const fn text(self) -> &'static str {
+            match self {
+                Self::Outer => "outer",
+                Self::Middle => "middle",
+                Self::Inner => "inner",
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    struct TestContext {
+        options: SimpleFormatOptions,
+        mode: Mode,
+        observed: Rc<Cell<Mode>>,
+    }
+
+    impl TestContext {
+        fn new(mode: Mode, observed: Rc<Cell<Mode>>) -> Self {
+            Self {
+                options: SimpleFormatOptions::default(),
+                mode,
+                observed,
+            }
+        }
+    }
+
+    impl FormatContext for TestContext {
+        type Options = SimpleFormatOptions;
+
+        fn options(&self) -> &Self::Options {
+            &self.options
+        }
+
+        fn source_map(&self) -> Option<&TransformSourceMap> {
+            None
+        }
+    }
+
+    struct TestItem {
+        calls: Cell<u8>,
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    struct TestRule {
+        fail: bool,
+    }
+
+    impl FormatRule<TestItem> for TestRule {
+        type Context = TestContext;
+
+        fn fmt(&self, item: &TestItem, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+            item.calls.set(item.calls.get() + 1);
+            f.context().observed.set(f.context().mode);
+
+            if self.fail {
+                Err(FormatError::SyntaxError)
+            } else {
+                token(f.context().mode.text()).fmt(f)
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    struct ScopedMode(Mode);
+
+    impl<Item> FormatScopedOptions<TestContext, Item> for ScopedMode {
+        type Restore = Mode;
+
+        fn enter(&self, _item: &Item, context: &mut TestContext) -> Self::Restore {
+            let previous = std::mem::replace(&mut context.mode, self.0);
+            context.observed.set(context.mode);
+            previous
+        }
+
+        fn exit(&self, restore: Self::Restore, context: &mut TestContext) {
+            context.mode = restore;
+            context.observed.set(context.mode);
+        }
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    struct CopyFormat;
+
+    impl Format<TestContext> for CopyFormat {
+        fn fmt(&self, _f: &mut Formatter<TestContext>) -> FormatResult<()> {
+            Ok(())
+        }
+    }
+
+    impl FormatWithRule<TestContext> for CopyFormat {
+        type Item = ();
+
+        fn item(&self) -> &Self::Item {
+            &()
+        }
+    }
+
+    fn assert_copy<T: Copy>(_: &T) {}
+
+    #[test]
+    fn scoped_options_copy_does_not_depend_on_context() {
+        let formatted = CopyFormat.with_scoped_options(ScopedMode(Mode::Inner));
+        assert_copy(&formatted);
+    }
+
+    #[test]
+    fn scoped_options_delegate_to_the_existing_rule_and_restore_context() {
+        let observed = Rc::new(Cell::new(Mode::Outer));
+        let context = TestContext::new(Mode::Outer, Rc::clone(&observed));
+        let item = TestItem {
+            calls: Cell::new(0),
+        };
+        let formatted = FormatRefWithRule::new(&item, TestRule { fail: false })
+            .with_scoped_options(ScopedMode(Mode::Inner));
+
+        let formatted = format!(context, [formatted]).unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "inner");
+        assert_eq!(formatted.context().mode, Mode::Outer);
+        assert_eq!(observed.get(), Mode::Outer);
+        assert_eq!(item.calls.get(), 1);
+    }
+
+    #[test]
+    fn scoped_options_nest_in_lifo_order() {
+        let observed = Rc::new(Cell::new(Mode::Outer));
+        let context = TestContext::new(Mode::Outer, Rc::clone(&observed));
+        let item = TestItem {
+            calls: Cell::new(0),
+        };
+        let formatted = FormatRefWithRule::new(&item, TestRule { fail: false })
+            .with_scoped_options(ScopedMode(Mode::Inner))
+            .with_scoped_options(ScopedMode(Mode::Middle));
+
+        assert!(std::ptr::eq(formatted.item(), &item));
+
+        let formatted = format!(context, [formatted]).unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "inner");
+        assert_eq!(formatted.context().mode, Mode::Outer);
+        assert_eq!(observed.get(), Mode::Outer);
+        assert_eq!(item.calls.get(), 1);
+    }
+
+    #[test]
+    fn scoped_options_restore_context_after_an_error() {
+        let observed = Rc::new(Cell::new(Mode::Outer));
+        let context = TestContext::new(Mode::Outer, Rc::clone(&observed));
+        let item = TestItem {
+            calls: Cell::new(0),
+        };
+        let formatted = FormatRefWithRule::new(&item, TestRule { fail: true })
+            .with_scoped_options(ScopedMode(Mode::Inner));
+
+        assert!(matches!(
+            format!(context, [formatted]),
+            Err(FormatError::SyntaxError)
+        ));
+        assert_eq!(observed.get(), Mode::Outer);
+        assert_eq!(item.calls.get(), 1);
     }
 }

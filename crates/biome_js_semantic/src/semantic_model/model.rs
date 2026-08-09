@@ -93,8 +93,10 @@ pub(crate) struct SemanticModelData {
     pub(crate) exported: FxHashSet<BindingId>,
     /// All references that could not be resolved
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    pub(crate) unresolved_references_by_start: FxHashSet<TextSize>,
     /// All globals references
     pub(crate) globals: Vec<SemanticModelGlobalBindingData>,
+    pub(crate) global_references_by_start: FxHashSet<TextSize>,
     /// JSDoc comments attached to export statements (keyed by the JsExport node's range).
     pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
 }
@@ -344,6 +346,13 @@ impl SemanticModel {
             })
     }
 
+    pub fn binding_by_id(&self, id: BindingId) -> Option<Binding> {
+        self.data.bindings.get(id.index()).map(|_| Binding {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
     pub fn all_exported_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
         self.data.exported.iter().map(|&id| Binding {
             data: self.data.clone(),
@@ -429,6 +438,13 @@ impl SemanticModel {
         std::iter::successors(first, succ)
     }
 
+    /// Returns whether `reference` resolves to a configured global.
+    pub fn is_global_reference(&self, reference: &impl HasDeclarationAstNode) -> bool {
+        self.data
+            .global_references_by_start
+            .contains(&reference.syntax().text_trimmed_range().start())
+    }
+
     /// Returns an iterator of all the unresolved references in the program
     pub fn all_unresolved_references(
         &self,
@@ -456,6 +472,13 @@ impl SemanticModel {
                 })
         }
         std::iter::successors(first, succ)
+    }
+
+    /// Returns whether `reference` could not be resolved to a binding or configured global.
+    pub fn is_unresolved_reference(&self, reference: &impl HasDeclarationAstNode) -> bool {
+        self.data
+            .unresolved_references_by_start
+            .contains(&reference.syntax().text_trimmed_range().start())
     }
 
     /// Returns if the node is exported or is a reference to a binding

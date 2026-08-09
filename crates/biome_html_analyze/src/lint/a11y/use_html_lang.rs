@@ -3,12 +3,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::T;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 
-use crate::{a11y::has_non_empty_attribute, utils::is_html_tag};
+use crate::a11y::has_non_empty_attribute;
 
 declare_lint_rule! {
     /// Enforce that `html` element has `lang` attribute.
@@ -53,9 +53,8 @@ impl Rule for UseHtmlLang {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(element, source_type, "html") {
+        if element.tag_name_kind() != Some(T![html]) {
             return None;
         }
 

@@ -1,8 +1,5 @@
-use super::{
-    CssStringQuote,
-    source_cursor::{SourceCursor, is_newline_byte},
-};
-use biome_css_syntax::{TextRange, TextSize};
+use super::{CssStringQuote, source_cursor::SourceCursor};
+use biome_css_syntax::{TextRange, TextSize, is_css_newline_byte, is_css_whitespace_byte};
 use biome_unicode_table::{Dispatch::*, is_css_non_ascii, lookup_byte};
 use std::char::REPLACEMENT_CHARACTER;
 
@@ -187,10 +184,7 @@ impl<'src> CssScanCursor<'src> {
             offset += 1;
         }
 
-        if self
-            .byte_at(offset)
-            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
-        {
+        if self.byte_at(offset).is_some_and(is_css_whitespace_byte) {
             offset += 1;
         }
 
@@ -364,7 +358,7 @@ impl<'src> CssScanCursor<'src> {
         self.advance(1);
 
         match self.current_byte() {
-            Some(byte) if is_newline_byte(byte) => {
+            Some(byte) if is_css_newline_byte(byte) => {
                 let len = if byte == b'\r' && self.peek_byte() == Some(b'\n') {
                     2
                 } else {
@@ -464,10 +458,7 @@ impl<'src> CssScanCursor<'src> {
         debug_assert!(self.current_byte() == Some(b'/') && self.peek_byte() == Some(b'/'));
         self.advance(2);
 
-        let starts_like_comment = matches!(
-            self.current_byte(),
-            Some(b'\t' | b' ' | b'\n' | b'\r' | 0x0C)
-        );
+        let starts_like_comment = self.current_byte().is_some_and(is_css_whitespace_byte);
 
         while let Some(current) = self.current_byte() {
             match current {
@@ -494,13 +485,7 @@ impl<'src> CssScanCursor<'src> {
         loop {
             let start = self.position();
 
-            while let Some(byte) = self.current_byte() {
-                if matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C) {
-                    self.advance(1);
-                } else {
-                    break;
-                }
-            }
+            self.skip_whitespace();
 
             if self.current_byte() == Some(b'/') && self.peek_byte() == Some(b'*') {
                 self.consume_block_comment();
@@ -509,6 +494,13 @@ impl<'src> CssScanCursor<'src> {
             if self.position() == start {
                 return;
             }
+        }
+    }
+
+    /// Skips CSS whitespace without consuming comments.
+    fn skip_whitespace(&mut self) {
+        while self.current_byte().is_some_and(is_css_whitespace_byte) {
+            self.advance(1);
         }
     }
 
@@ -530,6 +522,46 @@ impl<'src> CssScanCursor<'src> {
                 return;
             }
         }
+    }
+
+    /// Returns whether the current position starts a final custom-property
+    /// `!important`, using the caller's line-comment policy.
+    ///
+    /// Example: `!important;` is final, while declaration content such as
+    /// `!important// raw\n;` is not.
+    pub(crate) fn scan_final_custom_property_important(mut self, skip_line_comments: bool) -> bool {
+        if self.current_byte() != Some(b'!') {
+            return false;
+        }
+
+        self.advance(1);
+        if skip_line_comments {
+            self.skip_scss_expression_trivia();
+        } else {
+            self.skip_whitespace_and_block_comments();
+        }
+
+        if !self.is_ident_start() {
+            return false;
+        }
+
+        let mut name = [0; 9];
+        let scan = self.consume_ident_sequence(&mut name);
+        if scan.count != name.len()
+            || !scan.only_ascii_used
+            || !scan.last_was_buffered
+            || &name != b"important"
+        {
+            return false;
+        }
+
+        if skip_line_comments {
+            self.skip_scss_expression_trivia();
+        } else {
+            self.skip_whitespace_and_block_comments();
+        }
+
+        matches!(self.current_byte(), None | Some(b';' | b'}' | b')'))
     }
 
     /// Skips URL-leading trivia while preserving protocol-relative raw URLs
@@ -731,6 +763,14 @@ impl<'src> CssScanCursor<'src> {
         UrlBodyScanner::new(self).scan_url_body_start(scss_exclusive_syntax_allowed)
     }
 
+    /// Returns whether a complete `url(...)` body uses Sass raw-URL syntax.
+    ///
+    /// `url(//cdn.example/app.css)` is raw, while
+    /// `url(// comment\napp.css)` falls back to function parsing.
+    pub(crate) fn is_scss_raw_url_body(self) -> bool {
+        UrlBodyScanner::new(self).is_scss_raw_url_body()
+    }
+
     /// Scans a raw URL literal starting at the current position, if one can
     /// begin here.
     pub(crate) fn scan_url_raw_value(self) -> Option<PendingUrlRawValueScan> {
@@ -791,7 +831,7 @@ impl<'src> ScssStringScanner<'src> {
                         ));
                     }
                 }
-                WHS if is_newline_byte(byte) => {
+                WHS if is_css_newline_byte(byte) => {
                     let len = if byte == b'\r' && self.cursor.peek_byte() == Some(b'\n') {
                         2
                     } else {
@@ -950,6 +990,41 @@ impl<'src> UrlBodyScanner<'src> {
         } else {
             self.scan_url_body_value(scss_exclusive_syntax_allowed)
         }
+    }
+
+    /// Returns whether the body can be consumed as Sass raw URL contents.
+    ///
+    /// Internal whitespace is only valid immediately before `)`; otherwise
+    /// Sass parses the body as an ordinary function expression.
+    fn is_scss_raw_url_body(&mut self) -> bool {
+        self.cursor.skip_whitespace();
+
+        while let Some(current) = self.cursor.current_byte() {
+            match current {
+                b')' => return true,
+                b'\\' => {
+                    if !self.cursor.is_valid_escape_at(1) {
+                        return false;
+                    }
+                    self.consume_url_escape();
+                }
+                b'#' if self.cursor.peek_byte() == Some(b'{') => {
+                    if !self.cursor.consume_scss_interpolation_in_raw_url() {
+                        return false;
+                    }
+                }
+                _ if is_css_whitespace_byte(current) => {
+                    self.cursor.skip_whitespace();
+                    return self.cursor.current_byte() == Some(b')');
+                }
+                _ if Self::is_scss_raw_url_byte(current) => {
+                    self.cursor.advance_byte_or_char(current);
+                }
+                _ => return false,
+            }
+        }
+
+        false
     }
 
     /// Detects `$name + ...` URL bodies before raw URL lexing can consume them.
@@ -1112,6 +1187,9 @@ impl<'src> UrlBodyScanner<'src> {
         self.cursor.advance(1);
 
         match self.cursor.current_byte() {
+            Some(byte) if byte.is_ascii_hexdigit() => {
+                self.cursor.consume_escape_sequence();
+            }
             Some(byte) if byte.is_ascii() => self.cursor.advance(1),
             // URL raw values are otherwise byte-oriented, but escaped
             // non-ASCII characters must still advance on a UTF-8 boundary so
@@ -1130,6 +1208,13 @@ impl<'src> UrlBodyScanner<'src> {
             lookup_byte(byte),
             IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS
         )
+    }
+
+    /// Returns whether `byte` may appear unescaped in Sass raw URL contents.
+    ///
+    /// Example: `/` in `url(//cdn.example/app.css)`.
+    fn is_scss_raw_url_byte(byte: u8) -> bool {
+        matches!(byte, b'!' | b'#' | b'%' | b'&' | b'*'..=b'~') || !byte.is_ascii()
     }
 
     /// Returns true when `position + offset` can continue an interpolated URL head.

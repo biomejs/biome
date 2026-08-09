@@ -16,6 +16,15 @@ impl FormatNodeRule<CssColorProfileAtRuleDeclarator> for FormatCssColorProfileAt
             name,
         } = node.as_fields();
 
-        write!(f, [color_profile_token.format(), space(), name.format()])
+        write!(
+            f,
+            [
+                color_profile_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
+                space(),
+                name.format()
+            ]
+        )
     }
 }

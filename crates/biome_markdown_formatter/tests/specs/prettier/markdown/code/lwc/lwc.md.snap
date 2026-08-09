@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/lwc/lwc.md
+---
+
+# Input
+
+```md
+```html
+<test-this attr={should-be-quoted}>
+    Awesome</test-this>
+```
+
+```lwc
+<test-this attr={should-NOT-quoted}>
+    Awesome</test-this>
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,9 @@
+ ```html
+-<test-this attr="{should-be-quoted}"> Awesome</test-this>
++<test-this attr={should-be-quoted}>
++    Awesome</test-this>
+ ```
+ 
+ ```lwc
+-<test-this attr={should-NOT-quoted}> Awesome</test-this>
++<test-this attr={should-NOT-quoted}>
++    Awesome</test-this>
+ ```
+```
+
+# Output
+
+```md
+```html
+<test-this attr={should-be-quoted}>
+    Awesome</test-this>
+```
+
+```lwc
+<test-this attr={should-NOT-quoted}>
+    Awesome</test-this>
+```
+```

@@ -11,7 +11,13 @@ impl FormatNodeRule<CssComposesProperty> for FormatCssComposesProperty {
             values,
         } = node.as_fields();
 
-        write!(f, [name.format(), colon_token.format()])?;
+        write!(
+            f,
+            [
+                name?.format().with_text_case(CssCase::Lowercase),
+                colon_token.format()
+            ]
+        )?;
 
         if values.len() > 1 {
             return write!(

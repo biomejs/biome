@@ -19,7 +19,7 @@ impl FormatNodeRule<ScssAtRootQuery> for FormatScssAtRootQuery {
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                modifier.format(),
+                modifier.format()?.with_text_case(CssCase::Preserve),
                 colon_token.format(),
                 space(),
                 group(&indent(&queries.format())),

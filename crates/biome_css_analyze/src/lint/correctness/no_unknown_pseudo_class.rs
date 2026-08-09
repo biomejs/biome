@@ -1,9 +1,11 @@
-use crate::{
-    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
-    utils::{
-        is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class,
-        is_page_pseudo_class, vendor_prefixed,
-    },
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule needs the complete pseudo-class syntax."
+)]
+
+use crate::utils::{
+    is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class, is_page_pseudo_class,
+    vendor_prefixed,
 };
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -16,6 +18,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
     CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
     CssPseudoElementSelector, CssSyntaxToken, ScssInterpolatedPseudoClassFunction,
+    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
@@ -212,6 +215,9 @@ impl Rule for NoUnknownPseudoClass {
         if is_valid_class
             || should_ignore(lower_name, ctx.options())
             || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
+            // Vue uses `:deep()` to apply scoped styles to child components.
+            // https://vuejs.org/api/sfc-css-features.html#deep-selectors
+            || file_source.is_vue_embedded() && lower_name == "deep"
         {
             None
         } else {

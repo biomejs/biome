@@ -100,5 +100,6 @@ expression: valid.astro
 <select aria-expanded="true"></select>
 <div role="heading" aria-level></div>
 <div role="heading" aria-level="1"></div>
+<a {href} aria-label="label"></a>
 
 ```

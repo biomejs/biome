@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList};
+use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList, T};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
@@ -15,7 +15,6 @@ use crate::a11y::{
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.
@@ -106,7 +105,7 @@ impl Rule for UseAnchorContent {
 
         // Check if element is an anchor tag
         let tag_element = node.clone().as_any_html_tag_element()?;
-        if !is_html_tag(&tag_element, source_type, "a") {
+        if tag_element.tag_name_kind() != Some(T![a]) {
             return None;
         }
 

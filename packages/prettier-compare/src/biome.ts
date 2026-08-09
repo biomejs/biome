@@ -57,6 +57,11 @@ export async function formatWithBiome(
 					selfCloseVoidElements: "always",
 				},
 			},
+			yaml: {
+				formatter: {
+					enabled: true,
+				},
+			},
 		});
 
 		const result = biome.formatContent(projectKey, code, {

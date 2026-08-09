@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/emphasis/issue-3837.md
+---
+
+# Input
+
+```md
+5 * 10
+a * b * c
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-5 _ 10
+-a _ b \* c
++5 * 10
++a * b * c
+```
+
+# Output
+
+```md
+5 * 10
+a * b * c
+```

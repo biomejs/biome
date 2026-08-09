@@ -15,11 +15,11 @@ impl FormatNodeRule<CssSupportsAndCondition> for FormatCssSupportsAndCondition {
         write!(
             f,
             [
-                left.format(),
+                left?.format().with_text_case(CssCase::Preserve),
                 space(),
-                and_token.format(),
+                and_token.format()?.with_text_case(CssCase::Preserve),
                 soft_line_break_or_space(),
-                right.format()
+                right?.format().with_text_case(CssCase::Preserve)
             ]
         )
     }

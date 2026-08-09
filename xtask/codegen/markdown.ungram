@@ -45,7 +45,7 @@ MdBogusBlock = SyntaxElement*
 // to parse mid-list.
 MdBogusBullet = SyntaxElement*
 
-MdDocument =
+MdRoot =
   bom: 'UNICODE_BOM'?
   value: MdBlockList
   eof: 'EOF'
@@ -129,6 +129,8 @@ MdFencedCodeBlock =
 	r_fence: ('```' | '~~~')?
 
 MdCodeNameList = MdTextual*
+
+MdCodeContent = value: 'md_code_literal'
 
 // <div>
 // ^^^^^
@@ -259,6 +261,7 @@ AnyMdInline =
 	| MdInlineHtml
 	| MdEntityReference
 	| MdHtmlBlock
+	| MdCodeContent
 	| MdHardLine
 	| MdTextual
 	| MdQuotePrefix

@@ -48,6 +48,9 @@ pub struct PluginEvalResult {
 
 /// Definition of an analyzer plugin.
 pub trait AnalyzerPlugin: Debug + Send + Sync {
+    /// Human readable identifier of the plugin for profiling and logging.
+    fn name(&self) -> &str;
+
     fn language(&self) -> PluginTargetLanguage;
 
     fn query(&self) -> Vec<RawSyntaxKind>;
@@ -167,7 +170,7 @@ where
             return;
         }
 
-        let rule_timer = profiling::start_plugin_rule("plugin");
+        let rule_timer = profiling::start_plugin_rule(self.plugin.name());
         let eval_result = self
             .plugin
             .evaluate(node.clone().into(), ctx.options.file_path.clone());
@@ -310,7 +313,7 @@ where
             }
 
             let plugin = &self.plugins[idx];
-            let rule_timer = profiling::start_plugin_rule("plugin");
+            let rule_timer = profiling::start_plugin_rule(plugin.name());
             let eval_result = plugin.evaluate(node.clone().into(), ctx.options.file_path.clone());
             rule_timer.stop();
 

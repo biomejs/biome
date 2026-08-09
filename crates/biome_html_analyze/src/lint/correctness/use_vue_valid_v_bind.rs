@@ -155,7 +155,7 @@ fn find_invalid_modifiers(modifiers: &VueModifierList) -> Option<TextRange> {
 /// See <https://vuejs.org/guide/essentials/template-syntax.html#same-name-shorthand>.
 fn is_static_arg(arg: &VueDirectiveArgument) -> bool {
     matches!(
-        arg.arg().ok(),
+        arg.arg(),
         Some(AnyVueDirectiveArgument::VueStaticArgument(_))
     )
 }

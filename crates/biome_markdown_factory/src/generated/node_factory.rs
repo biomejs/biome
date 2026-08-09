@@ -35,39 +35,17 @@ pub fn md_bullet_list_item(md_bullet_list: MdBulletList) -> MdBulletListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
+pub fn md_code_content(value_token: SyntaxToken) -> MdCodeContent {
+    MdCodeContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_CODE_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn md_continuation_indent(indent: MdIndentTokenList) -> MdContinuationIndent {
     MdContinuationIndent::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_CONTINUATION_INDENT,
         [Some(SyntaxElement::Node(indent.into_syntax()))],
     ))
-}
-pub fn md_document(value: MdBlockList, eof_token: SyntaxToken) -> MdDocumentBuilder {
-    MdDocumentBuilder {
-        value,
-        eof_token,
-        bom_token: None,
-    }
-}
-pub struct MdDocumentBuilder {
-    value: MdBlockList,
-    eof_token: SyntaxToken,
-    bom_token: Option<SyntaxToken>,
-}
-impl MdDocumentBuilder {
-    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
-        self.bom_token = Some(bom_token);
-        self
-    }
-    pub fn build(self) -> MdDocument {
-        MdDocument::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_DOCUMENT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
-    }
 }
 pub fn md_entity_reference(value_token: SyntaxToken) -> MdEntityReference {
     MdEntityReference::unwrap_cast(SyntaxNode::new_detached(
@@ -597,6 +575,34 @@ pub fn md_reference_link_label(
             Some(SyntaxElement::Token(r_brack_token)),
         ],
     ))
+}
+pub fn md_root(value: MdBlockList, eof_token: SyntaxToken) -> MdRootBuilder {
+    MdRootBuilder {
+        value,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct MdRootBuilder {
+    value: MdBlockList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl MdRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> MdRoot {
+        MdRoot::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn md_setext_header(content: MdInlineItemList, underline_token: SyntaxToken) -> MdSetextHeader {
     MdSetextHeader::unwrap_cast(SyntaxNode::new_detached(

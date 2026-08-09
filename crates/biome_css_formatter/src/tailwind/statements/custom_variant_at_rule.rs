@@ -15,9 +15,11 @@ impl FormatNodeRule<TwCustomVariantAtRule> for FormatTwCustomVariantAtRule {
         write!(
             f,
             [
-                custom_variant_token.format(),
+                custom_variant_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
                 space(),
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 space(),
                 selector.format()
             ]

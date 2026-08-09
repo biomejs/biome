@@ -281,7 +281,7 @@ where
         if spaces == 0 {
             write!(f, [format_indented])
         } else {
-            write!(f, [align(spaces, &format_indented)])
+            write!(f, [align(" ".repeat(spaces as usize), &format_indented)])
         }
     });
 

@@ -1,21 +1,19 @@
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
     EditorCapabilities, EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint,
-    SearchCapabilities,
+    SearchCapabilities, format_on_type_noop, matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
-    LintResults, ParserCapabilities,
+    AnalyzerCapabilities, Capabilities, FixAllParams, FixedFileResult, FormatterCapabilities,
+    LintParams, LintResults, ParserCapabilities,
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{
-    CodeAction, FixFileResult, GetSyntaxTreeResult, PatternId, PullActionsResult,
-};
+use crate::workspace::{CodeAction, GetSyntaxTreeResult, PatternId, PullActionsResult};
 use crate::workspace::{FixFileMode, SearchQuery};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
@@ -41,11 +39,10 @@ use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
-use either::Either;
 use std::borrow::Cow;
 use tracing::{debug_span, error, instrument};
 
@@ -457,7 +454,7 @@ fn debug_formatter_ir(
 fn format(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -516,12 +513,28 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_json_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: JsonSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let printed =
+        biome_json_formatter::format_range(options, &tree, root_node.text_trimmed_range())?;
     Ok(printed)
 }
 
@@ -709,7 +722,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 #[instrument(level = "debug", skip_all)]
-fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: JsonRoot = params.parsed_source.tree(&params.workspace_db);
 
     // Compute final rules (taking `overrides` into account)
@@ -775,7 +788,13 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 &analyzer_options,
                 services,
                 &params.plugins,
-                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+                |signal| {
+                    if params.collect_final_diagnostics {
+                        process_fix_all.collect_signal(signal, &mut pending_actions)
+                    } else {
+                        process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                    }
+                },
             );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -787,22 +806,9 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             })?;
 
             if result.is_none() {
-                return process_fix_all.finish(
-                    || {
-                        Ok(if params.should_format {
-                            Either::Left(format_node(
-                                params.settings.format_options::<JsonLanguage>(
-                                    params.biome_path,
-                                    &params.document_file_source,
-                                ),
-                                tree.syntax(),
-                            ))
-                        } else {
-                            Either::Right(tree.syntax().to_string())
-                        })
-                    },
-                    params.embeds_initial_indent,
-                );
+                return Ok(Some(
+                    process_fix_all.finish(tree.syntax().as_send().unwrap()),
+                ));
             }
         }
     }
@@ -835,10 +841,15 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
-        let plugin_text_edit = pending_actions
-            .iter()
-            .find_map(|action| action.text_edit.clone());
-        pending_actions.retain(|action| action.text_edit.is_none());
+        let mut plugin_text_edit = None;
+        pending_actions.retain_mut(|action| {
+            if let Some(text_edit) = action.text_edit.take() {
+                plugin_text_edit.get_or_insert(text_edit);
+                false
+            } else {
+                true
+            }
+        });
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match JsonRoot::cast(root) {
                 Some(tree) => tree,
@@ -848,15 +859,20 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         })?;
 
         if result.is_none() {
-            if let Some(new_text) = process_fix_all
-                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
-            {
-                let options = params
-                    .settings
-                    .parse_options::<JsonLanguage>(params.biome_path, &params.document_file_source);
-                let parse = biome_json_parser::parse_json(&new_text, options);
-                tree = parse.tree();
-                continue;
+            if let Some(plugin_text_edit) = plugin_text_edit {
+                let new_text = {
+                    let current_text = tree.syntax().to_string();
+                    process_fix_all.apply_plugin_text_edit(plugin_text_edit, &current_text)?
+                };
+                if let Some(new_text) = new_text {
+                    let options = params.settings.parse_options::<JsonLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    );
+                    let parse = biome_json_parser::parse_json(&new_text, options);
+                    tree = parse.tree();
+                    continue;
+                }
             }
 
             break;
@@ -864,7 +880,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     }
 
     // Phase 2: all rules for final diagnostics
-    {
+    if params.collect_final_diagnostics {
         let services = JsonAnalyzeServices {
             file_source,
             configuration_provider: params
@@ -884,22 +900,9 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         );
     }
 
-    process_fix_all.finish(
-        || {
-            Ok(if params.should_format {
-                Either::Left(format_node(
-                    params.settings.format_options::<JsonLanguage>(
-                        params.biome_path,
-                        &params.document_file_source,
-                    ),
-                    tree.syntax(),
-                ))
-            } else {
-                Either::Right(tree.syntax().to_string())
-            })
-        },
-        params.embeds_initial_indent,
-    )
+    Ok(Some(
+        process_fix_all.finish(tree.syntax().as_send().unwrap()),
+    ))
 }
 
 fn search(

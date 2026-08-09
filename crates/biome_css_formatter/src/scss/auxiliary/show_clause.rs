@@ -15,7 +15,7 @@ impl FormatNodeRule<ScssShowClause> for FormatScssShowClause {
         write!(
             f,
             [group(&format_args![
-                show_token.format(),
+                show_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
                 members.format()
             ])]

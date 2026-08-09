@@ -10,6 +10,12 @@ fn build_model(source: &str) -> SemanticModel {
     semantic_model(&root)
 }
 
+fn build_scss_model(source: &str) -> SemanticModel {
+    let parse = parse_css(source, CssFileSource::scss(), CssParserOptions::default());
+    let root = parse.tree();
+    semantic_model(&root)
+}
+
 #[test]
 fn whitespace_change_is_eq() {
     assert_eq!(
@@ -101,6 +107,48 @@ fn global_variable_count_change_is_not_eq() {
 }
 
 #[test]
+fn scss_custom_property_function_boundary_is_not_eq() {
+    assert_ne!(
+        build_scss_model(":root { --value: url(foo); }"),
+        build_scss_model(":root { --value: url (foo); }"),
+        "source-tight functions and identifier-plus-block values should differ"
+    );
+}
+
+#[test]
+fn scss_custom_property_interpolation_boundary_is_not_eq() {
+    assert_ne!(
+        build_scss_model(":root { --value: #{$value}; }"),
+        build_scss_model(":root { --value: # {$value}; }"),
+        "interpolation and a literal hash-plus-block value should differ"
+    );
+}
+
+#[test]
+fn scss_custom_property_component_whitespace_is_not_eq() {
+    assert_ne!(
+        build_scss_model(":root { --value: //; }"),
+        build_scss_model(":root { --value: / /; }"),
+        "whitespace between raw components should affect equality"
+    );
+}
+
+#[test]
+fn scss_custom_property_container_whitespace_is_eq() {
+    assert_eq!(
+        build_scss_model(":root { --value: fn( value ) [ value ]; }"),
+        build_scss_model(":root { --value: fn(value) [value]; }"),
+        "formatter-normalized container whitespace should not affect equality"
+    );
+
+    assert_eq!(
+        build_scss_model(":root { --value: fn(/* note */); }"),
+        build_scss_model(":root { --value: fn(); }"),
+        "comments should not affect custom-property value equality"
+    );
+}
+
+#[test]
 fn at_property_name_change_is_not_eq() {
     assert_ne!(
         build_model(
@@ -127,6 +175,47 @@ fn at_property_syntax_change_is_not_eq() {
 }
 
 #[test]
+fn at_property_whitespace_change_is_eq() {
+    assert_eq!(
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: red; }"#
+        ),
+        build_model(
+            r#"@property  --foo  { syntax:  "<color>"; inherits:  true; initial-value:  red; }"#
+        ),
+        "@property whitespace should not affect semantic eq"
+    );
+}
+
+#[test]
+fn at_property_syntax_ranges_do_not_affect_eq() {
+    assert_eq!(
+        build_model(r#"@property --foo { syntax: "*"; inherits: true; }"#),
+        build_model(r#"@property --foo { syntax: " * "; inherits: true; }"#),
+        "universal syntax ranges should not affect semantic eq"
+    );
+
+    assert_eq!(
+        build_model(r#"@property --foo { syntax: "<unknown>"; inherits: true; }"#),
+        build_model("\n@property --foo { syntax: \"<unknown>\"; inherits: true; }"),
+        "diagnostic ranges should not affect semantic eq"
+    );
+}
+
+#[test]
+fn at_property_initial_value_change_is_not_eq() {
+    assert_ne!(
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: red; }"#
+        ),
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: blue; }"#
+        ),
+        "different @property initial values should produce different models"
+    );
+}
+
+#[test]
 fn at_property_inherits_change_is_not_eq() {
     assert_ne!(
         build_model(
@@ -136,6 +225,35 @@ fn at_property_inherits_change_is_not_eq() {
             r#"@property --foo { syntax: "<color>"; inherits: false; initial-value: red; }"#
         ),
         "different @property inherits should produce different models"
+    );
+}
+
+#[test]
+fn shadowed_at_property_change_is_not_eq() {
+    assert_ne!(
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        build_model(
+            r#"@property --foo { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        "shadowed @property rules remain part of semantic equality"
+    );
+}
+
+#[test]
+fn shadowed_at_property_count_is_not_eq() {
+    assert_ne!(
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        build_model(
+            r#"@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        "authored @property rule count remains part of semantic equality"
     );
 }
 

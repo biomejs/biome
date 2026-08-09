@@ -47,8 +47,8 @@ div {
 
 ```css
 div {
-	all: InItial;
-	all: inherIT;
+	all: initial;
+	all: inherit;
 	all: revert-layer;
 
 	all: unknown-value;

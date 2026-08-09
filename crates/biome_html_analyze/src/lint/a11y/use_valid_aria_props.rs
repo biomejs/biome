@@ -109,8 +109,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
             AnyVueDirective::VueVBindShorthandDirective(d) => Some(
                 d.arg()
                     .ok()?
-                    .arg()
-                    .ok()?
+                    .arg()?
                     .as_vue_static_argument()?
                     .name_token()
                     .ok()?
@@ -122,8 +121,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
                 }
                 Some(
                     d.arg()?
-                        .arg()
-                        .ok()?
+                        .arg()?
                         .as_vue_static_argument()?
                         .name_token()
                         .ok()?

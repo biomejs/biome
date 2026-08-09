@@ -60,16 +60,16 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.js:8:1 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:10:2 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown property is not allowed.
   
-     6 │ `;
-     7 │ const _Baz = styled.div`background-color: red;
-   > 8 │ align: center;
-       │ ^^^^^
-     9 │ padding: 0;
-    10 │ `;
+     8 │ const _Baz = styled.div`
+     9 │ 	background-color: red;
+  > 10 │ 	align: center;
+       │ 	^^^^^
+    11 │ 	padding: 0;
+    12 │ `;
   
   i See CSS Specifications and browser specific properties for more details.
   

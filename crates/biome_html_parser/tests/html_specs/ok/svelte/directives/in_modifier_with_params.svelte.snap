@@ -23,7 +23,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteInDirective {
@@ -65,7 +65,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@50..51 "<" [] [],
                 slash_token: SLASH@51..52 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@52..55 "div" [] [],
+                    value_token: DIV_KW@52..55 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@55..56 ">" [] [],
             },
@@ -87,7 +87,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..32
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..31
           0: SVELTE_IN_DIRECTIVE@5..31
             0: IN_KW@5..7 "in" [] []
@@ -115,7 +115,7 @@ HtmlRoot {
         0: L_ANGLE@50..51 "<" [] []
         1: SLASH@51..52 "/" [] []
         2: HTML_TAG_NAME@52..55
-          0: HTML_LITERAL@52..55 "div" [] []
+          0: DIV_KW@52..55 "div" [] []
         3: R_ANGLE@55..56 ">" [] []
   4: EOF@56..57 "" [Newline("\n")] []
 

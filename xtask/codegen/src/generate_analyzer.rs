@@ -126,7 +126,7 @@ pub fn generate_analyzer() -> Result<()> {
     )?;
     generate_analyzer_crate(
         "biome_css_analyze",
-        &["lint", "assist"],
+        &["lint", "assist", "syntax"],
         update_css_registry_builder,
     )?;
     generate_analyzer_crate(
@@ -138,6 +138,11 @@ pub fn generate_analyzer() -> Result<()> {
         "biome_html_analyze",
         &["lint", "assist"],
         update_html_registry_builder,
+    )?;
+    generate_analyzer_crate(
+        "biome_markdown_analyze",
+        &["lint", "assist"],
+        update_markdown_registry_builder,
     )?;
     Ok(())
 }
@@ -329,6 +334,25 @@ fn update_html_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
         use biome_html_syntax::HtmlLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<HtmlLanguage>>(registry: &mut V) {
+            #( #categories )*
+        }
+    })?;
+
+    fs2::write(path, tokens)?;
+
+    Ok(())
+}
+
+fn update_markdown_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
+    let path = project_root().join("crates/biome_markdown_analyze/src/registry.rs");
+
+    let categories = analyzers.into_values();
+
+    let tokens = reformat(quote! {
+        use biome_analyze::RegistryVisitor;
+        use biome_markdown_syntax::MarkdownLanguage;
+
+        pub fn visit_registry<V: RegistryVisitor<MarkdownLanguage>>(registry: &mut V) {
             #( #categories )*
         }
     })?;

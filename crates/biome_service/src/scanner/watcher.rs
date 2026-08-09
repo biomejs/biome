@@ -19,10 +19,10 @@ use std::str::FromStr;
 use std::time::Duration;
 use tracing::{debug, error, info, warn};
 
-/// Controls various aspects of the Biome Daemon.
+/// Options that control the Biome daemon server's file watcher.
 #[derive(Clone, Debug, Eq, PartialEq, Bpaf)]
 pub struct WatcherOptions {
-    /// Controls how the Biome file watcher should behave.
+    /// Selects how the daemon server detects file changes. `recommended` uses the operating system's recommended watcher, `polling` periodically checks for changes, and `none` disables watching.
     #[bpaf(
         env("BIOME_WATCHER_KIND"),
         long("watcher-kind"),
@@ -32,7 +32,7 @@ pub struct WatcherOptions {
     )]
     pub watcher_kind: WatcherKind,
 
-    /// The polling interval in milliseconds. This is only applicable when using the polling watcher.
+    /// Sets how often the polling watcher checks for file changes, in milliseconds. This setting applies only when `--watcher-kind=polling`.
     #[bpaf(
         env("BIOME_WATCHER_POLLING_INTERVAL"),
         long("watcher-polling-interval"),
@@ -54,13 +54,12 @@ impl Default for WatcherOptions {
 
 #[derive(Clone, Debug, Eq, PartialEq, Bpaf, Default)]
 pub enum WatcherKind {
-    /// It uses the polling strategy. It's slower than the recommended, by it avoids locking folders in Windows systems.
+    /// Polls for changes. This can be slower, but avoids locking directories on Windows.
     Polling,
-    /// It uses the recommended strategy of the current OS. It's faster than polling in some cases, but it might behaves differently based on the OS.
+    /// Uses the strategy recommended by the operating system. Behavior can vary by platform.
     #[default]
     Recommended,
-    /// The file watcher is disabled, which means that changes aren't tracked, causing linting not working properly inside editors or
-    /// when using the Biome daemon. It's useful for testing purposes or when the file watcher isn't needed.
+    /// Disables file watching. The daemon and editor integrations will not detect file changes.
     None,
 }
 

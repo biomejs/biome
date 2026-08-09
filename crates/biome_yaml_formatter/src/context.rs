@@ -1,7 +1,7 @@
 use crate::YamlCommentStyle;
 use crate::comments::{FormatYamlLeadingComment, YamlComments};
 use biome_formatter::{
-    CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
+    CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth, QuoteStyle,
     TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{IndentWidth, prelude::*};
@@ -62,6 +62,9 @@ pub struct YamlFormatOptions {
     line_width: LineWidth,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
+    /// The preferred quote style for quoted scalars that work with either
+    /// kind of quote. Defaults to double quotes.
+    quote_style: QuoteStyle,
 }
 
 impl YamlFormatOptions {
@@ -104,6 +107,19 @@ impl YamlFormatOptions {
     pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
         self.trailing_newline = trailing_newline;
     }
+
+    pub fn with_quote_style(mut self, quote_style: QuoteStyle) -> Self {
+        self.quote_style = quote_style;
+        self
+    }
+
+    pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
+        self.quote_style = quote_style;
+    }
+
+    pub fn quote_style(&self) -> QuoteStyle {
+        self.quote_style
+    }
 }
 
 impl FormatOptions for YamlFormatOptions {
@@ -138,6 +154,7 @@ impl fmt::Display for YamlFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
+        writeln!(f, "Quote style: {}", self.quote_style)?;
 
         Ok(())
     }

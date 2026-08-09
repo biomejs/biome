@@ -1,0 +1,77 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+%YAML 1.2
+value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@0..9 "%YAML 1.2" [] [],
+                },
+            ],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@9..10 "" [Newline("\n")] [],
+                flow: YamlFlowYamlNode {
+                    properties: YamlPropertyList [],
+                    content: YamlPlainScalar {
+                        value_token: PLAIN_LITERAL@10..16 "value\n" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@16..16 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@16..16 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..16
+  0: YAML_DOCUMENT_LIST@0..16
+    0: YAML_DOCUMENT@0..16
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..9
+        0: YAML_DIRECTIVE@0..9
+          0: DIRECTIVE_LITERAL@0..9 "%YAML 1.2" [] []
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@9..16
+        0: FLOW_START@9..10 "" [Newline("\n")] []
+        1: YAML_FLOW_YAML_NODE@10..16
+          0: YAML_PROPERTY_LIST@10..10
+          1: YAML_PLAIN_SCALAR@10..16
+            0: PLAIN_LITERAL@10..16 "value\n" [] []
+        2: FLOW_END@16..16 "" [] []
+      4: (empty)
+  1: EOF@16..16 "" [] []
+
+```
+
+## Diagnostics
+
+```
+directive_without_end_marker.yaml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `---` after YAML directives.
+  
+  > 1 │ %YAML 1.2
+      │ ^^^^^^^^^
+    2 │ value
+    3 │ 
+  
+```

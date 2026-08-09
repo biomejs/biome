@@ -10,6 +10,7 @@ pub mod static_value;
 mod string_ext;
 mod svg;
 mod syntax_node;
+pub mod tags;
 mod text_ext;
 mod vue_ext;
 
@@ -18,6 +19,7 @@ pub use generated::*;
 pub use script_type::*;
 pub use svg::*;
 pub use syntax_node::*;
+pub use tags::HTML_TAG_NAMES;
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,
@@ -120,14 +122,35 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
     }
 }
 
+/// Whether `text` is wrapped in a matching pair of `"` or `'`.
+///
+/// A lone quote leaves `next_back` empty, so a single character is correctly
+/// not treated as quoted.
+pub(crate) fn is_quoted(text: &str) -> bool {
+    let mut characters = text.chars();
+    matches!(
+        (characters.next(), characters.next_back()),
+        (Some('"'), Some('"')) | (Some('\''), Some('\''))
+    )
+}
+
+/// `text` without the quotes that delimit it. Text that isn't quoted, such as an
+/// unquoted attribute value, is returned unchanged.
+pub(crate) fn unquote(text: &str) -> &str {
+    if is_quoted(text) {
+        // Both quotes are ASCII, so this can't split a character.
+        &text[1..text.len() - 1]
+    } else {
+        text
+    }
+}
+
 /// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
 pub fn inner_string_text(token: &HtmlSyntaxToken) -> TokenText {
-    let mut text = token.token_text_trimmed();
-    if token.kind() == HtmlSyntaxKind::HTML_STRING_LITERAL {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
+    let text = token.token_text_trimmed();
+    if token.kind() == HtmlSyntaxKind::HTML_STRING_LITERAL && is_quoted(text.text()) {
         let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
-        text = text.slice(range);
+        return text.slice(range);
     }
     text
 }

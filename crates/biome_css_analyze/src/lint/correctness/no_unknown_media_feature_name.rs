@@ -68,6 +68,11 @@ declare_lint_rule! {
     /// @media screen and (-webkit-width > 320px) {}
     /// ```
     ///
+    /// ```css
+    /// @custom-media --mobile (max-width: 768px);
+    /// @media screen and (--mobile) {}
+    /// ```
+    ///
     pub NoUnknownMediaFeatureName {
         version: "1.8.0",
         name: "noUnknownMediaFeatureName",
@@ -155,9 +160,7 @@ fn is_invalid_feature_name_included_in_css_media_type_query(
             match css_media_and_type_query.right().ok()? {
                 AnyCssMediaTypeCondition::AnyCssMediaConditionOperand(
                     any_css_media_condition_operand,
-                ) => {
-                    has_invalid_media_condition_operand(any_css_media_condition_operand)
-                }
+                ) => has_invalid_media_condition_operand(any_css_media_condition_operand),
                 AnyCssMediaTypeCondition::CssMediaAndCondition(css_media_and_condition) => {
                     is_css_media_and_condition_invalid(css_media_and_condition)
                 }
@@ -387,7 +390,8 @@ fn media_feature_name_from_query_name(name: AnyCssQueryFeatureName) -> Option<Me
         AnyCssQueryFeatureName::CssIdentifier(identifier) => Some(MediaFeatureName::Literal(
             identifier.value_token().ok()?.token_text_trimmed(),
         )),
-        AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_)
+        AnyCssQueryFeatureName::CssDashedIdentifier(_)
+        | AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_)
         | AnyCssQueryFeatureName::ScssVariable(_) => Some(MediaFeatureName::Dynamic),
     }
 }

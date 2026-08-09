@@ -24,7 +24,7 @@ HtmlRoot {
                 HtmlOpeningElement {
                     l_angle_token: L_ANGLE@0..1 "<" [] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@1..2 "h" [] [],
+                        value_token: HTML_UNKNOWN_TAG@1..2 "h" [] [],
                     },
                     attributes: HtmlAttributeList [
                         HtmlBogusAttribute {
@@ -53,8 +53,9 @@ HtmlRoot {
                         L_ANGLE@36..37 "<" [] [],
                         SLASH@37..38 "/" [] [],
                         HtmlTagName {
-                            value_token: HTML_LITERAL@38..42 "h{{" [] [Whitespace(" ")],
+                            value_token: HTML_UNKNOWN_TAG@38..39 "h" [] [],
                         },
+                        HTML_BOGUS@39..42 "{{" [] [Whitespace(" ")],
                         HTML_BOGUS@42..66 "heading_level|default:2" [] [Whitespace(" ")],
                         HTML_BOGUS@66..68 "}}" [] [],
                         R_ANGLE@68..69 ">" [] [],
@@ -79,7 +80,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..32
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..2
-          0: HTML_LITERAL@1..2 "h" [] []
+          0: HTML_UNKNOWN_TAG@1..2 "h" [] []
         2: HTML_ATTRIBUTE_LIST@2..31
           0: HTML_BOGUS_ATTRIBUTE@2..31
             0: HTML_BOGUS_ATTRIBUTE@2..31
@@ -94,11 +95,12 @@ HtmlRoot {
       2: HTML_BOGUS_ELEMENT@36..69
         0: L_ANGLE@36..37 "<" [] []
         1: SLASH@37..38 "/" [] []
-        2: HTML_TAG_NAME@38..42
-          0: HTML_LITERAL@38..42 "h{{" [] [Whitespace(" ")]
-        3: HTML_BOGUS@42..66 "heading_level|default:2" [] [Whitespace(" ")]
-        4: HTML_BOGUS@66..68 "}}" [] []
-        5: R_ANGLE@68..69 ">" [] []
+        2: HTML_TAG_NAME@38..39
+          0: HTML_UNKNOWN_TAG@38..39 "h" [] []
+        3: HTML_BOGUS@39..42 "{{" [] [Whitespace(" ")]
+        4: HTML_BOGUS@42..66 "heading_level|default:2" [] [Whitespace(" ")]
+        5: HTML_BOGUS@66..68 "}}" [] []
+        6: R_ANGLE@68..69 ">" [] []
   4: EOF@69..70 "" [Newline("\n")] []
 
 ```
@@ -115,6 +117,14 @@ issue-5450.html:1:3 parse ━━━━━━━━━━━━━━━━━━
     2 │ 
   
   i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+issue-5450.html:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Closing tags should not have attributes.
+  
+  > 1 │ <h{{ heading_level|default:2 }}>name</h{{ heading_level|default:2 }}>
+      │                                        ^^
+    2 │ 
   
 issue-5450.html:1:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

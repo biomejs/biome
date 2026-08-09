@@ -2,10 +2,9 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NUM_PREDEFINED_TYPES, NamedFunctionParameter, Object, ObjectLiteral,
-    PatternFunctionParameter, ReturnType, Type, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
+    MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
+    RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind,
+    TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -63,12 +62,6 @@ impl FormatContext for FormatTypeContext {
 
     fn source_map(&self) -> Option<&TransformSourceMap> {
         None
-    }
-}
-
-impl std::fmt::Display for Type {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.deref(), f)
     }
 }
 
@@ -150,6 +143,15 @@ impl Format<FormatTypeContext> for Object {
                 write!(f, [token("No prototype")])
             }
         });
+        // Objects with a complete member list are the common case, so the
+        // marker is only printed when it carries information.
+        let unknown_members = format_with(|f| {
+            if self.has_unknown_members {
+                write!(f, [token("unknown members"), hard_line_break()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
@@ -157,6 +159,7 @@ impl Format<FormatTypeContext> for Object {
                 space(),
                 token("{"),
                 &group(&block_indent(&format_args![
+                    unknown_members,
                     token("prototype:"),
                     space(),
                     prototype,
@@ -496,6 +499,15 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::OptionalChainIndex(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.object,
+                        text(&std::format!("?.[{}]", expr.index), None),
+                    ]]
+                )
+            }
             Self::IterableValueOf(expr) => {
                 write!(
                     f,
@@ -548,6 +560,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, token("."), &expr.member]])
             }
+            Self::OptionalChainStaticMember(expr) => {
+                write!(f, [&format_args![&expr.object, token("?."), &expr.member]])
+            }
             Self::Super(_) => write!(f, [&format_args![token("super")]]),
             Self::This(_) => write!(f, [&format_args![token("this")]]),
             Self::Typeof(expr) => {
@@ -598,21 +613,11 @@ impl Format<FormatTypeContext> for TypeReference {
                     ]]
                 )
             }
-            Self::Resolved(resolved) => {
-                let level = resolved.level();
-                let id = resolved.id();
-                if level == TypeResolverLevel::Global {
-                    // GlobalsResolverBuilder makes sure the type store is fully filled.
-                    // Every global TypeId whose index is less than NUM_PREDEFINED_TYPES
-                    // must have a name returned by global_type_name().
-                    // GLOBAL_TYPE_MEMBERS ensures this invariant.
-                    if let Some(name) = global_type_name(id) {
+            Self::Resolved(resolved) => match resolved {
+                RawTypeId::Global(id) => {
+                    if let Some(name) = global_type_name(id.as_type_id()) {
                         write!(f, [token(name)])
                     } else {
-                        // Start counting from `NUM_PREDEFINED_TYPES` so
-                        // snapshots remain stable even if we add new predefined
-                        // types.
-                        let id = TypeId::new(id.index() - NUM_PREDEFINED_TYPES);
                         write!(
                             f,
                             [&format_args![
@@ -622,27 +627,18 @@ impl Format<FormatTypeContext> for TypeReference {
                             ]]
                         )
                     }
-                } else if level == TypeResolverLevel::Thin {
-                    let module_id = resolved.module_id().index();
+                }
+                RawTypeId::Local(id) => {
                     write!(
                         f,
                         [&format_args![
-                            text(&std::format!("Module({module_id})"), None),
-                            space(),
-                            text(&std::format!("{id:?}"), None),
-                        ]]
-                    )
-                } else {
-                    write!(
-                        f,
-                        [&format_args![
-                            text(&std::format!("{level:?}"), None),
+                            token("Local"),
                             space(),
                             text(&std::format!("{id:?}"), None),
                         ]]
                     )
                 }
-            }
+            },
             Self::Import(import) => write!(f, [import.as_ref()]),
         }
     }

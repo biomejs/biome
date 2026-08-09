@@ -3,13 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlOpeningElement, element_ext::AnyHtmlTagElement};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{HtmlOpeningElement, T, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_script_url::NoScriptUrlOptions;
 use biome_string_case::StrOnlyExtension;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs in HTML.
@@ -64,9 +61,8 @@ impl Rule for NoScriptUrl {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(&AnyHtmlTagElement::from(element.clone()), source_type, "a") {
+        if AnyHtmlTagElement::from(element.clone()).tag_name_kind() != Some(T![a]) {
             return None;
         }
 

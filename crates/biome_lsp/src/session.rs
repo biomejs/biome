@@ -24,7 +24,7 @@ use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::db::DbState;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, SupportsFeatureParams,
+    PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -277,7 +277,42 @@ impl Session {
         }
     }
 
+    /// Returns the workspace, wrapped so that any call interrupted by a
+    /// concurrent update to the workspace database is automatically retried.
+    ///
+    /// Use this accessor in code where nobody would re-send the work if we
+    /// dropped it:
+    ///
+    /// - **LSP notifications**, i.e. one-way messages from the editor, such
+    ///   as `textDocument/didOpen`, `textDocument/didChange` and
+    ///   `textDocument/didClose`. The editor sends them once and never asks
+    ///   again: dropping a `didChange` would leave our copy of the document
+    ///   permanently out of sync with the editor.
+    /// - **Background tasks** the server starts on its own, such as
+    ///   refreshing the diagnostics of the open documents, loading the
+    ///   configuration file, or scanning the project folder.
+    ///
+    /// LSP request handlers (formatting, code actions, ...) should use
+    /// [Self::workspace_for_request] instead.
     pub(crate) fn workspace(&self) -> impl Workspace + '_ {
+        RetryingWorkspace::new(self.workspace.with_db_state(&self.db_state))
+    }
+
+    /// Returns the workspace without automatic retries.
+    ///
+    /// Use this accessor in **LSP request handlers**, i.e. handlers for
+    /// messages the editor sends and awaits an answer for, such as
+    /// `textDocument/formatting` or `textDocument/codeAction`. These handlers
+    /// run inside `catch_lsp_operation`, which turns an interrupted call into
+    /// a `ContentModified` response.
+    ///
+    /// Requests must not retry on their own, because their positions and
+    /// ranges are only meaningful for the document version the editor sent
+    /// them for. If the user types while we compute code actions for line 10,
+    /// a retry would compute them for whatever moved to line 10 after the
+    /// edit. Answering with `ContentModified` instead makes the editor
+    /// re-send the request with fresh positions, if it still needs it.
+    pub(crate) fn workspace_for_request(&self) -> impl Workspace + '_ {
         self.workspace.with_db_state(&self.db_state)
     }
 
@@ -437,6 +472,7 @@ impl Session {
         }
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     pub(crate) fn schedule_diagnostics(self: &Arc<Self>, url: Uri, version: i32) {
         let entry = self.diagnostics_entry(url.clone(), version);
         entry.closed.store(false, Ordering::Release);
@@ -445,6 +481,7 @@ impl Session {
         self.spawn_delayed_diagnostics(url, entry, version);
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn spawn_delayed_diagnostics(
         self: &Arc<Self>,
         url: Uri,
@@ -458,6 +495,7 @@ impl Session {
         });
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn run_debounced_diagnostics(
         self: Arc<Self>,
         url: Uri,
@@ -578,7 +616,6 @@ impl Session {
                 self.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await
             }
         }
-
         let FileFeaturesResult {
             features_supported: file_features,
         } = self.workspace().file_features(SupportsFeatureParams {
@@ -599,7 +636,6 @@ impl Session {
                 .await;
             return Ok(());
         }
-
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if configuration_status.is_loaded() {
@@ -665,8 +701,6 @@ impl Session {
                 })
                 .collect()
         };
-
-        info!("Diagnostics sent to the client {}", diagnostics.len());
 
         if !self.can_publish_diagnostics(&url, doc.version, entry) {
             return Ok(());
@@ -1440,16 +1474,23 @@ impl Session {
     }
 
     pub(crate) fn failsafe_rage(&self, params: RageParams) -> RageResult {
-        self.workspace().rage(params).unwrap_or_else(|err| {
-            let entries = vec![
-                RageEntry::section("Workspace"),
-                RageEntry::markup(markup! {
-                    <Error>"\u{2716} Rage command failed:"</Error> {&format!("{err}")}
-                }),
-            ];
+        let result = salsa::Cancelled::catch(std::panic::AssertUnwindSafe(|| {
+            self.workspace().rage(params)
+        }));
+        let err = match result {
+            Ok(Ok(result)) => return result,
+            Ok(Err(err)) => err.to_string(),
+            Err(cancelled) => cancelled.to_string(),
+        };
 
-            RageResult { entries }
-        })
+        let entries = vec![
+            RageEntry::section("Workspace"),
+            RageEntry::markup(markup! {
+                <Error>"\u{2716} Rage command failed:"</Error> {&err}
+            }),
+        ];
+
+        RageResult { entries }
     }
 
     /// Retrieves the configuration status of the given project, defaulting to

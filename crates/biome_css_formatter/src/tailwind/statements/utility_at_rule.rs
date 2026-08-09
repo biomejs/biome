@@ -15,9 +15,9 @@ impl FormatNodeRule<TwUtilityAtRule> for FormatTwUtilityAtRule {
         write!(
             f,
             [
-                utility_token.format(),
+                utility_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 space(),
                 block.format()
             ]

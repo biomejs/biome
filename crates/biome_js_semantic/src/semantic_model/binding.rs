@@ -604,7 +604,7 @@ impl Binding {
     /// Returns all exports of the binding.
     ///
     /// The node kind is either an identifier binding (if the declaration is
-    /// itself an `export` statement) or an identifier usage.
+    /// itself an `export` statement) or an identifier reference.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
         binding.export_ranges.iter().filter_map(|export_start| {

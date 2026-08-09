@@ -25,7 +25,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                    value_token: TEMPLATE_KW@1..9 "template" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@9..10 ">" [] [],
@@ -37,21 +37,21 @@ HtmlRoot {
                         object: HtmlMemberName {
                             object: HtmlMemberName {
                                 object: HtmlComponentName {
-                                    value_token: HTML_LITERAL@14..23 "Component" [] [],
+                                    value_token: HTML_COMPONENT_LITERAL@14..23 "Component" [] [],
                                 },
                                 dot_token: DOT@23..24 "." [] [],
-                                member: HtmlTagName {
-                                    value_token: HTML_LITERAL@24..25 "A" [] [],
+                                member: HtmlComponentName {
+                                    value_token: HTML_COMPONENT_LITERAL@24..25 "A" [] [],
                                 },
                             },
                             dot_token: DOT@25..26 "." [] [],
-                            member: HtmlTagName {
-                                value_token: HTML_LITERAL@26..27 "B" [] [],
+                            member: HtmlComponentName {
+                                value_token: HTML_COMPONENT_LITERAL@26..27 "B" [] [],
                             },
                         },
                         dot_token: DOT@27..28 "." [] [],
-                        member: HtmlTagName {
-                            value_token: HTML_LITERAL@28..30 "C" [] [Whitespace(" ")],
+                        member: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@28..30 "C" [] [Whitespace(" ")],
                         },
                     },
                     attributes: HtmlAttributeList [],
@@ -63,7 +63,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@32..34 "<" [Newline("\n")] [],
                 slash_token: SLASH@34..35 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@35..43 "template" [] [],
+                    value_token: TEMPLATE_KW@35..43 "template" [] [],
                 },
                 r_angle_token: R_ANGLE@43..44 ">" [] [],
             },
@@ -85,7 +85,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..9
-          0: HTML_LITERAL@1..9 "template" [] []
+          0: TEMPLATE_KW@1..9 "template" [] []
         2: HTML_ATTRIBUTE_LIST@9..9
         3: R_ANGLE@9..10 ">" [] []
       1: HTML_ELEMENT_LIST@10..32
@@ -95,16 +95,16 @@ HtmlRoot {
             0: HTML_MEMBER_NAME@14..27
               0: HTML_MEMBER_NAME@14..25
                 0: HTML_COMPONENT_NAME@14..23
-                  0: HTML_LITERAL@14..23 "Component" [] []
+                  0: HTML_COMPONENT_LITERAL@14..23 "Component" [] []
                 1: DOT@23..24 "." [] []
-                2: HTML_TAG_NAME@24..25
-                  0: HTML_LITERAL@24..25 "A" [] []
+                2: HTML_COMPONENT_NAME@24..25
+                  0: HTML_COMPONENT_LITERAL@24..25 "A" [] []
               1: DOT@25..26 "." [] []
-              2: HTML_TAG_NAME@26..27
-                0: HTML_LITERAL@26..27 "B" [] []
+              2: HTML_COMPONENT_NAME@26..27
+                0: HTML_COMPONENT_LITERAL@26..27 "B" [] []
             1: DOT@27..28 "." [] []
-            2: HTML_TAG_NAME@28..30
-              0: HTML_LITERAL@28..30 "C" [] [Whitespace(" ")]
+            2: HTML_COMPONENT_NAME@28..30
+              0: HTML_COMPONENT_LITERAL@28..30 "C" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@30..30
           3: SLASH@30..31 "/" [] []
           4: R_ANGLE@31..32 ">" [] []
@@ -112,7 +112,7 @@ HtmlRoot {
         0: L_ANGLE@32..34 "<" [Newline("\n")] []
         1: SLASH@34..35 "/" [] []
         2: HTML_TAG_NAME@35..43
-          0: HTML_LITERAL@35..43 "template" [] []
+          0: TEMPLATE_KW@35..43 "template" [] []
         3: R_ANGLE@43..44 ">" [] []
   4: EOF@44..45 "" [Newline("\n")] []
 

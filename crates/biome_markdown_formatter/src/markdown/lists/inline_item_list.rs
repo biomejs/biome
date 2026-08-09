@@ -1,13 +1,14 @@
+use crate::context::ProseWrap;
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
 use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode, TrimMode};
-use crate::words::{FormatWordGroup, ProseItem, WordStreamResult, build_word_stream_flat};
+use crate::words::{ProseItem, ProseItemList};
 use biome_formatter::Format;
+use biome_markdown_syntax::MdBullet;
 
-/// Formats a sequence of prose items as a single line — word groups joined by spaces.
-/// SoftBreak and HardBreak are treated as space separators if encountered.
+/// Formats Markdown text on one line, replacing whitespace and line breaks with spaces.
 struct FormatSourceLine<'a>(&'a [ProseItem]);
 
 impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
@@ -15,47 +16,150 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
         let mut needs_space = false;
         for item in self.0 {
             match item {
-                ProseItem::WordGroup { atoms, escape } => {
+                ProseItem::WordGroup(group) => {
                     if needs_space {
                         write!(f, [space()])?;
                     }
-                    FormatWordGroup {
-                        atoms,
-                        escape: *escape,
-                    }
-                    .fmt(f)?;
+                    group.fmt(f)?;
                     needs_space = true;
                 }
                 ProseItem::Space | ProseItem::SoftBreak | ProseItem::HardBreak(_) => {
                     needs_space = true;
                 }
+                ProseItem::OutdentedLineStart => {}
             }
         }
         Ok(())
     }
 }
-/// Removes leading `Space` items after every `SoftBreak` in the word stream.
-///
-/// When the parser doesn't recognize continuation-line whitespace as
-/// `MdIndentToken` (e.g. because the source list marker had leading spaces
-/// that shift the expected indent), those spaces end up as `MdTextual " "`
-/// tokens → `Space` items in the stream. The structural `align()` in the IR
-/// already provides the correct indentation, so these spaces are artifacts.
-fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
-    let mut i = 0;
-    while i < stream.len() {
-        if matches!(stream[i], ProseItem::SoftBreak) {
-            let start = i + 1;
-            let mut end = start;
-            while end < stream.len() && matches!(stream[end], ProseItem::Space) {
-                end += 1;
+fn outdented_list_marker_lines(
+    node: &MdInlineItemList,
+    content_indent: usize,
+) -> FormatResult<(Vec<usize>, Vec<usize>)> {
+    let mut lines = Vec::new();
+    let mut indented_lines = Vec::new();
+    let mut line_index = 0;
+    let mut at_line_start = true;
+    let mut leading_spaces = 0;
+
+    for item in node.iter() {
+        let AnyMdInline::MdTextual(textual) = item else {
+            at_line_start = false;
+            continue;
+        };
+
+        let token = textual.value_token()?;
+        let mut text = token.text();
+
+        loop {
+            if at_line_start {
+                let trimmed = text.trim_start_matches(' ');
+                leading_spaces += text.len() - trimmed.len();
+                text = trimmed;
+
+                if text.is_empty() {
+                    break;
+                }
+
+                if line_index > 0
+                    && leading_spaces < content_indent
+                    && starts_with_list_marker(text)
+                {
+                    lines.push(line_index);
+                    if leading_spaces > 0 {
+                        indented_lines.push(line_index);
+                    }
+                }
+
+                at_line_start = false;
             }
-            if end > start {
-                stream.drain(start..end);
-            }
+
+            let Some(newline_index) = text.find('\n') else {
+                break;
+            };
+
+            line_index += 1;
+            at_line_start = true;
+            leading_spaces = 0;
+            text = &text[newline_index + 1..];
         }
-        i += 1;
     }
+
+    Ok((lines, indented_lines))
+}
+
+fn starts_with_list_marker(text: &str) -> bool {
+    let bytes = text.as_bytes();
+
+    match bytes {
+        [b'-' | b'*' | b'+'] => true,
+        [b'-' | b'*' | b'+', next, ..] => next.is_ascii_whitespace(),
+        [first, ..] if first.is_ascii_digit() => {
+            let marker_end = bytes
+                .iter()
+                .position(|byte| !byte.is_ascii_digit())
+                .unwrap_or(bytes.len());
+
+            matches!(bytes.get(marker_end), Some(b'.' | b')'))
+                && bytes
+                    .get(marker_end + 1)
+                    .is_none_or(|next| next.is_ascii_whitespace())
+        }
+        _ => false,
+    }
+}
+
+fn enclosing_list_content_indent(node: &MdInlineItemList) -> Option<usize> {
+    let bullet = node.syntax().ancestors().find_map(MdBullet::cast)?;
+    let prefix = bullet.prefix().ok()?;
+    let marker = prefix.marker().ok()?;
+    let pre_marker_width = prefix
+        .pre_marker_indent()
+        .iter()
+        .map(|indent| {
+            indent
+                .md_indent_char_token()
+                .ok()
+                .map_or(0, |token| token.text().len())
+        })
+        .sum::<usize>();
+
+    Some(pre_marker_width + marker.text_trimmed().len() + prefix.post_marker_len().unwrap_or(2))
+}
+
+fn format_source_line(
+    line_items: &[ProseItem],
+    line_index: usize,
+    needs_leading_break: bool,
+    trailing_soft_break: bool,
+    outdented_lines: &[usize],
+    f: &mut MarkdownFormatter,
+) -> FormatResult<()> {
+    if line_items.is_empty() {
+        return Ok(());
+    }
+
+    if needs_leading_break && outdented_lines.contains(&line_index) {
+        return write!(
+            f,
+            [dedent_to_root(&format_with(|f| {
+                write!(f, [hard_line_break()])?;
+                FormatSourceLine(line_items).fmt(f)
+            }))]
+        );
+    }
+
+    if needs_leading_break {
+        write!(f, [hard_line_break()])?;
+    }
+
+    FormatSourceLine(line_items).fmt(f)?;
+
+    if trailing_soft_break {
+        write!(f, [soft_line_break()])?;
+    }
+
+    Ok(())
 }
 
 use biome_formatter::{FormatRuleWithOptions, write};
@@ -63,7 +167,7 @@ use biome_markdown_syntax::{
     AnyMdInline, MarkdownLanguage, MdFencedCodeBlock, MdIndentCodeBlock, MdIndentToken,
     MdInlineItemList, MdTextual,
 };
-use biome_rowan::AstNodeListIterator;
+use biome_rowan::{AstNode, AstNodeListIterator};
 use std::iter::{FusedIterator, Peekable};
 
 #[derive(Debug, Clone, Default)]
@@ -715,40 +819,66 @@ impl FormatMdInlineItemList {
         write!(f, [hard_line_break()])
     }
 
-    /// Formats prose with `proseWrap: "preserve"` semantics.
-    ///
-    /// Each source line is emitted as-is with `hard_line_break` between them.
-    /// Hard breaks (`  \n` or `\\\n`) are formatted using their original node.
-    ///
-    /// TODO: for `proseWrap: "always"`, replace sequential writes with `f.fill()`
-    /// using `soft_line_break_or_space()` separators between word-level entries.
-    /// The word stream from `build_word_stream_flat` already provides the
-    /// granularity needed — just change the emission strategy.
     fn fmt_fill(
         &self,
         node: &MdInlineItemList,
         f: &mut MarkdownFormatter,
         text_context: TextContext,
     ) -> FormatResult<()> {
-        let WordStreamResult { mut stream } = build_word_stream_flat(node, f)?;
+        let mut items = ProseItemList::from_inline_item_list(node, f)?;
         let inside_list = text_context.is_list();
 
         if inside_list {
-            strip_spaces_after_soft_breaks(&mut stream);
+            items.remove_spaces_after_soft_breaks();
+        }
+        let items = items.as_slice();
+
+        match f.options().prose_wrap() {
+            ProseWrap::Preserve => self.fmt_prose_preserve(node, items, f, inside_list)?,
+            ProseWrap::Always => self.fmt_prose_always(items, f)?,
+            ProseWrap::Never => self.fmt_prose_never(items, f)?,
         }
 
+        if !inside_list {
+            write!(f, [hard_line_break()])?;
+        }
+
+        Ok(())
+    }
+
+    fn fmt_prose_preserve(
+        &self,
+        node: &MdInlineItemList,
+        items: &[ProseItem],
+        f: &mut MarkdownFormatter,
+        inside_list: bool,
+    ) -> FormatResult<()> {
+        let (outdented_lines, indented_outdented_lines) = if inside_list {
+            enclosing_list_content_indent(node)
+                .map(|content_indent| outdented_list_marker_lines(node, content_indent))
+                .transpose()?
+                .unwrap_or_default()
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         let mut is_first_line = true;
+        let mut line_index = 0;
         let mut line_start = 0;
 
-        for (i, item) in stream.iter().enumerate() {
+        for (i, item) in items.iter().enumerate() {
             match item {
                 ProseItem::HardBreak(hard_break) => {
-                    let line_items = &stream[line_start..i];
+                    let line_items = &items[line_start..i];
                     if !line_items.is_empty() {
-                        if !is_first_line {
-                            write!(f, [hard_line_break()])?;
-                        }
-                        FormatSourceLine(line_items).fmt(f)?;
+                        format_source_line(
+                            line_items,
+                            line_index,
+                            !is_first_line,
+                            false,
+                            &outdented_lines,
+                            f,
+                        )?;
                     }
                     write!(
                         f,
@@ -760,37 +890,118 @@ impl FormatMdInlineItemList {
                     )?;
                     is_first_line = true;
                     line_start = i + 1;
+                    line_index += 1;
                 }
                 ProseItem::SoftBreak => {
-                    let line_items = &stream[line_start..i];
+                    let line_items = &items[line_start..i];
                     if !line_items.is_empty() {
-                        if !is_first_line {
-                            write!(f, [hard_line_break()])?;
+                        let next_line_is_outdented_list_marker =
+                            indented_outdented_lines.contains(&(line_index + 1));
+                        format_source_line(
+                            line_items,
+                            line_index,
+                            !is_first_line,
+                            !inside_list,
+                            &outdented_lines,
+                            f,
+                        )?;
+                        if next_line_is_outdented_list_marker {
+                            write!(f, [space()])?;
+                            is_first_line = true;
+                        } else {
+                            is_first_line = false;
                         }
-                        FormatSourceLine(line_items).fmt(f)?;
-                        if !inside_list {
-                            write!(f, [soft_line_break()])?;
-                        }
-                        is_first_line = false;
                     }
                     line_start = i + 1;
+                    line_index += 1;
                 }
                 _ => {}
             }
         }
-        let remaining = &stream[line_start..];
+        let remaining = &items[line_start..];
         if !remaining.is_empty() {
-            if !is_first_line {
-                write!(f, [hard_line_break()])?;
-            }
-            FormatSourceLine(remaining).fmt(f)?;
-        }
-
-        if !inside_list {
-            write!(f, [hard_line_break()])?;
+            format_source_line(
+                remaining,
+                line_index,
+                !is_first_line,
+                false,
+                &outdented_lines,
+                f,
+            )?;
         }
 
         Ok(())
+    }
+
+    fn fmt_prose_never(&self, items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut segment_start = 0;
+
+        for (index, item) in items.iter().enumerate() {
+            let ProseItem::HardBreak(hard_break) = item else {
+                continue;
+            };
+
+            FormatSourceLine(&items[segment_start..index]).fmt(f)?;
+            write!(
+                f,
+                [hard_break
+                    .format()
+                    .with_options(FormatMdFormatHardLineOptions {
+                        print_mode: TextPrintMode::fill(),
+                    })]
+            )?;
+            segment_start = index + 1;
+        }
+
+        FormatSourceLine(&items[segment_start..]).fmt(f)
+    }
+
+    fn fmt_prose_always(&self, items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut segment_start = 0;
+
+        for (index, item) in items.iter().enumerate() {
+            let ProseItem::HardBreak(hard_break) = item else {
+                continue;
+            };
+
+            Self::format_fill_segment(&items[segment_start..index], f)?;
+            write!(
+                f,
+                [hard_break
+                    .format()
+                    .with_options(FormatMdFormatHardLineOptions {
+                        print_mode: TextPrintMode::fill(),
+                    })]
+            )?;
+            segment_start = index + 1;
+        }
+
+        Self::format_fill_segment(&items[segment_start..], f)
+    }
+
+    fn format_fill_segment(items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let no_separator = format_with(|_| Ok(()));
+        let mut fill = f.fill();
+        let mut has_separator = false;
+
+        for item in items {
+            match item {
+                ProseItem::Space | ProseItem::SoftBreak => has_separator = true,
+                ProseItem::WordGroup(group) => {
+                    if group.starts_with_block_marker() {
+                        fill.entry(&space(), group);
+                    } else if has_separator {
+                        fill.entry(&soft_line_break_or_space(), group);
+                    } else {
+                        fill.entry(&no_separator, group);
+                    }
+                    has_separator = false;
+                }
+                ProseItem::HardBreak(_) | ProseItem::OutdentedLineStart => {}
+            }
+        }
+
+        fill.finish()
     }
 }
 

@@ -5,14 +5,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_html_factory::make;
 use biome_html_syntax::{
-    AnyHtmlAttribute, AstroIsDirective, HtmlOpeningElement, HtmlSyntaxKind, HtmlSyntaxToken,
+    AnyHtmlAttribute, AstroIsDirective, HtmlOpeningElement, HtmlSyntaxKind, HtmlSyntaxToken, T,
     element_ext::AnyHtmlTagElement,
 };
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeCast};
 use biome_rule_options::use_scoped_styles::UseScopedStylesOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that `<style>` blocks in Vue SFCs have the `scoped` attribute and that `<style>` blocks in Astro components do not have the `is:global` directive.
@@ -89,11 +87,7 @@ impl Rule for UseScopedStyles {
 
         let opening = ctx.query();
 
-        if !is_html_tag(
-            &AnyHtmlTagElement::from(opening.clone()),
-            source_type,
-            "style",
-        ) {
+        if AnyHtmlTagElement::from(opening.clone()).tag_name_kind() != Some(T![style]) {
             return None;
         }
 

@@ -36,7 +36,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@1..10 "Component" [] [],
+                value_token: HTML_COMPONENT_LITERAL@1..10 "Component" [] [],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -57,7 +57,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@48..57 "Component" [] [],
+                value_token: HTML_COMPONENT_LITERAL@48..57 "Component" [] [],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -78,7 +78,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@89..91 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@91..128 "Component" [] [Whitespace(" "), Comments("/* inline block comme ..."), Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@91..128 "Component" [] [Whitespace(" "), Comments("/* inline block comme ..."), Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -99,7 +99,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@143..145 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@145..177 "Component" [] [Whitespace(" "), Comments("// inline line comment")],
+                value_token: HTML_COMPONENT_LITERAL@145..177 "Component" [] [Whitespace(" "), Comments("// inline line comment")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -121,11 +121,11 @@ HtmlRoot {
             l_angle_token: L_ANGLE@193..195 "<" [Newline("\n")] [],
             name: HtmlMemberName {
                 object: HtmlComponentName {
-                    value_token: HTML_LITERAL@195..204 "Component" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@195..204 "Component" [] [],
                 },
                 dot_token: DOT@204..205 "." [] [],
-                member: HtmlTagName {
-                    value_token: HTML_LITERAL@205..211 "Member" [] [],
+                member: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@205..211 "Member" [] [],
                 },
             },
             attributes: HtmlAttributeList [
@@ -160,7 +160,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..46
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_COMPONENT_NAME@1..10
-        0: HTML_LITERAL@1..10 "Component" [] []
+        0: HTML_COMPONENT_LITERAL@1..10 "Component" [] []
       2: HTML_ATTRIBUTE_LIST@10..43
         0: HTML_ATTRIBUTE@10..43
           0: HTML_ATTRIBUTE_NAME@10..35
@@ -174,7 +174,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@46..89
       0: L_ANGLE@46..48 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@48..57
-        0: HTML_LITERAL@48..57 "Component" [] []
+        0: HTML_COMPONENT_LITERAL@48..57 "Component" [] []
       2: HTML_ATTRIBUTE_LIST@57..86
         0: HTML_ATTRIBUTE@57..86
           0: HTML_ATTRIBUTE_NAME@57..78
@@ -188,7 +188,7 @@ HtmlRoot {
     2: HTML_SELF_CLOSING_ELEMENT@89..143
       0: L_ANGLE@89..91 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@91..128
-        0: HTML_LITERAL@91..128 "Component" [] [Whitespace(" "), Comments("/* inline block comme ..."), Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@91..128 "Component" [] [Whitespace(" "), Comments("/* inline block comme ..."), Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@128..141
         0: HTML_ATTRIBUTE@128..141
           0: HTML_ATTRIBUTE_NAME@128..132
@@ -202,7 +202,7 @@ HtmlRoot {
     3: HTML_SELF_CLOSING_ELEMENT@143..193
       0: L_ANGLE@143..145 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@145..177
-        0: HTML_LITERAL@145..177 "Component" [] [Whitespace(" "), Comments("// inline line comment")]
+        0: HTML_COMPONENT_LITERAL@145..177 "Component" [] [Whitespace(" "), Comments("// inline line comment")]
       2: HTML_ATTRIBUTE_LIST@177..191
         0: HTML_ATTRIBUTE@177..191
           0: HTML_ATTRIBUTE_NAME@177..182
@@ -217,10 +217,10 @@ HtmlRoot {
       0: L_ANGLE@193..195 "<" [Newline("\n")] []
       1: HTML_MEMBER_NAME@195..211
         0: HTML_COMPONENT_NAME@195..204
-          0: HTML_LITERAL@195..204 "Component" [] []
+          0: HTML_COMPONENT_LITERAL@195..204 "Component" [] []
         1: DOT@204..205 "." [] []
-        2: HTML_TAG_NAME@205..211
-          0: HTML_LITERAL@205..211 "Member" [] []
+        2: HTML_COMPONENT_NAME@205..211
+          0: HTML_COMPONENT_LITERAL@205..211 "Member" [] []
       2: HTML_ATTRIBUTE_LIST@211..244
         0: HTML_ATTRIBUTE@211..244
           0: HTML_ATTRIBUTE_NAME@211..236

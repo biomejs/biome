@@ -69,6 +69,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This import is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -104,6 +105,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "Several of these imports are unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -139,6 +141,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -174,6 +177,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -209,6 +213,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This import is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -244,6 +249,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "Several of these imports are unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -279,6 +285,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -314,6 +321,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -349,6 +357,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -384,6 +393,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -418,7 +428,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -438,7 +449,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -458,7 +470,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "'z' is redeclared in the same scope."
+      "message": "'z' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -478,7 +491,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "'f' is redeclared in the same scope."
+      "message": "'f' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -499,6 +513,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -534,6 +549,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -568,7 +584,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -588,7 +605,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -608,7 +626,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "'z' is redeclared in the same scope."
+      "message": "'z' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -628,7 +647,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "'f' is redeclared in the same scope."
+      "message": "'f' is redeclared in the same scope.",
+      "severity": "ERROR"
     }
   ]
 }

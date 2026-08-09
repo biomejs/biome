@@ -29,7 +29,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -63,7 +63,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@31..33 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@33..39 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@33..39 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -97,7 +97,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@67..69 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@69..76 "Toggle" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@69..76 "Toggle" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -131,7 +131,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@116..118 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@118..124 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@118..124 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -165,7 +165,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@167..169 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@169..175 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@169..175 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -212,7 +212,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..31
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..29
         0: SVELTE_BIND_DIRECTIVE@7..29
           0: BIND_KW@7..11 "bind" [] []
@@ -236,7 +236,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@31..67
       0: L_ANGLE@31..33 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@33..39
-        0: HTML_LITERAL@33..39 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@33..39 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@39..65
         0: SVELTE_BIND_DIRECTIVE@39..65
           0: BIND_KW@39..43 "bind" [] []
@@ -260,7 +260,7 @@ HtmlRoot {
     2: HTML_SELF_CLOSING_ELEMENT@67..116
       0: L_ANGLE@67..69 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@69..76
-        0: HTML_LITERAL@69..76 "Toggle" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@69..76 "Toggle" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@76..114
         0: SVELTE_BIND_DIRECTIVE@76..114
           0: BIND_KW@76..80 "bind" [] []
@@ -284,7 +284,7 @@ HtmlRoot {
     3: HTML_SELF_CLOSING_ELEMENT@116..167
       0: L_ANGLE@116..118 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@118..124
-        0: HTML_LITERAL@118..124 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@118..124 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@124..165
         0: SVELTE_BIND_DIRECTIVE@124..165
           0: BIND_KW@124..128 "bind" [] []
@@ -308,7 +308,7 @@ HtmlRoot {
     4: HTML_SELF_CLOSING_ELEMENT@167..238
       0: L_ANGLE@167..169 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@169..175
-        0: HTML_LITERAL@169..175 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@169..175 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@175..236
         0: SVELTE_BIND_DIRECTIVE@175..236
           0: BIND_KW@175..179 "bind" [] []

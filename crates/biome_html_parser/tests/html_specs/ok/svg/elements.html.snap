@@ -1,0 +1,153 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<svg><circle /><a></a></svg><a></a>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@1..4 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@5..6 "<" [] [],
+                    name: HtmlTagName {
+                        value_token: CIRCLE_KW@6..13 "circle" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [],
+                    slash_token: SLASH@13..14 "/" [] [],
+                    r_angle_token: R_ANGLE@14..15 ">" [] [],
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@15..16 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: A_KW@16..17 "a" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@17..18 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@18..19 "<" [] [],
+                        slash_token: SLASH@19..20 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: A_KW@20..21 "a" [] [],
+                        },
+                        r_angle_token: R_ANGLE@21..22 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@22..23 "<" [] [],
+                slash_token: SLASH@23..24 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@24..27 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@27..28 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@28..29 "<" [] [],
+                name: HtmlTagName {
+                    value_token: A_KW@29..30 "a" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@30..31 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@31..32 "<" [] [],
+                slash_token: SLASH@32..33 "/" [] [],
+                name: HtmlTagName {
+                    value_token: A_KW@33..34 "a" [] [],
+                },
+                r_angle_token: R_ANGLE@34..35 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..36
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..35
+    0: HTML_ELEMENT@0..28
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: SVG_KW@1..4 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..22
+        0: HTML_SELF_CLOSING_ELEMENT@5..15
+          0: L_ANGLE@5..6 "<" [] []
+          1: HTML_TAG_NAME@6..13
+            0: CIRCLE_KW@6..13 "circle" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@13..13
+          3: SLASH@13..14 "/" [] []
+          4: R_ANGLE@14..15 ">" [] []
+        1: HTML_ELEMENT@15..22
+          0: HTML_OPENING_ELEMENT@15..18
+            0: L_ANGLE@15..16 "<" [] []
+            1: HTML_TAG_NAME@16..17
+              0: A_KW@16..17 "a" [] []
+            2: HTML_ATTRIBUTE_LIST@17..17
+            3: R_ANGLE@17..18 ">" [] []
+          1: HTML_ELEMENT_LIST@18..18
+          2: HTML_CLOSING_ELEMENT@18..22
+            0: L_ANGLE@18..19 "<" [] []
+            1: SLASH@19..20 "/" [] []
+            2: HTML_TAG_NAME@20..21
+              0: A_KW@20..21 "a" [] []
+            3: R_ANGLE@21..22 ">" [] []
+      2: HTML_CLOSING_ELEMENT@22..28
+        0: L_ANGLE@22..23 "<" [] []
+        1: SLASH@23..24 "/" [] []
+        2: HTML_TAG_NAME@24..27
+          0: SVG_KW@24..27 "svg" [] []
+        3: R_ANGLE@27..28 ">" [] []
+    1: HTML_ELEMENT@28..35
+      0: HTML_OPENING_ELEMENT@28..31
+        0: L_ANGLE@28..29 "<" [] []
+        1: HTML_TAG_NAME@29..30
+          0: A_KW@29..30 "a" [] []
+        2: HTML_ATTRIBUTE_LIST@30..30
+        3: R_ANGLE@30..31 ">" [] []
+      1: HTML_ELEMENT_LIST@31..31
+      2: HTML_CLOSING_ELEMENT@31..35
+        0: L_ANGLE@31..32 "<" [] []
+        1: SLASH@32..33 "/" [] []
+        2: HTML_TAG_NAME@33..34
+          0: A_KW@33..34 "a" [] []
+        3: R_ANGLE@34..35 ">" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```

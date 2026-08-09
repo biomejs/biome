@@ -187,7 +187,7 @@ impl Rule for UseVueHyphenatedAttributes {
             // v-directive with static argument: v-bind:foo
             if let Some(directive) = vue.as_vue_directive() {
                 if let Some(vue_arg) = directive.arg()
-                    && let Ok(any_arg) = vue_arg.arg()
+                    && let Some(any_arg) = vue_arg.arg()
                     && let Some(static_arg) = any_arg.as_vue_static_argument()
                     && let Ok(old_token) = static_arg.name_token()
                 {
@@ -203,7 +203,7 @@ impl Rule for UseVueHyphenatedAttributes {
             // v-bind shorthand: :foo
             } else if let Some(shorthand_bind) = vue.as_vue_v_bind_shorthand_directive()
                 && let Ok(vue_arg) = shorthand_bind.arg()
-                && let Ok(any_arg) = vue_arg.arg()
+                && let Some(any_arg) = vue_arg.arg()
                 && let Some(static_arg) = any_arg.as_vue_static_argument()
                 && let Ok(old_token) = static_arg.name_token()
             {
@@ -248,7 +248,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
                 return None;
             }
             if let Some(vue_arg) = directive.arg()
-                && let Ok(any_arg) = vue_arg.arg()
+                && let Some(any_arg) = vue_arg.arg()
                 && let Some(static_arg) = any_arg.as_vue_static_argument()
                 && let Ok(name_token) = static_arg.name_token()
             {
@@ -261,7 +261,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
         if let Some(shorthand_bind) = vue.as_vue_v_bind_shorthand_directive()
             && let Ok(vue_arg) = shorthand_bind.arg()
         {
-            if let Ok(any_arg) = vue_arg.arg()
+            if let Some(any_arg) = vue_arg.arg()
                 && let Some(static_arg) = any_arg.as_vue_static_argument()
                 && let Ok(name_token) = static_arg.name_token()
             {

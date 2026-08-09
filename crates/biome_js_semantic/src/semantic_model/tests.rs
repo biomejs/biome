@@ -386,7 +386,7 @@ declare module "jsoneditor" {
     }
 
     #[test]
-    pub fn ok_semantic_model_namespace_import_type_unqualified_reference_is_unresolved_and_tracked_for_usage()
+    pub fn ok_semantic_model_namespace_import_type_unqualified_reference_is_unresolved_and_tracked()
      {
         let r = biome_js_parser::parse(
             "import type * as Namespace from \"mod\"; type T = Namespace;",

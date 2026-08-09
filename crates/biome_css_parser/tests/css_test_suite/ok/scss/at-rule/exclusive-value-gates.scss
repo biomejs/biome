@@ -1,0 +1,59 @@
+@supports (variable: $value) {
+  .variable {}
+}
+
+@supports (variable-interpolation: $value#{suffix}) {
+  .variable-interpolation {}
+}
+
+@supports (module-member: module.$value) {
+  .module-member {}
+}
+
+@supports (module-member-interpolation: module.$value#{suffix}) {
+  .module-member-interpolation {}
+}
+
+@supports (qualified-function: module.fn(1)) {
+  .qualified-function {}
+}
+
+@supports (interpolation: #{$value}) {
+  .interpolation {}
+}
+
+@supports (adjacent-interpolations: #{$a}#{$b}) {
+  .adjacent-interpolations {}
+}
+
+@supports (number-interpolation: 10#{unit}) {
+  .number-interpolation {}
+}
+
+@supports (dimension-interpolation: 10px#{suffix}) {
+  .dimension-interpolation {}
+}
+
+@supports (interpolated-name: foo#{$bar}) {
+  .interpolated-name {}
+}
+
+@supports (interpolated-string: "#{$value}") {
+  .interpolated-string {}
+}
+
+@supports (interpolated-custom-property: --#{$name}) {
+  .interpolated-custom-property {}
+}
+
+@supports (interpolated-custom-property-suffix: --theme-#{$slot}) {
+  .interpolated-custom-property-suffix {}
+}
+
+@media (aspect-ratio: module.fn(1)) {
+  .media-qualified-function {}
+}
+
+@media (resolution: #{$a}#{$b}) {
+  .media-adjacent-interpolations {}
+}

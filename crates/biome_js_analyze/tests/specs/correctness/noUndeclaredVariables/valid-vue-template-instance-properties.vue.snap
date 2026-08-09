@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-template-instance-properties.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const items = [{ id: 1, name: "alpha" }];
+</script>
+
+<template>
+  <button v-if="$slots['icon']">
+    <slot name="icon"></slot>
+  </button>
+  <p>{{ $attrs.class }} {{ $props }} {{ $refs.foo }} {{ $el }} {{ $root }}</p>
+  <p v-for="item in items" :key="item.id" @click="$emit('select', item)">
+    {{ item.name }}
+  </p>
+</template>
+
+```

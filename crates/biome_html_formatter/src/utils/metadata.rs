@@ -889,6 +889,7 @@ pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
             | AnySvelteBlock::SvelteKeyBlock(_)
             | AnySvelteBlock::SvelteSnippetBlock(_)
             | AnySvelteBlock::SvelteConstBlock(_)
+            | AnySvelteBlock::SvelteDeclarationBlock(_)
             | AnySvelteBlock::SvelteDebugBlock(_)
             | AnySvelteBlock::SvelteBogusBlock(_) => CssDisplay::Block,
         };
@@ -917,7 +918,21 @@ pub(crate) enum CssWhitespace {
     PreserveNoWrap,
 }
 
-#[cfg_attr(not(test), expect(dead_code))]
+impl CssWhitespace {
+    /// Whether this mode keeps newlines and sequences of spaces in the element's
+    /// text, which makes that text whitespace-sensitive.
+    ///
+    /// `PreLine` is deliberately excluded: it keeps newlines but still
+    /// collapses sequences of spaces, so its content can be reflowed in part and
+    /// isn't verbatim.
+    pub(crate) fn preserves_content(self) -> bool {
+        matches!(self, Self::Pre | Self::PreWrap)
+    }
+}
+
+/// Gets the CSS whitespace handling mode for an HTML element, based on its tag name.
+///
+/// See: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space>
 pub(crate) fn get_css_whitespace(tag_name: &str) -> CssWhitespace {
     // Mirrors Prettier's CSS white-space lookup:
     // prettier/src/language-html/constants.evaluate.js

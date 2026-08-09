@@ -12,6 +12,13 @@ impl FormatNodeRule<CssIfTestBooleanNotExpr> for FormatCssIfTestBooleanNotExpr {
             expression,
         } = node.as_fields();
 
-        write!(f, [not_token.format(), space(), expression.format()])
+        write!(
+            f,
+            [
+                not_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                expression.format()
+            ]
+        )
     }
 }

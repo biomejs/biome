@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+
 use crate::fonts::{
     CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
 };
@@ -105,6 +107,7 @@ impl Rule for UseGenericFontNames {
         // e.g: { font: caption }, { font: inherit }
         let properties = match node.value() {
             Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
                 AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
                 AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
             },

@@ -11,14 +11,15 @@ use biome_html_syntax::{
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression,
-    AnyJsIdentifierUsage, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
+    AnyJsIdentifierReference, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    JsIdentifierAssignment, JsImport, JsModuleItemList, JsReferenceIdentifier,
+    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement,
+    JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
-use biome_languages::javascript::JsEmbeddingKind;
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use biome_unicode_table::is_js_ident;
@@ -36,6 +37,7 @@ enum SvelteBlockKind {
     Render,
     Snippet,
     Const,
+    Declaration,
 }
 
 impl From<&AnySvelteBlock> for EmbeddedBlockKind {
@@ -49,6 +51,7 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
             | AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
             AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteDeclarationBlock(_) => Self::Svelte(SvelteBlockKind::Declaration),
             AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
             AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
@@ -170,7 +173,7 @@ fn collect_embedded_references(
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
-            builder.visit_non_source_snippet(&snippet.parsed(db).tree());
+            builder.visit_non_source_snippet(&snippet.parsed(db).tree(), &js_file_source);
         }
     }
 
@@ -187,13 +190,17 @@ fn collect_embedded_references(
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {
     match source.as_embedding_kind() {
         JsEmbeddingKind::Svelte {
-            is_function_signature: true,
+            embedding_kind: SvelteEmbeddingKind::SnippetSignature,
             ..
         } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Snippet)),
         JsEmbeddingKind::Svelte {
-            is_const_block: true,
+            embedding_kind: SvelteEmbeddingKind::LegacyConst,
             ..
         } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Const)),
+        JsEmbeddingKind::Svelte {
+            embedding_kind: SvelteEmbeddingKind::Declaration,
+            ..
+        } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Declaration)),
         _ => None,
     }
 }
@@ -471,6 +478,8 @@ impl EmbeddedBindingsBuilder {
                             HtmlVariant::Svelte => {
                                 self.visit_svelte_block_call_expressions(&expr, embed_block_kind);
                             }
+                            // TODO: Angular support
+                            HtmlVariant::Angular => {}
                         }
                     } else if let Some(assign) = JsAssignmentExpression::cast_ref(&node)
                         && host_file_source.is_svelte()
@@ -480,6 +489,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_snippet_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsSvelteDeclarationRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_declaration(&root, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -533,6 +546,22 @@ impl EmbeddedBindingsBuilder {
         None
     }
 
+    fn visit_svelte_declaration(
+        &mut self,
+        root: &JsSvelteDeclarationRoot,
+        embed_block_kind: Option<&EmbeddedBlockKind>,
+    ) -> Option<()> {
+        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Declaration) = embed_block_kind? else {
+            return None;
+        };
+
+        for declarator in root.declaration().ok()?.declarators().iter().flatten() {
+            self.visit_any_js_binding_pattern(&declarator.id().ok()?)?;
+        }
+
+        Some(())
+    }
+
     fn visit_svelte_block_call_expressions(
         &mut self,
         call_expression: &JsCallExpression,
@@ -567,7 +596,7 @@ impl EmbeddedBindingsBuilder {
                         }
                     }
                 }
-                SvelteBlockKind::Const => {}
+                SvelteBlockKind::Const | SvelteBlockKind::Declaration => {}
             },
             EmbeddedBlockKind::Neutral => return None,
         }
@@ -1118,7 +1147,7 @@ impl EmbeddedReferencesBuilder {
         self.type_references.push((range, text));
     }
 
-    fn visit_non_source_snippet(&mut self, root: &AnyJsRoot) {
+    fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {
         let preorder = root.syntax().preorder();
 
         for event in preorder {
@@ -1128,6 +1157,10 @@ impl EmbeddedReferencesBuilder {
                         self.visit_jsx_reference_identifier(reference);
                     } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
                         self.visit_reference_identifier(reference);
+                    } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&node)
+                        && matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
+                    {
+                        self.visit_identifier_assignment(assignment);
                     } else if let Some(member) = JsStaticMemberExpression::cast_ref(&node) {
                         self.visit_static_member_expression(member);
                     }
@@ -1274,9 +1307,9 @@ impl EmbeddedReferencesBuilder {
     }
 
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
-        let usage = AnyJsIdentifierUsage::from(reference.clone());
+        let reference = AnyJsIdentifierReference::from(reference.clone());
         let name_token = reference.value_token().ok()?;
-        if usage.is_only_type() {
+        if reference.is_only_type() {
             self.register_type_reference(
                 name_token.text_trimmed_range(),
                 name_token.token_text_trimmed(),
@@ -1287,6 +1320,15 @@ impl EmbeddedReferencesBuilder {
                 name_token.token_text_trimmed(),
             );
         }
+        Some(())
+    }
+
+    fn visit_identifier_assignment(&mut self, assignment: JsIdentifierAssignment) -> Option<()> {
+        let name_token = assignment.name_token().ok()?;
+        self.register_reference(
+            name_token.text_trimmed_range(),
+            name_token.token_text_trimmed(),
+        );
         Some(())
     }
 

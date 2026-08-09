@@ -258,6 +258,113 @@ function identifierBoundToEmpty(): object { const x = {}; return x; }
 function arrowBodyBareEmpty(): object { return {}; }
 const arrowExprBareEmpty = (): object => ({});
 async function asyncBareEmpty(): Promise<object> { return {}; }
+
+// Exhausting the structural comparison must suppress the diagnostic.
+type CappedReturn0 = { value: string };
+type CappedReturn1 = { value: CappedReturn0 };
+type CappedReturn2 = { value: CappedReturn1 };
+type CappedReturn3 = { value: CappedReturn2 };
+type CappedReturn4 = { value: CappedReturn3 };
+type CappedReturn5 = { value: CappedReturn4 };
+type CappedReturn6 = { value: CappedReturn5 };
+type CappedReturn7 = { value: CappedReturn6 };
+type CappedReturn8 = { value: CappedReturn7 };
+type CappedReturn9 = { value: CappedReturn8 };
+type CappedReturn10 = { value: CappedReturn9 };
+type CappedReturn11 = { value: CappedReturn10 };
+type CappedReturn12 = { value: CappedReturn11 };
+type CappedReturn13 = { value: CappedReturn12 };
+type CappedReturn14 = { value: CappedReturn13 };
+type CappedReturn15 = { value: CappedReturn14 };
+type CappedReturn16 = { value: CappedReturn15 };
+type CappedReturn17 = { value: CappedReturn16 };
+type CappedReturn18 = { value: CappedReturn17 };
+type CappedReturn19 = { value: CappedReturn18 };
+type CappedReturn20 = { value: CappedReturn19 };
+type CappedReturn21 = { value: CappedReturn20 };
+type CappedReturn22 = { value: CappedReturn21 };
+type CappedReturn23 = { value: CappedReturn22 };
+type CappedReturn24 = { value: CappedReturn23 };
+type CappedReturn25 = { value: CappedReturn24 };
+type CappedReturn26 = { value: CappedReturn25 };
+type CappedReturn27 = { value: CappedReturn26 };
+type CappedReturn28 = { value: CappedReturn27 };
+type CappedReturn29 = { value: CappedReturn28 };
+type CappedReturn30 = { value: CappedReturn29 };
+type CappedReturn31 = { value: CappedReturn30 };
+type CappedReturn32 = { value: CappedReturn31 };
+type CappedReturn33 = { value: CappedReturn32 };
+type CappedReturn34 = { value: CappedReturn33 };
+type CappedReturn35 = { value: CappedReturn34 };
+type CappedReturn36 = { value: CappedReturn35 };
+type CappedReturn37 = { value: CappedReturn36 };
+type CappedReturn38 = { value: CappedReturn37 };
+type CappedReturn39 = { value: CappedReturn38 };
+type CappedReturn40 = { value: CappedReturn39 };
+type CappedReturn41 = { value: CappedReturn40 };
+type CappedReturn42 = { value: CappedReturn41 };
+type CappedReturn43 = { value: CappedReturn42 };
+type CappedReturn44 = { value: CappedReturn43 };
+type CappedReturn45 = { value: CappedReturn44 };
+type CappedReturn46 = { value: CappedReturn45 };
+type CappedReturn47 = { value: CappedReturn46 };
+type CappedReturn48 = { value: CappedReturn47 };
+type CappedReturn49 = { value: CappedReturn48 };
+type CappedReturn50 = { value: CappedReturn49 };
+type CappedReturn51 = { value: CappedReturn50 };
+const cappedReturn0 = { value: "value" } as const;
+const cappedReturn1 = { value: cappedReturn0 } as const;
+const cappedReturn2 = { value: cappedReturn1 } as const;
+const cappedReturn3 = { value: cappedReturn2 } as const;
+const cappedReturn4 = { value: cappedReturn3 } as const;
+const cappedReturn5 = { value: cappedReturn4 } as const;
+const cappedReturn6 = { value: cappedReturn5 } as const;
+const cappedReturn7 = { value: cappedReturn6 } as const;
+const cappedReturn8 = { value: cappedReturn7 } as const;
+const cappedReturn9 = { value: cappedReturn8 } as const;
+const cappedReturn10 = { value: cappedReturn9 } as const;
+const cappedReturn11 = { value: cappedReturn10 } as const;
+const cappedReturn12 = { value: cappedReturn11 } as const;
+const cappedReturn13 = { value: cappedReturn12 } as const;
+const cappedReturn14 = { value: cappedReturn13 } as const;
+const cappedReturn15 = { value: cappedReturn14 } as const;
+const cappedReturn16 = { value: cappedReturn15 } as const;
+const cappedReturn17 = { value: cappedReturn16 } as const;
+const cappedReturn18 = { value: cappedReturn17 } as const;
+const cappedReturn19 = { value: cappedReturn18 } as const;
+const cappedReturn20 = { value: cappedReturn19 } as const;
+const cappedReturn21 = { value: cappedReturn20 } as const;
+const cappedReturn22 = { value: cappedReturn21 } as const;
+const cappedReturn23 = { value: cappedReturn22 } as const;
+const cappedReturn24 = { value: cappedReturn23 } as const;
+const cappedReturn25 = { value: cappedReturn24 } as const;
+const cappedReturn26 = { value: cappedReturn25 } as const;
+const cappedReturn27 = { value: cappedReturn26 } as const;
+const cappedReturn28 = { value: cappedReturn27 } as const;
+const cappedReturn29 = { value: cappedReturn28 } as const;
+const cappedReturn30 = { value: cappedReturn29 } as const;
+const cappedReturn31 = { value: cappedReturn30 } as const;
+const cappedReturn32 = { value: cappedReturn31 } as const;
+const cappedReturn33 = { value: cappedReturn32 } as const;
+const cappedReturn34 = { value: cappedReturn33 } as const;
+const cappedReturn35 = { value: cappedReturn34 } as const;
+const cappedReturn36 = { value: cappedReturn35 } as const;
+const cappedReturn37 = { value: cappedReturn36 } as const;
+const cappedReturn38 = { value: cappedReturn37 } as const;
+const cappedReturn39 = { value: cappedReturn38 } as const;
+const cappedReturn40 = { value: cappedReturn39 } as const;
+const cappedReturn41 = { value: cappedReturn40 } as const;
+const cappedReturn42 = { value: cappedReturn41 } as const;
+const cappedReturn43 = { value: cappedReturn42 } as const;
+const cappedReturn44 = { value: cappedReturn43 } as const;
+const cappedReturn45 = { value: cappedReturn44 } as const;
+const cappedReturn46 = { value: cappedReturn45 } as const;
+const cappedReturn47 = { value: cappedReturn46 } as const;
+const cappedReturn48 = { value: cappedReturn47 } as const;
+const cappedReturn49 = { value: cappedReturn48 } as const;
+const cappedReturn50 = { value: cappedReturn49 } as const;
+const cappedReturn51 = { value: cappedReturn50 } as const;
+function cappedReturnComparison(): CappedReturn51 { return cappedReturn51; }
 function multipleBareEmptyObjects(b: boolean): object { if (b) return {}; return {}; }
 function mixedBareEmptyAndObjectCast(b: boolean): object { if (b) return {}; return {} as object; }
 function mixedBareAndCast(b: boolean): object { if (b) return {} as object; return { a: 1 }; }
@@ -315,3 +422,14 @@ function widenSatisfiesAssertion(b: boolean): string { if (b) return ("a" as str
 type WidenedAlias = string;
 function widenAliasAssertion(b: boolean): WidenedAlias { if (b) return "a" as WidenedAlias; return "b" as WidenedAlias; }
 function assertedBooleanLiteralsCollapse(b: boolean): boolean { if (b) return true as true; return false as false; }
+function unresolvedReturnType(): MissingType {
+    return "value" as const;
+}
+
+function selfGenericConstraintCycle<T extends T>(value: T): string {
+    return value;
+}
+
+function multiGenericConstraintCycle<T extends U, U extends V, V extends T>(value: T): string {
+    return value;
+}

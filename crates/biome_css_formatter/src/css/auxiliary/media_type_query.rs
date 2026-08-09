@@ -13,8 +13,11 @@ impl FormatNodeRule<CssMediaTypeQuery> for FormatCssMediaTypeQuery {
     fn fmt_fields(&self, node: &CssMediaTypeQuery, f: &mut CssFormatter) -> FormatResult<()> {
         let CssMediaTypeQueryFields { modifier, ty } = node.as_fields();
 
-        if modifier.is_some() {
-            write!(f, [modifier.format(), space()])?;
+        if let Some(modifier) = modifier {
+            write!(
+                f,
+                [modifier.format().with_text_case(CssCase::Preserve), space()]
+            )?;
         }
 
         write!(f, [ty.format()])

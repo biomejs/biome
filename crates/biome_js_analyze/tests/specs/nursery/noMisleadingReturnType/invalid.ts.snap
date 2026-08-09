@@ -216,6 +216,20 @@ function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies
 function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
 function singleAssertedBooleanLiteral(): boolean { return false as false; }
 
+function longGenericConstraintChain<
+    T8 extends { value: string },
+    T7 extends T8,
+    T6 extends T7,
+    T5 extends T6,
+    T4 extends T5,
+    T3 extends T4,
+    T2 extends T3,
+    T1 extends T2,
+    T0 extends T1,
+>(value: T0): object {
+    return value;
+}
+
 ```
 
 # Diagnostics
@@ -2490,10 +2504,34 @@ invalid.ts:211:40 lint/nursery/noMisleadingReturnType ━━━━━━━━�
   > 211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
         │                                        ^^^^^^^^^
     212 │ 
+    213 │ function longGenericConstraintChain<
   
   i A wider return type hides the precise types that callers could rely on.
   
   i Consider using false as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:223:13 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    221 │     T1 extends T2,
+    222 │     T0 extends T1,
+  > 223 │ >(value: T0): object {
+        │             ^^^^^^^^
+    224 │     return value;
+    225 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
   

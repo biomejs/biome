@@ -25,6 +25,21 @@ use biome_unicode_table::{
     lookup_byte,
 };
 
+/// Controls how `//` is classified in an SCSS custom-property value.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum CssCustomPropertyCommentMode {
+    /// Preserves `//` as raw content, as in `--value: // literal;`.
+    PreserveDoubleSlash,
+    /// Treats `//` as a comment, as in `@supports (--value: // comment\n token) {}`.
+    ScssLineComments,
+}
+
+#[derive(Debug, Copy, Clone)]
+enum TokenFallback {
+    Error,
+    Delimiter,
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
     /// Default context: no particular rules are applied to the lexer logic.
@@ -65,6 +80,9 @@ pub enum CssLexContext {
     /// outer SCSS string. Behaves like regular lexing, but preserves the outer
     /// quote for malformed recovery.
     ScssStringInterpolation(CssStringQuote),
+
+    /// Applied to the raw body of an SCSS custom property.
+    CustomPropertyValue(CssCustomPropertyCommentMode),
 
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
@@ -200,6 +218,9 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
+                CssLexContext::CustomPropertyValue(comment_mode) => {
+                    self.consume_custom_property_value_token(current, comment_mode)
+                }
                 CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
                 CssLexContext::TailwindUtilityName => {
                     self.consume_token_tailwind_utility_name(current)
@@ -421,6 +442,14 @@ impl<'src> CssLexer<'src> {
     /// Guaranteed to not be at the end of the file
     // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
     fn consume_token(&mut self, current: u8) -> CssSyntaxKind {
+        self.consume_token_with_fallback(current, TokenFallback::Error)
+    }
+
+    fn consume_token_with_fallback(
+        &mut self,
+        current: u8,
+        fallback: TokenFallback,
+    ) -> CssSyntaxKind {
         // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
         // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
         // to do more aggressive optimizations on the match regarding how to map it to instructions
@@ -469,7 +498,7 @@ impl<'src> CssLexer<'src> {
                 } else if self.is_ident_start() {
                     self.consume_identifier()
                 } else {
-                    self.consume_unexpected_character()
+                    self.consume_fallback(fallback)
                 }
             }
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
@@ -498,10 +527,40 @@ impl<'src> CssLexer<'src> {
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
-            UNI => self.consume_unexpected_character(),
-
-            _ => self.consume_unexpected_character(),
+            _ => self.consume_fallback(fallback),
         }
+    }
+
+    fn consume_fallback(&mut self, fallback: TokenFallback) -> CssSyntaxKind {
+        match fallback {
+            TokenFallback::Error => self.consume_unexpected_character(),
+            TokenFallback::Delimiter => self.consume_custom_property_delimiter(),
+        }
+    }
+
+    /// Lexes one token from an SCSS custom-property value.
+    #[inline]
+    fn consume_custom_property_value_token(
+        &mut self,
+        current: u8,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> CssSyntaxKind {
+        if comment_mode == CssCustomPropertyCommentMode::PreserveDoubleSlash
+            && current == b'/'
+            && self.peek_byte() == Some(b'/')
+        {
+            return self.consume_byte(T![/]);
+        }
+
+        self.consume_token_with_fallback(current, TokenFallback::Delimiter)
+    }
+
+    #[inline]
+    fn consume_custom_property_delimiter(&mut self) -> CssSyntaxKind {
+        self.assert_current_char_boundary();
+        let current = self.current_char_unchecked();
+        self.advance(current.len_utf8());
+        CSS_DELIM_LITERAL
     }
 
     fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1190,6 +1249,9 @@ impl<'src> CssLexer<'src> {
             b"returns" => RETURNS_KW,
             b"use" => USE_KW,
             b"with" => WITH_KW,
+            b"custom-media" => CUSTOM_MEDIA_KW,
+            b"true" => TRUE_KW,
+            b"false" => FALSE_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,
@@ -1636,6 +1698,27 @@ impl<'src> CssLexer<'src> {
     /// Example: `url('v'+1)`.
     pub(crate) fn is_at_scss_concatenation_plus(&self, start: usize) -> bool {
         self.scan_cursor_at(start).is_at_scss_concatenation_plus()
+    }
+
+    /// Returns whether a complete `url(...)` body at `start` uses Sass raw-URL syntax.
+    pub(crate) fn is_scss_raw_url_body(&self, start: usize) -> bool {
+        self.scan_cursor_at(start).is_scss_raw_url_body()
+    }
+
+    /// Returns whether `start` begins a final custom-property `!important`.
+    ///
+    /// This uses the source scanner because buffered token lookahead always
+    /// uses regular lexing, which would drop declaration content such as
+    /// `// raw` before deciding whether `!important` is final.
+    pub(crate) fn is_at_final_custom_property_important(
+        &self,
+        start: usize,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> bool {
+        self.scan_cursor_at(start)
+            .scan_final_custom_property_important(
+                comment_mode == CssCustomPropertyCommentMode::ScssLineComments,
+            )
     }
 
     fn take_pending_url_raw_value_scan_at_current_position(

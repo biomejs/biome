@@ -1,5 +1,6 @@
 <!-- should not generate diagnostics: Vue v-bind shorthand (:aria-*) bindings satisfy required aria props -->
 <template>
+	<span :role="roleValue"></span>
 	<span role="checkbox" :aria-checked="isChecked"></span>
 	<span role="radio" :aria-checked="true"></span>
 	<span role="switch" :aria-checked="dynamicValue"></span>

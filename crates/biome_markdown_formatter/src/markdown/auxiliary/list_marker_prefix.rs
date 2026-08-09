@@ -1,7 +1,7 @@
-use crate::prelude::*;
+use crate::{markdown::lists::indent_token_list::FormatMdIndentTokenListOptions, prelude::*};
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_markdown_syntax::list_ext::{ListMarker, OrderedListDelimiter};
-use biome_markdown_syntax::{MdListMarkerPrefix, MdListMarkerPrefixFields};
+use biome_markdown_syntax::{MdBullet, MdListMarkerPrefix, MdListMarkerPrefixFields};
 use biome_rowan::TextSize;
 use std::ops::Add;
 
@@ -61,10 +61,17 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             }
         }
 
-        let post_marker_len = post_marker_space_token
-            .as_ref()
-            .map_or(0, |token| token.text_trimmed().len())
-            .max(self.min_post_marker_len);
+        let is_marker_only_bullet = is_marker_only_bullet(node);
+        let post_marker_len = if is_marker_only_bullet {
+            // marker-only bullets have no post-marker space to preserve
+            0
+        } else {
+            // this returns the number of spaces to preserve after the marker
+            post_marker_space_token
+                .as_ref()
+                .map_or(0, |token| token.text_trimmed().len())
+                .max(self.min_post_marker_len)
+        };
 
         if let Some(post_marker_space_token) = post_marker_space_token {
             write!(f, [format_removed(&post_marker_space_token)])?;
@@ -81,7 +88,20 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
                 write!(f, [token(" ")])?;
             }
         }
-        write!(f, [content_indent.format()])
+        if is_marker_only_bullet {
+            write!(
+                f,
+                [content_indent
+                    .format()
+                    .with_options(FormatMdIndentTokenListOptions {
+                        should_remove: true,
+                    })]
+            )?;
+        } else {
+            write!(f, [content_indent.format()])?;
+        }
+
+        Ok(())
     }
 }
 
@@ -175,6 +195,17 @@ impl Format<MarkdownFormatContext> for LocatedTargetMarker {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         write!(f, [source_position(self.source_position), self.target])
     }
+}
+
+// A marker-only bullet (`-\n`, or `-   \n` before formatting) has no block
+// content besides the newline.
+fn is_marker_only_bullet(node: &MdListMarkerPrefix) -> bool {
+    let Some(bullet) = node.syntax().parent().and_then(MdBullet::cast) else {
+        return false;
+    };
+
+    let mut blocks = bullet.content().iter();
+    blocks.next().is_some_and(|block| block.is_newline()) && blocks.next().is_none()
 }
 
 pub(crate) struct FormatMdListMarkerPrefixOptions {

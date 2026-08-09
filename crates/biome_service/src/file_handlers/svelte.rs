@@ -5,11 +5,11 @@ use super::{
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
+    LintResults, ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::PullActionsResult;
 use biome_db::AnyParsedSource;
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
@@ -17,7 +17,7 @@ use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsLanguage, TextRange, TextSize};
-use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
@@ -83,10 +83,8 @@ impl SvelteFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: true,
-                            is_function_signature: false,
-                            kind: SvelteFileKind::Component,
-                            is_const_block: false,
+                            file_kind: SvelteFileKind::Component,
+                            embedding_kind: SvelteEmbeddingKind::Source,
                         }),
                 )
             })
@@ -175,7 +173,7 @@ fn parse(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -240,13 +238,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let html_options = params
-        .settings
-        .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
-    if *html_options.indent_script_and_style() {
-        params.embeds_initial_indent = 1;
-    }
+fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     javascript::fix_all(params)
 }
 

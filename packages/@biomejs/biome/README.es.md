@@ -130,6 +130,9 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
       <td align="center" valign="middle">
         <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://latitude.so/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/98949449?s=200&v=4" height="100" alt="Latitude logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>

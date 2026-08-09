@@ -12,6 +12,13 @@ impl FormatNodeRule<ScssIncludeUsingClause> for FormatScssIncludeUsingClause {
             parameters,
         } = node.as_fields();
 
-        write!(f, [using_token.format(), space(), parameters.format()])
+        write!(
+            f,
+            [
+                using_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                parameters.format()
+            ]
+        )
     }
 }

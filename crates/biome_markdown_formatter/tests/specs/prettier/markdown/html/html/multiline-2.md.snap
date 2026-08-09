@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/html/multiline-2.md
+---
+
+# Input
+
+```md
+<!-- https://github.com/prettier/prettier/pull/18467#discussion_r2614298105 -->
+
+<table><tr><td>
+<pre>
+**Hello**,
+
+_world_.
+</pre>
+</td></tr></table>
+
+<table><tr><td>
+pre
+**Hello**,
+
+_world_.
+pre
+</td></tr></table>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,7 +5,6 @@
+ **Hello**,
+ 
+ _world_.
+-
+ </pre>
+ </td></tr></table>
+ 
+@@ -15,5 +14,4 @@
+ 
+ _world_.
+ pre
+-
+ </td></tr></table>
+```
+
+# Output
+
+```md
+<!-- https://github.com/prettier/prettier/pull/18467#discussion_r2614298105 -->
+
+<table><tr><td>
+<pre>
+**Hello**,
+
+_world_.
+</pre>
+</td></tr></table>
+
+<table><tr><td>
+pre
+**Hello**,
+
+_world_.
+pre
+</td></tr></table>
+```

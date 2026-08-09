@@ -16,7 +16,7 @@ impl FormatNodeRule<ScssImportAtRule> for FormatScssImportAtRule {
         write!(
             f,
             [
-                import_token.format(),
+                import_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 group(&indent(&imports.format())),
                 semicolon_token.format()

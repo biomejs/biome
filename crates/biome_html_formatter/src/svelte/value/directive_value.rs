@@ -74,7 +74,6 @@ impl FormatSvelteDirectiveValue {
                 return Ok(false);
             };
 
-            print!("{:?}", initializer_value.text());
             if initializer_value.text() != binding_value.text_trimmed() {
                 return Ok(false);
             }

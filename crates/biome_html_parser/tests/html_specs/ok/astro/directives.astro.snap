@@ -24,7 +24,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@1..11 "BuyButton" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@1..11 "BuyButton" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 AstroClientDirective {
@@ -82,7 +82,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@75..78 "<" [Newline("\n"), Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@78..93 "ShowHideButton" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@78..93 "ShowHideButton" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 AstroClientDirective {
@@ -115,7 +115,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..75
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_COMPONENT_NAME@1..11
-        0: HTML_LITERAL@1..11 "BuyButton" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@1..11 "BuyButton" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@11..73
         0: ASTRO_CLIENT_DIRECTIVE@11..23
           0: CLIENT_KW@11..17 "client" [] []
@@ -155,7 +155,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@75..107
       0: L_ANGLE@75..78 "<" [Newline("\n"), Newline("\n")] []
       1: HTML_COMPONENT_NAME@78..93
-        0: HTML_LITERAL@78..93 "ShowHideButton" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@78..93 "ShowHideButton" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@93..105
         0: ASTRO_CLIENT_DIRECTIVE@93..105
           0: CLIENT_KW@93..99 "client" [] []

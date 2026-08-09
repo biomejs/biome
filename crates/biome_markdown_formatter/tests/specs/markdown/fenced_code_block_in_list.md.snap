@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: markdown/fenced_code_block_in_list.md
+---
+
+# Input
+
+```md
+1. before
+
+   ```sh
+   echo before
+   ```
+
+   1. after
+
+---
+
+1. before
+   ```sh
+   echo before
+   ```
+   1. after
+
+```
+
+
+# Formatted
+
+```md
+1. before
+
+   ```sh
+   echo before
+   ```
+
+   1. after
+
+---
+
+1. before
+
+   ```sh
+   echo before
+   ```
+
+   1. after
+
+```

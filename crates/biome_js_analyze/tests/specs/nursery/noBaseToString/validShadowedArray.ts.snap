@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validShadowedArray.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+class Array<T> {
+    join(): string {
+        return "custom";
+    }
+}
+
+declare const values: Array<{}>;
+values.join();
+
+```

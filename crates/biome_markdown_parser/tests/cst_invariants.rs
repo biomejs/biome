@@ -1,8 +1,9 @@
 use biome_markdown_parser::parse_markdown;
 use biome_markdown_syntax::{
     MarkdownSyntaxKind, MdContinuationIndent, MdListMarkerPrefix, MdOrderedListItem,
+    MdReferenceLink,
 };
-use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rowan::{AstNode, AstNodeList, Direction, TextRange};
 
 fn indent_len(indent: impl AstNodeList) -> usize {
     // Indent runs are folded into single nodes, so measure text length
@@ -184,6 +185,56 @@ fn has_missing_required(input: &str) -> bool {
     format!("{:#?}", parsed.tree()).contains("missing (required)")
 }
 
+/// Text of every `MD_CODE_LITERAL` token in the tree. Document-level fenced
+/// code blocks store their content in exactly one such token; quote- and
+/// list-nested ones must produce none.
+fn code_literal_texts(input: &str) -> Vec<String> {
+    parse_markdown(input)
+        .syntax()
+        .descendants_with_tokens(Direction::Next)
+        .filter_map(|element| element.into_token())
+        .filter(|token| token.kind() == MarkdownSyntaxKind::MD_CODE_LITERAL)
+        .map(|token| token.text().to_string())
+        .collect()
+}
+
+#[test]
+fn document_fence_content_is_one_verbatim_literal() {
+    // CRLF must survive verbatim inside the literal. This can't live in the
+    // fixture suite: checkouts may normalize line endings.
+    let input = "```\r\nfoo\r\n```\r\n";
+    assert_eq!(code_literal_texts(input), ["\r\nfoo\r\n"]);
+    assert!(
+        !has_missing_required(input),
+        "document-level fence left a missing required slot\n\n{:#?}",
+        parse_markdown(input).tree()
+    );
+}
+
+#[test]
+fn unterminated_document_fence_literal_runs_to_eof() {
+    let input = "```\nfoo";
+    assert_eq!(code_literal_texts(input), ["\nfoo"]);
+    assert!(
+        !has_missing_required(input),
+        "unterminated fence left a missing required slot\n\n{:#?}",
+        parse_markdown(input).tree()
+    );
+}
+
+#[test]
+fn nested_fence_content_keeps_per_line_tokens() {
+    // Container prefixes (`>`/list indent) interleave with fence content, so
+    // quote- and list-nested fences keep the per-line representation.
+    for input in ["> ```\n> a\n> ```\n", "- ```\n  a\n  ```\n"] {
+        assert!(
+            code_literal_texts(input).is_empty(),
+            "nested fence content was folded into a code literal for {input:?}\n\n{:#?}",
+            parse_markdown(input).tree()
+        );
+    }
+}
+
 #[test]
 fn unterminated_fence_has_no_missing_required_slot() {
     // CommonMark §4.5: a fenced code block need not be closed; if the end of
@@ -296,4 +347,44 @@ fn no_fixture_has_bullet_list_newline_siblings() {
         "fixtures with MdNewline as a direct MdBulletList child:\n{}",
         offenders.join("\n")
     );
+}
+
+#[test]
+fn deferred_references_preserve_cst_and_container_metadata() {
+    let input = "> - *[foo*][ref]\n>\n> [ref]: /uri\n";
+    let parsed = parse_markdown(input);
+
+    assert_eq!(parsed.syntax().to_string(), input);
+    assert!(parsed.diagnostics().is_empty());
+    assert!(
+        parsed
+            .syntax()
+            .descendants()
+            .any(|node| MdReferenceLink::can_cast(node.kind()))
+    );
+    assert!(!parsed.list_tightness().is_empty());
+    assert!(!parsed.list_item_indents().is_empty());
+    assert!(!parsed.quote_indents().is_empty());
+}
+
+#[test]
+fn deferred_references_preserve_headings_and_diagnostics() {
+    let heading = "# *[foo*][ref]\n\n[ref]: /uri\n";
+    let parsed = parse_markdown(heading);
+
+    assert_eq!(parsed.syntax().to_string(), heading);
+    assert!(
+        parsed
+            .syntax()
+            .descendants()
+            .any(|node| MdReferenceLink::can_cast(node.kind()))
+    );
+
+    let invalid = format!("{} [ref]\n\n[ref]: /uri\n", ">".repeat(101));
+    let parsed = parse_markdown(&invalid);
+    assert_eq!(parsed.syntax().to_string(), invalid);
+    assert!(!parsed.diagnostics().is_empty());
+    assert!(parsed.diagnostics().windows(2).all(|diagnostics| {
+        diagnostics[0].span().map(TextRange::start) <= diagnostics[1].span().map(TextRange::start)
+    }));
 }

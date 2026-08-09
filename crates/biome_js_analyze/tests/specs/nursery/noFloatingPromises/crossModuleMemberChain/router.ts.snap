@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: router.ts
+---
+# Input
+```ts
+import { protectedProcedure } from "./procedures";
+
+export const routerProcedure = protectedProcedure.mutation;
+
+```

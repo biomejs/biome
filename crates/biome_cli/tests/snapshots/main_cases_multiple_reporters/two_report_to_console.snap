@@ -47,6 +47,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -67,7 +68,8 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
       "code": {
         "value": "format"
       },
-      "message": "Formatter would have printed the following content:"
+      "message": "Formatter would have printed the following content:",
+      "severity": "ERROR"
     }
   ]
 }

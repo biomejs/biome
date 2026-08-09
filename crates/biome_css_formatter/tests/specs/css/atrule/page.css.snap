@@ -171,9 +171,9 @@ index
 	margin: 20px;
 }
 
-@page :first {
+@page :FIRST {
 }
-@page :left {
+@page :LEFT {
 }
 
 ```

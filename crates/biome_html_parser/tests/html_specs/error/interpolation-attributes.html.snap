@@ -25,7 +25,7 @@ HtmlRoot {
                     items: [
                         L_ANGLE@0..1 "<" [] [],
                         HtmlTagName {
-                            value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
+                            value_token: BUTTON_KW@1..8 "button" [] [Whitespace(" ")],
                         },
                         HtmlBogus {
                             items: [
@@ -44,7 +44,7 @@ HtmlRoot {
                     l_angle_token: L_ANGLE@19..20 "<" [] [],
                     slash_token: SLASH@20..21 "/" [] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@21..27 "button" [] [],
+                        value_token: BUTTON_KW@21..27 "button" [] [],
                     },
                     r_angle_token: R_ANGLE@27..28 ">" [] [],
                 },
@@ -67,7 +67,7 @@ HtmlRoot {
       0: HTML_BOGUS@0..19
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..8
-          0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
+          0: BUTTON_KW@1..8 "button" [] [Whitespace(" ")]
         2: HTML_BOGUS@8..19
           0: HTML_BOGUS_ELEMENT@8..19
             0: L_CURLY@8..9 "{" [] []
@@ -77,7 +77,7 @@ HtmlRoot {
         0: L_ANGLE@19..20 "<" [] []
         1: SLASH@20..21 "/" [] []
         2: HTML_TAG_NAME@21..27
-          0: HTML_LITERAL@21..27 "button" [] []
+          0: BUTTON_KW@21..27 "button" [] []
         3: R_ANGLE@27..28 ">" [] []
   4: EOF@28..29 "" [Newline("\n")] []
 

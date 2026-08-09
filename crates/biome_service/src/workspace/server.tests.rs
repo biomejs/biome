@@ -2,8 +2,9 @@ use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{
-    FormatterConfiguration, JsConfiguration,
+    FormatterConfiguration, HtmlConfiguration, JsConfiguration,
     analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
 };
@@ -13,7 +14,267 @@ use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
 use biome_rowan::TextSize;
 use camino::Utf8Path;
+use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
+
+#[test]
+fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "debugger;\nundeclared()";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let no_debugger = AnalyzerSelector::from_str("lint/suspicious/noDebugger").unwrap();
+    let no_undeclared =
+        AnalyzerSelector::from_str("lint/correctness/noUndeclaredVariables").unwrap();
+    let result = workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default()
+                .with_syntax()
+                .with_lint()
+                .build(),
+            only: vec![no_debugger, no_undeclared],
+            skip: vec![],
+            enabled_rules: vec![no_debugger, no_undeclared],
+            fix_file_mode: Some(FixFileMode::SafeAndUnsafeFixes),
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: true,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap();
+
+    let output = result.output.unwrap();
+    assert_eq!(output, "undeclared();\n");
+    assert_eq!(result.applied_fixes, 1);
+    assert_eq!(result.diagnostics.len(), 1);
+    let span = result.diagnostics[0].location().span.unwrap();
+    assert_eq!(&output[span], "undeclared");
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        SOURCE
+    );
+}
+
+#[test]
+fn process_file_preserves_embedded_content_after_formatting() {
+    const PATH: &str = "/project/file.html";
+    const SOURCE: &str = "<style>#id{color:red}</style><div></div>";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            fix_file_mode: Some(FixFileMode::SafeFixes),
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: false,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap();
+
+    let output = result.output.unwrap();
+    assert!(output.contains("#id"));
+    assert!(output.contains("color: red"));
+    assert!(!output.contains("<style></style>"));
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        SOURCE
+    );
+}
+
+#[test]
+fn change_file_resumes_module_update_after_cancellation() {
+    const BASE_PATH: &str = "/project/base.ts";
+    const INDEX_PATH: &str = "/project/index.ts";
+    const OLD_BASE: &str = "export function task(): void {}";
+    const NEW_BASE: &str = "export async function task(): Promise<void> {}";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(BASE_PATH), OLD_BASE.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from(INDEX_PATH),
+        b"import { task } from './base';\ntask();",
+    );
+    let (mut workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace.db_state = db::DbState::lsp();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: FileContent::FromClient {
+                content: OLD_BASE.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let initial_diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(INDEX_PATH),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(initial_diagnostics.diagnostics.is_empty());
+
+    let params = ChangeFileParams {
+        project_key,
+        path: BiomePath::new(BASE_PATH),
+        content: NEW_BASE.into(),
+        version: 2,
+        inline_config: None,
+        editor_features: None,
+    };
+    workspace
+        .server
+        .cancel_change_file_after_document_update
+        .store(true, Ordering::Release);
+
+    let cancelled = salsa::Cancelled::catch(AssertUnwindSafe(|| {
+        workspace.as_workspace().change_file(params.clone())
+    }));
+    assert!(matches!(cancelled, Err(salsa::Cancelled::PendingWrite)));
+
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new(BASE_PATH))
+        .expect("base module must remain registered");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("base module must be JavaScript");
+    };
+    assert!(!format!("{:?}", js_info.raw_types).contains("Promise"));
+    drop(db);
+
+    workspace.change_file(params).unwrap();
+
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new(BASE_PATH))
+        .expect("base module must remain registered");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("base module must be JavaScript");
+    };
+    assert!(format!("{:?}", js_info.raw_types).contains("Promise"));
+    drop(db);
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(INDEX_PATH),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert_eq!(diagnostics.diagnostics.len(), 1);
+}
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -316,6 +577,81 @@ fn format_html_with_scripts_and_css() {
     	</head>
     </html>
     "#);
+}
+
+#[test]
+fn format_html_preserves_template_literal_and_block_comment_indentation() {
+    // Regression: re-formatting an HTML file whose embedded <script> contains a
+    // template literal or whose <style> contains a block comment must not gain
+    // extra indentation on each run.
+    const FILE_CONTENT: &str = r#"<html>
+    <head>
+        <script>
+            const sql = `
+                SELECT *
+                FROM users
+            `;
+        </script>
+        <style>
+            /*
+             * A block comment.
+             */
+            .foo {
+                color: red;
+            }
+        </style>
+    </head>
+</html>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let first = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from("/project/file.html").into(),
+            project_key,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: first.as_code().to_string(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let second = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from("/project/file.html").into(),
+            project_key,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        first.as_code(),
+        second.as_code(),
+        "format_file must be idempotent for template literals and block comments"
+    );
 }
 
 #[test]
@@ -3016,6 +3352,78 @@ fn go_to_definition_css_class_via_transitive_import() {
     assert_eq!(path, &BiomePath::new("/project/components.css"));
     // "card" in `.card` starts at offset 1 (after the dot)
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
+}
+#[test]
+fn fix_file_is_idempotent_for_template_literals_and_css_block_comments() {
+    // Regression: reindent_embedded_code was adding the host indentation prefix
+    // to continuation lines inside template literals and CSS block comments, so
+    // each successive `biome check --write` stacked another indent level.
+    // HTML files exercise the update_snippets → reindent_embedded_code path.
+    const FILE_PATH: &str = "/project/page.html";
+    const FILE_CONTENT: &str = "<html>\n\t<head>\n\t\t<script>\n\t\t\tconst sql = `\n\t\t\t\tSELECT *\n\t\t\t\tFROM users\n\t\t\t`;\n\t\t</script>\n\t\t<style>\n\t\t\t/*\n\t\t\t * A block comment.\n\t\t\t */\n\t\t\t.foo { color: red; }\n\t\t</style>\n\t</head>\n</html>\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let first = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            fix_file_mode: FixFileMode::SafeFixes,
+            should_format: true,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories: RuleCategories::default(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: first.code.clone(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let second = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            fix_file_mode: FixFileMode::SafeFixes,
+            should_format: true,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories: RuleCategories::default(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        first.code, second.code,
+        "fix_file must be idempotent: template literal and block comment continuation lines must not gain an extra indent on each run"
+    );
 }
 
 #[test]

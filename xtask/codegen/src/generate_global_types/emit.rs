@@ -3,23 +3,36 @@ use std::path::Path;
 use anyhow::{Result, bail};
 
 use super::lower::{
-    LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter, LoweredGlobal,
-    LoweredGlobalTypes, LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeMember,
-    LoweredTypeReference,
+    LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
+    LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
+    LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
 };
 
 /// Relative path of the generated global types module from the workspace root.
 const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/global_types.rs";
 
-/// Stable generated global emission order for generated globals with fixed IDs.
+/// Generated globals in ascending `GlobalTypeId` index order.
 ///
-/// Must stay ordered by ascending `GlobalTypeId` index so the emitted
-/// `MIGRATED_PREDEFINED_IDS` stays sorted for the runtime `binary_search`.
-const GLOBAL_ID_EMIT_ORDER: [&str; 7] = [
+/// The index is the row position in `PREDEFINED_ID_ROWS`. This keeps
+/// `MIGRATED_PREDEFINED_IDS` sorted for the runtime `binary_search`.
+const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
+    "ARRAY_ID_GLOBAL_TYPE_ID",
+    "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
+    "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
+    "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
+    "REGEXP_ID_GLOBAL_TYPE_ID",
+    "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
+    "SYMBOL_ID_GLOBAL_TYPE_ID",
+    "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
     "DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "DATE_ID_GLOBAL_TYPE_ID",
+    "MAP_ID_GLOBAL_TYPE_ID",
+    "SET_ID_GLOBAL_TYPE_ID",
+    "WEAK_MAP_ID_GLOBAL_TYPE_ID",
     "ERROR_ID_GLOBAL_TYPE_ID",
     "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
@@ -64,25 +77,25 @@ pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builde
 /// Builds the migrated ID slice body.
 fn render_migrated_ids(lowered: &LoweredGlobalTypes) -> Result<String> {
     let mut ids = String::new();
-    for global in sorted_globals(lowered)? {
+    for_each_global_in_emit_order(lowered, |global| {
         ids.push_str("    crate::globals::");
         ids.push_str(global.id_constant());
         ids.push_str(",\n");
-    }
+    })?;
     Ok(ids)
 }
 
 /// Builds the resolver registration statements.
 fn render_registrations(lowered: &LoweredGlobalTypes) -> Result<String> {
     let mut registrations = String::new();
-    for global in sorted_globals(lowered)? {
+    for_each_global_in_emit_order(lowered, |global| {
         registrations.push_str("    let data = ");
         registrations.push_str(&render_type_data(global.data()));
         registrations.push_str(";\n");
         registrations.push_str("    builder.set_type_data(crate::globals::");
         registrations.push_str(global.id_constant());
         registrations.push_str(", data);\n");
-    }
+    })?;
     Ok(registrations)
 }
 
@@ -93,6 +106,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         LoweredTypeData::Constructor(constructor) => render_constructor(constructor),
         LoweredTypeData::Function(function) => render_function(function),
         LoweredTypeData::Interface(interface) => render_interface(interface),
+        LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
     }
 }
 
@@ -101,14 +115,30 @@ fn render_class(class: &LoweredClass) -> String {
     format!(
         "crate::TypeData::Class(Box::new(crate::Class {{
             name: Some(biome_rowan::Text::new_static({name})),
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             extends: None,
             implements: Box::default(),
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(class.name()),
+        type_parameters = render_type_references(class.type_parameters()),
         members = render_members(class.members()),
     )
+}
+
+/// Builds a boxed type-reference expression list.
+fn render_type_references(references: &[LoweredTypeReference]) -> String {
+    if references.is_empty() {
+        return "Box::default()".to_string();
+    }
+
+    let mut rendered = String::from("Box::new([");
+    for reference in references {
+        rendered.push_str(&render_type_reference(reference));
+        rendered.push(',');
+    }
+    rendered.push_str("])");
+    rendered
 }
 
 /// Builds a `TypeData::Interface` expression.
@@ -157,12 +187,13 @@ fn render_function(function: &LoweredFunction) -> String {
     format!(
         "crate::TypeData::Function(Box::new(crate::Function {{
             is_async: {is_async},
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             name: {name},
             parameters: Box::new([{parameters}]),
             return_type: crate::ReturnType::Type({return_type}),
         }}))",
         is_async = function.is_async(),
+        type_parameters = render_type_references(function.type_parameters()),
         parameters = render_function_parameters(function.parameters()),
         return_type = render_type_reference(function.return_type()),
     )
@@ -243,20 +274,37 @@ fn render_function_parameters(parameters: &[LoweredFunctionParameter]) -> String
     rendered
 }
 
-/// Builds one named parameter expression.
+/// Preserves named bindings and uses pattern parameters for synthetic callback slots.
 fn render_function_parameter(parameter: &LoweredFunctionParameter) -> String {
-    format!(
-        "crate::FunctionParameter::Named(crate::NamedFunctionParameter {{
-            name: biome_rowan::Text::new_static({name}),
-            ty: {type_reference},
-            is_optional: {is_optional},
-            is_rest: {is_rest},
-        }})",
-        name = rust_string_literal(parameter.name()),
-        type_reference = render_type_reference(parameter.type_reference()),
-        is_optional = parameter.is_optional(),
-        is_rest = parameter.is_rest(),
-    )
+    match parameter.binding() {
+        LoweredFunctionParameterBinding::Named(name) => {
+            format!(
+                "crate::FunctionParameter::Named(crate::NamedFunctionParameter {{
+                    name: biome_rowan::Text::new_static({name}),
+                    ty: {type_reference},
+                    is_optional: {is_optional},
+                    is_rest: {is_rest},
+                }})",
+                name = rust_string_literal(name.text()),
+                type_reference = render_type_reference(parameter.type_reference()),
+                is_optional = parameter.is_optional(),
+                is_rest = parameter.is_rest(),
+            )
+        }
+        LoweredFunctionParameterBinding::Pattern => {
+            format!(
+                "crate::FunctionParameter::Pattern(crate::PatternFunctionParameter {{
+                    bindings: Box::default(),
+                    ty: {type_reference},
+                    is_optional: {is_optional},
+                    is_rest: {is_rest},
+                }})",
+                type_reference = render_type_reference(parameter.type_reference()),
+                is_optional = parameter.is_optional(),
+                is_rest = parameter.is_rest(),
+            )
+        }
+    }
 }
 
 /// Builds a generated `TypeReference` expression.
@@ -286,8 +334,10 @@ fn global_with_id_constant<'a>(
     bail!("generated global output is missing {id_constant}");
 }
 
-/// Returns generated globals in the sorted predefined-ID order.
-fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
+fn for_each_global_in_emit_order(
+    lowered: &LoweredGlobalTypes,
+    mut visit: impl FnMut(&LoweredGlobal),
+) -> Result<()> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant()) {
             bail!(
@@ -298,13 +348,9 @@ fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
         }
     }
 
-    Ok([
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[0])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[1])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[2])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[3])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[4])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[5])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[6])?,
-    ])
+    for id_constant in GLOBAL_ID_EMIT_ORDER {
+        visit(global_with_id_constant(lowered, id_constant)?);
+    }
+
+    Ok(())
 }

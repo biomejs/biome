@@ -55,7 +55,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..7 "button" [] [],
+                    value_token: BUTTON_KW@1..7 "button" [] [],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -85,7 +85,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@65..66 "<" [] [],
                 slash_token: SLASH@66..67 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@67..73 "button" [] [],
+                    value_token: BUTTON_KW@67..73 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@73..74 ">" [] [],
             },
@@ -94,7 +94,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@74..77 "<" [Newline("\n"), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@77..80 "div" [] [],
+                    value_token: DIV_KW@77..80 "div" [] [],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -120,7 +120,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@122..123 "<" [] [],
                 slash_token: SLASH@123..124 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@124..127 "div" [] [],
+                    value_token: DIV_KW@124..127 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@127..128 ">" [] [],
             },
@@ -128,7 +128,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@128..131 "<" [Newline("\n"), Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@131..136 "input" [] [],
+                value_token: INPUT_KW@131..136 "input" [] [],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -150,7 +150,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@191..194 "<" [Newline("\n"), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@194..198 "span" [] [],
+                    value_token: SPAN_KW@194..198 "span" [] [],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -187,7 +187,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@297..298 "<" [] [],
                 slash_token: SLASH@298..299 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@299..303 "span" [] [],
+                    value_token: SPAN_KW@299..303 "span" [] [],
                 },
                 r_angle_token: R_ANGLE@303..304 ">" [] [],
             },
@@ -196,7 +196,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@304..308 "<" [Newline("\n"), Newline("\n"), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@308..314 "button" [] [],
+                    value_token: BUTTON_KW@308..314 "button" [] [],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -233,7 +233,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@434..435 "<" [] [],
                 slash_token: SLASH@435..436 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@436..442 "button" [] [],
+                    value_token: BUTTON_KW@436..442 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@442..443 ">" [] [],
             },
@@ -242,7 +242,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@443..446 "<" [Newline("\n"), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@446..470 "div" [] [Whitespace(" "), Comments("/* block comment */"), Whitespace(" ")],
+                    value_token: DIV_KW@446..470 "div" [] [Whitespace(" "), Comments("/* block comment */"), Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -268,7 +268,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@506..507 "<" [] [],
                 slash_token: SLASH@507..508 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@508..511 "div" [] [],
+                    value_token: DIV_KW@508..511 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@511..512 ">" [] [],
             },
@@ -290,7 +290,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..57
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..7
-          0: HTML_LITERAL@1..7 "button" [] []
+          0: BUTTON_KW@1..7 "button" [] []
         2: HTML_ATTRIBUTE_LIST@7..55
           0: HTML_ATTRIBUTE@7..55
             0: HTML_ATTRIBUTE_NAME@7..42
@@ -310,13 +310,13 @@ HtmlRoot {
         0: L_ANGLE@65..66 "<" [] []
         1: SLASH@66..67 "/" [] []
         2: HTML_TAG_NAME@67..73
-          0: HTML_LITERAL@67..73 "button" [] []
+          0: BUTTON_KW@67..73 "button" [] []
         3: R_ANGLE@73..74 ">" [] []
     1: HTML_ELEMENT@74..128
       0: HTML_OPENING_ELEMENT@74..118
         0: L_ANGLE@74..77 "<" [Newline("\n"), Newline("\n")] []
         1: HTML_TAG_NAME@77..80
-          0: HTML_LITERAL@77..80 "div" [] []
+          0: DIV_KW@77..80 "div" [] []
         2: HTML_ATTRIBUTE_LIST@80..116
           0: HTML_ATTRIBUTE@80..116
             0: HTML_ATTRIBUTE_NAME@80..110
@@ -333,12 +333,12 @@ HtmlRoot {
         0: L_ANGLE@122..123 "<" [] []
         1: SLASH@123..124 "/" [] []
         2: HTML_TAG_NAME@124..127
-          0: HTML_LITERAL@124..127 "div" [] []
+          0: DIV_KW@124..127 "div" [] []
         3: R_ANGLE@127..128 ">" [] []
     2: HTML_SELF_CLOSING_ELEMENT@128..191
       0: L_ANGLE@128..131 "<" [Newline("\n"), Newline("\n")] []
       1: HTML_TAG_NAME@131..136
-        0: HTML_LITERAL@131..136 "input" [] []
+        0: INPUT_KW@131..136 "input" [] []
       2: HTML_ATTRIBUTE_LIST@136..188
         0: HTML_ATTRIBUTE@136..188
           0: HTML_ATTRIBUTE_NAME@136..181
@@ -353,7 +353,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@191..290
         0: L_ANGLE@191..194 "<" [Newline("\n"), Newline("\n")] []
         1: HTML_TAG_NAME@194..198
-          0: HTML_LITERAL@194..198 "span" [] []
+          0: SPAN_KW@194..198 "span" [] []
         2: HTML_ATTRIBUTE_LIST@198..288
           0: HTML_ATTRIBUTE@198..243
             0: HTML_ATTRIBUTE_NAME@198..235
@@ -377,13 +377,13 @@ HtmlRoot {
         0: L_ANGLE@297..298 "<" [] []
         1: SLASH@298..299 "/" [] []
         2: HTML_TAG_NAME@299..303
-          0: HTML_LITERAL@299..303 "span" [] []
+          0: SPAN_KW@299..303 "span" [] []
         3: R_ANGLE@303..304 ">" [] []
     4: HTML_ELEMENT@304..443
       0: HTML_OPENING_ELEMENT@304..426
         0: L_ANGLE@304..308 "<" [Newline("\n"), Newline("\n"), Newline("\n")] []
         1: HTML_TAG_NAME@308..314
-          0: HTML_LITERAL@308..314 "button" [] []
+          0: BUTTON_KW@308..314 "button" [] []
         2: HTML_ATTRIBUTE_LIST@314..395
           0: HTML_ATTRIBUTE@314..362
             0: HTML_ATTRIBUTE_NAME@314..349
@@ -408,13 +408,13 @@ HtmlRoot {
         0: L_ANGLE@434..435 "<" [] []
         1: SLASH@435..436 "/" [] []
         2: HTML_TAG_NAME@436..442
-          0: HTML_LITERAL@436..442 "button" [] []
+          0: BUTTON_KW@436..442 "button" [] []
         3: R_ANGLE@442..443 ">" [] []
     5: HTML_ELEMENT@443..512
       0: HTML_OPENING_ELEMENT@443..502
         0: L_ANGLE@443..446 "<" [Newline("\n"), Newline("\n")] []
         1: HTML_TAG_NAME@446..470
-          0: HTML_LITERAL@446..470 "div" [] [Whitespace(" "), Comments("/* block comment */"), Whitespace(" ")]
+          0: DIV_KW@446..470 "div" [] [Whitespace(" "), Comments("/* block comment */"), Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@470..501
           0: HTML_ATTRIBUTE@470..501
             0: HTML_ATTRIBUTE_NAME@470..475
@@ -431,7 +431,7 @@ HtmlRoot {
         0: L_ANGLE@506..507 "<" [] []
         1: SLASH@507..508 "/" [] []
         2: HTML_TAG_NAME@508..511
-          0: HTML_LITERAL@508..511 "div" [] []
+          0: DIV_KW@508..511 "div" [] []
         3: R_ANGLE@511..512 ">" [] []
   4: EOF@512..513 "" [Newline("\n")] []
 

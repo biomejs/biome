@@ -3,15 +3,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlAttribute;
+use biome_html_syntax::{AnyHtmlAttribute, HtmlSyntaxKind, T};
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::get_truthy_aria_hidden_attribute;
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that aria-hidden="true" is not set on focusable elements.
@@ -63,6 +62,10 @@ pub struct NoAriaHiddenOnFocusableState {
     aria_hidden_attribute: AnyHtmlAttribute,
 }
 
+const FOCUSABLE_WITH_HREF: TokenSet<HtmlSyntaxKind> = token_set!(T![a], T![area]);
+const ALWAYS_FOCUSABLE: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![button], T![select], T![textarea], T![details], T![summary]);
+
 impl Rule for NoAriaHiddenOnFocusable {
     type Query = Ast<AnyHtmlTagElement>;
     type State = NoAriaHiddenOnFocusableState;
@@ -72,7 +75,6 @@ impl Rule for NoAriaHiddenOnFocusable {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
         let aria_hidden_attr = get_truthy_aria_hidden_attribute(element)?;
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Tabindex overrides native focusability: negative removes from tab order,
         // non-negative makes the element focusable regardless of element type.
@@ -89,7 +91,7 @@ impl Rule for NoAriaHiddenOnFocusable {
         }
 
         // Check if element is natively focusable or has contenteditable
-        if is_focusable_element(element, source_type)? {
+        if is_focusable_element(element)? {
             return Some(NoAriaHiddenOnFocusableState {
                 aria_hidden_attribute: aria_hidden_attr,
             });
@@ -137,26 +139,23 @@ impl Rule for NoAriaHiddenOnFocusable {
 ///
 /// Returns `Some(false)` when the element is recognized but not focusable.
 /// Returns `None` when the element name cannot be determined (e.g., bogus elements).
-fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<bool> {
+fn is_focusable_element(element: &AnyHtmlTagElement) -> Option<bool> {
+    let tag_kind = element.tag_name_kind();
+
     // <a> and <area> are only focusable when they have an href attribute
-    if (is_html_tag(element, source_type, "a") || is_html_tag(element, source_type, "area"))
+    if tag_kind.is_some_and(|kind| FOCUSABLE_WITH_HREF.contains(kind))
         && element.find_attribute_or_vue_binding("href").is_some()
     {
         return Some(true);
     }
 
     // These elements are always natively focusable
-    if is_html_tag(element, source_type, "button")
-        || is_html_tag(element, source_type, "select")
-        || is_html_tag(element, source_type, "textarea")
-        || is_html_tag(element, source_type, "details")
-        || is_html_tag(element, source_type, "summary")
-    {
+    if tag_kind.is_some_and(|kind| ALWAYS_FOCUSABLE.contains(kind)) {
         return Some(true);
     }
 
     // <input> is focusable unless type="hidden"
-    if is_html_tag(element, source_type, "input") {
+    if tag_kind == Some(T![input]) {
         let is_hidden = element
             .find_attribute_or_vue_binding("type")
             .and_then(|attr| attr.as_static_value())
