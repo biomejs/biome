@@ -1,0 +1,62 @@
+name: biome
+description: One toolchain for your web project. Format, lint, and more in milliseconds. Biome is a fast formatter and linter for JavaScript, TypeScript, HTML, CSS, and more, written in Rust.
+language: Rust (primary), JavaScript/TypeScript (secondary)
+stars: 25537
+repository:
+  upstream: biomejs/biome
+  fork: nickhac/biome
+  clone_url: https://github.com/nickhac/biome.git
+
+setup:
+  steps:
+    - description: Clone the repository
+      command: git clone https://github.com/nickhac/biome.git
+      requires_upstream: true
+    - description: Install Rust toolchain (stable)
+      command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      platform: unix
+    - description: Install just (command runner)
+      command: curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+      platform: unix
+      optional: true
+    - description: Install Node.js and pnpm
+      command: curl -fsSL https://get.pnpm.io/install.sh | sh -
+      platform: unix
+      optional: true
+    - description: Install development tools
+      command: just install-tools
+      requires_stdin: false
+    - description: Build the project
+      command: cargo build --release
+
+verification:
+  description: Verify Biome development setup
+  commands:
+    - name: Run quick tests
+      command: just test-quick biome_cli
+      timeout: 120
+    - name: Run linting
+      command: just lint
+      timeout: 60
+    - name: Check formatting
+      command: just format --check
+      timeout: 60
+    - name: Verify biome binary
+      command: cargo run --release -p biome_cli -- --version
+      expected_output: "^biome \\d+\\.\\d+\\.\\d+"
+    - name: Test markdown conformance
+      command: just test-markdown-conformance
+      timeout: 120
+      optional: true
+
+entry_points:
+  binary: ./target/release/biome
+
+tags:
+  - linter
+  - formatter
+  - rust
+  - javascript
+  - typescript
+  - toolchain
+  - web-development
