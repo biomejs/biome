@@ -1,0 +1,35 @@
+{
+  "afterFileEdit": {
+    "commands": [
+      {
+        "name": "format-rust",
+        "command": "cargo fmt --all",
+        "description": "Format Rust code"
+      },
+      {
+        "name": "format-node",
+        "command": "pnpm run format",
+        "description": "Format Node.js code"
+      }
+    ]
+  },
+  "beforeCommit": {
+    "commands": [
+      {
+        "name": "lint-rust",
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "description": "Check Rust linting"
+      },
+      {
+        "name": "lint-node",
+        "command": "pnpm run lint",
+        "description": "Check Node.js linting"
+      },
+      {
+        "name": "test",
+        "command": "just test",
+        "description": "Run tests"
+      }
+    ]
+  }
+}
