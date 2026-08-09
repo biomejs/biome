@@ -16,8 +16,8 @@ function narrowedToNumber(x: number | Promise<void>) {
 
 // The cases below stay quiet with or without narrowing. They exist to catch
 // narrowing producing a promise type where there is none, not to prove that
-// narrowing happens -- the inferred types themselves are pinned by the
-// snapshots in `biome_module_graph`.
+// narrowing happens -- the inferred types themselves are pinned by
+// `biome_module_graph/tests/spec_tests/narrowing.test.rs`.
 
 async function handled(x: number | (() => Promise<void>)) {
 	if (typeof x === "function") {

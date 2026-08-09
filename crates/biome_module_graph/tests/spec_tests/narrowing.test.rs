@@ -130,9 +130,7 @@ export function constructSignature(k: Ctor | number) {
             .expect("reference type must be inferred")
     };
 
-    // An interface with a call signature is a function at runtime, so a
-    // `"function"` guard keeps it alongside the plain function and only
-    // strips `null`.
+    // An interface with a call signature is a function at runtime.
     let function_offset = SOURCE
         .find("f;")
         .expect("function-guarded reference must exist");
@@ -142,8 +140,7 @@ export function constructSignature(k: Ctor | number) {
     assert!(formatted.contains("Function"), "{formatted}");
     assert!(!formatted.contains("null"), "{formatted}");
 
-    // An `"object"` guard strips both callable variants, but keeps `null`
-    // because `typeof null` is `"object"`.
+    // `typeof null` is `"object"`.
     let object_offset = SOURCE
         .rfind("f;")
         .expect("object-guarded reference must exist");
@@ -153,8 +150,7 @@ export function constructSignature(k: Ctor | number) {
     assert!(!formatted.contains("AsyncFn"), "{formatted}");
     assert!(!formatted.contains("Function"), "{formatted}");
 
-    // A class value is a constructor function at runtime, so a `"function"`
-    // guard keeps it and strips the number.
+    // A class value is a constructor function at runtime.
     let class_offset = SOURCE.find("c;").expect("class reference must exist");
     let narrowed = normalize_type(&db, module, expression_ty_at(class_offset));
     assert!(!contains_inferred_number(&db, narrowed));
@@ -169,7 +165,8 @@ export function constructSignature(k: Ctor | number) {
 }
 
 /// A guard says nothing about a name that the guarded code rebinds or
-/// reassigns, so narrowing must be declined for it.
+/// reassigns, so narrowing must be declined for it -- and must survive for
+/// the names the branch leaves alone.
 #[test]
 fn test_infer_module_types_declines_narrowing_when_invalidated() {
     const SOURCE: &str = r#"
@@ -294,7 +291,7 @@ export function classFieldInitializer(x: number | (() => void)) {
     );
 }
 
-/// Covers the `typeof` results that the other tests leave out.
+/// Covers the `typeof` comparison strings no other test in this file guards on.
 #[test]
 fn test_infer_module_types_narrows_remaining_typeof_results() {
     const SOURCE: &str = r#"
@@ -336,8 +333,9 @@ export function numberGuard(v: number | string) {
 }
 
 /// Pins the guard forms this slice deliberately leaves unhandled: they keep
-/// the declared type. The `x.length` receivers sit in a consequent that is
-/// handled, so those do narrow and keep the snapshot discriminating.
+/// the declared type. `elseBranch` and `afterGuard` also read `x.length` from
+/// inside a handled consequent, so the snapshot still records narrowing
+/// somewhere and would change if narrowing regressed.
 #[test]
 fn test_infer_module_types_leaves_unsupported_guard_forms_unnarrowed() {
     const SOURCE: &str = r#"
