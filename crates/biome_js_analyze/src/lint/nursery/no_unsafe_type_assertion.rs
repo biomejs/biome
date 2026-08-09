@@ -5,7 +5,7 @@ use biome_js_syntax::{
     AnyTsType, TsAsAssignment, TsAsExpression, TsTypeAssertionAssignment,
     TsTypeAssertionExpression,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions;
 
 declare_lint_rule! {
@@ -124,6 +124,31 @@ impl AnyTsTypeAssertionLike {
             Self::TsTypeAssertionExpression(assertion) => assertion.ty().ok(),
         }
     }
+
+    fn diagnostic_range(&self) -> Option<TextRange> {
+        Some(match self {
+            Self::TsAsAssignment(assertion) => assertion
+                .as_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(assertion.ty().ok()?.range()),
+            Self::TsAsExpression(assertion) => assertion
+                .as_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(assertion.ty().ok()?.range()),
+            Self::TsTypeAssertionAssignment(assertion) => assertion
+                .l_angle_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
+            Self::TsTypeAssertionExpression(assertion) => assertion
+                .l_angle_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
+        })
+    }
 }
 
 impl Rule for NoUnsafeTypeAssertion {
@@ -139,29 +164,7 @@ impl Rule for NoUnsafeTypeAssertion {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let query = ctx.query();
-        let ty = query.ty()?;
-        let range = match query {
-            AnyTsTypeAssertionLike::TsAsAssignment(assertion) => assertion
-                .as_token()
-                .ok()?
-                .text_trimmed_range()
-                .cover(ty.range()),
-            AnyTsTypeAssertionLike::TsAsExpression(assertion) => assertion
-                .as_token()
-                .ok()?
-                .text_trimmed_range()
-                .cover(ty.range()),
-            AnyTsTypeAssertionLike::TsTypeAssertionAssignment(assertion) => assertion
-                .l_angle_token()
-                .ok()?
-                .text_trimmed_range()
-                .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
-            AnyTsTypeAssertionLike::TsTypeAssertionExpression(assertion) => assertion
-                .l_angle_token()
-                .ok()?
-                .text_trimmed_range()
-                .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
-        };
+        let range = query.diagnostic_range()?;
 
         Some(
             RuleDiagnostic::new(
