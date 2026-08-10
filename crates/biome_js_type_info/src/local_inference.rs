@@ -7,28 +7,28 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
-    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument,
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration,
-    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
-    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
+    AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
+    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
     JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
     JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsIfStatement, JsInitializerClause,
-    JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember, JsNewExpression,
-    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
-    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression,
-    JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
-    TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsFunctionExpression, JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding,
+    JsIfStatement, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
+    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
+    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
+    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInstantiationExpression,
+    TsInterfaceDeclaration, TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
@@ -3216,7 +3216,7 @@ fn typeof_guard_narrowed_tag(
                     Some(_) => return None,
                 }
             }
-        } else if is_function_boundary(&ancestor) {
+        } else if is_narrowing_boundary(&ancestor) {
             break;
         }
         child = ancestor;
@@ -3307,12 +3307,14 @@ fn narrowing_invalidated_within(
     }
 
     let invalidated = node.descendants().any(|descendant| {
-        matches!(
-            descendant.kind(),
-            JsSyntaxKind::JS_IDENTIFIER_BINDING | JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT
-        ) && descendant
-            .first_token()
-            .is_some_and(|token| token.text_trimmed() == name)
+        let name_token = if let Some(binding) = JsIdentifierBinding::cast_ref(&descendant) {
+            binding.name_token()
+        } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&descendant) {
+            assignment.name_token()
+        } else {
+            return false;
+        };
+        name_token.is_ok_and(|token| token.text_trimmed() == name)
     });
 
     if let Some(cache) = resolver.narrowing_invalidation_cache() {
@@ -3322,12 +3324,15 @@ fn narrowing_invalidated_within(
     invalidated
 }
 
-/// Returns whether `node` is a function-like scope boundary (a function,
-/// method, or constructor), including sync-only members (getters, setters,
-/// static initialization blocks) where `typeof` guards can't cross either.
+/// Returns whether `node` is a boundary that `typeof` narrowing must not
+/// reach into. A guard only vouches for the value at the time its test runs,
+/// so it says nothing about code whose execution is deferred:
 ///
-/// Class property initializers count too. An instance field runs when the
-/// class is instantiated, which can be long after the guard was evaluated:
+/// - function-like scopes ([`biome_js_syntax::is_function_boundary`]):
+///   functions, methods, constructors, getters, setters, and static
+///   initialization blocks;
+/// - class property members, whose initializers run when the class is
+///   instantiated:
 ///
 /// ```js
 /// if (typeof x === "number") {
@@ -3338,20 +3343,11 @@ fn narrowing_invalidated_within(
 /// A `static` field is evaluated with the class expression itself, so
 /// narrowing it would be correct. We treat the whole class body as one
 /// boundary anyway, rather than deciding per member.
-///
-/// This is `biome_js_analyze::ast_utils::is_function_boundary` plus class
-/// property members. That crate can't be depended on from here (it depends on
-/// this one), so the two are maintained separately and may drift.
-fn is_function_boundary(node: &JsSyntaxNode) -> bool {
-    AnyFunctionLike::can_cast(node.kind())
+fn is_narrowing_boundary(node: &JsSyntaxNode) -> bool {
+    biome_js_syntax::is_function_boundary(node.kind())
         || matches!(
             node.kind(),
-            JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-                | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-                | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
-                | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-                | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
-                | JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
+            JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
                 | JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
         )
 }
