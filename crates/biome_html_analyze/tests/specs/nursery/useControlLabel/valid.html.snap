@@ -11,6 +11,7 @@ expression: valid.html
 <button aria-label="Close"></button>
 
 <button aria-labelledby="save-label"></button>
+<span id="save-label">Save</span>
 
 <button title="Close"></button>
 

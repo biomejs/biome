@@ -5,6 +5,7 @@ const a = <button>Submit</button>;
 const b = <button aria-label="Close" />;
 
 const c = <button aria-labelledby="save-label" />;
+const c2 = <span id="save-label">Save</span>;
 
 const d = <button title="Close" />;
 
