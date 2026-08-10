@@ -17,3 +17,10 @@ const f = <button><span aria-hidden="true">Delete</span></button>;
 
 // An empty template-literal label is not a real label either.
 const g = <button aria-label={``} />;
+
+// A whitespace-only label is not a real label either.
+const h = <button aria-label="   " />;
+
+// A `null` or `undefined` label is not a real label either.
+const i = <button aria-label={null} />;
+const j = <button aria-label={undefined} />;

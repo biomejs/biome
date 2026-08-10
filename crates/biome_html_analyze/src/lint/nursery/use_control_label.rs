@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlSyntaxKind, T};
 use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
@@ -151,10 +152,15 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
-                false
-            } else {
-                has_accessible_content(&element.children(), is_astro)
+                return false;
             }
+
+            let has_own_accessible_name = element
+                .opening_element()
+                .ok()
+                .is_some_and(|opening| has_accessible_name(&AnyHtmlTagElement::from(opening)));
+
+            has_own_accessible_name || has_accessible_content(&element.children(), is_astro)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {

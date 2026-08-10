@@ -147,8 +147,9 @@ fn is_aria_hidden(element: &AnyJsxElement) -> bool {
 
 /// Whether the element carries a labeling attribute with a non-empty value. A
 /// dynamic value (not statically known, e.g. `aria-label={label}`) is assumed
-/// to provide a label; an empty literal (`aria-label=""` or `aria-label={``}`)
-/// does not.
+/// to provide a label; an empty or whitespace-only literal (`aria-label=""`,
+/// `aria-label={``}`, `aria-label="  "`) does not, nor does a literal `null`
+/// or `undefined` (e.g. `aria-label={null}`).
 fn has_labeling_attribute(element: &AnyJsxElement) -> bool {
     LABEL_ATTRIBUTES.iter().any(|name| {
         let Some(attribute) = element.find_attribute_by_name(name) else {
@@ -157,8 +158,9 @@ fn has_labeling_attribute(element: &AnyJsxElement) -> bool {
         match attribute.as_static_value() {
             None => true,
             Some(value) => match value {
-                StaticValue::String(_) => !value.text().is_empty(),
+                StaticValue::String(_) => !value.text().trim().is_empty(),
                 StaticValue::EmptyString(_) => false,
+                StaticValue::Null(_) | StaticValue::Undefined(_) => false,
                 _ => true,
             },
         }

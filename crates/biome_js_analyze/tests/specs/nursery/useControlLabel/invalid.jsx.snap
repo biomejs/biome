@@ -24,6 +24,13 @@ const f = <button><span aria-hidden="true">Delete</span></button>;
 // An empty template-literal label is not a real label either.
 const g = <button aria-label={``} />;
 
+// A whitespace-only label is not a real label either.
+const h = <button aria-label="   " />;
+
+// A `null` or `undefined` label is not a real label either.
+const i = <button aria-label={null} />;
+const j = <button aria-label={undefined} />;
+
 ```
 
 # Diagnostics
@@ -159,6 +166,67 @@ invalid.jsx:19:11 lint/nursery/useControlLabel ━━━━━━━━━━━
   > 19 │ const g = <button aria-label={``} />;
        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ 
+    21 │ // A whitespace-only label is not a real label either.
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:22:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    21 │ // A whitespace-only label is not a real label either.
+  > 22 │ const h = <button aria-label="   " />;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // A `null` or `undefined` label is not a real label either.
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:25:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    24 │ // A `null` or `undefined` label is not a real label either.
+  > 25 │ const i = <button aria-label={null} />;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ const j = <button aria-label={undefined} />;
+    27 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:26:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    24 │ // A `null` or `undefined` label is not a real label either.
+    25 │ const i = <button aria-label={null} />;
+  > 26 │ const j = <button aria-label={undefined} />;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   

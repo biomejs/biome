@@ -16,6 +16,11 @@ expression: valid.html
 
 <button><span>Delete</span></button>
 
+<button><img src="close.png" alt="Close" /></button>
+
+<!-- A labeling attribute on a non-self-closing child supplies the accessible label. -->
+<button><span aria-label="Delete"></span></button>
+
 <!-- Hidden from the accessibility tree; no label needed. -->
 <button aria-hidden="true"></button>
 

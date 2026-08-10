@@ -14,6 +14,9 @@ const c = <button aria-labelledby="save-label" />;
 
 const d = <button title="Close" />;
 
+// A dynamic label value is assumed to provide a label.
+const d2 = <button aria-label={label} />;
+
 const e = <button><Icon /><span>Delete</span></button>;
 
 // Hidden from the accessibility tree; no label needed.

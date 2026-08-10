@@ -14,3 +14,15 @@
 
 <!-- A hidden child does not supply an accessible label. -->
 <button><span aria-hidden="true">Delete</span></button>
+
+<!-- Element names are matched case-insensitively in `.html` files. -->
+<BUTTON></BUTTON>
+
+<!-- A decorative image supplies no accessible name. -->
+<button><img src="close.png" alt="" /></button>
+
+<!-- Void elements supply no accessible name. -->
+<button><br /></button>
+
+<!-- A hidden input supplies no accessible name. -->
+<button><input type="hidden" /></button>
