@@ -972,8 +972,30 @@ CssRoot {
                                         CssUrlFunction {
                                             name: URL_KW@727..730 "url" [] [],
                                             l_paren_token: L_PAREN@730..731 "(" [] [],
-                                            value: CssUrlValueRaw {
-                                                value_token: CSS_URL_VALUE_RAW_LITERAL@731..750 "images/#{$name}.png" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@731..738 "images/" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@738..739 "#" [] [],
+                                                        l_curly_token: L_CURLY@739..740 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@740..741 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@741..745 "name" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@745..746 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@746..750 ".png" [] [],
+                                                    },
+                                                ],
                                             },
                                             modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@750..751 ")" [] [],
@@ -1831,8 +1853,22 @@ CssRoot {
                     0: CSS_URL_FUNCTION@727..751
                       0: URL_KW@727..730 "url" [] []
                       1: L_PAREN@730..731 "(" [] []
-                      2: CSS_URL_VALUE_RAW@731..750
-                        0: CSS_URL_VALUE_RAW_LITERAL@731..750 "images/#{$name}.png" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@731..750
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@731..750
+                          0: SCSS_URL_TEXT@731..738
+                            0: SCSS_URL_CONTENT_LITERAL@731..738 "images/" [] []
+                          1: SCSS_INTERPOLATION@738..746
+                            0: HASH@738..739 "#" [] []
+                            1: L_CURLY@739..740 "{" [] []
+                            2: SCSS_EXPRESSION@740..745
+                              0: SCSS_EXPRESSION_ITEM_LIST@740..745
+                                0: SCSS_VARIABLE@740..745
+                                  0: DOLLAR@740..741 "$" [] []
+                                  1: CSS_IDENTIFIER@741..745
+                                    0: IDENT@741..745 "name" [] []
+                            3: R_CURLY@745..746 "}" [] []
+                          2: SCSS_URL_TEXT@746..750
+                            0: SCSS_URL_CONTENT_LITERAL@746..750 ".png" [] []
                       3: CSS_URL_MODIFIER_LIST@750..750
                       4: R_PAREN@750..751 ")" [] []
               1: (empty)
