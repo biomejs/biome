@@ -7076,6 +7076,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAstroClientOnlyDirectiveValue": {
+					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAwaitThenable": {
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
@@ -11243,6 +11250,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseAtIndexOptions": {
 			"type": "object",
 			"properties": {
@@ -14911,6 +14927,16 @@
 			]
 		},
 		"UseAsConstAssertionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseAstroClientOnlyDirectiveValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroClientOnlyDirectiveValueOptions" }
+			]
+		},
+		"UseAstroClientOnlyDirectiveValueOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
