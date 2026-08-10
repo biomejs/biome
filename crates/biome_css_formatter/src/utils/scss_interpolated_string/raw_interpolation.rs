@@ -26,13 +26,13 @@ use std::borrow::Cow;
 /// The raw body delegates token tracking, suppression checks, and comment
 /// marking to the verbatim range formatter because child [`FormatNodeRule`]s
 /// do not run for preserved source text.
-pub(super) struct FormatRawScssStringInterpolation<'a> {
+pub(crate) struct FormatRawScssStringInterpolation<'a> {
     interpolation: &'a ScssInterpolation,
     quotes: ScssInterpolatedStringQuotes,
 }
 
 impl<'a> FormatRawScssStringInterpolation<'a> {
-    pub(super) fn new(
+    pub(crate) fn new(
         interpolation: &'a ScssInterpolation,
         quotes: ScssInterpolatedStringQuotes,
     ) -> Self {
