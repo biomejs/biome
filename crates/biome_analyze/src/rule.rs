@@ -15,7 +15,6 @@ use biome_diagnostics::{
 };
 use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
-use biome_string_case::StrOnlyExtension;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -512,7 +511,6 @@ impl<'a> RuleSource<'a> {
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
             Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
-            Self::Markdownlint(rule_name) => format!("https://github.com/DavidAnson/markdownlint/blob/main/doc/{}.md", rule_name.to_lowercase_cow()),
         }
     }
 

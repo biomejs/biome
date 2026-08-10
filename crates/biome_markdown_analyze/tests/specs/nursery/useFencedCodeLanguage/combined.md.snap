@@ -16,7 +16,7 @@ print(1)
 ```
 combined.md:3:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This language isn't in the list of allowed languages.
+  i This language tag isn't in the list of allowed languages.
   
     1 │ <!-- should generate diagnostics for both options -->
     2 │ 
@@ -25,7 +25,7 @@ combined.md:3:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
     4 │ print(1)
     5 │ ```
   
-  i The allowedLanguages option restricts fenced code blocks to a specific set of languages.
+  i The allowedLanguages option restricts fenced code blocks to a specific set of language tags.
   
   i Use one of the allowed languages: "js", "ts".
   
@@ -37,7 +37,7 @@ combined.md:3:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
 ```
 combined.md:3:10 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This info string contains more than just the language.
+  i This info string contains content beyond the language tag.
   
     1 │ <!-- should generate diagnostics for both options -->
     2 │ 
@@ -46,9 +46,9 @@ combined.md:3:10 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
     4 │ print(1)
     5 │ ```
   
-  i The languageOnly option requires the info string to contain nothing but the language.
+  i The languageOnly option requires the info string to contain only a language tag.
   
-  i Remove any whitespace or extra content surrounding the language.
+  i Remove metadata after the language tag.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
