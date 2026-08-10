@@ -1,3 +1,7 @@
+//! Configuration for the heading level checked by `useSingleTopLevelHeading`.
+//!
+//! The level must be between 1 and 6 and defaults to 1.
+
 use std::num::NonZeroU8;
 
 use biome_deserialize::{
@@ -17,9 +21,10 @@ pub struct UseSingleTopLevelHeadingOptions {
 }
 
 impl UseSingleTopLevelHeadingOptions {
+    /// The heading level used when no level is configured.
     pub const DEFAULT_LEVEL: NonZeroU8 = NonZeroU8::new(1).unwrap();
 
-    /// Returns [`Self::level`] if it is set. Otherwise, returns [`Self::DEFAULT_LEVEL`].
+    /// Returns the configured heading level, or the default level, as a `u8`.
     pub fn level(&self) -> u8 {
         self.level.unwrap_or(Self::DEFAULT_LEVEL).get()
     }

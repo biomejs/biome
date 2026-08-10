@@ -1,5 +1,19 @@
 use crate::{MdHeader, MdSetextHeader};
-use biome_rowan::AstNodeList;
+use biome_rowan::{AstNodeList, declare_node_union};
+
+declare_node_union! {
+    pub AnyMdHeader = MdHeader | MdSetextHeader
+}
+
+impl AnyMdHeader {
+    /// Returns the level of the header.
+    pub fn level(&self) -> usize {
+        match self {
+            Self::MdHeader(header) => header.level(),
+            Self::MdSetextHeader(header) => header.level(),
+        }
+    }
+}
 
 impl MdHeader {
     /// Returns the level, as a number, of the current header
@@ -24,7 +38,7 @@ impl MdSetextHeader {
     /// The underline determines the level: `=` is level 1, `-` is level 2.
     pub fn level(&self) -> usize {
         match self.underline_token() {
-            Ok(underline) if !underline.text().trim_start().starts_with('=') => 2,
+            Ok(underline) if !underline.text_trimmed().starts_with('=') => 2,
             _ => 1,
         }
     }

@@ -9,24 +9,28 @@ expression: level_two.md
 ## Section A
 
 # An h1, ignored under level=2
-
-## Section B
+Section B
+---------
+Content
+More content
 
 ```
 
 # Diagnostics
 ```
-level_two.md:7:1 lint/nursery/useSingleTopLevelHeading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+level_two.md:6:1 lint/nursery/useSingleTopLevelHeading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This document has more than one top-level heading.
   
     5 │ # An h1, ignored under level=2
-    6 │ 
-  > 7 │ ## Section B
-      │ ^^^^^^^^^^^^
-    8 │ 
+  > 6 │ Section B
+      │ ^^^^^^^^^
+  > 7 │ ---------
+      │ ^^^^^^^^^
+    8 │ Content
+    9 │ More content
   
-  i The first top-level heading is here.
+  i The other top-level heading is here.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 

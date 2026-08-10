@@ -24,7 +24,7 @@ nested_headings.md:5:3 lint/nursery/useSingleTopLevelHeading ━━━━━━�
       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i The first top-level heading is here.
+  i The other top-level heading is here.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 

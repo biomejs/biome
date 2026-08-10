@@ -27,7 +27,7 @@ invalid.md:5:1 lint/nursery/useSingleTopLevelHeading ━━━━━━━━━
     6 │ 
     7 │ # Three
   
-  i The first top-level heading is here.
+  i The other top-level heading is here.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
@@ -56,7 +56,7 @@ invalid.md:7:1 lint/nursery/useSingleTopLevelHeading ━━━━━━━━━
       │ ^^^^^^^
     8 │ 
   
-  i The first top-level heading is here.
+  i The other top-level heading is here.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 

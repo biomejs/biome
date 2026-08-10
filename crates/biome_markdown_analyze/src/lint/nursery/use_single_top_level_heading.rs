@@ -3,9 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_markdown_syntax::{
-    MarkdownSyntaxKind::*, MarkdownSyntaxNode, MdHeader, MdHtmlBlock, MdRoot, MdSetextHeader,
+    AnyMdHeader, MarkdownSyntaxKind::*, MdHtmlBlock, MdRoot,
 };
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOptions;
 
 declare_lint_rule! {
@@ -70,87 +70,57 @@ declare_lint_rule! {
     /// ## Another top-level section
     /// ```
     ///
-    /// :::note
-    /// This rule does not support markdownlint's `front_matter_title` option: Biome's Markdown
-    /// parser doesn't model YAML front matter, so a `title:` key can't be recognized as the
-    /// document's title.
-    /// :::
-    ///
     pub UseSingleTopLevelHeading {
         version: "next",
         name: "useSingleTopLevelHeading",
         language: "md",
         recommended: true,
-        sources: &[RuleSource::Markdownlint("MD025").inspired()],
+        sources: &[RuleSource::MarkdownLint("md025", "single-title").inspired()],
     }
-}
-
-declare_node_union! {
-    /// Any kind of Markdown heading: ATX (`# Heading`) or setext (`Heading` underlined with `=`/`-`).
-    pub(crate) AnyMdHeading = MdHeader | MdSetextHeader
-}
-
-impl AnyMdHeading {
-    fn level(&self) -> usize {
-        match self {
-            Self::MdHeader(header) => header.level(),
-            Self::MdSetextHeader(header) => header.level(),
-        }
-    }
-}
-
-pub struct UseSingleTopLevelHeadingState {
-    range: TextRange,
-    title_range: TextRange,
 }
 
 impl Rule for UseSingleTopLevelHeading {
-    type Query = Ast<MdRoot>;
-    type State = UseSingleTopLevelHeadingState;
-    type Signals = Box<[Self::State]>;
+    type Query = Ast<AnyMdHeader>;
+    type State = TextRange;
+    type Signals = Option<Self::State>;
     type Options = UseSingleTopLevelHeadingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let root = ctx.query();
+        let header = ctx.query();
         let level = ctx.options().level() as usize;
 
-        let mut matching_headings = root
-            .syntax()
-            .descendants()
-            .filter_map(AnyMdHeading::cast)
-            .filter(|heading| heading.level() == level);
-
-        let Some(title) = matching_headings.next() else {
-            return [].into();
-        };
-
-        if !is_document_title(root, &title) {
-            return [].into();
+        if header.level() != level {
+            return None;
         }
 
-        let title_range = title.range();
+        let root = ctx.root();
+        let title = root
+            .syntax()
+            .descendants()
+            .skip(1)
+            .filter_map(AnyMdHeader::cast)
+            .find(|header| header.level() == level)?;
 
-        matching_headings
-            .map(|heading| UseSingleTopLevelHeadingState {
-                range: heading.range(),
-                title_range,
-            })
-            .collect()
+        if title.syntax() == header.syntax() || !is_document_title(&root, &title) {
+            return None;
+        }
+
+        Some(title.range())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, title_range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range,
+                ctx.query().range(),
                 markup! {
                     "This document has more than one top-level heading."
                 },
             )
             .detail(
-                state.title_range,
+                *title_range,
                 markup! {
-                    "The first top-level heading is here."
+                    "The other top-level heading is here."
                 },
             )
             .note(markup! {
@@ -163,45 +133,36 @@ impl Rule for UseSingleTopLevelHeading {
     }
 }
 
-/// Mirrors markdownlint's MD025 check that the document's title is only recognized as such if
-/// nothing but non-content material precedes it: blank lines, structural containers (the ones
-/// wrapping the heading itself, e.g. a surrounding block quote or list item), and HTML comments.
-fn is_document_title(root: &MdRoot, heading: &AnyMdHeading) -> bool {
+/// Returns whether a header can serve as the document title.
+///
+/// A document title may be preceded only by blank lines, containers that contain the header, and
+/// HTML comments.
+fn is_document_title(root: &MdRoot, header: &AnyMdHeader) -> bool {
     root.syntax()
         .descendants()
-        .take_while(|node| node != heading.syntax())
-        .all(|node| is_non_content(&node, heading))
-}
-
-fn is_non_content(node: &MarkdownSyntaxNode, heading: &AnyMdHeading) -> bool {
-    match node.kind() {
-        MD_ROOT | MD_BLOCK_LIST | MD_QUOTE | MD_BULLET_LIST_ITEM | MD_ORDERED_LIST_ITEM
-        | MD_BULLET_LIST | MD_BULLET => is_ancestor_of_heading(node, heading),
-        MD_LIST_MARKER_PREFIX
-        | MD_INDENT_TOKEN_LIST
-        | MD_QUOTE_INDENT_LIST
-        | MD_NEWLINE
-        | MD_QUOTE_PREFIX
-        | MD_QUOTE_INDENT
-        | MD_INDENT_TOKEN
-        | MD_CONTINUATION_INDENT
-        | MD_HTML_CONTENT => true,
-        MD_HTML_BLOCK => MdHtmlBlock::cast(node.clone()).is_some_and(|block| is_html_comment(&block)),
-        _ => false,
-    }
-}
-
-fn is_ancestor_of_heading(node: &MarkdownSyntaxNode, heading: &AnyMdHeading) -> bool {
-    heading.syntax().ancestors().any(|ancestor| ancestor == *node)
-}
-
-/// Whether an HTML block is a comment (`<!-- ... -->`), which markdownlint treats as
-/// non-content when it precedes the document's title.
-fn is_html_comment(block: &MdHtmlBlock) -> bool {
-    block.content().is_ok_and(|content| {
-        content.value_token().is_ok_and(|token| {
-            let text = token.text_trimmed();
-            text.starts_with("<!--") && text.ends_with("-->")
+        .skip(1)
+        .take_while(|node| node != header.syntax())
+        .all(|node| match node.kind() {
+            MD_BLOCK_LIST | MD_QUOTE | MD_BULLET_LIST_ITEM | MD_ORDERED_LIST_ITEM
+            | MD_BULLET_LIST | MD_BULLET => header
+                .syntax()
+                .ancestors()
+                .any(|ancestor| ancestor == node),
+            MD_LIST_MARKER_PREFIX
+            | MD_INDENT_TOKEN_LIST
+            | MD_QUOTE_INDENT_LIST
+            | MD_NEWLINE
+            | MD_QUOTE_PREFIX
+            | MD_QUOTE_INDENT
+            | MD_INDENT_TOKEN
+            | MD_CONTINUATION_INDENT => true,
+            MD_HTML_CONTENT => node
+                .parent()
+                .and_then(MdHtmlBlock::cast)
+                .is_some_and(|block| block.is_html_comment()),
+            MD_HTML_BLOCK => {
+                MdHtmlBlock::cast(node.clone()).is_some_and(|block| block.is_html_comment())
+            }
+            _ => false,
         })
-    })
 }

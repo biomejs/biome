@@ -25,7 +25,7 @@ html_comment_before_title.md:6:1 lint/nursery/useSingleTopLevelHeading ━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
   
-  i The first top-level heading is here.
+  i The other top-level heading is here.
   
     2 │ <!-- another leading comment -->
     3 │ 
