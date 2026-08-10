@@ -24,7 +24,7 @@ MdRoot {
             l_fence: TRIPLE_TILDE@0..3 "~~~" [] [],
             code_list: MdCodeNameList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@3..24 " lang`with-backticks`" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@3..24 "lang`with-backticks`" [Whitespace(" ")] [],
                 },
             ],
             content: MdInlineItemList [
@@ -54,7 +54,7 @@ MdRoot {
       1: TRIPLE_TILDE@0..3 "~~~" [] []
       2: MD_CODE_NAME_LIST@3..24
         0: MD_TEXTUAL@3..24
-          0: MD_TEXTUAL_LITERAL@3..24 " lang`with-backticks`" [] []
+          0: MD_TEXTUAL_LITERAL@3..24 "lang`with-backticks`" [Whitespace(" ")] []
       3: MD_INLINE_ITEM_LIST@24..38
         0: MD_CODE_CONTENT@24..38
           0: MD_CODE_LITERAL@24..38 "\nfn main() {}\n" [] []
