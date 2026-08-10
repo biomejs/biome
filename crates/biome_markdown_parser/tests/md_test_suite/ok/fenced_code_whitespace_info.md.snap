@@ -10,6 +10,18 @@ expression: snapshot
 code
 ```
 
+~~~	
+code
+~~~
+
+```  js  
+code
+```
+
+~~~	python	
+code
+~~~
+
 ```
 
 
@@ -22,14 +34,10 @@ MdRoot {
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
             l_fence: TRIPLE_BACKTICK@0..3 "```" [] [],
-            code_list: MdCodeNameList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@3..6 "   " [] [],
-                },
-            ],
+            code_list: MdCodeNameList [],
             content: MdInlineItemList [
                 MdCodeContent {
-                    value_token: MD_CODE_LITERAL@6..12 "\ncode\n" [] [],
+                    value_token: MD_CODE_LITERAL@3..12 "\ncode\n" [Whitespace("   ")] [],
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
@@ -38,30 +46,133 @@ MdRoot {
         MdNewline {
             value_token: NEWLINE@15..16 "\n" [] [],
         },
+        MdNewline {
+            value_token: NEWLINE@16..17 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
+            l_fence: TRIPLE_TILDE@17..20 "~~~" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@20..27 "\ncode\n" [Whitespace("\t")] [],
+                },
+            ],
+            r_fence_indent: MdIndentTokenList [],
+            r_fence: TRIPLE_TILDE@27..30 "~~~" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@30..31 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
+            l_fence: TRIPLE_BACKTICK@32..35 "```" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..39 "js" [Whitespace("  ")] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@39..47 "\ncode\n" [Whitespace("  ")] [],
+                },
+            ],
+            r_fence_indent: MdIndentTokenList [],
+            r_fence: TRIPLE_BACKTICK@47..50 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@50..51 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@51..52 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
+            l_fence: TRIPLE_TILDE@52..55 "~~~" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@55..62 "python" [Whitespace("\t")] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@62..69 "\ncode\n" [Whitespace("\t")] [],
+                },
+            ],
+            r_fence_indent: MdIndentTokenList [],
+            r_fence: TRIPLE_TILDE@69..72 "~~~" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@72..73 "\n" [] [],
+        },
     ],
-    eof_token: EOF@16..16 "" [] [],
+    eof_token: EOF@73..73 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_ROOT@0..16
+0: MD_ROOT@0..73
   0: (empty)
-  1: MD_BLOCK_LIST@0..16
+  1: MD_BLOCK_LIST@0..73
     0: MD_FENCED_CODE_BLOCK@0..15
       0: MD_INDENT_TOKEN_LIST@0..0
       1: TRIPLE_BACKTICK@0..3 "```" [] []
-      2: MD_CODE_NAME_LIST@3..6
-        0: MD_TEXTUAL@3..6
-          0: MD_TEXTUAL_LITERAL@3..6 "   " [] []
-      3: MD_INLINE_ITEM_LIST@6..12
-        0: MD_CODE_CONTENT@6..12
-          0: MD_CODE_LITERAL@6..12 "\ncode\n" [] []
+      2: MD_CODE_NAME_LIST@3..3
+      3: MD_INLINE_ITEM_LIST@3..12
+        0: MD_CODE_CONTENT@3..12
+          0: MD_CODE_LITERAL@3..12 "\ncode\n" [Whitespace("   ")] []
       4: MD_INDENT_TOKEN_LIST@12..12
       5: TRIPLE_BACKTICK@12..15 "```" [] []
     1: MD_NEWLINE@15..16
       0: NEWLINE@15..16 "\n" [] []
-  2: EOF@16..16 "" [] []
+    2: MD_NEWLINE@16..17
+      0: NEWLINE@16..17 "\n" [] []
+    3: MD_FENCED_CODE_BLOCK@17..30
+      0: MD_INDENT_TOKEN_LIST@17..17
+      1: TRIPLE_TILDE@17..20 "~~~" [] []
+      2: MD_CODE_NAME_LIST@20..20
+      3: MD_INLINE_ITEM_LIST@20..27
+        0: MD_CODE_CONTENT@20..27
+          0: MD_CODE_LITERAL@20..27 "\ncode\n" [Whitespace("\t")] []
+      4: MD_INDENT_TOKEN_LIST@27..27
+      5: TRIPLE_TILDE@27..30 "~~~" [] []
+    4: MD_NEWLINE@30..31
+      0: NEWLINE@30..31 "\n" [] []
+    5: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+    6: MD_FENCED_CODE_BLOCK@32..50
+      0: MD_INDENT_TOKEN_LIST@32..32
+      1: TRIPLE_BACKTICK@32..35 "```" [] []
+      2: MD_CODE_NAME_LIST@35..39
+        0: MD_TEXTUAL@35..39
+          0: MD_TEXTUAL_LITERAL@35..39 "js" [Whitespace("  ")] []
+      3: MD_INLINE_ITEM_LIST@39..47
+        0: MD_CODE_CONTENT@39..47
+          0: MD_CODE_LITERAL@39..47 "\ncode\n" [Whitespace("  ")] []
+      4: MD_INDENT_TOKEN_LIST@47..47
+      5: TRIPLE_BACKTICK@47..50 "```" [] []
+    7: MD_NEWLINE@50..51
+      0: NEWLINE@50..51 "\n" [] []
+    8: MD_NEWLINE@51..52
+      0: NEWLINE@51..52 "\n" [] []
+    9: MD_FENCED_CODE_BLOCK@52..72
+      0: MD_INDENT_TOKEN_LIST@52..52
+      1: TRIPLE_TILDE@52..55 "~~~" [] []
+      2: MD_CODE_NAME_LIST@55..62
+        0: MD_TEXTUAL@55..62
+          0: MD_TEXTUAL_LITERAL@55..62 "python" [Whitespace("\t")] []
+      3: MD_INLINE_ITEM_LIST@62..69
+        0: MD_CODE_CONTENT@62..69
+          0: MD_CODE_LITERAL@62..69 "\ncode\n" [Whitespace("\t")] []
+      4: MD_INDENT_TOKEN_LIST@69..69
+      5: TRIPLE_TILDE@69..72 "~~~" [] []
+    10: MD_NEWLINE@72..73
+      0: NEWLINE@72..73 "\n" [] []
+  2: EOF@73..73 "" [] []
 
 ```

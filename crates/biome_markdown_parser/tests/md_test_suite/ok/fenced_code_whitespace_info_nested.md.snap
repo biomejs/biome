@@ -35,14 +35,10 @@ MdRoot {
                 MdFencedCodeBlock {
                     indent: MdIndentTokenList [],
                     l_fence: TRIPLE_BACKTICK@2..5 "```" [] [],
-                    code_list: MdCodeNameList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@5..8 "   " [] [],
-                        },
-                    ],
+                    code_list: MdCodeNameList [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@8..9 "\n" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@5..9 "\n" [Whitespace("   ")] [],
                         },
                         MdQuotePrefix {
                             pre_marker_indent: MdQuoteIndentList [],
@@ -105,14 +101,10 @@ MdRoot {
                         MdFencedCodeBlock {
                             indent: MdIndentTokenList [],
                             l_fence: TRIPLE_BACKTICK@40..43 "```" [] [],
-                            code_list: MdCodeNameList [
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@43..46 "   " [] [],
-                                },
-                            ],
+                            code_list: MdCodeNameList [],
                             content: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@43..47 "\n" [Whitespace("   ")] [],
                                 },
                                 MdIndentToken {
                                     md_indent_char_token: MD_INDENT_CHAR@47..49 "  " [] [],
@@ -158,12 +150,10 @@ MdRoot {
         0: MD_FENCED_CODE_BLOCK@2..23
           0: MD_INDENT_TOKEN_LIST@2..2
           1: TRIPLE_BACKTICK@2..5 "```" [] []
-          2: MD_CODE_NAME_LIST@5..8
-            0: MD_TEXTUAL@5..8
-              0: MD_TEXTUAL_LITERAL@5..8 "   " [] []
-          3: MD_INLINE_ITEM_LIST@8..20
-            0: MD_TEXTUAL@8..9
-              0: MD_TEXTUAL_LITERAL@8..9 "\n" [] []
+          2: MD_CODE_NAME_LIST@5..5
+          3: MD_INLINE_ITEM_LIST@5..20
+            0: MD_TEXTUAL@5..9
+              0: MD_TEXTUAL_LITERAL@5..9 "\n" [Whitespace("   ")] []
             1: MD_QUOTE_PREFIX@9..11
               0: MD_QUOTE_INDENT_LIST@9..9
               1: R_ANGLE@9..10 ">" [] []
@@ -206,12 +196,10 @@ MdRoot {
             3: MD_FENCED_CODE_BLOCK@40..61
               0: MD_INDENT_TOKEN_LIST@40..40
               1: TRIPLE_BACKTICK@40..43 "```" [] []
-              2: MD_CODE_NAME_LIST@43..46
-                0: MD_TEXTUAL@43..46
-                  0: MD_TEXTUAL_LITERAL@43..46 "   " [] []
-              3: MD_INLINE_ITEM_LIST@46..56
-                0: MD_TEXTUAL@46..47
-                  0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
+              2: MD_CODE_NAME_LIST@43..43
+              3: MD_INLINE_ITEM_LIST@43..56
+                0: MD_TEXTUAL@43..47
+                  0: MD_TEXTUAL_LITERAL@43..47 "\n" [Whitespace("   ")] []
                 1: MD_INDENT_TOKEN@47..49
                   0: MD_INDENT_CHAR@47..49 "  " [] []
                 2: MD_TEXTUAL@49..55
