@@ -371,7 +371,7 @@ fn is_sync_only_function_boundary(kind: JsSyntaxKind) -> bool {
 
 /// Returns `true` if the node kind is any function-like scope boundary.
 pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
-    AnyFunctionLike::can_cast(kind) || is_sync_only_function_boundary(kind)
+    biome_js_syntax::is_function_boundary(kind)
 }
 
 #[cfg(test)]

@@ -1,12 +1,27 @@
 use crate::{
     AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsCallExpression,
     JsConstructorClassMember, JsMethodClassMember, JsMethodObjectMember, JsParenthesizedExpression,
-    JsStatementList, JsSyntaxToken,
+    JsStatementList, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
 
 declare_node_union! {
     pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember | JsConstructorClassMember
+}
+
+/// Returns `true` if the node kind is a function-like scope boundary: a
+/// function, method, constructor, getter, setter, or static initialization
+/// block.
+pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
+    AnyFunctionLike::can_cast(kind)
+        || matches!(
+            kind,
+            JsSyntaxKind::JS_GETTER_CLASS_MEMBER
+                | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+                | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
+                | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
+                | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
+        )
 }
 
 impl AnyJsFunction {
