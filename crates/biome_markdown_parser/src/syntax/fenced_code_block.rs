@@ -224,21 +224,21 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
 /// Grammar: MdCodeNameList = MdTextual*
 ///
 /// The language name is on the same line as the opening fence.
-/// If the current token has a preceding line break or is NEWLINE, the code block has no language.
+/// If the opening fence ends at a newline or EOF, the code block has no language.
 fn parse_code_name_list(p: &mut MarkdownParser) {
     // Relexing
     p.re_lex(MarkdownReLexContext::CodeInfoString);
 
     let m = p.start();
 
-    // If the current token is already on a new line, there's no language name
-    if p.at_inline_end() {
+    // The info string ends at the physical end of the opening-fence line.
+    if p.at(NEWLINE) || p.at(T![EOF]) {
         m.complete(p, MD_CODE_NAME_LIST);
         return;
     }
 
     // Parse language identifiers until we hit end of line
-    while !p.at_inline_end() {
+    while !p.at(NEWLINE) && !p.at(T![EOF]) {
         // Parse each token as textual content
         let text_m = p.start();
         p.bump_remap(MD_TEXTUAL_LITERAL);

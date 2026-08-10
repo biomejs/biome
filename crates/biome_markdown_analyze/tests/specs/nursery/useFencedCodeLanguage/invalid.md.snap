@@ -33,7 +33,7 @@ unterminated fence
 ```
 invalid.md:3:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This fenced code block has no language specifier.
+  i This fenced code block is missing a language tag.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
@@ -42,9 +42,9 @@ invalid.md:3:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━
     4 │ console.log(1)
     5 │ ```
   
-  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  i Renderers use language tags to select syntax highlighting for supported languages.
   
-  i Add a language after the opening fence, such as js, or use text for plain text.
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -54,7 +54,7 @@ invalid.md:3:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━
 ```
 invalid.md:7:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This fenced code block has no language specifier.
+  i This fenced code block is missing a language tag.
   
     5 │ ```
     6 │ 
@@ -63,9 +63,9 @@ invalid.md:7:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━
     8 │ print(1)
     9 │ ~~~
   
-  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  i Renderers use language tags to select syntax highlighting for supported languages.
   
-  i Add a language after the opening fence, such as js, or use text for plain text.
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -75,7 +75,7 @@ invalid.md:7:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━
 ```
 invalid.md:13:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This fenced code block has no language specifier.
+  i This fenced code block is missing a language tag.
   
     11 │ - list item
     12 │ 
@@ -84,9 +84,9 @@ invalid.md:13:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
     14 │   const a = 1;
     15 │   ```
   
-  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  i Renderers use language tags to select syntax highlighting for supported languages.
   
-  i Add a language after the opening fence, such as js, or use text for plain text.
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -96,7 +96,7 @@ invalid.md:13:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
 ```
 invalid.md:17:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This fenced code block has no language specifier.
+  i This fenced code block is missing a language tag.
   
     15 │   ```
     16 │ 
@@ -105,9 +105,9 @@ invalid.md:17:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
     18 │ > fn main() {}
     19 │ > ```
   
-  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  i Renderers use language tags to select syntax highlighting for supported languages.
   
-  i Add a language after the opening fence, such as js, or use text for plain text.
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -117,7 +117,7 @@ invalid.md:17:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
 ```
 invalid.md:21:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This fenced code block has no language specifier.
+  i This fenced code block is missing a language tag.
   
     19 │ > ```
     20 │ 
@@ -126,9 +126,9 @@ invalid.md:21:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━�
     22 │ unterminated fence
     23 │ 
   
-  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  i Renderers use language tags to select syntax highlighting for supported languages.
   
-  i Add a language after the opening fence, such as js, or use text for plain text.
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
