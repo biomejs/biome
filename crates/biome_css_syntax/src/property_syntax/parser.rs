@@ -1,9 +1,12 @@
-use crate::data::{
+use super::data::{
     PropertySyntax, PropertySyntaxComponent, PropertySyntaxComponentName, PropertySyntaxErrorKind,
     PropertySyntaxMultiplier, PropertySyntaxParseDiagnostic, PropertySyntaxResult,
     PropertySyntaxType, RESERVED_CUSTOM_IDENTIFIERS,
 };
-use biome_css_syntax::{CssString, is_css_newline_byte, is_css_whitespace_byte};
+use crate::{
+    CssString,
+    css_escape::{DecodedCharacter, DecodedCursor, is_css_newline, is_css_whitespace},
+};
 use biome_rowan::{AstNode, TextRange, TextSize};
 use biome_unicode_table::{
     Dispatch::{DIG, IDT, MIN, ZER},
@@ -44,141 +47,6 @@ fn invalid_css_string(range: TextRange) -> PropertySyntaxResult {
         PropertySyntaxErrorKind::ExpectedString,
         range,
     ))
-}
-
-fn decode_css_code_point(value: u32) -> char {
-    if value == 0 || value > 0x0010_ffff || (0xd800..=0xdfff).contains(&value) {
-        '\u{fffd}'
-    } else {
-        // SAFETY: The invalid scalar value ranges are rejected above.
-        char::from_u32(value).expect("the escape should decode to a character")
-    }
-}
-
-#[derive(Clone, Copy)]
-struct DecodedCharacter {
-    value: char,
-    source_start: usize,
-    source_end: usize,
-}
-
-#[derive(Clone)]
-struct DecodedCursor<'source> {
-    source: &'source str,
-    source_start: TextSize,
-    position: usize,
-    decode_css_escapes: bool,
-}
-
-impl<'source> DecodedCursor<'source> {
-    #[cfg(test)]
-    fn new(source: &'source str, source_start: TextSize) -> Self {
-        Self {
-            source,
-            source_start,
-            position: 0,
-            decode_css_escapes: false,
-        }
-    }
-
-    fn new_css_string(source: &'source str, source_start: TextSize) -> Self {
-        Self {
-            source,
-            source_start,
-            position: 0,
-            decode_css_escapes: true,
-        }
-    }
-
-    fn source_range(&self, start: usize, end: usize) -> TextRange {
-        TextRange::new(
-            self.source_start + TextSize::from(start as u32),
-            self.source_start + TextSize::from(end as u32),
-        )
-    }
-}
-
-impl Iterator for DecodedCursor<'_> {
-    type Item = DecodedCharacter;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            let source_start = self.position;
-            let character = self.source.get(self.position..)?.chars().next()?;
-            self.position += character.len_utf8();
-
-            if !self.decode_css_escapes || character != '\\' {
-                return Some(DecodedCharacter {
-                    value: if self.decode_css_escapes && character == '\0' {
-                        '\u{fffd}'
-                    } else {
-                        character
-                    },
-                    source_start,
-                    source_end: self.position,
-                });
-            }
-
-            let Some(escaped) = self.source.get(self.position..)?.chars().next() else {
-                return Some(DecodedCharacter {
-                    value: '\u{fffd}',
-                    source_start,
-                    source_end: self.position,
-                });
-            };
-            if is_css_newline(escaped) {
-                self.position += escaped.len_utf8();
-                if escaped == '\r'
-                    && self
-                        .source
-                        .get(self.position..)
-                        .is_some_and(|rest| rest.starts_with('\n'))
-                {
-                    self.position += 1;
-                }
-                continue;
-            }
-
-            let value = if escaped.is_ascii_hexdigit() {
-                let mut code_point = 0_u32;
-                let mut digits = 0;
-                while digits < 6 {
-                    let Some(character) = self.source.get(self.position..)?.chars().next() else {
-                        break;
-                    };
-                    let Some(digit) = character.to_digit(16) else {
-                        break;
-                    };
-                    code_point = code_point * 16 + digit;
-                    self.position += character.len_utf8();
-                    digits += 1;
-                }
-                if let Some(whitespace) = self.source.get(self.position..)?.chars().next()
-                    && is_css_whitespace(whitespace)
-                {
-                    self.position += whitespace.len_utf8();
-                    if whitespace == '\r'
-                        && self
-                            .source
-                            .get(self.position..)
-                            .is_some_and(|rest| rest.starts_with('\n'))
-                    {
-                        self.position += 1;
-                    }
-                }
-                decode_css_code_point(code_point)
-            } else {
-                self.position += escaped.len_utf8();
-                escaped
-            };
-
-            return Some(DecodedCharacter {
-                value,
-                source_start,
-                source_end: self.position,
-            });
-        }
-    }
 }
 
 struct Encoder<'source> {
@@ -576,14 +444,6 @@ impl<'source> Encoder<'source> {
     ) -> PropertySyntaxParseDiagnostic {
         PropertySyntaxParseDiagnostic::new(kind, self.range(start, end))
     }
-}
-
-fn is_css_whitespace(character: char) -> bool {
-    character.is_ascii() && is_css_whitespace_byte(character as u8)
-}
-
-fn is_css_newline(character: char) -> bool {
-    character.is_ascii() && is_css_newline_byte(character as u8)
 }
 
 fn is_css_identifier_non_ascii(character: char) -> bool {

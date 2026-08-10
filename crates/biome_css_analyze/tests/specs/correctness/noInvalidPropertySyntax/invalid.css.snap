@@ -73,6 +73,10 @@ invalid.css:3:2 syntax/correctness/noInvalidPropertySyntax ━━━━━━━
     6 │ 
     7 │ @property --empty {
   
+  i Without a valid syntax descriptor, the browser does not register the custom property.
+  
+  i Add a syntax descriptor that describes the accepted values.
+  
 
 ```
 

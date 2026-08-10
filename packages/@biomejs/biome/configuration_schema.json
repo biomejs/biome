@@ -4542,6 +4542,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidPropertyInitValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidPropertyInitValueOptions" }
+			]
+		},
+		"NoInvalidPropertyInitValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidUseBeforeDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6789,6 +6799,13 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidPropertyInitValue": {
+					"description": "Checks that the initial-value of an @property rule follows the value format declared by its syntax.\nSee https://biomejs.dev/linter/rules/no-invalid-property-init-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidPropertyInitValueConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9351,6 +9368,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoInvalidPositionAtImportRuleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInvalidPropertyInitValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidPropertyInitValueOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

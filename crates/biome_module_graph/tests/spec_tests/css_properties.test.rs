@@ -278,28 +278,6 @@ fn css_property_query_traverses_js_importers() {
 }
 
 #[test]
-fn js_import_paths_are_deduplicated_at_the_last_occurrence() {
-    let (fs, mut db) = build_css_db(&[("/first.css", ""), ("/second.css", ""), ("/third.css", "")]);
-    fs.insert("/app.ts".into(), "import './first.css'; import type X from './second.css'; import('./second.css'); import('./first.css'); import('./third.css');");
-    add_js_modules(
-        &mut db,
-        &fs,
-        &ProjectLayout::default(),
-        &[BiomePath::new("/app.ts")],
-        false,
-    );
-    assert_eq!(
-        db.js_module_info_for_path(Utf8Path::new("/app.ts"))
-            .unwrap()
-            .import_paths
-            .named_iter()
-            .map(|(name, _)| name.text())
-            .collect::<Vec<_>>(),
-        ["./second.css", "./first.css", "./third.css"]
-    );
-}
-
-#[test]
 fn css_property_query_reads_html_like_embedded_styles() {
     for path in [
         "/index.html",

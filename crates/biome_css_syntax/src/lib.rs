@@ -2,20 +2,26 @@
 
 #[macro_use]
 mod generated;
+mod css_escape;
+mod dimension_ext;
 mod import_ext;
+pub mod keywords;
 mod number_ext;
 mod property_ext;
+pub mod property_syntax;
 mod scss_ext;
 pub mod selector_ext;
 pub mod stmt_ext;
 mod string_ext;
 mod syntax_node;
+mod value_ext;
 mod whitespace_ext;
 
 pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
+pub use css_escape::decode_css_identifier;
 pub use number_ext::{CssNumberScanOptions, scan_css_number};
 pub use property_ext::{CssGridTemplateProperty, css_grid_template_property};
 pub use scss_ext::{

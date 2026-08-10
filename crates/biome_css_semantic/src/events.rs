@@ -1,10 +1,12 @@
 use biome_css_syntax::{
     AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
     AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
-    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssSyntaxKind::*,
-};
-use biome_property_codec::{
-    PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule,
+    CssSyntaxKind::*,
+    decode_css_identifier,
+    property_syntax::{
+        PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
+    },
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -252,11 +254,9 @@ impl SemanticEventExtractor {
                 && let Ok(prop_name) = prop.name()
             {
                 let prop_name = prop_name.to_trimmed_string();
+                let prop_name = decode_css_identifier(&prop_name);
                 if prop_name.eq_ignore_ascii_case("initial-value") {
-                    let Ok(value) = prop.value() else {
-                        continue;
-                    };
-                    initial_value = Some(match value {
+                    initial_value = prop.value().ok().map(|value| match value {
                         AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(value) => {
                             CssPropertyInitialValueKind::from(value)
                         }
@@ -268,10 +268,10 @@ impl SemanticEventExtractor {
                         }
                     });
                 } else if prop_name.eq_ignore_ascii_case("syntax") {
-                    let Ok(value) = prop.value() else {
-                        continue;
+                    syntax = match prop.value() {
+                        Ok(value) => parse_property_syntax(value),
+                        Err(_) => invalid_property_syntax(prop.range()),
                     };
-                    syntax = parse_property_syntax(value);
                 } else if prop_name.eq_ignore_ascii_case("inherits") {
                     let Ok(value) = prop.value() else {
                         continue;

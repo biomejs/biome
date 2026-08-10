@@ -34,12 +34,15 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
 #[cfg(test)]
 mod tests {
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_languages::CssFileSource;
-    use biome_property_codec::{
-        PropertySyntax, PropertySyntaxComponentName, PropertySyntaxErrorKind, PropertySyntaxResult,
-        PropertySyntaxType,
+    use biome_css_syntax::{
+        CssPropertyAtRule,
+        property_syntax::{
+            PropertySyntax, PropertySyntaxComponentName, PropertySyntaxErrorKind,
+            PropertySyntaxResult, PropertySyntaxType,
+        },
     };
-    use biome_rowan::TextRange;
+    use biome_languages::CssFileSource;
+    use biome_rowan::{AstNode, TextRange, TextSize};
 
     #[test]
     fn test_simple_ruleset() {
@@ -303,16 +306,28 @@ mod tests {
 @property --unquoted {
   syntax: color;
   inherits: yes;
+}
+@property --invalid-last {
+  syntax: "<length>";
+  syntax:;
+  inherits: true;
 }"#,
             CssFileSource::css(),
             CssParserOptions::default(),
         );
 
-        let model = super::semantic_model(&parse.tree());
+        let root = parse.tree();
+        let rules = root
+            .syntax()
+            .descendants()
+            .filter_map(CssPropertyAtRule::cast)
+            .collect::<Vec<_>>();
+        let model = super::semantic_model(&root);
         let variables = model.global_custom_variables();
-        let invalid = variables.get("--invalid").unwrap().at_property().unwrap();
-        let missing = variables.get("--missing").unwrap().at_property().unwrap();
-        let unquoted = variables.get("--unquoted").unwrap().at_property().unwrap();
+        let invalid = variables.at_property_by_range(rules[0].range()).unwrap();
+        let missing = variables.at_property_by_range(rules[1].range()).unwrap();
+        let unquoted = variables.at_property_by_range(rules[2].range()).unwrap();
+        let invalid_last = variables.at_property_by_range(rules[3].range()).unwrap();
 
         let PropertySyntaxResult::Error(diagnostic) = invalid.syntax() else {
             panic!("expected invalid syntax");
@@ -321,6 +336,10 @@ mod tests {
         assert_eq!(missing.syntax(), &PropertySyntaxResult::Missing);
         let PropertySyntaxResult::Error(diagnostic) = unquoted.syntax() else {
             panic!("expected a string diagnostic, got {:#?}", unquoted.syntax());
+        };
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedString);
+        let PropertySyntaxResult::Error(diagnostic) = invalid_last.syntax() else {
+            panic!("expected the final syntax descriptor to be invalid");
         };
         assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedString);
         assert_eq!(unquoted.inherits(), None);
@@ -353,10 +372,18 @@ or>";
 }"#;
         let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
 
-        let model = super::semantic_model(&parse.tree());
+        let root = parse.tree();
+        let rules = root
+            .syntax()
+            .descendants()
+            .filter_map(CssPropertyAtRule::cast)
+            .collect::<Vec<_>>();
+        let model = super::semantic_model(&root);
         let variables = model.global_custom_variables();
-        for name in ["--escaped", "--continued"] {
-            let at_property = variables.get(name).unwrap().at_property().unwrap();
+        for (index, name) in ["--escaped", "--continued"].into_iter().enumerate() {
+            let at_property = variables
+                .at_property_by_range(rules[index].range())
+                .unwrap();
             let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
                 at_property.syntax()
             else {
@@ -368,7 +395,7 @@ or>";
             );
         }
 
-        let escaped = variables.get("--escaped").unwrap().at_property().unwrap();
+        let escaped = variables.at_property_by_range(rules[0].range()).unwrap();
         let PropertySyntaxResult::Value(PropertySyntax::Components(components)) = escaped.syntax()
         else {
             unreachable!();
@@ -380,11 +407,7 @@ or>";
             TextRange::new(start.into(), end.into())
         );
 
-        let invalid = variables
-            .get("--invalid-escaped")
-            .unwrap()
-            .at_property()
-            .unwrap();
+        let invalid = variables.at_property_by_range(rules[2].range()).unwrap();
         let PropertySyntaxResult::Error(diagnostic) = invalid.syntax() else {
             panic!("expected invalid escaped syntax");
         };
@@ -393,17 +416,13 @@ or>";
         assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
         assert_eq!(diagnostic.range(), TextRange::new(start.into(), end.into()));
 
-        let empty = variables.get("--empty").unwrap().at_property().unwrap();
+        let empty = variables.at_property_by_range(rules[3].range()).unwrap();
         let PropertySyntaxResult::Error(diagnostic) = empty.syntax() else {
             panic!("expected empty syntax");
         };
         assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::Empty);
 
-        let identifier = variables
-            .get("--identifier")
-            .unwrap()
-            .at_property()
-            .unwrap();
+        let identifier = variables.at_property_by_range(rules[4].range()).unwrap();
         let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
             identifier.syntax()
         else {
@@ -439,7 +458,7 @@ or>";
     }
 
     #[test]
-    fn test_last_at_property_rule_wins() {
+    fn test_last_valid_at_property_rule_wins() {
         let parse = parse_css(
             r#"@property --color {
   syntax: "<color>";
@@ -454,19 +473,129 @@ or>";
             CssParserOptions::default(),
         );
 
-        let model = super::semantic_model(&parse.tree());
+        let root = parse.tree();
+        let rules = root
+            .syntax()
+            .descendants()
+            .filter_map(CssPropertyAtRule::cast)
+            .collect::<Vec<_>>();
+        let model = super::semantic_model(&root);
         let at_property = model
             .global_custom_variables()
             .get("--color")
             .unwrap()
             .at_property()
             .unwrap();
-        let PropertySyntaxResult::Error(diagnostic) = at_property.syntax() else {
-            panic!("expected the last authored rule");
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
+            at_property.syntax()
+        else {
+            panic!("expected the last valid rule");
         };
 
-        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
+        assert_eq!(
+            components[0].name,
+            PropertySyntaxComponentName::Type(PropertySyntaxType::Color)
+        );
         assert_eq!(model.global_custom_variables().at_properties().count(), 1);
+        let invalid = model
+            .global_custom_variables()
+            .at_property_by_range(rules[1].range())
+            .unwrap();
+        let PropertySyntaxResult::Error(diagnostic) = invalid.syntax() else {
+            panic!("expected the authored invalid rule");
+        };
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
+    }
+
+    #[test]
+    fn test_at_property_registration_requires_valid_descriptors() {
+        let parse = parse_css(
+            r#"@property --missing-syntax { inherits: true; }
+@property --invalid-syntax { syntax: "<unknown>"; inherits: true; }
+@property --missing-inherits { syntax: "*"; }
+@property --invalid-inherits { syntax: "*"; inherits: yes; }
+@property --missing-initial { syntax: "<length>"; inherits: true; }
+@property --universal { syntax: "*"; inherits: false; }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let variables = model.global_custom_variables();
+        for name in [
+            "--missing-syntax",
+            "--invalid-syntax",
+            "--missing-inherits",
+            "--invalid-inherits",
+            "--missing-initial",
+        ] {
+            let variable = variables.get(name).unwrap();
+            assert!(!variable.is_at_property(), "{name}");
+            assert!(variable.at_property().is_none(), "{name}");
+        }
+        assert!(variables.get("--universal").unwrap().is_at_property());
+        assert_eq!(variables.at_properties().count(), 1);
+    }
+
+    #[test]
+    fn test_mismatched_initial_value_does_not_hide_valid_registration() {
+        let parse = parse_css(
+            r#"@property --value {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: red;
+}
+@property --value {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: red;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let property = model
+            .global_custom_variables()
+            .get("--value")
+            .unwrap()
+            .at_property()
+            .unwrap();
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) = property.syntax()
+        else {
+            panic!("expected the valid color registration");
+        };
+        assert_eq!(
+            components[0].name,
+            PropertySyntaxComponentName::Type(PropertySyntaxType::Color)
+        );
+    }
+
+    #[test]
+    fn test_context_dependent_initial_value_does_not_hide_valid_registration() {
+        let parse = parse_css(
+            r#"@property --value {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 10px;
+}
+@property --value {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 3em;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let property = model
+            .global_custom_variables()
+            .get("--value")
+            .unwrap()
+            .at_property()
+            .unwrap();
+        assert!(property.range().end() < TextSize::from(100));
     }
 
     #[test]

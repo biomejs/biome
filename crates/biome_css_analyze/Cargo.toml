@@ -31,7 +31,6 @@ biome_diagnostics        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_css"] }
 biome_module_graph       = { workspace = true }
 biome_project_layout     = { workspace = true }
-biome_property_codec     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
