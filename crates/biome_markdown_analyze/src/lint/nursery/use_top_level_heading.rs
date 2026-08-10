@@ -9,14 +9,14 @@ use biome_rule_options::use_top_level_heading::UseTopLevelHeadingOptions;
 declare_lint_rule! {
     /// Require Markdown documents to start with a top-level heading.
     ///
-    /// Enforces the first meaningful block in the document to be an h1 heading,
-    /// either ATX (`# Heading`) or setext level 1 (`Heading` followed by `===`).
+    /// Requires the first block in the document to be a level-1 heading,
+    /// either ATX (`# Heading`) or setext (`Heading` followed by `===`).
     ///
     /// Leading HTML comments used as file preamble are ignored when determining
-    /// the first meaningful block.
+    /// the first block.
     ///
-    /// The rule does not report when the first meaningful block is an HTML block
-    /// or a thematic break block.
+    /// The rule does not report when the first block is an HTML block or a thematic break.
+    /// HTML blocks are permitted because some projects use HTML markup for their heading, especially in READMEs.
     ///
     /// ## Examples
     ///
@@ -104,7 +104,7 @@ impl Rule for UseTopLevelHeading {
                 },
             )
             .note(markup! {
-                "The first meaningful block should be a top-level heading (h1) so readers and tools can identify the document title. Add a "<Emphasis>"# Heading"</Emphasis>" (or a level-1 setext heading) to the start of the document."
+                "The document should start with a top-level heading (h1) so readers and tools can identify its title. Add a "<Emphasis>"# Heading"</Emphasis>" (or a level-1 setext heading) at the start of the document."
             }),
         )
     }
