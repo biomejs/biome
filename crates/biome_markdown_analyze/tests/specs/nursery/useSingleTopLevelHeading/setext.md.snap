@@ -28,7 +28,7 @@ setext.md:6:1 lint/nursery/useSingleTopLevelHeading ━━━━━━━━━�
       │ ^^^^^^^^^^^^^
     8 │ 
   
-  i The first top-level heading is here.
+  i The other top-level heading is here.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
