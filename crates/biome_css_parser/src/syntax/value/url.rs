@@ -92,20 +92,11 @@ pub(crate) fn parse_url_function_with_context(
         // Keep plain function heads on regular tokenization so `src(var(--foo))`
         // and similar cases do not get folded into a raw URL literal.
         p.bump(T!['(']);
-    } else if context.is_full_scss_parsing_allowed() {
-        // Full SCSS mode needs URL-body classification so interpolation-based
-        // function names such as `url(#{name}(bar))` survive lexing.
-        p.bump_with_context(
-            T!['('],
-            CssLexContext::UrlBody {
-                scss_exclusive_syntax_allowed: true,
-            },
-        );
     } else {
-        // Plain CSS keeps the cheaper raw-URL path. CSS-only SCSS diagnostics
-        // for interpolation-shaped bodies are not worth paying this cost on
-        // every `url(...)`.
-        p.bump_with_context(T!['('], CssLexContext::UrlRawValue);
+        let lex_context = p
+            .source()
+            .url_body_lex_context(context.is_full_scss_parsing_allowed());
+        p.bump_with_context(T!['('], lex_context);
     }
 
     parse_url_value_with_context(p, context).ok();
