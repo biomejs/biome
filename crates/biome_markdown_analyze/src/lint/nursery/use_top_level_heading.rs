@@ -116,8 +116,15 @@ fn is_html_comment_block(block: &AnyMdBlock) -> bool {
             html_block.is_html_comment()
         }
         AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
-            let text = paragraph.syntax().text_trimmed().to_string();
-            text.starts_with("<!--") && text.ends_with("-->")
+            let Some(first_token) = paragraph.syntax().first_token() else {
+                return false;
+            };
+            let Some(last_token) = paragraph.syntax().last_token() else {
+                return false;
+            };
+
+            first_token.token_text_trimmed().starts_with("<!--")
+                && last_token.token_text_trimmed().ends_with("-->")
         }
         _ => false,
     }
