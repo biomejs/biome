@@ -23,7 +23,7 @@ setext-heading-2.md:2:1 lint/nursery/useTopLevelHeading ━━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
-  i The first block should be a top-level heading (h1). Add a # Heading (or a level-1 setext heading) to the start of the document.
+  i The first meaningful block should be a top-level heading (h1) so readers and tools can identify the document title. Add a # Heading (or a level-1 setext heading) to the start of the document.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

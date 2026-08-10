@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdHtmlBlock, MdRoot};
+use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdRoot};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_top_level_heading::UseTopLevelHeadingOptions;
 
@@ -22,7 +22,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```markdown,expect_diagnostic
+    /// ```md,expect_diagnostic
     /// Some text
     ///
     /// # Heading
@@ -30,13 +30,13 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```markdown
+    /// ```md
     /// # Heading
     ///
     /// Some text
     /// ```
     ///
-    /// ```markdown
+    /// ```md
     /// ---
     /// title: Example
     /// ---
@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ## Section
     /// ```
     ///
-    /// ```markdown
+    /// ```md
     /// <div>Intro</div>
     ///
     /// ## Section
@@ -104,7 +104,7 @@ impl Rule for UseTopLevelHeading {
                 },
             )
             .note(markup! {
-                "The first block should be a top-level heading (h1). Add a "<Emphasis>"# Heading"</Emphasis>" (or a level-1 setext heading) to the start of the document."
+                "The first meaningful block should be a top-level heading (h1) so readers and tools can identify the document title. Add a "<Emphasis>"# Heading"</Emphasis>" (or a level-1 setext heading) to the start of the document."
             }),
         )
     }
@@ -113,7 +113,7 @@ impl Rule for UseTopLevelHeading {
 fn is_html_comment_block(block: &AnyMdBlock) -> bool {
     match block {
         AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html_block)) => {
-            is_html_comment(html_block)
+            html_block.is_html_comment()
         }
         AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
             let text = paragraph.syntax().text_trimmed().to_string();
@@ -124,22 +124,5 @@ fn is_html_comment_block(block: &AnyMdBlock) -> bool {
 }
 
 fn is_ignorable_leading_block(block: &AnyMdBlock) -> bool {
-    is_html_comment_block(block)
-        || matches!(
-            block,
-            AnyMdBlock::AnyMdLeafBlock(
-                AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_)
-            )
-        )
-}
-
-fn is_html_comment(block: &MdHtmlBlock) -> bool {
-    let Ok(content) = block.content() else {
-        return false;
-    };
-    let Ok(token) = content.value_token() else {
-        return false;
-    };
-
-    token.text_trimmed().starts_with("<!--")
+    is_html_comment_block(block) || block.is_newline() || block.is_continuation_indent()
 }
