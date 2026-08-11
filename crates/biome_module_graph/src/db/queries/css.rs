@@ -205,12 +205,11 @@ pub fn traverse_import_tree_for_html_classes(
 ///
 /// A CSS module's local definition takes precedence over definitions reached
 /// through its imports. A JavaScript module searches the CSS files it imports.
-/// An HTML-like module first searches all of its embedded styles, including
-/// component-scoped styles, before its linked stylesheets and imports. Every
-/// importer is then traversed as an independent branch. A branch stops at its
-/// first visible definition, and only sibling imports authored before the child
-/// edge are visible. Component-scoped styles do not escape an HTML-like
-/// importer.
+/// An HTML-like module searches embedded styles, linked stylesheets, and script
+/// imports in document order. Every importer is then traversed as an independent
+/// branch. A branch stops at its first visible definition, and only CSS contexts
+/// authored before the child edge are visible. Component-scoped styles do not
+/// escape an HTML-like importer.
 /// Definitions reached through the same authored rule are deduplicated, while
 /// definitions from separate branches remain separate. Result order is
 /// unspecified.

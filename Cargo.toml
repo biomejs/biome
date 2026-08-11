@@ -76,7 +76,6 @@ biome_json_syntax            = { path = "./crates/biome_json_syntax", version = 
 biome_json_value             = { path = "./crates/biome_json_value", version = "0.1.0" }
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.1.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
-biome_property_codec         = { path = "./crates/biome_property_codec", version = "0.1.0" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.0.1" }
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
@@ -133,7 +132,10 @@ indexmap                     = { version = "2.14.0" }
 insta                        = "1.48.0"
 jiff                         = "0.2.35"
 libc                         = "0.2.189"
-mimalloc                     = "0.1.48"
+# mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
+# See: https://github.com/biomejs/biome/issues/10270
+# See: https://github.com/biomejs/biome/issues/11242
+mimalloc                     = "=0.1.48"
 notify                       = "8.2.0"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
@@ -147,7 +149,7 @@ quote                        = "1.0.47"
 rayon                        = "1.12.0"
 regex                        = "1.13.1"
 reqwest                      = { version = "0.12.19", default-features = false }
-rust-lapper                  = "1.2.0"
+rust-lapper                  = "1.3.0"
 rustc-hash                   = "2.1.3"
 salsa                        = "0.27.2"
 schemars                     = { version = "1.2.2", features = ["indexmap2", "smallvec1"] }

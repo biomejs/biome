@@ -35,7 +35,7 @@ declare_lint_rule! {
     ///
     /// - [Svelte declaration tags](https://svelte.dev/docs/svelte/declaration-tags)
     pub NoSvelteLegacyConst {
-        version: "next",
+        version: "2.5.8",
         name: "noSvelteLegacyConst",
         language: "html",
         domains: &[RuleDomain::Svelte],

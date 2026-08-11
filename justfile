@@ -60,6 +60,10 @@ gen-rules:
 gen-css-baseline:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
+# Generates CSS keywords from @webref/css
+gen-css-keywords:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-keywords
+
 # Generates module-replacements data from e18e
 gen-module-replacements:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- module-replacements
@@ -284,11 +288,13 @@ test-lintrule name:
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
   just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
   just _touch crates/biome_html_analyze/tests/spec_tests.rs
+  just _touch crates/biome_markdown_analyze/tests/spec_tests.rs
   cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_html_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_markdown_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

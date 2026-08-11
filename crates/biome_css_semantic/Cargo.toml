@@ -13,15 +13,14 @@ include              = ["!**/tests/**/*", "src/**/*"]
 publish              = true
 
 [dependencies]
-biome_css_syntax     = { workspace = true }
-biome_db             = { workspace = true }
-biome_formatter      = { workspace = true }
-biome_languages      = { workspace = true, features = ["lang_css"] }
-biome_property_codec = { workspace = true }
-biome_rowan          = { workspace = true }
-biome_string_case    = { workspace = true }
-rustc-hash           = { workspace = true }
-salsa                = { workspace = true }
+biome_css_syntax  = { workspace = true }
+biome_db          = { workspace = true }
+biome_formatter   = { workspace = true }
+biome_languages   = { workspace = true, features = ["lang_css"] }
+biome_rowan       = { workspace = true }
+biome_string_case = { workspace = true }
+rustc-hash        = { workspace = true }
+salsa             = { workspace = true }
 
 [dev-dependencies]
 biome_css_parser = { path = "../biome_css_parser" }

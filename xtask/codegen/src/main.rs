@@ -5,6 +5,8 @@ mod generate_configuration;
 #[cfg(feature = "external_data")]
 mod generate_css_baseline;
 #[cfg(feature = "external_data")]
+mod generate_css_keywords;
+#[cfg(feature = "external_data")]
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
@@ -21,6 +23,8 @@ use crate::generate_configuration::generate_rule_options;
 use crate::generate_configuration::generate_rules_configuration;
 #[cfg(feature = "external_data")]
 use crate::generate_css_baseline::generate_css_baseline;
+#[cfg(feature = "external_data")]
+use crate::generate_css_keywords::generate_css_keywords;
 #[cfg(feature = "external_data")]
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
@@ -86,6 +90,10 @@ fn main() -> Result<()> {
         TaskCommand::CssBaseline => {
             #[cfg(feature = "external_data")]
             generate_css_baseline(Overwrite)?;
+        }
+        TaskCommand::CssKeywords => {
+            #[cfg(feature = "external_data")]
+            generate_css_keywords(Overwrite)?;
         }
         TaskCommand::ModuleReplacements => {
             #[cfg(feature = "external_data")]

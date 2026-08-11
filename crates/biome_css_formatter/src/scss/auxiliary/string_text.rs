@@ -1,5 +1,5 @@
-use super::interpolated_string::ScssInterpolatedStringQuotes;
 use crate::prelude::*;
+use crate::utils::scss_interpolated_string::ScssInterpolatedStringQuotes;
 use biome_css_syntax::{ScssStringText, ScssStringTextFields};
 use biome_formatter::{FormatRuleWithOptions, prelude::text, token::string::normalize_string};
 

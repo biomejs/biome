@@ -389,8 +389,8 @@ function addKeywordBranches(
 		if (ctx.staticKeySet.has(cls)) continue;
 		const cands = ds.parseCandidate(cls);
 		const cand = cands.find((c) => c.kind === "functional");
-		if (!cand || cand.kind !== "functional") continue;
-		if (!cand.value || cand.value.kind !== "named") continue;
+		if (cand?.kind !== "functional") continue;
+		if (cand.value?.kind !== "named") continue;
 		const value = cand.value.value;
 		if (/[\d.]/.test(value)) continue;
 		if (ctx.allThemeKeys.has(value)) continue;
