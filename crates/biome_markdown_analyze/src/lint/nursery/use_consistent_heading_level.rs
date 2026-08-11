@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ````
     ///
     pub UseConsistentHeadingLevel {
-        version: "next",
+        version: "2.5.8",
         name: "useConsistentHeadingLevel",
         language: "md",
         recommended: true,

@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTopLevelHeading {
-        version: "next",
+        version: "2.5.8",
         name: "useTopLevelHeading",
         language: "md",
         recommended: false,
