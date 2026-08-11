@@ -14,7 +14,7 @@ use crate::syntax::angular::{
 };
 use crate::syntax::astro::{
     is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
-    parse_astro_fence, parse_astro_spread_or_expression,
+    parse_astro_fence, parse_astro_spread_or_expression, source_has_astro_frontmatter,
 };
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
@@ -122,7 +122,10 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
 
     p.eat(UNICODE_BOM);
 
-    if p.at(T![---]) {
+    let disqualified_by_leading_markup =
+        Astro.is_supported(p) && !source_has_astro_frontmatter(p.source().text());
+
+    if p.at(T![---]) && !disqualified_by_leading_markup {
         HtmlSyntaxFeatures::Astro
             .parse_exclusive_syntax(
                 p,
@@ -133,6 +136,9 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
                 },
             )
             .ok();
+    } else if p.at(T![---]) {
+        p.set_after_frontmatter(true);
+        p.re_lex(html_text_re_lex_context(p));
     }
 
     // Whether or not frontmatter was present, once we're past the frontmatter

@@ -13,6 +13,24 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
+/// Markup before the opening `---` makes a later `---` content, not a fence.
+pub(crate) fn source_has_astro_frontmatter(source: &str) -> bool {
+    let mut dashes = 0u32;
+    for &byte in source.as_bytes() {
+        match byte {
+            b'-' => {
+                dashes += 1;
+                if dashes == 3 {
+                    return true;
+                }
+            }
+            b'<' | b'{' | b'}' => return false,
+            _ => dashes = 0,
+        }
+    }
+    false
+}
+
 pub(crate) fn parse_astro_fence(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![---]) {
         return Absent;
