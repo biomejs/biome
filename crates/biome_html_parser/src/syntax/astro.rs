@@ -127,6 +127,31 @@ pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
     first_is_directive && second_token == T![:]
 }
 
+/// Whether the parser sits at `is:raw`, the directive that turns an element's
+/// children into raw text.
+///
+/// The directive name is only reachable as a token while it is being consumed,
+/// so this looks ahead over it in the same contexts [`parse_directive_value`]
+/// uses rather than reading it back off the parsed node.
+pub(crate) fn is_at_astro_raw_directive(p: &mut HtmlParser) -> bool {
+    if Astro.is_unsupported(p) {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        if p.re_lex(HtmlReLexContext::InsideTagAstro) != T![is] {
+            return false;
+        }
+        p.bump_with_context(T![is], super::inside_tag_context(p));
+        if !p.at(T![:]) {
+            return false;
+        }
+        p.bump_with_context(T![:], super::inside_tag_context(p));
+
+        p.at(HTML_LITERAL) && p.cur_text() == "raw"
+    })
+}
+
 pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
     if !is_at_astro_directive_start(p) {
         return Absent;

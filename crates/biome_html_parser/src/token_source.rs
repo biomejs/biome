@@ -179,10 +179,11 @@ pub(crate) enum HtmlEmbeddedLanguage {
     /// reproduce it byte for byte; splitting it into markup would lose the
     /// whitespace to trivia.
     Preformatted(PreformattedElement),
-    /// A top-level block of a Vue single-file component whose content is not
-    /// HTML: a custom block such as `<i18n>` or `<docs>`, or a `<template>`
-    /// written in another language. The tag name is arbitrary, so it is
-    /// carried as a range into the source rather than as a `&'static str`.
+    /// An element whose content is raw text because of how it was written
+    /// rather than because of its name: a custom block or non-HTML `<template>`
+    /// of a Vue single-file component, or an Astro element carrying `is:raw`.
+    /// The tag name is arbitrary, so it is carried as a range into the source
+    /// rather than as a `&'static str`.
     RawTextBlock {
         name: TextRange,
     },

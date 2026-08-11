@@ -13,8 +13,9 @@ use crate::syntax::angular::{
     parse_angular_structural_directive, parse_angular_template_ref, parse_angular_two_way_binding,
 };
 use crate::syntax::astro::{
-    is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
-    parse_astro_fence, parse_astro_spread_or_expression, source_has_astro_frontmatter,
+    is_at_astro_directive_keyword, is_at_astro_directive_start, is_at_astro_raw_directive,
+    parse_astro_directive, parse_astro_fence, parse_astro_spread_or_expression,
+    source_has_astro_frontmatter,
 };
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
@@ -400,7 +401,9 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
     attributes.parse_list(p);
     let is_raw_text_block =
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
-    let is_raw_text = is_embedded_language_tag || is_raw_text_block;
+    // A fragment has no name for the lexer to scan its closing tag for.
+    let is_astro_raw = attributes.is_raw && !is_fragment;
+    let is_raw_text = is_embedded_language_tag || is_raw_text_block || is_astro_raw;
 
     if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
@@ -433,6 +436,10 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
                         HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Plaintext)
                     }
                     _ => unreachable!(),
+                })
+            } else if is_astro_raw {
+                HtmlLexContext::EmbeddedLanguage(HtmlEmbeddedLanguage::RawTextBlock {
+                    name: name_range,
                 })
             } else {
                 regular_context(p)
@@ -624,6 +631,8 @@ struct AttributeList {
     /// Whether the list held a `lang` attribute naming a language. Always false
     /// without [`Self::track_lang`].
     names_a_language: bool,
+    /// Whether the list held Astro's `is:raw`. Always false outside Astro.
+    is_raw: bool,
 }
 
 impl AttributeList {
@@ -631,6 +640,7 @@ impl AttributeList {
         Self {
             track_lang,
             names_a_language: false,
+            is_raw: false,
         }
     }
 }
@@ -644,6 +654,7 @@ impl ParseNodeList for AttributeList {
         if self.track_lang {
             self.names_a_language |= is_at_lang_naming_a_language(p);
         }
+        self.is_raw |= is_at_astro_raw_directive(p);
 
         parse_attribute(p)
     }
