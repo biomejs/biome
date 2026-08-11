@@ -554,6 +554,39 @@ mod tests {
     }
 
     #[test]
+    fn astro_comment_only_template_expression_is_allowed() {
+        for body in ["/* only a comment */", "// a line comment", "/* a */ /* b */"] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+
+            assert!(
+                !parse.has_errors(),
+                "comment-only body `{body}` is valid Astro, got: {:?}",
+                parse.diagnostics()
+            );
+        }
+    }
+
+    #[test]
+    fn astro_empty_template_expression_is_allowed() {
+        let parse = parse("  ", astro_template_source(), JsParserOptions::default());
+
+        assert!(!parse.has_errors(), "`{{ }}` renders nothing in Astro");
+    }
+
+    #[test]
+    fn comment_only_template_expression_is_an_error_outside_astro() {
+        let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+        });
+        let parse = parse("/* only a comment */", vue, JsParserOptions::default());
+
+        assert!(parse.has_errors(), "only Astro allows a comment-only body");
+    }
+
+    #[test]
     fn void_element_without_slash_is_an_error_outside_astro() {
         let parse = parse(
             "cond && <br>",

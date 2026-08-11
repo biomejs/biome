@@ -2522,8 +2522,8 @@ impl JsExpressionTemplateRoot {
             eof_token: self.eof_token(),
         }
     }
-    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn expression(&self) -> Option<AnyJsExpression> {
+        support::node(&self.syntax, 0usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2539,7 +2539,7 @@ impl Serialize for JsExpressionTemplateRoot {
 }
 #[derive(Serialize)]
 pub struct JsExpressionTemplateRootFields {
-    pub expression: SyntaxResult<AnyJsExpression>,
+    pub expression: Option<AnyJsExpression>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -19625,7 +19625,10 @@ impl std::fmt::Debug for JsExpressionTemplateRoot {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("JsExpressionTemplateRoot")
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
         } else {
