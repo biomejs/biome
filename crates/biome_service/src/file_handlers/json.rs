@@ -26,7 +26,7 @@ use biome_configuration::json::{
     JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
     JsonLinterEnabled, JsonParserConfiguration,
 };
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
     BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
@@ -38,8 +38,9 @@ use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
-use biome_languages::JsonFileSource;
-use biome_rowan::{AstNode, NodeCache, SyntaxKind};
+use biome_languages::{JsonFileSource, LanguageDb};
+use biome_parser::{AnyParse, AnyParsedSource};
+use biome_rowan::{AstNode, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
@@ -353,6 +354,7 @@ impl ExtensionHandler for JsonFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_text: Some(parse_text),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -404,30 +406,52 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
-fn parse(
-    biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
-    settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
+#[salsa::interned]
+struct ParseJsonInput {
+    file: FileSource,
+    options: JsonParserOptions,
+}
 
-    let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_json_file<'db>(db: &'db dyn Db, input: ParseJsonInput<'db>) -> AnyParse {
+    biome_json_parser::parse_json(input.file(db).content(db), input.options(db)).into()
+}
+
+fn parse(biome_path: &BiomePath, settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
+    let file = db
+        .get_file(biome_path.as_path())
+        .expect("file must exist in workspace");
+    let file_source = db
+        .source_from_index(file.document_source_index(&db))
+        .unwrap_or_default();
+    let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_json_file(file_db, ParseJsonInput::new(file_db, file, options));
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(file_source),
     }
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: JsonSyntaxNode = parse.syntax(&workspace_db);
-    let tree: JsonRoot = parse.tree(&workspace_db);
+fn parse_text(
+    biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    settings: &SettingsWithEditor,
+) -> ParseResult {
+    let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
+    let any_parse = biome_json_parser::parse_json(code, options).into();
+
+    ParseResult {
+        any_parse,
+        language: Some(file_source),
+    }
+}
+
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: JsonSyntaxNode = parse.syntax();
+    let tree: JsonRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -439,28 +463,25 @@ fn debug_formatter_ir(
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -475,11 +496,10 @@ fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let printed = biome_json_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -490,11 +510,10 @@ fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
 
     let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
@@ -548,7 +567,7 @@ fn lint(params: LintParams) -> LintResults {
     else {
         return LintResults::default();
     };
-    let root: JsonRoot = params.parsed_source.tree(&params.workspace_db);
+    let root: JsonRoot = params.parsed_source.tree();
 
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.path,
@@ -596,7 +615,7 @@ fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    let mut diagnostics = params.parsed_source.serde_diagnostics();
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
     if params.path.ends_with(ConfigName::biome_json())
@@ -621,7 +640,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings: workspace,
         path,
-        workspace_db,
+        workspace_db: _,
         project_layout,
         language,
         skip,
@@ -633,10 +652,11 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         working_directory,
         compute_actions,
         analyzer_cache,
+        ..
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
-    let tree: JsonRoot = parsed_source.tree(&workspace_db);
+    let tree: JsonRoot = parsed_source.tree();
     let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
         params.path,
         working_directory,
@@ -670,7 +690,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         error!("Could not determine the file source of the file");
         return PullActionsResult { actions: vec![] };
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let services = JsonAnalyzeServices {
         file_source,
         configuration_provider: workspace
@@ -723,7 +743,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 #[instrument(level = "debug", skip_all)]
 fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let mut tree: JsonRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut tree: JsonRoot = params.parsed_source.tree();
 
     // Compute final rules (taking `overrides` into account)
     let rules = params
@@ -912,8 +932,7 @@ fn search(
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
-    workspace_db: WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let any_parse = parsed.any_parse(&workspace_db);
+    let any_parse = parsed.any_parse();
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
 }

@@ -444,6 +444,7 @@ dependencies = [
  "biome_db",
  "biome_formatter",
  "biome_languages",
+ "biome_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -1140,6 +1141,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_jsdoc_comment",
  "biome_languages",
+ "biome_parser",
  "biome_rowan",
  "camino",
  "insta",
@@ -1808,6 +1810,7 @@ dependencies = [
  "biome_markdown_parser",
  "biome_markdown_syntax",
  "biome_module_graph",
+ "biome_parser",
  "biome_project_layout",
  "biome_rowan",
  "biome_service",
@@ -2070,6 +2073,7 @@ name = "biome_workspace_db"
 version = "0.1.0"
 dependencies = [
  "biome_db",
+ "biome_diagnostics",
  "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",

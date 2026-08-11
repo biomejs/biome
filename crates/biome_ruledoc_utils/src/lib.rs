@@ -9,12 +9,12 @@ pub use printer::*;
 use anyhow::bail;
 use biome_analyze::{RuleCategory, RuleMetadata};
 use biome_configuration::Configuration;
-use biome_db::ParsedSource;
+use biome_db::FileSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_semantic::{SemanticModel, semantic_model_from_source};
+use biome_js_semantic::{SemanticInput, SemanticModel, semantic_model_from_source};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
@@ -22,6 +22,7 @@ use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_module_graph::{
     ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
+use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
@@ -189,17 +190,17 @@ impl AnalyzerServicesBuilder {
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
-        let parsed_source = ParsedSource::new(
+        let file = FileSource::new(
             &self.module_db,
             path.clone(),
-            parse.into(),
+            root.syntax().to_string(),
             source_index,
-            vec![],
+            None,
         );
-        self.module_db.insert_file(&path, parsed_source);
+        self.module_db.insert_file(&path, file);
 
-        let semantic_model =
-            Arc::new(semantic_model_from_source(&self.module_db, parsed_source).clone());
+        let input = SemanticInput::new(&self.module_db, file, AnyParse::from(parse));
+        let semantic_model = Arc::new(semantic_model_from_source(&self.module_db, input).clone());
         let (module_info, _, _) = resolve_js_module(
             root,
             &BiomePath::new(&path),

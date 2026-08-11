@@ -1,6 +1,7 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
 use biome_languages::LanguageDb;
 use biome_rowan::TokenText;
+use biome_workspace_db::embedded::EmbeddedSourceData;
 use biome_workspace_db::embedded::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
@@ -13,49 +14,74 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct EmbeddedService {
-    db: Rc<dyn LanguageDb>,
+    db: Option<Rc<dyn LanguageDb>>,
     path: Utf8PathBuf,
+    source: Option<EmbeddedSourceData>,
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf) -> Self {
-        Self { db, path }
+    pub(crate) fn new(
+        db: Option<Rc<dyn LanguageDb>>,
+        path: Utf8PathBuf,
+        source: Option<EmbeddedSourceData>,
+    ) -> Self {
+        Self { db, path, source }
     }
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
+        let (Some(db), Some(source)) = (&self.db, &self.source) else {
+            return false;
+        };
         get_binding_by_name(
-            self.db.as_ref(),
-            InternedBindingTokenText::new(self.db.as_ref(), self.path.clone(), binding),
+            db.as_ref(),
+            source.intern(db.as_ref()),
+            InternedBindingTokenText::new(db.as_ref(), self.path.clone(), binding),
         )
         .is_some()
     }
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
+        let (Some(db), Some(source)) = (&self.db, &self.source) else {
+            return false;
+        };
         get_binding_by_text(
-            self.db.as_ref(),
-            InternedBindingText::new(self.db.as_ref(), self.path.clone(), binding.to_string()),
+            db.as_ref(),
+            source.intern(db.as_ref()),
+            InternedBindingText::new(db.as_ref(), self.path.clone(), binding.to_string()),
         )
         .is_some()
     }
 
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
+        let (Some(db), Some(source)) = (&self.db, &self.source) else {
+            return false;
+        };
         is_value_reference_used(
-            self.db.as_ref(),
-            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+            db.as_ref(),
+            source.intern(db.as_ref()),
+            InternedReference::new(db.as_ref(), self.path.clone(), identifier),
         )
     }
 
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
+        let (Some(db), Some(source)) = (&self.db, &self.source) else {
+            return false;
+        };
         is_type_reference_used(
-            self.db.as_ref(),
-            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+            db.as_ref(),
+            source.intern(db.as_ref()),
+            InternedReference::new(db.as_ref(), self.path.clone(), identifier),
         )
     }
 
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
+        let (Some(db), Some(source)) = (&self.db, &self.source) else {
+            return false;
+        };
         is_reference_used(
-            self.db.as_ref(),
-            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+            db.as_ref(),
+            source.intern(db.as_ref()),
+            InternedReference::new(db.as_ref(), self.path.clone(), identifier),
         )
     }
 
@@ -63,9 +89,13 @@ impl EmbeddedService {
     ///
     /// See also: https://svelte.dev/docs/svelte/stores
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
+        let (Some(db), Some(source)) = (&self.db, &self.source) else {
+            return false;
+        };
         is_svelte_store_reference_used(
-            self.db.as_ref(),
-            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+            db.as_ref(),
+            source.intern(db.as_ref()),
+            InternedReference::new(db.as_ref(), self.path.clone(), identifier),
         )
     }
 }

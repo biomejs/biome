@@ -582,7 +582,7 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
         self.as_ref().source.clone()
     }
 
-    fn as_merged_settings(&self) -> Settings {
+    pub(crate) fn as_merged_settings(&self) -> Settings {
         self.configuration()
             .map(|editor| {
                 let mut settings = self.inner.read().unwrap().clone();

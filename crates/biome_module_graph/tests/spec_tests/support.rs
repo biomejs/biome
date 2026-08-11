@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_db::ParsedSource;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource};
@@ -17,7 +16,7 @@ use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use biome_workspace_db::WorkspaceDb;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 
 pub fn add_js_modules(
     db: &mut WorkspaceDb,
@@ -77,11 +76,6 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
     let mut db = WorkspaceDb::default();
     add_css_modules(&mut db, &fs, &ProjectLayout::default(), &paths);
 
-    for (path, source) in files {
-        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
-        let parsed = ParsedSource::new(&db, Utf8PathBuf::from(*path), parse.into(), 0, Vec::new());
-        db.insert_file(Utf8Path::new(path), parsed);
-    }
     (fs, db)
 }
 

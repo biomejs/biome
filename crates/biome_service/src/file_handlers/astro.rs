@@ -7,13 +7,13 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+use biome_js_parser::{JsParserOptions, parse as parse_js};
 use biome_js_syntax::{TextRange, TextSize};
-use biome_languages::{DocumentFileSource, JsFileSource};
-use biome_rowan::NodeCache;
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_workspace_db::WorkspaceDb;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;
@@ -78,6 +78,7 @@ impl ExtensionHandler for AstroFileHandler {
 
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_text: Some(parse_text),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -112,44 +113,77 @@ impl ExtensionHandler for AstroFileHandler {
     }
 }
 
-fn parse(
-    _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
-    _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let frontmatter = AstroFileHandler::input(text);
-    let parse = parse_js_with_cache(
-        frontmatter,
-        file_source
-            .to_js_file_source()
-            .unwrap_or(JsFileSource::ts()),
+#[salsa::interned]
+struct ParseAstroInput {
+    file: FileSource,
+    document_source: JsFileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_astro_file<'db>(db: &'db dyn Db, input: ParseAstroInput<'db>) -> AnyParse {
+    parse_js(
+        AstroFileHandler::input(input.file(db).content(db)),
+        input.document_source(db),
         JsParserOptions::default(),
-        cache,
+    )
+    .into()
+}
+
+fn parse(biome_path: &BiomePath, _settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
+    let file = db
+        .get_file(biome_path.as_path())
+        .expect("file must exist in workspace");
+    let file_source = db
+        .source_from_index(file.document_source_index(&db))
+        .unwrap_or_default();
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_astro_file(
+        file_db,
+        ParseAstroInput::new(
+            file_db,
+            file,
+            file_source
+                .to_js_file_source()
+                .unwrap_or(JsFileSource::ts()),
+        ),
     );
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(JsFileSource::astro().into()),
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
+fn parse_text(
+    _biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    _settings: &SettingsWithEditor,
+) -> ParseResult {
+    let document_source = file_source
+        .to_js_file_source()
+        .unwrap_or(JsFileSource::ts());
+    let any_parse = parse_js(
+        AstroFileHandler::input(code),
+        document_source,
+        JsParserOptions::default(),
+    )
+    .into();
+
+    ParseResult {
+        any_parse,
+        language: Some(JsFileSource::astro().into()),
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        workspace_db,
-    )
+    javascript::format(biome_path, document_file_source, parse, settings)
 }
 pub(crate) fn format_range(
     biome_path: &BiomePath,
@@ -157,16 +191,8 @@ pub(crate) fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        range,
-        workspace_db,
-    )
+    javascript::format_range(biome_path, document_file_source, parse, settings, range)
 }
 
 pub(crate) fn format_on_type(
@@ -175,16 +201,8 @@ pub(crate) fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        offset,
-        workspace_db,
-    )
+    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

@@ -139,7 +139,7 @@ impl<'src> Parser for HtmlParser<'src> {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug, Eq, Hash, PartialEq)]
 pub struct HtmlParserOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,

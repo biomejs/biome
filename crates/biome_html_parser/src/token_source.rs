@@ -124,7 +124,7 @@ impl HtmlLexContext {
     }
 }
 
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub(crate) enum TextExpressionKind {
     // {{ expr }}
     #[default]

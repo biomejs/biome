@@ -5,8 +5,11 @@ use crate::embed::html::{
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
-use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
+use crate::settings::{EditorFeatures, Settings, SettingsHandle};
+use biome_css_parser::{CssModulesKind, parse_css_with_offset};
 use biome_css_syntax::{CssLanguage, TextSize};
+use biome_db::Db;
+use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
@@ -15,39 +18,48 @@ use biome_html_syntax::{
     SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue,
     VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
-use biome_js_parser::parse_js_with_offset_and_cache;
+use biome_js_parser::parse_js_with_offset;
 use biome_js_syntax::JsLanguage;
-use biome_json_parser::parse_json_with_offset_and_cache;
+use biome_json_parser::parse_json_with_offset;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
-use biome_parser::AnyParse;
+use biome_parser::{AnyParse, ParsedSnippet};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
+use std::sync::Arc;
 
-pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
-    let ParseEmbeddedParams {
-        any_parse,
-        path,
-        file_source,
-        settings,
-        node_cache,
-    } = params;
-    let mut nodes = Vec::new();
-    let html_root: HtmlRoot = any_parse.tree();
-    let Some(file_source) = file_source.to_html_file_source() else {
-        return ParseEmbedResult::default();
-    };
+#[salsa::input]
+struct EmbedSettings {
+    #[returns(ref)]
+    #[no_eq]
+    settings: Arc<Settings>,
+}
 
-    let doc_file_source = DocumentFileSource::Html(file_source);
+#[salsa::interned]
+struct EmbedInput {
+    any_parse: AnyParse,
+    path: BiomePath,
+    settings: EmbedSettings,
+    source: HtmlFileSource,
+}
 
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_embeds_tracked<'db>(db: &'db dyn Db, input: EmbedInput<'db>) -> ParseEmbedResult {
+    let file_source = input.source(db);
+    let html_root: HtmlRoot = input.any_parse(db).tree();
+    let settings = SettingsHandle::new(
+        input.settings(db).settings(db),
+        (None, EditorFeatures::default()),
+    );
     let mut ctx = EmbedParseContext {
-        cache: node_cache,
-        biome_path: path,
+        biome_path: &input.path(db),
         host_file_source: &file_source,
-        settings,
+        settings: &settings,
     };
+    let doc_file_source = DocumentFileSource::Html(file_source);
+    let mut nodes = Vec::new();
 
     match file_source.variant() {
         HtmlVariant::Standard(text_expression) => {
@@ -404,7 +416,46 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         }
     }
 
-    ParseEmbedResult { nodes }
+    ParseEmbedResult {
+        nodes: nodes
+            .into_iter()
+            .map(|(parsed, content, file_source)| {
+                (
+                    ParsedSnippet {
+                        parsed,
+                        element_range: content.element_range,
+                        content_range: content.content_range,
+                        content_offset: content.content_offset,
+                        document_source_index: None,
+                    },
+                    file_source,
+                )
+            })
+            .collect(),
+    }
+}
+
+pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
+    let ParseEmbeddedParams {
+        any_parse,
+        path,
+        file_source,
+        settings,
+        workspace_db,
+    } = params;
+    let Some(file_source) = file_source.to_html_file_source() else {
+        return ParseEmbedResult::default();
+    };
+
+    let settings = EmbedSettings::new(&workspace_db, Arc::new(settings.as_merged_settings()));
+    let input = EmbedInput::new(
+        &workspace_db,
+        any_parse,
+        path.clone(),
+        settings,
+        file_source,
+    );
+    parse_embeds_tracked(&workspace_db, input)
 }
 
 // Pass 3: control flow blocks via registry
@@ -1098,12 +1149,11 @@ fn parse_matched_embed(
             let options = ctx
                 .settings
                 .parse_options::<JsLanguage>(ctx.biome_path, &doc_source);
-            let parse = parse_js_with_offset_and_cache(
+            let parse = parse_js_with_offset(
                 content.text.text(),
                 content.content_offset,
                 js_source,
                 options,
-                ctx.cache,
             );
 
             Some(ParsedEmbed {
@@ -1130,11 +1180,10 @@ fn parse_matched_embed(
                     options.css_modules = CssModulesKind::Classic;
                 }
             }
-            let parse = parse_css_with_offset_and_cache(
+            let parse = parse_css_with_offset(
                 content.text.text(),
                 css_source,
                 content.content_offset,
-                ctx.cache,
                 options,
             );
 
@@ -1149,12 +1198,8 @@ fn parse_matched_embed(
             let options = ctx
                 .settings
                 .parse_options::<JsonLanguage>(ctx.biome_path, &doc_source);
-            let parse = parse_json_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                ctx.cache,
-                options,
-            );
+            let parse =
+                parse_json_with_offset(content.text.text(), content.content_offset, options);
 
             Some(ParsedEmbed {
                 node: (parse.into(), content, doc_source),

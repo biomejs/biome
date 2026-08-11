@@ -40,6 +40,13 @@ pub enum HtmlEmbeddedContent {
     Js(AnyJsRoot, TextSize),
 }
 
+#[derive(Clone, Debug)]
+pub struct HtmlCssPropertyRegistration {
+    pub name: TokenText,
+    pub range: TextRange,
+    pub applicability: EmbeddingStyleApplicability,
+}
+
 /// Information restricted to a single HTML module in the [ModuleGraph].
 ///
 /// Tracks CSS classes defined in embedded `<style>` blocks, CSS classes
@@ -63,12 +70,14 @@ impl HtmlModuleInfo {
         referenced_classes: Vec<CssClassReference>,
         imported_stylesheets: Vec<HtmlImport>,
         import_paths: ImportPathMap<HtmlImport>,
+        property_registrations: Vec<HtmlCssPropertyRegistration>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
             style_classes,
             referenced_classes,
             imported_stylesheets,
             import_paths,
+            property_registrations,
         };
         Self(Arc::new(info))
     }
@@ -131,6 +140,8 @@ pub struct HtmlModuleInfoInner {
     ///
     /// Each `TokenText` represents a single class name (e.g., "header" from `.header`).
     pub style_classes: IndexSet<CssClassDefinition>,
+
+    pub property_registrations: Vec<HtmlCssPropertyRegistration>,
 
     /// CSS class references from `class="..."` attributes within this HTML file.
     ///

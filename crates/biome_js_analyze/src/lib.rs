@@ -27,6 +27,7 @@ use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_workspace_db::embedded::EmbeddedSourceData;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -58,6 +59,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct JsAnalyzerServices<'a> {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
+    embedded_source: Option<EmbeddedSourceData>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     semantic_model: Option<&'a SemanticModel>,
@@ -74,6 +76,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
         Self {
             module_db: Some(module_db),
             language_db: None,
+            embedded_source: None,
             project_layout,
             source_type,
             semantic_model: None,
@@ -86,6 +89,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
         Self {
             module_db: None,
             language_db: None,
+            embedded_source: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             semantic_model: None,
@@ -111,6 +115,11 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
         self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_embedded_source(mut self, source: EmbeddedSourceData) -> Self {
+        self.embedded_source = Some(source);
         self
     }
 
@@ -172,6 +181,7 @@ where
     let JsAnalyzerServices {
         module_db,
         language_db: embedded_db,
+        embedded_source,
         project_layout,
         source_type,
         semantic_model,
@@ -236,9 +246,11 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    if let Some(embedded_db) = embedded_db {
-        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
-    }
+    services.insert_service(EmbeddedService::new(
+        embedded_db,
+        options.file_path.clone(),
+        embedded_source,
+    ));
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
     // interleaved with the analyzer's syntax-phase traversal (single pass).

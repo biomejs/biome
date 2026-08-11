@@ -1,5 +1,5 @@
 /// Options to pass to the JavaScript parser
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, Eq, Hash, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(
     feature = "serde",

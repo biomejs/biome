@@ -16,6 +16,7 @@ use biome_glob::NormalizedGlob;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use super::{ScanKind, WorkspaceScannerBridge};
+use crate::Workspace;
 use crate::scanner::IndexTrigger;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
@@ -23,7 +24,6 @@ use crate::workspace::{
     CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, ScanProjectParams,
     UpdateSettingsParams,
 };
-use crate::{Workspace, WorkspaceError};
 
 #[test]
 fn close_file_through_watcher_before_client() {
@@ -51,7 +51,6 @@ fn close_file_through_watcher_before_client() {
                 version: 1,
             },
             document_file_source: None,
-            persist_node_cache: true,
             inline_config: None,
             editor_features: None,
         })
@@ -87,14 +86,10 @@ fn close_file_through_watcher_before_client() {
         })
         .expect("can close file from client");
 
-    let error = workspace
-        .get_file_content(GetFileContentParams {
-            project_key,
-            path: BiomePath::new(&file_path),
-        })
-        .expect_err("can no longer get file content");
-
-    assert!(matches!(error, WorkspaceError::NotFound(_)));
+    assert!(
+        !workspace.is_indexed(&file_path),
+        "file should remain unindexed"
+    );
 }
 
 #[test]
@@ -117,7 +112,6 @@ fn close_file_from_client_before_watcher() {
                 version: 1,
             },
             document_file_source: None,
-            persist_node_cache: true,
             inline_config: None,
             editor_features: None,
         })

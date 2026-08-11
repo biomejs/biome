@@ -79,6 +79,12 @@ pub struct CssPropertyDefinition {
     pub range: TextRange,
 }
 
+#[derive(Clone, Debug)]
+pub struct CssPropertyRegistration {
+    pub name: TokenText,
+    pub range: TextRange,
+}
+
 impl CssClassReference {
     /// Creates a new CSS class reference.
     pub fn new(token: TokenText, file_path: Utf8PathBuf) -> Self {
@@ -125,8 +131,16 @@ impl Deref for CssModuleInfo {
 }
 
 impl CssModuleInfo {
-    pub(crate) fn new(imports: CssImports, classes: IndexMap<TextRange, TokenText>) -> Self {
-        let info = CssModuleInfoInner { imports, classes };
+    pub(crate) fn new(
+        imports: CssImports,
+        classes: IndexMap<TextRange, TokenText>,
+        property_registrations: Vec<CssPropertyRegistration>,
+    ) -> Self {
+        let info = CssModuleInfoInner {
+            imports,
+            classes,
+            property_registrations,
+        };
         Self(Arc::new(info))
     }
 
@@ -165,6 +179,8 @@ pub struct CssModuleInfoInner {
     /// Keys are class names (e.g., "header" from `.header`), values are the
     /// `TextRange` of the class selector in the source file.
     pub classes: IndexMap<TextRange, TokenText>,
+
+    pub property_registrations: Vec<CssPropertyRegistration>,
 }
 
 pub type CssImports = ImportPathMap<CssImport>;

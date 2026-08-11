@@ -17,16 +17,18 @@ use biome_configuration::grit::{
     GritAssistConfiguration, GritAssistEnabled, GritFormatterConfiguration, GritFormatterEnabled,
     GritLinterConfiguration, GritLinterEnabled,
 };
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
-use biome_grit_parser::parse_grit_with_cache;
+use biome_grit_parser::parse_grit;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
-use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
+use biome_languages::LanguageDb;
+use biome_parser::{AnyParse, AnyParsedSource};
+use biome_rowan::{AstNode, SyntaxKind, TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use tracing::debug_span;
@@ -262,6 +264,7 @@ impl ExtensionHandler for GritFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_text: Some(parse_text),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -311,28 +314,47 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
-fn parse(
-    _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
-    _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let parse = parse_grit_with_cache(text, cache);
+#[salsa::interned]
+struct ParseGritInput {
+    file: FileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_grit_file<'db>(db: &'db dyn Db, input: ParseGritInput<'db>) -> AnyParse {
+    parse_grit(input.file(db).content(db)).into()
+}
+
+fn parse(biome_path: &BiomePath, _settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
+    let file = db
+        .get_file(biome_path.as_path())
+        .expect("file must exist in workspace");
+    let file_source = db
+        .source_from_index(file.document_source_index(&db))
+        .unwrap_or_default();
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_grit_file(file_db, ParseGritInput::new(file_db, file));
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(file_source),
     }
 }
 
-fn debug_syntax_tree(
+fn parse_text(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: GritSyntaxNode = parse.syntax(&workspace_db);
-    let tree: GritRoot = parse.tree(&workspace_db);
+    file_source: DocumentFileSource,
+    code: &str,
+    _settings: &SettingsWithEditor,
+) -> ParseResult {
+    ParseResult {
+        any_parse: parse_grit(code).into(),
+        language: Some(file_source),
+    }
+}
+
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: GritSyntaxNode = parse.syntax();
+    let tree: GritRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -344,28 +366,25 @@ fn debug_formatter_ir(
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -381,11 +400,10 @@ fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let printed = biome_grit_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -397,11 +415,10 @@ fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
 
     let range = tree.text_range();
     if offset < range.start() || offset > range.end() {
@@ -457,7 +474,7 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
         .entered();
-    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    let diagnostics = params.parsed_source.serde_diagnostics();
 
     let diagnostic_count = diagnostics.len() as u32;
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
@@ -479,7 +496,7 @@ fn lint(params: LintParams) -> LintResults {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let tree: GritRoot = params.parsed_source.tree(&params.workspace_db);
+    let tree: GritRoot = params.parsed_source.tree();
     Ok(Some(FixedFileResult {
         root: tree.syntax().as_send().unwrap(),
         skipped_suggested_fixes: 0,
