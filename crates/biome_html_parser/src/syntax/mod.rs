@@ -706,6 +706,12 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
 
+    // Astro splits `:` off so that `client:load` can be a directive, but it has
+    // no leading-colon shorthand, so `:href` is one ordinary attribute name.
+    if Astro.is_supported(p) && p.at(T![:]) {
+        p.re_lex(HtmlReLexContext::InsideTag);
+    }
+
     match p.cur() {
         T!["{{"] => {
             let m = p.start();
