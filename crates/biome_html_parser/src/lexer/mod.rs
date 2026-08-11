@@ -172,7 +172,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => self.consume_byte(T![/]),
+            SLH => match self.consume_js_comment_in_tag() {
+                Some(comment) => comment,
+                None => self.consume_byte(T![/]),
+            },
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             // Handle colons as separate tokens for Astro directives
@@ -300,16 +303,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => {
-                if svelte {
-                    match self.byte_at(1).map(lookup_byte) {
-                        Some(SLH) => return self.consume_js_line_comment(),
-                        Some(MUL) => return self.consume_js_block_comment(),
-                        _ => {}
-                    }
-                }
-                self.consume_byte(T![/])
-            }
+            SLH => match self.consume_js_comment_in_tag() {
+                Some(comment) => comment,
+                None => self.consume_byte(T![/]),
+            },
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
@@ -400,11 +397,7 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            SLH => match self.byte_at(1).map(lookup_byte) {
-                Some(SLH) => return self.consume_js_line_comment(),
-                Some(MUL) => return self.consume_js_block_comment(),
-                _ => {}
-            },
+            SLH if let Some(comment) = self.consume_js_comment_in_tag() => return comment,
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
@@ -818,6 +811,20 @@ impl<'src> HtmlLexer<'src> {
         }
 
         COMMENT
+    }
+
+    /// Consumes a comment between attributes, which only Svelte and Astro
+    /// accept; elsewhere a `/` inside a tag can only open a self-closing tag.
+    fn consume_js_comment_in_tag(&mut self) -> Option<HtmlSyntaxKind> {
+        if !matches!(self.framework, HtmlFramework::Svelte | HtmlFramework::Astro) {
+            return None;
+        }
+
+        match self.byte_at(1).map(lookup_byte) {
+            Some(SLH) => Some(self.consume_js_line_comment()),
+            Some(MUL) => Some(self.consume_js_block_comment()),
+            _ => None,
+        }
     }
 
     /// Consumes a `//` single-line comment, returning COMMENT.

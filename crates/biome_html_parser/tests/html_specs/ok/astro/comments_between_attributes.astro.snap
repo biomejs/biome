@@ -1,0 +1,200 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<div
+/* block comment */
+class="something"
+></div>
+<div class="d" // inline line comment
+id="e"
+></div>
+<Component /* c */ client:load /* c */ />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@4..30 "class" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@30..31 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@31..42 "\"something\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@42..44 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@44..45 "<" [] [],
+                slash_token: SLASH@45..46 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@46..49 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@49..50 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@50..52 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@52..56 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@56..61 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@61..62 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@62..88 "\"d\"" [] [Whitespace(" "), Comments("// inline line comment")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@88..91 "id" [Newline("\n")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@91..92 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@92..95 "\"e\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@95..97 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@97..98 "<" [] [],
+                slash_token: SLASH@98..99 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@99..102 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@102..103 ">" [] [],
+            },
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@103..105 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_COMPONENT_LITERAL@105..123 "Component" [] [Whitespace(" "), Comments("/* c */"), Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                AstroClientDirective {
+                    client_token: CLIENT_KW@123..129 "client" [] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@129..130 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@130..143 "load" [] [Whitespace(" "), Comments("/* c */"), Whitespace(" ")],
+                        },
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@143..144 "/" [] [],
+            r_angle_token: R_ANGLE@144..145 ">" [] [],
+        },
+    ],
+    eof_token: EOF@145..146 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..146
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..145
+    0: HTML_ELEMENT@0..50
+      0: HTML_OPENING_ELEMENT@0..44
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: DIV_KW@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..42
+          0: HTML_ATTRIBUTE@4..42
+            0: HTML_ATTRIBUTE_NAME@4..30
+              0: HTML_LITERAL@4..30 "class" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@30..42
+              0: EQ@30..31 "=" [] []
+              1: HTML_STRING@31..42
+                0: HTML_STRING_LITERAL@31..42 "\"something\"" [] []
+        3: R_ANGLE@42..44 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@44..44
+      2: HTML_CLOSING_ELEMENT@44..50
+        0: L_ANGLE@44..45 "<" [] []
+        1: SLASH@45..46 "/" [] []
+        2: HTML_TAG_NAME@46..49
+          0: DIV_KW@46..49 "div" [] []
+        3: R_ANGLE@49..50 ">" [] []
+    1: HTML_ELEMENT@50..103
+      0: HTML_OPENING_ELEMENT@50..97
+        0: L_ANGLE@50..52 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@52..56
+          0: DIV_KW@52..56 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@56..95
+          0: HTML_ATTRIBUTE@56..88
+            0: HTML_ATTRIBUTE_NAME@56..61
+              0: HTML_LITERAL@56..61 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@61..88
+              0: EQ@61..62 "=" [] []
+              1: HTML_STRING@62..88
+                0: HTML_STRING_LITERAL@62..88 "\"d\"" [] [Whitespace(" "), Comments("// inline line comment")]
+          1: HTML_ATTRIBUTE@88..95
+            0: HTML_ATTRIBUTE_NAME@88..91
+              0: HTML_LITERAL@88..91 "id" [Newline("\n")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@91..95
+              0: EQ@91..92 "=" [] []
+              1: HTML_STRING@92..95
+                0: HTML_STRING_LITERAL@92..95 "\"e\"" [] []
+        3: R_ANGLE@95..97 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@97..97
+      2: HTML_CLOSING_ELEMENT@97..103
+        0: L_ANGLE@97..98 "<" [] []
+        1: SLASH@98..99 "/" [] []
+        2: HTML_TAG_NAME@99..102
+          0: DIV_KW@99..102 "div" [] []
+        3: R_ANGLE@102..103 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@103..145
+      0: L_ANGLE@103..105 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@105..123
+        0: HTML_COMPONENT_LITERAL@105..123 "Component" [] [Whitespace(" "), Comments("/* c */"), Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@123..143
+        0: ASTRO_CLIENT_DIRECTIVE@123..143
+          0: CLIENT_KW@123..129 "client" [] []
+          1: ASTRO_DIRECTIVE_VALUE@129..143
+            0: COLON@129..130 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@130..143
+              0: HTML_LITERAL@130..143 "load" [] [Whitespace(" "), Comments("/* c */"), Whitespace(" ")]
+            2: (empty)
+      3: SLASH@143..144 "/" [] []
+      4: R_ANGLE@144..145 ">" [] []
+  4: EOF@145..146 "" [Newline("\n")] []
+
+```
