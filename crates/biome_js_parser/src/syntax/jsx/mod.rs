@@ -8,7 +8,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
 
 use crate::JsSyntaxFeature::{Astro, TypeScript};
-use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
+use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, JsxRawTextElement, T};
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
     parse_reference_identifier,
@@ -163,11 +163,18 @@ fn parse_any_jsx_tag(p: &mut JsParser, in_expression: bool) -> ParsedSyntax {
             expect_closing_fragment(p, in_expression, opening_range);
             Present(fragment.complete(p, JSX_FRAGMENT))
         }
-        Some(OpeningElement::Element { name, opening }) => {
+        Some(OpeningElement::Element {
+            name,
+            opening,
+            raw_text,
+        }) => {
             let opening_range = opening.range(p);
             let element = opening.precede(p);
 
-            parse_jsx_children(p);
+            match raw_text {
+                Some(_) => parse_jsx_raw_text_child(p),
+                None => parse_jsx_children(p),
+            }
 
             expect_closing_element(p, in_expression, name, opening_range);
             Present(element.complete(p, JSX_ELEMENT))
@@ -181,6 +188,7 @@ enum OpeningElement {
     Element {
         name: Option<CompletedMarker>,
         opening: CompletedMarker,
+        raw_text: Option<JsxRawTextElement>,
     },
     SelfClosing(CompletedMarker),
 }
@@ -242,13 +250,19 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
             m.complete(p, JSX_SELF_CLOSING_ELEMENT),
         ))
     } else {
+        let raw_text = astro_raw_text_element(p, name.as_ref());
+
         // test_err jsx jsx_opening_element_missing_r_angle
         // <><test <inner> some content</inner></test></>
-        expect_jsx_token(p, T![>], true);
+        match raw_text {
+            Some(element) => expect_jsx_raw_text_token(p, T![>], element),
+            None => expect_jsx_token(p, T![>], true),
+        }
 
         Some(OpeningElement::Element {
             opening: m.complete(p, JSX_OPENING_ELEMENT),
             name,
+            raw_text,
         })
     }
 }
@@ -260,6 +274,19 @@ fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> boo
         return false;
     }
     name.is_some_and(|name| is_void_element(p.text(name.range(p))))
+}
+
+/// A `<script>` or `<style>` holds text, not markup, so an Astro template
+/// expression reads its children the way the HTML layer already does. In plain
+/// JSX the same element is an ordinary component call, hence the gate.
+fn astro_raw_text_element(
+    p: &JsParser,
+    name: Option<&CompletedMarker>,
+) -> Option<JsxRawTextElement> {
+    if !p.source_type.as_embedding_kind().is_astro() || !p.at(T![>]) {
+        return None;
+    }
+    JsxRawTextElement::from_element_name(p.text(name?.range(p)))
 }
 
 fn expect_closing_fragment(
@@ -359,6 +386,15 @@ fn expect_closing_element(
     m.complete(p, JSX_CLOSING_ELEMENT)
 }
 
+/// Like [`expect_jsx_token`], but lexes what follows as the raw text of `element`.
+fn expect_jsx_raw_text_token(p: &mut JsParser, token: JsSyntaxKind, element: JsxRawTextElement) {
+    if p.at(token) {
+        p.bump_with_context(token, JsLexContext::JsxRawText(element));
+    } else {
+        p.error(expected_token(token));
+    }
+}
+
 /// Expects a JSX token that may be followed by JSX child content.
 /// Ensures that the child content is lexed with the [JsLexContext::JsxChild] context.
 fn expect_jsx_token(p: &mut JsParser, token: JsSyntaxKind, before_child_content: bool) {
@@ -431,6 +467,18 @@ impl ParseNodeList for JsxChildrenList {
 #[inline]
 fn parse_jsx_children(p: &mut JsParser) {
     JsxChildrenList.parse_list(p);
+}
+
+/// Raw text is one token, so the list holds at most the single [`JSX_TEXT`] the
+/// lexer produced for everything up to the closing tag.
+fn parse_jsx_raw_text_child(p: &mut JsParser) {
+    let list = p.start();
+    if p.at(JSX_TEXT_LITERAL) {
+        let m = p.start();
+        p.bump(JSX_TEXT_LITERAL);
+        m.complete(p, JSX_TEXT);
+    }
+    list.complete(p, JsSyntaxKind::JSX_CHILD_LIST);
 }
 
 fn parse_jsx_expression_child(p: &mut JsParser) -> ParsedSyntax {
