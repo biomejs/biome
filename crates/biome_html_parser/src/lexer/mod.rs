@@ -484,13 +484,17 @@ impl<'src> HtmlLexer<'src> {
                 }) {
                     self.consume_l_angle()
                 } else {
-                    self.push_diagnostic(
-                        ParseDiagnostic::new(
-                            "Unescaped `<` bracket character. Expected a tag or escaped character.",
-                            self.text_position()..self.text_position() + TextSize::from(1),
-                        )
-                        .with_hint("Replace this character with `&lt;` to escape it."),
-                    );
+                    // Astro keeps the HTML5 reading, where a `<` that cannot open
+                    // a tag is text and so needs no escaping.
+                    if self.framework != HtmlFramework::Astro {
+                        self.push_diagnostic(
+                            ParseDiagnostic::new(
+                                "Unescaped `<` bracket character. Expected a tag or escaped character.",
+                                self.text_position()..self.text_position() + TextSize::from(1),
+                            )
+                            .with_hint("Replace this character with `&lt;` to escape it."),
+                        );
+                    }
                     self.consume_byte(HTML_LITERAL)
                 }
             }
