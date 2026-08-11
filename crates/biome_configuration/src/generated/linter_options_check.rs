@@ -2308,6 +2308,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions>(),
     ));
     result.push((
+        "nursery",
+        "useTopLevelHeading",
+        TypeId::of::<biome_rule_options::use_top_level_heading::UseTopLevelHeadingOptions>(),
+    ));
+    result.push((
         "performance",
         "useTopLevelRegex",
         TypeId::of::<biome_rule_options::use_top_level_regex::UseTopLevelRegexOptions>(),

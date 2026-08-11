@@ -80,7 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidPropertyInitValue {
-        version: "next",
+        version: "2.5.8",
         name: "noInvalidPropertyInitValue",
         language: "css",
         recommended: true,
