@@ -895,8 +895,7 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS if self.at_start_cdata() => self.consume_cdata_start(),
             LSS => self.consume_byte(T![<]),
-            MIN => {
-                debug_assert!(self.at_frontmatter_edge());
+            MIN if self.at_frontmatter_edge() => {
                 self.advance(3);
                 self.after_frontmatter = true;
                 T![---]
