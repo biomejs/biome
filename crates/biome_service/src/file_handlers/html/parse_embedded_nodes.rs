@@ -5,7 +5,8 @@ use crate::embed::html::{
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
 use crate::file_handlers::{
-    DocumentFileSource, ParseEmbedResult, ParseEmbeddedMode, ParseEmbeddedParams,
+    DocumentFileSource, ParseEmbedResult, ParseEmbeddedCaches, ParseEmbeddedMode,
+    ParseEmbeddedParams,
 };
 use crate::settings::{EditorFeatures, Settings, SettingsHandle, SettingsWithEditor};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
@@ -29,7 +30,7 @@ use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::{AnyParse, ParsedSnippet};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 use std::sync::Arc;
 
 #[salsa::input]
@@ -54,13 +55,13 @@ fn parse_embeds_tracked<'db>(db: &'db dyn Db, input: EmbedInput<'db>) -> ParseEm
         input.settings(db).settings(db),
         (None, EditorFeatures::default()),
     );
-    let mut node_cache = NodeCache::default();
+    let mut caches = ParseEmbeddedCaches::default();
     parse_embeds(
         &input.any_parse(db),
         &input.path(db),
         &settings,
         file_source,
-        &mut node_cache,
+        &mut caches,
     )
 }
 
@@ -69,14 +70,14 @@ fn parse_embeds(
     path: &BiomePath,
     settings: &SettingsWithEditor,
     file_source: HtmlFileSource,
-    node_cache: &mut NodeCache,
+    caches: &mut ParseEmbeddedCaches,
 ) -> ParseEmbedResult {
     let html_root: HtmlRoot = any_parse.tree();
     let mut ctx = EmbedParseContext {
         biome_path: path,
         host_file_source: &file_source,
         settings,
-        node_cache,
+        caches,
     };
     let doc_file_source = DocumentFileSource::Html(file_source);
     let mut nodes = Vec::new();
@@ -480,8 +481,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             );
             parse_embeds_tracked(&workspace_db, input)
         }
-        ParseEmbeddedMode::Stateless(node_cache) => {
-            parse_embeds(any_parse, path, settings, file_source, node_cache)
+        ParseEmbeddedMode::Stateless(caches) => {
+            parse_embeds(any_parse, path, settings, file_source, caches)
         }
     }
 }
@@ -1182,7 +1183,7 @@ fn parse_matched_embed(
                 content.content_offset,
                 js_source,
                 options,
-                ctx.node_cache,
+                &mut ctx.caches.javascript,
             );
 
             Some(ParsedEmbed {
@@ -1213,7 +1214,7 @@ fn parse_matched_embed(
                 content.text.text(),
                 css_source,
                 content.content_offset,
-                ctx.node_cache,
+                &mut ctx.caches.css,
                 options,
             );
 
@@ -1231,7 +1232,7 @@ fn parse_matched_embed(
             let parse = parse_json_with_offset_and_cache(
                 content.text.text(),
                 content.content_offset,
-                ctx.node_cache,
+                &mut ctx.caches.json,
                 options,
             );
 

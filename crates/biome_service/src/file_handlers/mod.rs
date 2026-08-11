@@ -414,9 +414,17 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) mode: ParseEmbeddedMode<'a>,
 }
 
+#[derive(Default)]
+pub(crate) struct ParseEmbeddedCaches {
+    pub(crate) javascript: NodeCache,
+    pub(crate) css: NodeCache,
+    pub(crate) json: NodeCache,
+    pub(crate) graphql: NodeCache,
+}
+
 pub(crate) enum ParseEmbeddedMode<'a> {
     Workspace(WorkspaceDb),
-    Stateless(&'a mut NodeCache),
+    Stateless(&'a mut ParseEmbeddedCaches),
 }
 
 type Parse = fn(&BiomePath, &SettingsWithEditor, WorkspaceDb) -> ParseResult;

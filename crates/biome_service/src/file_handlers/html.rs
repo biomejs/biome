@@ -487,7 +487,7 @@ struct EmbedParseContext<'a, 'b, 'cache> {
     biome_path: &'a BiomePath,
     host_file_source: &'a HtmlFileSource,
     settings: &'a SettingsWithEditor<'b>,
-    node_cache: &'cache mut NodeCache,
+    caches: &'cache mut super::ParseEmbeddedCaches,
 }
 
 fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {

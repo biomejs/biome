@@ -5,9 +5,9 @@ use crate::diagnostics::{NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::AstroFileHandler;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
-    FixAllParams, FixedFileResult, LintParams, LintResults, ParseEmbeddedMode, ParseEmbeddedParams,
-    ParseResult, ParsedOrigin, ParsedSnippetOrigin, ResolveBindingParams, ResolveDefinitionParams,
-    UpdateSnippetsNodes,
+    FixAllParams, FixedFileResult, LintParams, LintResults, ParseEmbeddedCaches, ParseEmbeddedMode,
+    ParseEmbeddedParams, ParseResult, ParsedOrigin, ParsedSnippetOrigin, ResolveBindingParams,
+    ResolveDefinitionParams, UpdateSnippetsNodes,
 };
 #[cfg(all(feature = "lang_js", feature = "lang_html"))]
 use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
@@ -167,7 +167,7 @@ struct ProcessFileState {
 #[derive(Default)]
 struct ParseCaches {
     document: NodeCache,
-    embedded: NodeCache,
+    embedded: ParseEmbeddedCaches,
 }
 
 impl ProcessFileState {
@@ -809,9 +809,22 @@ impl WorkspaceServerWithDb<'_> {
             FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
 
-        let should_parse_stateless = (biome_path.is_dependency() && !biome_path.is_manifest())
-            || (reason.is_index()
-                && self.is_path_ignored(PathIsIgnoredParams {
+        let retained_file_source = if reason.is_index() {
+            let db = self.get_db().into_untracked_db();
+            db.file_source_for_path(&path).and_then(|file| {
+                file.version(&db)
+                    .is_some()
+                    .then(|| db.source_from_index(file.document_source_index(&db)))
+                    .flatten()
+            })
+        } else {
+            None
+        };
+
+        let should_parse_stateless = reason.is_index()
+            && retained_file_source.is_none()
+            && ((biome_path.is_dependency() && !biome_path.is_manifest())
+                || self.is_path_ignored(PathIsIgnoredParams {
                     project_key,
                     path: biome_path.clone(),
                     is_dir: false,
@@ -819,7 +832,11 @@ impl WorkspaceServerWithDb<'_> {
                     ignore_kind: IgnoreKind::Ancestors,
                 })?);
 
-        let parsed = if should_parse_stateless {
+        let parsed = if let Some(file_source) = retained_file_source {
+            self.get_parse(project_key, &biome_path)
+                .ok()
+                .map(|parse| (ParsedOrigin::Workspace(parse.into()), file_source))
+        } else if should_parse_stateless {
             let limit = settings.as_ref().get_max_file_size(&path);
             if content.len() >= limit {
                 None
@@ -2064,12 +2081,12 @@ impl WorkspaceServerWithDb<'_> {
                 .get_settings_based_on_path(project_key, path)
                 .ok_or_else(WorkspaceError::no_project)?;
             let settings = self.settings_handle(&settings, None);
-            let mut node_cache = NodeCache::default();
+            let mut caches = ParseEmbeddedCaches::default();
             let mode = match parsed {
                 ParsedOrigin::Workspace(_) => {
                     ParseEmbeddedMode::Workspace(self.get_db().into_untracked_db())
                 }
-                ParsedOrigin::Stateless(_) => ParseEmbeddedMode::Stateless(&mut node_cache),
+                ParsedOrigin::Stateless(_) => ParseEmbeddedMode::Stateless(&mut caches),
             };
             self.parse_embedded_language_snippets(path, &parse, file_source, &settings, mode)
         }
@@ -3780,15 +3797,17 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }))
     }
 
-    /// Closes a file opened in the workspace.
+    /// Closes client-owned state for a file.
     ///
-    /// This only unloads the document from the workspace if the file is NOT
-    /// indexed by the scanner. If the scanner has the file indexed, it may
-    /// still be required for multi-file analysis.
+    /// Files indexed by the scanner are scheduled for reindexing so their
+    /// filesystem content replaces the client buffer.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         let path = params.path.as_path();
+        let is_indexed = self.is_indexed(path);
 
-        if self.is_indexed(path) {
+        self.db_remove_file_source(path);
+
+        if is_indexed {
             // This may look counter-intuitive, but we need to consider that the
             // file may have gone out-of-sync between the client and the
             // filesystem. So when the client closes it, and the scanner still
