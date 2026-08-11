@@ -391,7 +391,11 @@ fn parse_element_allowing_sfc_blocks(
     // MathML is foreign content, where Astro parses no expressions at all.
     let is_astro_math = Astro.is_supported(p) && opening_tag_name.eq_ignore_ascii_case("math");
 
-    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+    // `<>` opens a fragment in Astro; elsewhere a missing name is still an error.
+    let is_fragment = Astro.is_supported(p) && p.at(T![>]);
+    if !is_fragment {
+        parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+    }
 
     match html_framework(p) {
         HtmlFramework::Svelte => {
@@ -409,7 +413,8 @@ fn parse_element_allowing_sfc_blocks(
     attributes.parse_list(p);
     let is_raw_text_block =
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
-    let is_astro_raw = attributes.is_raw;
+    // A fragment has no name for the lexer to scan its closing tag for.
+    let is_astro_raw = attributes.is_raw && !is_fragment;
     // Astro still interpolates inside a `<textarea>`, so its text runs only to
     // the next `{` rather than all the way to the closing tag.
     let is_astro_rcdata =
@@ -503,7 +508,12 @@ fn parse_element_allowing_sfc_blocks(
                         continue;
                     }
 
-                    if !closing.text(p).contains(opening_tag_name.as_str()) {
+                    let closing_matches = if is_fragment {
+                        closing.text(p).trim() == "</>"
+                    } else {
+                        closing.text(p).contains(opening_tag_name.as_str())
+                    };
+                    if !closing_matches {
                         p.error(
                             expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
                         );

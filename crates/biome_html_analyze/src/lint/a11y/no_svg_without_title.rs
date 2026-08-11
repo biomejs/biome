@@ -189,7 +189,7 @@ fn has_valid_title_element(html_child_list: &HtmlElementList) -> Option<bool> {
     let first_child = html_child_list.into_iter().next()?;
     let html_element = first_child.as_html_element()?;
     let opening_element = html_element.opening_element().ok()?;
-    let name = opening_element.name().ok()?;
+    let name = opening_element.name()?;
     let name_text = name.token_text_trimmed()?;
     let has_title_name = name_text == "title";
     if !has_title_name {

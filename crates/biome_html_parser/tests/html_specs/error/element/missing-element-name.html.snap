@@ -23,7 +23,7 @@ HtmlRoot {
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
-                name: missing (required),
+                name: missing (optional),
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@1..2 ">" [] [],
             },
@@ -31,7 +31,7 @@ HtmlRoot {
             closing_element: HtmlClosingElement {
                 l_angle_token: L_ANGLE@2..3 "<" [] [],
                 slash_token: SLASH@3..4 "/" [] [],
-                name: missing (required),
+                name: missing (optional),
                 r_angle_token: R_ANGLE@4..5 ">" [] [],
             },
         },

@@ -84,7 +84,7 @@ impl Rule for UseValidAnchor {
         let node = ctx.query();
         let file_source = ctx.source_type::<HtmlFileSource>();
 
-        let name = node.name().ok()?.token_text_trimmed()?;
+        let name = node.name()?.token_text_trimmed()?;
 
         if (file_source.is_html() && name.eq_ignore_ascii_case("a"))
             || (!file_source.is_html() && name == "a")

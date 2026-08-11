@@ -222,7 +222,7 @@ impl NoUndeclaredClasses {
 
         // Try casting to opening or self-closing element
         let tag_name = if let Some(opening) = HtmlOpeningElement::cast_ref(&element_node) {
-            opening.name().ok()
+            opening.name()
         } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element_node) {
             self_closing.name().ok()
         } else {
