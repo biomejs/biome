@@ -1,0 +1,352 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<textarea>{value}</textarea>
+<textarea>  a {x} b  </textarea>
+<textarea><div></textarea>
+<textarea>  plain  </textarea>
+<textarea></textarea>
+<textarea is:raw>{value}</textarea>
+<pre>{value}</pre>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@1..9 "textarea" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@10..11 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..16 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@16..17 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@17..18 "<" [] [],
+                slash_token: SLASH@18..19 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@19..27 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@27..28 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@28..30 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@30..38 "textarea" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@38..39 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@39..43 "  a " [] [],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@43..44 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@44..45 "x" [] [],
+                    },
+                    r_curly_token: R_CURLY@45..46 "}" [] [],
+                },
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@46..50 " b  " [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@50..51 "<" [] [],
+                slash_token: SLASH@51..52 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@52..60 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@60..61 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@61..63 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@63..71 "textarea" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@71..72 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@72..77 "<div>" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@77..78 "<" [] [],
+                slash_token: SLASH@78..79 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@79..87 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@87..88 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@88..90 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@90..98 "textarea" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@98..99 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@99..108 "  plain  " [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@108..109 "<" [] [],
+                slash_token: SLASH@109..110 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@110..118 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@118..119 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@119..121 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@121..129 "textarea" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@129..130 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@130..131 "<" [] [],
+                slash_token: SLASH@131..132 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@132..140 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@140..141 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@141..143 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@143..152 "textarea" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AstroIsDirective {
+                        is_token: IS_KW@152..154 "is" [] [],
+                        value: AstroDirectiveValue {
+                            colon_token_token: COLON@154..155 ":" [] [],
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@155..158 "raw" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@158..159 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@159..166 "{value}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@166..167 "<" [] [],
+                slash_token: SLASH@167..168 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@168..176 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@176..177 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@177..179 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: PRE_KW@179..182 "pre" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@182..183 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@183..190 "{value}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@190..191 "<" [] [],
+                slash_token: SLASH@191..192 "/" [] [],
+                name: HtmlTagName {
+                    value_token: PRE_KW@192..195 "pre" [] [],
+                },
+                r_angle_token: R_ANGLE@195..196 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@196..197 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..197
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..196
+    0: HTML_ELEMENT@0..28
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: TEXTAREA_KW@1..9 "textarea" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..17
+        0: HTML_SINGLE_TEXT_EXPRESSION@10..17
+          0: L_CURLY@10..11 "{" [] []
+          1: HTML_TEXT_EXPRESSION@11..16
+            0: HTML_LITERAL@11..16 "value" [] []
+          2: R_CURLY@16..17 "}" [] []
+      2: HTML_CLOSING_ELEMENT@17..28
+        0: L_ANGLE@17..18 "<" [] []
+        1: SLASH@18..19 "/" [] []
+        2: HTML_TAG_NAME@19..27
+          0: TEXTAREA_KW@19..27 "textarea" [] []
+        3: R_ANGLE@27..28 ">" [] []
+    1: HTML_ELEMENT@28..61
+      0: HTML_OPENING_ELEMENT@28..39
+        0: L_ANGLE@28..30 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@30..38
+          0: TEXTAREA_KW@30..38 "textarea" [] []
+        2: HTML_ATTRIBUTE_LIST@38..38
+        3: R_ANGLE@38..39 ">" [] []
+      1: HTML_ELEMENT_LIST@39..50
+        0: HTML_EMBEDDED_CONTENT@39..43
+          0: HTML_LITERAL@39..43 "  a " [] []
+        1: HTML_SINGLE_TEXT_EXPRESSION@43..46
+          0: L_CURLY@43..44 "{" [] []
+          1: HTML_TEXT_EXPRESSION@44..45
+            0: HTML_LITERAL@44..45 "x" [] []
+          2: R_CURLY@45..46 "}" [] []
+        2: HTML_EMBEDDED_CONTENT@46..50
+          0: HTML_LITERAL@46..50 " b  " [] []
+      2: HTML_CLOSING_ELEMENT@50..61
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_TAG_NAME@52..60
+          0: TEXTAREA_KW@52..60 "textarea" [] []
+        3: R_ANGLE@60..61 ">" [] []
+    2: HTML_ELEMENT@61..88
+      0: HTML_OPENING_ELEMENT@61..72
+        0: L_ANGLE@61..63 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@63..71
+          0: TEXTAREA_KW@63..71 "textarea" [] []
+        2: HTML_ATTRIBUTE_LIST@71..71
+        3: R_ANGLE@71..72 ">" [] []
+      1: HTML_ELEMENT_LIST@72..77
+        0: HTML_EMBEDDED_CONTENT@72..77
+          0: HTML_LITERAL@72..77 "<div>" [] []
+      2: HTML_CLOSING_ELEMENT@77..88
+        0: L_ANGLE@77..78 "<" [] []
+        1: SLASH@78..79 "/" [] []
+        2: HTML_TAG_NAME@79..87
+          0: TEXTAREA_KW@79..87 "textarea" [] []
+        3: R_ANGLE@87..88 ">" [] []
+    3: HTML_ELEMENT@88..119
+      0: HTML_OPENING_ELEMENT@88..99
+        0: L_ANGLE@88..90 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@90..98
+          0: TEXTAREA_KW@90..98 "textarea" [] []
+        2: HTML_ATTRIBUTE_LIST@98..98
+        3: R_ANGLE@98..99 ">" [] []
+      1: HTML_ELEMENT_LIST@99..108
+        0: HTML_EMBEDDED_CONTENT@99..108
+          0: HTML_LITERAL@99..108 "  plain  " [] []
+      2: HTML_CLOSING_ELEMENT@108..119
+        0: L_ANGLE@108..109 "<" [] []
+        1: SLASH@109..110 "/" [] []
+        2: HTML_TAG_NAME@110..118
+          0: TEXTAREA_KW@110..118 "textarea" [] []
+        3: R_ANGLE@118..119 ">" [] []
+    4: HTML_ELEMENT@119..141
+      0: HTML_OPENING_ELEMENT@119..130
+        0: L_ANGLE@119..121 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@121..129
+          0: TEXTAREA_KW@121..129 "textarea" [] []
+        2: HTML_ATTRIBUTE_LIST@129..129
+        3: R_ANGLE@129..130 ">" [] []
+      1: HTML_ELEMENT_LIST@130..130
+      2: HTML_CLOSING_ELEMENT@130..141
+        0: L_ANGLE@130..131 "<" [] []
+        1: SLASH@131..132 "/" [] []
+        2: HTML_TAG_NAME@132..140
+          0: TEXTAREA_KW@132..140 "textarea" [] []
+        3: R_ANGLE@140..141 ">" [] []
+    5: HTML_ELEMENT@141..177
+      0: HTML_OPENING_ELEMENT@141..159
+        0: L_ANGLE@141..143 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@143..152
+          0: TEXTAREA_KW@143..152 "textarea" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@152..158
+          0: ASTRO_IS_DIRECTIVE@152..158
+            0: IS_KW@152..154 "is" [] []
+            1: ASTRO_DIRECTIVE_VALUE@154..158
+              0: COLON@154..155 ":" [] []
+              1: HTML_ATTRIBUTE_NAME@155..158
+                0: HTML_LITERAL@155..158 "raw" [] []
+              2: (empty)
+        3: R_ANGLE@158..159 ">" [] []
+      1: HTML_ELEMENT_LIST@159..166
+        0: HTML_EMBEDDED_CONTENT@159..166
+          0: HTML_LITERAL@159..166 "{value}" [] []
+      2: HTML_CLOSING_ELEMENT@166..177
+        0: L_ANGLE@166..167 "<" [] []
+        1: SLASH@167..168 "/" [] []
+        2: HTML_TAG_NAME@168..176
+          0: TEXTAREA_KW@168..176 "textarea" [] []
+        3: R_ANGLE@176..177 ">" [] []
+    6: HTML_ELEMENT@177..196
+      0: HTML_OPENING_ELEMENT@177..183
+        0: L_ANGLE@177..179 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@179..182
+          0: PRE_KW@179..182 "pre" [] []
+        2: HTML_ATTRIBUTE_LIST@182..182
+        3: R_ANGLE@182..183 ">" [] []
+      1: HTML_ELEMENT_LIST@183..190
+        0: HTML_EMBEDDED_CONTENT@183..190
+          0: HTML_LITERAL@183..190 "{value}" [] []
+      2: HTML_CLOSING_ELEMENT@190..196
+        0: L_ANGLE@190..191 "<" [] []
+        1: SLASH@191..192 "/" [] []
+        2: HTML_TAG_NAME@192..195
+          0: PRE_KW@192..195 "pre" [] []
+        3: R_ANGLE@195..196 ">" [] []
+  4: EOF@196..197 "" [Newline("\n")] []
+
+```

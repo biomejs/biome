@@ -403,7 +403,12 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
     // A fragment has no name for the lexer to scan its closing tag for.
     let is_astro_raw = attributes.is_raw && !is_fragment;
-    let is_raw_text = is_embedded_language_tag || is_raw_text_block || is_astro_raw;
+    // Astro still interpolates inside a `<textarea>`, so its text runs only to
+    // the next `{` rather than all the way to the closing tag.
+    let is_astro_rcdata =
+        Astro.is_supported(p) && name_kind == T![textarea] && !is_astro_raw && !is_raw_text_block;
+    let is_raw_text =
+        (is_embedded_language_tag && !is_astro_rcdata) || is_raw_text_block || is_astro_raw;
 
     if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
@@ -423,6 +428,8 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
                 HtmlLexContext::EmbeddedLanguage(HtmlEmbeddedLanguage::RawTextBlock {
                     name: name_range,
                 })
+            } else if is_astro_rcdata {
+                ASTRO_TEXTAREA_CONTEXT
             } else if is_embedded_language_tag {
                 HtmlLexContext::EmbeddedLanguage(match name_kind {
                     T![script] => HtmlEmbeddedLanguage::Script,
@@ -453,7 +460,10 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
             p.re_lex(html_text_re_lex_context(p));
         }
 
-        if is_raw_text {
+        if is_astro_rcdata {
+            parse_astro_textarea_children(p);
+            parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag);
+        } else if is_raw_text {
             // raw text tags always have 1 element as content
             let list = p.start();
             if p.at(HTML_LITERAL) {
@@ -497,6 +507,31 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
 
         Present(previous.complete(p, HTML_ELEMENT))
     }
+}
+
+const ASTRO_TEXTAREA_CONTEXT: HtmlLexContext = HtmlLexContext::RawTextWithExpressions(
+    HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Textarea),
+);
+
+/// Reads the children of an Astro `<textarea>`, which alternate between runs of
+/// raw text and interpolations. The text runs stay [`HTML_EMBEDDED_CONTENT`] so
+/// that a `<textarea>` without interpolations parses exactly as it did before.
+fn parse_astro_textarea_children(p: &mut HtmlParser) {
+    let list = p.start();
+    loop {
+        if p.at(HTML_LITERAL) {
+            let m = p.start();
+            p.bump_with_context(HTML_LITERAL, ASTRO_TEXTAREA_CONTEXT);
+            m.complete(p, HTML_EMBEDDED_CONTENT);
+        } else if p.at(T!['{']) {
+            if parse_single_text_expression(p, ASTRO_TEXTAREA_CONTEXT).is_absent() {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    list.complete(p, HTML_ELEMENT_LIST);
 }
 
 fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
