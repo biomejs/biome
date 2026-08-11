@@ -1,5 +1,5 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
-use biome_embeds::EmbeddedData;
+use biome_embeds::{EmbeddedData, EmbeddedSourceData};
 use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
@@ -23,72 +23,82 @@ enum EmbeddedSource {
     Workspace {
         db: Rc<dyn LanguageDb>,
         path: Utf8PathBuf,
+        source: EmbeddedSourceData,
     },
-    Interned(Arc<EmbeddedData>),
+    Direct(Arc<EmbeddedData>),
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf) -> Self {
+    pub(crate) fn new(
+        db: Rc<dyn LanguageDb>,
+        path: Utf8PathBuf,
+        source: EmbeddedSourceData,
+    ) -> Self {
         Self {
-            source: EmbeddedSource::Workspace { db, path },
+            source: EmbeddedSource::Workspace { db, path, source },
         }
     }
 
     pub(crate) fn from_data(data: Arc<EmbeddedData>) -> Self {
         Self {
-            source: EmbeddedSource::Interned(data),
+            source: EmbeddedSource::Direct(data),
         }
     }
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => get_binding_by_name(
+            EmbeddedSource::Workspace { db, path, source } => get_binding_by_name(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedBindingTokenText::new(db.as_ref(), path.clone(), binding),
             )
             .is_some(),
-            EmbeddedSource::Interned(data) => data.contains_binding(binding.text()),
+            EmbeddedSource::Direct(data) => data.contains_binding(binding.text()),
         }
     }
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => get_binding_by_text(
+            EmbeddedSource::Workspace { db, path, source } => get_binding_by_text(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedBindingText::new(db.as_ref(), path.clone(), binding.to_string()),
             )
             .is_some(),
-            EmbeddedSource::Interned(data) => data.contains_binding(binding),
+            EmbeddedSource::Direct(data) => data.contains_binding(binding),
         }
     }
 
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => is_value_reference_used(
+            EmbeddedSource::Workspace { db, path, source } => is_value_reference_used(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
-            EmbeddedSource::Interned(data) => data.is_used_as_value(identifier.text()),
+            EmbeddedSource::Direct(data) => data.is_used_as_value(identifier.text()),
         }
     }
 
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => is_type_reference_used(
+            EmbeddedSource::Workspace { db, path, source } => is_type_reference_used(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
-            EmbeddedSource::Interned(data) => data.is_used_as_type(identifier.text()),
+            EmbeddedSource::Direct(data) => data.is_used_as_type(identifier.text()),
         }
     }
 
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => is_reference_used(
+            EmbeddedSource::Workspace { db, path, source } => is_reference_used(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
-            EmbeddedSource::Interned(data) => data.is_used(identifier.text()),
+            EmbeddedSource::Direct(data) => data.is_used(identifier.text()),
         }
     }
 
@@ -97,26 +107,23 @@ impl EmbeddedService {
     /// See also: https://svelte.dev/docs/svelte/stores
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => is_svelte_store_reference_used(
+            EmbeddedSource::Workspace { db, path, source } => is_svelte_store_reference_used(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
-            EmbeddedSource::Interned(data) => data.is_svelte_store_used(identifier.text()),
+            EmbeddedSource::Direct(data) => data.is_svelte_store_used(identifier.text()),
         }
     }
 
-    /// Vue custom directives are a special case. The template spells them in
-    /// kebab-case (e.g. `v-highlight`), while the JS binding they refer to is
-    /// spelled in camelCase (e.g. `vHighlight`).
-    ///
-    /// See also: https://vuejs.org/guide/reusability/custom-directives.html
     pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => is_vue_directive_reference_used(
+            EmbeddedSource::Workspace { db, path, source } => is_vue_directive_reference_used(
                 db.as_ref(),
+                source.intern(db.as_ref()),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
-            EmbeddedSource::Interned(data) => data.is_vue_directive_used(identifier.text()),
+            EmbeddedSource::Direct(data) => data.is_vue_directive_used(identifier.text()),
         }
     }
 }

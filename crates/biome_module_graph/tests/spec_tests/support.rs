@@ -2,14 +2,13 @@ use std::collections::BTreeMap;
 
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_db::{ParsedSnippet, ParsedSource};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource};
 use biome_module_graph::{
-    ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
+    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module,
+    resolve_js_module,
 };
-use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_service::Workspace;
 use biome_service::db::WorkspaceDb;
@@ -17,13 +16,13 @@ use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 
 type HtmlTestFile<'a> = (
     &'a str,
     &'a str,
     HtmlFileSource,
-    Vec<(AnyParse, CssFileSource)>,
+    Vec<HtmlEmbeddedContent>,
 );
 
 pub fn add_js_modules(
@@ -84,15 +83,10 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
     let mut db = WorkspaceDb::default();
     add_css_modules(&mut db, &fs, &ProjectLayout::default(), &paths);
 
-    for (path, source) in files {
-        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
-        let parsed = ParsedSource::new(&db, Utf8PathBuf::from(*path), parse.into(), 0, Vec::new());
-        db.insert_file(Utf8Path::new(path), parsed);
-    }
     (fs, db)
 }
 
-pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, CssFileSource) {
+pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbeddedContent {
     let css_modules = match file_source.as_embedding_kind() {
         CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
         CssEmbeddingKind::Html(
@@ -108,7 +102,7 @@ pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, C
             ..Default::default()
         },
     );
-    (parsed.into(), file_source)
+    HtmlEmbeddedContent::Css(parsed.tree(), file_source, 0.into())
 }
 
 pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> WorkspaceDb {
@@ -116,32 +110,15 @@ pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> Works
     let cache = PathInfoCache::default();
     for (path, source, file_source, embedded) in files {
         let path = BiomePath::new(*path);
-        let snippets = embedded
-            .iter()
-            .map(|(parsed, file_source)| {
-                let source_index = db.insert_source(DocumentFileSource::Css(*file_source));
-                ParsedSnippet::new(
-                    &db,
-                    parsed.clone(),
-                    Default::default(),
-                    Default::default(),
-                    0.into(),
-                    source_index,
-                )
-            })
-            .collect();
-        let parsed = biome_html_parser::parse_html(source, file_source.into());
-        let source_index = db.insert_source(DocumentFileSource::Html(*file_source));
-        let parsed_source = ParsedSource::new(
-            &db,
-            path.as_path().to_path_buf(),
-            parsed.into(),
-            source_index,
-            snippets,
+        let root = biome_html_parser::parse_html(source, file_source.into()).tree();
+        let (info, _, _) = resolve_html_module(
+            root,
+            embedded,
+            &path,
+            fs,
+            &ProjectLayout::default(),
+            &cache,
         );
-        db.insert_file(path.as_path(), parsed_source);
-        let (info, _, _) =
-            resolve_html_module(&db, &path, fs, &ProjectLayout::default(), &cache).unwrap();
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
     }
     db

@@ -3,15 +3,12 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
-use biome_db::ParsedSource;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
-use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
-use biome_rowan::AstNode;
+use biome_languages::JsFileSource;
+use biome_service::db::WorkspaceDb;
 use biome_test_utils::BenchCase;
-use camino::Utf8Path;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
-use salsa::Storage;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -50,37 +47,6 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     code,
                     |b, _| {
-                        #[salsa::db]
-                        #[derive(Default)]
-                        struct TestDb {
-                            parsed: Option<ParsedSource>,
-                            js_source: Option<JsFileSource>,
-                            storage: Storage<Self>,
-                        }
-
-                        #[salsa::db]
-                        impl LanguageDb for TestDb {
-                            fn source_from_index(
-                                &self,
-                                _index: usize,
-                            ) -> Option<DocumentFileSource> {
-                                Some(DocumentFileSource::Js(JsFileSource::tsx()))
-                            }
-                        }
-
-                        #[salsa::db]
-                        impl biome_db::Db for TestDb {
-                            fn parsed_source_for_path(
-                                &self,
-                                _path: &Utf8Path,
-                            ) -> Option<ParsedSource> {
-                                self.parsed
-                            }
-                        }
-
-                        #[salsa::db]
-                        impl salsa::Database for TestDb {}
-
                         let file_source =
                             JsFileSource::try_from(test_case.path()).unwrap_or_default();
                         let parse =
@@ -100,17 +66,9 @@ fn bench_analyzer(criterion: &mut Criterion) {
                         );
 
                         b.iter(|| {
-                            let mut db = TestDb::default();
-                            db.parsed = Some(ParsedSource::new(
-                                &db,
-                                test_case.path().to_path_buf(),
-                                parse.tree().syntax().as_send().unwrap().into(),
-                                0,
-                                vec![],
-                            ));
-                            db.js_source = Some(file_source);
-                            let services =
-                                JsAnalyzerServices::default().with_language_db(Rc::new(db));
+                            let services = JsAnalyzerServices::default()
+                                .with_language_db(Rc::new(WorkspaceDb::default()))
+                                .with_source_type(file_source);
                             biome_js_analyze::analyze(
                                 &parse.tree(),
                                 filter,

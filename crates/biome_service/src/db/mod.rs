@@ -10,7 +10,7 @@ use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
 use biome_configuration::vcs::VcsClientKind;
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::FileSource;
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
@@ -18,8 +18,6 @@ use biome_module_graph::{
     InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
     ModuleInfoKind, TypeDb, module_for_key,
 };
-use biome_parser::AnyParse;
-use biome_rowan::SendNode;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -167,8 +165,8 @@ pub(crate) enum ProjectUpdateMode {
 #[salsa::db]
 #[derive(Clone)]
 pub struct WorkspaceDb {
-    /// It maps a file path to its corresponding parsed version.
-    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    /// Maps file paths to their Salsa input handles.
+    files: Arc<HashMap<Utf8PathBuf, FileSource>>,
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
@@ -212,7 +210,7 @@ impl Default for WorkspaceDb {
 /// runs. This type is what makes that possible.
 #[derive(Clone)]
 pub struct WorkspaceDbData {
-    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    files: Arc<HashMap<Utf8PathBuf, FileSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -238,8 +236,7 @@ impl WorkspaceDbData {
         self.projects.pin().remove(&project_key);
     }
 
-    /// Removes the parsed source cached for `path`.
-    pub fn remove_file(&self, path: &Utf8Path) {
+    pub fn remove_file_source(&self, path: &Utf8Path) {
         self.files.pin().remove(path);
     }
 
@@ -344,39 +341,39 @@ impl WorkspaceDb {
         self.data().insert_source(document_file_source)
     }
 
-    pub fn insert_file(&mut self, path: &Utf8Path, file: ParsedSource) {
+    pub fn insert_file(&mut self, path: &Utf8Path, file: FileSource) {
         self.files.pin().insert(path.to_path_buf(), file);
     }
 
-    pub fn update_file(&mut self, path: &Utf8Path, file: ParsedSource) {
+    pub fn update_file(&mut self, path: &Utf8Path, file: FileSource) {
         self.files.pin().update(path.to_path_buf(), |_| file);
     }
 
     pub fn update_file_with_mode(
         &mut self,
         path: &Utf8Path,
-        file: ParsedSource,
+        file: FileSource,
         mode: ParsedSourceUpdateMode,
-    ) -> ParsedSource {
-        let parsed = file.parsed(self).clone();
+    ) -> FileSource {
+        let content = file.content(self).clone();
         let document_source_index = file.document_source_index(self);
-        let snippets = file.snippets(self).clone();
-        self.update_or_insert_file(path, parsed, document_source_index, snippets, mode)
+        let version = file.version(self);
+        self.update_or_insert_file(path, content, document_source_index, version, mode)
     }
 
     pub fn replace_file(
         &mut self,
         path: &Utf8Path,
-        parsed: AnyParse,
+        content: String,
         document_source_index: usize,
-        snippets: Vec<ParsedSnippet>,
-    ) -> ParsedSource {
-        let file = ParsedSource::new(
+        version: Option<i32>,
+    ) -> FileSource {
+        let file = FileSource::new(
             self,
             path.to_path_buf(),
-            parsed,
+            content,
             document_source_index,
-            snippets,
+            version,
         );
         self.files.pin().insert(path.to_path_buf(), file);
         file
@@ -385,15 +382,15 @@ impl WorkspaceDb {
     pub fn upsert_file(
         &mut self,
         path: &Utf8Path,
-        parsed: AnyParse,
+        content: String,
         document_source_index: usize,
-        snippets: Vec<ParsedSnippet>,
-    ) -> ParsedSource {
+        version: Option<i32>,
+    ) -> FileSource {
         self.update_or_insert_file(
             path,
-            parsed,
+            content,
             document_source_index,
-            snippets,
+            version,
             ParsedSourceUpdateMode::Setters,
         )
     }
@@ -401,26 +398,26 @@ impl WorkspaceDb {
     pub fn update_or_insert_file(
         &mut self,
         path: &Utf8Path,
-        parsed: AnyParse,
+        content: String,
         document_source_index: usize,
-        snippets: Vec<ParsedSnippet>,
+        version: Option<i32>,
         mode: ParsedSourceUpdateMode,
-    ) -> ParsedSource {
+    ) -> FileSource {
         if mode == ParsedSourceUpdateMode::Replace {
-            return self.replace_file(path, parsed, document_source_index, snippets);
+            return self.replace_file(path, content, document_source_index, version);
         }
 
         let existing_file = { self.files.pin().get(path).copied() };
 
         if let Some(existing_file) = existing_file {
-            existing_file.set_parsed(self).to(parsed);
+            existing_file.set_content(self).to(content);
             existing_file
                 .set_document_source_index(self)
                 .to(document_source_index);
-            existing_file.set_snippets(self).to(snippets);
+            existing_file.set_version(self).to(version);
             existing_file
         } else {
-            self.replace_file(path, parsed, document_source_index, snippets)
+            self.replace_file(path, content, document_source_index, version)
         }
     }
 
@@ -429,16 +426,16 @@ impl WorkspaceDb {
         self.modules.pin().get(path).copied()
     }
 
-    pub fn get_parsed_source(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    pub fn get_file(&self, path: &Utf8Path) -> Option<FileSource> {
         self.files.pin().get(path).copied()
     }
 
-    /// Returns the number of cached parsed sources.
+    /// Returns the number of registered file sources.
     ///
     /// Only used by tests to check that eviction empties the collection,
     /// rather than only the specific paths a test looks up.
     #[cfg(test)]
-    pub(crate) fn parsed_sources_len(&self) -> usize {
+    pub(crate) fn file_sources_len(&self) -> usize {
         self.files.pin().len()
     }
 
@@ -477,37 +474,6 @@ impl WorkspaceDb {
             let module = ModuleInfo::new(self, path.clone(), kind);
             self.insert_module(path, module);
             module
-        }
-    }
-
-    /// It updates the CST of an existing parsed source
-    pub fn update_parsed_root(&mut self, path: &Utf8Path, new_root: SendNode) {
-        self.update_parsed_root_with_mode(path, new_root, ParsedSourceUpdateMode::Setters);
-    }
-
-    /// It updates the CST of an existing parsed source
-    pub fn update_parsed_root_with_mode(
-        &mut self,
-        path: &Utf8Path,
-        new_root: SendNode,
-        mode: ParsedSourceUpdateMode,
-    ) {
-        if let Some(parsed_source) = self.get_parsed_source(path) {
-            let mut any_parse = parsed_source.parsed(self).clone();
-            any_parse.set_new_root(new_root);
-            match mode {
-                ParsedSourceUpdateMode::Replace => {
-                    self.replace_file(
-                        path,
-                        any_parse,
-                        parsed_source.document_source_index(self),
-                        parsed_source.snippets(self).clone(),
-                    );
-                }
-                ParsedSourceUpdateMode::Setters => {
-                    parsed_source.set_parsed(self).to(any_parse);
-                }
-            }
         }
     }
 
@@ -761,7 +727,7 @@ impl WorkspaceDb {
 /// database value with fresh Salsa local state and shared workspace data.
 #[derive(Clone)]
 pub struct SharedWorkspaceDb {
-    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    files: Arc<HashMap<Utf8PathBuf, FileSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -832,8 +798,14 @@ impl salsa::Database for WorkspaceDb {}
 
 #[salsa::db]
 impl biome_db::Db for WorkspaceDb {
-    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    fn file_source_for_path(&self, path: &Utf8Path) -> Option<FileSource> {
         self.files.pin().get(path).copied()
+    }
+
+    fn for_each_file_source(&self, f: &mut dyn FnMut(FileSource)) {
+        for file in self.files.pin().values() {
+            f(*file);
+        }
     }
 }
 
@@ -992,15 +964,6 @@ mod tests {
         test_settings_query(db, input)
     }
 
-    fn parse_js(source: &str) -> AnyParse {
-        parse(
-            source,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into()
-    }
-
     fn settings_query_test_db() -> (WorkspaceDb, Events) {
         let events = Events::default();
         let storage = Storage::new(Some(Box::new({
@@ -1105,16 +1068,15 @@ mod tests {
         let path = BiomePath::new(path);
         let fs = MemoryFileSystem::default();
         let source_index = db.insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
-        let parsed = parse_html("", HtmlParserOptions::default());
-        db.replace_file(path.as_path(), parsed.into(), source_index, vec![]);
+        let root = parse_html("", HtmlParserOptions::default()).tree();
         let (module, _, _) = resolve_html_module(
-            db,
+            root,
+            &[],
             &path,
             &fs,
             &ProjectLayout::default(),
             &PathInfoCache::default(),
-        )
-        .expect("the parsed HTML source was just inserted");
+        );
         ModuleInfo::new(
             db,
             path.as_path().to_path_buf(),
@@ -1123,7 +1085,7 @@ mod tests {
     }
 
     #[salsa::tracked]
-    fn blocking_document_source_index(db: &dyn Db, file: ParsedSource) -> usize {
+    fn blocking_document_source_index(db: &dyn Db, file: FileSource) -> usize {
         SETTER_READER_STARTED.wait();
 
         let timeout = Instant::now() + Duration::from_secs(2);
@@ -1140,11 +1102,11 @@ mod tests {
         let mut db = WorkspaceDb::default();
         let path = Utf8Path::new("test.js");
 
-        let file = db.upsert_file(path, parse_js("let a = 1;"), 0, vec![]);
-        let updated_file = db.upsert_file(path, parse_js("let b = 2;"), 0, vec![]);
+        let file = db.upsert_file(path, "let a = 1;".to_string(), 0, None);
+        let updated_file = db.upsert_file(path, "let b = 2;".to_string(), 0, None);
 
         assert_eq!(file.as_id(), updated_file.as_id());
-        assert_eq!(db.get_parsed_source(path).unwrap().as_id(), file.as_id());
+        assert_eq!(db.get_file(path).unwrap().as_id(), file.as_id());
     }
 
     #[test]
@@ -1152,12 +1114,12 @@ mod tests {
         let mut db = WorkspaceDb::default();
         let path = Utf8Path::new("test.js");
 
-        let file = db.replace_file(path, parse_js("let a = 1;"), 0, vec![]);
-        let updated_file = db.replace_file(path, parse_js("let b = 2;"), 0, vec![]);
+        let file = db.replace_file(path, "let a = 1;".to_string(), 0, None);
+        let updated_file = db.replace_file(path, "let b = 2;".to_string(), 0, None);
 
         assert_ne!(file.as_id(), updated_file.as_id());
         assert_eq!(
-            db.get_parsed_source(path).unwrap().as_id(),
+            db.get_file(path).unwrap().as_id(),
             updated_file.as_id()
         );
     }
@@ -1214,9 +1176,9 @@ mod tests {
 
         db.upsert_file(
             Utf8Path::new("project/file.js"),
-            parse_js("let a = 1;"),
+            "let a = 1;".to_string(),
             0,
-            vec![],
+            None,
         );
         take_events(&events);
         run_test_settings_query(&db, &query);
@@ -1283,9 +1245,9 @@ mod tests {
 
         db.upsert_file(
             Utf8Path::new("project/file.js"),
-            parse_js("let a = 1;"),
+            "let a = 1;".to_string(),
             0,
-            vec![],
+            None,
         );
         take_events(&events);
         resolve_js_format_options(
@@ -1385,9 +1347,9 @@ mod tests {
 
         db.upsert_file(
             Utf8Path::new("project/file.js"),
-            parse_js("let a = 1;"),
+            "let a = 1;".to_string(),
             0,
-            vec![],
+            None,
         );
         take_events(&events);
         resolve_js_analyzer_options(
@@ -1559,9 +1521,9 @@ mod tests {
 
         db.upsert_file(
             Utf8Path::new("project/file.js"),
-            parse_js("let a = 1;"),
+            "let a = 1;".to_string(),
             0,
-            vec![],
+            None,
         );
         take_events(&events);
         resolved_manifest_visitor_for_test(
@@ -1997,7 +1959,7 @@ mod tests {
     fn setter_update_cancels_running_query_without_deadlock() {
         let mut db = WorkspaceDb::default();
         let path = Utf8PathBuf::from("test.js");
-        let file = db.upsert_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        let file = db.upsert_file(&path, "let a = 1;".to_string(), 0, None);
         let (writer_finished_tx, writer_finished_rx) = mpsc::channel();
 
         std::thread::scope(|scope| {
@@ -2009,7 +1971,7 @@ mod tests {
             let writer_path = path.clone();
             scope.spawn(move || {
                 SETTER_READER_STARTED.wait();
-                db.upsert_file(&writer_path, parse_js("let b = 2;"), 0, vec![]);
+                db.upsert_file(&writer_path, "let b = 2;".to_string(), 0, None);
                 writer_finished_tx.send(()).unwrap();
             });
 

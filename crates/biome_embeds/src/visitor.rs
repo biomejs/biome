@@ -1,7 +1,7 @@
+use crate::embedded::EmbeddedSource;
 use crate::bindings::EmbeddedBinding;
 use crate::data::EmbeddedData;
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
-use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
@@ -110,19 +110,20 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
 #[salsa::tracked(returns(ref))]
 pub fn embedded_bindings_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Vec<Vec<EmbeddedBinding>> {
+    let file = source.file_source(db);
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return Vec::new();
     };
-    let snippets = file
+    let snippets = source
         .snippets(db)
         .iter()
         .filter_map(|snippet| {
-            let file_source = db.source_from_index(snippet.document_source_index(db))?;
+            let file_source = db.source_from_index(snippet.document_source_index())?;
             Some(EmbeddedSnippet::new(
-                snippet.parsed(db),
-                snippet.content_range(db),
+                snippet.parsed(),
+                snippet.content_range(),
                 file_source,
             ))
         })
@@ -130,7 +131,7 @@ pub fn embedded_bindings_from_source(
 
     vec![collect_embedded_bindings(
         host_source,
-        file.parsed(db),
+        source.parsed(db),
         &snippets,
     )]
 }
@@ -186,9 +187,9 @@ fn collect_embedded_bindings(
 #[salsa::tracked(returns(ref))]
 pub fn embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Vec<Vec<EmbeddedValueReference>> {
-    let Some(builder) = collect_embedded_references_from_source(db, file) else {
+    let Some(builder) = collect_embedded_references_from_source(db, source) else {
         return Vec::new();
     };
 
@@ -198,9 +199,9 @@ pub fn embedded_references_from_source(
 #[salsa::tracked(returns(ref))]
 pub fn embedded_type_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Vec<Vec<EmbeddedTypeReference>> {
-    let Some(builder) = collect_embedded_references_from_source(db, file) else {
+    let Some(builder) = collect_embedded_references_from_source(db, source) else {
         return Vec::new();
     };
 
@@ -209,23 +210,24 @@ pub fn embedded_type_references_from_source(
 
 fn collect_embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Option<EmbeddedReferencesBuilder> {
+    let file = source.file_source(db);
     let host_source = db.source_from_index(file.document_source_index(db))?;
-    let snippets = file
+    let snippets = source
         .snippets(db)
         .iter()
         .filter_map(|snippet| {
-            let file_source = db.source_from_index(snippet.document_source_index(db))?;
+            let file_source = db.source_from_index(snippet.document_source_index())?;
             Some(EmbeddedSnippet::new(
-                snippet.parsed(db),
-                snippet.content_range(db),
+                snippet.parsed(),
+                snippet.content_range(),
                 file_source,
             ))
         })
         .collect::<Vec<_>>();
 
-    collect_embedded_references(host_source, file.parsed(db), &snippets)
+    collect_embedded_references(host_source, source.parsed(db), &snippets)
 }
 
 fn collect_embedded_references(

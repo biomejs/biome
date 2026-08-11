@@ -1,3 +1,4 @@
+use crate::embedded::EmbeddedSource;
 use crate::visitor::{embedded_references_from_source, embedded_type_references_from_source};
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
@@ -31,64 +32,64 @@ pub struct InternedReference {
 }
 
 #[salsa::tracked]
-pub fn is_value_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
-    let parsed_source = db.parsed_source_for_path(reference.path(db));
-    parsed_source.is_some_and(|parsed_source| {
-        embedded_references_from_source(db, parsed_source)
-            .iter()
-            .any(|refs| {
-                refs.iter()
-                    .any(|value_reference| value_reference.text.text() == *reference.name(db))
-            })
-    })
+pub fn is_value_reference_used<'db>(
+    db: &'db dyn LanguageDb,
+    source: EmbeddedSource<'db>,
+    reference: InternedReference<'db>,
+) -> bool {
+    embedded_references_from_source(db, source)
+        .iter()
+        .any(|refs| {
+            refs.iter()
+                .any(|value_reference| value_reference.text.text() == *reference.name(db))
+        })
 }
 
 #[salsa::tracked]
-pub fn is_type_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
-    let parsed_source = db.parsed_source_for_path(reference.path(db));
-    parsed_source.is_some_and(|parsed_source| {
-        embedded_type_references_from_source(db, parsed_source)
-            .iter()
-            .any(|refs| {
-                refs.iter()
-                    .any(|type_reference| type_reference.text.text() == *reference.name(db))
-            })
-    })
+pub fn is_type_reference_used<'db>(
+    db: &'db dyn LanguageDb,
+    source: EmbeddedSource<'db>,
+    reference: InternedReference<'db>,
+) -> bool {
+    embedded_type_references_from_source(db, source)
+        .iter()
+        .any(|refs| {
+            refs.iter()
+                .any(|type_reference| type_reference.text.text() == *reference.name(db))
+        })
 }
 
 #[salsa::tracked]
-pub fn is_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
-    let parsed_source = db.parsed_source_for_path(reference.path(db));
-    parsed_source.is_some_and(|parsed_source| {
-        let name = reference.name(db);
-        embedded_references_from_source(db, parsed_source)
+pub fn is_reference_used<'db>(
+    db: &'db dyn LanguageDb,
+    source: EmbeddedSource<'db>,
+    reference: InternedReference<'db>,
+) -> bool {
+    let name = reference.name(db);
+    embedded_references_from_source(db, source)
+        .iter()
+        .any(|refs| {
+            refs.iter()
+                .any(|value_reference| value_reference.text.text() == *name)
+        })
+        || embedded_type_references_from_source(db, source)
             .iter()
             .any(|refs| {
                 refs.iter()
-                    .any(|value_reference| value_reference.text.text() == *name)
+                    .any(|type_reference| type_reference.text.text() == *name)
             })
-            || embedded_type_references_from_source(db, parsed_source)
-                .iter()
-                .any(|refs| {
-                    refs.iter()
-                        .any(|type_reference| type_reference.text.text() == *name)
-                })
-    })
 }
 
 /// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
 ///
 /// See also: https://svelte.dev/docs/svelte/stores
 #[salsa::tracked]
-pub fn is_svelte_store_reference_used(
-    db: &dyn LanguageDb,
-    reference: InternedReference<'_>,
+pub fn is_svelte_store_reference_used<'db>(
+    db: &'db dyn LanguageDb,
+    source: EmbeddedSource<'db>,
+    reference: InternedReference<'db>,
 ) -> bool {
-    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
-        return false;
-    };
-
-    embedded_references_from_source(db, parsed_source)
+    embedded_references_from_source(db, source)
         .iter()
         .any(|refs| {
             refs.iter().any(|value_reference| {
@@ -129,6 +130,7 @@ pub(crate) fn svelte_store_reference_name(reference_name: &str) -> Option<&str> 
 #[salsa::tracked]
 pub fn is_vue_directive_reference_used(
     db: &dyn LanguageDb,
+    source: EmbeddedSource<'_>,
     reference: InternedReference<'_>,
 ) -> bool {
     let reference_name = reference.name(db).text();
@@ -136,11 +138,7 @@ pub fn is_vue_directive_reference_used(
         return false;
     }
 
-    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
-        return false;
-    };
-
-    embedded_references_from_source(db, parsed_source)
+    embedded_references_from_source(db, source)
         .iter()
         .any(|refs| {
             refs.iter().any(|value_reference| {
@@ -210,12 +208,13 @@ pub(crate) fn vue_directive_name_matches_reference_name(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_db::FileSource;
     use biome_db::testing::{Events, assert_function_query_was_not_run};
-    use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
     use biome_languages::javascript::JsEmbeddingKind;
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
+    use biome_parser::{AnyParse, ParsedSnippet};
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
     use papaya::HashMap;
@@ -224,7 +223,7 @@ mod tests {
     #[salsa::db]
     #[derive(Default)]
     struct TestDb {
-        files: HashMap<Utf8PathBuf, ParsedSource>,
+        files: HashMap<Utf8PathBuf, FileSource>,
         events: Events,
         storage: Storage<Self>,
     }
@@ -252,7 +251,7 @@ mod tests {
             self.take_salsa_events();
         }
 
-        fn insert_file(&self, path: Utf8PathBuf, file: ParsedSource) {
+        fn insert_file(&self, path: Utf8PathBuf, file: FileSource) {
             self.files.pin().insert(path, file);
         }
     }
@@ -262,8 +261,14 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<biome_db::ParsedSource> {
+        fn file_source_for_path(&self, path: &Utf8Path) -> Option<FileSource> {
             self.files.pin().get(path).copied()
+        }
+
+        fn for_each_file_source(&self, f: &mut dyn FnMut(FileSource)) {
+            for file in self.files.pin().values() {
+                f(*file);
+            }
         }
     }
 
@@ -288,10 +293,11 @@ mod tests {
         TokenText::new_raw(RawSyntaxKind(0), text)
     }
 
-    fn parse_vue_source(db: &TestDb) -> Utf8PathBuf {
+    fn parse_vue_source<'db>(db: &'db TestDb) -> (Utf8PathBuf, EmbeddedSource<'db>) {
         let path = Utf8PathBuf::from("src/App.vue");
         let html_source = r#"<template>{{ Component }}<AvatarPrimitive.Fallback /></template>"#;
-        let parsed = parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
+        let parsed: AnyParse =
+            parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
         let snippet_parse = biome_js_parser::parse(
             "Component",
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
@@ -303,26 +309,27 @@ mod tests {
             JsParserOptions::default(),
         )
         .into();
-        let snippet = ParsedSnippet::new(
-            db,
-            snippet_parse,
-            TextRange::new(TextSize::from(12), TextSize::from(23)),
-            TextRange::new(TextSize::from(12), TextSize::from(21)),
-            TextSize::from(12),
-            1,
-        );
-        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
-        db.insert_file(path.clone(), parsed);
-        path
+        let snippet = ParsedSnippet {
+            parsed: snippet_parse,
+            element_range: TextRange::new(TextSize::from(12), TextSize::from(23)),
+            content_range: TextRange::new(TextSize::from(12), TextSize::from(21)),
+            content_offset: TextSize::from(12),
+            document_source_index: Some(1),
+        };
+        let file = FileSource::new(db, path.clone(), html_source.to_string(), 0, None);
+        db.insert_file(path.clone(), file);
+        let source = EmbeddedSource::new(db, file, parsed, vec![snippet]);
+        (path, source)
     }
 
-    fn parse_vue_source_with_js_snippet(db: &TestDb, js_source: &str) -> Utf8PathBuf {
+    fn parse_vue_source_with_js_snippet<'db>(
+        db: &'db TestDb,
+        js_source: &str,
+    ) -> (Utf8PathBuf, EmbeddedSource<'db>) {
         let path = Utf8PathBuf::from("src/App.vue");
-        let parsed = parse_html(
-            "<template></template>",
-            HtmlParserOptions::default().with_vue(),
-        )
-        .into();
+        let html_source = "<template></template>";
+        let parsed: AnyParse =
+            parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
         let snippet_parse = biome_js_parser::parse(
             js_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
@@ -334,34 +341,41 @@ mod tests {
             JsParserOptions::default(),
         )
         .into();
-        let snippet = ParsedSnippet::new(
-            db,
-            snippet_parse,
-            TextRange::default(),
-            TextRange::default(),
-            TextSize::default(),
-            1,
-        );
-        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
-        db.insert_file(path.clone(), parsed);
-        path
+        let snippet = ParsedSnippet {
+            parsed: snippet_parse,
+            element_range: TextRange::default(),
+            content_range: TextRange::default(),
+            content_offset: TextSize::default(),
+            document_source_index: Some(1),
+        };
+        let file = FileSource::new(db, path.clone(), html_source.to_string(), 0, None);
+        db.insert_file(path.clone(), file);
+        let source = EmbeddedSource::new(db, file, parsed, vec![snippet]);
+        (path, source)
     }
 
-    fn parse_vue_template_source(db: &TestDb, html_source: &str) -> Utf8PathBuf {
+    fn parse_vue_template_source<'db>(
+        db: &'db TestDb,
+        html_source: &str,
+    ) -> (Utf8PathBuf, EmbeddedSource<'db>) {
         let path = Utf8PathBuf::from("src/App.vue");
-        let parsed = parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
-        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![]);
-        db.insert_file(path.clone(), parsed);
-        path
+        let parsed: AnyParse =
+            parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
+        let file = FileSource::new(db, path.clone(), html_source.to_string(), 0, None);
+        db.insert_file(path.clone(), file);
+        let source = EmbeddedSource::new(db, file, parsed, Vec::new());
+        (path, source)
     }
 
     #[test]
     fn is_value_reference_used_finds_vue_same_name_binding_shorthand() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><button :disabled /></template>"#);
+        let (path, source) =
+            parse_vue_template_source(&db, r#"<template><button :disabled /></template>"#);
 
         assert!(is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path, token_text("disabled")),
         ));
     }
@@ -369,11 +383,12 @@ mod tests {
     #[test]
     fn is_value_reference_used_finds_vue_v_bind_same_name_binding_shorthand() {
         let db = TestDb::new();
-        let path =
+        let (path, source) =
             parse_vue_template_source(&db, r#"<template><button v-bind:disabled /></template>"#);
 
         assert!(is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path, token_text("disabled")),
         ));
     }
@@ -381,13 +396,14 @@ mod tests {
     #[test]
     fn is_value_reference_used_ignores_vue_binding_attribute_name() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(
+        let (path, source) = parse_vue_template_source(
             &db,
             r#"<template><button :disabled="isDisabled" /><button v-bind:disabled="isDisabled" /></template>"#,
         );
 
         assert!(!is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path, token_text("disabled")),
         ));
     }
@@ -395,29 +411,34 @@ mod tests {
     #[test]
     fn is_vue_directive_reference_used_finds_custom_directive() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(
+        let (path, source) = parse_vue_template_source(
             &db,
             r#"<template><div v-highlight /><div v-click-outside /><div v-require-2fa /><div v-2fa-forbidden /><div v-weird-_but-valid /></template>"#,
         );
 
         assert!(is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vHighlight")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vClickOutside")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vRequire2fa")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("v2faForbidden")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vWeird_butValid")),
         ));
     }
@@ -425,10 +446,12 @@ mod tests {
     #[test]
     fn is_vue_directive_reference_used_ignores_builtin_directive() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div v-cloak /></template>"#);
+        let (path, source) =
+            parse_vue_template_source(&db, r#"<template><div v-cloak /></template>"#);
 
         assert!(!is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vCloak")),
         ));
     }
@@ -436,10 +459,12 @@ mod tests {
     #[test]
     fn is_vue_directive_reference_used_ignores_mismatched_name() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
+        let (path, source) =
+            parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
 
         assert!(!is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vSomethingElse")),
         ));
     }
@@ -447,10 +472,12 @@ mod tests {
     #[test]
     fn is_vue_directive_reference_used_ignores_trailing_hyphen() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div v-foo- /></template>"#);
+        let (path, source) =
+            parse_vue_template_source(&db, r#"<template><div v-foo- /></template>"#);
 
         assert!(!is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vFoo")),
         ));
     }
@@ -458,10 +485,12 @@ mod tests {
     #[test]
     fn is_vue_directive_reference_used_ignores_consecutive_hyphens() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div v-foo--bar /></template>"#);
+        let (path, source) =
+            parse_vue_template_source(&db, r#"<template><div v-foo--bar /></template>"#);
 
         assert!(!is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("vFooBar")),
         ));
     }
@@ -473,10 +502,12 @@ mod tests {
         // mistaken for a `v-`-prefixed directive name that happens to also
         // camelCase-match "ariaLabel".
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div :aria-label /></template>"#);
+        let (path, source) =
+            parse_vue_template_source(&db, r#"<template><div :aria-label /></template>"#);
 
         assert!(!is_vue_directive_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("ariaLabel")),
         ));
     }
@@ -484,18 +515,21 @@ mod tests {
     #[test]
     fn is_value_reference_used_finds_references_across_groups() {
         let db = TestDb::new();
-        let path = parse_vue_source(&db);
+        let (path, source) = parse_vue_source(&db);
 
         assert!(is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("Component"))
         ));
         assert!(is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("AvatarPrimitive"))
         ));
         assert!(!is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path, token_text("Missing"))
         ));
     }
@@ -503,14 +537,16 @@ mod tests {
     #[test]
     fn is_value_reference_used_finds_vue_assignment_targets() {
         let db = TestDb::new();
-        let path = parse_vue_source_with_js_snippet(&db, "() => isNewSheetOpen = true");
+        let (path, source) = parse_vue_source_with_js_snippet(&db, "() => isNewSheetOpen = true");
 
         assert!(is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("isNewSheetOpen"))
         ));
         assert!(!is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path, token_text("Missing"))
         ));
     }
@@ -518,22 +554,26 @@ mod tests {
     #[test]
     fn is_reference_used_classifies_type_references() {
         let db = TestDb::new();
-        let path = parse_vue_source_with_js_snippet(&db, "foo as IconType");
+        let (path, source) = parse_vue_source_with_js_snippet(&db, "foo as IconType");
 
         assert!(is_type_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("IconType"))
         ));
         assert!(!is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("IconType"))
         ));
         assert!(is_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path.clone(), token_text("IconType"))
         ));
         assert!(is_value_reference_used(
             &db,
+            source,
             InternedReference::new(&db, path, token_text("foo"))
         ));
     }
@@ -541,17 +581,14 @@ mod tests {
     #[test]
     fn is_value_reference_used_is_memoized() {
         let db = TestDb::new();
-        let path = parse_vue_source(&db);
-        let file = db
-            .parsed_source_for_path(&path)
-            .expect("parsed source should be stored");
+        let (_, source) = parse_vue_source(&db);
 
-        let _ = embedded_references_from_source(&db, file);
+        let _ = embedded_references_from_source(&db, source);
 
         db.clear_salsa_events();
-        let _ = embedded_references_from_source(&db, file);
+        let _ = embedded_references_from_source(&db, source);
         let events = db.take_salsa_events();
 
-        assert_function_query_was_not_run(&db, embedded_references_from_source, file, &events);
+        assert_function_query_was_not_run(&db, embedded_references_from_source, source, &events);
     }
 }

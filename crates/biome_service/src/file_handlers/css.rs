@@ -37,15 +37,16 @@ use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::db::css_semantic_model;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{
     DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_languages::DocumentFileSource;
 use biome_languages::css::CssEmbeddingKind;
-use biome_rowan::{AstNode, NodeCache, SyntaxKind};
+use biome_languages::{CssFileSource, DocumentFileSource, LanguageDb};
+use biome_parser::{AnyParse, AnyParsedSource};
+use biome_rowan::{AstNode, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -472,6 +473,7 @@ impl ExtensionHandler for CssFileHandler {
         Capabilities {
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_text: Some(parse_text),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -529,31 +531,63 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
-fn parse(
-    biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
-    settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+#[salsa::interned]
+struct ParseCssInput {
+    file: FileSource,
+    document_source: CssFileSource,
+    options: CssParserOptions,
+}
 
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_css_file<'db>(db: &'db dyn Db, input: ParseCssInput<'db>) -> AnyParse {
+    biome_css_parser::parse_css(
+        input.file(db).content(db),
+        input.document_source(db),
+        input.options(db),
+    )
+    .into()
+}
+
+fn parse(biome_path: &BiomePath, settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
+    let file = db
+        .get_file(biome_path.as_path())
+        .expect("file must exist in workspace");
+    let file_source = db
+        .source_from_index(file.document_source_index(&db))
+        .unwrap_or_default();
+    let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
     let source_type = file_source.to_css_file_source().unwrap_or_default();
-    let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_css_file(
+        file_db,
+        ParseCssInput::new(file_db, file, source_type, options),
+    );
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(file_source),
     }
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: CssSyntaxNode = parse.syntax(&workspace_db);
-    let tree: CssRoot = parse.tree(&workspace_db);
+fn parse_text(
+    biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    settings: &SettingsWithEditor,
+) -> ParseResult {
+    let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+    let source_type = file_source.to_css_file_source().unwrap_or_default();
+    let any_parse = biome_css_parser::parse_css(code, source_type, options).into();
+
+    ParseResult {
+        any_parse,
+        language: Some(file_source),
+    }
+}
+
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: CssSyntaxNode = parse.syntax();
+    let tree: CssRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -565,11 +599,9 @@ fn debug_formatter_ir(
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -579,24 +611,23 @@ fn debug_formatter_ir(
 fn debug_semantic_model(
     _path: &BiomePath,
     parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
+    _workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let tree: AnyCssRoot = parse.tree(&workspace_db);
+    let tree: AnyCssRoot = parse.tree();
     let model = semantic_model(&tree);
     Ok(model.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -611,11 +642,10 @@ fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -626,11 +656,10 @@ fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
 
     let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
@@ -694,7 +723,7 @@ fn lint(params: LintParams) -> LintResults {
         settings,
         &params.workspace_db,
     );
-    let tree = params.parsed_source.tree(&params.workspace_db);
+    let tree = params.parsed_source.tree();
 
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -719,9 +748,13 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
     let semantic_model = match &params.parsed_source {
         super::ParsedOrigin::Workspace(source) => {
-            css_semantic_model(&params.workspace_db, source).clone()
+            let file = params
+                .workspace_db
+                .file_source_for_path(params.path.as_path())
+                .expect("file must exist in workspace");
+            css_semantic_model(&params.workspace_db, file, source).clone()
         }
-        super::ParsedOrigin::Interned { .. } => semantic_model(&tree),
+        super::ParsedOrigin::Stateless(_) => semantic_model(&tree),
     };
     let css_services = CssAnalyzerServices {
         semantic_model: Some(&semantic_model),
@@ -748,7 +781,7 @@ fn lint(params: LintParams) -> LintResults {
     );
 
     process_lint.into_result(
-        params.parsed_source.serde_diagnostics(&params.workspace_db),
+        params.parsed_source.serde_diagnostics(),
         analyze_diagnostics,
     )
 }
@@ -771,8 +804,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
+        analyzer_cache,
     } = params;
-    let tree = parsed_source.tree(&workspace_db);
+    let tree = parsed_source.tree();
     let Some(file_source) = language.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
@@ -809,11 +843,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
 
     info!("CSS runs the analyzer");
+    let file = workspace_db
+        .file_source_for_path(path.as_path())
+        .expect("file must exist in workspace");
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(css_semantic_model(&workspace_db, &parsed_source)),
+        semantic_model: Some(css_semantic_model(&workspace_db, file, &parsed_source)),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -873,7 +910,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let mut tree: AnyCssRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut tree: AnyCssRoot = params.parsed_source.tree();
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return Ok(None);
@@ -1074,9 +1111,8 @@ fn search(
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
-    workspace_db: WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let any_parse = parsed.any_parse(&workspace_db);
+    let any_parse = parsed.any_parse();
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
 }
 

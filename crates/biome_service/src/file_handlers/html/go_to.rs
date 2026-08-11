@@ -23,7 +23,12 @@ use biome_rowan::{AstNode, TokenAtOffset};
 use camino::Utf8Path;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let root: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
+    #[cfg(feature = "html_embeds")]
+    let embedded_source = params
+        .embedded_source
+        .as_ref()
+        .map(|source| source.intern(&params.workspace_db));
+    let root: HtmlRoot = params.parsed_source.tree();
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {
         TokenAtOffset::Single(token) => token,
@@ -88,6 +93,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
             && let Some(element_value) = element.value_token().ok()
             && let Some(binding) = get_binding_with_source(
                 &params.workspace_db,
+                embedded_source?,
                 InternedBindingTokenText::new(
                     &params.workspace_db,
                     params.path.clone(),
@@ -107,6 +113,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
             && let Some(element_value) = element.html_literal_token().ok()
             && let Some(binding) = get_binding_by_token_text(
                 &params.workspace_db,
+                embedded_source?,
                 InternedBindingTokenText::new(
                     &params.workspace_db,
                     params.path.clone(),

@@ -11,15 +11,15 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
-use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+use biome_js_parser::{JsParserOptions, parse as parse_js};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{DocumentFileSource, JsFileSource};
-use biome_rowan::NodeCache;
+use biome_parser::{AnyParse, AnyParsedSource};
 use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::{debug, error};
@@ -106,6 +106,7 @@ impl ExtensionHandler for VueFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_text: Some(parse_text),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -140,33 +141,59 @@ impl ExtensionHandler for VueFileHandler {
     }
 }
 
-fn parse(
-    _biome_path: &BiomePath,
-    _file_source: DocumentFileSource,
-    text: &str,
-    _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
+#[salsa::interned]
+struct ParseVueInput {
+    file: FileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_vue_file<'db>(db: &'db dyn Db, input: ParseVueInput<'db>) -> AnyParse {
+    let text = input.file(db).content(db);
     let script = VueFileHandler::input(text);
     let file_source = VueFileHandler::file_source(text);
 
     debug!("Parsing file with language {:?}", file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    parse_js(script, file_source, JsParserOptions::default()).into()
+}
+
+fn parse(biome_path: &BiomePath, _settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
+    let file = db
+        .get_file(biome_path.as_path())
+        .expect("file must exist in workspace");
+    let file_db: &dyn Db = &db;
+    let file_source = VueFileHandler::file_source(file.content(file_db));
+    let any_parse = parse_vue_file(file_db, ParseVueInput::new(file_db, file));
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(file_source.into()),
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
+fn parse_text(
+    _biome_path: &BiomePath,
+    _file_source: DocumentFileSource,
+    code: &str,
+    _settings: &SettingsWithEditor,
+) -> ParseResult {
+    let script = VueFileHandler::input(code);
+    let file_source = VueFileHandler::file_source(code);
+
+    debug!("Parsing file with language {:?}", file_source);
+
+    ParseResult {
+        any_parse: parse_js(script, file_source, JsParserOptions::default()).into(),
+        language: Some(file_source.into()),
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = javascript::resolve_format_options(
         biome_path,
@@ -181,7 +208,7 @@ fn format(
     } else {
         0
     };
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
@@ -198,16 +225,8 @@ pub(crate) fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        range,
-        workspace_db,
-    )
+    javascript::format_range(biome_path, document_file_source, parse, settings, range)
 }
 
 pub(crate) fn format_on_type(
@@ -216,16 +235,8 @@ pub(crate) fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        offset,
-        workspace_db,
-    )
+    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
