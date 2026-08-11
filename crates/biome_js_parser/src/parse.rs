@@ -613,6 +613,73 @@ mod tests {
     }
 
     #[test]
+    fn astro_style_and_script_children_are_raw_text() {
+        for (body, text) in [
+            (
+                "cond && (\n<style>a { color: red }</style>\n)",
+                "a { color: red }",
+            ),
+            (
+                "cond && (\n<script>let x = {a: 1};</script>\n)",
+                "let x = {a: 1};",
+            ),
+        ] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+
+            assert!(
+                !parse.has_errors(),
+                "`{body}` is valid Astro, got: {:?}",
+                parse.diagnostics()
+            );
+            let tree = format!("{:#?}", parse.syntax());
+            assert_eq!(tree.matches("JSX_TEXT@").count(), 1);
+            assert!(tree.contains(&format!("{text:?}")));
+            assert!(!tree.contains("JSX_EXPRESSION_CHILD"));
+        }
+    }
+
+    #[test]
+    fn astro_raw_text_runs_to_its_own_closing_tag() {
+        let parse = parse(
+            "<script>const re = \"</b>\";</script>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "`</b>` does not end a script");
+        assert!(
+            format!("{:#?}", parse.syntax()).contains(r#""const re = \"</b>\";""#),
+            "the whole body should be one text token"
+        );
+    }
+
+    #[test]
+    fn astro_raw_text_does_not_apply_to_other_elements() {
+        let parse = parse(
+            "<div>{ color }</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        assert!(format!("{:#?}", parse.syntax()).contains("JSX_EXPRESSION_CHILD"));
+    }
+
+    #[test]
+    fn style_children_are_jsx_outside_astro() {
+        let parse = parse(
+            "<style>a { color: red }</style>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(
+            format!("{:#?}", parse.syntax()).contains("JSX_EXPRESSION_CHILD"),
+            "plain JSX reads `{{ color: red }}` as an expression child"
+        );
+    }
+
+    #[test]
     fn astro_implicit_fragment_delimiters_are_absent() {
         let parse = parse(
             "<p>a</p>\n<div />",
