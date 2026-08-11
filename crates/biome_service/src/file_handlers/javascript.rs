@@ -1,7 +1,5 @@
 mod go_to;
 
-#[cfg(feature = "js_embeds")]
-use super::ParseEmbeddedMode;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
@@ -10,6 +8,8 @@ use super::{
     ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint, SearchCapabilities,
     UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
 };
+#[cfg(feature = "js_embeds")]
+use super::{ParseEmbeddedCaches, ParseEmbeddedMode};
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
 #[cfg(feature = "js_embeds")]
@@ -801,10 +801,10 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
     }
 
     let js_root: AnyJsRoot = any_parse.tree();
-    let mut workspace_cache = NodeCache::default();
-    let node_cache = match mode {
-        ParseEmbeddedMode::Workspace(_) => &mut workspace_cache,
-        ParseEmbeddedMode::Stateless(node_cache) => node_cache,
+    let mut workspace_caches = ParseEmbeddedCaches::default();
+    let caches = match mode {
+        ParseEmbeddedMode::Workspace(_) => &mut workspace_caches,
+        ParseEmbeddedMode::Stateless(caches) => caches,
     };
 
     let candidates = js_root
@@ -823,7 +823,7 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         .filter_map(|candidate| {
             let embed_match = EmbedDetectorsRegistry::detect_match(&candidate, file_source)?;
             let (snippet, content, doc_source) =
-                parse_js_matched_embed(&candidate, &embed_match, path, settings, node_cache)?;
+                parse_js_matched_embed(&candidate, &embed_match, path, settings, caches)?;
             Some((
                 biome_parser::ParsedSnippet {
                     parsed: snippet,
@@ -975,7 +975,7 @@ fn parse_js_matched_embed(
     embed_match: &EmbedMatch,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
-    node_cache: &mut NodeCache,
+    caches: &mut ParseEmbeddedCaches,
 ) -> Option<(AnyParse, EmbedContent, DocumentFileSource)> {
     let content = candidate.content();
 
@@ -993,7 +993,7 @@ fn parse_js_matched_embed(
                 content.text.text(),
                 file_source.to_css_file_source().unwrap_or_default(),
                 content.content_offset,
-                node_cache,
+                &mut caches.css,
                 options,
             );
 
@@ -1006,7 +1006,7 @@ fn parse_js_matched_embed(
             let parse = parse_graphql_with_offset_and_cache(
                 content.text.text(),
                 content.content_offset,
-                node_cache,
+                &mut caches.graphql,
             );
 
             Some((parse.into(), content, file_source))

@@ -17,12 +17,13 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 use super::{ScanKind, WorkspaceScannerBridge};
 use crate::Workspace;
+use crate::module_graph::SerializedModuleInfo;
 use crate::scanner::IndexTrigger;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{
-    CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, ScanProjectParams,
-    UpdateSettingsParams,
+    CloseFileParams, FileContent, GetFileContentParams, GetModuleGraphParams, OpenFileParams,
+    ScanProjectParams, UpdateSettingsParams,
 };
 
 #[test]
@@ -150,6 +151,51 @@ fn close_file_from_client_before_watcher() {
         !workspace.is_indexed(&file_path),
         "file should no longer be indexed"
     );
+}
+
+#[test]
+fn index_dependency_opened_by_client_uses_client_content() {
+    let file_path = Utf8PathBuf::from("/project/node_modules/package/index.js");
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'disk';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(&file_path),
+            content: FileContent::FromClient {
+                content: "import 'client';".to_string(),
+                version: 1,
+            },
+            document_file_source: None,
+            inline_config: None,
+            editor_features: None,
+        })
+        .expect("can open dependency from client");
+
+    workspace
+        .index_file(project_key, file_path.clone(), IndexTrigger::Update)
+        .expect("can index dependency opened by client");
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(&file_path),
+        })
+        .expect("client content remains available");
+    assert_eq!(content, "import 'client';");
+
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
+    let Some(SerializedModuleInfo::Js(module_info)) = module_graph.data.get(file_path.as_str())
+    else {
+        panic!("expected JavaScript module info for {file_path}");
+    };
+    assert!(module_info.static_import_paths.contains_key("client"));
+    assert!(!module_info.static_import_paths.contains_key("disk"));
 }
 
 #[test]
