@@ -89,7 +89,7 @@ use biome_parser::{AnyParse, AnyParsedSource, ParsedSnippet};
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "lang_js")]
 use biome_rowan::TokenText;
-use biome_rowan::{BatchMutation, SendNode, SyntaxNode, TextRange, TextSize};
+use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -411,11 +411,17 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) path: &'a BiomePath,
     pub(crate) file_source: &'a DocumentFileSource,
     pub(crate) settings: &'a SettingsWithEditor<'settings>,
-    pub(crate) workspace_db: WorkspaceDb,
+    pub(crate) mode: ParseEmbeddedMode<'a>,
+}
+
+pub(crate) enum ParseEmbeddedMode<'a> {
+    Workspace(WorkspaceDb),
+    Stateless(&'a mut NodeCache),
 }
 
 type Parse = fn(&BiomePath, &SettingsWithEditor, WorkspaceDb) -> ParseResult;
-type ParseText = fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor) -> ParseResult;
+type ParseText =
+    fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
 type ParseEmbeddedNodes =
     for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
 #[derive(Default)]

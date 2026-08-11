@@ -24,11 +24,11 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
-use biome_grit_parser::parse_grit;
+use biome_grit_parser::{parse_grit, parse_grit_with_cache};
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
 use biome_languages::LanguageDb;
 use biome_parser::{AnyParse, AnyParsedSource};
-use biome_rowan::{AstNode, SyntaxKind, TextRange, TextSize, TokenAtOffset};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use tracing::debug_span;
@@ -345,9 +345,10 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     ParseResult {
-        any_parse: parse_grit(code).into(),
+        any_parse: parse_grit_with_cache(code, node_cache).into(),
         language: Some(file_source),
     }
 }

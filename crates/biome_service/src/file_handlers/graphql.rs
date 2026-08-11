@@ -32,13 +32,13 @@ use biome_fs::BiomePath;
 use biome_graphql_analyze::analyze;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
-use biome_graphql_parser::parse_graphql;
+use biome_graphql_parser::{parse_graphql, parse_graphql_with_cache};
 use biome_graphql_syntax::{
     GraphqlLanguage, GraphqlRoot, GraphqlSyntaxKind, GraphqlSyntaxNode, TextRange, TextSize,
 };
 use biome_languages::LanguageDb;
 use biome_parser::{AnyParse, AnyParsedSource};
-use biome_rowan::{AstNode, SyntaxKind, TokenAtOffset};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -367,9 +367,10 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     ParseResult {
-        any_parse: parse_graphql(code).into(),
+        any_parse: parse_graphql_with_cache(code, node_cache).into(),
         language: Some(file_source),
     }
 }
