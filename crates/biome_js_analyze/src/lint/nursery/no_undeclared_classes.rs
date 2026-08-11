@@ -253,7 +253,7 @@ fn extract_class_entries_from_embedded(
     }
 
     let mut entries = Vec::new();
-    if let Ok(expression) = root.expression() {
+    if let Some(expression) = root.expression() {
         collect_class_names_from_expression(&expression.omit_parentheses(), model, &mut entries);
     }
     entries
@@ -272,7 +272,7 @@ fn run_without_semantic(
     }
 
     let mut entries = Vec::new();
-    if let Ok(expression) = root.expression() {
+    if let Some(expression) = root.expression() {
         collect_class_names_from_expression_no_semantic(
             &expression.omit_parentheses(),
             &mut entries,

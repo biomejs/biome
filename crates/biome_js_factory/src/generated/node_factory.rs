@@ -1327,17 +1327,31 @@ impl JsExpressionStatementBuilder {
         ))
     }
 }
-pub fn js_expression_template_root(
-    expression: AnyJsExpression,
+pub fn js_expression_template_root(eof_token: SyntaxToken) -> JsExpressionTemplateRootBuilder {
+    JsExpressionTemplateRootBuilder {
+        eof_token,
+        expression: None,
+    }
+}
+pub struct JsExpressionTemplateRootBuilder {
     eof_token: SyntaxToken,
-) -> JsExpressionTemplateRoot {
-    JsExpressionTemplateRoot::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
-        [
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+    expression: Option<AnyJsExpression>,
+}
+impl JsExpressionTemplateRootBuilder {
+    pub fn with_expression(mut self, expression: AnyJsExpression) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+    pub fn build(self) -> JsExpressionTemplateRoot {
+        JsExpressionTemplateRoot::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
+            [
+                self.expression
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn js_extends_clause(
     extends_token: SyntaxToken,

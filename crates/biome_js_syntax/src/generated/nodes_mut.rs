@@ -1183,11 +1183,11 @@ impl JsExpressionStatement {
     }
 }
 impl JsExpressionTemplateRoot {
-    pub fn with_expression(self, element: AnyJsExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_expression(self, element: Option<AnyJsExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_eof_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

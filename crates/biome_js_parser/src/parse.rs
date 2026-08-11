@@ -440,8 +440,9 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsParserOptions, parse_js_with_cache, parse_js_with_offset};
+    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset};
     use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
 
     use biome_rowan::TextSize;
 
@@ -512,4 +513,54 @@ mod tests {
             normal_parse.syntax().text_with_trivia().to_string()
         );
     }
+
+    fn astro_template_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        })
+    }
+
+
+
+    #[test]
+    fn astro_non_void_element_still_requires_a_closing_tag() {
+        let parse = parse("<span>", astro_template_source(), JsParserOptions::default());
+
+        assert!(parse.has_errors(), "`<span>` is not a void element");
+    }
+
+    #[test]
+    fn astro_comment_only_template_expression_is_allowed() {
+        for body in ["/* only a comment */", "// a line comment", "/* a */ /* b */"] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+
+            assert!(
+                !parse.has_errors(),
+                "comment-only body `{body}` is valid Astro, got: {:?}",
+                parse.diagnostics()
+            );
+        }
+    }
+
+    #[test]
+    fn astro_empty_template_expression_is_allowed() {
+        let parse = parse("  ", astro_template_source(), JsParserOptions::default());
+
+        assert!(!parse.has_errors(), "`{{ }}` renders nothing in Astro");
+    }
+
+    #[test]
+    fn comment_only_template_expression_is_an_error_outside_astro() {
+        let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+        });
+        let parse = parse("/* only a comment */", vue, JsParserOptions::default());
+
+        assert!(parse.has_errors(), "only Astro allows a comment-only body");
+    }
+
 }

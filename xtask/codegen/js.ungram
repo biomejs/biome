@@ -83,8 +83,9 @@ JsExpressionSnippet =
 	expression: AnyJsExpression
 	eof: 'EOF'
 
+// The expression is absent when the template body holds only comments
 JsExpressionTemplateRoot =
-	expression: AnyJsExpression
+	expression: AnyJsExpression?
 	eof: 'EOF'
 
 // Special root created for Svelte #snippet block
