@@ -3,7 +3,8 @@ use std::collections::HashSet;
 use crate::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
     AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement,
-    JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString, inner_string_text,
+    JsxFragment, JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
+    inner_string_text,
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
@@ -784,4 +785,12 @@ pub const VOID_ELEMENTS: [&str; 16] = [
 
 pub fn is_void_element(name: &str) -> bool {
     VOID_ELEMENTS.contains(&name)
+}
+
+impl JsxFragment {
+    /// Written without `<>`, so its children sit in expression context.
+    pub fn is_implicit(&self) -> bool {
+        self.opening_fragment()
+            .is_ok_and(|opening| opening.l_angle_token().is_none())
+    }
 }

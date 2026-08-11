@@ -62,11 +62,52 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
         return Absent;
     }
 
+    let checkpoint = p.checkpoint();
     let m = p.start();
 
     // Safety: Safe because `parse_any_jsx_tag only returns Absent if the parser isn't positioned
     // at the `<` token which is tested for at the beginning of the function.
     parse_any_jsx_tag(p, true).unwrap();
+
+    if is_at_astro_adjacent_sibling(p) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return parse_astro_implicit_fragment(p);
+    }
+
+    Present(m.complete(p, JSX_TAG_EXPRESSION))
+}
+
+/// Adjacent siblings are an implicit fragment in Astro but invalid in JSX.
+fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
+    is_astro(p) && is_at_jsx_tag_start(p)
+}
+
+fn is_at_jsx_tag_start(p: &mut JsParser) -> bool {
+    p.at(T![<])
+        && (p.nth_at(1, T![>])
+            || is_nth_at_identifier_or_keyword(p, 1)
+            || is_nth_at_metavariable(p, 1))
+}
+
+/// The opening and closing fragments carry no tokens: the source has none.
+fn parse_astro_implicit_fragment(p: &mut JsParser) -> ParsedSyntax {
+    let m = p.start();
+    let fragment = p.start();
+
+    let opening = p.start();
+    opening.complete(p, JSX_OPENING_FRAGMENT);
+
+    let children = p.start();
+    while is_at_jsx_tag_start(p) {
+        parse_any_jsx_tag(p, true).ok();
+    }
+    children.complete(p, JSX_CHILD_LIST);
+
+    let closing = p.start();
+    closing.complete(p, JSX_CLOSING_FRAGMENT);
+
+    fragment.complete(p, JSX_FRAGMENT);
     Present(m.complete(p, JSX_TAG_EXPRESSION))
 }
 
