@@ -523,7 +523,11 @@ mod tests {
 
     #[test]
     fn astro_void_element_is_self_closing_without_slash() {
-        let parse = parse("cond && <br>", astro_template_source(), JsParserOptions::default());
+        let parse = parse(
+            "cond && <br>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
 
         assert!(!parse.has_errors(), "`<br>` is valid Astro");
         assert!(
@@ -548,14 +552,22 @@ mod tests {
 
     #[test]
     fn astro_non_void_element_still_requires_a_closing_tag() {
-        let parse = parse("<span>", astro_template_source(), JsParserOptions::default());
+        let parse = parse(
+            "<span>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
 
         assert!(parse.has_errors(), "`<span>` is not a void element");
     }
 
     #[test]
     fn astro_comment_only_template_expression_is_allowed() {
-        for body in ["/* only a comment */", "// a line comment", "/* a */ /* b */"] {
+        for body in [
+            "/* only a comment */",
+            "// a line comment",
+            "/* a */ /* b */",
+        ] {
             let parse = parse(body, astro_template_source(), JsParserOptions::default());
 
             assert!(
@@ -584,6 +596,88 @@ mod tests {
         let parse = parse("/* only a comment */", vue, JsParserOptions::default());
 
         assert!(parse.has_errors(), "only Astro allows a comment-only body");
+    }
+
+    #[test]
+    fn astro_adjacent_siblings_form_an_implicit_fragment() {
+        let parse = parse(
+            "options.map(() => \n  <div />\n  <span />\n)",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "adjacent siblings are valid Astro");
+        let tree = format!("{:#?}", parse.syntax());
+        assert_eq!(tree.matches("JSX_FRAGMENT@").count(), 1);
+        assert_eq!(tree.matches("JSX_SELF_CLOSING_ELEMENT@").count(), 2);
+    }
+
+    #[test]
+    fn astro_implicit_fragment_delimiters_are_absent() {
+        let parse = parse(
+            "<p>a</p>\n<div />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains("JSX_OPENING_FRAGMENT@0..0"));
+        assert!(tree.contains("JSX_CLOSING_FRAGMENT@16..16"));
+    }
+
+    #[test]
+    fn astro_implicit_fragment_keeps_comments_between_siblings() {
+        let parse = parse(
+            "<p>a</p>\n/* c */ <div />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "a comment between siblings is valid");
+        assert_eq!(
+            format!("{:#?}", parse.syntax())
+                .matches("JSX_FRAGMENT@")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn astro_single_element_is_not_wrapped_in_a_fragment() {
+        let parse = parse(
+            "<div />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        assert!(!format!("{:#?}", parse.syntax()).contains("JSX_FRAGMENT@"));
+    }
+
+    #[test]
+    fn adjacent_siblings_are_an_error_outside_astro() {
+        let parse = parse(
+            "options.map(() => <div /> <span />)",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX requires a single root");
+    }
+
+    #[test]
+    fn explicit_fragment_keeps_its_delimiters_outside_astro() {
+        let parse = parse(
+            "<><div /><span /></>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains("JSX_FRAGMENT@"));
+        assert!(!tree.contains("JSX_OPENING_FRAGMENT@0..0"));
     }
 
     #[test]

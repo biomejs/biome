@@ -2356,14 +2356,15 @@ JsxFragment =
 	children: JsxChildList
 	closing_fragment: JsxClosingFragment
 
+// Tokens are absent in an Astro implicit fragment, which has no delimiters
 JsxOpeningFragment =
-	'<'
-	'>'
+	'<'?
+	'>'?
 
 JsxClosingFragment =
-	'<'
-	'/'
-	'>'
+	'<'?
+	'/'?
+	'>'?
 
 // ==================================
 // Names

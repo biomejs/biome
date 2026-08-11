@@ -18,6 +18,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_leading_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
+        if node.is_implicit() {
+            return format_leading_comments(node.syntax()).fmt(f);
+        }
         debug_assert!(
             !f.comments().has_leading_comments(node.syntax()),
             "JsxFragment can not have comments."
@@ -26,6 +29,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_dangling_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
+        if node.is_implicit() {
+            return format_dangling_comments(node.syntax()).fmt(f);
+        }
         debug_assert!(
             !f.comments().has_dangling_comments(node.syntax()),
             "JsxFragment can not have comments."
@@ -34,6 +40,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_trailing_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
+        if node.is_implicit() {
+            return format_trailing_comments(node.syntax()).fmt(f);
+        }
         debug_assert!(
             !f.comments().has_trailing_comments(node.syntax()),
             "JsxFragment can not have comments."

@@ -45,7 +45,7 @@ JsModule {
                             closing_fragment: JsxClosingFragment {
                                 l_angle_token: L_ANGLE@11..12 "<" [] [],
                                 slash_token: SLASH@12..14 "/" [] [Whitespace(" ")],
-                                r_angle_token: missing (required),
+                                r_angle_token: missing (optional),
                             },
                         },
                         JsxText {

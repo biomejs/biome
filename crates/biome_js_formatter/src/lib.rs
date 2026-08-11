@@ -1109,4 +1109,80 @@ console.log(a);
 
         assert!(result.is_err());
     }
+
+    fn format_astro_template(src: &str) -> String {
+        let syntax = JsFileSource::tsx().with_embedding_kind(
+            biome_languages::javascript::JsEmbeddingKind::Astro {
+                frontmatter: false,
+                is_class_attribute: false,
+            },
+        );
+        let tree = parse(src, syntax, JsParserOptions::default());
+        assert!(!tree.has_errors(), "{:?}", tree.diagnostics());
+        crate::format_node(
+            JsFormatOptions::new(syntax).with_indent_style(IndentStyle::Space),
+            &tree.syntax(),
+            Vec::new(),
+        )
+        .unwrap()
+        .print()
+        .unwrap()
+        .as_code()
+        .to_string()
+    }
+
+    #[test]
+    fn format_keeps_comment_between_implicit_fragment_siblings() {
+        let output = format_astro_template("<p>a</p>\n/* c */ <div />");
+
+        assert!(
+            output.contains("/* c */"),
+            "comment was dropped: {output:?}"
+        );
+        assert!(
+            output.find("/* c */").unwrap() > output.find("<p>").unwrap(),
+            "comment was hoisted above the first sibling: {output:?}"
+        );
+    }
+
+    #[test]
+    fn format_keeps_comment_before_an_implicit_fragment_element() {
+        let output = format_astro_template("<div />\n/* c */ <p>a</p>");
+
+        assert!(
+            output.contains("/* c */"),
+            "comment was dropped: {output:?}"
+        );
+        assert!(
+            output.find("/* c */").unwrap() > output.find("<div />").unwrap(),
+            "comment was hoisted above the first sibling: {output:?}"
+        );
+    }
+
+    #[test]
+    fn format_does_not_add_delimiters_to_an_implicit_fragment() {
+        let output = format_astro_template("<p>a</p>\n<div />");
+
+        assert!(!output.contains("<>"), "delimiters were added: {output:?}");
+    }
+
+    #[test]
+    fn format_keeps_explicit_fragment_delimiters() {
+        let syntax = JsFileSource::tsx();
+        let src = "<><p>a</p><div /></>";
+        let tree = parse(src, syntax, JsParserOptions::default());
+        let output = crate::format_node(
+            JsFormatOptions::new(syntax).with_indent_style(IndentStyle::Space),
+            &tree.syntax(),
+            Vec::new(),
+        )
+        .unwrap()
+        .print()
+        .unwrap()
+        .as_code()
+        .to_string();
+
+        assert!(output.contains("<>"), "delimiters were lost: {output:?}");
+        assert!(output.contains("</>"), "delimiters were lost: {output:?}");
+    }
 }

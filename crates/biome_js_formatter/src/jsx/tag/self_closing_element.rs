@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::jsx::tag::opening_element::AnyJsxOpeningElement;
 
-use crate::utils::jsx::is_jsx_suppressed;
+use crate::utils::jsx::{is_implicit_fragment_child, is_jsx_suppressed};
 use biome_js_syntax::JsxSelfClosingElement;
 
 #[derive(Debug, Clone, Default)]
@@ -22,6 +22,9 @@ impl FormatNodeRule<JsxSelfClosingElement> for FormatJsxSelfClosingElement {
         node: &JsxSelfClosingElement,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
+        if is_implicit_fragment_child(node.syntax()) {
+            return format_leading_comments(node.syntax()).fmt(f);
+        }
         debug_assert!(
             !f.comments().has_leading_comments(node.syntax()),
             "JsxSelfClosingElement can not have comments."
@@ -34,6 +37,9 @@ impl FormatNodeRule<JsxSelfClosingElement> for FormatJsxSelfClosingElement {
         node: &JsxSelfClosingElement,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
+        if is_implicit_fragment_child(node.syntax()) {
+            return format_dangling_comments(node.syntax()).fmt(f);
+        }
         debug_assert!(
             !f.comments().has_dangling_comments(node.syntax()),
             "JsxSelfClosingElement can not have comments."
@@ -46,6 +52,9 @@ impl FormatNodeRule<JsxSelfClosingElement> for FormatJsxSelfClosingElement {
         node: &JsxSelfClosingElement,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
+        if is_implicit_fragment_child(node.syntax()) {
+            return format_trailing_comments(node.syntax()).fmt(f);
+        }
         debug_assert!(
             !f.comments().has_trailing_comments(node.syntax()),
             "JsxSelfClosingElement can not have comments."
