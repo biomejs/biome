@@ -73,6 +73,36 @@ pub enum JsLexContext {
     /// Lexes a JSX Attribute value. Calls into normal lex token if positioned at anything
     /// that isn't `'` or `"`.
     JsxAttributeValue,
+
+    /// Lexes the content of an Astro `<script>` or `<style>` written inside a
+    /// template expression, where a `{` opens no expression and a `<` starts no
+    /// element. Runs to the element's own closing tag.
+    JsxRawText(JsxRawTextElement),
+}
+
+/// The elements whose children an Astro template expression reads as raw text,
+/// each identified by the closing tag that ends that text.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum JsxRawTextElement {
+    Script,
+    Style,
+}
+
+impl JsxRawTextElement {
+    fn closing_tag_name(self) -> &'static str {
+        match self {
+            Self::Script => "script",
+            Self::Style => "style",
+        }
+    }
+
+    pub(crate) fn from_element_name(name: &str) -> Option<Self> {
+        match name {
+            "script" => Some(Self::Script),
+            "style" => Some(Self::Style),
+            _ => None,
+        }
+    }
 }
 
 impl LexContext for JsLexContext {
@@ -177,6 +207,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
                 JsLexContext::TemplateElement { tagged } => self.lex_template(tagged),
                 JsLexContext::JsxChild => self.lex_jsx_child_token(),
                 JsLexContext::JsxAttributeValue => self.lex_jsx_attribute_value(),
+                JsLexContext::JsxRawText(element) => self.lex_jsx_raw_text_token(element),
             }
         };
 
@@ -380,6 +411,38 @@ impl<'src> JsLexer<'src> {
         } else {
             self.current_kind
         }
+    }
+
+    /// Whether the lexer sits at the closing tag that ends `element`'s raw text,
+    /// matched case-insensitively the way JSX matches element names.
+    fn at_jsx_raw_text_end(&self, element: JsxRawTextElement) -> bool {
+        let name = element.closing_tag_name();
+        self.source
+            .get(self.position..)
+            .and_then(|rest| rest.strip_prefix("</"))
+            .and_then(|rest| rest.get(..name.len()))
+            .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+    }
+
+    fn lex_jsx_raw_text_token(&mut self, element: JsxRawTextElement) -> JsSyntaxKind {
+        debug_assert!(!self.is_eof());
+
+        if self.at_jsx_raw_text_end(element) {
+            return self.eat_byte(T![<]);
+        }
+
+        while let Some(chr) = self.current_byte() {
+            if chr == b'<' && self.at_jsx_raw_text_end(element) {
+                break;
+            }
+            if chr.is_ascii() {
+                self.advance(1);
+            } else {
+                self.advance_char_unchecked();
+            }
+        }
+
+        JSX_TEXT_LITERAL
     }
 
     fn lex_jsx_child_token(&mut self) -> JsSyntaxKind {
