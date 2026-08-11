@@ -5,46 +5,65 @@ expression: invalid.jsx
 # Input
 ```jsx
 /* should generate diagnostics */
+<>
+	<button />
+	<button></button>
+	<menuitem />
+	<button>   </button>
 
-const a = <button />;
+	{/* An empty, whitespace-only, `null` or `undefined` labeling attribute is not a real label. */}
+	<button aria-label="" />
+	<button aria-label="   " />
+	<button aria-label={``} />
+	<button aria-label={null} />
+	<button aria-label={undefined} />
+	<button aria-labelledby="" />
+	<button title="" />
 
-const b = <button></button>;
+	{/* A falsy `aria-hidden` leaves the control exposed, so a label is still required. */}
+	<button aria-hidden="false" />
+	<button aria-hidden={false} />
+	<button aria-hidden="" />
 
-const c = <menuitem />;
+	{/* A hidden child supplies no accessible label, however deep the text is. */}
+	<button><span aria-hidden="true">Delete</span></button>
+	<button><span aria-hidden="true"><span>Delete</span></span></button>
 
-// `aria-hidden="false"` is still exposed — a label is still required.
-const d = <button aria-hidden="false" />;
+	{/* An empty child element renders nothing announceable, at any depth. */}
+	<button><span /></button>
+	<button><span></span></button>
+	<button><span><em></em></span></button>
 
-// An empty labeling attribute is not a real label.
-const e = <button aria-label="" />;
+	{/* A decorative or unlabeled image supplies no accessible name. */}
+	<button><img /></button>
+	<button><img alt="" /></button>
 
-// A hidden child does not supply an accessible label.
-const f = <button><span aria-hidden="true">Delete</span></button>;
+	{/* Void elements and hidden inputs render nothing. */}
+	<button><br /></button>
+	<button><input type="hidden" /></button>
 
-// An empty template-literal label is not a real label either.
-const g = <button aria-label={``} />;
-
-// A whitespace-only label is not a real label either.
-const h = <button aria-label="   " />;
-
-// A `null` or `undefined` label is not a real label either.
-const i = <button aria-label={null} />;
-const j = <button aria-label={undefined} />;
+	{/* A falsy expression child, a JSX comment, an empty fragment, and a falsy
+	    `children` prop all render nothing. */}
+	<button>{false}</button>
+	<button>{/* comment */}</button>
+	<button><></></button>
+	<button children="" />
+</>
 
 ```
 
 # Diagnostics
 ```
-invalid.jsx:3:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
     1 │ /* should generate diagnostics */
-    2 │ 
-  > 3 │ const a = <button />;
-      │           ^^^^^^^^^^
-    4 │ 
-    5 │ const b = <button></button>;
+    2 │ <>
+  > 3 │ 	<button />
+      │ 	^^^^^^^^^^
+    4 │ 	<button></button>
+    5 │ 	<menuitem />
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -56,16 +75,16 @@ invalid.jsx:3:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:5:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    3 │ const a = <button />;
-    4 │ 
-  > 5 │ const b = <button></button>;
-      │           ^^^^^^^^
-    6 │ 
-    7 │ const c = <menuitem />;
+    2 │ <>
+    3 │ 	<button />
+  > 4 │ 	<button></button>
+      │ 	^^^^^^^^
+    5 │ 	<menuitem />
+    6 │ 	<button>   </button>
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -77,16 +96,16 @@ invalid.jsx:5:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:7:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    5 │ const b = <button></button>;
-    6 │ 
-  > 7 │ const c = <menuitem />;
-      │           ^^^^^^^^^^^^
-    8 │ 
-    9 │ // `aria-hidden="false"` is still exposed — a label is still required.
+    3 │ 	<button />
+    4 │ 	<button></button>
+  > 5 │ 	<menuitem />
+      │ 	^^^^^^^^^^^^
+    6 │ 	<button>   </button>
+    7 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -98,15 +117,16 @@ invalid.jsx:7:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:10:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-     9 │ // `aria-hidden="false"` is still exposed — a label is still required.
-  > 10 │ const d = <button aria-hidden="false" />;
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ // An empty labeling attribute is not a real label.
+    4 │ 	<button></button>
+    5 │ 	<menuitem />
+  > 6 │ 	<button>   </button>
+      │ 	^^^^^^^^
+    7 │ 
+    8 │ 	{/* An empty, whitespace-only, `null` or `undefined` labeling attribute is not a real label. */}
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -118,15 +138,15 @@ invalid.jsx:10:11 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:13:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    12 │ // An empty labeling attribute is not a real label.
-  > 13 │ const e = <button aria-label="" />;
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ // A hidden child does not supply an accessible label.
+     8 │ 	{/* An empty, whitespace-only, `null` or `undefined` labeling attribute is not a real label. */}
+   > 9 │ 	<button aria-label="" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<button aria-label="   " />
+    11 │ 	<button aria-label={``} />
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -138,15 +158,16 @@ invalid.jsx:13:11 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:16:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    15 │ // A hidden child does not supply an accessible label.
-  > 16 │ const f = <button><span aria-hidden="true">Delete</span></button>;
-       │           ^^^^^^^^
-    17 │ 
-    18 │ // An empty template-literal label is not a real label either.
+     8 │ 	{/* An empty, whitespace-only, `null` or `undefined` labeling attribute is not a real label. */}
+     9 │ 	<button aria-label="" />
+  > 10 │ 	<button aria-label="   " />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<button aria-label={``} />
+    12 │ 	<button aria-label={null} />
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -158,15 +179,16 @@ invalid.jsx:16:11 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:19:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    18 │ // An empty template-literal label is not a real label either.
-  > 19 │ const g = <button aria-label={``} />;
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ 
-    21 │ // A whitespace-only label is not a real label either.
+     9 │ 	<button aria-label="" />
+    10 │ 	<button aria-label="   " />
+  > 11 │ 	<button aria-label={``} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<button aria-label={null} />
+    13 │ 	<button aria-label={undefined} />
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -178,15 +200,16 @@ invalid.jsx:19:11 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:22:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    21 │ // A whitespace-only label is not a real label either.
-  > 22 │ const h = <button aria-label="   " />;
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ 
-    24 │ // A `null` or `undefined` label is not a real label either.
+    10 │ 	<button aria-label="   " />
+    11 │ 	<button aria-label={``} />
+  > 12 │ 	<button aria-label={null} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<button aria-label={undefined} />
+    14 │ 	<button aria-labelledby="" />
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -198,15 +221,16 @@ invalid.jsx:22:11 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:25:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    24 │ // A `null` or `undefined` label is not a real label either.
-  > 25 │ const i = <button aria-label={null} />;
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ const j = <button aria-label={undefined} />;
-    27 │ 
+    11 │ 	<button aria-label={``} />
+    12 │ 	<button aria-label={null} />
+  > 13 │ 	<button aria-label={undefined} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<button aria-labelledby="" />
+    15 │ 	<button title="" />
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -218,15 +242,368 @@ invalid.jsx:25:11 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:26:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    24 │ // A `null` or `undefined` label is not a real label either.
-    25 │ const i = <button aria-label={null} />;
-  > 26 │ const j = <button aria-label={undefined} />;
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ 
+    12 │ 	<button aria-label={null} />
+    13 │ 	<button aria-label={undefined} />
+  > 14 │ 	<button aria-labelledby="" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<button title="" />
+    16 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    13 │ 	<button aria-label={undefined} />
+    14 │ 	<button aria-labelledby="" />
+  > 15 │ 	<button title="" />
+       │ 	^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ 	{/* A falsy `aria-hidden` leaves the control exposed, so a label is still required. */}
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:18:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    17 │ 	{/* A falsy `aria-hidden` leaves the control exposed, so a label is still required. */}
+  > 18 │ 	<button aria-hidden="false" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	<button aria-hidden={false} />
+    20 │ 	<button aria-hidden="" />
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    17 │ 	{/* A falsy `aria-hidden` leaves the control exposed, so a label is still required. */}
+    18 │ 	<button aria-hidden="false" />
+  > 19 │ 	<button aria-hidden={false} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 	<button aria-hidden="" />
+    21 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    18 │ 	<button aria-hidden="false" />
+    19 │ 	<button aria-hidden={false} />
+  > 20 │ 	<button aria-hidden="" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ 	{/* A hidden child supplies no accessible label, however deep the text is. */}
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    22 │ 	{/* A hidden child supplies no accessible label, however deep the text is. */}
+  > 23 │ 	<button><span aria-hidden="true">Delete</span></button>
+       │ 	^^^^^^^^
+    24 │ 	<button><span aria-hidden="true"><span>Delete</span></span></button>
+    25 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    22 │ 	{/* A hidden child supplies no accessible label, however deep the text is. */}
+    23 │ 	<button><span aria-hidden="true">Delete</span></button>
+  > 24 │ 	<button><span aria-hidden="true"><span>Delete</span></span></button>
+       │ 	^^^^^^^^
+    25 │ 
+    26 │ 	{/* An empty child element renders nothing announceable, at any depth. */}
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:27:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    26 │ 	{/* An empty child element renders nothing announceable, at any depth. */}
+  > 27 │ 	<button><span /></button>
+       │ 	^^^^^^^^
+    28 │ 	<button><span></span></button>
+    29 │ 	<button><span><em></em></span></button>
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:28:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    26 │ 	{/* An empty child element renders nothing announceable, at any depth. */}
+    27 │ 	<button><span /></button>
+  > 28 │ 	<button><span></span></button>
+       │ 	^^^^^^^^
+    29 │ 	<button><span><em></em></span></button>
+    30 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:29:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    27 │ 	<button><span /></button>
+    28 │ 	<button><span></span></button>
+  > 29 │ 	<button><span><em></em></span></button>
+       │ 	^^^^^^^^
+    30 │ 
+    31 │ 	{/* A decorative or unlabeled image supplies no accessible name. */}
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:32:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    31 │ 	{/* A decorative or unlabeled image supplies no accessible name. */}
+  > 32 │ 	<button><img /></button>
+       │ 	^^^^^^^^
+    33 │ 	<button><img alt="" /></button>
+    34 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:33:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    31 │ 	{/* A decorative or unlabeled image supplies no accessible name. */}
+    32 │ 	<button><img /></button>
+  > 33 │ 	<button><img alt="" /></button>
+       │ 	^^^^^^^^
+    34 │ 
+    35 │ 	{/* Void elements and hidden inputs render nothing. */}
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:36:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    35 │ 	{/* Void elements and hidden inputs render nothing. */}
+  > 36 │ 	<button><br /></button>
+       │ 	^^^^^^^^
+    37 │ 	<button><input type="hidden" /></button>
+    38 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:37:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    35 │ 	{/* Void elements and hidden inputs render nothing. */}
+    36 │ 	<button><br /></button>
+  > 37 │ 	<button><input type="hidden" /></button>
+       │ 	^^^^^^^^
+    38 │ 
+    39 │ 	{/* A falsy expression child, a JSX comment, an empty fragment, and a falsy
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:41:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    39 │ 	{/* A falsy expression child, a JSX comment, an empty fragment, and a falsy
+    40 │ 	    `children` prop all render nothing. */}
+  > 41 │ 	<button>{false}</button>
+       │ 	^^^^^^^^
+    42 │ 	<button>{/* comment */}</button>
+    43 │ 	<button><></></button>
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:42:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    40 │ 	    `children` prop all render nothing. */}
+    41 │ 	<button>{false}</button>
+  > 42 │ 	<button>{/* comment */}</button>
+       │ 	^^^^^^^^
+    43 │ 	<button><></></button>
+    44 │ 	<button children="" />
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    41 │ 	<button>{false}</button>
+    42 │ 	<button>{/* comment */}</button>
+  > 43 │ 	<button><></></button>
+       │ 	^^^^^^^^
+    44 │ 	<button children="" />
+    45 │ </>
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    42 │ 	<button>{/* comment */}</button>
+    43 │ 	<button><></></button>
+  > 44 │ 	<button children="" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    45 │ </>
+    46 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   

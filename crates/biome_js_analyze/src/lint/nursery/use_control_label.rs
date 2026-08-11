@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::static_value::StaticValue;
+use biome_js_syntax::{AnyJsxChild, JsxChildList, JsxElement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_control_label::UseControlLabelOptions;
 
@@ -13,14 +14,20 @@ declare_lint_rule! {
     ///
     /// A control with no accessible label is announced by assistive technology
     /// as an anonymous control (e.g. just "button"), leaving its purpose
-    /// unclear. A label can come from text content, or from an `aria-label`,
-    /// `aria-labelledby`, or `title` attribute.
+    /// unclear. A label can come from text content anywhere inside the
+    /// control, or from an `aria-label`, `aria-labelledby`, or `title`
+    /// attribute.
     ///
     /// This rule checks native controls whose accessible name is expected to
     /// come from their own content or attributes (`button`, `menuitem`).
     /// Elements hidden from assistive technology with `aria-hidden` are
     /// skipped, as are elements that already require a text alternative under
     /// a dedicated rule (e.g. `area`, `img`, checked by `useAltText`).
+    ///
+    /// The search through the content of a control is permissive: anything
+    /// whose rendered output cannot be determined statically, such as an
+    /// expression, a spread, or a custom component, is assumed to provide a
+    /// label.
     ///
     /// ## Examples
     ///
@@ -32,6 +39,12 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <button></button>;
+    /// ```
+    ///
+    /// An icon button whose content renders nothing announceable:
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <button><i className="icon-save" /></button>;
     /// ```
     ///
     /// ### Valid
@@ -46,6 +59,10 @@ declare_lint_rule! {
     ///
     /// ```jsx
     /// <button><Icon /><span>Delete</span></button>;
+    /// ```
+    ///
+    /// ```jsx
+    /// <button><img src="save.png" alt="Save" /></button>;
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -72,6 +89,10 @@ const CONTROL_ELEMENTS: &[&str] = &["button", "menuitem"];
 /// Attributes that supply an accessible name for these controls.
 const LABEL_ATTRIBUTES: &[&str] = &["aria-label", "aria-labelledby", "title"];
 
+/// Void elements that render nothing an assistive technology can announce, so
+/// they never contribute to the accessible name of an ancestor control.
+const EMPTY_CONTENT_ELEMENTS: &[&str] = &["br", "hr", "wbr", "meta", "link", "base", "col"];
+
 impl Rule for UseControlLabel {
     type Query = Ast<AnyJsxElement>;
     type State = ();
@@ -90,8 +111,10 @@ impl Rule for UseControlLabel {
             return None;
         }
 
-        // An element hidden from the accessibility tree does not need a label.
-        if is_aria_hidden(element) {
+        // An element hidden from the accessibility tree does not need a label. A
+        // bare `aria-hidden` counts as `true`, while a falsy value (`false`,
+        // `null`, `undefined`, `""`) leaves the control exposed.
+        if element.has_truthy_attribute("aria-hidden") {
             return None;
         }
 
@@ -100,10 +123,18 @@ impl Rule for UseControlLabel {
             return None;
         }
 
+        // Props that can carry a label the rule cannot read leave the outcome
+        // undecidable, so the control is left alone.
+        if has_opaque_label_source(element) {
+            return None;
+        }
+
         // Otherwise the name must come from accessible child content. Only an
         // opening element can have children; a self-closing control cannot.
         let has_content = match element {
-            AnyJsxElement::JsxOpeningElement(opening) => opening.has_accessible_child(),
+            AnyJsxElement::JsxOpeningElement(opening) => opening
+                .parent::<JsxElement>()
+                .is_some_and(|parent| has_accessible_content(&parent.children())),
             AnyJsxElement::JsxSelfClosingElement(_) => false,
         };
         if has_content {
@@ -132,37 +163,130 @@ impl Rule for UseControlLabel {
     }
 }
 
-/// Whether the element is hidden from the accessibility tree by a truthy
-/// `aria-hidden`. A bare `aria-hidden` counts as `true`; only an explicit
-/// `aria-hidden="false"` (or `{false}`) is treated as visible.
-fn is_aria_hidden(element: &AnyJsxElement) -> bool {
-    let Some(attribute) = element.find_attribute_by_name("aria-hidden") else {
+/// Whether any descendant of a control supplies part of its accessible name.
+///
+/// The walk is unbounded and deliberately permissive: anything whose rendered
+/// output cannot be determined statically (an expression, a spread, a custom
+/// component) counts as a label, so only a subtree that is provably silent
+/// reports.
+fn has_accessible_content(children: &JsxChildList) -> bool {
+    children.into_iter().any(|child| match child {
+        AnyJsxChild::JsxText(text) => text
+            .value_token()
+            .is_ok_and(|token| !token.text_trimmed().trim().is_empty()),
+        AnyJsxChild::JsxExpressionChild(expression) => {
+            expression
+                .expression()
+                .is_some_and(|expression| match expression.as_static_value() {
+                    None => true,
+                    Some(value) => match value {
+                        StaticValue::Boolean(token) => token.text_trimmed() != "false",
+                        StaticValue::Null(_)
+                        | StaticValue::Undefined(_)
+                        | StaticValue::EmptyString(_) => false,
+                        StaticValue::String(_) => !value.text().trim().is_empty(),
+                        _ => true,
+                    },
+                })
+        }
+        AnyJsxChild::JsxFragment(fragment) => has_accessible_content(&fragment.children()),
+        AnyJsxChild::JsxElement(element) => {
+            let Ok(opening) = element.opening_element() else {
+                return true;
+            };
+            names_itself(&AnyJsxElement::from(opening))
+                .unwrap_or_else(|| has_accessible_content(&element.children()))
+        }
+        AnyJsxChild::JsxSelfClosingElement(element) => {
+            names_itself(&AnyJsxElement::from(element)).unwrap_or(false)
+        }
+        _ => true,
+    })
+}
+
+/// Whether a descendant element names itself, independently of its children.
+///
+/// `Some(true)` when it supplies a name, `Some(false)` when it can never
+/// supply one, and `None` when the answer depends on its own children.
+fn names_itself(element: &AnyJsxElement) -> Option<bool> {
+    // A hidden subtree is skipped whole: it contributes nothing even if it
+    // holds text.
+    if element.has_truthy_attribute("aria-hidden") {
+        return Some(false);
+    }
+
+    if element.is_custom_component()
+        || has_opaque_label_source(element)
+        || has_labeling_attribute(element)
+    {
+        return Some(true);
+    }
+
+    match element.name_value_token().ok()?.text_trimmed() {
+        // An image is named by its alt text; an empty `alt` marks it decorative.
+        "img" if has_non_empty_attribute(element, "alt") => Some(true),
+        "img" => Some(false),
+        // A hidden input renders nothing; any other input is a control whose
+        // own label this rule does not resolve.
+        "input" => Some(!is_hidden_input(element)),
+        name if EMPTY_CONTENT_ELEMENTS.contains(&name) => Some(false),
+        _ => None,
+    }
+}
+
+/// Whether the element is an `<input type="hidden">`, which renders nothing.
+fn is_hidden_input(element: &AnyJsxElement) -> bool {
+    element
+        .find_attribute_by_name("type")
+        .and_then(|attribute| attribute.as_static_value())
+        .is_some_and(|value| value.text().eq_ignore_ascii_case("hidden"))
+}
+
+/// Whether the element carries a prop that can supply content or a labeling
+/// attribute the rule cannot inspect: a prop that injects children
+/// (`dangerouslySetInnerHTML`, `innerHTML`, a non-falsy `children`), or a
+/// spread whose members are unknown (`{...props}`).
+fn has_opaque_label_source(element: &AnyJsxElement) -> bool {
+    element
+        .find_attribute_by_name("dangerouslySetInnerHTML")
+        .is_some()
+        || element.find_attribute_by_name("innerHTML").is_some()
+        || element
+            .find_attribute_by_name("children")
+            .is_some_and(|attribute| {
+                if attribute.initializer().is_none() {
+                    return false;
+                }
+                attribute
+                    .as_static_value()
+                    .is_none_or(|value| !value.is_falsy())
+            })
+        || element.has_spread_prop()
+}
+
+/// Whether the element carries a labeling attribute with a non-empty value.
+fn has_labeling_attribute(element: &AnyJsxElement) -> bool {
+    LABEL_ATTRIBUTES
+        .iter()
+        .any(|name| has_non_empty_attribute(element, name))
+}
+
+/// Whether the named attribute is present and carries a usable value. A
+/// dynamic value (not statically known, e.g. `aria-label={label}`) is assumed
+/// to provide one; an empty or whitespace-only literal (`aria-label=""`,
+/// `aria-label={``}`, `aria-label="  "`) does not, nor does a literal `null`
+/// or `undefined` (e.g. `aria-label={null}`).
+fn has_non_empty_attribute(element: &AnyJsxElement, name: &str) -> bool {
+    let Some(attribute) = element.find_attribute_by_name(name) else {
         return false;
     };
     match attribute.as_static_value() {
         None => true,
-        Some(value) => value.text() != "false",
+        Some(value) => match value {
+            StaticValue::String(_) => !value.text().trim().is_empty(),
+            StaticValue::EmptyString(_) => false,
+            StaticValue::Null(_) | StaticValue::Undefined(_) => false,
+            _ => true,
+        },
     }
-}
-
-/// Whether the element carries a labeling attribute with a non-empty value. A
-/// dynamic value (not statically known, e.g. `aria-label={label}`) is assumed
-/// to provide a label; an empty or whitespace-only literal (`aria-label=""`,
-/// `aria-label={``}`, `aria-label="  "`) does not, nor does a literal `null`
-/// or `undefined` (e.g. `aria-label={null}`).
-fn has_labeling_attribute(element: &AnyJsxElement) -> bool {
-    LABEL_ATTRIBUTES.iter().any(|name| {
-        let Some(attribute) = element.find_attribute_by_name(name) else {
-            return false;
-        };
-        match attribute.as_static_value() {
-            None => true,
-            Some(value) => match value {
-                StaticValue::String(_) => !value.text().trim().is_empty(),
-                StaticValue::EmptyString(_) => false,
-                StaticValue::Null(_) | StaticValue::Undefined(_) => false,
-                _ => true,
-            },
-        }
-    })
 }

@@ -1,26 +1,45 @@
 /* should generate diagnostics */
+<>
+	<button />
+	<button></button>
+	<menuitem />
+	<button>   </button>
 
-const a = <button />;
+	{/* An empty, whitespace-only, `null` or `undefined` labeling attribute is not a real label. */}
+	<button aria-label="" />
+	<button aria-label="   " />
+	<button aria-label={``} />
+	<button aria-label={null} />
+	<button aria-label={undefined} />
+	<button aria-labelledby="" />
+	<button title="" />
 
-const b = <button></button>;
+	{/* A falsy `aria-hidden` leaves the control exposed, so a label is still required. */}
+	<button aria-hidden="false" />
+	<button aria-hidden={false} />
+	<button aria-hidden="" />
 
-const c = <menuitem />;
+	{/* A hidden child supplies no accessible label, however deep the text is. */}
+	<button><span aria-hidden="true">Delete</span></button>
+	<button><span aria-hidden="true"><span>Delete</span></span></button>
 
-// `aria-hidden="false"` is still exposed — a label is still required.
-const d = <button aria-hidden="false" />;
+	{/* An empty child element renders nothing announceable, at any depth. */}
+	<button><span /></button>
+	<button><span></span></button>
+	<button><span><em></em></span></button>
 
-// An empty labeling attribute is not a real label.
-const e = <button aria-label="" />;
+	{/* A decorative or unlabeled image supplies no accessible name. */}
+	<button><img /></button>
+	<button><img alt="" /></button>
 
-// A hidden child does not supply an accessible label.
-const f = <button><span aria-hidden="true">Delete</span></button>;
+	{/* Void elements and hidden inputs render nothing. */}
+	<button><br /></button>
+	<button><input type="hidden" /></button>
 
-// An empty template-literal label is not a real label either.
-const g = <button aria-label={``} />;
-
-// A whitespace-only label is not a real label either.
-const h = <button aria-label="   " />;
-
-// A `null` or `undefined` label is not a real label either.
-const i = <button aria-label={null} />;
-const j = <button aria-label={undefined} />;
+	{/* A falsy expression child, a JSX comment, an empty fragment, and a falsy
+	    `children` prop all render nothing. */}
+	<button>{false}</button>
+	<button>{/* comment */}</button>
+	<button><></></button>
+	<button children="" />
+</>

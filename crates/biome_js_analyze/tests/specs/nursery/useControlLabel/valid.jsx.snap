@@ -5,31 +5,65 @@ expression: valid.jsx
 # Input
 ```jsx
 /* should not generate diagnostics */
+<>
+	<button>Submit</button>
+	<button aria-label="Close" />
+	<button title="Close" />
+	<button aria-labelledby="save-label" />
+	<span id="save-label">Save</span>
 
-const a = <button>Submit</button>;
+	{/* A dynamic labeling value is assumed to provide a label. */}
+	<button aria-label={label} />
 
-const b = <button aria-label="Close" />;
+	{/* A numeric expression child renders as its text. */}
+	<button>{0}</button>
+	<button>{0n}</button>
 
-const c = <button aria-labelledby="save-label" />;
-const c2 = <span id="save-label">Save</span>;
+	{/* Nested text is found however deep it sits. */}
+	<button><Icon /><span>Delete</span></button>
+	<button><span><em>Delete</em></span></button>
+	<button><>Save</></button>
+	<button>{label}</button>
 
-const d = <button title="Close" />;
+	{/* A labeling attribute on a descendant names the control. */}
+	<button><span aria-label="Delete" /></button>
+	<button><span><span aria-labelledby="save-label" /></span></button>
+	<button><span title="Delete" /></button>
 
-// A dynamic label value is assumed to provide a label.
-const d2 = <button aria-label={label} />;
+	{/* An image is named by its alt text, an icon button by its inline SVG. */}
+	<button><img src="save.png" alt="Save" /></button>
+	<button><svg><title>Save</title></svg></button>
+	<button><svg aria-label="Save" /></button>
 
-const e = <button><Icon /><span>Delete</span></button>;
+	{/* A custom component or spread descendant may render a label. */}
+	<button><Icon /></button>
+	<button><span {...props} /></button>
 
-// Hidden from the accessibility tree; no label needed.
-const f = <button aria-hidden="true" />;
+	{/* A hidden child alongside real text still leaves the control named. */}
+	<button><span aria-hidden="true" />Save</button>
 
-// Not a control this rule checks; `area` is covered by `useAltText`.
-const g = <area href="#" />;
+	{/* Hidden from the accessibility tree; no label needed. A bare `aria-hidden`
+	    is shorthand for `{true}` in JSX, unlike in HTML where a valueless
+	    `aria-hidden` leaves the control exposed. */}
+	<button aria-hidden="true" />
+	<button aria-hidden />
+	<button aria-hidden={isHidden} />
 
-// Custom component, not a native control.
-const h = <Button />;
+	{/* A spread may carry a labeling attribute, so the control is left alone. */}
+	<button {...props} />
+	<button aria-hidden {...props} />
 
-// A dynamic expression child is assumed to eventually render a label.
-const i = <button>{label}</button>;
+	{/* Props that inject children supply content the rule cannot read. */}
+	<button children="Save" />
+	<button dangerouslySetInnerHTML={{ __html: "Save" }} />
+	<button innerHTML={html} />
+	<button><span dangerouslySetInnerHTML={{ __html: "Save" }} /></button>
+
+	{/* Not a control this rule checks; `area` is covered by `useAltText`. */}
+	<area href="#" />
+
+	{/* Custom component, not a native control. */}
+	<Button />
+</>
 
 ```

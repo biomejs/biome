@@ -9,8 +9,21 @@
 <!-- `aria-hidden="false"` is still exposed — a label is still required. -->
 <button aria-hidden="false"></button>
 
-<!-- An empty labeling attribute is not a real label. -->
+<!-- An empty or whitespace-only labeling attribute is not a real label. -->
 <button aria-label=""></button>
+<button aria-label="   "></button>
+<button aria-labelledby=""></button>
+<button title=""></button>
+
+<!-- A valueless or empty `aria-hidden` leaves the control exposed. -->
+<button aria-hidden></button>
+<button aria-hidden=""></button>
+
+<!-- A child with only whitespace supplies no accessible name. -->
+<button><span>   </span></button>
+
+<!-- A comment supplies no accessible name. -->
+<button><!-- save --></button>
 
 <!-- A hidden child does not supply an accessible label. -->
 <button><span aria-hidden="true">Delete</span></button>

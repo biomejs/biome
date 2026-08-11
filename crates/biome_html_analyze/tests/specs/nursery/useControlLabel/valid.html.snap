@@ -22,6 +22,13 @@ expression: valid.html
 <!-- A labeling attribute on a non-self-closing child supplies the accessible label. -->
 <button><span aria-label="Delete"></span></button>
 
+<!-- An icon button is named by the title or labeling attribute of its inline SVG. -->
+<button><svg><title>Save</title></svg></button>
+<button><svg aria-label="Save"></svg></button>
+
+<!-- A hidden child alongside real text still leaves the control named. -->
+<button><span aria-hidden="true"></span>Save</button>
+
 <!-- Hidden from the accessibility tree; no label needed. -->
 <button aria-hidden="true"></button>
 
