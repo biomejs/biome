@@ -52,8 +52,12 @@ fn parse_document(p: &mut YamlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.eat(UNICODE_BOM);
-    DirectiveList.parse_list(p);
-    p.eat(T![---]);
+    let directives = DirectiveList.parse_list(p);
+    if directives.range(p).is_empty() {
+        p.eat(T![---]);
+    } else if !p.eat(T![---]) {
+        p.error(p.err_builder("Expected `---` after YAML directives.", directives.range(p)));
+    }
     parse_any_block_node(p).ok();
     p.eat(T![...]);
     Present(m.complete(p, YAML_DOCUMENT))

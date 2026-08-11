@@ -163,6 +163,24 @@ YamlRoot {
 ## Diagnostics
 
 ```
+invalid_headers.yaml:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A block scalar can have only one chomping indicator.
+  
+  > 1 │ - |+1-2
+      │      ^
+    2 │ 
+    3 │ - |123
+  
+invalid_headers.yaml:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A block scalar can have only one indentation indicator.
+  
+  > 1 │ - |+1-2
+      │       ^
+    2 │ 
+    3 │ - |123
+  
 invalid_headers.yaml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Indentation indicator must be between '1' and '9'

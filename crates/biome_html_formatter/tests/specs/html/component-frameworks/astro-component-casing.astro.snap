@@ -23,6 +23,8 @@ import TextInput from './TextInput.astro';
 
 ```astro
 ---
+import Button from "./Button.astro";
+import TextInput from "./TextInput.astro";
 ---
 
 <Button label="test button" />

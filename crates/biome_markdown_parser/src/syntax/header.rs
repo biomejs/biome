@@ -24,7 +24,7 @@
 //! ---------
 //! ```
 
-use crate::parser::{MarkdownParser, MarkdownParserCheckpoint};
+use crate::parser::{DeferredInlineFlavor, MarkdownParser, MarkdownParserCheckpoint};
 use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_any_inline;
@@ -35,6 +35,7 @@ use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
+use std::rc::Rc;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
 const MAX_HEADER_HASHES: usize = 6;
@@ -171,6 +172,7 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
     let prev_context = set_header_emphasis_context(p);
 
     // Parse content as a paragraph containing inline items
+    let deferred = p.start_deferred_inline(DeferredInlineFlavor::AtxParagraph);
     let m = p.start();
     let inline_m = p.start();
 
@@ -214,6 +216,7 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
 
     inline_m.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_PARAGRAPH);
+    p.finish_deferred_inline(deferred);
 
     // Restore previous emphasis context
     p.set_emphasis_context(prev_context);
@@ -278,7 +281,7 @@ fn header_content_source_len(p: &mut MarkdownParser) -> usize {
 
 /// Build an emphasis context for header content and install it on the parser.
 /// Returns the previous context so it can be restored.
-fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext> {
+fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisContext>> {
     let source_len = header_content_source_len(p);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {
@@ -290,7 +293,7 @@ fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
     let context = EmphasisContext::new(inline_source, base_offset, |label| {
         p.has_link_reference_definition(label)
     });
-    p.set_emphasis_context(Some(context))
+    p.set_new_emphasis_context(context)
 }
 
 /// Check if the current position has a trailing hash sequence.

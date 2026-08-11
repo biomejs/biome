@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/sort_v4_test.rs
-assertion_line: 25
 expression: rendered
 input_file: crates/biome_js_analyze/tests/sort_v4/cases.jsonc
 ---
@@ -364,6 +363,48 @@ sorted: -mt-2! mt-4
 input:  not-a-class! flex
 sorted: not-a-class! flex
 ---
+input:  hover:flex flex
+sorted: flex hover:flex
+---
+input:  focus:flex hover:flex flex
+sorted: flex hover:flex focus:flex
+---
+input:  hover:flex [&:hover]:flex flex
+sorted: flex hover:flex [&:hover]:flex
+---
+input:  data-[state=open]:flex aria-checked:flex flex
+sorted: flex aria-checked:flex data-[state=open]:flex
+---
+input:  nth-last-3:flex nth-2:flex flex
+sorted: flex nth-2:flex nth-last-3:flex
+---
+input:  peer-focus:flex group-hover:flex flex
+sorted: flex group-hover:flex peer-focus:flex
+---
+input:  has-[:checked]:flex not-hover:flex flex
+sorted: flex not-hover:flex has-[:checked]:flex
+---
+input:  dark:flex hover:flex flex
+sorted: flex hover:flex dark:flex
+---
+input:  md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex
+sorted: flex max-lg:flex max-sm:flex sm:flex md:flex min-lg:flex
+---
+input:  md:hover:flex hover:flex flex md:flex
+sorted: flex hover:flex md:flex md:hover:flex
+---
+input:  p-2! flex!
+sorted: flex! p-2!
+---
+input:  p-2! hover:flex! flex!
+sorted: flex! p-2! hover:flex!
+---
+input:  w-full! flex! p-4!
+sorted: flex! w-full! p-4!
+---
+input:  flex [color:red]!
+sorted: flex [color:red]!
+---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
 sorted: text-card-foreground bg-card flex flex-col gap-6 rounded-xl border py-6 shadow-sm
 ---
@@ -380,4 +421,4 @@ input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-acc
 sorted: hover:text-accent-foreground bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 border shadow-xs
 ---
 input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
-sorted: [&_svg]:pointer-events-none disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none
+sorted: focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0

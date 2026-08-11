@@ -697,6 +697,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions>(),
     ));
     result.push(("correctness", "noInvalidPositionAtImportRule", TypeId::of::<biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions>()));
+    result.push((
+        "nursery",
+        "noInvalidPropertyInitValue",
+        TypeId::of::<
+            biome_rule_options::no_invalid_property_init_value::NoInvalidPropertyInitValueOptions,
+        >(),
+    ));
     result.push(("correctness", "noInvalidUseBeforeDeclaration", TypeId::of::<biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions>()));
     result.push((
         "suspicious",
@@ -1711,9 +1718,9 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("style", "useConsistentGraphqlDescriptions", TypeId::of::<biome_rule_options::use_consistent_graphql_descriptions::UseConsistentGraphqlDescriptionsOptions>()));
     result.push((
         "nursery",
-        "useConsistentHeaderLevel",
+        "useConsistentHeadingLevel",
         TypeId::of::<
-            biome_rule_options::use_consistent_header_level::UseConsistentHeaderLevelOptions,
+            biome_rule_options::use_consistent_heading_level::UseConsistentHeadingLevelOptions,
         >(),
     ));
     result.push(("style", "useConsistentMemberAccessibility", TypeId::of::<biome_rule_options::use_consistent_member_accessibility::UseConsistentMemberAccessibilityOptions>()));
@@ -2294,6 +2301,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "useThrowOnlyError",
         TypeId::of::<biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useTopLevelHeading",
+        TypeId::of::<biome_rule_options::use_top_level_heading::UseTopLevelHeadingOptions>(),
     ));
     result.push((
         "performance",

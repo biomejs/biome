@@ -97,6 +97,38 @@ impl ThemeNamespace {
     }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum VariantKind {
+    Static,
+    Functional,
+    Compound,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum VariantCompare {
+    Default,
+    BreakpointAsc,
+    BreakpointDesc,
+    ContainerAsc,
+    ContainerDesc,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct VariantEntry {
+    pub kind: VariantKind,
+    pub order: u16,
+    pub compare: VariantCompare,
+    /// Tailwind's `Compounds` bitflags for what this variant emits:
+    /// `1` = at-rules (media / container queries), `2` = style rules
+    /// (selectors), `0` = neither.
+    pub compounds: u8,
+    /// The `Compounds` bitflags a compound variant (`group-*`, `has-*`)
+    /// accepts as its nested variant; `0` for non-compound variants.
+    pub compounds_with: u8,
+}
+
 #[derive(Copy, Clone)]
 pub struct UtilityEntry {
     /// Index into `SIGNATURE_POOL` — the ascending property-order

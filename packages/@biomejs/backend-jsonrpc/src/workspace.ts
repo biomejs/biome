@@ -2432,6 +2432,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
+See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
+	 */
+	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
+	/**
 	* Disallow specific object properties.
 See https://biomejs.dev/linter/rules/no-js-restricted-properties 
 	 */
@@ -4710,6 +4715,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidPropertyInitValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidPropertyInitValueOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -6583,6 +6591,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoInvalidPropertyInitValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidPropertyInitValueOptions;
+}
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsRestrictedPropertiesOptions;
@@ -8383,6 +8395,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	* Restriction entries for object/property access.
@@ -9863,6 +9876,7 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
@@ -9906,7 +9920,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useConsistentHeaderLevel"
+	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDisposables"
@@ -9946,6 +9960,7 @@ export type Category =
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
+	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

@@ -1,6 +1,8 @@
+mod analyzer;
 mod codeblock;
 mod printer;
 
+pub use analyzer::*;
 pub use codeblock::*;
 pub use printer::*;
 
@@ -76,7 +78,7 @@ impl AnalyzerServicesBuilder {
         let mut html_paths = Vec::new();
 
         for (path, src) in files {
-            let path_buf = Utf8PathBuf::from(path);
+            let path_buf = Utf8PathBuf::from(codeblock::normalize_file_path(&path));
             let biome_path = BiomePath::new(&path_buf);
             if biome_path.is_manifest() {
                 match biome_path.file_name() {
@@ -248,12 +250,12 @@ pub fn parse_rule_options(
             let error = diag
                 .with_file_path(block.file_path())
                 .with_file_source_code(code);
-            diagnostics_writer.write_parse_error(error);
+            diagnostics_writer.write_parse_error(error)?;
         }
         if block.expect_diagnostic {
             return Ok(None);
         } else {
-            diagnostics_writer.print_all_diagnostics();
+            diagnostics_writer.print_all_diagnostics()?;
             bail!("Please fix the parse errors above.");
         };
     }
@@ -387,12 +389,12 @@ pub fn parse_rule_options(
             let error = diag
                 .with_file_path(block.file_path())
                 .with_file_source_code(code);
-            diagnostics_writer.write_diagnostic(error);
+            diagnostics_writer.write_diagnostic(error)?;
         }
         if block.expect_diagnostic {
             return Ok(None);
         } else {
-            diagnostics_writer.print_all_diagnostics();
+            diagnostics_writer.print_all_diagnostics()?;
             bail!("Please fix the configuration errors above.");
         };
     }

@@ -1,5 +1,5 @@
 use crate::token_source::{
-    HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
+    HtmlFramework, HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
     TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
@@ -23,9 +23,10 @@ pub(crate) struct HtmlParser<'source> {
 
 impl<'source> HtmlParser<'source> {
     pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
+        let framework = options.framework();
         Self {
             context: ParserContext::default(),
-            source: HtmlTokenSource::from_str(source),
+            source: HtmlTokenSource::from_str(source, HtmlLexContext::Regular { framework }),
             options,
         }
     }
@@ -149,6 +150,20 @@ pub struct HtmlParserOptions {
 }
 
 impl HtmlParserOptions {
+    pub(crate) fn framework(&self) -> HtmlFramework {
+        if self.vue {
+            HtmlFramework::Vue
+        } else if self.svelte {
+            HtmlFramework::Svelte
+        } else if self.frontmatter {
+            HtmlFramework::Astro
+        } else if self.angular {
+            HtmlFramework::Angular
+        } else {
+            HtmlFramework::Plain
+        }
+    }
+
     pub fn with_single_text_expression(mut self) -> Self {
         self.text_expression = Some(TextExpressionKind::Single);
         self

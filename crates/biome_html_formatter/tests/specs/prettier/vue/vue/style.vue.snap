@@ -61,20 +61,48 @@ info: vue/vue/style.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,5 @@
+@@ -1,42 +1,48 @@
 -<script></script>
 +<script>
 +</script>
  
  <style>
- #foo1{ color: #f00;
-@@ -23,20 +24,20 @@
+-#foo1{ color: #f00;
++#foo1 {
++  color: #f00;
+ }
+ </style>
+ <style scoped>
+-#foo2{ color: #f00;
++#foo2 {
++  color: #f00;
+ }
+ </style>
+ 
+ <style lang="css">
+-#foo3{ color: #f00;
++#foo3 {
++  color: #f00;
+ }
+ </style>
+ <style lang="css" scoped>
+-#foo4{ color: #f00;
++#foo4 {
++  color: #f00;
+ }
+ </style>
+ 
+ <style lang="less">
+-#foo5{ color: #f00;
++#foo5 {
++  color: #f00;
  }
  </style>
  <style lang="less" scoped>
 -#foo6{
-+#foo6{ 
-          @color: #f00;
+-         @color: #f00;
++#foo6 {
++  @color : #f00;
    color: @color;
  }
  </style>
@@ -101,30 +129,35 @@ info: vue/vue/style.vue
 </script>
 
 <style>
-#foo1{ color: #f00;
+#foo1 {
+  color: #f00;
 }
 </style>
 <style scoped>
-#foo2{ color: #f00;
+#foo2 {
+  color: #f00;
 }
 </style>
 
 <style lang="css">
-#foo3{ color: #f00;
+#foo3 {
+  color: #f00;
 }
 </style>
 <style lang="css" scoped>
-#foo4{ color: #f00;
+#foo4 {
+  color: #f00;
 }
 </style>
 
 <style lang="less">
-#foo5{ color: #f00;
+#foo5 {
+  color: #f00;
 }
 </style>
 <style lang="less" scoped>
-#foo6{ 
-         @color: #f00;
+#foo6 {
+  @color : #f00;
   color: @color;
 }
 </style>

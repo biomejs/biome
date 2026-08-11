@@ -9,7 +9,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
-use biome_rowan::{SyntaxKind, TextSize};
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::{is_unicode_punctuation, lookup_byte};
 
@@ -89,6 +89,9 @@ pub enum MarkdownReLexContext {
 pub(crate) struct MarkdownLexer<'src> {
     /// Source text
     source: &'src str,
+
+    /// Exclusive end of the source range visible to this lexer.
+    end: usize,
 
     /// The start byte position in the source text of the next token.
     position: usize,
@@ -210,6 +213,15 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         self.position
     }
 
+    fn is_eof(&self) -> bool {
+        self.position >= self.end
+    }
+
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        let position = self.position.checked_add(offset)?;
+        (position < self.end).then(|| self.source.as_bytes()[position])
+    }
+
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
         self.diagnostics.push(diagnostic);
     }
@@ -230,15 +242,31 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
 impl<'src> MarkdownLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(source: &'src str) -> Self {
+        Self::from_valid_range(source, TextSize::from(0), source.len())
+    }
+
+    pub fn from_range(source: &'src str, range: TextRange) -> Option<Self> {
+        let start: usize = range.start().into();
+        let end: usize = range.end().into();
+        source.get(start..end)?;
+
+        Some(Self::from_valid_range(source, range.start(), end))
+    }
+
+    fn from_valid_range(source: &'src str, start: TextSize, end: usize) -> Self {
         Self {
             source,
-            // Start of document is treated as start of line for indentation purposes
-            after_newline: true,
+            end,
+            after_newline: start == TextSize::from(0)
+                || matches!(
+                    source.as_bytes().get(usize::from(start) - 1),
+                    Some(b'\n' | b'\r')
+                ),
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
-            current_start: TextSize::from(0),
+            current_start: start,
             current_flags: TokenFlags::empty(),
-            position: 0,
+            position: start.into(),
             diagnostics: vec![],
             force_ordered_list_marker: false,
             relex_span: None,
@@ -247,6 +275,10 @@ impl<'src> MarkdownLexer<'src> {
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.force_ordered_list_marker = value;
+    }
+
+    pub fn range_end(&self) -> usize {
+        self.end
     }
 
     /// Sets the target for the next [MarkdownReLexContext::Span] re-lex.
@@ -589,10 +621,8 @@ impl<'src> MarkdownLexer<'src> {
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source()
-            .as_bytes()
-            .get(self.position() + offset)
-            .copied()
+        let position = self.position.checked_add(offset)?;
+        (position < self.end).then(|| self.source.as_bytes()[position])
     }
 
     /// Peeks at the next byte
@@ -1221,7 +1251,7 @@ impl<'src> MarkdownLexer<'src> {
     /// Returns `true` if the parser is at or passed the end of the file.
     #[inline]
     fn is_eof(&self) -> bool {
-        self.position >= self.source.len()
+        self.position >= self.end
     }
 
     /// Consume textual characters until hitting special markdown syntax.
@@ -1385,7 +1415,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     fn is_ordered_list_marker_at(&self, idx: usize) -> bool {
-        if idx >= self.source.len() {
+        if idx >= self.end {
             return false;
         }
 
@@ -1393,7 +1423,7 @@ impl<'src> MarkdownLexer<'src> {
         let mut pos = idx;
         let mut digit_count = 0;
 
-        while pos < bytes.len() && bytes[pos].is_ascii_digit() {
+        while pos < self.end && bytes[pos].is_ascii_digit() {
             digit_count += 1;
             if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                 return false;
@@ -1405,12 +1435,12 @@ impl<'src> MarkdownLexer<'src> {
             return false;
         }
 
-        if pos >= bytes.len() || !(bytes[pos] == b'.' || bytes[pos] == b')') {
+        if pos >= self.end || !(bytes[pos] == b'.' || bytes[pos] == b')') {
             return false;
         }
         pos += 1;
 
-        if pos >= bytes.len() {
+        if pos >= self.end {
             return true;
         }
 
@@ -1423,7 +1453,7 @@ impl<'src> MarkdownLexer<'src> {
     fn is_at_trailing_hash_closing_whitespace(&self) -> bool {
         let mut i = self.position;
         let bytes = self.source.as_bytes();
-        let len = bytes.len();
+        let len = self.end;
 
         let mut saw_ws = false;
         while i < len {
@@ -1526,7 +1556,7 @@ impl<'src> MarkdownLexer<'src> {
         while let Some(b'_') = self.byte_at(offset) {
             offset += 1;
         }
-        let after = self.source[self.position + offset..].chars().next();
+        let after = self.source[self.position + offset..self.end].chars().next();
         is_word_char(after)
     }
 
@@ -1626,7 +1656,7 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
                     .relex_span
                     .take()
                     .expect("set_relex_span must be called before a Span re-lex");
-                debug_assert!(end > self.position && end <= self.source.len());
+                debug_assert!(end > self.position && end <= self.end);
                 self.position = end;
                 kind
             }

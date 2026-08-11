@@ -7,8 +7,8 @@ use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
 use syntax::parse_document;
 
+mod inline_phase;
 mod lexer;
-mod link_reference;
 mod parser;
 mod syntax;
 mod token_source;
@@ -38,26 +38,26 @@ pub fn parse_markdown_with_cache(
     cache: &mut NodeCache,
     options: MarkdownParserOptions,
 ) -> MarkdownParse {
-    let link_definitions =
-        link_reference::collect_link_reference_definitions(source, options.clone());
-    let mut parser = MarkdownParser::new(source, options);
-    parser.set_link_reference_definitions(link_definitions);
+    let mut parser = MarkdownParser::new(source, options.clone());
 
     parse_document(&mut parser);
 
-    let (events, diagnostics, trivia, list_tightness, list_item_indents, quote_indents) =
-        parser.finish();
+    let mut output = parser.finish();
+    if !inline_phase::parse_deferred_inlines(source, &options, &mut output) {
+        output.deferred_inlines.clear();
+    }
+    debug_assert!(output.deferred_inlines.is_empty());
 
-    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &trivia, cache);
-    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &output.trivia, cache);
+    biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);
     let (green, diagnostics) = tree_sink.finish();
 
     MarkdownParse::new(
         green,
         diagnostics,
-        list_tightness,
-        list_item_indents,
-        quote_indents,
+        output.list_tightness,
+        output.list_item_indents,
+        output.quote_indents,
     )
 }
 

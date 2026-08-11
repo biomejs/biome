@@ -2111,6 +2111,22 @@ mod tests {
     }
 
     #[test]
+    fn test_forward_reference_scopes_emphasis() {
+        assert_eq!(
+            render("*[foo*][ref]\n\n[ref]: /uri\n"),
+            "<p>*<a href=\"/uri\">foo*</a></p>\n"
+        );
+        assert_eq!(
+            render("[foo *bar][ref]*\n\n[ref]: /uri\n"),
+            "<p><a href=\"/uri\">foo *bar</a>*</p>\n"
+        );
+        assert_eq!(
+            render("# [foo][ref]  \n\n[ref]: /uri\n"),
+            "<h1><a href=\"/uri\">foo</a></h1>\n"
+        );
+    }
+
+    #[test]
     fn test_emphasis_complex_cases() {
         // Test: Nested
         let parsed = parse_markdown("**bold *and italic* text**\n");
