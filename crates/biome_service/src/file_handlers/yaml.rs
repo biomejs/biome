@@ -17,8 +17,9 @@ use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, 
 use biome_fs::BiomePath;
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::{AnyParse, AnyParsedSource};
+use biome_rowan::NodeCache;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
-use biome_yaml_parser::parse_yaml;
+use biome_yaml_parser::{parse_yaml, parse_yaml_with_cache};
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
 use camino::Utf8Path;
 use tracing::{debug, error};
@@ -281,9 +282,10 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     ParseResult {
-        any_parse: parse_yaml(code).into(),
+        any_parse: parse_yaml_with_cache(code, node_cache).into(),
         language: Some(file_source),
     }
 }

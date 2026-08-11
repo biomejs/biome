@@ -15,11 +15,12 @@ use biome_db::{Db, FileSource};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
-use biome_js_parser::{JsParserOptions, parse as parse_js};
+use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::{AnyParse, AnyParsedSource};
+use biome_rowan::NodeCache;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::{debug, error};
@@ -176,6 +177,7 @@ fn parse_text(
     _file_source: DocumentFileSource,
     code: &str,
     _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let script = VueFileHandler::input(code);
     let file_source = VueFileHandler::file_source(code);
@@ -183,7 +185,8 @@ fn parse_text(
     debug!("Parsing file with language {:?}", file_source);
 
     ParseResult {
-        any_parse: parse_js(script, file_source, JsParserOptions::default()).into(),
+        any_parse: parse_js_with_cache(script, file_source, JsParserOptions::default(), node_cache)
+            .into(),
         language: Some(file_source.into()),
     }
 }

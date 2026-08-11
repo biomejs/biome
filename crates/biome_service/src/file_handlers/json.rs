@@ -38,11 +38,11 @@ use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::{JsonFileSource, LanguageDb};
 use biome_parser::{AnyParse, AnyParsedSource};
-use biome_rowan::{AstNode, SyntaxKind};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -525,9 +525,10 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
-    let any_parse = biome_json_parser::parse_json(code, options).into();
+    let any_parse = parse_json_with_cache(code, node_cache, options).into();
 
     ParseResult {
         any_parse,

@@ -441,10 +441,10 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<MarkdownLanguage>(biome_path, &file_source);
-    let mut node_cache = NodeCache::default();
-    let any_parse = parse_markdown_with_cache(code, &mut node_cache, options).into();
+    let any_parse = parse_markdown_with_cache(code, node_cache, options).into();
 
     ParseResult {
         any_parse,

@@ -33,7 +33,7 @@ use biome_configuration::css::{
 use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
-use biome_css_parser::{CssModulesKind, CssParserOptions};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css_with_cache};
 use biome_css_semantic::db::css_semantic_model;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
@@ -46,7 +46,7 @@ use biome_fs::BiomePath;
 use biome_languages::css::CssEmbeddingKind;
 use biome_languages::{CssFileSource, DocumentFileSource, LanguageDb};
 use biome_parser::{AnyParse, AnyParsedSource};
-use biome_rowan::{AstNode, SyntaxKind};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -574,10 +574,11 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
     let source_type = file_source.to_css_file_source().unwrap_or_default();
-    let any_parse = biome_css_parser::parse_css(code, source_type, options).into();
+    let any_parse = parse_css_with_cache(code, source_type, node_cache, options).into();
 
     ParseResult {
         any_parse,

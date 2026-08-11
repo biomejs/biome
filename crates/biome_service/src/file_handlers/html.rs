@@ -64,7 +64,7 @@ use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
     format_node,
 };
-use biome_html_parser::{HtmlParserOptions, parse_html};
+use biome_html_parser::{HtmlParserOptions, parse_html, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
@@ -75,7 +75,7 @@ use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
 use biome_json_syntax::JsonLanguage;
 use biome_languages::{HtmlFileSource, LanguageDb};
 use biome_parser::{AnyParse, AnyParsedSource};
-use biome_rowan::{AstNode, BatchMutation, SendNode, TextRange, TextSize};
+use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 use camino::Utf8Path;
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -546,11 +546,12 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
 
     ParseResult {
-        any_parse: parse_html(code, options).into(),
+        any_parse: parse_html_with_cache(code, node_cache, options).into(),
         language: Some(file_source),
     }
 }
@@ -573,10 +574,11 @@ struct ParsedEmbed {
 /// Groups the arguments that stay constant across all embed parses within a
 /// single `parse_embedded_nodes` invocation.
 #[cfg(feature = "html_embeds")]
-struct EmbedParseContext<'a, 'b> {
+struct EmbedParseContext<'a, 'b, 'cache> {
     biome_path: &'a BiomePath,
     host_file_source: &'a HtmlFileSource,
     settings: &'a SettingsWithEditor<'b>,
+    node_cache: &'cache mut NodeCache,
 }
 
 fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {

@@ -11,10 +11,11 @@ use crate::workspace::PullActionsResult;
 use biome_db::{Db, FileSource};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{JsParserOptions, parse as parse_js};
+use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_parser::{AnyParse, AnyParsedSource};
+use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;
 
@@ -159,14 +160,16 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let document_source = file_source
         .to_js_file_source()
         .unwrap_or(JsFileSource::ts());
-    let any_parse = parse_js(
+    let any_parse = parse_js_with_cache(
         AstroFileHandler::input(code),
         document_source,
         JsParserOptions::default(),
+        node_cache,
     )
     .into();
 

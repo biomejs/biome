@@ -4,9 +4,11 @@ use crate::embed::html::{
     SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
-use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
-use crate::settings::{EditorFeatures, Settings, SettingsHandle};
-use biome_css_parser::{CssModulesKind, parse_css_with_offset};
+use crate::file_handlers::{
+    DocumentFileSource, ParseEmbedResult, ParseEmbeddedMode, ParseEmbeddedParams,
+};
+use crate::settings::{EditorFeatures, Settings, SettingsHandle, SettingsWithEditor};
+use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{AnyCssRoot, CssFunction, CssLanguage, CssString, TextSize};
 use biome_db::Db;
 use biome_fs::BiomePath;
@@ -18,16 +20,16 @@ use biome_html_syntax::{
     SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue,
     VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
-use biome_js_parser::parse_js_with_offset;
+use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
-use biome_json_parser::parse_json_with_offset;
+use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::{AnyParse, ParsedSnippet};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache};
 use std::sync::Arc;
 
 #[salsa::input]
@@ -48,15 +50,33 @@ struct EmbedInput {
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_embeds_tracked<'db>(db: &'db dyn Db, input: EmbedInput<'db>) -> ParseEmbedResult {
     let file_source = input.source(db);
-    let html_root: HtmlRoot = input.any_parse(db).tree();
     let settings = SettingsHandle::new(
         input.settings(db).settings(db),
         (None, EditorFeatures::default()),
     );
+    let mut node_cache = NodeCache::default();
+    parse_embeds(
+        &input.any_parse(db),
+        &input.path(db),
+        &settings,
+        file_source,
+        &mut node_cache,
+    )
+}
+
+fn parse_embeds(
+    any_parse: &AnyParse,
+    path: &BiomePath,
+    settings: &SettingsWithEditor,
+    file_source: HtmlFileSource,
+    node_cache: &mut NodeCache,
+) -> ParseEmbedResult {
+    let html_root: HtmlRoot = any_parse.tree();
     let mut ctx = EmbedParseContext {
-        biome_path: &input.path(db),
+        biome_path: path,
         host_file_source: &file_source,
-        settings: &settings,
+        settings,
+        node_cache,
     };
     let doc_file_source = DocumentFileSource::Html(file_source);
     let mut nodes = Vec::new();
@@ -459,21 +479,29 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         path,
         file_source,
         settings,
-        workspace_db,
+        mode,
     } = params;
     let Some(file_source) = file_source.to_html_file_source() else {
         return ParseEmbedResult::default();
     };
 
-    let settings = EmbedSettings::new(&workspace_db, Arc::new(settings.as_merged_settings()));
-    let input = EmbedInput::new(
-        &workspace_db,
-        any_parse,
-        path.clone(),
-        settings,
-        file_source,
-    );
-    parse_embeds_tracked(&workspace_db, input)
+    match mode {
+        ParseEmbeddedMode::Workspace(workspace_db) => {
+            let settings =
+                EmbedSettings::new(&workspace_db, Arc::new(settings.as_merged_settings()));
+            let input = EmbedInput::new(
+                &workspace_db,
+                any_parse,
+                path.clone(),
+                settings,
+                file_source,
+            );
+            parse_embeds_tracked(&workspace_db, input)
+        }
+        ParseEmbeddedMode::Stateless(node_cache) => {
+            parse_embeds(any_parse, path, settings, file_source, node_cache)
+        }
+    }
 }
 
 // Pass 3: control flow blocks via registry
@@ -1067,7 +1095,7 @@ fn embedded_css_file_source(
     base.with_embedding_kind(embedding_kind)
 }
 
-impl EmbedParseContext<'_, '_> {
+impl EmbedParseContext<'_, '_, '_> {
     /// Runs the detector on a candidate and, if matched, parses the embed.
     /// Returns the raw `ParsedEmbed` for callers that need to inspect the
     /// resolved JS file source before deciding what to do with the node
@@ -1230,11 +1258,12 @@ fn parse_matched_embed(
             let options = ctx
                 .settings
                 .parse_options::<JsLanguage>(ctx.biome_path, &doc_source);
-            let parse = parse_js_with_offset(
+            let parse = parse_js_with_offset_and_cache(
                 content.text.text(),
                 content.content_offset,
                 js_source,
                 options,
+                ctx.node_cache,
             );
 
             Some(ParsedEmbed {
@@ -1261,10 +1290,11 @@ fn parse_matched_embed(
                     options.css_modules = CssModulesKind::Classic;
                 }
             }
-            let parse = parse_css_with_offset(
+            let parse = parse_css_with_offset_and_cache(
                 content.text.text(),
                 css_source,
                 content.content_offset,
+                ctx.node_cache,
                 options,
             );
 
@@ -1279,8 +1309,12 @@ fn parse_matched_embed(
             let options = ctx
                 .settings
                 .parse_options::<JsonLanguage>(ctx.biome_path, &doc_source);
-            let parse =
-                parse_json_with_offset(content.text.text(), content.content_offset, options);
+            let parse = parse_json_with_offset_and_cache(
+                content.text.text(),
+                content.content_offset,
+                ctx.node_cache,
+                options,
+            );
 
             Some(ParsedEmbed {
                 node: (parse.into(), content, doc_source),

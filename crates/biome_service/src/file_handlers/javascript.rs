@@ -1,5 +1,7 @@
 mod go_to;
 
+#[cfg(feature = "js_embeds")]
+use super::ParseEmbeddedMode;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
@@ -41,7 +43,7 @@ use biome_configuration::javascript::{
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
 #[cfg(feature = "js_embeds")]
-use biome_css_parser::parse_css_with_offset;
+use biome_css_parser::parse_css_with_offset_and_cache;
 #[cfg(feature = "js_embeds")]
 use biome_css_syntax::CssLanguage;
 use biome_db::{Db, FileSource};
@@ -55,7 +57,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
-use biome_graphql_parser::parse_graphql_with_offset;
+use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -765,10 +767,11 @@ fn parse_text(
     file_source: DocumentFileSource,
     code: &str,
     settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
     let document_source = file_source.to_js_file_source().unwrap_or_default();
-    let parse = biome_js_parser::parse(code, document_source, options);
+    let parse = biome_js_parser::parse_js_with_cache(code, document_source, options, node_cache);
 
     ParseResult {
         any_parse: parse.into(),
@@ -788,7 +791,7 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         path,
         file_source,
         settings,
-        workspace_db: _,
+        mode,
     } = params;
     if !settings
         .as_ref()
@@ -798,6 +801,11 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
     }
 
     let js_root: AnyJsRoot = any_parse.tree();
+    let mut workspace_cache = NodeCache::default();
+    let node_cache = match mode {
+        ParseEmbeddedMode::Workspace(_) => &mut workspace_cache,
+        ParseEmbeddedMode::Stateless(node_cache) => node_cache,
+    };
 
     let candidates = js_root
         .syntax()
@@ -815,7 +823,7 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         .filter_map(|candidate| {
             let embed_match = EmbedDetectorsRegistry::detect_match(&candidate, file_source)?;
             let (snippet, content, doc_source) =
-                parse_js_matched_embed(&candidate, &embed_match, path, settings)?;
+                parse_js_matched_embed(&candidate, &embed_match, path, settings, node_cache)?;
             Some((
                 biome_parser::ParsedSnippet {
                     parsed: snippet,
@@ -967,6 +975,7 @@ fn parse_js_matched_embed(
     embed_match: &EmbedMatch,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> Option<(AnyParse, EmbedContent, DocumentFileSource)> {
     let content = candidate.content();
 
@@ -980,10 +989,11 @@ fn parse_js_matched_embed(
             let file_source =
                 DocumentFileSource::Css(CssFileSource::css().with_embedding_kind(embedding_kind));
             let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
-            let parse = parse_css_with_offset(
+            let parse = parse_css_with_offset_and_cache(
                 content.text.text(),
                 file_source.to_css_file_source().unwrap_or_default(),
                 content.content_offset,
+                node_cache,
                 options,
             );
 
@@ -993,7 +1003,11 @@ fn parse_js_matched_embed(
         #[cfg(feature = "lang_graphql")]
         GuestLanguage::GraphQL => {
             let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
-            let parse = parse_graphql_with_offset(content.text.text(), content.content_offset);
+            let parse = parse_graphql_with_offset_and_cache(
+                content.text.text(),
+                content.content_offset,
+                node_cache,
+            );
 
             Some((parse.into(), content, file_source))
         }
