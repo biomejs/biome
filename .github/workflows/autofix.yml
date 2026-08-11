@@ -52,7 +52,7 @@ jobs:
         run: |
           cargo fmt --all
 
-      - uses: tombi-toml/setup-tombi@df58d64dbb5163ba3413f0b75b4251e3fb5d250d # v1.2.5
+      - uses: tombi-toml/setup-tombi@aa99b34ddc84bea509c234ee13a5acc08d4dff46 # v1.2.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
