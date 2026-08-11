@@ -7,6 +7,7 @@ use biome_fs::BiomePath;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, find_css_class_definition};
+use biome_parser::AnyParsedSource;
 use biome_rowan::AstNode;
 use std::ops::Add;
 
@@ -34,10 +35,11 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         let Some(file) = params.workspace_db.file_source_for_path(path) else {
             return Some(result);
         };
-        let Some(file_source) = params
-            .workspace_db
-            .source_from_index(file.document_source_index(&params.workspace_db))
-        else {
+        let source_index = match &params.parsed_source {
+            AnyParsedSource::ParsedSource(_) => file.document_source_index(&params.workspace_db),
+            AnyParsedSource::ParsedSnippet(snippet) => snippet.document_source_index(),
+        };
+        let Some(file_source) = params.workspace_db.source_from_index(source_index) else {
             return Some(result);
         };
         if !file_source.is_css_like() {
