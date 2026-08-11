@@ -1,4 +1,6 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_html_syntax::AstroClientDirective;
 use biome_languages::HtmlFileSource;
@@ -40,6 +42,7 @@ declare_lint_rule! {
         name: "useAstroClientOnlyDirectiveValue",
         language: "html",
         recommended: false,
+        domains: &[RuleDomain::Astro],
         sources: &[RuleSource::EslintAstro("missing-client-only-directive-value").inspired()],
     }
 }
