@@ -1,0 +1,122 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+{{ a: 1 }}
+<Comp {{ answer: 4 }} />
+<Comp a={{ b: 1 }} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@1..9 "{ a: 1 }" [] [],
+            },
+            r_curly_token: R_CURLY@9..10 "}" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@10..12 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_COMPONENT_LITERAL@12..17 "Comp" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttributeSingleTextExpression {
+                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@18..31 "{ answer: 4 }" [] [],
+                    },
+                    r_curly_token: R_CURLY@31..33 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: SLASH@33..34 "/" [] [],
+            r_angle_token: R_ANGLE@34..35 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@35..37 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_COMPONENT_LITERAL@37..42 "Comp" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@42..43 "a" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@43..44 "=" [] [],
+                        value: HtmlAttributeSingleTextExpression {
+                            l_curly_token: L_CURLY@44..45 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@45..53 "{ b: 1 }" [] [],
+                            },
+                            r_curly_token: R_CURLY@53..55 "}" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@55..56 "/" [] [],
+            r_angle_token: R_ANGLE@56..57 ">" [] [],
+        },
+    ],
+    eof_token: EOF@57..58 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..58
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..57
+    0: HTML_SINGLE_TEXT_EXPRESSION@0..10
+      0: L_CURLY@0..1 "{" [] []
+      1: HTML_TEXT_EXPRESSION@1..9
+        0: HTML_LITERAL@1..9 "{ a: 1 }" [] []
+      2: R_CURLY@9..10 "}" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@10..35
+      0: L_ANGLE@10..12 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@12..17
+        0: HTML_COMPONENT_LITERAL@12..17 "Comp" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@17..33
+        0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@17..33
+          0: L_CURLY@17..18 "{" [] []
+          1: HTML_TEXT_EXPRESSION@18..31
+            0: HTML_LITERAL@18..31 "{ answer: 4 }" [] []
+          2: R_CURLY@31..33 "}" [] [Whitespace(" ")]
+      3: SLASH@33..34 "/" [] []
+      4: R_ANGLE@34..35 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@35..57
+      0: L_ANGLE@35..37 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@37..42
+        0: HTML_COMPONENT_LITERAL@37..42 "Comp" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@42..55
+        0: HTML_ATTRIBUTE@42..55
+          0: HTML_ATTRIBUTE_NAME@42..43
+            0: HTML_LITERAL@42..43 "a" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@43..55
+            0: EQ@43..44 "=" [] []
+            1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@44..55
+              0: L_CURLY@44..45 "{" [] []
+              1: HTML_TEXT_EXPRESSION@45..53
+                0: HTML_LITERAL@45..53 "{ b: 1 }" [] []
+              2: R_CURLY@53..55 "}" [] [Whitespace(" ")]
+      3: SLASH@55..56 "/" [] []
+      4: R_ANGLE@56..57 ">" [] []
+  4: EOF@57..58 "" [Newline("\n")] []
+
+```

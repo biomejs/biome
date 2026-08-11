@@ -1453,7 +1453,10 @@ impl<'src> HtmlLexer<'src> {
 
     #[inline(always)]
     fn at_opening_double_text_expression(&self) -> bool {
-        self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
+        // Astro has no `{{ }}` interpolation: `{{ a: 1 }}` is an object literal.
+        self.framework != HtmlFramework::Astro
+            && self.current_byte() == Some(b'{')
+            && self.byte_at(1) == Some(b'{')
     }
 
     #[inline(always)]
@@ -1488,7 +1491,9 @@ impl<'src> HtmlLexer<'src> {
 
     #[inline(always)]
     fn at_closing_double_text_expression(&self) -> bool {
-        self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
+        self.framework != HtmlFramework::Astro
+            && self.current_byte() == Some(b'}')
+            && self.byte_at(1) == Some(b'}')
     }
 
     #[inline(always)]
