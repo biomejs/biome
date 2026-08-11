@@ -27,6 +27,8 @@ pub(crate) struct HtmlLexer<'src> {
     /// consumed. Once set, the `Regular` context will no longer treat `---` as a
     /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
     after_frontmatter: bool,
+    /// Not read from the lex context: `bump()` uses [HtmlLexContext::default].
+    framework: HtmlFramework,
 }
 
 enum IdentifierContext {
@@ -88,7 +90,12 @@ impl<'src> HtmlLexer<'src> {
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
             after_frontmatter: false,
+            framework: HtmlFramework::Plain,
         }
+    }
+
+    pub fn set_framework(&mut self, framework: HtmlFramework) {
+        self.framework = framework;
     }
 
     /// Sets the `after_frontmatter` flag. When `true`, `---` in the `Regular`
@@ -911,7 +918,7 @@ impl<'src> HtmlLexer<'src> {
             COM => self.consume_byte(T![,]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
-            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BEO if self.at_svelte_block_start() => self.consume_svelte_opening_block(),
             BEO => self.consume_byte(T!['{']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
@@ -1368,7 +1375,7 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consumes a Svelte opening block token starting with '{' followed by @, #, : or /.
     fn consume_svelte_opening_block(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_svelte_opening_block());
+        debug_assert!(self.at_svelte_block_start());
         let next_byte = self.byte_at(1);
         let token = match next_byte {
             Some(b'@') => T!["{@"],
@@ -1451,12 +1458,16 @@ impl<'src> HtmlLexer<'src> {
     }
 
     #[inline(always)]
-    fn at_svelte_opening_block(&self) -> bool {
+    fn at_svelte_block_start(&self) -> bool {
         self.current_byte() == Some(b'{')
             && (self.byte_at(1) == Some(b'@')
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    fn at_svelte_opening_block(&self) -> bool {
+        self.framework == HtmlFramework::Svelte && self.at_svelte_block_start()
     }
 
     #[inline(always)]

@@ -257,7 +257,10 @@ pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
     pub fn from_str(source: &'source str, initial_context: HtmlLexContext) -> Self {
-        let lexer = HtmlLexer::from_str(source);
+        let mut lexer = HtmlLexer::from_str(source);
+        if let HtmlLexContext::Regular { framework } = initial_context {
+            lexer.set_framework(framework);
+        }
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 

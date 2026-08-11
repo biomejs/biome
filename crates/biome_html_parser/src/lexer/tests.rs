@@ -49,6 +49,12 @@ fn losslessness(string: String) -> bool {
 macro_rules! assert_lex {
     ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
         let mut lexer = HtmlLexer::from_str($src);
+        match $context {
+            HtmlLexContext::Regular { framework } | HtmlLexContext::InsideTag { framework } => {
+                lexer.set_framework(framework)
+            }
+            _ => {}
+        }
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -372,7 +378,7 @@ fn cdata_full() {
 #[test]
 fn svelte_openings() {
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{@debug}",
         SV_CURLY_AT: 2,
         DEBUG_KW: 5,
@@ -380,7 +386,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{/debug}",
         SV_CURLY_SLASH: 2,
         DEBUG_KW: 5,
@@ -388,7 +394,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{:debug}",
         SV_CURLY_COLON: 2,
         DEBUG_KW: 5,
@@ -396,11 +402,21 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{#debug}",
         SV_CURLY_HASH: 2,
         DEBUG_KW: 5,
         R_CURLY: 1
+    }
+}
+
+#[test]
+fn svelte_openings_are_not_lexed_outside_svelte() {
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Astro },
+        "{/debug}",
+        L_CURLY: 1,
+        HTML_LITERAL: 7,
     }
 }
 

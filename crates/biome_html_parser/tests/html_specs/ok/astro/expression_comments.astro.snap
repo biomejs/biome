@@ -1,0 +1,191 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+const x = 1;
+---
+<div>{/* block comment */ x}</div>
+<div>{// line comment
+x}</div>
+<div>{/* only a comment */}</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..17 "const x = 1;\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@17..20 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@20..22 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@22..25 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@25..26 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@27..48 "/* block comment */ x" [] [],
+                    },
+                    r_curly_token: R_CURLY@48..49 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@49..50 "<" [] [],
+                slash_token: SLASH@50..51 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@51..54 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@54..55 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@55..57 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@57..60 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@60..61 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@61..62 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@62..79 "// line comment\nx" [] [],
+                    },
+                    r_curly_token: R_CURLY@79..80 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@80..81 "<" [] [],
+                slash_token: SLASH@81..82 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@82..85 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@85..86 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@86..88 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@88..91 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@91..92 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@92..93 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@93..113 "/* only a comment */" [] [],
+                    },
+                    r_curly_token: R_CURLY@113..114 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@114..115 "<" [] [],
+                slash_token: SLASH@115..116 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@116..119 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@119..120 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@120..121 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..121
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..20
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..17
+      0: HTML_LITERAL@3..17 "const x = 1;\n" [Newline("\n")] []
+    2: FENCE@17..20 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@20..120
+    0: HTML_ELEMENT@20..55
+      0: HTML_OPENING_ELEMENT@20..26
+        0: L_ANGLE@20..22 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@22..25
+          0: DIV_KW@22..25 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@25..25
+        3: R_ANGLE@25..26 ">" [] []
+      1: HTML_ELEMENT_LIST@26..49
+        0: HTML_SINGLE_TEXT_EXPRESSION@26..49
+          0: L_CURLY@26..27 "{" [] []
+          1: HTML_TEXT_EXPRESSION@27..48
+            0: HTML_LITERAL@27..48 "/* block comment */ x" [] []
+          2: R_CURLY@48..49 "}" [] []
+      2: HTML_CLOSING_ELEMENT@49..55
+        0: L_ANGLE@49..50 "<" [] []
+        1: SLASH@50..51 "/" [] []
+        2: HTML_TAG_NAME@51..54
+          0: DIV_KW@51..54 "div" [] []
+        3: R_ANGLE@54..55 ">" [] []
+    1: HTML_ELEMENT@55..86
+      0: HTML_OPENING_ELEMENT@55..61
+        0: L_ANGLE@55..57 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@57..60
+          0: DIV_KW@57..60 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@60..60
+        3: R_ANGLE@60..61 ">" [] []
+      1: HTML_ELEMENT_LIST@61..80
+        0: HTML_SINGLE_TEXT_EXPRESSION@61..80
+          0: L_CURLY@61..62 "{" [] []
+          1: HTML_TEXT_EXPRESSION@62..79
+            0: HTML_LITERAL@62..79 "// line comment\nx" [] []
+          2: R_CURLY@79..80 "}" [] []
+      2: HTML_CLOSING_ELEMENT@80..86
+        0: L_ANGLE@80..81 "<" [] []
+        1: SLASH@81..82 "/" [] []
+        2: HTML_TAG_NAME@82..85
+          0: DIV_KW@82..85 "div" [] []
+        3: R_ANGLE@85..86 ">" [] []
+    2: HTML_ELEMENT@86..120
+      0: HTML_OPENING_ELEMENT@86..92
+        0: L_ANGLE@86..88 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@88..91
+          0: DIV_KW@88..91 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@91..91
+        3: R_ANGLE@91..92 ">" [] []
+      1: HTML_ELEMENT_LIST@92..114
+        0: HTML_SINGLE_TEXT_EXPRESSION@92..114
+          0: L_CURLY@92..93 "{" [] []
+          1: HTML_TEXT_EXPRESSION@93..113
+            0: HTML_LITERAL@93..113 "/* only a comment */" [] []
+          2: R_CURLY@113..114 "}" [] []
+      2: HTML_CLOSING_ELEMENT@114..120
+        0: L_ANGLE@114..115 "<" [] []
+        1: SLASH@115..116 "/" [] []
+        2: HTML_TAG_NAME@116..119
+          0: DIV_KW@116..119 "div" [] []
+        3: R_ANGLE@119..120 ">" [] []
+  4: EOF@120..121 "" [Newline("\n")] []
+
+```
