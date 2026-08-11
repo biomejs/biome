@@ -1306,6 +1306,12 @@ impl<'src> HtmlLexer<'src> {
             match current {
                 // these characters safely terminate an unquoted attribute value
                 b'\n' | b'\r' | b'\t' | b' ' | b'>' => break,
+                // HTML5 makes these a parse error but not a terminator, which is
+                // the reading Astro takes.
+                b'?' | b'\'' | b'"' | b'=' | b'`' if self.framework == HtmlFramework::Astro => {
+                    self.advance(1);
+                    content_started = true;
+                }
                 // these characters are absolutely invalid in an unquoted attribute value
                 b'?' | b'\'' | b'"' | b'=' | b'<' | b'`' => {
                     encountered_invalid = true;
