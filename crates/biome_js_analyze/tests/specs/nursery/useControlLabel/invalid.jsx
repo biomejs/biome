@@ -18,6 +18,8 @@
 	<button aria-hidden="false" />
 	<button aria-hidden={false} />
 	<button aria-hidden="" />
+	<button aria-hidden={null} />
+	<button aria-hidden={undefined} />
 
 	{/* A hidden child supplies no accessible label, however deep the text is. */}
 	<button><span aria-hidden="true">Delete</span></button>
@@ -36,10 +38,25 @@
 	<button><br /></button>
 	<button><input type="hidden" /></button>
 
-	{/* A falsy expression child, a JSX comment, an empty fragment, and a falsy
-	    `children` prop all render nothing. */}
-	<button>{false}</button>
+	{/* A JSX comment and an empty fragment render nothing. */}
 	<button>{/* comment */}</button>
 	<button><></></button>
+
+	{/* JSX omits both Boolean values, so `{true}` is as silent as `{false}`,
+	    inline or through the `children` prop. A valueless `children` is `true`. */}
+	<button>{false}</button>
+	<button>{true}</button>
+	<button>{null}</button>
+	<button>{undefined}</button>
+	<button>{``}</button>
+	<button children={false} />
+	<button children={true} />
+	<button children />
+
+	{/* A `children` prop with nothing announceable to render. */}
 	<button children="" />
+	<button children="   " />
+	<button children={null} />
+	<button children={undefined} />
+	<button children={``} />
 </>

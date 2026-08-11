@@ -179,14 +179,7 @@ fn has_accessible_content(children: &JsxChildList) -> bool {
                 .expression()
                 .is_some_and(|expression| match expression.as_static_value() {
                     None => true,
-                    Some(value) => match value {
-                        StaticValue::Boolean(token) => token.text_trimmed() != "false",
-                        StaticValue::Null(_)
-                        | StaticValue::Undefined(_)
-                        | StaticValue::EmptyString(_) => false,
-                        StaticValue::String(_) => !value.text().trim().is_empty(),
-                        _ => true,
-                    },
+                    Some(value) => renders_content(&value),
                 })
         }
         AnyJsxChild::JsxFragment(fragment) => has_accessible_content(&fragment.children()),
@@ -234,6 +227,23 @@ fn names_itself(element: &AnyJsxElement) -> Option<bool> {
     }
 }
 
+/// Whether a statically known value renders text an assistive technology can
+/// announce.
+///
+/// This is about rendered output, not truthiness: JSX omits both Boolean
+/// values and nullish values, and whitespace renders nothing announceable,
+/// while every number renders as its own text, `0` and `0n` included.
+fn renders_content(value: &StaticValue) -> bool {
+    match value {
+        StaticValue::Boolean(_)
+        | StaticValue::Null(_)
+        | StaticValue::Undefined(_)
+        | StaticValue::EmptyString(_) => false,
+        StaticValue::String(_) => !value.text().trim().is_empty(),
+        StaticValue::Number(_) | StaticValue::BigInt(_) => true,
+    }
+}
+
 /// Whether the element is an `<input type="hidden">`, which renders nothing.
 fn is_hidden_input(element: &AnyJsxElement) -> bool {
     element
@@ -244,8 +254,8 @@ fn is_hidden_input(element: &AnyJsxElement) -> bool {
 
 /// Whether the element carries a prop that can supply content or a labeling
 /// attribute the rule cannot inspect: a prop that injects children
-/// (`dangerouslySetInnerHTML`, `innerHTML`, a non-falsy `children`), or a
-/// spread whose members are unknown (`{...props}`).
+/// (`dangerouslySetInnerHTML`, `innerHTML`, a `children` prop that renders
+/// something), or a spread whose members are unknown (`{...props}`).
 fn has_opaque_label_source(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("dangerouslySetInnerHTML")
@@ -254,12 +264,13 @@ fn has_opaque_label_source(element: &AnyJsxElement) -> bool {
         || element
             .find_attribute_by_name("children")
             .is_some_and(|attribute| {
+                // A valueless `children` is `true`, which renders nothing.
                 if attribute.initializer().is_none() {
                     return false;
                 }
                 attribute
                     .as_static_value()
-                    .is_none_or(|value| !value.is_falsy())
+                    .is_none_or(|value| renders_content(&value))
             })
         || element.has_spread_prop()
 }

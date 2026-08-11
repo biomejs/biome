@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlSyntaxKind, T};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList};
 use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_control_label::UseControlLabelOptions;
@@ -82,7 +82,7 @@ declare_lint_rule! {
 /// Native interactive elements whose accessible name comes from their own
 /// content or labeling attributes (rather than an external `<label>` or a
 /// dedicated alt-text rule).
-const CONTROL_ELEMENTS: &[HtmlSyntaxKind] = &[T![button], T![menuitem]];
+const CONTROL_ELEMENTS: &[&str] = &["button", "menuitem"];
 
 impl Rule for UseControlLabel {
     type Query = Ast<AnyHtmlElement>;
@@ -93,10 +93,14 @@ impl Rule for UseControlLabel {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let source_type = ctx.source_type::<HtmlFileSource>();
+        let is_html = source_type.is_html();
 
         let tag_element = node.clone().as_any_html_tag_element()?;
-        let tag_kind = tag_element.tag_name_kind()?;
-        if !CONTROL_ELEMENTS.contains(&tag_kind) {
+        let tag_name = node.name()?;
+        if !CONTROL_ELEMENTS
+            .iter()
+            .any(|control| matches_tag_name(&tag_name, control, is_html))
+        {
             return None;
         }
 
@@ -120,7 +124,7 @@ impl Rule for UseControlLabel {
         }
 
         let is_astro = source_type.is_astro();
-        if has_accessible_content(&html_element.children(), is_astro) {
+        if has_accessible_content(&html_element.children(), is_html, is_astro) {
             return None;
         }
 
@@ -147,7 +151,11 @@ impl Rule for UseControlLabel {
 }
 
 /// Checks if `HtmlElementList` contains accessible content (non-empty text or visible elements).
-fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> bool {
+fn has_accessible_content(
+    html_child_list: &HtmlElementList,
+    is_html: bool,
+    is_astro: bool,
+) -> bool {
     html_child_list.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         AnyHtmlElement::HtmlElement(element) => {
@@ -160,7 +168,8 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                 .ok()
                 .is_some_and(|opening| has_accessible_name(&AnyHtmlTagElement::from(opening)));
 
-            has_own_accessible_name || has_accessible_content(&element.children(), is_astro)
+            has_own_accessible_name
+                || has_accessible_content(&element.children(), is_html, is_astro)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {
@@ -174,21 +183,20 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
-                Some(name) if name.eq_ignore_ascii_case("img") || (is_astro && name == "Image") => {
+                Some(name)
+                    if matches_tag_name(name, "img", is_html)
+                        || (is_astro && name == "Image") =>
+                {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
                 Some(name)
-                    if name.eq_ignore_ascii_case("br")
-                        || name.eq_ignore_ascii_case("hr")
-                        || name.eq_ignore_ascii_case("wbr")
-                        || name.eq_ignore_ascii_case("meta")
-                        || name.eq_ignore_ascii_case("link")
-                        || name.eq_ignore_ascii_case("base")
-                        || name.eq_ignore_ascii_case("col") =>
+                    if ["br", "hr", "wbr", "meta", "link", "base", "col"]
+                        .iter()
+                        .any(|empty| matches_tag_name(name, empty, is_html)) =>
                 {
                     false
                 }
-                Some(name) if name.eq_ignore_ascii_case("input") => {
+                Some(name) if matches_tag_name(name, "input", is_html) => {
                     let is_hidden =
                         element
                             .find_attribute_or_vue_binding("type")
@@ -199,7 +207,11 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                     !is_hidden
                 }
                 // Custom components (PascalCase) may render accessible content.
-                Some(name) if name.starts_with(|c: char| c.is_uppercase()) => true,
+                Some(name)
+                    if !is_html && name.starts_with(|c: char| c.is_uppercase()) =>
+                {
+                    true
+                }
                 _ => false,
             }
         }
@@ -207,6 +219,14 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         | AnyHtmlElement::HtmlCdataSection(_)
         | AnyHtmlElement::HtmlProcessingInstruction(_) => true,
     })
+}
+
+fn matches_tag_name(name: &str, expected: &str, is_html: bool) -> bool {
+    if is_html {
+        name.eq_ignore_ascii_case(expected)
+    } else {
+        name == expected
+    }
 }
 
 /// Checks if the content node contains non-empty text.

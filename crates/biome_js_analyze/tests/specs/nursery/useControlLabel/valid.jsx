@@ -9,9 +9,12 @@
 	{/* A dynamic labeling value is assumed to provide a label. */}
 	<button aria-label={label} />
 
-	{/* A numeric expression child renders as its text. */}
+	{/* A number renders as its own text, `0` included, inline or through the
+	    `children` prop. */}
 	<button>{0}</button>
 	<button>{0n}</button>
+	<button children={0} />
+	<button children={0n} />
 
 	{/* Nested text is found however deep it sits. */}
 	<button><Icon /><span>Delete</span></button>

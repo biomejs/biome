@@ -1,0 +1,4 @@
+<!-- should not generate diagnostics -->
+<Button />
+<Menuitem />
+<button><Icon /></button>
