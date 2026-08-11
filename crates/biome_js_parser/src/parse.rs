@@ -440,8 +440,9 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsParserOptions, parse_js_with_cache, parse_js_with_offset};
+    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset};
     use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
 
     use biome_rowan::TextSize;
 
@@ -511,5 +512,55 @@ mod tests {
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
         );
+    }
+
+    fn astro_template_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        })
+    }
+
+    #[test]
+    fn astro_void_element_is_self_closing_without_slash() {
+        let parse = parse("cond && <br>", astro_template_source(), JsParserOptions::default());
+
+        assert!(!parse.has_errors(), "`<br>` is valid Astro");
+        assert!(
+            format!("{:#?}", parse.syntax()).contains("JSX_SELF_CLOSING_ELEMENT"),
+            "`<br>` should be a self-closing element"
+        );
+    }
+
+    #[test]
+    fn astro_void_element_does_not_capture_siblings_as_children() {
+        let parse = parse(
+            "<div><br>text</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        let tree = format!("{:#?}", parse.syntax());
+        assert_eq!(tree.matches("JSX_SELF_CLOSING_ELEMENT").count(), 1);
+        assert_eq!(tree.matches("JSX_ELEMENT@").count(), 1);
+    }
+
+    #[test]
+    fn astro_non_void_element_still_requires_a_closing_tag() {
+        let parse = parse("<span>", astro_template_source(), JsParserOptions::default());
+
+        assert!(parse.has_errors(), "`<span>` is not a void element");
+    }
+
+    #[test]
+    fn void_element_without_slash_is_an_error_outside_astro() {
+        let parse = parse(
+            "cond && <br>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "`<br>` is not valid TSX");
     }
 }
