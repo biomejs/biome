@@ -2,6 +2,7 @@ use crate::prelude::*;
 pub mod jsx_parse_errors;
 
 use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::jsx_ext::is_void_element;
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
@@ -177,6 +178,12 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         Some(OpeningElement::SelfClosing(
             m.complete(p, JSX_SELF_CLOSING_ELEMENT),
         ))
+    } else if is_at_astro_void_element(p, name.as_ref()) {
+        expect_jsx_token(p, T![>], !in_expression);
+
+        Some(OpeningElement::SelfClosing(
+            m.complete(p, JSX_SELF_CLOSING_ELEMENT),
+        ))
     } else {
         // test_err jsx jsx_opening_element_missing_r_angle
         // <><test <inner> some content</inner></test></>
@@ -187,6 +194,18 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
             name,
         })
     }
+}
+
+fn is_astro(p: &JsParser) -> bool {
+    p.source_type.as_embedding_kind().is_astro()
+}
+
+/// Unclosed `<br>` is valid in Astro templates but not in JSX, hence the gate.
+fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> bool {
+    if !is_astro(p) || !p.at(T![>]) {
+        return false;
+    }
+    name.is_some_and(|name| is_void_element(p.text(name.range(p))))
 }
 
 fn expect_closing_fragment(

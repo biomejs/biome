@@ -4071,29 +4071,32 @@ pub fn jsx_self_closing_element(
     l_angle_token: SyntaxToken,
     name: AnyJsxElementName,
     attributes: JsxAttributeList,
-    slash_token: SyntaxToken,
     r_angle_token: SyntaxToken,
 ) -> JsxSelfClosingElementBuilder {
     JsxSelfClosingElementBuilder {
         l_angle_token,
         name,
         attributes,
-        slash_token,
         r_angle_token,
         type_arguments: None,
+        slash_token: None,
     }
 }
 pub struct JsxSelfClosingElementBuilder {
     l_angle_token: SyntaxToken,
     name: AnyJsxElementName,
     attributes: JsxAttributeList,
-    slash_token: SyntaxToken,
     r_angle_token: SyntaxToken,
     type_arguments: Option<TsTypeArguments>,
+    slash_token: Option<SyntaxToken>,
 }
 impl JsxSelfClosingElementBuilder {
     pub fn with_type_arguments(mut self, type_arguments: TsTypeArguments) -> Self {
         self.type_arguments = Some(type_arguments);
+        self
+    }
+    pub fn with_slash_token(mut self, slash_token: SyntaxToken) -> Self {
+        self.slash_token = Some(slash_token);
         self
     }
     pub fn build(self) -> JsxSelfClosingElement {
@@ -4105,7 +4108,7 @@ impl JsxSelfClosingElementBuilder {
                 self.type_arguments
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.attributes.into_syntax())),
-                Some(SyntaxElement::Token(self.slash_token)),
+                self.slash_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Token(self.r_angle_token)),
             ],
         ))

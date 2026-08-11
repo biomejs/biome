@@ -206,9 +206,8 @@ impl JsxSelfClosingElement {
     ///         jsx_name(ident("Test"))
     ///     ),
     ///     attributes,
-    ///     token(T![/]),
     ///     token(T![>]),
-    /// ).build();
+    /// ).with_slash_token(token(T![/])).build();
     ///
     /// assert!(opening_element.find_attribute_by_name("div").is_some());
     /// assert!(opening_element.find_attribute_by_name("img").is_some());
@@ -256,9 +255,8 @@ impl JsxSelfClosingElement {
     ///         jsx_name(ident("Test"))
     ///     ),
     ///     attributes,
-    ///     token(T![/]),
     ///     token(T![>]),
-    /// ).build();
+    /// ).with_slash_token(token(T![/])).build();
     ///
     /// let div = opening_element.find_attribute_by_name("div").unwrap();
     /// assert!(opening_element.has_trailing_spread_prop(&div));
@@ -619,9 +617,8 @@ impl AnyJsxElement {
     ///           jsx_name(ident("button"))
     ///       ),
     ///       attributes,
-    ///       token(T![/]),
     ///       token(T![>]),
-    ///   ).build()
+    ///   ).with_slash_token(token(T![/])).build()
     /// );
     ///
     /// assert!(jsx_element.get_attribute_inner_string_text("unknown").is_none());
@@ -775,4 +772,16 @@ impl AnyJsxChild {
             _ => true,
         })
     }
+}
+
+/// HTML elements that never have a closing tag.
+///
+/// <https://html.spec.whatwg.org/multipage/syntax.html#void-elements>
+pub const VOID_ELEMENTS: [&str; 16] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
+    "meta", "param", "source", "track", "wbr",
+];
+
+pub fn is_void_element(name: &str) -> bool {
+    VOID_ELEMENTS.contains(&name)
 }

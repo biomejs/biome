@@ -2327,13 +2327,13 @@ AnyJsxTag =
 	| JsxSelfClosingElement
 	| JsxFragment
 
-// <a />
+// <a />, or `<br>` in Astro, where HTML void elements need no slash
 JsxSelfClosingElement =
 	'<'
 	name: AnyJsxElementName
 	type_arguments: TsTypeArguments?
 	attributes: JsxAttributeList
-	'/'
+	'/'?
 	'>'
 
 JsxElement =

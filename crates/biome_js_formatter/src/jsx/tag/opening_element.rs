@@ -44,13 +44,13 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
                         l_angle_token.format(),
                         name.format(),
                         type_arguments.format(),
-                        space(),
+                        self.has_slash().then(space),
                         format_close
                     ]
                 )
             }
             OpeningElementLayout::SingleStringAttribute => {
-                let attribute_spacing = if self.is_self_closing() {
+                let attribute_spacing = if self.has_slash() {
                     Some(space())
                 } else {
                     None
@@ -86,8 +86,10 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
                     let force_bracket_same_line = f.options().bracket_same_line().value();
                     let wants_bracket_same_line = attributes.is_empty() && !name_has_comments;
 
-                    if self.is_self_closing() {
+                    if self.has_slash() {
                         write!(f, [soft_line_break_or_space(), format_close])
+                    } else if self.is_self_closing() {
+                        write!(f, [soft_line_break(), format_close])
                     } else if force_bracket_same_line && last_attribute_has_comments {
                         write!(f, [soft_line_break(), format_close])
                     } else if force_bracket_same_line || wants_bracket_same_line {
@@ -147,6 +149,14 @@ impl AnyJsxOpeningElement {
 
     fn is_self_closing(&self) -> bool {
         matches!(self, Self::JsxSelfClosingElement(_))
+    }
+
+    /// Astro `<br>` is self-closing without a slash: emit no space before `>`.
+    fn has_slash(&self) -> bool {
+        match self {
+            Self::JsxSelfClosingElement(element) => element.slash_token().is_some(),
+            Self::JsxOpeningElement(_) => false,
+        }
     }
 
     fn compute_layout(&self, comments: &JsComments) -> SyntaxResult<OpeningElementLayout> {

@@ -7984,8 +7984,8 @@ impl JsxSelfClosingElement {
     pub fn attributes(&self) -> JsxAttributeList {
         support::list(&self.syntax, 3usize)
     }
-    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn slash_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
@@ -8005,7 +8005,7 @@ pub struct JsxSelfClosingElementFields {
     pub name: SyntaxResult<AnyJsxElementName>,
     pub type_arguments: Option<TsTypeArguments>,
     pub attributes: JsxAttributeList,
-    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: Option<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -26036,7 +26036,7 @@ impl std::fmt::Debug for JsxSelfClosingElement {
                 .field("attributes", &self.attributes())
                 .field(
                     "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
+                    &support::DebugOptionalElement(self.slash_token()),
                 )
                 .field(
                     "r_angle_token",
