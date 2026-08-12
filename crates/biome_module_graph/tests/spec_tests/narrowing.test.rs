@@ -549,6 +549,20 @@ export function precedingCaseTestWrites(x: number | "a") {
             break;
     }
 }
+
+type Kinded =
+    | { kind: "a"; a: number }
+    | { kind: "b"; b: number };
+
+export function precedingCaseTestWritesMember(y: Kinded) {
+    switch (y.kind) {
+        case (y.kind = "a", "zzz" as any):
+            break;
+        case "b":
+            y;
+            break;
+    }
+}
 "#;
 
     let fs = MemoryFileSystem::default();
@@ -570,6 +584,23 @@ export function precedingCaseTestWrites(x: number | "a") {
         .expect("reference type must be inferred");
     let unnarrowed = normalize_type(&db, module, ty);
     assert!(contains_inferred_number(&db, unnarrowed));
+
+    // A preceding case test that writes to a member of the discriminant
+    // object must also decline member-discriminant narrowing.
+    let member_offset = SOURCE
+        .find("y;")
+        .expect("member-discriminant reference must exist");
+    let start = TextSize::from(member_offset as u32);
+    let range = TextRange::new(start, start + TextSize::from(1));
+    let ty = inferred
+        .expressions
+        .get(&range)
+        .copied()
+        .expect("reference type must be inferred");
+    let unnarrowed = normalize_type(&db, module, ty);
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(formatted.contains("\"a\""), "{formatted}");
+    assert!(formatted.contains("\"b\""), "{formatted}");
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_declines_switch_narrowing_on_test_side_effects",

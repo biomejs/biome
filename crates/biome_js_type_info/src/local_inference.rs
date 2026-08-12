@@ -3259,6 +3259,13 @@ fn switch_case_predicate(
         .syntax()
         .ancestors()
         .find_map(JsSwitchStatement::cast)?;
+    let discriminant = switch_stmt.discriminant().ok()?.omit_parentheses();
+    let member = if is_reference_to(&discriminant, name) {
+        None
+    } else {
+        Some(member_of_reference(&discriminant, name)?)
+    };
+
     for clause in switch_stmt.cases() {
         if clause.syntax() == case_clause.syntax() {
             break;
@@ -3267,27 +3274,33 @@ fn switch_case_predicate(
             return None;
         }
         if let AnyJsSwitchClause::JsCaseClause(preceding) = &clause
-            && preceding.test().is_ok_and(|test| {
-                narrowing_invalidated_within(resolver, test.syntax(), name, name_token)
-            })
+            && let Ok(preceding_test) = preceding.test()
         {
-            return None;
+            if narrowing_invalidated_within(resolver, preceding_test.syntax(), name_token) {
+                return None;
+            }
+            // For a member discriminant, a preceding test can also overwrite
+            // the compared member itself.
+            if member.is_some()
+                && member_write_invalidated_within(resolver, preceding_test.syntax(), name_token)
+            {
+                return None;
+            }
         }
     }
 
-    let discriminant = switch_stmt.discriminant().ok()?.omit_parentheses();
-    if is_reference_to(&discriminant, name) {
-        Some(NarrowingPredicate::StringEquals(value))
-    } else {
-        let member = member_of_reference(&discriminant, name)?;
-        // Writing to a member of the narrowed value inside the clause could
-        // change the compared member.
-        if member_write_invalidated_within(resolver, case_clause.syntax(), name_token) {
-            return None;
+    match member {
+        None => Some(NarrowingPredicate::StringEquals(value)),
+        Some(member) => {
+            // Writing to a member of the narrowed value inside the clause
+            // could change the compared member.
+            if member_write_invalidated_within(resolver, case_clause.syntax(), name_token) {
+                return None;
+            }
+            Some(NarrowingPredicate::MemberEquals(Box::new(
+                MemberEqualsPredicate { member, value },
+            )))
         }
-        Some(NarrowingPredicate::MemberEquals(Box::new(
-            MemberEqualsPredicate { member, value },
-        )))
     }
 }
 
