@@ -2726,7 +2726,16 @@ impl<'db> ResolutionCtx<'db, '_> {
             return None;
         };
 
-        let parameter = function.parameters(self.db).get(predicate.argument_index)?;
+        let parameters = function.parameters(self.db);
+        // A TS `this` parameter occupies the first slot of the parameter
+        // list but no argument position, so it must not count when mapping
+        // the argument index. `this` cannot be a formal parameter name, so
+        // matching on the name is unambiguous.
+        let parameters = match parameters.split_first() {
+            Some((InferredFunctionParameter::Named(first), rest)) if first.name == "this" => rest,
+            _ => parameters,
+        };
+        let parameter = parameters.get(predicate.argument_index)?;
         let InferredFunctionParameter::Named(parameter) = parameter else {
             return None;
         };

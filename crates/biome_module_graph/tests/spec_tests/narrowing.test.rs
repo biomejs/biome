@@ -610,6 +610,15 @@ export function spreadBefore(b: unknown) {
         b;
     }
 }
+
+declare function isFirstWithThis(this: void, first: unknown, second: unknown): first is Pred;
+
+export function thisParameter(p: unknown, q: unknown) {
+    if (isFirstWithThis(p, q)) {
+        p;
+        q;
+    }
+}
 "#;
 
     let fs = MemoryFileSystem::default();
@@ -653,6 +662,17 @@ export function spreadBefore(b: unknown) {
     // unknowable; it must keep its declared type.
     let spread_offset = SOURCE.find("b;").expect("spread reference must exist");
     let unnarrowed = normalize_type(&db, module, expression_ty_at(spread_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(!formatted.contains("Pred"), "{formatted}");
+
+    // A `this` parameter occupies a parameter slot but no argument
+    // position: the predicate over the first real parameter narrows the
+    // first argument, not the second.
+    let this_param_offset = SOURCE.find("p;").expect("this-param reference must exist");
+    let narrowed = normalize_type(&db, module, expression_ty_at(this_param_offset));
+    assert!(inferred.find_member_type(&db, narrowed, "pr").is_some());
+    let second_offset = SOURCE.find("q;").expect("second reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(second_offset));
     let formatted = format_inferred_type(&db, unnarrowed);
     assert!(!formatted.contains("Pred"), "{formatted}");
 

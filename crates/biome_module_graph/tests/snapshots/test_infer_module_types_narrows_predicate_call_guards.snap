@@ -37,6 +37,19 @@ export function spreadBefore(b: unknown) {
 		b;
 	}
 }
+
+declare function isFirstWithThis(
+	this: void,
+	first: unknown,
+	second: unknown,
+): first is Pred;
+
+export function thisParameter(p: unknown, q: unknown) {
+	if (isFirstWithThis(p, q)) {
+		p;
+		q;
+	}
+}
 ```
 
 ## Inferred types
@@ -197,4 +210,57 @@ Expression "others" => instanceof Array<unknown>
 Expression "b" => unknown
 
 Expression "b" => unknown
+
+Binding isFirstWithThis "isFirstWithThis" => sync Function "isFirstWithThis" {
+  accepts: {
+    params: [
+      required this: void
+      required first: unknown
+      required second: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate first: instanceof Pred
+}
+
+Binding first "first" => unknown
+
+Binding second "second" => unknown
+
+Binding thisParameter "thisParameter" => sync Function "thisParameter" {
+  accepts: {
+    params: [
+      required p: unknown
+      required q: unknown
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding p "p" => unknown
+
+Binding q "q" => unknown
+
+Expression "isFirstWithThis" => sync Function "isFirstWithThis" {
+  accepts: {
+    params: [
+      required this: void
+      required first: unknown
+      required second: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate first: instanceof Pred
+}
+
+Expression "isFirstWithThis(p, q)" => boolean
+
+Expression "p" => unknown
+
+Expression "q" => unknown
+
+Expression "p" => instanceof Pred
+
+Expression "q" => unknown
 ```
