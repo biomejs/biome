@@ -36,6 +36,15 @@ export function closureWrite(a: string | undefined) {
 	a;
 }
 
+export function closureBeforeAssignment(f: string | undefined) {
+	const reset = () => {
+		f = undefined;
+	};
+	f = "on";
+	reset();
+	f;
+}
+
 export function insideClosure(b: string | undefined) {
 	b = "on";
 	return () => {
@@ -254,6 +263,54 @@ Expression "reset" => sync Function {
 Expression "reset()" => void
 
 Expression "a" => string | undefined
+
+Binding closureBeforeAssignment "closureBeforeAssignment" => sync Function "closureBeforeAssignment" {
+  accepts: {
+    params: [
+      required f: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding f "f" => string | undefined
+
+Binding reset "reset" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "() => { f = undefined; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "f = undefined" => unknown
+
+Expression "undefined" => undefined
+
+Expression "f = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "reset" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "reset()" => void
+
+Expression "f" => string: on
 
 Binding insideClosure "insideClosure" => sync Function "insideClosure" {
   accepts: {

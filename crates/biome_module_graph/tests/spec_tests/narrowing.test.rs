@@ -745,6 +745,15 @@ export function closureWrite(a: string | undefined) {
     a;
 }
 
+export function closureBeforeAssignment(f: string | undefined) {
+    const reset = () => {
+        f = undefined;
+    };
+    f = "on";
+    reset();
+    f;
+}
+
 export function insideClosure(b: string | undefined) {
     b = "on";
     return () => {
@@ -862,6 +871,21 @@ export function updateWrite(j: number | undefined) {
     let closure_offset = SOURCE.rfind("a;").expect("closure reference must exist");
     let unnarrowed_closure = normalize_type(&db, module, expression_ty_at(closure_offset));
     assert!(contains_inferred_undefined(&db, unnarrowed_closure));
+
+    // A closure declared before the assignment and called after it is not
+    // detected: the call statement contains no syntactic write. This is a
+    // deliberate limitation shared with TypeScript, which also narrows to
+    // the assigned type here.
+    let closure_first_offset = SOURCE
+        .rfind("f;")
+        .expect("closure-before-assignment reference must exist");
+    let narrowed_past_closure_call =
+        normalize_type(&db, module, expression_ty_at(closure_first_offset));
+    assert!(is_inferred_string_literal(
+        &db,
+        narrowed_past_closure_call,
+        "on"
+    ));
 
     // A reference inside a closure is never narrowed by outer assignments.
     let inside_closure_offset = SOURCE
