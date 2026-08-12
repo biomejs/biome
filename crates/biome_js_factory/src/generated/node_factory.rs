@@ -3746,6 +3746,18 @@ impl JsVariableStatementBuilder {
         ))
     }
 }
+pub fn js_vue_slot_scope_root(
+    pattern: AnyJsBindingPattern,
+    eof_token: SyntaxToken,
+) -> JsVueSlotScopeRoot {
+    JsVueSlotScopeRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_VUE_SLOT_SCOPE_ROOT,
+        [
+            Some(SyntaxElement::Node(pattern.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_while_statement(
     while_token: SyntaxToken,
     l_paren_token: SyntaxToken,

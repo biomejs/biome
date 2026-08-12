@@ -56,6 +56,7 @@ AnyJsRoot =
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
+	| JsVueSlotScopeRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -97,6 +98,11 @@ JsSvelteDeclarationRoot =
 		declaration: JsVariableDeclaration
 		semicolon: ';'?
 		eof: 'EOF'
+
+// Special root created for Vue v-slot / #slot directive values
+JsVueSlotScopeRoot =
+	pattern: AnyJsBindingPattern
+	eof: 'EOF'
 
 JsDirective =
 	value: 'js_string_literal'

@@ -17,7 +17,7 @@ use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsLanguage, TextRange, TextSize};
-use biome_languages::javascript::JsEmbeddingKind;
+use biome_languages::javascript::{JsEmbeddingKind, VueEmbeddingKind};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
@@ -86,9 +86,7 @@ impl VueFileHandler {
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Vue {
                             setup,
-                            is_source: true,
-                            event_handler: false,
-                            allow_statements: true,
+                            embedding_kind: VueEmbeddingKind::Source,
                         }),
                 )
             })

@@ -1,6 +1,6 @@
 use super::EmbedContent;
 use biome_html_syntax::{AnySvelteBlock, ScriptType, element_ext::is_css_style_attribute_value};
-use biome_languages::javascript::Language;
+use biome_languages::javascript::{Language, VueEmbeddingKind};
 use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_rowan::TokenText;
 
@@ -70,7 +70,9 @@ pub(crate) enum EmbedCandidate {
     },
     Directive {
         content: EmbedContent,
-        is_event_handler: bool,
+        /// How the directive's value should be parsed. Only meaningful for Vue
+        /// hosts; other frameworks always use [`VueEmbeddingKind::Expression`].
+        vue_kind: VueEmbeddingKind,
         is_class_attribute: bool,
     },
     Attribute {

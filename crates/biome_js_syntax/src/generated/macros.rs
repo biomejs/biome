@@ -658,6 +658,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsVariableStatement::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_VUE_SLOT_SCOPE_ROOT => {
+                    let $pattern = unsafe { $crate::JsVueSlotScopeRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_WHILE_STATEMENT => {
                     let $pattern = unsafe { $crate::JsWhileStatement::new_unchecked(node) };
                     $body
