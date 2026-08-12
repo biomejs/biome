@@ -940,6 +940,107 @@ export function updateWrite(j: number | undefined) {
     );
 }
 
+#[test]
+fn test_infer_module_types_treats_object_values_as_truthy() {
+    const SOURCE: &str = r#"
+class Service {
+    run(): void {}
+}
+
+interface Task {
+    id: string;
+}
+
+export function promiseInstance(x: Promise<void> | undefined) {
+    if (!x) {
+        x;
+    }
+    if (x) {
+        x;
+    }
+}
+
+export function classInstance(y: Service | null) {
+    if (!y) {
+        y;
+    }
+}
+
+export function interfaceValue(z: Task | undefined) {
+    if (!z) {
+        z;
+    }
+}
+
+export function genericValue<T>(k: T | undefined) {
+    if (!k) {
+        k;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A promise instance can never be falsy, so a negated guard narrows the
+    // union to `undefined`.
+    let falsy_promise_offset = SOURCE.find("x;").expect("falsy reference must exist");
+    let narrowed_to_undefined = normalize_type(&db, module, expression_ty_at(falsy_promise_offset));
+    assert!(!contains_inferred_instance(&db, narrowed_to_undefined));
+    assert!(contains_inferred_undefined(&db, narrowed_to_undefined));
+
+    // The truthy branch keeps the promise instance.
+    let truthy_promise_offset = SOURCE.rfind("x;").expect("truthy reference must exist");
+    let narrowed_to_promise = normalize_type(&db, module, expression_ty_at(truthy_promise_offset));
+    assert!(is_inferred_promise_instance(&db, narrowed_to_promise));
+
+    // A class instance can never be falsy either.
+    let class_offset = SOURCE.find("y;").expect("class reference must exist");
+    let narrowed_to_null = normalize_type(&db, module, expression_ty_at(class_offset));
+    assert!(!contains_inferred_instance(&db, narrowed_to_null));
+    assert!(contains_inferred_null(&db, narrowed_to_null));
+
+    // A value of an interface type is an object at runtime, following
+    // TypeScript's narrowing semantics.
+    let interface_offset = SOURCE.find("z;").expect("interface reference must exist");
+    let narrowed_interface = normalize_type(&db, module, expression_ty_at(interface_offset));
+    assert!(contains_inferred_undefined(&db, narrowed_interface));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_interface, "id")
+            .is_none()
+    );
+
+    // A generic value could be instantiated with a falsy type, so it must
+    // be kept.
+    let generic_offset = SOURCE.find("k;").expect("generic reference must exist");
+    let kept_generic = normalize_type(&db, module, expression_ty_at(generic_offset));
+    assert!(contains_inferred_instance(&db, kept_generic));
+    assert!(contains_inferred_undefined(&db, kept_generic));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_treats_object_values_as_truthy",
+        &db,
+        &fs,
+    );
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
 /// reassigns, so guard narrowing must be declined for it -- and must
 /// survive for the names the branch leaves alone. An assignment still

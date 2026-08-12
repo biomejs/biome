@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: instanceClassificationInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function alwaysFalsyPromise(p: Promise<void> | undefined) {
+	if (!p) {
+		// `p` is narrowed to `undefined` here, so this condition is always falsy.
+		if (p) {
+			p;
+		}
+	}
+}
+
+function alwaysTruthyPromise(p: Promise<void>) {
+	// A promise instance is always an object, so this condition is always truthy.
+	if (p) {
+		p;
+	}
+}
+
+```
+
+# Diagnostics
+```
+instanceClassificationInvalid.ts:6:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    4 │ 	if (!p) {
+    5 │ 		// `p` is narrowed to `undefined` here, so this condition is always falsy.
+  > 6 │ 		if (p) {
+      │ 		    ^
+    7 │ 			p;
+    8 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+instanceClassificationInvalid.ts:14:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    12 │ function alwaysTruthyPromise(p: Promise<void>) {
+    13 │ 	// A promise instance is always an object, so this condition is always truthy.
+  > 14 │ 	if (p) {
+       │ 	    ^
+    15 │ 		p;
+    16 │ 	}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
