@@ -164,6 +164,65 @@ export function constructSignature(k: Ctor | number) {
     );
 }
 
+#[test]
+fn test_infer_module_types_narrows_truthiness_guards() {
+    const SOURCE: &str = r#"
+export function truthiness(z: "on" | null) {
+    if (z) {
+        z;
+    }
+    if (!z) {
+        z;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A truthiness guard drops the nullish variant.
+    let truthy_offset = SOURCE
+        .find("z;")
+        .expect("truthy-guarded reference must exist");
+    let narrowed_to_truthy = normalize_type(&db, module, expression_ty_at(truthy_offset));
+    assert!(contains_inferred_string_literal(
+        &db,
+        narrowed_to_truthy,
+        "on"
+    ));
+    assert!(!contains_inferred_null(&db, narrowed_to_truthy));
+
+    // A negated truthiness guard keeps only the falsy variants.
+    let falsy_offset = SOURCE
+        .rfind("z;")
+        .expect("falsy-guarded reference must exist");
+    let narrowed_to_falsy = normalize_type(&db, module, expression_ty_at(falsy_offset));
+    assert!(contains_inferred_null(&db, narrowed_to_falsy));
+    assert!(!contains_inferred_string_literal(
+        &db,
+        narrowed_to_falsy,
+        "on"
+    ));
+
+    assert_inferred_type_snapshot("test_infer_module_types_narrows_truthiness_guards", &db, &fs);
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
 /// reassigns, so narrowing must be declined for it -- and must survive for
 /// the names the branch leaves alone.
