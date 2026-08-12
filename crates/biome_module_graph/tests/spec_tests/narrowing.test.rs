@@ -220,7 +220,11 @@ export function truthiness(z: "on" | null) {
         "on"
     ));
 
-    assert_inferred_type_snapshot("test_infer_module_types_narrows_truthiness_guards", &db, &fs);
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_truthiness_guards",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -311,7 +315,11 @@ export function mixins(m: MixedCls | SiblingCls) {
             .is_some()
     );
 
-    assert_inferred_type_snapshot("test_infer_module_types_narrows_instanceof_guards", &db, &fs);
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_instanceof_guards",
+        &db,
+        &fs,
+    );
 }
 
 #[test]

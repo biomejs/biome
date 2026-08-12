@@ -4,8 +4,8 @@ use crate::{
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
     MergedReference, NamedFunctionParameter, NarrowingPredicate, Object, ObjectLiteral,
     PatternFunctionParameter, RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance,
-    TypeMember, TypeMemberKind,
-    TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofAwaitExpression,
+    TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{

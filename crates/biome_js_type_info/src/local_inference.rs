@@ -17,24 +17,24 @@ use biome_js_syntax::{
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsCallExpression, JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsClassMemberList,
-    JsComputedMemberAssignment, JsConstructorParameters, JsExtendsClause, JsForInStatement,
-    JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsIdentifierAssignment,
-    JsIdentifierBinding,
-    JsIfStatement, JsInitializerClause, JsInstanceofExpression, JsLogicalExpression,
-    JsLogicalOperator,
+    JsClassExpression, JsClassMemberList, JsComputedMemberAssignment, JsConstructorParameters,
+    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIfStatement,
+    JsInitializerClause, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator,
     JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
     JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
     JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsStaticMemberAssignment,
-    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInstantiationExpression,
-    TsInterfaceDeclaration, TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType,
-    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression,
+    JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
+    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText,
+};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
@@ -47,16 +47,15 @@ use crate::{
     Interface, Intersection, Literal, MemberEqualsPredicate, Module, NamedFunctionParameter,
     Namespace, NarrowingInvalidationKind, NarrowingPredicate, Object, Path,
     PatternFunctionParameter, PredicateCallPredicate, PredicateReturnType, RawTypeCollector,
-    RawTypeId, ReturnType,
-    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
-    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNarrowedExpression,
-    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
-    TypeofTag, TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression,
-    TypeofValue, Union,
+    RawTypeId, ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
+    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofConditionalExpression,
+    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
+    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
+    TypeofNarrowedExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofStaticMemberExpression, TypeofTag, TypeofThisOrSuperExpression, TypeofTypeofExpression,
+    TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -3566,7 +3565,7 @@ fn instanceof_guard_class(
     // reference. A same-name binding declared in the consequent would shadow
     // the class the guard actually checked against.
     if if_stmt.consequent().is_ok_and(|consequent| {
-        narrowing_invalidated_within(resolver, consequent.syntax(), class_name.text(), &class_name)
+        narrowing_invalidated_within(resolver, consequent.syntax(), &class_name)
     }) {
         return None;
     }
