@@ -899,10 +899,17 @@ impl SyntaxFactory for TailwindSyntaxFactory {
             }
             TW_STATIC_CANDIDATE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == TW_BASE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyTwModifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

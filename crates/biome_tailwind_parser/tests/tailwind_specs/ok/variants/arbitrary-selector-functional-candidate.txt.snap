@@ -39,6 +39,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@12..21 "underline" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -70,6 +71,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@12..21
         0: TW_BASE@12..21 "underline" [] []
+        1: (empty)
       3: (empty)
   2: EOF@21..22 "" [Newline("\n")] []
 

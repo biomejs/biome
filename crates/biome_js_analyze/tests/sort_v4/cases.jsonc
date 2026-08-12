@@ -122,6 +122,21 @@
 	"outline outline-2 outline-none border-t",        // border-top before the outline family
 	"blur blur-sm grayscale invert",                  // filter utilities in signature order
 
+	// ─── bare utilities with modifiers ─────────────────────────────
+	// A handful of utilities compile bare with a modifier:
+	// `@container/sidebar` names the container, `shadow/50` and
+	// `drop-shadow/50` set the shadow color opacity. Statics take no
+	// modifier, so `flex/50` stays one unknown class. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"@container flex pointer-events-none visible container", // container-type leads the property order
+	"@container/sidebar @container flex",   // the name adds a declaration, so the named form leads
+	"@container! @container flex",
+	"shadow/50 shadow shadow-lg",
+	"drop-shadow/50 drop-shadow blur",
+	"flex/50 flex",
+	"group/item peer/tab flex",             // group/peer scopes are no utilities — unknown-front parity
+
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep
 	// their relative input order (stable sort).

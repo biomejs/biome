@@ -470,7 +470,7 @@ fn apply_auto_fix(
                 [],
                 [],
             );
-            let new_static = make::tw_static_candidate(new_base_token);
+            let new_static = make::tw_static_candidate(new_base_token).build();
             let mut new_full = make::tw_full_candidate(
                 to_modify.variants(),
                 AnyTwCandidate::TwStaticCandidate(new_static),
@@ -495,16 +495,21 @@ fn apply_auto_fix(
                         ),
                     );
                 }
-                AnyTwCandidate::TwStaticCandidate(_) => {
+                AnyTwCandidate::TwStaticCandidate(old_static) => {
                     // Static candidate (e.g. bare `border-x` with no value):
                     // replace the whole node since there is no value slot to keep.
+                    // Any `/modifier` on the old candidate is carried over.
                     let new_base = TailwindSyntaxToken::new_detached(
                         TailwindSyntaxKind::TW_BASE,
                         replacement_base,
                         [],
                         [],
                     );
-                    let new_static = make::tw_static_candidate(new_base);
+                    let mut new_static = make::tw_static_candidate(new_base);
+                    if let Some(modifier) = old_static.modifier() {
+                        new_static = new_static.with_modifier(modifier);
+                    }
+                    let new_static = new_static.build();
                     let new_full = make::tw_full_candidate(
                         to_modify.variants(),
                         AnyTwCandidate::TwStaticCandidate(new_static),

@@ -486,9 +486,6 @@ sorted: flex *:flex **:flex hover:flex
 input:  @container:flex flex @sm:flex
 sorted: @container:flex flex @sm:flex
 ---
-input:  @:flex flex
-sorted: @:flex flex
----
 input:  group-hover/menu:flex group-hover:flex flex
 sorted: flex group-hover:flex group-hover/menu:flex
 ---

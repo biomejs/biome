@@ -22,6 +22,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@0..7 "border" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -65,6 +66,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@0..7
         0: TW_BASE@0..7 "border" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     1: TW_FULL_CANDIDATE@7..25
       0: TW_VARIANT_LIST@7..13

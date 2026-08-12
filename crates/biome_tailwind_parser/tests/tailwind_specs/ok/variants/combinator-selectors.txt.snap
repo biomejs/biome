@@ -38,6 +38,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@11..16 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -63,6 +64,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@25..30 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -88,6 +90,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@42..47 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -117,6 +120,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@64..68 "flex" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -148,6 +152,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@11..16
         0: TW_BASE@11..16 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     1: TW_FULL_CANDIDATE@16..30
       0: TW_VARIANT_LIST@16..25
@@ -166,6 +171,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@25..30
         0: TW_BASE@25..30 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     2: TW_FULL_CANDIDATE@30..47
       0: TW_VARIANT_LIST@30..42
@@ -184,6 +190,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@42..47
         0: TW_BASE@42..47 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     3: TW_FULL_CANDIDATE@47..68
       0: TW_VARIANT_LIST@47..64
@@ -205,6 +212,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@64..68
         0: TW_BASE@64..68 "flex" [] []
+        1: (empty)
       3: (empty)
   2: EOF@68..68 "" [] []
 

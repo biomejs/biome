@@ -33,6 +33,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@6..11 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -56,6 +57,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@23..28 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -83,6 +85,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@45..50 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -120,6 +123,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@73..78 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -171,6 +175,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@112..117 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -227,6 +232,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@6..11
         0: TW_BASE@6..11 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     1: TW_FULL_CANDIDATE@11..28
       0: TW_VARIANT_LIST@11..23
@@ -243,6 +249,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@23..28
         0: TW_BASE@23..28 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     2: TW_FULL_CANDIDATE@28..50
       0: TW_VARIANT_LIST@28..45
@@ -262,6 +269,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@45..50
         0: TW_BASE@45..50 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     3: TW_FULL_CANDIDATE@50..78
       0: TW_VARIANT_LIST@50..73
@@ -288,6 +296,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@73..78
         0: TW_BASE@73..78 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     4: TW_FULL_CANDIDATE@78..102
       0: TW_VARIANT_LIST@78..92
@@ -324,6 +333,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@112..117
         0: TW_BASE@112..117 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     6: TW_FULL_CANDIDATE@117..143
       0: TW_VARIANT_LIST@117..133

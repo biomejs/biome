@@ -295,7 +295,26 @@ impl PendingSortKey {
                     return Self::Unknown;
                 };
                 let name = name.text_trimmed();
-                if let Some(entry) = STATIC_UTILITIES
+                if let Some(modifier) = s.modifier() {
+                    // Static registrations take no modifier; the few
+                    // valid bare-with-modifier forms (`@container/main`
+                    // names the container, `shadow/50` sets the shadow
+                    // color opacity) compile through a functional root's
+                    // bare placement, picked by modifier shape.
+                    if is_negative {
+                        None
+                    } else {
+                        FUNCTIONAL_UTILITIES.get(name).and_then(|entry| {
+                            let placement = if modifier_accepted(ModifierKind::Opacity, &modifier)
+                            {
+                                entry.bare_opacity
+                            } else {
+                                entry.bare_name
+                            };
+                            placement.map(|(sig, count)| (pool_signature(sig), count))
+                        })
+                    }
+                } else if let Some(entry) = STATIC_UTILITIES
                     .get(name)
                     // Tailwind registers negative statics individually
                     // (`-m-px` exists, `-flex` does not).

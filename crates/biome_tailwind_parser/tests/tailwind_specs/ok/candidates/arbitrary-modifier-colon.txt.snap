@@ -97,6 +97,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@50..55 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -137,6 +138,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@70..74 "flex" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -206,6 +208,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@50..55
         0: TW_BASE@50..55 "flex" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     2: TW_FULL_CANDIDATE@55..74
       0: TW_VARIANT_LIST@55..70
@@ -233,6 +236,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@70..74
         0: TW_BASE@70..74 "flex" [] []
+        1: (empty)
       3: (empty)
   2: EOF@74..75 "" [Newline("\n")] []
 

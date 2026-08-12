@@ -448,11 +448,31 @@ impl TwRootBuilder {
         ))
     }
 }
-pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
-    TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_STATIC_CANDIDATE,
-        [Some(SyntaxElement::Token(base_token))],
-    ))
+pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidateBuilder {
+    TwStaticCandidateBuilder {
+        base_token,
+        modifier: None,
+    }
+}
+pub struct TwStaticCandidateBuilder {
+    base_token: SyntaxToken,
+    modifier: Option<AnyTwModifier>,
+}
+impl TwStaticCandidateBuilder {
+    pub fn with_modifier(mut self, modifier: AnyTwModifier) -> Self {
+        self.modifier = Some(modifier);
+        self
+    }
+    pub fn build(self) -> TwStaticCandidate {
+        TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_STATIC_CANDIDATE,
+            [
+                Some(SyntaxElement::Token(self.base_token)),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpressionBuilder {
     TwVariantExpressionBuilder {

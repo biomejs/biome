@@ -112,6 +112,13 @@ export type FunctionalUtility = {
 	// without a value (`border`, `ring`, `shadow` have defaults; `w`
 	// does not).
 	bare: PropertySort | null;
+	// The placements of the bare basename with a modifier, probed with a
+	// numeric modifier and a bare-word modifier separately because the
+	// compiled shape can differ: `shadow/50` sets an extra opacity
+	// declaration that `shadow/x` does not, and `@container/sidebar`
+	// names the container.
+	bareOpacity: PropertySort | null;
+	bareName: PropertySort | null;
 	negative: Negative | null;
 };
 
@@ -228,6 +235,8 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 				registration_idx: i,
 				...branches,
 				bare: propertySortOf(ds, key),
+				bareOpacity: propertySortOf(ds, `${key}/50`),
+				bareName: propertySortOf(ds, `${key}/x`),
 				negative: null,
 			});
 		}

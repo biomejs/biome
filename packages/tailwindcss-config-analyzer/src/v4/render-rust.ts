@@ -97,6 +97,8 @@ function collectSignaturePool(utils: ExtractedUtilities): {
 	for (const u of utils.functional) {
 		internBranches(u.namedBranches, u.arbitraryBranches);
 		if (u.bare) intern(u.bare);
+		if (u.bareOpacity) intern(u.bareOpacity);
+		if (u.bareName) intern(u.bareName);
 		if (u.negative?.kind === "Distinct") {
 			internBranches(u.negative.namedBranches, u.negative.arbitraryBranches);
 		}
@@ -239,6 +241,8 @@ function renderFunctionalUtilities(
 			u.namedBranches.length > 0 ||
 			u.arbitraryBranches.length > 0 ||
 			u.bare !== null ||
+			u.bareOpacity !== null ||
+			u.bareName !== null ||
 			u.negative !== null,
 	);
 	const entries = populated.map((u) => {
@@ -253,16 +257,18 @@ function renderFunctionalUtilities(
 			u.arbitraryBranches,
 			sigIdx,
 		);
-		let bare = "None";
-		if (u.bare) {
-			const { sig, count } = checked(u.bare, sigIdx(u.bare));
-			bare = `Some((${sig}, ${count}))`;
-		}
+		const renderPlacement = (sort: PropertySort | null) => {
+			if (!sort) return "None";
+			const { sig, count } = checked(sort, sigIdx(sort));
+			return `Some((${sig}, ${count}))`;
+		};
 		const negative = renderNegative(u, sigIdx, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
 ${renderBranchSlice("        ", "named_branches", namedItems)}
 ${renderBranchSlice("        ", "arbitrary_branches", arbitraryItems)}
-        bare: ${bare},
+        bare: ${renderPlacement(u.bare)},
+        bare_opacity: ${renderPlacement(u.bareOpacity)},
+        bare_name: ${renderPlacement(u.bareName)},
 ${negative}
     },`;
 	});
