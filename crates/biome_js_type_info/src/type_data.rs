@@ -1407,6 +1407,9 @@ pub enum NarrowingPredicate {
     InstanceOf(TypeReference),
     /// A member of the value strictly equals a string literal.
     MemberEquals(Box<MemberEqualsPredicate>),
+    /// The value strictly equals a string literal, with escape sequences
+    /// processed.
+    StringEquals(Text),
     /// The value is truthy.
     Truthy,
     /// The `typeof` operator evaluates to the given tag for the value.

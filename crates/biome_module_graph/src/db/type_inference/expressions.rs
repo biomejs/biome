@@ -174,6 +174,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     RawNarrowingPredicate::MemberEquals(predicate) => {
                         InferredNarrowingPredicate::MemberEquals(predicate.as_ref().clone())
                     }
+                    RawNarrowingPredicate::StringEquals(value) => {
+                        InferredNarrowingPredicate::StringEquals(value.clone())
+                    }
                     RawNarrowingPredicate::Truthy => InferredNarrowingPredicate::Truthy,
                     RawNarrowingPredicate::Typeof(tag) => InferredNarrowingPredicate::Typeof(*tag),
                 };
@@ -2539,6 +2542,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredNarrowingPredicate::MemberEquals(predicate) => {
                 self.narrow_by_member_equals(ty, predicate)
             }
+            InferredNarrowingPredicate::StringEquals(value) => {
+                self.narrow_by_string_equals(ty, value)
+            }
             InferredNarrowingPredicate::Truthy => {
                 self.filter_type_to_subset(ty, ConditionalSubset::Truthy)
             }
@@ -2690,6 +2696,137 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredLiteral::Object(_)
             | InferredLiteral::RegExp(_) => false,
         }
+    }
+
+    /// Narrows `ty` to the union variants that may strictly equal the given
+    /// string `value`.
+    ///
+    /// Returns `None` if the type cannot be made any more specific.
+    fn narrow_by_string_equals(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        value: &Text,
+    ) -> Option<InferredTypeData<'db>> {
+        self.narrow_union_leaves(ty, |ctx, ty| {
+            if ctx.value_may_equal_string(ty, value) {
+                FilterAction::Retained
+            } else {
+                FilterAction::Stripped
+            }
+        })
+    }
+
+    /// Returns whether values of type `ty` may strictly equal the string
+    /// `value`.
+    ///
+    /// Only types whose values are provably never strings yield `false`.
+    fn value_may_equal_string(&mut self, ty: InferredTypeData<'db>, value: &Text) -> bool {
+        match ty {
+            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
+                // Literal types retain their escape sequences, while the
+                // guard value is unescaped; compare the unescaped values.
+                InferredLiteral::String(string) => {
+                    literal_string_may_equal(string.as_str(), value.text())
+                }
+                // A template literal's value is not statically known.
+                InferredLiteral::Template(_) => true,
+                // A literal of another kind is never strictly equal to a
+                // string.
+                InferredLiteral::BigInt(_)
+                | InferredLiteral::Boolean(_)
+                | InferredLiteral::Number(_)
+                | InferredLiteral::Object(_)
+                | InferredLiteral::RegExp(_) => false,
+            },
+            // A string can only satisfy an object-like type whose members
+            // all exist on strings.
+            InferredTypeData::Interface(interface) => {
+                let members = interface.members(self.db).to_vec();
+                self.string_may_satisfy_members(&members)
+            }
+            InferredTypeData::Object(object) => {
+                let members = object.members(self.db).to_vec();
+                self.string_may_satisfy_members(&members)
+            }
+            // A non-flattened instance can only be ruled out when its
+            // `typeof` tag is statically known to differ from `"string"`.
+            // An unresolvable target, such as a generic type parameter,
+            // could stand for a string, so it stays in.
+            InferredTypeData::InstanceOf(instance) => {
+                let target = self.resolve_inferred_type(instance.ty(self.db));
+                match self.instance_typeof_tag(target) {
+                    Some(tag) => tag == TypeofTag::String,
+                    None => true,
+                }
+            }
+            // Values of these types are never strings.
+            InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::VoidKeyword => false,
+            // A string may satisfy these, or we cannot tell.
+            InferredTypeData::Unknown
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::String
+            | InferredTypeData::Conditional
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword => true,
+        }
+    }
+
+    /// Returns whether a string value may satisfy a type with the given
+    /// members, i.e. whether every named instance member also exists on
+    /// `String`.
+    ///
+    /// Members are looked up on an instance of the global `String` class;
+    /// the bare `String` primitive contributes no members in member lookup.
+    fn string_may_satisfy_members(&mut self, members: &[InferredTypeMember<'db>]) -> bool {
+        let Some(string_class) = self.resolve_global_name("String") else {
+            // Without the global String type we cannot prove any member
+            // absent.
+            return true;
+        };
+        let string_instance =
+            InferredTypeData::instance_of(self.db, string_class, Box::default());
+        for member in members {
+            if member.kind.is_static() || member.kind.is_constructor() {
+                continue;
+            }
+            let Some(name) = member.kind.name() else {
+                // We cannot reason about unnamed members, such as index
+                // signatures.
+                continue;
+            };
+            if self
+                .resolve_static_member_expression(string_instance, name.text())
+                .is_none()
+            {
+                return false;
+            }
+        }
+        true
     }
 
     /// Narrows `ty` to the subset that may be an instance of the `guard`

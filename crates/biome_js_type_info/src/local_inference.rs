@@ -12,11 +12,12 @@ use biome_js_syntax::{
     AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSwitchClause, AnyTsModuleName,
+    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
+    JsClassMemberList,
     JsComputedMemberAssignment, JsConstructorParameters, JsExtendsClause, JsForInStatement,
     JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
     JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsIdentifierAssignment,
@@ -26,14 +27,14 @@ use biome_js_syntax::{
     JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
     JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
     JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsStaticMemberAssignment,
-    JsSyntaxKind, JsSyntaxNode,
+    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
     TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInstantiationExpression,
     TsInterfaceDeclaration, TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType,
     TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, Text, TextRange, TokenText};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
@@ -3212,12 +3213,104 @@ fn guard_narrowing_predicate(
             {
                 record_guard_predicate(&mut found, predicate)?;
             }
+        } else if let Some(case_clause) = JsCaseClause::cast_ref(&ancestor) {
+            if case_clause.test().is_ok_and(|test| test.syntax() != &child)
+                && let Some(predicate) =
+                    switch_case_predicate(resolver, &case_clause, name, &name_token)
+                && !narrowing_invalidated_within(resolver, &ancestor, &name_token)
+            {
+                record_guard_predicate(&mut found, predicate)?;
+            }
         } else if is_narrowing_boundary(&ancestor) {
             break;
         }
         child = ancestor;
     }
     found
+}
+
+/// Returns the predicate that the given `case` clause establishes for
+/// references with the given `name` in its statements, if any.
+///
+/// Narrowing only applies when every preceding clause of the `switch`
+/// statement provably exits, since execution could otherwise fall through
+/// into the clause while the discriminant held a different value. The tests
+/// of preceding clauses still evaluate in order even when their clauses are
+/// not entered, so a write to `name` inside one of them also declines
+/// narrowing:
+///
+/// ```js
+/// switch (x) {
+///   case (x = 5, "nope"): break; // evaluates before "a" is tested
+///   case "a":
+///     x; // not narrowed: `x` no longer holds the matched value
+/// }
+/// ```
+fn switch_case_predicate(
+    resolver: &mut dyn RawTypeCollector,
+    case_clause: &JsCaseClause,
+    name: &str,
+    name_token: &TokenText,
+) -> Option<NarrowingPredicate> {
+    let test = case_clause.test().ok()?.omit_parentheses();
+    let value = string_literal_value(&test)?;
+
+    let switch_stmt = case_clause
+        .syntax()
+        .ancestors()
+        .find_map(JsSwitchStatement::cast)?;
+    for clause in switch_stmt.cases() {
+        if clause.syntax() == case_clause.syntax() {
+            break;
+        }
+        if !clause_provably_exits(&clause) {
+            return None;
+        }
+        if let AnyJsSwitchClause::JsCaseClause(preceding) = &clause
+            && preceding.test().is_ok_and(|test| {
+                narrowing_invalidated_within(resolver, test.syntax(), name, name_token)
+            })
+        {
+            return None;
+        }
+    }
+
+    let discriminant = switch_stmt.discriminant().ok()?.omit_parentheses();
+    if is_reference_to(&discriminant, name) {
+        Some(NarrowingPredicate::StringEquals(value))
+    } else {
+        let member = member_of_reference(&discriminant, name)?;
+        // Writing to a member of the narrowed value inside the clause could
+        // change the compared member.
+        if member_write_invalidated_within(resolver, case_clause.syntax(), name_token) {
+            return None;
+        }
+        Some(NarrowingPredicate::MemberEquals(Box::new(
+            MemberEqualsPredicate { member, value },
+        )))
+    }
+}
+
+/// Returns whether execution provably exits at the end of the given clause,
+/// instead of falling through to the next one.
+///
+/// Only a `break`, `continue`, `return`, or `throw` as the clause's last
+/// statement counts; an exit nested in a block or an `if` is not detected,
+/// so such clauses conservatively decline narrowing for their successors.
+fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
+    let statements = match clause {
+        AnyJsSwitchClause::JsCaseClause(clause) => clause.consequent(),
+        AnyJsSwitchClause::JsDefaultClause(clause) => clause.consequent(),
+    };
+    statements.iter().last().is_some_and(|last| {
+        matches!(
+            last.syntax().kind(),
+            JsSyntaxKind::JS_BREAK_STATEMENT
+                | JsSyntaxKind::JS_CONTINUE_STATEMENT
+                | JsSyntaxKind::JS_RETURN_STATEMENT
+                | JsSyntaxKind::JS_THROW_STATEMENT
+        )
+    })
 }
 
 /// Records the predicate of the next enclosing guard, keeping the innermost
@@ -3293,14 +3386,39 @@ fn guard_predicate(
             let argument = unary.argument().ok()?.omit_parentheses();
             is_reference_to(&argument, name).then_some(NarrowingPredicate::Falsy)
         }
-        // `if (typeof x === "<tag>")` or `if (x.member === "<value>")`
+        // `if (typeof x === "<tag>")`, `if (x.member === "<value>")`, or
+        // `if (x === "<value>")`
         AnyJsExpression::JsBinaryExpression(binary) => typeof_guard_tag(binary, name)
             .map(NarrowingPredicate::Typeof)
             .or_else(|| {
                 member_equals_guard(resolver, if_stmt, binary, name, name_token)
                     .map(|predicate| NarrowingPredicate::MemberEquals(Box::new(predicate)))
-            }),
+            })
+            .or_else(|| string_equals_guard(binary, name).map(NarrowingPredicate::StringEquals)),
         _ => None,
+    }
+}
+
+/// Returns the string of a `<name> === "<value>"` comparison, if the given
+/// binary expression is one.
+///
+/// Handles both operand orders. Loose equality is not accepted: a test like
+/// `x == "1"` also passes when `x` holds the number `1`, so stripping the
+/// variants that are not the string `"1"` would narrow away the value
+/// actually present at runtime.
+fn string_equals_guard(binary: &JsBinaryExpression, name: &str) -> Option<Text> {
+    if !matches!(binary.operator().ok()?, JsBinaryOperator::StrictEquality) {
+        return None;
+    }
+
+    let left = binary.left().ok()?.omit_parentheses();
+    let right = binary.right().ok()?.omit_parentheses();
+    if is_reference_to(&left, name) {
+        string_literal_value(&right)
+    } else if is_reference_to(&right, name) {
+        string_literal_value(&left)
+    } else {
+        None
     }
 }
 

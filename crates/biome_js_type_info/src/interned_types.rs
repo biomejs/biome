@@ -1347,6 +1347,7 @@ impl<'db> TypeDataSlots<'db> {
                     NarrowingPredicate::InstanceOf(guard) => self.slots.push(*guard),
                     NarrowingPredicate::Falsy
                     | NarrowingPredicate::MemberEquals(_)
+                    | NarrowingPredicate::StringEquals(_)
                     | NarrowingPredicate::Truthy
                     | NarrowingPredicate::Typeof(_) => {}
                 }
@@ -1764,6 +1765,9 @@ impl<'db> TypeDataSlotReplacements<'db> {
                         NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
                         NarrowingPredicate::MemberEquals(predicate) => {
                             NarrowingPredicate::MemberEquals(predicate.clone())
+                        }
+                        NarrowingPredicate::StringEquals(value) => {
+                            NarrowingPredicate::StringEquals(value.clone())
                         }
                         NarrowingPredicate::Truthy => NarrowingPredicate::Truthy,
                         NarrowingPredicate::Typeof(tag) => NarrowingPredicate::Typeof(*tag),
@@ -2193,6 +2197,9 @@ pub enum NarrowingPredicate<'db> {
     InstanceOf(TypeData<'db>),
     /// A member of the value strictly equals a string literal.
     MemberEquals(raw::MemberEqualsPredicate),
+    /// The value strictly equals a string literal, with escape sequences
+    /// processed.
+    StringEquals(Text),
     /// The value is truthy.
     Truthy,
     /// The `typeof` operator evaluates to the given tag for the value.
@@ -2715,6 +2722,9 @@ fn convert_typeof_expression<'db>(
                     }
                     raw::NarrowingPredicate::MemberEquals(predicate) => {
                         NarrowingPredicate::MemberEquals(predicate.as_ref().clone())
+                    }
+                    raw::NarrowingPredicate::StringEquals(value) => {
+                        NarrowingPredicate::StringEquals(value.clone())
                     }
                     raw::NarrowingPredicate::Truthy => NarrowingPredicate::Truthy,
                     raw::NarrowingPredicate::Typeof(tag) => NarrowingPredicate::Typeof(*tag),

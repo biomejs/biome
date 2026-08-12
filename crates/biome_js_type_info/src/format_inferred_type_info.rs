@@ -847,6 +847,14 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                             token("\"")
                         ]]
                     ),
+                    NarrowingPredicate::StringEquals(value) => write!(
+                        f,
+                        [&format_args![
+                            token("== \""),
+                            text(value.text(), None),
+                            token("\"")
+                        ]]
+                    ),
                     NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
                     NarrowingPredicate::Typeof(tag) => write!(
                         f,
