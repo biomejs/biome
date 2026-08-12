@@ -81,7 +81,23 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
 /// Adjacent siblings are an implicit fragment in Astro but invalid in JSX.
 #[inline]
 fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
-    Astro.is_supported(p) && is_at_jsx_tag_start(p)
+    if !Astro.is_supported(p) {
+        return false;
+    }
+    skip_astro_html_comments(p);
+    is_at_jsx_tag_start(p)
+}
+
+/// Astro reads `<!-- -->` as trivia, so children may be separated by comments.
+#[inline]
+fn skip_astro_html_comments(p: &mut JsParser) {
+    while p.at(T![<]) {
+        let start = p.cur_range().start();
+        p.re_lex(JsReLexContext::AstroHtmlComment);
+        if p.cur_range().start() == start {
+            break;
+        }
+    }
 }
 
 #[inline]
@@ -104,6 +120,7 @@ impl ParseNodeList for AstroImplicitFragmentChildren {
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
+        skip_astro_html_comments(p);
         !is_at_jsx_tag_start(p)
     }
 
@@ -213,7 +230,7 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         //   <
         //   /
         // >;
-        p.bump_with_context(T![>], JsLexContext::JsxChild);
+        p.bump_with_context(T![>], JsLexContext::JsxChild { astro: Astro.is_supported(p) });
 
         return Some(OpeningElement::Fragment(
             m.complete(p, JSX_OPENING_FRAGMENT),
@@ -398,14 +415,15 @@ fn expect_jsx_raw_text_token(p: &mut JsParser, token: JsSyntaxKind, element: Jsx
 /// Expects a JSX token that may be followed by JSX child content.
 /// Ensures that the child content is lexed with the [JsLexContext::JsxChild] context.
 fn expect_jsx_token(p: &mut JsParser, token: JsSyntaxKind, before_child_content: bool) {
+    let astro = Astro.is_supported(p);
     if !before_child_content {
         p.expect(token);
     } else if p.at(token) {
-        p.bump_with_context(token, JsLexContext::JsxChild);
+        p.bump_with_context(token, JsLexContext::JsxChild { astro });
     } else {
         p.error(expected_token(token));
         // Re-lex the current token as a JSX child.
-        p.re_lex(JsReLexContext::JsxChild);
+        p.re_lex(JsReLexContext::JsxChild { astro });
     }
 }
 
@@ -439,7 +457,12 @@ impl ParseNodeList for JsxChildrenList {
             // <test>\u3333</test> // no error for invalid unicode escape
             JsSyntaxKind::JSX_TEXT_LITERAL => {
                 let m = p.start();
-                p.bump(JSX_TEXT_LITERAL);
+                if Astro.is_supported(p) {
+                    // Keep the child context so a following `<!-- -->` lexes as trivia.
+                    p.bump_with_context(JSX_TEXT_LITERAL, JsLexContext::JsxChild { astro: true });
+                } else {
+                    p.bump(JSX_TEXT_LITERAL);
+                }
                 ParsedSyntax::Present(m.complete(p, JSX_TEXT))
             }
             _ => ParsedSyntax::Absent,
