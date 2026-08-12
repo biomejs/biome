@@ -58,6 +58,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@23..28 "hover" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@28..29 ":" [] [],
             ],
@@ -92,6 +94,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@45..50 "hover" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@50..51 ":" [] [],
                 TwVariantExpression {
@@ -100,6 +104,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@51..56 "focus" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@56..57 ":" [] [],
                 TwVariantExpression {
@@ -114,6 +120,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@70..71 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@71..72 ":" [] [],
             ],
@@ -176,6 +184,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@123..124 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@124..125 ":" [] [],
             ],
@@ -204,6 +214,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@146..154 "disabled" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@154..155 ":" [] [],
             ],
@@ -260,6 +272,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@23..28
             0: TW_NAMED_VARIANT_SEGMENT@23..28
               0: TW_VARIANT_SEGMENT@23..28 "hover" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@28..29 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@29..45
@@ -283,11 +297,15 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@45..50
             0: TW_NAMED_VARIANT_SEGMENT@45..50
               0: TW_VARIANT_SEGMENT@45..50 "hover" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@50..51 ":" [] []
         2: TW_VARIANT_EXPRESSION@51..56
           0: TW_VARIANT_SEGMENT_LIST@51..56
             0: TW_NAMED_VARIANT_SEGMENT@51..56
               0: TW_VARIANT_SEGMENT@51..56 "focus" [] []
+          1: (empty)
+          2: (empty)
         3: COLON@56..57 ":" [] []
         4: TW_VARIANT_EXPRESSION@57..71
           0: TW_VARIANT_SEGMENT_LIST@57..71
@@ -298,6 +316,8 @@ TwRoot {
               0: L_BRACKET@62..63 "[" [] []
               1: TW_SELECTOR@63..70 "checked" [] []
               2: R_BRACKET@70..71 "]" [] []
+          1: (empty)
+          2: (empty)
         5: COLON@71..72 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@72..85
@@ -344,6 +364,8 @@ TwRoot {
               0: L_BRACKET@113..114 "[" [] []
               1: TW_SELECTOR@114..123 ":disabled" [] []
               2: R_BRACKET@123..124 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@124..125 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@125..136
@@ -364,6 +386,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@146..154
             0: TW_NAMED_VARIANT_SEGMENT@146..154
               0: TW_VARIANT_SEGMENT@146..154 "disabled" [] []
+          1: (empty)
+          2: (empty)
         3: COLON@154..155 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@155..173

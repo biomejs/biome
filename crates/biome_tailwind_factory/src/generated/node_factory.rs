@@ -454,11 +454,39 @@ pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
         [Some(SyntaxElement::Token(base_token))],
     ))
 }
-pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpression {
-    TwVariantExpression::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_VARIANT_EXPRESSION,
-        [Some(SyntaxElement::Node(segments.into_syntax()))],
-    ))
+pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpressionBuilder {
+    TwVariantExpressionBuilder {
+        segments,
+        glued_value: None,
+        modifier: None,
+    }
+}
+pub struct TwVariantExpressionBuilder {
+    segments: TwVariantSegmentList,
+    glued_value: Option<TwArbitraryVariantSegment>,
+    modifier: Option<AnyTwModifier>,
+}
+impl TwVariantExpressionBuilder {
+    pub fn with_glued_value(mut self, glued_value: TwArbitraryVariantSegment) -> Self {
+        self.glued_value = Some(glued_value);
+        self
+    }
+    pub fn with_modifier(mut self, modifier: AnyTwModifier) -> Self {
+        self.modifier = Some(modifier);
+        self
+    }
+    pub fn build(self) -> TwVariantExpression {
+        TwVariantExpression::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_VARIANT_EXPRESSION,
+            [
+                Some(SyntaxElement::Node(self.segments.into_syntax())),
+                self.glued_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where

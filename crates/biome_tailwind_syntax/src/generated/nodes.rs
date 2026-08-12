@@ -1362,10 +1362,18 @@ impl TwVariantExpression {
     pub fn as_fields(&self) -> TwVariantExpressionFields {
         TwVariantExpressionFields {
             segments: self.segments(),
+            glued_value: self.glued_value(),
+            modifier: self.modifier(),
         }
     }
     pub fn segments(&self) -> TwVariantSegmentList {
         support::list(&self.syntax, 0usize)
+    }
+    pub fn glued_value(&self) -> Option<TwArbitraryVariantSegment> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn modifier(&self) -> Option<AnyTwModifier> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for TwVariantExpression {
@@ -1379,6 +1387,8 @@ impl Serialize for TwVariantExpression {
 #[derive(Serialize)]
 pub struct TwVariantExpressionFields {
     pub segments: TwVariantSegmentList,
+    pub glued_value: Option<TwArbitraryVariantSegment>,
+    pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDimension {
@@ -3482,6 +3492,11 @@ impl std::fmt::Debug for TwVariantExpression {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwVariantExpression")
                 .field("segments", &self.segments())
+                .field(
+                    "glued_value",
+                    &support::DebugOptionalElement(self.glued_value()),
+                )
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .finish()
         } else {
             f.debug_struct("TwVariantExpression").finish()

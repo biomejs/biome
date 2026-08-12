@@ -35,6 +35,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@28..29 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@29..30 ":" [] [],
             ],
@@ -69,6 +71,8 @@ TwRoot {
               0: L_BRACKET@11..12 "[" [] []
               1: TW_SELECTOR@12..28 "collapsible=icon" [] []
               2: R_BRACKET@28..29 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@29..30 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@30..36

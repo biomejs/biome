@@ -30,6 +30,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@9..10 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@10..11 ":" [] [],
             ],
@@ -53,6 +55,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@23..24 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@24..25 ":" [] [],
             ],
@@ -76,6 +80,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@40..41 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@41..42 ":" [] [],
             ],
@@ -103,6 +109,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@62..63 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@63..64 ":" [] [],
             ],
@@ -134,6 +142,8 @@ TwRoot {
               0: L_BRACKET@4..5 "[" [] []
               1: TW_SELECTOR@5..9 ">svg" [] []
               2: R_BRACKET@9..10 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@10..11 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@11..16
@@ -150,6 +160,8 @@ TwRoot {
               0: L_BRACKET@20..21 "[" [] []
               1: TW_SELECTOR@21..23 "+p" [] []
               2: R_BRACKET@23..24 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@24..25 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@25..30
@@ -166,6 +178,8 @@ TwRoot {
               0: L_BRACKET@34..35 "[" [] []
               1: TW_SELECTOR@35..40 "~span" [] []
               2: R_BRACKET@40..41 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@41..42 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@42..47
@@ -185,6 +199,8 @@ TwRoot {
               0: L_BRACKET@57..58 "[" [] []
               1: TW_SELECTOR@58..62 ">svg" [] []
               2: R_BRACKET@62..63 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@63..64 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@64..68

@@ -481,7 +481,9 @@ impl<'src> TailwindLexer<'src> {
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
             let char = self.current_char_unchecked();
-            if matches!(dispatched, WHS | EXL | PRC) {
+            // A `:` ends the modifier: it means the modifier belonged to a
+            // variant (`group-hover/menu:flex`), never to a candidate.
+            if matches!(dispatched, WHS | EXL | PRC | COL) {
                 break;
             }
             if !matches!(dispatched, ZER | DIG | PRD) {
@@ -697,5 +699,10 @@ fn is_css_identifier_continue(byte: u8) -> bool {
 
 #[inline]
 fn is_variant_segment_name_boundary(byte: u8) -> bool {
-    matches!(lookup_byte(byte), WHS | COL | MIN | SLH | EXL | BTC | PNC)
+    // `[` ends a segment name so a glued arbitrary value (`@[400px]`)
+    // lexes as its own bracketed segment rather than part of the name.
+    matches!(
+        lookup_byte(byte),
+        WHS | COL | MIN | SLH | EXL | BTO | BTC | PNC
+    )
 }

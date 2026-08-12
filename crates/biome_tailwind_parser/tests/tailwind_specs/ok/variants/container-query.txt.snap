@@ -24,6 +24,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..3 "@sm" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@3..4 ":" [] [],
             ],
@@ -41,6 +43,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@9..12 "@md" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@12..13 ":" [] [],
             ],
@@ -58,6 +62,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@18..21 "@lg" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@21..22 ":" [] [],
             ],
@@ -79,6 +85,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@32..34 "lg" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@34..35 ":" [] [],
             ],
@@ -102,6 +110,8 @@ TwRoot {
                             r_brack_token: R_BRACKET@51..52 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@52..53 ":" [] [],
             ],
@@ -119,6 +129,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@58..68 "@container" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@68..69 ":" [] [],
             ],
@@ -145,6 +157,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..3
             0: TW_NAMED_VARIANT_SEGMENT@0..3
               0: TW_VARIANT_SEGMENT@0..3 "@sm" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@3..4 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@4..9
@@ -156,6 +170,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@9..12
             0: TW_NAMED_VARIANT_SEGMENT@9..12
               0: TW_VARIANT_SEGMENT@9..12 "@md" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@12..13 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@13..18
@@ -167,6 +183,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@18..21
             0: TW_NAMED_VARIANT_SEGMENT@18..21
               0: TW_VARIANT_SEGMENT@18..21 "@lg" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@21..22 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@22..27
@@ -181,6 +199,8 @@ TwRoot {
             1: DASH@31..32 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@32..34
               0: TW_VARIANT_SEGMENT@32..34 "lg" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@34..35 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@35..40
@@ -197,6 +217,8 @@ TwRoot {
               0: L_BRACKET@45..46 "[" [] []
               1: TW_SELECTOR@46..51 "400px" [] []
               2: R_BRACKET@51..52 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@52..53 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@53..58
@@ -208,6 +230,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@58..68
             0: TW_NAMED_VARIANT_SEGMENT@58..68
               0: TW_VARIANT_SEGMENT@58..68 "@container" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@68..69 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@69..73

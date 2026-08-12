@@ -51,6 +51,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@13..18 "hover" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@18..19 ":" [] [],
             ],
@@ -102,6 +104,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@13..18
             0: TW_NAMED_VARIANT_SEGMENT@13..18
               0: TW_VARIANT_SEGMENT@13..18 "hover" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@18..19 ":" [] []
       1: DASH@19..20 "-" [] []
       2: TW_FUNCTIONAL_CANDIDATE@20..24

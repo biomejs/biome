@@ -149,6 +149,14 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
 
     if p.at(T![/]) {
         parse_modifier(p).or_add_diagnostic(p, expected_modifier);
+        if p.at(T![:]) {
+            // A `:` after the modifier means this was a (malformed)
+            // variant, not a candidate; rewinding lets the whole token
+            // recover as one bogus candidate.
+            m.abandon(p);
+            p.rewind(checkpoint);
+            return Absent;
+        }
     }
 
     Present(m.complete(p, TW_FUNCTIONAL_CANDIDATE))
@@ -189,14 +197,20 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         return Present(m.complete(p, TW_ARBITRARY_CANDIDATE));
     }
 
-    if p.at(T![/]) {
-        parse_modifier(p).or_add_diagnostic(p, expected_modifier);
+    parse_modifier(p).or_add_diagnostic(p, expected_modifier);
+    if p.at(T![:]) {
+        // A `:` after the modifier means this was a (malformed) variant,
+        // not a candidate; rewinding lets the whole token recover as one
+        // bogus candidate.
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
     }
 
     Present(m.complete(p, TW_ARBITRARY_CANDIDATE))
 }
 
-fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
+pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
     if !p.expect(T![/]) {
         m.abandon(p);
