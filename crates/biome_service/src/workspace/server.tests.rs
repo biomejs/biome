@@ -15,6 +15,8 @@ use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
+#[cfg(feature = "lang_html")]
+use biome_languages::HtmlFileSource;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use salsa::plumbing::AsId;
@@ -480,12 +482,116 @@ fn settings_query_uses_inline_analyzer_override_indices() {
 }
 
 #[test]
-fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
-    const PATH: &str = "/project/file.js";
-    const SOURCE: &str = "debugger;\nundeclared()";
+fn parse_capability_returns_not_found_for_unregistered_file() {
+    const PATH: &str = "/project/missing.json";
+
+    let (workspace, _) = setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let settings = Settings::default();
+    let settings = SettingsHandle::new(&settings, (None, EditorFeatures::default()));
+    let parse = workspace
+        .features
+        .get_deprecated_capabilities(JsonFileSource::json().into())
+        .parser
+        .parse
+        .expect("JSON parser capability must exist");
+
+    let result = parse(&BiomePath::new(PATH), &settings, workspace.get_db());
+
+    assert!(matches!(result, Err(WorkspaceError::NotFound(_))));
+}
+
+#[cfg(feature = "html_embeds")]
+#[test]
+fn workspace_embeds_use_registered_source_for_custom_extension() {
+    const PATH: &str = "/project/component.custom";
+    const SOURCE: &str = "<script>const value = 1;</script>";
 
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(HtmlFileSource::html().into()),
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let snippets = workspace
+        .as_workspace()
+        .get_parse_snippets(project_key, &BiomePath::new(PATH))
+        .unwrap();
+
+    assert_eq!(snippets.len(), 1);
+}
+
+#[cfg(feature = "html_embeds")]
+#[test]
+fn workspace_svelte_snippets_use_svelte_semantics() {
+    const PATH: &str = "/project/component.svelte";
+    const SOURCE: &str = "<script>const store = {};</script><p>{$store}</p>";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let no_undeclared =
+        AnalyzerSelector::from_str("lint/correctness/noUndeclaredVariables").unwrap();
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            only: vec![no_undeclared],
+            skip: vec![],
+            enabled_rules: vec![no_undeclared],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(result.diagnostics.is_empty(), "{:#?}", result.diagnostics);
+}
+
+#[test]
+fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
+    const PATH: &str = "/project/file.js";
+    const STORED_SOURCE: &str = "debugger;";
+    const SOURCE: &str = "debugger;\nundeclared()";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), STORED_SOURCE.as_bytes());
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
     workspace
         .open_file(OpenFileParams {
@@ -505,7 +611,10 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
         .process_file(ProcessFileParams {
             project_key,
             path: BiomePath::new(PATH),
-            content: FileContent::FromServer,
+            content: FileContent::FromClient {
+                content: SOURCE.into(),
+                version: 1,
+            },
             categories: RuleCategoriesBuilder::default()
                 .with_syntax()
                 .with_lint()
@@ -538,7 +647,7 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
                 path: BiomePath::new(PATH),
             })
             .unwrap(),
-        SOURCE
+        STORED_SOURCE
     );
 }
 
@@ -711,6 +820,91 @@ fn process_file_preserves_embedded_content_after_formatting() {
             .unwrap(),
         SOURCE
     );
+}
+
+#[test]
+fn fix_file_state_reparses_updated_embedded_snippets() {
+    const PATH: &str = "/project/file.html";
+    const SOURCE: &str = "<script>debugger;</script>";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let server = workspace.as_workspace();
+    let mut state = server
+        .process_file_state_from_server(project_key, &BiomePath::new(PATH))
+        .unwrap();
+    #[cfg(feature = "module_graph")]
+    let module_db = state.db.rc_module_db();
+    let no_debugger = AnalyzerSelector::from_str("lint/suspicious/noDebugger").unwrap();
+    let result = server
+        .with_workspace_embedded_parse_caches(Utf8Path::new(PATH), |caches| {
+            server.fix_file_state(
+                FixFileParams {
+                    project_key,
+                    path: BiomePath::new(PATH),
+                    fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
+                    should_format: false,
+                    only: vec![no_debugger],
+                    skip: vec![],
+                    enabled_rules: vec![no_debugger],
+                    rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
+                    suppression_reason: None,
+                    inline_config: None,
+                },
+                &mut state,
+                caches,
+                #[cfg(feature = "module_graph")]
+                module_db,
+                false,
+            )
+        })
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(result.actions.len(), 1);
+    assert!(
+        !state
+            .parsed
+            .send_node()
+            .into_source_text()
+            .contains("debugger")
+    );
+    assert!(state.iter_snippets().all(|snippet| {
+        !snippet
+            .parsed()
+            .clone()
+            .embedded_syntax::<JsLanguage>()
+            .text_with_trivia()
+            .to_string()
+            .contains("debugger")
+    }));
 }
 
 #[test]
@@ -4561,7 +4755,6 @@ export const noTopLevelVar = defineRule({
             path: BiomePath::new(FILE_PATH),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -4590,4 +4783,60 @@ export const noTopLevelVar = defineRule({
         diagnostics.contains("top-level var declaration"),
         "Expected a diagnostic from the TypeScript plugin, got: {diagnostics}"
     );
+}
+
+#[test]
+fn go_to_definition_on_vue_directive_quote_does_not_underflow() {
+    const PATH: &str = "/project/file.vue";
+    const SOURCE: &str = "<template><button @click=\"handler()\"></button></template>";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let quote = TextSize::from(SOURCE.find("\"handler").unwrap() as u32);
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new(PATH),
+            cursor_range: TextRange::new(quote, quote),
+        })
+        .unwrap();
+
+    assert!(result.is_none_or(|definition| definition.matches.is_empty()));
 }

@@ -308,7 +308,7 @@ impl ExtensionHandler for GritFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_text: Some(parse_text),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -368,23 +368,24 @@ fn parse_grit_file<'db>(db: &'db dyn Db, input: ParseGritInput<'db>) -> AnyParse
     parse_grit(input.file(db).content(db)).into()
 }
 
-fn parse(biome_path: &BiomePath, _settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
-    let file = db
-        .get_file(biome_path.as_path())
-        .expect("file must exist in workspace");
-    let file_source = db
-        .source_from_index(file.document_source_index(&db))
-        .unwrap_or_default();
+fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
     let file_db: &dyn Db = &db;
     let any_parse = parse_grit_file(file_db, ParseGritInput::new(file_db, file));
 
-    ParseResult {
+    Ok(ParseResult {
         any_parse,
         language: Some(file_source),
-    }
+    })
 }
 
-fn parse_text(
+fn parse_detached(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     code: &str,
@@ -424,7 +425,7 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);

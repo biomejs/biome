@@ -3,8 +3,8 @@ mod go_to;
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, LintParams, LintResults,
-    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, format_on_type_noop,
-    matches_on_type_char,
+    ParseOrigin, ParseResult, ParsedSource, ProcessFixAll, ProcessLint, SearchCapabilities,
+    format_on_type_noop, matches_on_type_char,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules_by_indices;
@@ -35,6 +35,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css_with_cache};
 use biome_css_semantic::db::css_semantic_model;
+use biome_css_semantic::model::SemanticModel;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_db::{Db, FileSource};
@@ -51,6 +52,18 @@ use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{error, info};
+
+fn analyzer_semantic_model(
+    parsed_source: &ParsedSource,
+    workspace_db: &WorkspaceDb,
+) -> SemanticModel {
+    match parsed_source.origin() {
+        ParseOrigin::Workspace(file) => {
+            css_semantic_model(workspace_db, file, parsed_source).clone()
+        }
+        ParseOrigin::Stateless => semantic_model(&parsed_source.tree::<AnyCssRoot>()),
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -473,7 +486,7 @@ impl ExtensionHandler for CssFileHandler {
         Capabilities {
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_text: Some(parse_text),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -548,13 +561,14 @@ fn parse_css_file<'db>(db: &'db dyn Db, input: ParseCssInput<'db>) -> AnyParse {
     .into()
 }
 
-fn parse(biome_path: &BiomePath, settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
-    let file = db
-        .get_file(biome_path.as_path())
-        .expect("file must exist in workspace");
-    let file_source = db
-        .source_from_index(file.document_source_index(&db))
-        .unwrap_or_default();
+fn parse(
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
     let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
     let source_type = file_source.to_css_file_source().unwrap_or_default();
     let file_db: &dyn Db = &db;
@@ -563,13 +577,13 @@ fn parse(biome_path: &BiomePath, settings: &SettingsWithEditor, db: WorkspaceDb)
         ParseCssInput::new(file_db, file, source_type, options),
     );
 
-    ParseResult {
+    Ok(ParseResult {
         any_parse,
         language: Some(file_source),
-    }
+    })
 }
 
-fn parse_text(
+fn parse_detached(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     code: &str,
@@ -623,7 +637,7 @@ fn debug_semantic_model(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
@@ -747,16 +761,7 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let semantic_model = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => {
-            let file = params
-                .workspace_db
-                .file_source_for_path(params.path.as_path())
-                .expect("file must exist in workspace");
-            css_semantic_model(&params.workspace_db, file, source).clone()
-        }
-        super::ParsedOrigin::Stateless(_) => semantic_model(&tree),
-    };
+    let semantic_model = analyzer_semantic_model(&params.parsed_source, &params.workspace_db);
     let css_services = CssAnalyzerServices {
         semantic_model: Some(&semantic_model),
         file_source,
@@ -847,11 +852,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset();
 
     info!("CSS runs the analyzer");
-    let file = workspace_db
-        .file_source_for_path(path.as_path())
-        .expect("file must exist in workspace");
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(css_semantic_model(&workspace_db, file, &parsed_source)),
+        semantic_model: Some(&analyzer_semantic_model(&parsed_source, &workspace_db)),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]

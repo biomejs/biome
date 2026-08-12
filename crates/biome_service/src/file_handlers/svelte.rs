@@ -103,7 +103,7 @@ impl ExtensionHandler for SvelteFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_text: Some(parse_text),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -162,24 +162,25 @@ fn parse_svelte_file<'db>(db: &'db dyn Db, input: ParseSvelteInput<'db>) -> AnyP
     parse_js(script, script_file_source, JsParserOptions::default()).into()
 }
 
-fn parse(biome_path: &BiomePath, _settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
-    let file = db
-        .get_file(biome_path.as_path())
-        .expect("file must exist in workspace");
-    let file_source = db
-        .source_from_index(file.document_source_index(&db))
-        .unwrap_or_default();
+fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
     let source_type = file_source.to_js_file_source().unwrap_or_default();
     let file_db: &dyn Db = &db;
     let any_parse = parse_svelte_file(file_db, ParseSvelteInput::new(file_db, file, source_type));
 
-    ParseResult {
+    Ok(ParseResult {
         any_parse,
         language: Some(file_source),
-    }
+    })
 }
 
-fn parse_text(
+fn parse_detached(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     code: &str,
@@ -214,7 +215,7 @@ fn parse_text(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = javascript::resolve_format_options(

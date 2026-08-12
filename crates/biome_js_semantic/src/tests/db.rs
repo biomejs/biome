@@ -202,7 +202,7 @@ fn rename_does_recompute_downstream() {
 
     // Both should have run — model changed, downstream must recompute
     assert_function_query_was_run(&db, test_semantic_model, file, &events);
-    // assert_function_query_was_run(&db, binding_count, file, &events);
+    assert_function_query_was_run(&db, binding_count, file, &events);
 }
 
 #[test]

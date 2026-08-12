@@ -5,13 +5,11 @@ use crate::embed::html::{
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
 use crate::file_handlers::{
-    DocumentFileSource, ParseEmbedResult, ParseEmbeddedCaches, ParseEmbeddedMode,
-    ParseEmbeddedParams,
+    DocumentFileSource, ParseEmbedResult, ParseEmbeddedCaches, ParseEmbeddedParams,
 };
-use crate::settings::{EditorFeatures, Settings, SettingsHandle, SettingsWithEditor};
+use crate::settings::SettingsWithEditor;
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{AnyCssRoot, CssFunction, CssLanguage, CssString, TextSize};
-use biome_db::Db;
+use biome_css_syntax::{AnyCssRoot, CssFunction, CssLanguage, CssString};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
@@ -31,39 +29,6 @@ use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFi
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::{AnyParse, ParsedSnippet};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
-use std::sync::Arc;
-
-#[salsa::input]
-struct EmbedSettings {
-    #[returns(ref)]
-    #[no_eq]
-    settings: Arc<Settings>,
-}
-
-#[salsa::interned]
-struct EmbedInput {
-    any_parse: AnyParse,
-    path: BiomePath,
-    settings: EmbedSettings,
-    source: HtmlFileSource,
-}
-
-#[salsa::tracked(returns(clone), no_eq)]
-fn parse_embeds_tracked<'db>(db: &'db dyn Db, input: EmbedInput<'db>) -> ParseEmbedResult {
-    let file_source = input.source(db);
-    let settings = SettingsHandle::new(
-        input.settings(db).settings(db),
-        (None, EditorFeatures::default()),
-    );
-    let mut caches = ParseEmbeddedCaches::default();
-    parse_embeds(
-        &input.any_parse(db),
-        &input.path(db),
-        &settings,
-        file_source,
-        &mut caches,
-    )
-}
 
 fn parse_embeds(
     any_parse: &AnyParse,
@@ -480,29 +445,13 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         path,
         file_source,
         settings,
-        mode,
+        caches,
     } = params;
     let Some(file_source) = file_source.to_html_file_source() else {
         return ParseEmbedResult::default();
     };
 
-    match mode {
-        ParseEmbeddedMode::Workspace(workspace_db) => {
-            let settings =
-                EmbedSettings::new(&workspace_db, Arc::new(settings.as_merged_settings()));
-            let input = EmbedInput::new(
-                &workspace_db,
-                any_parse,
-                path.clone(),
-                settings,
-                file_source,
-            );
-            parse_embeds_tracked(&workspace_db, input)
-        }
-        ParseEmbeddedMode::Stateless(caches) => {
-            parse_embeds(any_parse, path, settings, file_source, caches)
-        }
-    }
+    parse_embeds(any_parse, path, settings, file_source, caches)
 }
 
 // Pass 3: control flow blocks via registry
@@ -827,7 +776,7 @@ fn build_svelte_text_expression_candidate(
 /// Build an `EmbedCandidate::Directive` from a Vue directive initializer clause.
 ///
 /// Vue directives use quoted string values (`@click="handler()"`).
-/// The JS content is the inner text without quotes, offset by +1 for the opening quote.
+/// The JS content and its range exclude the surrounding quotes.
 fn build_vue_directive_candidate(
     initializer: &HtmlAttributeInitializerClause,
     is_event_handler: bool,
@@ -836,14 +785,13 @@ fn build_vue_directive_candidate(
     let html_string = value_node.as_html_string()?;
     let content_token = html_string.value_token().ok()?;
     let inner_text = html_string.inner_string_text().ok()?;
-    let token_range = content_token.text_trimmed_range();
-    let inner_offset = token_range.start() + TextSize::from(1);
+    let content_range = inner_text.source_range(content_token.text_range());
 
     Some(EmbedCandidate::Directive {
         content: EmbedContent {
             element_range: initializer.range(),
-            content_range: token_range,
-            content_offset: inner_offset,
+            content_range,
+            content_offset: content_range.start(),
             text: inner_text,
         },
         is_event_handler,

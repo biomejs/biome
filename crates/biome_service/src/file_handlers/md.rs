@@ -356,7 +356,7 @@ impl ExtensionHandler for MarkdownFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_text: Some(parse_text),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -419,24 +419,25 @@ fn parse_markdown_file<'db>(db: &'db dyn Db, input: ParseMarkdownInput<'db>) -> 
     .into()
 }
 
-fn parse(biome_path: &BiomePath, settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
-    let file = db
-        .get_file(biome_path.as_path())
-        .expect("file must exist in workspace");
-    let file_source = db
-        .source_from_index(file.document_source_index(&db))
-        .unwrap_or_default();
+fn parse(
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
     let options = settings.parse_options::<MarkdownLanguage>(biome_path, &file_source);
     let file_db: &dyn Db = &db;
     let any_parse = parse_markdown_file(file_db, ParseMarkdownInput::new(file_db, file, options));
 
-    ParseResult {
+    Ok(ParseResult {
         any_parse,
         language: Some(file_source),
-    }
+    })
 }
 
-fn parse_text(
+fn parse_detached(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     code: &str,
@@ -478,7 +479,7 @@ fn debug_formatter_ir(
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
@@ -559,7 +560,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         analyzer_cache,
     } = params;
 
-    let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
+    let _ = debug_span!("Code actions Markdown", range =? range, path =? path).entered();
     let tree: MdRoot = parsed_source.tree();
     let analyzer_options = resolve_analyzer_options(
         path,

@@ -64,10 +64,11 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             AnalyzerConfiguration::default()
                                 .with_jsx_runtime(JsxRuntime::default()),
                         );
+                        let language_db = Rc::new(WorkspaceDb::default());
 
                         b.iter(|| {
                             let services = JsAnalyzerServices::default()
-                                .with_language_db(Rc::new(WorkspaceDb::default()))
+                                .with_language_db(language_db.clone())
                                 .with_source_type(file_source);
                             biome_js_analyze::analyze(
                                 &parse.tree(),

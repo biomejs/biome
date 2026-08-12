@@ -33,7 +33,6 @@ use self::javascript::JsFileHandler;
 use self::{json::JsonFileHandler, unknown::UnknownFileHandler};
 use crate::WorkspaceError;
 use crate::db::WorkspaceDb;
-use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 pub use crate::file_handlers::astro::AstroFileHandler;
 #[cfg(feature = "lang_graphql")]
@@ -63,6 +62,7 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomai
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
+use biome_db::FileSource;
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::{EmbeddedData, EmbeddedSourceData};
@@ -82,11 +82,11 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList};
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
+use biome_languages::DocumentFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
     JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
 };
-use biome_languages::{DocumentFileSource, LanguageDb};
 #[cfg(feature = "module_graph")]
 use biome_module_graph::ModuleDb;
 use biome_package::{Dependencies, PackageJson};
@@ -124,11 +124,15 @@ pub(crate) fn matches_on_type_char(value: &str) -> bool {
 }
 
 pub struct FixAllParams<'a> {
-    pub(crate) parsed_source: ParsedOrigin,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_source: Option<EmbeddedSourceData>,
     #[cfg(feature = "module_graph")]
     pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -143,238 +147,69 @@ pub struct FixAllParams<'a> {
     pub(crate) collect_final_diagnostics: bool,
 }
 
-/// A small wrapper for the parsed file.
 #[derive(Clone, Debug)]
-pub(crate) enum ParsedOrigin {
-    /// The parse result has been queried from the database.
-    Workspace(ParsedOriginSource),
-    /// The parse result has been generated from the server during an in-flight operation, and it won't
-    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
-    Stateless(ParsedOriginSource),
+pub(crate) struct ParsedSource {
+    source: AnyParsedSource,
+    origin: ParseOrigin,
 }
 
-#[derive(Clone, Debug)]
-pub(crate) struct ParsedOriginSource {
-    parsed_source: AnyParsedSource,
-    #[cfg(feature = "html_embeds")]
-    embedded_source: Option<EmbeddedSourceData>,
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum ParseOrigin {
+    Workspace(FileSource),
+    Stateless,
 }
 
-impl std::ops::Deref for ParsedOriginSource {
+impl std::ops::Deref for ParsedSource {
     type Target = AnyParsedSource;
 
     fn deref(&self) -> &Self::Target {
-        &self.parsed_source
+        &self.source
     }
 }
 
-impl From<AnyParsedSource> for ParsedOriginSource {
-    fn from(parsed_source: AnyParsedSource) -> Self {
+impl ParsedSource {
+    pub(crate) fn workspace(source: AnyParsedSource, file: FileSource) -> Self {
         Self {
-            parsed_source,
-            #[cfg(feature = "html_embeds")]
-            embedded_source: None,
-        }
-    }
-}
-
-impl From<AnyParse> for ParsedOriginSource {
-    fn from(parse: AnyParse) -> Self {
-        AnyParsedSource::from(parse).into()
-    }
-}
-
-impl From<ParsedSnippet> for ParsedOriginSource {
-    fn from(snippet: ParsedSnippet) -> Self {
-        AnyParsedSource::from(snippet).into()
-    }
-}
-
-impl From<&ParsedSnippet> for ParsedOriginSource {
-    fn from(snippet: &ParsedSnippet) -> Self {
-        AnyParsedSource::from(snippet).into()
-    }
-}
-
-impl ParsedOrigin {
-    pub(crate) fn stateless(parse: AnyParse) -> Self {
-        Self::Stateless(parse.into())
-    }
-
-    #[cfg(feature = "html_embeds")]
-    pub(crate) fn with_embedded_source(
-        mut self,
-        embedded_source: Option<EmbeddedSourceData>,
-    ) -> Self {
-        match &mut self {
-            Self::Workspace(source) | Self::Stateless(source) => {
-                source.embedded_source = embedded_source;
-            }
-        }
-        self
-    }
-
-    #[cfg(feature = "html_embeds")]
-    pub(crate) fn embedded_source(
-        &self,
-    ) -> Option<&EmbeddedSourceData> {
-        match self {
-            Self::Workspace(source) | Self::Stateless(source) => source.embedded_source.as_ref(),
+            source,
+            origin: ParseOrigin::Workspace(file),
         }
     }
 
-    pub(crate) fn tree<N>(&self) -> N
-    where
-        N: biome_rowan::AstNode,
-        N::Language: 'static,
-    {
-        match self {
-            Self::Workspace(source) => source.tree(),
-            Self::Stateless(source) => source.tree(),
+    pub(crate) fn stateless(source: AnyParsedSource) -> Self {
+        Self {
+            source,
+            origin: ParseOrigin::Stateless,
         }
     }
 
-    pub(crate) fn syntax<L>(&self) -> SyntaxNode<L>
-    where
-        L: biome_rowan::Language + 'static,
-    {
-        match self {
-            Self::Workspace(source) => source.syntax(),
-            Self::Stateless(source) => source.syntax(),
+    pub(crate) fn origin(&self) -> ParseOrigin {
+        self.origin
+    }
+
+    pub(crate) fn workspace_file(&self) -> Option<FileSource> {
+        match self.origin {
+            ParseOrigin::Workspace(file) => Some(file),
+            ParseOrigin::Stateless => None,
+        }
+    }
+
+    pub(crate) fn into_source(self) -> AnyParsedSource {
+        self.source
+    }
+
+    pub(crate) fn as_snippet(&self) -> Option<&ParsedSnippet> {
+        match &self.source {
+            AnyParsedSource::ParsedSnippet(snippet) => Some(snippet),
+            AnyParsedSource::ParsedSource(_) => None,
         }
     }
 
     pub(crate) fn parse(&self) -> AnyParse {
-        match self {
-            Self::Workspace(source) => source.any_parse().clone(),
-            Self::Stateless(source) => source.any_parse().clone(),
-        }
+        self.source.any_parse().clone()
     }
 
     pub(crate) fn send_node(&self) -> SendNode {
-        match self {
-            Self::Workspace(source) => source.any_parse().unwrap_as_send_node(),
-            Self::Stateless(source) => source.any_parse().unwrap_as_send_node(),
-        }
-    }
-
-    pub(crate) fn diagnostics(&self) -> &[biome_parser::diagnostic::ParseDiagnostic] {
-        match self {
-            Self::Workspace(source) => source.diagnostics(),
-            Self::Stateless(source) => source.diagnostics(),
-        }
-    }
-
-    pub(crate) fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        match self {
-            Self::Workspace(source) => source.serde_diagnostics(),
-            Self::Stateless(source) => source.serde_diagnostics(),
-        }
-    }
-
-    pub(crate) fn diagnostic_offset(&self) -> Option<TextSize> {
-        match self {
-            Self::Workspace(source) => source.diagnostic_offset(),
-            Self::Stateless(source) => source.diagnostic_offset(),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub(crate) enum ParsedSnippetOrigin {
-    Workspace(ParsedSnippet),
-    Stateless(ParsedSnippet),
-}
-
-impl ParsedSnippetOrigin {
-    pub(crate) fn snippet(&self) -> &ParsedSnippet {
-        match self {
-            Self::Workspace(snippet) | Self::Stateless(snippet) => snippet,
-        }
-    }
-
-    pub(crate) fn parsed_origin(&self) -> ParsedOrigin {
-        match self {
-            Self::Workspace(snippet) => ParsedOrigin::Workspace(snippet.into()),
-            Self::Stateless(snippet) => ParsedOrigin::Stateless(snippet.into()),
-        }
-    }
-
-    pub(crate) fn parsed(&self) -> &AnyParse {
-        match self {
-            Self::Workspace(snippet) | Self::Stateless(snippet) => snippet.parsed(),
-        }
-    }
-
-    pub(crate) fn file_source(&self, db: &WorkspaceDb) -> Option<DocumentFileSource> {
-        db.source_from_index(self.document_source_index())
-    }
-
-    pub(crate) fn document_source_index(&self) -> usize {
-        match self {
-            Self::Workspace(snippet) | Self::Stateless(snippet) => snippet.document_source_index(),
-        }
-    }
-
-    pub(crate) fn element_range(&self) -> TextRange {
-        match self {
-            Self::Workspace(snippet) | Self::Stateless(snippet) => snippet.element_range(),
-        }
-    }
-
-    pub(crate) fn content_range(&self) -> TextRange {
-        match self {
-            Self::Workspace(snippet) | Self::Stateless(snippet) => snippet.content_range(),
-        }
-    }
-
-    pub(crate) fn content_offset(&self) -> TextSize {
-        match self {
-            Self::Workspace(snippet) | Self::Stateless(snippet) => snippet.content_offset(),
-        }
-    }
-
-    pub(crate) fn diagnostics(&self) -> &[biome_parser::diagnostic::ParseDiagnostic] {
-        self.parsed().diagnostics()
-    }
-
-    pub(crate) fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        self.parsed().clone().into_serde_diagnostics()
-    }
-
-    pub(crate) fn has_errors(&self) -> bool {
-        self.parsed().has_errors()
-    }
-
-    pub(crate) fn error_count(&self) -> usize {
-        self.diagnostics()
-            .iter()
-            .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
-            .count()
-    }
-}
-
-impl From<AnyParsedSource> for ParsedOrigin {
-    fn from(source: AnyParsedSource) -> Self {
-        Self::Workspace(source.into())
-    }
-}
-
-impl From<ParsedSnippet> for ParsedOrigin {
-    fn from(source: ParsedSnippet) -> Self {
-        Self::Workspace(source.into())
-    }
-}
-
-impl From<&ParsedSnippet> for ParsedOrigin {
-    fn from(source: &ParsedSnippet) -> Self {
-        Self::Workspace(source.clone().into())
-    }
-}
-
-impl From<AnyParse> for ParsedOrigin {
-    fn from(parse: AnyParse) -> Self {
-        Self::stateless(parse)
+        self.source.any_parse().unwrap_as_send_node()
     }
 }
 
@@ -413,24 +248,24 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) path: &'a BiomePath,
     pub(crate) file_source: &'a DocumentFileSource,
     pub(crate) settings: &'a SettingsWithEditor<'settings>,
-    pub(crate) mode: ParseEmbeddedMode<'a>,
+    pub(crate) caches: &'a mut ParseEmbeddedCaches,
 }
 
 #[derive(Default)]
 pub(crate) struct ParseEmbeddedCaches {
+    #[cfg(feature = "lang_js")]
     pub(crate) javascript: NodeCache,
+    #[cfg(feature = "lang_css")]
     pub(crate) css: NodeCache,
+    #[cfg(feature = "lang_json")]
     pub(crate) json: NodeCache,
+    #[cfg(feature = "lang_graphql")]
     pub(crate) graphql: NodeCache,
 }
 
-pub(crate) enum ParseEmbeddedMode<'a> {
-    Workspace(WorkspaceDb),
-    Stateless(&'a mut ParseEmbeddedCaches),
-}
-
-type Parse = fn(&BiomePath, &SettingsWithEditor, WorkspaceDb) -> ParseResult;
-type ParseText =
+type Parse =
+    fn(&BiomePath, &SettingsWithEditor, WorkspaceDb) -> Result<ParseResult, WorkspaceError>;
+type ParseDetached =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
 type ParseEmbeddedNodes =
     for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
@@ -439,8 +274,8 @@ pub struct ParserCapabilities {
     /// Parse a file
     pub(crate) parse: Option<Parse>,
 
-    /// Parse some text. This is usually used for in-flight operations
-    pub(crate) parse_text: Option<ParseText>,
+    /// Parse some text, detached from the database. This is usually used for in-flight operations
+    pub(crate) parse_detached: Option<ParseDetached>,
 
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
@@ -475,7 +310,7 @@ pub struct DebugCapabilities {
 }
 
 pub(crate) struct LintParams<'a> {
-    pub(crate) parsed_source: ParsedOrigin,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -485,6 +320,8 @@ pub(crate) struct LintParams<'a> {
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
     pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_source: Option<EmbeddedSourceData>,
     #[cfg(feature = "module_graph")]
     pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -500,7 +337,7 @@ pub(crate) struct LintParams<'a> {
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -999,7 +836,7 @@ impl ProcessDiagnosticsAndActions {
 }
 
 pub(crate) struct CodeActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
@@ -1039,7 +876,7 @@ type FixAll = fn(FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError
 type Rename =
     fn(&BiomePath, AnyParsedSource, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type UpdateSnippets =
-    fn(ParsedOrigin, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
+    fn(ParsedSource, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
 #[derive(Default)]
@@ -1061,7 +898,7 @@ pub struct AnalyzerCapabilities {
 type Format = fn(
     &BiomePath,
     &DocumentFileSource,
-    ParsedOrigin,
+    ParsedSource,
     &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
@@ -1092,9 +929,9 @@ pub(crate) fn format_on_type_noop(offset: TextSize) -> Printed {
 type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
-    ParsedOrigin,
+    ParsedSource,
     &SettingsWithEditor,
-    Vec<ParsedSnippetOrigin>,
+    Vec<ParsedSource>,
     WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
