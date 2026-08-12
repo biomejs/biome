@@ -1,5 +1,6 @@
 use crate::DestructureField;
 use crate::format_type_info::FormatTypeOptions;
+use crate::NarrowingPredicate;
 use crate::interned_types::{
     CallArgumentType, ConstructorParameter, FunctionParameter, FunctionParameterBinding,
     InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
@@ -832,16 +833,22 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                 ])]]
             ),
             Self::Narrowed(expr) => {
+                let predicate = format_with(|f| match &expr.predicate {
+                    NarrowingPredicate::Typeof(tag) => write!(
+                        f,
+                        [&format_args![
+                            token("typeof == \""),
+                            text(tag.as_str(), None),
+                            token("\"")
+                        ]]
+                    ),
+                });
                 write!(
                     f,
                     [&format_args![
-                        token("Narrowed(typeof"),
-                        space(),
-                        token("=="),
-                        space(),
-                        token("\""),
-                        text(expr.tag.as_str(), None),
-                        token("\","),
+                        token("Narrowed("),
+                        predicate,
+                        token(","),
                         space(),
                         &expr.ty,
                         token(")")

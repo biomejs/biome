@@ -1386,16 +1386,23 @@ pub struct TypeofLogicalOrExpression {
     pub right: TypeReference,
 }
 
-/// Narrows the type of an expression to the subset that matches a `typeof`
-/// guard, e.g. the type of `x` inside the consequent of
+/// Narrows the type of an expression to the subset that matches a guard,
+/// e.g. the type of `x` inside the consequent of
 /// `if (typeof x === "function")`.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofNarrowedExpression {
     /// The type being narrowed.
     pub ty: TypeReference,
 
-    /// The tag the `typeof` guard compared against.
-    pub tag: TypeofTag,
+    /// The predicate the guard established for the value.
+    pub predicate: NarrowingPredicate,
+}
+
+/// Predicate established by a guard, used to narrow the guarded value's type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum NarrowingPredicate {
+    /// The `typeof` operator evaluates to the given tag for the value.
+    Typeof(TypeofTag),
 }
 
 /// One of the strings the `typeof` operator may evaluate to.

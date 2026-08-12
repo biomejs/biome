@@ -1745,7 +1745,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeofExpression::Narrowed(expression) => {
                 TypeofExpression::Narrowed(TypeofNarrowedExpression {
                     ty: self.take_type()?,
-                    tag: expression.tag,
+                    predicate: expression.predicate.clone(),
                 })
             }
             TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
@@ -2159,7 +2159,7 @@ pub struct TypeofLogicalOrExpression<'db> {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct TypeofNarrowedExpression<'db> {
     pub ty: TypeData<'db>,
-    pub tag: raw::TypeofTag,
+    pub predicate: raw::NarrowingPredicate,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2671,7 +2671,7 @@ fn convert_typeof_expression<'db>(
         raw::TypeofExpression::Narrowed(expression) => {
             TypeofExpression::Narrowed(TypeofNarrowedExpression {
                 ty: resolve_reference(&expression.ty),
-                tag: expression.tag,
+                predicate: expression.predicate.clone(),
             })
         }
         raw::TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
@@ -3440,7 +3440,28 @@ mod tests {
                 &db,
                 TypeofExpression::Narrowed(TypeofNarrowedExpression {
                     ty: s.next(),
-                    tag: raw::TypeofTag::String,
+                    predicate: NarrowingPredicate::Typeof(raw::TypeofTag::String),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    predicate: NarrowingPredicate::InstanceOf(s.next()),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    predicate: NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                        callee: s.next(),
+                        argument_index: 0,
+                    }),
                 }),
             )
         });

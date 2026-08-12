@@ -40,8 +40,9 @@ use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
+    Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace,
+    NarrowingPredicate, Object, Path, PatternFunctionParameter, PredicateReturnType,
+    RawTypeCollector, RawTypeId, ReturnType,
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
     TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
@@ -1200,13 +1201,15 @@ impl TypeData {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let tag = typeof_guard_narrowed_tag(resolver, id);
+                let predicate = guard_narrowing_predicate(resolver, id);
                 let reference = TypeReference::from_name(scope_id, name);
-                match tag {
-                    Some(tag) => Self::from(TypeofExpression::Narrowed(TypeofNarrowedExpression {
-                        ty: reference,
-                        tag,
-                    })),
+                match predicate {
+                    Some(predicate) => {
+                        Self::from(TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                            ty: reference,
+                            predicate,
+                        }))
+                    }
                     None => Self::reference(reference),
                 }
             }
@@ -3175,14 +3178,15 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
 }
 
-/// Returns the `typeof` tag to which a reference is narrowed when it appears
-/// inside the consequent of an `if (typeof x === "<tag>")` guard.
+/// Returns the narrowing predicate that the guards enclosing a reference
+/// establish for it, e.g. `Typeof(String)` for `x` inside the consequent of
+/// `if (typeof x === "string")`.
 ///
 /// This is a purely syntactic check, scoped to the enclosing function. A
 /// guard whose consequent declares or assigns a binding with the same name
 /// is ignored, since it no longer says anything about that binding.
 ///
-/// Guards can nest on the same name:
+/// `typeof` guards can nest on the same name:
 ///
 /// ```js
 /// if (typeof x === "string") {
@@ -3194,10 +3198,10 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 ///   }
 /// }
 /// ```
-fn typeof_guard_narrowed_tag(
+fn guard_narrowing_predicate(
     resolver: &mut dyn RawTypeCollector,
     id: &JsReferenceIdentifier,
-) -> Option<TypeofTag> {
+) -> Option<NarrowingPredicate> {
     let name_token = id.name().ok()?;
     let name = name_token.text();
     let mut child = id.syntax().clone();
@@ -3221,7 +3225,7 @@ fn typeof_guard_narrowed_tag(
         }
         child = ancestor;
     }
-    found
+    found.map(NarrowingPredicate::Typeof)
 }
 
 /// Returns the tag of a `typeof <name> === "<tag>"` test of the given `if`

@@ -2,8 +2,9 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
-    RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind,
+    MergedReference, NamedFunctionParameter, NarrowingPredicate, Object, ObjectLiteral,
+    PatternFunctionParameter, RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance,
+    TypeMember, TypeMemberKind,
     TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
@@ -543,18 +544,21 @@ impl Format<FormatTypeContext> for TypeofExpression {
                 )
             }
             Self::Narrowed(expr) => {
+                let predicate = format_with(|f| match &expr.predicate {
+                    NarrowingPredicate::Typeof(tag) => write!(
+                        f,
+                        [&format_args![
+                            token("typeof == \""),
+                            text(tag.as_str(), None),
+                            token("\"")
+                        ]]
+                    ),
+                });
                 write!(
                     f,
                     [&format_args![
-                        token("Narrowed"),
-                        token("("),
-                        token("typeof"),
-                        space(),
-                        token("=="),
-                        space(),
-                        token("\""),
-                        text(expr.tag.as_str(), None),
-                        token("\""),
+                        token("Narrowed("),
+                        predicate,
                         token(","),
                         space(),
                         &expr.ty,

@@ -13,8 +13,8 @@ use crate::db::queries::{
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    Literal as RawLiteral, Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofExpression as RawTypeofExpression, TypeofTag,
+    Literal as RawLiteral, NarrowingPredicate, Path, RawTypeData, TypeId, TypeReference,
+    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression as RawTypeofExpression, TypeofTag,
     global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
@@ -163,10 +163,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Narrowed(expression) => {
                 let ty = self.resolve(&expression.ty);
-                Some(
-                    self.filter_type_to_subset(ty, ConditionalSubset::Typeof(expression.tag))
-                        .unwrap_or(ty),
-                )
+                Some(self.resolve_narrowed_expression(ty, &expression.predicate))
             }
             RawTypeofExpression::New(expression) => {
                 let callee = self.resolve(&expression.callee);
@@ -264,13 +261,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::LogicalOr(expression) => {
                 self.resolve_logical_or_expression(expression.left, expression.right)
             }
-            InferredTypeofExpression::Narrowed(expression) => Some(
-                self.filter_type_to_subset(
-                    expression.ty,
-                    ConditionalSubset::Typeof(expression.tag),
-                )
-                .unwrap_or(expression.ty),
-            ),
+            InferredTypeofExpression::Narrowed(expression) => {
+                Some(self.resolve_narrowed_expression(expression.ty, &expression.predicate))
+            }
             InferredTypeofExpression::New(expression) => {
                 let arguments = self.resolve_inferred_call_arguments(&expression.arguments);
                 let arguments = arguments
@@ -2513,6 +2506,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::UnknownKeyword
             | InferredTypeData::VoidKeyword => None,
         }
+    }
+
+    /// Narrows `ty` according to the given guard `predicate`.
+    ///
+    /// Returns `ty` unchanged if the predicate cannot make it any more
+    /// specific.
+    fn resolve_narrowed_expression(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        predicate: &NarrowingPredicate,
+    ) -> InferredTypeData<'db> {
+        let narrowed = match predicate {
+            NarrowingPredicate::Typeof(tag) => {
+                self.filter_type_to_subset(ty, ConditionalSubset::Typeof(*tag))
+            }
+        };
+        narrowed.unwrap_or(ty)
     }
 
     /// Returns the tag the `typeof` operator evaluates to for instances of
