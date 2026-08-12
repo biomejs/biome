@@ -1,13 +1,12 @@
 use crate::DestructureField;
 use crate::format_type_info::FormatTypeOptions;
-use crate::NarrowingPredicate;
 use crate::interned_types::{
     CallArgumentType, ConstructorParameter, FunctionParameter, FunctionParameterBinding,
     InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
     InternedInterface, InternedLiteral, InternedMergedReference, InternedModule, InternedNamespace,
     InternedObject, InternedTuple, InternedTypeInstance, InternedTypeofExpression, Literal,
-    NamedFunctionParameter, PatternFunctionParameter, ReturnType, TupleElementType, TypeData,
-    TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
+    NamedFunctionParameter, NarrowingPredicate, PatternFunctionParameter, ReturnType,
+    TupleElementType, TypeData, TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{FormatContext, TransformSourceMap, format_args, write};
@@ -835,6 +834,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
             Self::Narrowed(expr) => {
                 let predicate = format_with(|f| match &expr.predicate {
                     NarrowingPredicate::Falsy => write!(f, [token("falsy")]),
+                    NarrowingPredicate::InstanceOf(guard) => {
+                        write!(f, [&format_args![token("instanceof"), space(), guard]])
+                    }
                     NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
                     NarrowingPredicate::Typeof(tag) => write!(
                         f,

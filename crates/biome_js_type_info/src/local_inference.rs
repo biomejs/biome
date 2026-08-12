@@ -20,7 +20,8 @@ use biome_js_syntax::{
     JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
     JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
     JsFunctionExpression, JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding,
-    JsIfStatement, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
+    JsIfStatement, JsInitializerClause, JsInstanceofExpression, JsLogicalExpression,
+    JsLogicalOperator,
     JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
     JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
     JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
@@ -1201,7 +1202,7 @@ impl TypeData {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let predicate = guard_narrowing_predicate(resolver, id);
+                let predicate = guard_narrowing_predicate(resolver, scope_id, id);
                 let reference = TypeReference::from_name(scope_id, name);
                 match predicate {
                     Some(predicate) => {
@@ -3191,6 +3192,7 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 /// the predicates of nested guards combine.
 fn guard_narrowing_predicate(
     resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
     id: &JsReferenceIdentifier,
 ) -> Option<NarrowingPredicate> {
     let name_token = id.name().ok()?;
@@ -3202,7 +3204,7 @@ fn guard_narrowing_predicate(
             if if_stmt
                 .consequent()
                 .is_ok_and(|consequent| consequent.syntax() == &child)
-                && let Some(predicate) = guard_predicate(&if_stmt, name)
+                && let Some(predicate) = guard_predicate(resolver, scope_id, &if_stmt, name)
                 && !narrowing_invalidated_within(resolver, &child, &name_token)
             {
                 record_guard_predicate(&mut found, predicate)?;
@@ -3252,12 +3254,22 @@ fn record_guard_predicate(
 /// Returns the predicate that the test of the given `if` statement
 /// establishes for references with the given `name` in its consequent, if
 /// any.
-fn guard_predicate(if_stmt: &JsIfStatement, name: &str) -> Option<NarrowingPredicate> {
+fn guard_predicate(
+    resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    if_stmt: &JsIfStatement,
+    name: &str,
+) -> Option<NarrowingPredicate> {
     let test = if_stmt.test().ok()?.omit_parentheses();
     match &test {
         // `if (x)`
         AnyJsExpression::JsIdentifierExpression(_) => {
             is_reference_to(&test, name).then_some(NarrowingPredicate::Truthy)
+        }
+        // `if (x instanceof Class)`
+        AnyJsExpression::JsInstanceofExpression(instanceof) => {
+            instanceof_guard_class(resolver, scope_id, if_stmt, instanceof, name)
+                .map(NarrowingPredicate::InstanceOf)
         }
         // `if (!x)`
         AnyJsExpression::JsUnaryExpression(unary)
@@ -3272,6 +3284,40 @@ fn guard_predicate(if_stmt: &JsIfStatement, name: &str) -> Option<NarrowingPredi
         }
         _ => None,
     }
+}
+
+/// Returns a reference to the class an `instanceof` guard over a reference
+/// with the given `name` checks against, if the given expression is one.
+fn instanceof_guard_class(
+    resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    if_stmt: &JsIfStatement,
+    instanceof: &JsInstanceofExpression,
+    name: &str,
+) -> Option<TypeReference> {
+    let left = instanceof.left().ok()?.omit_parentheses();
+    if !is_reference_to(&left, name) {
+        return None;
+    }
+
+    let right = instanceof.right().ok()?.omit_parentheses();
+    let class_name = right
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?
+        .name()
+        .ok()?;
+
+    // The class reference is resolved from the scope of the narrowed
+    // reference. A same-name binding declared in the consequent would shadow
+    // the class the guard actually checked against.
+    if if_stmt.consequent().is_ok_and(|consequent| {
+        narrowing_invalidated_within(resolver, consequent.syntax(), class_name.text(), &class_name)
+    }) {
+        return None;
+    }
+
+    Some(TypeReference::from_name(scope_id, class_name))
 }
 
 /// Returns the tag of a `typeof <name> === "<tag>"` comparison, if the given

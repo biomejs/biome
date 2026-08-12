@@ -13,8 +13,9 @@ use crate::db::queries::{
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    Literal as RawLiteral, NarrowingPredicate, Path, RawTypeData, TypeId, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression as RawTypeofExpression, TypeofTag,
+    Literal as RawLiteral, NarrowingPredicate as RawNarrowingPredicate, Path, RawTypeData, TypeId,
+    TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    TypeofExpression as RawTypeofExpression, TypeofTag,
     global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
@@ -23,7 +24,8 @@ use biome_js_type_info::{
         InternedGenericTypeParameter as InferredGenericTypeParameter,
         InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
         Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
-        NamedFunctionParameter as InferredNamedFunctionParameter, ReturnType as InferredReturnType,
+        NamedFunctionParameter as InferredNamedFunctionParameter,
+        NarrowingPredicate as InferredNarrowingPredicate, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
@@ -163,7 +165,15 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Narrowed(expression) => {
                 let ty = self.resolve(&expression.ty);
-                Some(self.resolve_narrowed_expression(ty, &expression.predicate))
+                let predicate = match &expression.predicate {
+                    RawNarrowingPredicate::Falsy => InferredNarrowingPredicate::Falsy,
+                    RawNarrowingPredicate::InstanceOf(guard) => {
+                        InferredNarrowingPredicate::InstanceOf(self.resolve(guard))
+                    }
+                    RawNarrowingPredicate::Truthy => InferredNarrowingPredicate::Truthy,
+                    RawNarrowingPredicate::Typeof(tag) => InferredNarrowingPredicate::Typeof(*tag),
+                };
+                Some(self.resolve_narrowed_expression(ty, &predicate))
             }
             RawTypeofExpression::New(expression) => {
                 let callee = self.resolve(&expression.callee);
@@ -2515,16 +2525,322 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn resolve_narrowed_expression(
         &mut self,
         ty: InferredTypeData<'db>,
-        predicate: &NarrowingPredicate,
+        predicate: &InferredNarrowingPredicate<'db>,
     ) -> InferredTypeData<'db> {
         let narrowed = match predicate {
-            NarrowingPredicate::Falsy => self.filter_type_to_subset(ty, ConditionalSubset::Falsy),
-            NarrowingPredicate::Truthy => self.filter_type_to_subset(ty, ConditionalSubset::Truthy),
-            NarrowingPredicate::Typeof(tag) => {
+            InferredNarrowingPredicate::Falsy => {
+                self.filter_type_to_subset(ty, ConditionalSubset::Falsy)
+            }
+            InferredNarrowingPredicate::InstanceOf(guard) => self.narrow_to_instance_of(ty, *guard),
+            InferredNarrowingPredicate::Truthy => {
+                self.filter_type_to_subset(ty, ConditionalSubset::Truthy)
+            }
+            InferredNarrowingPredicate::Typeof(tag) => {
                 self.filter_type_to_subset(ty, ConditionalSubset::Typeof(*tag))
             }
         };
         narrowed.unwrap_or(ty)
+    }
+
+    /// Narrows the union variants of `ty` to those the `leaf` callback
+    /// retains.
+    ///
+    /// The traversal resolves nested unions and `typeof` expressions and
+    /// flattens flattenable instances, so `leaf` only ever sees instances
+    /// that could not be flattened; every other type is passed to `leaf` to
+    /// decide whether the variant is retained, stripped, or mapped.
+    ///
+    /// Returns `None` if the type cannot be made any more specific.
+    fn narrow_union_leaves(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        mut leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut types = Vec::new();
+        let mut seen = FxHashSet::default();
+        let mut pending = Vec::from([ty]);
+
+        for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
+            let Some(ty) = pending.pop() else {
+                return collected_type_result(self.db, types);
+            };
+            let ty = self.resolve_inferred_type(ty);
+            if !seen.insert(ty) {
+                continue;
+            }
+
+            if let InferredTypeData::InstanceOf(instance) = ty {
+                let target = self.resolve_inferred_type(instance.ty(self.db));
+                if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                    pending.push(target);
+                    continue;
+                }
+            }
+
+            match ty {
+                InferredTypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().rev().copied());
+                }
+                InferredTypeData::TypeofExpression(expression) => pending.push(
+                    self.resolve_inferred_typeof_expression(expression.expression(self.db))
+                        .unwrap_or(InferredTypeData::Unknown),
+                ),
+                InferredTypeData::TypeofType(inner) => pending.push(inner.ty(self.db)),
+                InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => match leaf(self, ty) {
+                    FilterAction::Mapped(mapped) => types.push(mapped),
+                    FilterAction::Retained => types.push(ty),
+                    FilterAction::Stripped => {}
+                },
+            }
+        }
+
+        None
+    }
+
+    /// Narrows `ty` to the subset that may be an instance of the `guard`
+    /// class.
+    ///
+    /// Union variants that provably cannot be an instance of the guard class
+    /// are stripped, and variants the guard class derives from are replaced
+    /// by an instance of the guard class itself.
+    ///
+    /// Returns `None` if the type cannot be made any more specific.
+    fn narrow_to_instance_of(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        guard: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let guard = self.resolve_inferred_type(guard).expand_canonical_global(self.db);
+        let InferredTypeData::Class(guard_class) = guard else {
+            return None;
+        };
+
+        self.narrow_union_leaves(ty, |ctx, ty| match ty {
+            InferredTypeData::InstanceOf(instance) => {
+                let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
+                match target.expand_canonical_global(ctx.db) {
+                    InferredTypeData::Class(target_class) => {
+                        let target_contains_guard =
+                            ctx.class_extends_chain_contains(target_class, guard_class);
+                        let guard_contains_target =
+                            ctx.class_extends_chain_contains(guard_class, target_class);
+                        match (target_contains_guard, guard_contains_target) {
+                            // The variant is at least as specific as the
+                            // guard already.
+                            (
+                                ExtendsChainLookup::Contains,
+                                ExtendsChainLookup::Contains
+                                | ExtendsChainLookup::DoesNotContain
+                                | ExtendsChainLookup::Unknown,
+                            ) => FilterAction::Retained,
+                            // The guard is more specific; downcast to it.
+                            (
+                                ExtendsChainLookup::DoesNotContain | ExtendsChainLookup::Unknown,
+                                ExtendsChainLookup::Contains,
+                            ) => FilterAction::Mapped(InferredTypeData::instance_of(
+                                ctx.db,
+                                guard,
+                                Box::default(),
+                            )),
+                            // Both chains were walked to their roots without
+                            // meeting the other class; the variant provably
+                            // cannot be an instance of the guard class.
+                            (
+                                ExtendsChainLookup::DoesNotContain,
+                                ExtendsChainLookup::DoesNotContain,
+                            ) => FilterAction::Stripped,
+                            // Without a full proof either way, we cannot
+                            // rule the variant out; keep it.
+                            (ExtendsChainLookup::DoesNotContain, ExtendsChainLookup::Unknown)
+                            | (
+                                ExtendsChainLookup::Unknown,
+                                ExtendsChainLookup::DoesNotContain | ExtendsChainLookup::Unknown,
+                            ) => FilterAction::Retained,
+                        }
+                    }
+                    // We cannot reason about non-class instance targets.
+                    InferredTypeData::Unknown
+                    | InferredTypeData::Global
+                    | InferredTypeData::GlobalType(_)
+                    | InferredTypeData::BigInt
+                    | InferredTypeData::Boolean
+                    | InferredTypeData::Null
+                    | InferredTypeData::Number
+                    | InferredTypeData::String
+                    | InferredTypeData::Symbol
+                    | InferredTypeData::Undefined
+                    | InferredTypeData::Conditional
+                    | InferredTypeData::Constructor(_)
+                    | InferredTypeData::Function(_)
+                    | InferredTypeData::Interface(_)
+                    | InferredTypeData::Module(_)
+                    | InferredTypeData::Namespace(_)
+                    | InferredTypeData::Object(_)
+                    | InferredTypeData::Tuple(_)
+                    | InferredTypeData::Generic(_)
+                    | InferredTypeData::Local(_)
+                    | InferredTypeData::Intersection(_)
+                    | InferredTypeData::Union(_)
+                    | InferredTypeData::TypeOperator(_)
+                    | InferredTypeData::Literal(_)
+                    | InferredTypeData::InstanceOf(_)
+                    | InferredTypeData::MergedReference(_)
+                    | InferredTypeData::TypeofExpression(_)
+                    | InferredTypeData::TypeofType(_)
+                    | InferredTypeData::TypeofValue(_)
+                    | InferredTypeData::AnyKeyword
+                    | InferredTypeData::NeverKeyword
+                    | InferredTypeData::ObjectKeyword
+                    | InferredTypeData::ThisKeyword
+                    | InferredTypeData::UnknownKeyword
+                    | InferredTypeData::VoidKeyword => FilterAction::Retained,
+                }
+            }
+            InferredTypeData::Literal(literal) => match literal.literal(ctx.db) {
+                // Object and regular expression literals are objects.
+                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => FilterAction::Retained,
+                // Primitive literals are never class instances.
+                InferredLiteral::BigInt(_)
+                | InferredLiteral::Boolean(_)
+                | InferredLiteral::Number(_)
+                | InferredLiteral::String(_)
+                | InferredLiteral::Template(_) => FilterAction::Stripped,
+            },
+            // Values of these types are never class instances.
+            InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::VoidKeyword => FilterAction::Stripped,
+            // We cannot rule these out; keep them.
+            InferredTypeData::Unknown
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword => FilterAction::Retained,
+        })
+    }
+
+    /// Returns whether the extends chain of `class`, including `class`
+    /// itself, contains `needle`.
+    ///
+    /// Only returns [`ExtendsChainLookup::DoesNotContain`] when the chain
+    /// was walked all the way to a class without a base class; a chain that
+    /// contains a link we cannot resolve to a class, such as a mixin call or
+    /// an unresolved import, yields [`ExtendsChainLookup::Unknown`].
+    fn class_extends_chain_contains(
+        &mut self,
+        class: InferredClass<'db>,
+        needle: InferredClass<'db>,
+    ) -> ExtendsChainLookup {
+        let mut current = class;
+        for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
+            if current == needle {
+                return ExtendsChainLookup::Contains;
+            }
+            let Some(extends) = current.extends(self.db) else {
+                return ExtendsChainLookup::DoesNotContain;
+            };
+            match self
+                .resolve_inferred_type(extends)
+                .expand_canonical_global(self.db)
+            {
+                InferredTypeData::Class(parent) => current = parent,
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => return ExtendsChainLookup::Unknown,
+            }
+        }
+        ExtendsChainLookup::Unknown
     }
 
     /// Returns the tag the `typeof` operator evaluates to for instances of
@@ -2621,6 +2937,17 @@ fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
     members
         .iter()
         .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
+}
+
+/// Result of searching a class extends chain for a specific class.
+#[derive(Clone, Copy)]
+enum ExtendsChainLookup {
+    /// The chain contains the class.
+    Contains,
+    /// The chain was walked to its root without finding the class.
+    DoesNotContain,
+    /// The chain contains a link that could not be resolved to a class.
+    Unknown,
 }
 
 enum FilterAction<'db> {

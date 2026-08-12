@@ -1403,6 +1403,8 @@ pub struct TypeofNarrowedExpression {
 pub enum NarrowingPredicate {
     /// The value is falsy.
     Falsy,
+    /// The value is an instance of the referenced class.
+    InstanceOf(TypeReference),
     /// The value is truthy.
     Truthy,
     /// The `typeof` operator evaluates to the given tag for the value.

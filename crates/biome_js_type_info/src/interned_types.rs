@@ -1338,7 +1338,18 @@ impl<'db> TypeDataSlots<'db> {
             TypeofExpression::LogicalOr(expression) => {
                 self.slots.extend([expression.left, expression.right]);
             }
-            TypeofExpression::Narrowed(expression) => self.slots.push(expression.ty),
+            TypeofExpression::Narrowed(expression) => {
+                self.slots.push(expression.ty);
+                // The predicate's own types must follow `ty` in slot order;
+                // `rebuild_typeof_expression` takes them back in the same
+                // order.
+                match &expression.predicate {
+                    NarrowingPredicate::InstanceOf(guard) => self.slots.push(*guard),
+                    NarrowingPredicate::Falsy
+                    | NarrowingPredicate::Truthy
+                    | NarrowingPredicate::Typeof(_) => {}
+                }
+            }
             TypeofExpression::New(expression) => {
                 self.slots.push(expression.callee);
                 self.push_call_argument_slots(&expression.arguments);
@@ -1745,7 +1756,14 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeofExpression::Narrowed(expression) => {
                 TypeofExpression::Narrowed(TypeofNarrowedExpression {
                     ty: self.take_type()?,
-                    predicate: expression.predicate.clone(),
+                    predicate: match &expression.predicate {
+                        NarrowingPredicate::InstanceOf(_) => {
+                            NarrowingPredicate::InstanceOf(self.take_type()?)
+                        }
+                        NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
+                        NarrowingPredicate::Truthy => NarrowingPredicate::Truthy,
+                        NarrowingPredicate::Typeof(tag) => NarrowingPredicate::Typeof(*tag),
+                    },
                 })
             }
             TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
@@ -2159,7 +2177,20 @@ pub struct TypeofLogicalOrExpression<'db> {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct TypeofNarrowedExpression<'db> {
     pub ty: TypeData<'db>,
-    pub predicate: raw::NarrowingPredicate,
+    pub predicate: NarrowingPredicate<'db>,
+}
+
+/// Predicate established by a guard, used to narrow the guarded value's type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub enum NarrowingPredicate<'db> {
+    /// The value is falsy.
+    Falsy,
+    /// The value is an instance of the referenced class.
+    InstanceOf(TypeData<'db>),
+    /// The value is truthy.
+    Truthy,
+    /// The `typeof` operator evaluates to the given tag for the value.
+    Typeof(raw::TypeofTag),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2671,7 +2702,14 @@ fn convert_typeof_expression<'db>(
         raw::TypeofExpression::Narrowed(expression) => {
             TypeofExpression::Narrowed(TypeofNarrowedExpression {
                 ty: resolve_reference(&expression.ty),
-                predicate: expression.predicate.clone(),
+                predicate: match &expression.predicate {
+                    raw::NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
+                    raw::NarrowingPredicate::InstanceOf(guard) => {
+                        NarrowingPredicate::InstanceOf(resolve_reference(guard))
+                    }
+                    raw::NarrowingPredicate::Truthy => NarrowingPredicate::Truthy,
+                    raw::NarrowingPredicate::Typeof(tag) => NarrowingPredicate::Typeof(*tag),
+                },
             })
         }
         raw::TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {

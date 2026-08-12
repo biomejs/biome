@@ -546,6 +546,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
             Self::Narrowed(expr) => {
                 let predicate = format_with(|f| match &expr.predicate {
                     NarrowingPredicate::Falsy => write!(f, [token("falsy")]),
+                    NarrowingPredicate::InstanceOf(guard) => {
+                        write!(f, [&format_args![token("instanceof"), space(), guard]])
+                    }
                     NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
                     NarrowingPredicate::Typeof(tag) => write!(
                         f,
