@@ -117,6 +117,92 @@ fn expected_argument_requests_compose_lookup_queries() {
 }
 
 #[test]
+fn expected_call_argument_request_skips_requested_non_spread_argument() {
+    const SOURCE: &str = r#"
+        import { load } from "./source.ts";
+        declare function schedule(kind: "sync", task: (value: number) => void): void;
+        declare function schedule(kind: "async", task: (value: number) => Promise<void>): void;
+        schedule("sync", (value) => load(value));
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        "export async function load(value: number) { return value; }",
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let callee = expression_range_by_source(&db, module, SOURCE, "schedule");
+    let kind = expression_range_by_source(&db, module, SOURCE, r#""sync""#);
+    let callback = expression_range_by_source(&db, module, SOURCE, "(value) => load(value)");
+    let kind_input = ExpressionTypeInput::new(&db, module, kind);
+    let callback_input = ExpressionTypeInput::new(&db, module, callback);
+
+    db.clear_salsa_events();
+    let ty = execute_type_inference_request(
+        &db,
+        TypeInferenceCaller::new("test", "skipRequestedArgument"),
+        ExpectedCallArgumentTypeRequest::new(
+            module,
+            callback,
+            callee,
+            vec![
+                TypeInferenceArgument::new(kind, false),
+                TypeInferenceArgument::new(callback, false),
+            ]
+            .into_boxed_slice(),
+            1,
+        ),
+    )
+    .expect("argument type must be inferred");
+    assert!(InferredType::new(&db, ty).function_returns_void());
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_run(&db, infer_expression_type, kind_input, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, callback_input, &events);
+}
+
+#[test]
+fn expected_call_argument_request_resolves_requested_spread_argument() {
+    const SOURCE: &str = r#"
+        declare function consume(callback: () => void): void;
+        const callbacks: [() => Promise<void>] = [async () => {}];
+        consume(...callbacks);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let callee = expression_range_by_source(&db, module, SOURCE, "consume");
+    let callbacks = expression_range_by_source(&db, module, SOURCE, "callbacks");
+    let callbacks_input = ExpressionTypeInput::new(&db, module, callbacks);
+
+    db.clear_salsa_events();
+    let ty = execute_type_inference_request(
+        &db,
+        TypeInferenceCaller::new("test", "resolveRequestedSpread"),
+        ExpectedCallArgumentTypeRequest::new(
+            module,
+            callbacks,
+            callee,
+            vec![TypeInferenceArgument::new(callbacks, true)].into_boxed_slice(),
+            0,
+        ),
+    )
+    .expect("argument type must be inferred");
+    assert!(InferredType::new(&db, ty).function_returns_void());
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_run(&db, infer_expression_type, callbacks_input, &events);
+}
+
+#[test]
 fn classification_requests_preserve_conclusive_and_indeterminate_results() {
     let source = r#"
         declare function consume(value: unknown): void;
