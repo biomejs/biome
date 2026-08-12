@@ -314,6 +314,99 @@ export function mixins(m: MixedCls | SiblingCls) {
     assert_inferred_type_snapshot("test_infer_module_types_narrows_instanceof_guards", &db, &fs);
 }
 
+#[test]
+fn test_infer_module_types_narrows_discriminant_guards() {
+    const SOURCE: &str = r#"
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function discriminants(c: Choice) {
+    if (c.kind === "left") {
+        c;
+    }
+}
+
+type Esc =
+    | { kind: "o\x6e"; escaped: string }
+    | { kind: "off"; plain: number };
+
+export function escapes(e: Esc) {
+    if (e.kind === "on") {
+        e;
+    }
+}
+
+export function mutated(m: Choice) {
+    if (m.kind === "left") {
+        m.kind = "right";
+        m;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A discriminant guard strips union variants whose member is a literal
+    // with a different value.
+    let discriminant_offset = SOURCE
+        .find("c;")
+        .expect("discriminant reference must exist");
+    let narrowed_to_left = normalize_type(&db, module, expression_ty_at(discriminant_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_left, "left")
+            .is_some()
+    );
+    // On the un-narrowed union, `kind` would be `"left" | "right"`.
+    let kind_ty = inferred
+        .find_member_type(&db, narrowed_to_left, "kind")
+        .expect("kind member must be inferred");
+    let kind_ty = normalize_type(&db, module, kind_ty);
+    assert!(is_inferred_string_literal(&db, kind_ty, "left"));
+
+    // A discriminant with an escape sequence is compared by its unescaped
+    // value, so the guard keeps the escaped variant and strips the other.
+    let escape_offset = SOURCE.find("e;").expect("escape reference must exist");
+    let narrowed_to_escaped = normalize_type(&db, module, expression_ty_at(escape_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_escaped, "escaped")
+            .is_some()
+    );
+
+    // A write to a member of the narrowed value inside the consequent
+    // declines discriminant narrowing.
+    let mutated_offset = SOURCE.find("m;").expect("mutated reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(mutated_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(formatted.contains("\"left\""), "{formatted}");
+    assert!(formatted.contains("\"right\""), "{formatted}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_discriminant_guards",
+        &db,
+        &fs,
+    );
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
 /// reassigns, so narrowing must be declined for it -- and must survive for
 /// the names the branch leaves alone.
