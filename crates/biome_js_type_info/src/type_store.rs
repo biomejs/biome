@@ -173,13 +173,24 @@ pub trait RawTypeCollector {
         ]))))))
     }
 
-    /// Returns a scratch cache for memoizing `typeof`-guard narrowing
-    /// invalidation checks, if this collector wants to provide one.
+    /// Returns a scratch cache for memoizing guard-narrowing invalidation
+    /// checks, if this collector wants to provide one.
     fn narrowing_invalidation_cache(
         &mut self,
-    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text), bool>> {
+    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>> {
         None
     }
+}
+
+/// Distinguishes the scans memoized in the
+/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache).
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum NarrowingInvalidationKind {
+    /// A binding with the name is declared, or the name is assigned to,
+    /// within the node.
+    Binding,
+    /// A member of the named value is written to within the node.
+    MemberWrite,
 }
 
 #[derive(Default)]

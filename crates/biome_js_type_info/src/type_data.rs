@@ -1405,10 +1405,24 @@ pub enum NarrowingPredicate {
     Falsy,
     /// The value is an instance of the referenced class.
     InstanceOf(TypeReference),
+    /// A member of the value strictly equals a string literal.
+    MemberEquals(Box<MemberEqualsPredicate>),
     /// The value is truthy.
     Truthy,
     /// The `typeof` operator evaluates to the given tag for the value.
     Typeof(TypeofTag),
+}
+
+/// Predicate that a member of a value strictly equals a string literal,
+/// e.g. `x.kind === "tag"`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct MemberEqualsPredicate {
+    /// Name of the member being compared.
+    pub member: Text,
+
+    /// The string the member is compared against, with escape sequences
+    /// processed.
+    pub value: Text,
 }
 
 /// One of the strings the `typeof` operator may evaluate to.

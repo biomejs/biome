@@ -549,6 +549,16 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     NarrowingPredicate::InstanceOf(guard) => {
                         write!(f, [&format_args![token("instanceof"), space(), guard]])
                     }
+                    NarrowingPredicate::MemberEquals(predicate) => write!(
+                        f,
+                        [&format_args![
+                            token("."),
+                            text(predicate.member.text(), None),
+                            token(" == \""),
+                            text(predicate.value.text(), None),
+                            token("\"")
+                        ]]
+                    ),
                     NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
                     NarrowingPredicate::Typeof(tag) => write!(
                         f,

@@ -5,8 +5,8 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
-    GLOBAL_UNKNOWN_ID, Literal, NUM_PREDEFINED_TYPES, Object, ScopeId, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    GLOBAL_UNKNOWN_ID, Literal, NUM_PREDEFINED_TYPES, NarrowingInvalidationKind, Object, ScopeId,
+    TypeData, TypeId, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
     TypeReferenceQualifier,
     TypeResolverLevel::Import,
     TypeofExpression, TypeofStaticMemberExpression, TypeofValue, Union,

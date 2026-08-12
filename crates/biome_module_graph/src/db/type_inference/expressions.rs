@@ -11,10 +11,11 @@ use crate::db::queries::{
     ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
 };
 use biome_js_semantic::ScopeId;
+use biome_js_syntax::unescape_js_string_text;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    Literal as RawLiteral, NarrowingPredicate as RawNarrowingPredicate, Path, RawTypeData, TypeId,
-    TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    Literal as RawLiteral, MemberEqualsPredicate, NarrowingPredicate as RawNarrowingPredicate,
+    Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     TypeofExpression as RawTypeofExpression, TypeofTag,
     global_type_id_for_qualifier, global_types,
     interned_types::{
@@ -169,6 +170,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     RawNarrowingPredicate::Falsy => InferredNarrowingPredicate::Falsy,
                     RawNarrowingPredicate::InstanceOf(guard) => {
                         InferredNarrowingPredicate::InstanceOf(self.resolve(guard))
+                    }
+                    RawNarrowingPredicate::MemberEquals(predicate) => {
+                        InferredNarrowingPredicate::MemberEquals(predicate.as_ref().clone())
                     }
                     RawNarrowingPredicate::Truthy => InferredNarrowingPredicate::Truthy,
                     RawNarrowingPredicate::Typeof(tag) => InferredNarrowingPredicate::Typeof(*tag),
@@ -2532,6 +2536,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.filter_type_to_subset(ty, ConditionalSubset::Falsy)
             }
             InferredNarrowingPredicate::InstanceOf(guard) => self.narrow_to_instance_of(ty, *guard),
+            InferredNarrowingPredicate::MemberEquals(predicate) => {
+                self.narrow_by_member_equals(ty, predicate)
+            }
             InferredNarrowingPredicate::Truthy => {
                 self.filter_type_to_subset(ty, ConditionalSubset::Truthy)
             }
@@ -2627,6 +2634,62 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         None
+    }
+
+    /// Narrows `ty` to the union variants whose member may strictly equal
+    /// the string of the given `predicate`.
+    ///
+    /// Only variants whose member resolves to a literal type that provably
+    /// differs from the string are stripped.
+    ///
+    /// Returns `None` if the type cannot be made any more specific.
+    fn narrow_by_member_equals(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        predicate: &MemberEqualsPredicate,
+    ) -> Option<InferredTypeData<'db>> {
+        self.narrow_union_leaves(ty, |ctx, ty| {
+            if ctx.member_may_equal_string(ty, predicate) {
+                FilterAction::Retained
+            } else {
+                FilterAction::Stripped
+            }
+        })
+    }
+
+    /// Returns whether the member named by the given `predicate` may
+    /// strictly equal its string on values of type `ty`.
+    ///
+    /// Only a member that resolves to a literal type of a provably different
+    /// value yields `false`.
+    fn member_may_equal_string(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        predicate: &MemberEqualsPredicate,
+    ) -> bool {
+        let Some(member_ty) = self.resolve_static_member_expression(ty, predicate.member.text())
+        else {
+            // We cannot tell whether the member exists, let alone its value.
+            return true;
+        };
+        let InferredTypeData::Literal(literal) = self.resolve_inferred_type(member_ty) else {
+            return true;
+        };
+        match literal.literal(self.db) {
+            // Literal types retain their escape sequences, while the guard
+            // value is unescaped; compare the unescaped values.
+            InferredLiteral::String(string) => {
+                literal_string_may_equal(string.as_str(), predicate.value.text())
+            }
+            // A template literal's value is not statically known.
+            InferredLiteral::Template(_) => true,
+            // A literal of another kind is never strictly equal to a string.
+            InferredLiteral::BigInt(_)
+            | InferredLiteral::Boolean(_)
+            | InferredLiteral::Number(_)
+            | InferredLiteral::Object(_)
+            | InferredLiteral::RegExp(_) => false,
+        }
     }
 
     /// Narrows `ty` to the subset that may be an instance of the `guard`
@@ -2937,6 +3000,16 @@ fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
     members
         .iter()
         .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
+}
+
+/// Returns whether a literal string with the given raw `literal` source
+/// text may strictly equal the unescaped `value`.
+///
+/// A replacement character marks a lossy unescape, such as a lone surrogate
+/// escape; equality can be neither proven nor refuted then.
+fn literal_string_may_equal(literal: &str, value: &str) -> bool {
+    let unescaped = unescape_js_string_text(literal);
+    unescaped == value || unescaped.contains('\u{fffd}') || value.contains('\u{fffd}')
 }
 
 /// Result of searching a class extends chain for a specific class.

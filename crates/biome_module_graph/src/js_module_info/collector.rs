@@ -8,9 +8,9 @@ use biome_js_syntax::{
     JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GenericTypeParameter, RawTypeCollector, RawTypeData, RawTypeId, TypeData,
-    TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeStore,
-    UnionCollector, resolved::InferredLocalTypeId,
+    FunctionParameter, GenericTypeParameter, NarrowingInvalidationKind, RawTypeCollector,
+    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
+    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -57,9 +57,9 @@ pub(super) struct JsModuleInfoCollector {
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, TypeId>,
 
-    /// Memoizes `typeof`-guard narrowing invalidation checks, scoped to this
+    /// Memoizes guard-narrowing invalidation checks, scoped to this
     /// collector's single pass over the module.
-    narrowing_invalidation_cache: FxHashMap<(JsSyntaxNode, Text), bool>,
+    narrowing_invalidation_cache: FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>,
 
     /// Static and dynamic import paths in source order.
     import_paths: ImportPathMap<JsImportPath>,
@@ -830,7 +830,7 @@ impl JsModuleInfoCollector {
 impl RawTypeCollector for JsModuleInfoCollector {
     fn narrowing_invalidation_cache(
         &mut self,
-    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text), bool>> {
+    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>> {
         Some(&mut self.narrowing_invalidation_cache)
     }
 
