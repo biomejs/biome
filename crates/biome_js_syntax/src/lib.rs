@@ -305,9 +305,9 @@ pub fn inner_string_text(token: &JsSyntaxToken) -> TokenText {
     if matches!(
         token.kind(),
         JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::JSX_STRING_LITERAL
-    ) {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
+    ) && text.starts_with(['"', '\''])
+    {
+        // SAFETY: a quoted string literal token has a delimiter at the start and the end
         let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
         text = text.slice(range);
     }
