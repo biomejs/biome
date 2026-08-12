@@ -9,6 +9,7 @@ use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
+use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::TypeContext;
 use biome_js_syntax::JsSyntaxKind::*;
@@ -122,6 +123,9 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
+    if p.source_type().as_embedding_kind().is_astro() {
+        skip_astro_html_comments(p);
+    }
     let expr_marker = p.start();
     let expr_result = parse_expression(p, ExpressionContext::default());
 

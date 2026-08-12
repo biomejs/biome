@@ -87,13 +87,16 @@ pub enum JsLexContext {
 pub enum JsxRawTextElement {
     Script,
     Style,
+    /// An `is:raw` element, identified by its name's range in the source.
+    Other(TextRange),
 }
 
 impl JsxRawTextElement {
-    fn closing_tag_name(self) -> &'static str {
+    fn closing_tag_name(self) -> Option<&'static str> {
         match self {
-            Self::Script => "script",
-            Self::Style => "style",
+            Self::Script => Some("script"),
+            Self::Style => Some("style"),
+            Self::Other(_) => None,
         }
     }
 
@@ -445,12 +448,27 @@ impl<'src> JsLexer<'src> {
     /// Whether the lexer sits at the closing tag that ends `element`'s raw text,
     /// matched case-insensitively the way JSX matches element names.
     fn at_jsx_raw_text_end(&self, element: JsxRawTextElement) -> bool {
-        let name = element.closing_tag_name();
-        self.source
+        let Some(rest) = self
+            .source
             .get(self.position..)
             .and_then(|rest| rest.strip_prefix("</"))
-            .and_then(|rest| rest.get(..name.len()))
-            .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+        else {
+            return false;
+        };
+        match element.closing_tag_name() {
+            Some(name) => rest
+                .get(..name.len())
+                .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name)),
+            // Component names are case-sensitive, so `is:raw` names match exactly.
+            None => {
+                let JsxRawTextElement::Other(range) = element else {
+                    return false;
+                };
+                self.source
+                    .get(usize::from(range.start())..usize::from(range.end()))
+                    .is_some_and(|name| rest.get(..name.len()) == Some(name))
+            }
+        }
     }
 
     fn lex_jsx_raw_text_token(&mut self, element: JsxRawTextElement) -> JsSyntaxKind {

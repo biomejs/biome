@@ -90,7 +90,7 @@ fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
 
 /// Astro reads `<!-- -->` as trivia, so children may be separated by comments.
 #[inline]
-fn skip_astro_html_comments(p: &mut JsParser) {
+pub(crate) fn skip_astro_html_comments(p: &mut JsParser) {
     while p.at(T![<]) {
         let start = p.cur_range().start();
         p.re_lex(JsReLexContext::AstroHtmlComment);
@@ -250,7 +250,8 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         let _ = parse_ts_type_arguments(p, TypeContext::default());
     }
 
-    JsxAttributeList.parse_list(p);
+    let mut attributes = JsxAttributeList::default();
+    attributes.parse_list(p);
 
     if p.eat(T![/]) {
         // test_err jsx jsx_self_closing_element_missing_r_angle
@@ -267,7 +268,7 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
             m.complete(p, JSX_SELF_CLOSING_ELEMENT),
         ))
     } else {
-        let raw_text = astro_raw_text_element(p, name.as_ref());
+        let raw_text = astro_raw_text_element(p, name.as_ref(), attributes.saw_astro_is_raw);
 
         // test_err jsx jsx_opening_element_missing_r_angle
         // <><test <inner> some content</inner></test></>
@@ -299,11 +300,14 @@ fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> boo
 fn astro_raw_text_element(
     p: &JsParser,
     name: Option<&CompletedMarker>,
+    saw_is_raw: bool,
 ) -> Option<JsxRawTextElement> {
     if !p.source_type.as_embedding_kind().is_astro() || !p.at(T![>]) {
         return None;
     }
-    JsxRawTextElement::from_element_name(p.text(name?.range(p)))
+    let name = name?;
+    JsxRawTextElement::from_element_name(p.text(name.range(p)))
+        .or_else(|| saw_is_raw.then(|| JsxRawTextElement::Other(name.range(p))))
 }
 
 fn expect_closing_fragment(
@@ -628,7 +632,10 @@ fn parse_jsx_name(p: &mut JsParser) -> ParsedSyntax {
     }
 }
 
-struct JsxAttributeList;
+#[derive(Default)]
+struct JsxAttributeList {
+    saw_astro_is_raw: bool,
+}
 // test jsx jsx_element_attributes
 // function f() {
 //     return <div string_literal="a" expression={1} novalue el=<a/>></div>;
@@ -644,7 +651,7 @@ impl ParseNodeList for JsxAttributeList {
     const LIST_KIND: Self::Kind = JsSyntaxKind::JSX_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
-        if is_at_jsx_shorthand_attribute(p) {
+        let parsed = if is_at_jsx_shorthand_attribute(p) {
             parse_jsx_shorthand_attribute(p)
         } else if matches!(p.cur(), T!['{'] | T![...]) {
             parse_jsx_spread_attribute(p)
@@ -652,7 +659,18 @@ impl ParseNodeList for JsxAttributeList {
             parse_metavariable(p)
         } else {
             parse_jsx_attribute(p)
+        };
+        if !self.saw_astro_is_raw
+            && p.source_type.as_embedding_kind().is_astro()
+            && let Present(attribute) = &parsed
+        {
+            let text = p.text(attribute.range(p));
+            self.saw_astro_is_raw = text == "is:raw"
+                || text
+                    .strip_prefix("is:raw")
+                    .is_some_and(|rest| rest.starts_with(['=', ' ', '\t', '\r', '\n']));
         }
+        parsed
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
