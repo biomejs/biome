@@ -835,7 +835,8 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_angular_structural_directive,
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
         ),
-        _ if p.cur_text().starts_with("v-") => {
+        // Astro has no `v-` directives; there `v-if` is an ordinary attribute name.
+        _ if p.cur_text().starts_with("v-") && !Astro.is_supported(p) => {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
         _ if Svelte.is_supported(p) && is_at_svelte_directive_start(p) => Svelte
