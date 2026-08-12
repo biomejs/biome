@@ -19,8 +19,8 @@ pub fn unescape_js_string(text: TokenText) -> Text {
 
 /// Returns `text` with escape sequences processed.
 ///
-/// Same as [`unescape_js_string()`], for a string that is no longer backed
-/// by a token.
+/// Same as [`unescape_js_string()`], for a string that is not backed by a
+/// token, such as a literal stored in type data.
 pub fn unescape_js_string_text(text: &str) -> Cow<'_, str> {
     enum State {
         // Consume characters until an escape sequence is discovered.

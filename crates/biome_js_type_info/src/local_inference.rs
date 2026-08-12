@@ -3234,10 +3234,21 @@ fn guard_narrowing_predicate(
 /// }
 /// ```
 ///
-/// Two `typeof` guards with different tags contradict each other -- no value
-/// satisfies both, so we don't narrow at all rather than pick one
-/// arbitrarily. Returns `None` on such a contradiction so the caller can
-/// bail with `?`.
+/// The exception is two `typeof` guards comparing against different tags.
+/// `typeof x` evaluates to a single string, so the tests cannot both have
+/// passed for the same value, and we decline to narrow rather than pick one
+/// of the tags:
+///
+/// ```js
+/// if (typeof x === "number") {
+///   if (typeof x === "string") {
+///     x; // not narrowed: `typeof x` cannot be both "number" and "string"
+///   }
+/// }
+/// ```
+///
+/// Returns `Some(())` after recording, and `None` for the contradicting
+/// case above.
 fn record_guard_predicate(
     found: &mut Option<NarrowingPredicate>,
     predicate: NarrowingPredicate,
@@ -3296,8 +3307,10 @@ fn guard_predicate(
 /// Returns the predicate of a `<name>.<member> === "<value>"` comparison,
 /// if the given binary expression is one.
 ///
-/// Handles both operand orders. Loose equality is not accepted, because its
-/// coercion rules would make stripping variants unsound.
+/// Handles both operand orders. Loose equality is not accepted: a test like
+/// `x.kind == "1"` also passes when the member holds the number `1`, so
+/// stripping the variants whose member is not the string `"1"` would narrow
+/// away the value actually present at runtime.
 fn member_equals_guard(
     resolver: &mut dyn RawTypeCollector,
     if_stmt: &JsIfStatement,
@@ -3497,8 +3510,10 @@ fn narrowing_invalidated_within(
 /// Returns whether a member of the value with the given `name` is written
 /// to within `node`, e.g. `name.member = 1` or `name[key] = 1`.
 ///
-/// Like [`narrowing_invalidated_within`], the scan is flow-insensitive and
-/// memoized in the resolver's narrowing invalidation cache, under
+/// Like [`narrowing_invalidated_within`], the scan is deliberately coarse:
+/// a member write anywhere in `node` counts, even one that cannot execute
+/// before the reference being narrowed. Results are memoized in the
+/// resolver's narrowing invalidation cache, under
 /// [`NarrowingInvalidationKind::MemberWrite`].
 fn member_write_invalidated_within(
     resolver: &mut dyn RawTypeCollector,
