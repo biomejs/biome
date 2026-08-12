@@ -8572,6 +8572,9 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+/**
+ * Configuration for the `useControlLabel` lint rule.
+ */
 export type UseControlLabelOptions = {};
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};

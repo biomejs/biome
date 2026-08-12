@@ -15297,6 +15297,7 @@
 			]
 		},
 		"UseControlLabelOptions": {
+			"description": "Configuration for the `useControlLabel` lint rule.",
 			"type": "object",
 			"additionalProperties": false
 		},
