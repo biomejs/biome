@@ -72,9 +72,12 @@ allowedLanguages.md:11:4 lint/nursery/useFencedCodeLanguage ━━━━━━�
   
   i The allowedLanguages option restricts fenced code blocks to a specific set of language tags.
   
-  i Use one of the allowed languages: "js", "ts".
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use one of the allowed languages:
+  
+  - js
+  - ts
   
 
 ```
@@ -93,9 +96,12 @@ allowedLanguages.md:15:4 lint/nursery/useFencedCodeLanguage ━━━━━━�
   
   i The allowedLanguages option restricts fenced code blocks to a specific set of language tags.
   
-  i Use one of the allowed languages: "js", "ts".
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use one of the allowed languages:
+  
+  - js
+  - ts
   
 
 ```

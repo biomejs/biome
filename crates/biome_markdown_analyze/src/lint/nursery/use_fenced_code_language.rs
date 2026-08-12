@@ -192,11 +192,7 @@ impl Rule for UseFencedCodeLanguage {
                 let allowed_languages = options
                     .allowed_languages
                     .as_deref()
-                    .unwrap_or_default()
-                    .iter()
-                    .map(|language| format!("\"{language}\""))
-                    .collect::<Vec<_>>()
-                    .join(", ");
+                    .unwrap_or_default();
                 Some(
                     RuleDiagnostic::new(
                         rule_category!(),
@@ -208,9 +204,7 @@ impl Rule for UseFencedCodeLanguage {
                     .note(markup! {
                         "The "<Emphasis>"allowedLanguages"</Emphasis>" option restricts fenced code blocks to a specific set of language tags."
                     })
-                    .note(markup! {
-                        "Use one of the allowed languages: "{allowed_languages}"."
-                    }),
+                    .footer_list("Use one of the allowed languages:", allowed_languages),
                 )
             }
             FencedCodeLanguageIssue::ExtraInfo(range) => Some(
