@@ -1344,7 +1344,9 @@ impl<'db> TypeDataSlots<'db> {
                 // `rebuild_typeof_expression` takes them back in the same
                 // order.
                 match &expression.predicate {
-                    NarrowingPredicate::InstanceOf(guard) => self.slots.push(*guard),
+                    NarrowingPredicate::Assigned(ty) | NarrowingPredicate::InstanceOf(ty) => {
+                        self.slots.push(*ty)
+                    }
                     NarrowingPredicate::PredicateCall(predicate) => {
                         self.slots.push(predicate.callee);
                     }
@@ -1762,6 +1764,9 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 TypeofExpression::Narrowed(TypeofNarrowedExpression {
                     ty: self.take_type()?,
                     predicate: match &expression.predicate {
+                        NarrowingPredicate::Assigned(_) => {
+                            NarrowingPredicate::Assigned(self.take_type()?)
+                        }
                         NarrowingPredicate::InstanceOf(_) => {
                             NarrowingPredicate::InstanceOf(self.take_type()?)
                         }
@@ -2212,6 +2217,8 @@ pub struct PredicateCallPredicate<'db> {
 /// Predicate established by a guard, used to narrow the guarded value's type.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub enum NarrowingPredicate<'db> {
+    /// The value has the type it was assigned.
+    Assigned(TypeData<'db>),
     /// The value is falsy.
     Falsy,
     /// The value is an instance of the referenced class.
@@ -2739,6 +2746,9 @@ fn convert_typeof_expression<'db>(
             TypeofExpression::Narrowed(TypeofNarrowedExpression {
                 ty: resolve_reference(&expression.ty),
                 predicate: match &expression.predicate {
+                    raw::NarrowingPredicate::Assigned(assigned) => {
+                        NarrowingPredicate::Assigned(resolve_reference(assigned))
+                    }
                     raw::NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
                     raw::NarrowingPredicate::InstanceOf(guard) => {
                         NarrowingPredicate::InstanceOf(resolve_reference(guard))

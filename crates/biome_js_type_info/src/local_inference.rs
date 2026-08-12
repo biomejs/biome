@@ -7,18 +7,20 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument,
+    AnyJsClassMember, AnyJsClassMemberName,
     AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSwitchClause, AnyTsModuleName,
     AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsCallExpression, JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsClassMemberList, JsComputedMemberAssignment, JsConstructorParameters,
-    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsArrowFunctionExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
+    JsCallArguments, JsCallExpression, JsCaseClause, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsComputedMemberAssignment, JsConstructorParameters, JsExpressionStatement, JsExtendsClause,
+    JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
     JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
     JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIfStatement,
     JsInitializerClause, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator,
@@ -1205,7 +1207,13 @@ impl TypeData {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let predicate = guard_narrowing_predicate(resolver, scope_id, id);
+                let predicate = assignment_narrowing_source(resolver, id, &name)
+                    .map(|source| {
+                        NarrowingPredicate::Assigned(
+                            resolver.reference_to_resolved_expression(scope_id, &source),
+                        )
+                    })
+                    .or_else(|| guard_narrowing_predicate(resolver, scope_id, id));
                 let reference = TypeReference::from_name(scope_id, name);
                 match predicate {
                     Some(predicate) => {
@@ -3180,6 +3188,72 @@ fn apply_deep_const_reference(
 #[inline]
 fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
+}
+
+/// Returns the right-hand side of the nearest assignment to a reference
+/// that precedes it in the same statement list, if the assignment provably
+/// determines the reference's value.
+///
+/// This is a purely syntactic check. It bails out conservatively when any
+/// statement between the assignment and the reference -- or the reference's
+/// own statement, since loops re-evaluate their heads -- could write the
+/// value again or shadow its binding, and it does not look for assignments
+/// outside the enclosing function.
+fn assignment_narrowing_source(
+    resolver: &mut dyn RawTypeCollector,
+    id: &JsReferenceIdentifier,
+    name_token: &TokenText,
+) -> Option<AnyJsExpression> {
+    let name = name_token.text();
+    let containing_stmt = id
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .take_while(|ancestor| !is_narrowing_boundary(ancestor))
+        .find(|ancestor| {
+            ancestor
+                .parent()
+                .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
+        })?;
+    if narrowing_invalidated_within(resolver, &containing_stmt, name, name_token) {
+        return None;
+    }
+
+    let mut sibling = containing_stmt.prev_sibling();
+    while let Some(stmt) = sibling {
+        if let Some(source) = plain_assignment_rhs(&stmt, name) {
+            // A write within the right-hand side itself, such as a closure
+            // that reassigns the value, could occur after the assignment.
+            return (!narrowing_invalidated_within(resolver, source.syntax(), name, name_token))
+                .then_some(source);
+        }
+        if narrowing_invalidated_within(resolver, &stmt, name, name_token) {
+            return None;
+        }
+        sibling = stmt.prev_sibling();
+    }
+    None
+}
+
+/// Returns the right-hand side of a statement of the form `<name> = <expr>;`.
+fn plain_assignment_rhs(node: &JsSyntaxNode, name: &str) -> Option<AnyJsExpression> {
+    let stmt = JsExpressionStatement::cast_ref(node)?;
+    let expr = stmt.expression().ok()?.omit_parentheses();
+    let AnyJsExpression::JsAssignmentExpression(assignment) = expr else {
+        return None;
+    };
+    if !matches!(assignment.operator(), Ok(JsAssignmentOperator::Assign)) {
+        return None;
+    }
+    let AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsIdentifierAssignment(target)) =
+        assignment.left().ok()?
+    else {
+        return None;
+    };
+    if target.name_token().ok()?.text_trimmed() != name {
+        return None;
+    }
+    assignment.right().ok()
 }
 
 /// Returns the narrowing predicate that the guards enclosing a reference

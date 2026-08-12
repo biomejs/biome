@@ -167,6 +167,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::Narrowed(expression) => {
                 let ty = self.resolve(&expression.ty);
                 let predicate = match &expression.predicate {
+                    RawNarrowingPredicate::Assigned(assigned) => {
+                        InferredNarrowingPredicate::Assigned(self.resolve(assigned))
+                    }
                     RawNarrowingPredicate::Falsy => InferredNarrowingPredicate::Falsy,
                     RawNarrowingPredicate::InstanceOf(guard) => {
                         InferredNarrowingPredicate::InstanceOf(self.resolve(guard))
@@ -2486,6 +2489,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         predicate: &InferredNarrowingPredicate<'db>,
     ) -> InferredTypeData<'db> {
         let narrowed = match predicate {
+            InferredNarrowingPredicate::Assigned(assigned) => self.narrow_to_assigned(*assigned),
             InferredNarrowingPredicate::Falsy => {
                 self.filter_type_to_subset(ty, ConditionalSubset::Falsy)
             }
@@ -2507,6 +2511,18 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         };
         narrowed.unwrap_or(ty)
+    }
+
+    /// Narrows a value to the type it was assigned.
+    ///
+    /// Returns `None` when the assigned type resolves to `Unknown`, so the
+    /// value keeps its declared type.
+    fn narrow_to_assigned(
+        &mut self,
+        assigned: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let assigned = self.resolve_inferred_type(assigned);
+        (assigned != InferredTypeData::Unknown).then_some(assigned)
     }
 
     /// Narrows the union variants of `ty` to those the `leaf` callback
