@@ -136,6 +136,9 @@ pub enum JsReLexContext {
 
     /// Re-lexes an Astro `<!-- -->` comment as comment trivia; a no-op otherwise.
     AstroHtmlComment,
+
+    /// Re-lexes an Astro attribute name as one flat token; a no-op on an empty scan.
+    AstroJsxAttributeName,
 }
 
 /// An extremely fast, lookup table based, lossless ECMAScript lexer
@@ -309,6 +312,7 @@ impl<'src> ReLexer<'src> for JsLexer<'src> {
             JsReLexContext::AstroHtmlComment if self.at_astro_html_comment_start() => {
                 self.consume_astro_html_comment()
             }
+            JsReLexContext::AstroJsxAttributeName => self.re_lex_astro_jsx_attribute_name(),
             _ => self.current(),
         };
 
@@ -417,6 +421,24 @@ impl<'src> JsLexer<'src> {
             JSX_IDENT
         } else {
             self.current_kind
+        }
+    }
+
+    fn re_lex_astro_jsx_attribute_name(&mut self) -> JsSyntaxKind {
+        let start = self.position;
+
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'=' | b'>' | b'/' | b'{' | b'}' | b'<' => break,
+                chr if chr.is_ascii_whitespace() => break,
+                chr => self.advance_byte_or_char(chr),
+            }
+        }
+
+        if self.position == start {
+            self.current_kind
+        } else {
+            JSX_IDENT
         }
     }
 

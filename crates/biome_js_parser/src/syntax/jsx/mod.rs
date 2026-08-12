@@ -672,6 +672,10 @@ impl ParseNodeList for JsxAttributeList {
 }
 
 fn parse_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
+    if is_astro(p) {
+        return parse_astro_jsx_attribute(p);
+    }
+
     if !is_nth_at_identifier_or_keyword(p, 0) {
         return Absent;
     }
@@ -680,6 +684,23 @@ fn parse_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
 
     // SAFETY: Guaranteed to succeed because the parser is at an identifier or keyword
     parse_jsx_name_or_namespace(p).unwrap();
+    let _ = parse_jsx_attribute_initializer_clause(p);
+
+    Present(m.complete(p, JsSyntaxKind::JSX_ATTRIBUTE))
+}
+
+/// An Astro attribute name like `x-on:keyup.enter` is one flat atom, never a namespace.
+fn parse_astro_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
+    p.re_lex(JsReLexContext::AstroJsxAttributeName);
+
+    if !p.at(JSX_IDENT) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let name = p.start();
+    p.bump(JSX_IDENT);
+    name.complete(p, JSX_NAME);
     let _ = parse_jsx_attribute_initializer_clause(p);
 
     Present(m.complete(p, JsSyntaxKind::JSX_ATTRIBUTE))
