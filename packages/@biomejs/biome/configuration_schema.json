@@ -3096,6 +3096,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroSetHtmlDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroSetHtmlDirectiveOptions" }
+			]
+		},
+		"NoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6717,6 +6727,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroSetHtmlDirective": {
+					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroSetHtmlDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBaseToString": {
 					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
@@ -8196,6 +8213,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroSetHtmlDirectiveOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

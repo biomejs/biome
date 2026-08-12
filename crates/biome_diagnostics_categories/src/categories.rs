@@ -200,6 +200,7 @@ define_categories! {
     "lint/correctness/useVueValidVPre": "https://biomejs.dev/linter/rules/use-vue-valid-v-pre",
     "lint/correctness/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
+    "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
