@@ -280,6 +280,7 @@
 	"@lg:flex @sm:flex @md:flex flex",                    // container sizes ascending
 	"flex *:flex **:flex hover:flex",                     // child / descendant variants
 	"@container:flex flex @sm:flex",                      // bare `@container` is not sortable
+	"@:flex flex",                                        // `@` without a size is not sortable
 
 	// ─── variants + important suffix ───────────────────────────────
 	// The important suffix reuses the underlying utility key, so it

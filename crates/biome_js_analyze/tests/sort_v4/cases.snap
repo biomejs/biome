@@ -465,6 +465,9 @@ sorted: flex *:flex **:flex hover:flex
 input:  @container:flex flex @sm:flex
 sorted: @container:flex flex @sm:flex
 ---
+input:  @:flex flex
+sorted: @:flex flex
+---
 input:  p-2! flex!
 sorted: flex! p-2!
 ---
