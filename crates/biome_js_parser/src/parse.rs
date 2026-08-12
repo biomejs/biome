@@ -731,6 +731,50 @@ mod tests {
     }
 
     #[test]
+    fn astro_attribute_name_is_a_single_flat_token() {
+        let parse = parse(
+            "x && <C client:load.foo @click={handler} />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(
+            tree.contains(r#"JSX_IDENT@8..24 "client:load.foo""#),
+            "the full atom should be one token: {tree}"
+        );
+        assert!(tree.contains(r#""@click""#));
+        assert!(!tree.contains("JSX_NAMESPACE_NAME"));
+        assert_eq!(tree.matches("JSX_ATTRIBUTE@").count(), 2);
+    }
+
+    #[test]
+    fn astro_attribute_names_do_not_swallow_the_tag_end() {
+        let parse = parse(
+            "x && <div a=\"1\" is:raw>content</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains(r#""is:raw""#));
+        assert_eq!(tree.matches("JSX_ATTRIBUTE@").count(), 2);
+    }
+
+    #[test]
+    fn at_attribute_name_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <button @click={handler} />",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "`@click` is not a valid JSX name");
+    }
+
+    #[test]
     fn astro_unterminated_html_comment_reports_one_diagnostic() {
         let parse = parse(
             "<a></a><!-- never closed",
