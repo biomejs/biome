@@ -1,0 +1,54 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function precedingCaseTestWrites(x: number | "a") {
+	switch (x) {
+		case ((x = 5), "nope" as any):
+			break;
+		case "a":
+			x;
+			break;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding precedingCaseTestWrites "precedingCaseTestWrites" => sync Function "precedingCaseTestWrites" {
+  accepts: {
+    params: [
+      required x: number | string: a
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string: a
+
+Expression "x" => number | string: a
+
+Expression "(x = 5, \"nope\" as any)" => any
+
+Expression "x = 5" => unknown
+
+Expression "x = 5, \"nope\" as any" => any
+
+Expression "5" => number: 5
+
+Expression "\"nope\"" => string: nope
+
+Expression "\"nope\" as any" => any
+
+Expression "\"a\"" => string: a
+
+Expression "x" => number | string: a
+```
