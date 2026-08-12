@@ -3180,24 +3180,15 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 
 /// Returns the narrowing predicate that the guards enclosing a reference
 /// establish for it, e.g. `Typeof(String)` for `x` inside the consequent of
-/// `if (typeof x === "string")`.
+/// `if (typeof x === "string")`, or `Truthy` inside the consequent of
+/// `if (x)`.
 ///
 /// This is a purely syntactic check, scoped to the enclosing function. A
 /// guard whose consequent declares or assigns a binding with the same name
 /// is ignored, since it no longer says anything about that binding.
 ///
-/// `typeof` guards can nest on the same name:
-///
-/// ```js
-/// if (typeof x === "string") {
-///   if (typeof x === "string") {
-///     x; // both guards agree: narrowed to "string"
-///   }
-///   if (typeof x === "number") {
-///     x; // guards disagree: a value can't be both, so we don't narrow
-///   }
-/// }
-/// ```
+/// Guards can nest on the same name; see [`record_guard_predicate`] for how
+/// the predicates of nested guards combine.
 fn guard_narrowing_predicate(
     resolver: &mut dyn RawTypeCollector,
     id: &JsReferenceIdentifier,
@@ -3211,30 +3202,83 @@ fn guard_narrowing_predicate(
             if if_stmt
                 .consequent()
                 .is_ok_and(|consequent| consequent.syntax() == &child)
-                && let Some(tag) = typeof_guard_tag(&if_stmt, name)
+                && let Some(predicate) = guard_predicate(&if_stmt, name)
                 && !narrowing_invalidated_within(resolver, &child, &name_token)
             {
-                match found {
-                    None => found = Some(tag),
-                    Some(existing) if existing == tag => {}
-                    Some(_) => return None,
-                }
+                record_guard_predicate(&mut found, predicate)?;
             }
         } else if is_narrowing_boundary(&ancestor) {
             break;
         }
         child = ancestor;
     }
-    found.map(NarrowingPredicate::Typeof)
+    found
 }
 
-/// Returns the tag of a `typeof <name> === "<tag>"` test of the given `if`
-/// statement, if it has one.
+/// Records the predicate of the next enclosing guard, keeping the innermost
+/// one.
+///
+/// The innermost guard is the most specific, so an outer guard of another
+/// kind does not replace it:
+///
+/// ```js
+/// if (x) {
+///   if (typeof x === "string") {
+///     x; // narrowed by the `typeof` guard; the truthiness guard adds nothing
+///   }
+/// }
+/// ```
+///
+/// Two `typeof` guards with different tags contradict each other -- no value
+/// satisfies both, so we don't narrow at all rather than pick one
+/// arbitrarily. Returns `None` on such a contradiction so the caller can
+/// bail with `?`.
+fn record_guard_predicate(
+    found: &mut Option<NarrowingPredicate>,
+    predicate: NarrowingPredicate,
+) -> Option<()> {
+    match (&found, &predicate) {
+        (Some(NarrowingPredicate::Typeof(existing)), NarrowingPredicate::Typeof(tag))
+            if existing != tag =>
+        {
+            return None;
+        }
+        (Some(_), _) => {}
+        (None, _) => *found = Some(predicate),
+    }
+    Some(())
+}
+
+/// Returns the predicate that the test of the given `if` statement
+/// establishes for references with the given `name` in its consequent, if
+/// any.
+fn guard_predicate(if_stmt: &JsIfStatement, name: &str) -> Option<NarrowingPredicate> {
+    let test = if_stmt.test().ok()?.omit_parentheses();
+    match &test {
+        // `if (x)`
+        AnyJsExpression::JsIdentifierExpression(_) => {
+            is_reference_to(&test, name).then_some(NarrowingPredicate::Truthy)
+        }
+        // `if (!x)`
+        AnyJsExpression::JsUnaryExpression(unary)
+            if matches!(unary.operator(), Ok(JsUnaryOperator::LogicalNot)) =>
+        {
+            let argument = unary.argument().ok()?.omit_parentheses();
+            is_reference_to(&argument, name).then_some(NarrowingPredicate::Falsy)
+        }
+        // `if (typeof x === "<tag>")`
+        AnyJsExpression::JsBinaryExpression(binary) => {
+            typeof_guard_tag(binary, name).map(NarrowingPredicate::Typeof)
+        }
+        _ => None,
+    }
+}
+
+/// Returns the tag of a `typeof <name> === "<tag>"` comparison, if the given
+/// binary expression is one.
 ///
 /// Handles both operand orders, and treats `==` like `===`.
-fn typeof_guard_tag(if_stmt: &JsIfStatement, name: &str) -> Option<TypeofTag> {
-    let test = if_stmt.test().ok()?.omit_parentheses();
-    let binary = test.as_js_binary_expression()?;
+fn typeof_guard_tag(binary: &JsBinaryExpression, name: &str) -> Option<TypeofTag> {
     if !matches!(
         binary.operator().ok()?,
         JsBinaryOperator::StrictEquality | JsBinaryOperator::Equality
@@ -3253,6 +3297,14 @@ fn typeof_guard_tag(if_stmt: &JsIfStatement, name: &str) -> Option<TypeofTag> {
     }
 }
 
+/// Returns whether `expr` is a reference to a value with the given `name`.
+fn is_reference_to(expr: &AnyJsExpression, name: &str) -> bool {
+    expr.as_js_identifier_expression()
+        .and_then(|identifier| identifier.name().ok())
+        .and_then(|reference| reference.name().ok())
+        .is_some_and(|reference_name| reference_name.text() == name)
+}
+
 /// Returns whether `expr` is a `typeof` expression over a reference with the
 /// given `name`.
 fn is_typeof_of(expr: &AnyJsExpression, name: &str) -> bool {
@@ -3266,11 +3318,7 @@ fn is_typeof_of(expr: &AnyJsExpression, name: &str) -> bool {
         .argument()
         .ok()
         .map(AnyJsExpression::omit_parentheses)
-        .as_ref()
-        .and_then(AnyJsExpression::as_js_identifier_expression)
-        .and_then(|identifier| identifier.name().ok())
-        .and_then(|reference| reference.name().ok())
-        .is_some_and(|reference_name| reference_name.text() == name)
+        .is_some_and(|argument| is_reference_to(&argument, name))
 }
 
 fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {

@@ -2518,6 +2518,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         predicate: &NarrowingPredicate,
     ) -> InferredTypeData<'db> {
         let narrowed = match predicate {
+            NarrowingPredicate::Falsy => self.filter_type_to_subset(ty, ConditionalSubset::Falsy),
+            NarrowingPredicate::Truthy => self.filter_type_to_subset(ty, ConditionalSubset::Truthy),
             NarrowingPredicate::Typeof(tag) => {
                 self.filter_type_to_subset(ty, ConditionalSubset::Typeof(*tag))
             }

@@ -1401,6 +1401,10 @@ pub struct TypeofNarrowedExpression {
 /// Predicate established by a guard, used to narrow the guarded value's type.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum NarrowingPredicate {
+    /// The value is falsy.
+    Falsy,
+    /// The value is truthy.
+    Truthy,
     /// The `typeof` operator evaluates to the given tag for the value.
     Typeof(TypeofTag),
 }

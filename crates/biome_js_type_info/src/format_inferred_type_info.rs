@@ -834,6 +834,8 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
             ),
             Self::Narrowed(expr) => {
                 let predicate = format_with(|f| match &expr.predicate {
+                    NarrowingPredicate::Falsy => write!(f, [token("falsy")]),
+                    NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
                     NarrowingPredicate::Typeof(tag) => write!(
                         f,
                         [&format_args![
