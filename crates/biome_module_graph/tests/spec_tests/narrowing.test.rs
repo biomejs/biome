@@ -223,6 +223,97 @@ export function truthiness(z: "on" | null) {
     assert_inferred_type_snapshot("test_infer_module_types_narrows_truthiness_guards", &db, &fs);
 }
 
+#[test]
+fn test_infer_module_types_narrows_instanceof_guards() {
+    const SOURCE: &str = r#"
+class BaseCls {}
+class DerivedCls extends BaseCls {
+    run(): void {}
+}
+
+export function instances(v: BaseCls, w: number | DerivedCls) {
+    if (v instanceof DerivedCls) {
+        v;
+    }
+    if (w instanceof DerivedCls) {
+        w;
+    }
+}
+
+function WithMixin<T extends new (...args: unknown[]) => object>(base: T) {
+    return class extends base {};
+}
+class MixedCls extends WithMixin(BaseCls) {
+    onlyMixed(): void {}
+}
+class SiblingCls extends BaseCls {
+    onlySibling(): void {}
+}
+
+export function mixins(m: MixedCls | SiblingCls) {
+    if (m instanceof BaseCls) {
+        m;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // An instanceof guard over a base class reference downcasts it, making
+    // the subclass member visible.
+    let downcast_offset = SOURCE.find("v;").expect("downcast reference must exist");
+    let narrowed_to_derived = normalize_type(&db, module, expression_ty_at(downcast_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_derived, "run")
+            .is_some()
+    );
+
+    // An instanceof guard strips union variants that cannot be instances.
+    let union_offset = SOURCE.find("w;").expect("union reference must exist");
+    let narrowed_to_instance = normalize_type(&db, module, expression_ty_at(union_offset));
+    assert!(!contains_inferred_number(&db, narrowed_to_instance));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_instance, "run")
+            .is_some()
+    );
+
+    // A variant whose extends chain contains a mixin call cannot be walked
+    // to a proof, so it must be kept.
+    let mixin_offset = SOURCE.find("m;").expect("mixin reference must exist");
+    let narrowed_with_mixin = normalize_type(&db, module, expression_ty_at(mixin_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_with_mixin, "onlyMixed")
+            .is_some()
+    );
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_with_mixin, "onlySibling")
+            .is_some()
+    );
+
+    assert_inferred_type_snapshot("test_infer_module_types_narrows_instanceof_guards", &db, &fs);
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
 /// reassigns, so narrowing must be declined for it -- and must survive for
 /// the names the branch leaves alone.
