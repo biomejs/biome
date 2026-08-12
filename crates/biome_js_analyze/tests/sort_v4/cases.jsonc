@@ -282,6 +282,43 @@
 	"@container:flex flex @sm:flex",                      // bare `@container` is not sortable
 	"@:flex flex",                                        // `@` without a size is not sortable
 
+	// ─── variant modifiers ─────────────────────────────────────────
+	// Only group/peer compounds and container queries accept a
+	// `/modifier`; a bare variant sorts before its modified forms and
+	// container sizes ignore the modifier, tying with the bare form on
+	// candidate text. A modifier anywhere else invalidates the class.
+	// Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"group-hover/menu:flex group-hover:flex flex",
+	"group-hover/b:flex group-hover/a:flex group-hover/[.5]:flex flex",
+	"peer-checked/foo:flex peer-checked:flex flex",
+	"@sm/main:flex @sm:flex @sm/apple:flex flex",
+	"hover/foo:flex flex",                    // modifier invalid on plain variants
+	"has-hover/5:flex not-hover/5:flex flex", // invalid on has-/not- compounds
+	"min-[600px]/5:flex max-lg/5:flex flex",  // invalid on breakpoints
+
+	// ─── breakpoint and container sizes ────────────────────────────
+	// Sizes compare by unit text first, then magnitude (descending for
+	// `max-*`), so arbitrary pixel sizes group before the rem-valued
+	// named sizes; equal lengths share a rank and the candidate text
+	// decides. A size that can't resolve to a length is invalid.
+
+	"@[400px]:flex @sm:flex flex",
+	"@[400px]/name:flex @[400px]:flex flex",
+	"@min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex flex",
+	"@max-[100px]:flex @max-lg:flex @max-[900px]:flex flex",
+	"@min-[24rem]:flex @sm:flex flex",        // 24rem = @sm, rank shared
+	"min-[40rem]:flex sm:flex flex",          // 40rem = sm, rank shared
+	"min-sm:flex sm:flex flex",
+	"min-[100px]:flex min-[900px]:flex sm:flex flex",
+	"min-abc:flex max-abc:flex @max-abc:flex flex",
+
+	// ─── arbitrary selector text ───────────────────────────────────
+	// Selectors compare with `_` decoded to a space, `\_` to a literal
+	// underscore.
+
+	"[&>*]:flex [&_p]:flex [&.a]:flex flex",
+
 	// ─── variants + important suffix ───────────────────────────────
 	// The important suffix reuses the underlying utility key, so it
 	// composes with variant weight.

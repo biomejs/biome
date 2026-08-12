@@ -468,6 +468,57 @@ sorted: @container:flex flex @sm:flex
 input:  @:flex flex
 sorted: @:flex flex
 ---
+input:  group-hover/menu:flex group-hover:flex flex
+sorted: flex group-hover:flex group-hover/menu:flex
+---
+input:  group-hover/b:flex group-hover/a:flex group-hover/[.5]:flex flex
+sorted: flex group-hover/[.5]:flex group-hover/a:flex group-hover/b:flex
+---
+input:  peer-checked/foo:flex peer-checked:flex flex
+sorted: flex peer-checked:flex peer-checked/foo:flex
+---
+input:  @sm/main:flex @sm:flex @sm/apple:flex flex
+sorted: flex @sm/apple:flex @sm/main:flex @sm:flex
+---
+input:  hover/foo:flex flex
+sorted: hover/foo:flex flex
+---
+input:  has-hover/5:flex not-hover/5:flex flex
+sorted: has-hover/5:flex not-hover/5:flex flex
+---
+input:  min-[600px]/5:flex max-lg/5:flex flex
+sorted: min-[600px]/5:flex max-lg/5:flex flex
+---
+input:  @[400px]:flex @sm:flex flex
+sorted: flex @[400px]:flex @sm:flex
+---
+input:  @[400px]/name:flex @[400px]:flex flex
+sorted: flex @[400px]/name:flex @[400px]:flex
+---
+input:  @min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex flex
+sorted: flex @min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex
+---
+input:  @max-[100px]:flex @max-lg:flex @max-[900px]:flex flex
+sorted: flex @max-[900px]:flex @max-[100px]:flex @max-lg:flex
+---
+input:  @min-[24rem]:flex @sm:flex flex
+sorted: flex @min-[24rem]:flex @sm:flex
+---
+input:  min-[40rem]:flex sm:flex flex
+sorted: flex min-[40rem]:flex sm:flex
+---
+input:  min-sm:flex sm:flex flex
+sorted: flex min-sm:flex sm:flex
+---
+input:  min-[100px]:flex min-[900px]:flex sm:flex flex
+sorted: flex min-[100px]:flex min-[900px]:flex sm:flex
+---
+input:  min-abc:flex max-abc:flex @max-abc:flex flex
+sorted: min-abc:flex max-abc:flex @max-abc:flex flex
+---
+input:  [&>*]:flex [&_p]:flex [&.a]:flex flex
+sorted: flex [&_p]:flex [&.a]:flex [&>*]:flex
+---
 input:  p-2! flex!
 sorted: flex! p-2!
 ---

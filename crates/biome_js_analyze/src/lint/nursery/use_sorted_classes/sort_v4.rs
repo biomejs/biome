@@ -53,9 +53,18 @@ pub fn sort_class_list(root: &TwRoot) -> String {
         .collect();
 
     // `Vec::sort_by` is stable, so Unknown-vs-Unknown comparisons returning
-    // `Equal` keep input order, and Known entries with identical keys
-    // also keep input order.
-    keyed.sort_by(|a, b| compare(&a.0, &b.0));
+    // `Equal` keep input order. Known entries whose keys tie — possible
+    // when variants share a rank (`@sm/main:flex` with `@sm:flex`) —
+    // break the tie on full candidate text, mirroring Tailwind's final
+    // candidate-string comparison.
+    keyed.sort_by(|a, b| {
+        compare(&a.0, &b.0).then_with(|| match (&a.0, &b.0) {
+            (SortKey::Known { .. }, SortKey::Known { .. }) => {
+                TwNameCollator.cmp(a.1.chars(), b.1.chars())
+            }
+            _ => Ordering::Equal,
+        })
+    });
 
     // Sort is in-place; total text length is unchanged. Pre-size the output
     // so chunked emission never re-allocates.
@@ -1187,6 +1196,56 @@ mod tests {
         assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
         // `max-*` is descending, so the larger breakpoint sorts first.
         let keys = classify_all("max-lg:flex max-sm:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+    }
+
+    #[test]
+    fn group_and_peer_scopes_sort_bare_first_then_by_modifier_text() {
+        let keys = classify_all("group-hover:flex group-hover/a:flex group-hover/b:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+        assert_eq!(compare(&keys[1], &keys[2]), Ordering::Less);
+        // A bracketed modifier compares by its inner value (`.5` < `menu`).
+        let keys = classify_all("group-hover/[.5]:flex group-hover/menu:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+    }
+
+    #[test]
+    fn a_modifier_outside_group_peer_and_container_variants_is_unknown() {
+        assert_eq!(classify("hover/foo:flex"), SortKey::Unknown);
+        assert_eq!(classify("has-hover/5:flex"), SortKey::Unknown);
+        assert_eq!(classify("min-[600px]/5:flex"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn an_unresolvable_breakpoint_or_container_size_is_unknown() {
+        assert_eq!(classify("min-abc:flex"), SortKey::Unknown);
+        assert_eq!(classify("@max-abc:flex"), SortKey::Unknown);
+        assert_eq!(classify("min-[var(--w)]:flex"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn variants_resolving_equal_lengths_share_a_rank() {
+        // `min-[40rem]` and `sm` both resolve 40rem, so their keys tie;
+        // `sort_class_list` breaks the tie on candidate text.
+        let keys = classify_all("min-[40rem]:flex sm:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Equal);
+        // A container modifier does not participate in ordering.
+        let keys = classify_all("@sm/main:flex @sm:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Equal);
+    }
+
+    #[test]
+    fn container_sizes_compare_by_unit_text_before_magnitude() {
+        // 400px > 384px (= 24rem), but `px` < `rem` textually, so the
+        // arbitrary pixel size groups before every named (rem) size.
+        let keys = classify_all("@min-[400px]:flex @sm:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+    }
+
+    #[test]
+    fn arbitrary_selectors_compare_with_underscores_decoded() {
+        // `_` decodes to a space, which sorts below `>`.
+        let keys = classify_all("[&_p]:flex [&>p]:flex");
         assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
     }
 
