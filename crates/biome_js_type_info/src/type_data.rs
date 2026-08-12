@@ -1407,6 +1407,8 @@ pub enum NarrowingPredicate {
     InstanceOf(TypeReference),
     /// A member of the value strictly equals a string literal.
     MemberEquals(Box<MemberEqualsPredicate>),
+    /// The value was passed to a call whose callee may be a type predicate.
+    PredicateCall(Box<PredicateCallPredicate>),
     /// The value strictly equals a string literal, with escape sequences
     /// processed.
     StringEquals(Text),
@@ -1414,6 +1416,18 @@ pub enum NarrowingPredicate {
     Truthy,
     /// The `typeof` operator evaluates to the given tag for the value.
     Typeof(TypeofTag),
+}
+
+/// Predicate that a call returned `true` for a value passed as one of its
+/// arguments, narrowing the value when the callee turns out to be a type
+/// predicate, e.g. `isFoo(x)`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct PredicateCallPredicate {
+    /// Reference to the callee.
+    pub callee: TypeReference,
+
+    /// Index of the narrowed value among the call arguments.
+    pub argument_index: usize,
 }
 
 /// Predicate that a member of a value strictly equals a string literal,

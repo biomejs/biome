@@ -559,6 +559,17 @@ impl Format<FormatTypeContext> for TypeofExpression {
                             token("\"")
                         ]]
                     ),
+                    NarrowingPredicate::PredicateCall(predicate) => write!(
+                        f,
+                        [&format_args![
+                            token("predicate"),
+                            space(),
+                            &predicate.callee,
+                            token("["),
+                            text(&predicate.argument_index.to_string(), None),
+                            token("]")
+                        ]]
+                    ),
                     NarrowingPredicate::StringEquals(value) => write!(
                         f,
                         [&format_args![

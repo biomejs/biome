@@ -16,8 +16,8 @@ use biome_js_syntax::{
     AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
-    JsClassMemberList,
+    JsCallExpression, JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsClassMemberList,
     JsComputedMemberAssignment, JsConstructorParameters, JsExtendsClause, JsForInStatement,
     JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
     JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsIdentifierAssignment,
@@ -34,7 +34,7 @@ use biome_js_syntax::{
     TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
     TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, AstNodeList, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
@@ -46,7 +46,8 @@ use crate::{
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
     Interface, Intersection, Literal, MemberEqualsPredicate, Module, NamedFunctionParameter,
     Namespace, NarrowingInvalidationKind, NarrowingPredicate, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
+    PatternFunctionParameter, PredicateCallPredicate, PredicateReturnType, RawTypeCollector,
+    RawTypeId, ReturnType,
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
     TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
@@ -3374,6 +3375,11 @@ fn guard_predicate(
         AnyJsExpression::JsIdentifierExpression(_) => {
             is_reference_to(&test, name).then_some(NarrowingPredicate::Truthy)
         }
+        // `if (isFoo(x))`
+        AnyJsExpression::JsCallExpression(call) => {
+            predicate_call_guard(resolver, scope_id, if_stmt, call, name)
+                .map(|predicate| NarrowingPredicate::PredicateCall(Box::new(predicate)))
+        }
         // `if (x instanceof Class)`
         AnyJsExpression::JsInstanceofExpression(instanceof) => {
             instanceof_guard_class(resolver, scope_id, if_stmt, instanceof, name)
@@ -3483,6 +3489,55 @@ fn string_literal_value(expr: &AnyJsExpression) -> Option<Text> {
         .as_any_js_literal_expression()?
         .as_js_string_literal_expression()?;
     unescaped_text_from_token(literal.value_token())
+}
+
+/// Returns the predicate of an `isFoo(<name>)`-style call, if the given
+/// call expression passes a reference with the given `name` as one of its
+/// arguments.
+///
+/// Whether the callee is an actual type predicate is only decided during
+/// resolution. A spread among the arguments before the reference makes the
+/// mapping from its position to the callee's parameters ambiguous at
+/// runtime, so no predicate is returned then.
+fn predicate_call_guard(
+    resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    if_stmt: &JsIfStatement,
+    call: &JsCallExpression,
+    name: &str,
+) -> Option<PredicateCallPredicate> {
+    let callee = call.callee().ok()?.omit_parentheses();
+    let callee_name = callee
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?
+        .name()
+        .ok()?;
+
+    // The callee reference is resolved from the scope of the narrowed
+    // reference. A same-name binding declared in the consequent would
+    // shadow the callee the guard actually invoked.
+    if if_stmt.consequent().is_ok_and(|consequent| {
+        narrowing_invalidated_within(resolver, consequent.syntax(), &callee_name)
+    }) {
+        return None;
+    }
+
+    let mut argument_index = None;
+    for (index, argument) in call.arguments().ok()?.args().iter().enumerate() {
+        let Ok(AnyJsCallArgument::AnyJsExpression(expression)) = argument else {
+            return None;
+        };
+        if is_reference_to(&expression.omit_parentheses(), name) {
+            argument_index = Some(index);
+            break;
+        }
+    }
+
+    Some(PredicateCallPredicate {
+        callee: TypeReference::from_name(scope_id, callee_name),
+        argument_index: argument_index?,
+    })
 }
 
 /// Returns a reference to the class an `instanceof` guard over a reference

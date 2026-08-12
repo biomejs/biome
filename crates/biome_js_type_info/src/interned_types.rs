@@ -1345,6 +1345,9 @@ impl<'db> TypeDataSlots<'db> {
                 // order.
                 match &expression.predicate {
                     NarrowingPredicate::InstanceOf(guard) => self.slots.push(*guard),
+                    NarrowingPredicate::PredicateCall(predicate) => {
+                        self.slots.push(predicate.callee);
+                    }
                     NarrowingPredicate::Falsy
                     | NarrowingPredicate::MemberEquals(_)
                     | NarrowingPredicate::StringEquals(_)
@@ -1765,6 +1768,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
                         NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
                         NarrowingPredicate::MemberEquals(predicate) => {
                             NarrowingPredicate::MemberEquals(predicate.clone())
+                        }
+                        NarrowingPredicate::PredicateCall(predicate) => {
+                            NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                                callee: self.take_type()?,
+                                argument_index: predicate.argument_index,
+                            })
                         }
                         NarrowingPredicate::StringEquals(value) => {
                             NarrowingPredicate::StringEquals(value.clone())
@@ -2188,6 +2197,18 @@ pub struct TypeofNarrowedExpression<'db> {
     pub predicate: NarrowingPredicate<'db>,
 }
 
+/// Predicate that a call returned `true` for a value passed as one of its
+/// arguments, narrowing the value when the callee turns out to be a type
+/// predicate, e.g. `isFoo(x)`.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct PredicateCallPredicate<'db> {
+    /// Reference to the callee.
+    pub callee: TypeData<'db>,
+
+    /// Index of the narrowed value among the call arguments.
+    pub argument_index: usize,
+}
+
 /// Predicate established by a guard, used to narrow the guarded value's type.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub enum NarrowingPredicate<'db> {
@@ -2197,6 +2218,8 @@ pub enum NarrowingPredicate<'db> {
     InstanceOf(TypeData<'db>),
     /// A member of the value strictly equals a string literal.
     MemberEquals(raw::MemberEqualsPredicate),
+    /// The value was passed to a call whose callee may be a type predicate.
+    PredicateCall(PredicateCallPredicate<'db>),
     /// The value strictly equals a string literal, with escape sequences
     /// processed.
     StringEquals(Text),
@@ -2722,6 +2745,12 @@ fn convert_typeof_expression<'db>(
                     }
                     raw::NarrowingPredicate::MemberEquals(predicate) => {
                         NarrowingPredicate::MemberEquals(predicate.as_ref().clone())
+                    }
+                    raw::NarrowingPredicate::PredicateCall(predicate) => {
+                        NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                            callee: resolve_reference(&predicate.callee),
+                            argument_index: predicate.argument_index,
+                        })
                     }
                     raw::NarrowingPredicate::StringEquals(value) => {
                         NarrowingPredicate::StringEquals(value.clone())

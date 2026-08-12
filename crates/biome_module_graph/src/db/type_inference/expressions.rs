@@ -20,13 +20,15 @@ use biome_js_type_info::{
     global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
-        InternedClass as InferredClass, InternedConstructor as InferredConstructor,
-        InternedFunction as InferredFunction,
+        FunctionParameter as InferredFunctionParameter, InternedClass as InferredClass,
+        InternedConstructor as InferredConstructor, InternedFunction as InferredFunction,
         InternedGenericTypeParameter as InferredGenericTypeParameter,
         InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
         Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
         NamedFunctionParameter as InferredNamedFunctionParameter,
-        NarrowingPredicate as InferredNarrowingPredicate, ReturnType as InferredReturnType,
+        NarrowingPredicate as InferredNarrowingPredicate,
+        PredicateCallPredicate as InferredPredicateCallPredicate,
+        ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
@@ -173,6 +175,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                     RawNarrowingPredicate::MemberEquals(predicate) => {
                         InferredNarrowingPredicate::MemberEquals(predicate.as_ref().clone())
+                    }
+                    RawNarrowingPredicate::PredicateCall(predicate) => {
+                        InferredNarrowingPredicate::PredicateCall(InferredPredicateCallPredicate {
+                            callee: self.resolve(&predicate.callee),
+                            argument_index: predicate.argument_index,
+                        })
                     }
                     RawNarrowingPredicate::StringEquals(value) => {
                         InferredNarrowingPredicate::StringEquals(value.clone())
@@ -2542,6 +2550,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredNarrowingPredicate::MemberEquals(predicate) => {
                 self.narrow_by_member_equals(ty, predicate)
             }
+            InferredNarrowingPredicate::PredicateCall(predicate) => {
+                self.narrow_by_predicate_call(predicate)
+            }
             InferredNarrowingPredicate::StringEquals(value) => {
                 self.narrow_by_string_equals(ty, value)
             }
@@ -2695,6 +2706,46 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredLiteral::Number(_)
             | InferredLiteral::Object(_)
             | InferredLiteral::RegExp(_) => false,
+        }
+    }
+
+    /// Narrows a value passed as an argument to a call, to the type the
+    /// callee's type predicate establishes for it.
+    ///
+    /// This replaces the value's declared type rather than intersecting
+    /// with it; the predicate's type is taken at face value.
+    ///
+    /// Returns `None` if the callee does not turn out to be a type
+    /// predicate over the parameter in the position the value was passed
+    /// at.
+    fn narrow_by_predicate_call(
+        &mut self,
+        predicate: &InferredPredicateCallPredicate<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let callee = self.resolve_inferred_type(predicate.callee);
+        let function = callee.callable_function(self.db)?;
+        let InferredReturnType::Predicate(predicate_return) = function.return_type(self.db) else {
+            return None;
+        };
+
+        let parameter = function.parameters(self.db).get(predicate.argument_index)?;
+        let InferredFunctionParameter::Named(parameter) = parameter else {
+            return None;
+        };
+        if parameter.is_rest || parameter.name != predicate_return.parameter_name {
+            return None;
+        }
+
+        // A value satisfying the predicate is an instance of its type.
+        let target = self.resolve_inferred_type(predicate_return.ty);
+        if let InferredTypeData::InstanceOf(_) = target {
+            Some(target)
+        } else {
+            Some(InferredTypeData::instance_of(
+                self.db,
+                target,
+                Box::default(),
+            ))
         }
     }
 
