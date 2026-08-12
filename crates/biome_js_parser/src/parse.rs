@@ -522,6 +522,17 @@ mod tests {
     }
 
     #[test]
+    fn astro_bare_gt_is_jsx_text() {
+        let parse = parse(
+            "x && <div>a > b</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+        assert_eq!(parse.diagnostics().len(), 0, "{:?}", parse.diagnostics());
+        assert!(parse.syntax().to_string().contains("a > b"));
+    }
+
+    #[test]
     fn astro_void_element_is_self_closing_without_slash() {
         let parse = parse(
             "cond && <br>",
