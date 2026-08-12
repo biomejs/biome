@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+<!-- lead --> <a></a>
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsxTagExpression {
+        tag: JsxElement {
+            opening_element: JsxOpeningElement {
+                l_angle_token: L_ANGLE@0..15 "<" [Comments("<!-- lead -->"), Whitespace(" ")] [],
+                name: JsxName {
+                    value_token: JSX_IDENT@15..16 "a" [] [],
+                },
+                type_arguments: missing (optional),
+                attributes: JsxAttributeList [],
+                r_angle_token: R_ANGLE@16..17 ">" [] [],
+            },
+            children: JsxChildList [],
+            closing_element: JsxClosingElement {
+                l_angle_token: L_ANGLE@17..18 "<" [] [],
+                slash_token: SLASH@18..19 "/" [] [],
+                name: JsxName {
+                    value_token: JSX_IDENT@19..20 "a" [] [],
+                },
+                r_angle_token: R_ANGLE@20..21 ">" [] [],
+            },
+        },
+    },
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..21
+  0: JSX_TAG_EXPRESSION@0..21
+    0: JSX_ELEMENT@0..21
+      0: JSX_OPENING_ELEMENT@0..17
+        0: L_ANGLE@0..15 "<" [Comments("<!-- lead -->"), Whitespace(" ")] []
+        1: JSX_NAME@15..16
+          0: JSX_IDENT@15..16 "a" [] []
+        2: (empty)
+        3: JSX_ATTRIBUTE_LIST@16..16
+        4: R_ANGLE@16..17 ">" [] []
+      1: JSX_CHILD_LIST@17..17
+      2: JSX_CLOSING_ELEMENT@17..21
+        0: L_ANGLE@17..18 "<" [] []
+        1: SLASH@18..19 "/" [] []
+        2: JSX_NAME@19..20
+          0: JSX_IDENT@19..20 "a" [] []
+        3: R_ANGLE@20..21 ">" [] []
+  1: EOF@21..21 "" [] []
+
+```

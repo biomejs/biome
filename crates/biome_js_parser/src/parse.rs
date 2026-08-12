@@ -850,7 +850,9 @@ mod tests {
             .expect("an attribute initializer");
         assert!(matches!(
             clause.value(),
-            Ok(biome_js_syntax::AnyJsxAttributeValue::JsTemplateExpression(_))
+            Ok(biome_js_syntax::AnyJsxAttributeValue::JsTemplateExpression(
+                _
+            ))
         ));
     }
 
@@ -951,4 +953,67 @@ mod tests {
         assert!(!parse.has_errors(), "`{{ }}` renders nothing in Astro");
     }
 
+}
+
+#[cfg(test)]
+mod astro_raw_and_comment_edges {
+    use super::*;
+    use crate::JsParserOptions;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    fn astro_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        })
+    }
+
+    fn assert_clean(body: &str) -> String {
+        let parse = parse(body, astro_source(), JsParserOptions::default());
+        assert!(
+            parse.diagnostics().is_empty(),
+            "{body:?}: {:?}",
+            parse.diagnostics()
+        );
+        format!("{:#?}", parse.syntax())
+    }
+
+    #[test]
+    fn is_raw_children_are_raw_text() {
+        let tree = assert_clean("x && <div is:raw>{not js} < & oops</div>");
+        assert!(tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+        assert!(tree.contains("{not js} < & oops"), "{tree}");
+    }
+
+    #[test]
+    fn is_raw_ends_at_the_first_matching_closing_tag() {
+        let tree = assert_clean("x && <div is:raw><span></div>");
+        assert!(tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+        assert!(tree.contains("<span>"), "{tree}");
+    }
+
+    #[test]
+    fn is_raw_component_closing_tag_is_case_sensitive() {
+        let tree = assert_clean("x && <Card is:raw></card></Card>");
+        assert!(tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+        assert!(tree.contains("</card>"), "{tree}");
+    }
+
+    #[test]
+    fn comment_only_expression_body_parses() {
+        assert_clean("<!-- only a comment -->");
+        let parse = parse(
+            "<!-- only a comment -->",
+            astro_source(),
+            JsParserOptions::default(),
+        );
+        let last = parse.syntax().last_token().unwrap();
+        assert_eq!(last.text_trimmed(), "", "comment leaked into EOF text");
+    }
+
+    #[test]
+    fn comment_before_the_expression_parses() {
+        let tree = assert_clean("<!-- lead --> <a></a>");
+        assert!(tree.contains("<!-- lead -->"), "{tree}");
+    }
 }
