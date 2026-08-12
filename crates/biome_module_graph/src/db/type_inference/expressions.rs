@@ -16,8 +16,7 @@ use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
     Literal as RawLiteral, MemberEqualsPredicate, NarrowingPredicate as RawNarrowingPredicate,
     Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
-    TypeofExpression as RawTypeofExpression, TypeofTag,
-    global_type_id_for_qualifier, global_types,
+    TypeofExpression as RawTypeofExpression, TypeofTag, global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
         FunctionParameter as InferredFunctionParameter, InternedClass as InferredClass,
@@ -27,8 +26,7 @@ use biome_js_type_info::{
         Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
         NamedFunctionParameter as InferredNamedFunctionParameter,
         NarrowingPredicate as InferredNarrowingPredicate,
-        PredicateCallPredicate as InferredPredicateCallPredicate,
-        ReturnType as InferredReturnType,
+        PredicateCallPredicate as InferredPredicateCallPredicate, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
@@ -2859,8 +2857,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             // absent.
             return true;
         };
-        let string_instance =
-            InferredTypeData::instance_of(self.db, string_class, Box::default());
+        let string_instance = InferredTypeData::instance_of(self.db, string_class, Box::default());
         for member in members {
             if member.kind.is_static() || member.kind.is_constructor() {
                 continue;
@@ -2893,7 +2890,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         ty: InferredTypeData<'db>,
         guard: InferredTypeData<'db>,
     ) -> Option<InferredTypeData<'db>> {
-        let guard = self.resolve_inferred_type(guard).expand_canonical_global(self.db);
+        let guard = self
+            .resolve_inferred_type(guard)
+            .expand_canonical_global(self.db);
         let InferredTypeData::Class(guard_class) = guard else {
             return None;
         };
@@ -3021,7 +3020,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeofExpression(_)
             | InferredTypeData::TypeofType(_)
             | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::InstanceOf(_)
             | InferredTypeData::AnyKeyword
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::ThisKeyword
