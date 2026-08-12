@@ -723,6 +723,65 @@ mod tests {
     }
 
     #[test]
+    fn astro_html_comment_is_trivia_in_jsx_children() {
+        let parse = parse(
+            "x && <div>a<!-- c -->b</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(
+            tree.contains(r#"Comments("<!-- c -->")"#),
+            "the comment should be a trivia piece: {tree}"
+        );
+        assert_eq!(tree.matches("JSX_TEXT@").count(), 2);
+    }
+
+    #[test]
+    fn astro_html_comment_between_implicit_fragment_siblings() {
+        let parse = parse(
+            "cond && <a></a><!-- c --><b></b>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains(r#"Comments("<!-- c -->")"#));
+        assert_eq!(tree.matches("JSX_FRAGMENT@").count(), 1);
+        assert_eq!(tree.matches("JSX_ELEMENT@").count(), 2);
+    }
+
+    #[test]
+    fn astro_unterminated_html_comment_reports_one_diagnostic() {
+        let parse = parse(
+            "<a></a><!-- never closed",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert_eq!(
+            parse.diagnostics().len(),
+            1,
+            "got: {:?}",
+            parse.diagnostics()
+        );
+    }
+
+    #[test]
+    fn html_comment_in_jsx_children_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <div>a<!-- c -->b</div>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX has no HTML comments");
+    }
+
+    #[test]
     fn adjacent_siblings_are_an_error_outside_astro() {
         let parse = parse(
             "options.map(() => <div /> <span />)",

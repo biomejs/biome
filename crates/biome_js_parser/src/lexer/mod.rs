@@ -67,8 +67,9 @@ pub enum JsLexContext {
     /// - JsxText
     /// - `<` end of the current element, or start of a new element
     /// - expression start: `{`
+    /// - Comment trivia for `<!-- -->` when `astro` is `true`
     /// - EOF
-    JsxChild,
+    JsxChild { astro: bool },
 
     /// Lexes a JSX Attribute value. Calls into normal lex token if positioned at anything
     /// that isn't `'` or `"`.
@@ -131,7 +132,10 @@ pub enum JsReLexContext {
     JsxIdentifier,
 
     /// See [JsLexContext::JsxChild]
-    JsxChild,
+    JsxChild { astro: bool },
+
+    /// Re-lexes an Astro `<!-- -->` comment as comment trivia; a no-op otherwise.
+    AstroHtmlComment,
 }
 
 /// An extremely fast, lookup table based, lossless ECMAScript lexer
@@ -205,7 +209,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
             match context {
                 JsLexContext::Regular => self.lex_token(),
                 JsLexContext::TemplateElement { tagged } => self.lex_template(tagged),
-                JsLexContext::JsxChild => self.lex_jsx_child_token(),
+                JsLexContext::JsxChild { astro } => self.lex_jsx_child_token(astro),
                 JsLexContext::JsxAttributeValue => self.lex_jsx_attribute_value(),
                 JsLexContext::JsxRawText(element) => self.lex_jsx_raw_text_token(element),
             }
@@ -301,7 +305,10 @@ impl<'src> ReLexer<'src> for JsLexer<'src> {
             JsReLexContext::BinaryOperator => self.re_lex_binary_operator(),
             JsReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
             JsReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(old_position),
-            JsReLexContext::JsxChild if !self.is_eof() => self.lex_jsx_child_token(),
+            JsReLexContext::JsxChild { astro } if !self.is_eof() => self.lex_jsx_child_token(astro),
+            JsReLexContext::AstroHtmlComment if self.at_astro_html_comment_start() => {
+                self.consume_astro_html_comment()
+            }
             _ => self.current(),
         };
 
@@ -445,13 +452,57 @@ impl<'src> JsLexer<'src> {
         JSX_TEXT_LITERAL
     }
 
-    fn lex_jsx_child_token(&mut self) -> JsSyntaxKind {
+    fn at_astro_html_comment_start(&self) -> bool {
+        self.source.as_bytes()[self.position..].starts_with(b"<!--")
+    }
+
+    fn consume_astro_html_comment(&mut self) -> JsSyntaxKind {
+        let start = self.position;
+        self.advance(4);
+
+        while let Some(chr) = self.current_byte() {
+            if chr == b'-' && self.source.as_bytes()[self.position..].starts_with(b"-->") {
+                self.advance(3);
+                return MULTILINE_COMMENT;
+            }
+            if chr.is_ascii() {
+                if let b'\r' | b'\n' = chr {
+                    self.after_newline = true;
+                }
+                self.advance(1);
+            } else {
+                let chr = self.current_char_unchecked();
+                if is_linebreak(chr) {
+                    self.after_newline = true;
+                }
+                self.advance(chr.len_utf8());
+            }
+        }
+
+        let err = ParseDiagnostic::new(
+            "unterminated HTML comment",
+            self.position..self.position + 1,
+        )
+        .with_detail(
+            self.position..self.position + 1,
+            "... but the file ends here",
+        )
+        .with_detail(start..start + 4, "A comment starts here");
+        self.push_diagnostic(err);
+
+        MULTILINE_COMMENT
+    }
+
+    fn lex_jsx_child_token(&mut self, astro: bool) -> JsSyntaxKind {
         debug_assert!(!self.is_eof());
 
         // SAFETY: `lex_token` only calls this method if it isn't passed the EOF
         let chr = unsafe { self.current_unchecked() };
 
         match chr {
+            b'<' if astro && self.at_astro_html_comment_start() => {
+                self.consume_astro_html_comment()
+            }
             // `<`: empty jsx text, directly followed by another element or closing element
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
