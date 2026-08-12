@@ -75,13 +75,18 @@ pub struct CssClassReference {
 pub struct CssPropertyDefinition {
     /// The CSS or HTML-like document that contains the definition.
     pub module_path: Utf8PathBuf,
-    /// The absolute source range of the complete `@property` rule.
+    /// The source range of the complete `@property` rule in the CSS module.
     pub range: TextRange,
 }
 
+/// An authored `@property` registration in a CSS module.
+///
+/// Registrations with duplicate names remain distinct entries.
 #[derive(Clone, Debug)]
 pub struct CssPropertyRegistration {
+    /// The registered custom property name token.
     pub name: TokenText,
+    /// The absolute source range of the complete `@property` rule.
     pub range: TextRange,
 }
 
@@ -180,6 +185,7 @@ pub struct CssModuleInfoInner {
     /// `TextRange` of the class selector in the source file.
     pub classes: IndexMap<TextRange, TokenText>,
 
+    /// Authored `@property` registrations in source order, including duplicates.
     pub property_registrations: Vec<CssPropertyRegistration>,
 }
 

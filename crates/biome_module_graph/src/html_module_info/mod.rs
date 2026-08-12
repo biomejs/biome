@@ -40,10 +40,14 @@ pub enum HtmlEmbeddedContent {
     Js(AnyJsRoot, TextSize),
 }
 
+/// An authored `@property` registration from an embedded style block.
 #[derive(Clone, Debug)]
 pub struct HtmlCssPropertyRegistration {
+    /// The registered custom property name token.
     pub name: TokenText,
+    /// The absolute range of the complete `@property` rule in the host document.
     pub range: TextRange,
+    /// The style block's component-local, global, or unknown scope.
     pub applicability: EmbeddingStyleApplicability,
 }
 
@@ -141,6 +145,10 @@ pub struct HtmlModuleInfoInner {
     /// Each `TokenText` represents a single class name (e.g., "header" from `.header`).
     pub style_classes: IndexSet<CssClassDefinition>,
 
+    /// Authored registrations from embedded style blocks in source order.
+    ///
+    /// Duplicate names remain distinct, and every range uses host-document
+    /// coordinates.
     pub property_registrations: Vec<HtmlCssPropertyRegistration>,
 
     /// CSS class references from `class="..."` attributes within this HTML file.

@@ -1063,8 +1063,10 @@ pub struct ParsedSnippet {
     /// This is used for offset-aware parsing.
     pub content_offset: TextSize,
 
-    /// The file source of the document. It's `None` for snippets that are newly parsed.
-    /// The workspace is in charge of updating it once it's a safe writing mode.
+    /// The index of the snippet's document source.
+    ///
+    /// Newly parsed snippets use `None` until the workspace registers their
+    /// document source.
     pub document_source_index: Option<usize>,
 }
 
@@ -1081,6 +1083,15 @@ impl ParsedSnippet {
     pub fn parsed(&self) -> &AnyParse {
         &self.parsed
     }
+
+    /// Returns the registered document source index.
+    ///
+    /// Callers must register the snippet's document source before invoking this
+    /// method.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `document_source_index` is `None`.
     pub fn document_source_index(&self) -> usize {
         self.document_source_index
             .expect("The workspace must register this index.")

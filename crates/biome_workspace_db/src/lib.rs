@@ -32,7 +32,7 @@ pub enum ParsedSourceUpdateMode {
 #[salsa::db]
 #[derive(Clone)]
 pub struct WorkspaceDb {
-    /// It maps a file path to its corresponding parsed version.
+    /// Maps file paths to their Salsa input handles.
     files: Arc<HashMap<Utf8PathBuf, FileSource>>,
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
@@ -72,7 +72,7 @@ impl Default for WorkspaceDb {
 /// runs. This type is what makes that possible.
 #[derive(Clone)]
 pub struct WorkspaceDbData {
-    /// It maps a file path to its corresponding parsed version.
+    /// Maps file paths to their Salsa input handles.
     files: Arc<HashMap<Utf8PathBuf, FileSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,

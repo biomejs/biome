@@ -18,7 +18,7 @@ use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
 use biome_js_syntax::{JsLanguage, TextRange, TextSize};
 use biome_languages::javascript::JsEmbeddingKind;
-use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
@@ -108,7 +108,7 @@ impl ExtensionHandler for VueFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_text: Some(parse_text),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -159,21 +159,25 @@ fn parse_vue_file<'db>(db: &'db dyn Db, input: ParseVueInput<'db>) -> AnyParse {
     parse_js(script, file_source, JsParserOptions::default()).into()
 }
 
-fn parse(biome_path: &BiomePath, _settings: &SettingsWithEditor, db: WorkspaceDb) -> ParseResult {
-    let file = db
-        .get_file(biome_path.as_path())
-        .expect("file must exist in workspace");
+fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, _) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
     let file_db: &dyn Db = &db;
     let file_source = VueFileHandler::file_source(file.content(file_db));
     let any_parse = parse_vue_file(file_db, ParseVueInput::new(file_db, file));
 
-    ParseResult {
+    Ok(ParseResult {
         any_parse,
         language: Some(file_source.into()),
-    }
+    })
 }
 
-fn parse_text(
+fn parse_detached(
     _biome_path: &BiomePath,
     _file_source: DocumentFileSource,
     code: &str,
@@ -196,7 +200,7 @@ fn parse_text(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
