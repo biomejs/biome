@@ -72,8 +72,8 @@ pub enum JsLexContext {
     JsxChild { astro: bool },
 
     /// Lexes a JSX Attribute value. Calls into normal lex token if positioned at anything
-    /// that isn't `'` or `"`.
-    JsxAttributeValue,
+    /// that isn't `'` or `"`, or an unquoted value when `astro` is `true`.
+    JsxAttributeValue { astro: bool },
 
     /// Lexes the content of an Astro `<script>` or `<style>` written inside a
     /// template expression, where a `{` opens no expression and a `<` starts no
@@ -213,7 +213,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
                 JsLexContext::Regular => self.lex_token(),
                 JsLexContext::TemplateElement { tagged } => self.lex_template(tagged),
                 JsLexContext::JsxChild { astro } => self.lex_jsx_child_token(astro),
-                JsLexContext::JsxAttributeValue => self.lex_jsx_attribute_value(),
+                JsLexContext::JsxAttributeValue { astro } => self.lex_jsx_attribute_value(astro),
                 JsLexContext::JsxRawText(element) => self.lex_jsx_raw_text_token(element),
             }
         };
@@ -567,7 +567,7 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    fn lex_jsx_attribute_value(&mut self) -> JsSyntaxKind {
+    fn lex_jsx_attribute_value(&mut self, astro: bool) -> JsSyntaxKind {
         debug_assert!(!self.is_eof());
 
         // Safety: Guaranteed because we aren't at the end of the file
@@ -581,8 +581,27 @@ impl<'src> JsLexer<'src> {
                     ERROR_TOKEN
                 }
             }
+            _ if astro
+                && !matches!(chr, b'{' | b'`' | b'<' | b'>' | b'}')
+                && !chr.is_ascii_whitespace() =>
+            {
+                self.consume_astro_unquoted_attribute_value()
+            }
             _ => self.lex_token(),
         }
+    }
+
+    /// `/` does not terminate the value: HTML5 reads `value=4/>` as `4/`.
+    fn consume_astro_unquoted_attribute_value(&mut self) -> JsSyntaxKind {
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'>' | b'{' | b'}' | b'<' => break,
+                chr if chr.is_ascii_whitespace() => break,
+                chr => self.advance_byte_or_char(chr),
+            }
+        }
+
+        JSX_STRING_LITERAL
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
