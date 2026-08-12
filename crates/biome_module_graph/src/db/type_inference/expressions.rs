@@ -2249,22 +2249,34 @@ impl<'db> ResolutionCtx<'db, '_> {
         subset: ConditionalSubset,
     ) -> Option<InferredTypeData<'db>> {
         let types = self.collect_union_leaves(ty, |ctx, ty| {
+            let action = ctx.filter_action(ty, subset);
+            let (FilterAction::Retained, InferredTypeData::InstanceOf(instance)) = (&action, ty)
+            else {
+                return action;
+            };
+
             // An instance classifies by the type it is an instance of, not by
-            // the instance type itself, which carries no tag of its own.
-            if let InferredTypeData::InstanceOf(instance) = ty
-                && let ConditionalSubset::Typeof(tag) = subset
-            {
-                let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
-                return match ctx.instance_typeof_tag(target) {
+            // the instance type itself, which carries neither a tag nor a
+            // truthiness of its own.
+            let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
+            match subset {
+                ConditionalSubset::Typeof(tag) => match ctx.instance_typeof_tag(target) {
                     Some(known_tag) if known_tag == tag => FilterAction::Retained,
                     Some(_) => FilterAction::Stripped,
                     // We cannot determine the tag statically, so we cannot
                     // rule the type out.
                     None => FilterAction::Retained,
-                };
+                },
+                ConditionalSubset::Falsy
+                | ConditionalSubset::Truthy
+                | ConditionalSubset::NonNullish => {
+                    if ctx.instance_excluded_from_subset(target, subset) {
+                        FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
+                    }
+                }
             }
-
-            ctx.filter_action(ty, subset)
         })?;
 
         match subset {
@@ -3098,6 +3110,30 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         ExtendsChainLookup::Unknown
+    }
+
+    /// Returns whether instances of the given `target` type provably fall
+    /// outside the given `subset`.
+    ///
+    /// The conditional class of an instance comes from its target: instances
+    /// of a truthy target, such as a class or an interface, are objects that
+    /// can never be falsy. Targets without a conditional class, such as
+    /// generic type parameters, exclude nothing.
+    fn instance_excluded_from_subset(
+        &self,
+        target: InferredTypeData<'db>,
+        subset: ConditionalSubset,
+    ) -> bool {
+        let target = target.expand_canonical_global(self.db);
+        let Some(conditional) = target.conditional_type_shallow(self.db) else {
+            return false;
+        };
+        match subset {
+            ConditionalSubset::Falsy => conditional.is_truthy(),
+            ConditionalSubset::Truthy => conditional.is_falsy(),
+            ConditionalSubset::NonNullish => conditional.is_nullish(),
+            ConditionalSubset::Typeof(_) => false,
+        }
     }
 
     /// Returns the tag the `typeof` operator evaluates to for instances of

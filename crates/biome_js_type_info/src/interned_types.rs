@@ -541,13 +541,17 @@ impl<'db> TypeData<'db> {
             | Self::ThisKeyword
             | Self::Unknown
             | Self::UnknownKeyword => Some(ConditionalType::Anything),
-            Self::BigInt | Self::Boolean | Self::Interface(_) | Self::Number | Self::String => {
+            Self::BigInt | Self::Boolean | Self::Number | Self::String => {
                 Some(ConditionalType::NonNullish)
             }
+            // Following TypeScript's narrowing semantics, a value of an
+            // interface type counts as an object, even though a primitive
+            // could structurally satisfy the interface.
             Self::Class(_)
             | Self::Constructor(_)
             | Self::Function(_)
             | Self::Global
+            | Self::Interface(_)
             | Self::Module(_)
             | Self::Namespace(_)
             | Self::Object(_)
