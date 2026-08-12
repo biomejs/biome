@@ -107,6 +107,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
         matches!(
             self,
             CSS_BOGUS
+                | CSS_BOGUS_DECLARATION
                 | CSS_BOGUS_RULE
                 | CSS_BOGUS_SELECTOR
                 | CSS_BOGUS_SUB_SELECTOR
