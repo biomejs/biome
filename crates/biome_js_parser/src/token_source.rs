@@ -101,14 +101,17 @@ impl<'l> JsTokenSource<'l> {
 
         let mut kind = self.lexer.re_lex(mode);
         // Astro HTML comments re-lex into trivia, which the parser must never see as current.
-        let mut trailing = self.preceding_token_exists() && !self.lexer.has_preceding_line_break();
-        while let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) {
-            if trivia_kind.is_newline() {
-                trailing = false;
+        if TriviaPieceKind::try_from(kind).is_ok() {
+            let mut trailing =
+                self.preceding_token_exists() && !self.lexer.has_preceding_line_break();
+            while let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) {
+                if trivia_kind.is_newline() {
+                    trailing = false;
+                }
+                self.trivia_list
+                    .push(Trivia::new(trivia_kind, self.current_range(), trailing));
+                kind = self.lexer.next_token(continuation);
             }
-            self.trivia_list
-                .push(Trivia::new(trivia_kind, self.current_range(), trailing));
-            kind = self.lexer.next_token(continuation);
         }
 
         kind
