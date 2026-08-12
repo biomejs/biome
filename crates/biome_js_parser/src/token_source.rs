@@ -76,7 +76,24 @@ impl<'l> JsTokenSource<'l> {
     }
 
     pub fn re_lex(&mut self, mode: JsReLexContext) -> JsSyntaxKind {
-        self.lexer.re_lex(mode)
+        let continuation = match mode {
+            JsReLexContext::JsxChild { astro } => JsLexContext::JsxChild { astro },
+            _ => JsLexContext::Regular,
+        };
+
+        let mut kind = self.lexer.re_lex(mode);
+        // Astro HTML comments re-lex into trivia, which the parser must never see as current.
+        let mut trailing = !self.lexer.has_preceding_line_break();
+        while let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) {
+            if trivia_kind.is_newline() {
+                trailing = false;
+            }
+            self.trivia_list
+                .push(Trivia::new(trivia_kind, self.current_range(), trailing));
+            kind = self.lexer.next_token(continuation);
+        }
+
+        kind
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
