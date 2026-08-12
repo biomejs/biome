@@ -799,6 +799,53 @@ mod tests {
     }
 
     #[test]
+    fn astro_unquoted_attribute_value_is_a_jsx_string_without_quotes() {
+        use biome_rowan::AstNode;
+
+        let parse = parse(
+            "x && <div class=foo />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let value = parse
+            .syntax()
+            .descendants()
+            .find_map(biome_js_syntax::JsxString::cast)
+            .expect("a JsxString attribute value");
+        let token = value.value_token().unwrap();
+        assert_eq!(token.text_trimmed(), "foo");
+        assert_eq!(biome_js_syntax::inner_string_text(&token).text(), "foo");
+    }
+
+    #[test]
+    fn astro_unquoted_attribute_value_keeps_a_trailing_slash() {
+        let parse = parse(
+            "x && <input value=4/>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        assert!(
+            format!("{:#?}", parse.syntax()).contains(r#"JSX_STRING_LITERAL@18..20 "4/""#),
+            "`/` is part of the value"
+        );
+    }
+
+    #[test]
+    fn unquoted_attribute_value_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <div class=foo />",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX requires quoted attribute values");
+    }
+
+    #[test]
     fn astro_unterminated_html_comment_reports_one_diagnostic() {
         let parse = parse(
             "<a></a><!-- never closed",

@@ -770,7 +770,7 @@ fn parse_jsx_attribute_initializer_clause(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T![=], JsLexContext::JsxAttributeValue);
+    p.bump_with_context(T![=], JsLexContext::JsxAttributeValue { astro: is_astro(p) });
 
     // test_err jsx jsx_element_attribute_missing_value
     // function f() {
