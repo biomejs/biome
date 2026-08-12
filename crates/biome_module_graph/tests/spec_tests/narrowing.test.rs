@@ -570,6 +570,91 @@ export function precedingCaseTestWrites(x: number | "a") {
     );
 }
 
+#[test]
+fn test_infer_module_types_narrows_predicate_call_guards() {
+    const SOURCE: &str = r#"
+type Pred = { pr: string };
+
+function isPred(value: unknown): value is Pred {
+    return typeof value === "object" && value !== null;
+}
+
+export function predicates(t: unknown) {
+    if (isPred(t)) {
+        t;
+    }
+}
+
+function isSecond(first: unknown, value: unknown): value is Pred {
+    return typeof value === "object" && value !== null;
+}
+
+export function wrongPosition(w: unknown) {
+    if (isSecond(w, 0)) {
+        w;
+    }
+}
+
+declare const others: unknown[];
+
+export function spreadBefore(b: unknown) {
+    if (isSecond(...others, b)) {
+        b;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A type predicate narrows its argument to the predicate's type.
+    let predicate_offset = SOURCE.find("t;").expect("predicate reference must exist");
+    let narrowed_by_predicate = normalize_type(&db, module, expression_ty_at(predicate_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_by_predicate, "pr")
+            .is_some()
+    );
+
+    // The predicate is over the second parameter, but the reference was
+    // passed as the first argument; it must keep its declared type.
+    let wrong_position_offset = SOURCE
+        .find("w;")
+        .expect("wrong-position reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(wrong_position_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(!formatted.contains("Pred"), "{formatted}");
+
+    // A spread before the reference makes its runtime parameter position
+    // unknowable; it must keep its declared type.
+    let spread_offset = SOURCE.find("b;").expect("spread reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(spread_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(!formatted.contains("Pred"), "{formatted}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_predicate_call_guards",
+        &db,
+        &fs,
+    );
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
 /// reassigns, so narrowing must be declined for it -- and must survive for
 /// the names the branch leaves alone.
