@@ -538,6 +538,8 @@ impl<'src> JsLexer<'src> {
                     match chr {
                         // Start of a new element, the closing tag, or an expression
                         b'<' | b'{' => break,
+                        // Astro reads a bare `>` as ordinary text, as HTML does.
+                        b'>' if astro => self.advance(1),
                         b'>' => {
                             self.push_diagnostic(ParseDiagnostic::new(
                                 "Unexpected token. Did you mean `{'>'}` or `&gt;`?",
