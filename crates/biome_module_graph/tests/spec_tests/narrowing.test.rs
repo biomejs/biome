@@ -714,9 +714,237 @@ export function thisParameter(p: unknown, q: unknown) {
     );
 }
 
+#[test]
+fn test_infer_module_types_narrows_assigned_references() {
+    const SOURCE: &str = r#"
+export function assigned(x: number | (() => Promise<void>)) {
+    x = async () => {};
+    x;
+}
+
+export function nearestWins(y: string | number | undefined) {
+    y = "first";
+    y = 1;
+    y;
+}
+
+export function conditionalWrite(z: string | undefined, flag: boolean) {
+    z = "on";
+    if (flag) {
+        z = undefined;
+    }
+    z;
+}
+
+export function closureWrite(a: string | undefined) {
+    a = "on";
+    const reset = () => {
+        a = undefined;
+    };
+    reset();
+    a;
+}
+
+export function insideClosure(b: string | undefined) {
+    b = "on";
+    return () => {
+        b;
+    };
+}
+
+export function compoundWrite(c: number | undefined) {
+    c = 1;
+    c += 1;
+    c;
+}
+
+export function nestedBlockWrite(q: string | undefined) {
+    q = "on";
+    {
+        q = undefined;
+    }
+    q;
+}
+
+export function loopTest(e: string | undefined) {
+    e = "on";
+    for (; e; ) {
+        e = undefined;
+    }
+}
+
+export function reassignedInGuard(m: number | string) {
+    if (typeof m === "string") {
+        m = 7;
+        m;
+    }
+}
+
+export function selfReference(n: number | undefined) {
+    n = 1;
+    n = n;
+    n;
+}
+
+export function unresolvedRhs(w: string | undefined) {
+    w = missing;
+    w;
+}
+
+export function destructured(p: string | undefined, arr: [string]) {
+    p = "on";
+    [p] = arr;
+    p;
+}
+
+export function scanPast(v: string | undefined, log: (value: string) => void) {
+    v = "on";
+    log(v);
+    v;
+}
+
+export function caseAssignment(t: string | undefined, choice: string) {
+    switch (choice) {
+        case "set":
+            t = "on";
+            t;
+            break;
+    }
+}
+
+export function updateWrite(j: number | undefined) {
+    j = 1;
+    j++;
+    j;
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // After an assignment, the reference takes the assigned type.
+    let assigned_offset = SOURCE.find("x;").expect("assigned reference must exist");
+    let narrowed_to_assigned = normalize_type(&db, module, expression_ty_at(assigned_offset));
+    assert!(narrowed_to_assigned.callable_function(&db).is_some());
+    assert!(!contains_inferred_number(&db, narrowed_to_assigned));
+
+    // The nearest preceding assignment wins.
+    let nearest_offset = SOURCE.find("y;").expect("nearest reference must exist");
+    let narrowed_to_nearest = normalize_type(&db, module, expression_ty_at(nearest_offset));
+    assert!(is_inferred_number_literal(&db, narrowed_to_nearest, "1"));
+
+    // A conditional write between the assignment and the reference cancels
+    // the narrowing.
+    let conditional_offset = SOURCE
+        .rfind("z;")
+        .expect("conditional reference must exist");
+    let unnarrowed_conditional = normalize_type(&db, module, expression_ty_at(conditional_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_conditional));
+
+    // A closure between the assignment and the reference that writes the
+    // value cancels the narrowing.
+    let closure_offset = SOURCE.rfind("a;").expect("closure reference must exist");
+    let unnarrowed_closure = normalize_type(&db, module, expression_ty_at(closure_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_closure));
+
+    // A reference inside a closure is never narrowed by outer assignments.
+    let inside_closure_offset = SOURCE
+        .find("b;")
+        .expect("inside-closure reference must exist");
+    let unnarrowed_inside = normalize_type(&db, module, expression_ty_at(inside_closure_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_inside));
+
+    // A compound assignment is not a narrowing source, and cancels scanning
+    // past it.
+    let compound_offset = SOURCE.find("c;").expect("compound reference must exist");
+    let unnarrowed_compound = normalize_type(&db, module, expression_ty_at(compound_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_compound));
+
+    // A write inside a nested block between the assignment and the
+    // reference cancels the narrowing.
+    let nested_offset = SOURCE.rfind("q;").expect("nested reference must exist");
+    let unnarrowed_nested = normalize_type(&db, module, expression_ty_at(nested_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_nested));
+
+    // A loop test that the loop body writes to is re-evaluated, so it must
+    // not be narrowed.
+    let loop_offset = SOURCE.find("e;").expect("loop reference must exist");
+    let unnarrowed_loop = normalize_type(&db, module, expression_ty_at(loop_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_loop));
+
+    // An assignment inside a guarded consequent cancels the guard but
+    // establishes its own narrowing.
+    let guard_offset = SOURCE.find("m;").expect("guard reference must exist");
+    let narrowed_in_guard = normalize_type(&db, module, expression_ty_at(guard_offset));
+    assert!(is_inferred_number_literal(&db, narrowed_in_guard, "7"));
+
+    // A self-referencing assignment resolves without narrowing its own
+    // right-hand side.
+    let self_offset = SOURCE.rfind("n;").expect("self reference must exist");
+    let narrowed_self = normalize_type(&db, module, expression_ty_at(self_offset));
+    assert!(contains_inferred_undefined(&db, narrowed_self));
+    assert!(contains_inferred_number(&db, narrowed_self));
+
+    // An unresolvable assigned type falls back to the declared type.
+    let unresolved_offset = SOURCE.find("w;").expect("unresolved reference must exist");
+    let unnarrowed_unresolved = normalize_type(&db, module, expression_ty_at(unresolved_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_unresolved));
+    assert!(contains_inferred_string(&db, unnarrowed_unresolved));
+
+    // A destructuring assignment is not a narrowing source, and cancels
+    // scanning past it.
+    let destructured_offset = SOURCE
+        .rfind("p;")
+        .expect("destructured reference must exist");
+    let unnarrowed_destructured =
+        normalize_type(&db, module, expression_ty_at(destructured_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_destructured));
+
+    // The scan walks past intervening statements that cannot write the
+    // value.
+    let scan_past_offset = SOURCE.find("v;").expect("scan-past reference must exist");
+    let narrowed_past_call = normalize_type(&db, module, expression_ty_at(scan_past_offset));
+    assert!(is_inferred_string_literal(&db, narrowed_past_call, "on"));
+
+    // A case clause is its own statement list, and an assignment inside it
+    // narrows references that follow in the same clause.
+    let case_offset = SOURCE.find("t;").expect("case reference must exist");
+    let narrowed_in_clause = normalize_type(&db, module, expression_ty_at(case_offset));
+    assert!(is_inferred_string_literal(&db, narrowed_in_clause, "on"));
+
+    // An update expression writes the value, and cancels scanning past it.
+    let update_offset = SOURCE.find("j;").expect("update reference must exist");
+    let unnarrowed_update = normalize_type(&db, module, expression_ty_at(update_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_update));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_assigned_references",
+        &db,
+        &fs,
+    );
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
-/// reassigns, so narrowing must be declined for it -- and must survive for
-/// the names the branch leaves alone.
+/// reassigns, so guard narrowing must be declined for it -- and must
+/// survive for the names the branch leaves alone. An assignment still
+/// narrows on its own behalf, so the reassigned rows in the snapshot show
+/// the assigned type rather than the guard's subset or the declared type.
 #[test]
 fn test_infer_module_types_declines_narrowing_when_invalidated() {
     const SOURCE: &str = r#"

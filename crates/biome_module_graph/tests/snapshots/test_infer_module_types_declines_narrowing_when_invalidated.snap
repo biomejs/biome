@@ -1,5 +1,5 @@
 ---
-source: crates/biome_module_graph/tests/spec_tests_v2.rs
+source: crates/biome_module_graph/tests/spec_tests.rs
 expression: content
 ---
 
@@ -99,7 +99,7 @@ Expression "x = 0" => unknown
 
 Expression "0" => number: 0
 
-Expression "x" => number | string
+Expression "x" => number: 0
 
 Binding compoundAssigned "compoundAssigned" => sync Function "compoundAssigned" {
   accepts: {
@@ -210,7 +210,7 @@ Expression "a = 0" => unknown
 
 Expression "0" => number: 0
 
-Expression "a" => number | string
+Expression "a" => number: 0
 
 Expression "b" => string
 
