@@ -6371,6 +6371,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessLengthCheckConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessLengthCheckOptions" }
+			]
+		},
+		"NoUselessLengthCheckOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessLoneBlockStatementsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7030,6 +7040,13 @@
 					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessLengthCheck": {
+					"description": "Disallow useless array length checks.\nSee https://biomejs.dev/linter/rules/no-useless-length-check",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessLengthCheckConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10830,6 +10847,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessLabelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessLengthCheckOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessLengthCheckOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
