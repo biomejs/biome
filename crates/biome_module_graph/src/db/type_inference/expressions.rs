@@ -2225,108 +2225,53 @@ impl<'db> ResolutionCtx<'db, '_> {
         ConditionalType::Unknown
     }
 
+    /// Narrows `ty` to the union variants that belong to the given `subset`.
+    ///
+    /// An empty result means no variant belongs to the subset. For a `typeof`
+    /// guard that is conclusive, since a value has exactly one `typeof` tag:
+    ///
+    /// ```js
+    /// function f(x: Promise<void>) {
+    ///   if (typeof x === "number") { x; } // x is `never`
+    /// }
+    /// ```
+    ///
+    /// The other subsets treat an empty result as indeterminate instead, so
+    /// their callers fall back to the un-narrowed type.
+    ///
+    /// Returns `None` if the type cannot be made any more specific.
     fn filter_type_to_subset(
         &mut self,
         ty: InferredTypeData<'db>,
         subset: ConditionalSubset,
     ) -> Option<InferredTypeData<'db>> {
-        let mut types = Vec::new();
-        let mut seen = FxHashSet::default();
-        let mut pending = Vec::from([ty]);
-
-        for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
-            let Some(ty) = pending.pop() else {
-                // The filter ran to completion. For a `typeof` guard, an empty
-                // result means no member can produce the requested `typeof`
-                // value, which is conclusively `never`:
-                //
-                //   function f(x: Promise<void>) {
-                //     if (typeof x === "number") { x; } // x is `never`
-                //   }
-                //
-                // The other subsets keep treating an empty result as
-                // indeterminate, so their callers fall back to the
-                // un-narrowed type.
-                return match subset {
-                    ConditionalSubset::Typeof(_) => Some(
-                        collected_type_result(self.db, types)
-                            .unwrap_or(InferredTypeData::NeverKeyword),
-                    ),
-                    ConditionalSubset::Falsy
-                    | ConditionalSubset::Truthy
-                    | ConditionalSubset::NonNullish => collected_type_result(self.db, types),
+        let types = self.collect_union_leaves(ty, |ctx, ty| {
+            // An instance classifies by the type it is an instance of, not by
+            // the instance type itself, which carries no tag of its own.
+            if let InferredTypeData::InstanceOf(instance) = ty
+                && let ConditionalSubset::Typeof(tag) = subset
+            {
+                let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
+                return match ctx.instance_typeof_tag(target) {
+                    Some(known_tag) if known_tag == tag => FilterAction::Retained,
+                    Some(_) => FilterAction::Stripped,
+                    // We cannot determine the tag statically, so we cannot
+                    // rule the type out.
+                    None => FilterAction::Retained,
                 };
-            };
-            let ty = self.resolve_inferred_type(ty);
-            if !seen.insert(ty) {
-                continue;
             }
 
-            match self.filter_action(ty, subset) {
-                FilterAction::Mapped(ty) => types.push(ty),
-                FilterAction::Retained => match ty {
-                    InferredTypeData::InstanceOf(instance) => {
-                        let target = self.resolve_inferred_type(instance.ty(self.db));
-                        if target.should_flatten_instance(instance.type_parameters(self.db)) {
-                            pending.push(target);
-                        } else if let ConditionalSubset::Typeof(tag) = subset {
-                            match self.instance_typeof_tag(target) {
-                                Some(known_tag) if known_tag == tag => types.push(ty),
-                                Some(_) => {}
-                                // We cannot determine the tag statically, so
-                                // we cannot rule the type out.
-                                None => types.push(ty),
-                            }
-                        } else {
-                            types.push(ty);
-                        }
-                    }
-                    InferredTypeData::Union(union) => {
-                        pending.extend(union.types(self.db).iter().rev().copied());
-                    }
-                    InferredTypeData::TypeofExpression(expression) => pending.push(
-                        self.resolve_inferred_typeof_expression(expression.expression(self.db))
-                            .unwrap_or(InferredTypeData::Unknown),
-                    ),
-                    InferredTypeData::TypeofType(ty) => pending.push(ty.ty(self.db)),
-                    InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
-                    InferredTypeData::Unknown
-                    | InferredTypeData::Global
-                    | InferredTypeData::GlobalType(_)
-                    | InferredTypeData::BigInt
-                    | InferredTypeData::Boolean
-                    | InferredTypeData::Null
-                    | InferredTypeData::Number
-                    | InferredTypeData::String
-                    | InferredTypeData::Symbol
-                    | InferredTypeData::Undefined
-                    | InferredTypeData::Conditional
-                    | InferredTypeData::Class(_)
-                    | InferredTypeData::Constructor(_)
-                    | InferredTypeData::Function(_)
-                    | InferredTypeData::Interface(_)
-                    | InferredTypeData::Module(_)
-                    | InferredTypeData::Namespace(_)
-                    | InferredTypeData::Object(_)
-                    | InferredTypeData::Tuple(_)
-                    | InferredTypeData::Generic(_)
-                    | InferredTypeData::Local(_)
-                    | InferredTypeData::Intersection(_)
-                    | InferredTypeData::TypeOperator(_)
-                    | InferredTypeData::Literal(_)
-                    | InferredTypeData::MergedReference(_)
-                    | InferredTypeData::AnyKeyword
-                    | InferredTypeData::NeverKeyword
-                    | InferredTypeData::ObjectKeyword
-                    | InferredTypeData::ThisKeyword
-                    | InferredTypeData::UnknownKeyword
-                    | InferredTypeData::VoidKeyword => types.push(ty),
-                },
-                FilterAction::Stripped => {}
-            }
+            ctx.filter_action(ty, subset)
+        })?;
+
+        match subset {
+            ConditionalSubset::Typeof(_) => Some(
+                collected_type_result(self.db, types).unwrap_or(InferredTypeData::NeverKeyword),
+            ),
+            ConditionalSubset::Falsy
+            | ConditionalSubset::Truthy
+            | ConditionalSubset::NonNullish => collected_type_result(self.db, types),
         }
-
-        None
     }
 
     fn filter_action(
@@ -2567,24 +2512,43 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Narrows the union variants of `ty` to those the `leaf` callback
     /// retains.
     ///
-    /// The traversal resolves nested unions and `typeof` expressions and
-    /// flattens flattenable instances, so `leaf` only ever sees instances
-    /// that could not be flattened; every other type is passed to `leaf` to
-    /// decide whether the variant is retained, stripped, or mapped.
+    /// See [`Self::collect_union_leaves`] for which types `leaf` gets to
+    /// decide on.
     ///
     /// Returns `None` if the type cannot be made any more specific.
     fn narrow_union_leaves(
         &mut self,
         ty: InferredTypeData<'db>,
-        mut leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
+        leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
     ) -> Option<InferredTypeData<'db>> {
+        let types = self.collect_union_leaves(ty, leaf)?;
+        collected_type_result(self.db, types)
+    }
+
+    /// Collects the union variants of `ty` that the `leaf` callback retains.
+    ///
+    /// This is the traversal behind every narrowing operation. It expands the
+    /// types that stand for other types — nested unions, `typeof` types, and
+    /// instances of a type that [should be flattened](InferredTypeData::should_flatten_instance)
+    /// — so `leaf` only sees the types that remain once nothing can be
+    /// expanded any further, and decides for each whether it is retained,
+    /// stripped, or mapped to another type.
+    ///
+    /// Returns `None` if the traversal does not settle within
+    /// [`MAX_CONDITIONAL_FILTER_STEPS`] steps, which bounds the work spent on
+    /// cyclic or pathologically nested types.
+    fn collect_union_leaves(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        mut leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
+    ) -> Option<Vec<InferredTypeData<'db>>> {
         let mut types = Vec::new();
         let mut seen = FxHashSet::default();
         let mut pending = Vec::from([ty]);
 
         for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
             let Some(ty) = pending.pop() else {
-                return collected_type_result(self.db, types);
+                return Some(types);
             };
             let ty = self.resolve_inferred_type(ty);
             if !seen.insert(ty) {
