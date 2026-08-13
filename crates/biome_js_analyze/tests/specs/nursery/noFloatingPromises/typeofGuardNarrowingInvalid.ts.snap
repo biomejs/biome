@@ -30,6 +30,16 @@ function looseEquality(x: number | (() => Promise<void>)) {
 	}
 }
 
+interface AsyncFn {
+	(): Promise<void>;
+}
+
+function guardedCallableInterface(f: number | AsyncFn) {
+	if (typeof f === "function") {
+		f();
+	}
+}
+
 ```
 
 # Diagnostics
@@ -101,6 +111,25 @@ typeofGuardNarrowingInvalid.ts:23:3 lint/nursery/noFloatingPromises ━━━━
        │ 		^^^^
     24 │ 	}
     25 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowingInvalid.ts:33:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    31 │ function guardedCallableInterface(f: number | AsyncFn) {
+    32 │ 	if (typeof f === "function") {
+  > 33 │ 		f();
+       │ 		^^^^
+    34 │ 	}
+    35 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

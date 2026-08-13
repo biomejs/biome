@@ -23,3 +23,13 @@ function looseEquality(x: number | (() => Promise<void>)) {
 		x();
 	}
 }
+
+interface AsyncFn {
+	(): Promise<void>;
+}
+
+function guardedCallableInterface(f: number | AsyncFn) {
+	if (typeof f === "function") {
+		f();
+	}
+}
