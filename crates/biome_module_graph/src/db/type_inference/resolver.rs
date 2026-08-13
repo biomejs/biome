@@ -64,6 +64,11 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
+    /// Instance of the global `String` class, resolved on first use.
+    ///
+    /// Narrowing asks whether a string can satisfy an object-like type once
+    /// per union variant, and resolving the global by name allocates.
+    pub(in crate::db::type_inference) string_instance: Option<InferredTypeData<'db>>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -122,6 +127,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             resolved: FxHashMap::default(),
             in_progress: FxHashSet::default(),
             resolution_depth: Cell::new(0),
+            string_instance: None,
         }
     }
 

@@ -2861,12 +2861,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Members are looked up on an instance of the global `String` class;
     /// the bare `String` primitive contributes no members in member lookup.
     fn string_may_satisfy_members(&mut self, members: &[InferredTypeMember<'db>]) -> bool {
-        let Some(string_class) = self.resolve_global_name("String") else {
+        let Some(string_instance) = self.string_instance() else {
             // Without the global String type we cannot prove any member
             // absent.
             return true;
         };
-        let string_instance = InferredTypeData::instance_of(self.db, string_class, Box::default());
         for member in members {
             if member.kind.is_static() || member.kind.is_constructor() {
                 continue;
@@ -2884,6 +2883,19 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         true
+    }
+
+    /// Returns an instance of the global `String` class, resolving it on
+    /// first use.
+    fn string_instance(&mut self) -> Option<InferredTypeData<'db>> {
+        if let Some(instance) = self.string_instance {
+            return Some(instance);
+        }
+
+        let string_class = self.resolve_global_name("String")?;
+        let instance = InferredTypeData::instance_of(self.db, string_class, Box::default());
+        self.string_instance = Some(instance);
+        Some(instance)
     }
 
     /// Narrows `ty` to the subset that may be an instance of the `guard`
