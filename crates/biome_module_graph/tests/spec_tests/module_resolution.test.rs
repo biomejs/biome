@@ -235,7 +235,7 @@ fn test_package_typings_field_resolution() {
     );
 }
 
-fn export_db(source: &str, barrel: &str) -> biome_workspace_db::WorkspaceDb {
+fn export_db(source: &str, barrel: &str) -> biome_service::db::WorkspaceDb {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/source.ts".into(), source);
     fs.insert("/src/barrel.ts".into(), barrel);

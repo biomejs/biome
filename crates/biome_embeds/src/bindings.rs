@@ -1,4 +1,4 @@
-use crate::embedded::visitor::embedded_bindings_from_source;
+use crate::visitor::embedded_bindings_from_source;
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
 use camino::Utf8PathBuf;

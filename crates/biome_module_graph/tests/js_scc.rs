@@ -4,8 +4,8 @@ use biome_module_graph::{
     resolve_js_module,
 };
 use biome_project_layout::ProjectLayout;
+use biome_service::db::WorkspaceDb;
 use biome_test_utils::get_added_js_paths;
-use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 
 fn resolve_module(fs: &MemoryFileSystem, path: &str) -> ModuleInfoKind {

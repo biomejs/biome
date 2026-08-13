@@ -1,6 +1,4 @@
-use crate::embedded::visitor::{
-    embedded_references_from_source, embedded_type_references_from_source,
-};
+use crate::visitor::{embedded_references_from_source, embedded_type_references_from_source};
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
 use camino::Utf8PathBuf;

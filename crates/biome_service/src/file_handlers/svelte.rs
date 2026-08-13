@@ -3,6 +3,7 @@ use super::{
     parse_lang_and_setup_from_script_opening_tag,
 };
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
@@ -20,7 +21,6 @@ use biome_js_syntax::{JsLanguage, TextRange, TextSize};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
-use biome_workspace_db::WorkspaceDb;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::{debug, error};

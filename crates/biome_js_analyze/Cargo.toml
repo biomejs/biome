@@ -31,6 +31,7 @@ biome_db                  = { workspace = true }
 biome_deserialize         = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros  = { workspace = true }
 biome_diagnostics         = { workspace = true }
+biome_embeds              = { workspace = true }
 biome_fs                  = { workspace = true }
 biome_glob                = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_js_factory          = { workspace = true }
@@ -53,7 +54,6 @@ biome_suppression         = { workspace = true }
 biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }
-biome_workspace_db        = { workspace = true, features = ["html_embeds"] }
 bitvec                    = "1.0.1"
 camino                    = { workspace = true }
 either                    = { workspace = true }

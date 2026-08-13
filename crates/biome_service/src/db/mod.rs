@@ -1,9 +1,15 @@
 //! This is the database used inside the biome Workspace, mainly the `biome_service` crate.
 //!
 
-#[cfg(feature = "html_embeds")]
-pub mod embedded;
+mod state;
 
+pub(crate) use state::DbReadGuard;
+pub use state::DbState;
+
+use crate::WorkspaceError;
+use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
+use crate::settings::{Settings, VcsIgnoredPatterns};
+use biome_configuration::vcs::VcsClientKind;
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
@@ -17,14 +23,42 @@ use biome_rowan::SendNode;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
-use papaya::HashMap;
+use papaya::{Compute, HashMap, Operation};
 use salsa::{Setter, Storage};
+use std::convert::Infallible;
 use std::rc::Rc;
 use std::sync::Arc;
+use tracing::{debug, instrument};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ParsedSourceUpdateMode {
     Replace,
+    Setters,
+}
+
+/// Selects how an existing [`ProjectInput`] is updated.
+///
+/// Choose this mode at the [`DbState`] storage boundary, where the
+/// caller knows whether it is operating on a temporary Shared-mode fork or the
+/// canonical Owned-mode database. Project operations inside this module accept
+/// the mode but must not infer it from the [`WorkspaceDb`] itself because both
+/// storage modes use the same database type.
+///
+/// Passing `Setters` from Shared mode can deadlock because Salsa cannot acquire
+/// exclusive storage access while the retained shared handle is alive. Passing
+/// `Replace` from Owned mode changes the project's Salsa identity and leaves
+/// the previous input allocated.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ProjectUpdateMode {
+    /// Allocates a replacement input and publishes its handle in the project
+    /// map.
+    ///
+    /// Use this only from an operation-local Shared-mode fork.
+    Replace,
+    /// Preserves the existing input and changes its fields through Salsa
+    /// setters.
+    ///
+    /// Use this only for the Owned-mode database inside `OwnedDb::with_setter`.
     Setters,
 }
 
@@ -41,6 +75,8 @@ pub struct WorkspaceDb {
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     /// It stores the file sources across projects.
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+    /// A map of projects loaded in the workspace.
+    projects: Arc<HashMap<ProjectKey, ProjectInput>>,
     // NOTE: this must stay last as per salsa restrictions.
     storage: Storage<Self>,
 }
@@ -52,6 +88,7 @@ impl Default for WorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: Arc::default(),
             file_sources: Arc::default(),
+            projects: Arc::default(),
             storage: Storage::default(),
         };
         #[cfg(feature = "module_graph")]
@@ -77,6 +114,7 @@ pub struct WorkspaceDbData {
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+    projects: Arc<HashMap<ProjectKey, ProjectInput>>,
 }
 
 impl WorkspaceDbData {
@@ -92,6 +130,10 @@ impl WorkspaceDbData {
                 || self.file_sources.push(document_file_source),
                 |(index, _)| index,
             )
+    }
+
+    pub(crate) fn remove_project(&self, project_key: ProjectKey) {
+        self.projects.pin().remove(&project_key);
     }
 
     /// Checks whether the module data contains `path` without making Salsa
@@ -161,6 +203,7 @@ impl WorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
+            projects: self.projects.clone(),
         }
     }
 
@@ -257,7 +300,7 @@ impl WorkspaceDb {
         self.modules.pin().get(path).copied()
     }
 
-    pub fn get_file(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    pub fn get_parsed_source(&self, path: &Utf8Path) -> Option<ParsedSource> {
         self.files.pin().get(path).copied()
     }
 
@@ -311,7 +354,7 @@ impl WorkspaceDb {
         new_root: SendNode,
         mode: ParsedSourceUpdateMode,
     ) {
-        if let Some(parsed_source) = self.get_file(path) {
+        if let Some(parsed_source) = self.get_parsed_source(path) {
             let mut any_parse = parsed_source.parsed(self).clone();
             any_parse.set_new_root(new_root);
             match mode {
@@ -363,6 +406,205 @@ impl WorkspaceDb {
         #[cfg(not(feature = "module_graph"))]
         let _ = path;
     }
+
+    // #region Project operations
+
+    /// Replaces a project only while the project map still contains the input
+    /// from which the replacement was derived.
+    fn replace_project_with(
+        &self,
+        project_key: ProjectKey,
+        mut replace: impl FnMut(&Self, ProjectInput) -> ProjectInput,
+    ) -> Option<ProjectInput> {
+        match self.try_replace_project_with(project_key, |db, project| {
+            Ok::<_, Infallible>(replace(db, project))
+        }) {
+            Ok(project) => project,
+            Err(error) => match error {},
+        }
+    }
+
+    /// Replaces a project only while the project map still contains the input
+    /// from which the replacement was derived.
+    fn try_replace_project_with<E>(
+        &self,
+        project_key: ProjectKey,
+        mut replace: impl FnMut(&Self, ProjectInput) -> Result<ProjectInput, E>,
+    ) -> Result<Option<ProjectInput>, E> {
+        let projects = self.projects.pin();
+        let Some(mut current) = projects.get(&project_key).copied() else {
+            return Ok(None);
+        };
+
+        loop {
+            // Input allocation stays outside Papaya's callback because that
+            // callback may be replayed during a compare-and-swap retry.
+            let replacement = replace(self, current)?;
+            match projects.compute(project_key, |entry| match entry {
+                Some((_, actual)) if *actual == current => Operation::Insert(replacement),
+                Some((_, actual)) => Operation::Abort(Some(*actual)),
+                None => Operation::Abort(None),
+            }) {
+                Compute::Updated { .. } => return Ok(Some(replacement)),
+                Compute::Aborted(Some(actual)) => current = actual,
+                Compute::Aborted(None) => return Ok(None),
+                Compute::Inserted(..) | Compute::Removed(..) => unreachable!(),
+            }
+        }
+    }
+
+    pub(crate) fn insert_nested_setting_with_mode(
+        &mut self,
+        project_key: ProjectKey,
+        path: Utf8PathBuf,
+        settings: Settings,
+        mode: ProjectUpdateMode,
+    ) {
+        debug!("Set nested settings for {path}");
+        match mode {
+            ProjectUpdateMode::Replace => {
+                let path = NestedPath::from(path);
+                let settings = Arc::new(settings);
+                self.replace_project_with(project_key, |db, project| {
+                    let mut nested_settings = project.nested_settings(db);
+                    nested_settings.insert(path.clone(), settings.clone());
+                    ProjectInput::new(
+                        db,
+                        project_key,
+                        project.path(db).to_path_buf(),
+                        project.root_settings(db),
+                        nested_settings,
+                    )
+                });
+            }
+            ProjectUpdateMode::Setters => {
+                let Some(project) = self.get_project(&project_key) else {
+                    return;
+                };
+                let mut nested_settings = project.nested_settings(self);
+                nested_settings.insert(path.into(), Arc::new(settings));
+                project.set_nested_settings(self).to(nested_settings);
+            }
+        }
+    }
+
+    pub(crate) fn insert_root_settings_with_mode(
+        &mut self,
+        project_key: ProjectKey,
+        settings: Settings,
+        mode: ProjectUpdateMode,
+    ) {
+        let root_settings = Arc::new(settings);
+        match mode {
+            ProjectUpdateMode::Replace => {
+                self.replace_project_with(project_key, |db, project| {
+                    ProjectInput::new(
+                        db,
+                        project_key,
+                        project.path(db).to_path_buf(),
+                        root_settings.clone(),
+                        project.nested_settings(db),
+                    )
+                });
+            }
+            ProjectUpdateMode::Setters => {
+                let Some(project) = self.get_project(&project_key) else {
+                    return;
+                };
+                project.set_root_settings(self).to(root_settings);
+            }
+        }
+    }
+
+    /// Inserts a new project with the given root path.
+    ///
+    /// Returns the key of the newly inserted project, or returns an existing
+    /// project key if a project with the given path already existed.
+    #[instrument(skip(self, path), fields(path))]
+    pub fn insert_project(&mut self, path: Utf8PathBuf) -> ProjectKey {
+        debug!("Insert workspace folder {}", path.as_str());
+
+        let data = self.projects.pin();
+        for (key, project_data) in data.iter() {
+            if project_data.path(self) == path.as_path() {
+                return *key;
+            }
+        }
+
+        let key = ProjectKey::new();
+        data.insert(
+            key,
+            ProjectInput::new(
+                self,
+                key,
+                path,
+                Arc::new(Settings::default()),
+                Default::default(),
+            ),
+        );
+        key
+    }
+
+    /// Removes the project with the given key.
+    pub fn remove_project(&self, project_key: ProjectKey) {
+        self.data().remove_project(project_key);
+    }
+
+    pub(crate) fn store_nested_ignore_patterns_with_mode(
+        &mut self,
+        project_key: ProjectKey,
+        payload: Vec<(Utf8PathBuf, Vec<String>)>,
+        mode: ProjectUpdateMode,
+    ) -> Result<(), WorkspaceError> {
+        let update_root_settings =
+            |mut root_settings: Arc<Settings>| -> Result<Arc<Settings>, WorkspaceError> {
+                let git_ignores = match root_settings.vcs_settings.client_kind {
+                    Some(VcsClientKind::Git) => payload
+                        .iter()
+                        .map(|(path, patterns)| {
+                            let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
+                            VcsIgnoredPatterns::git_ignore(path.as_path(), patterns.as_slice())
+                        })
+                        .collect::<Result<Vec<_>, _>>()?,
+                    None => Vec::new(),
+                };
+
+                let settings = Arc::make_mut(&mut root_settings);
+                if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
+                    for git_ignore in git_ignores {
+                        ignore_matches.insert_git_match(git_ignore);
+                    }
+                }
+
+                Ok(root_settings)
+            };
+
+        match mode {
+            ProjectUpdateMode::Replace => {
+                self.try_replace_project_with(project_key, |db, project| {
+                    Ok::<_, WorkspaceError>(ProjectInput::new(
+                        db,
+                        project_key,
+                        project.path(db).to_path_buf(),
+                        update_root_settings(project.root_settings(db))?,
+                        project.nested_settings(db),
+                    ))
+                })?
+                .ok_or_else(WorkspaceError::no_project)?;
+            }
+            ProjectUpdateMode::Setters => {
+                let project = self
+                    .get_project(&project_key)
+                    .ok_or_else(WorkspaceError::no_project)?;
+                let root_settings = update_root_settings(project.root_settings(self))?;
+                project.set_root_settings(self).to(root_settings);
+            }
+        }
+
+        Ok(())
+    }
+
+    // #endregion
 }
 
 /// Shared state for creating operation-local [WorkspaceDb] forks.
@@ -375,6 +617,7 @@ pub struct SharedWorkspaceDb {
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+    projects: Arc<HashMap<ProjectKey, ProjectInput>>,
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
 
@@ -386,28 +629,42 @@ impl Default for SharedWorkspaceDb {
             modules,
             file_sources,
             storage,
+            projects,
         } = WorkspaceDb::default();
         Self {
             files,
             #[cfg(feature = "module_graph")]
             modules,
             file_sources,
+            projects,
             storage: storage.into_zalsa_handle(),
         }
     }
 }
 
 impl SharedWorkspaceDb {
+    pub fn data(&self) -> WorkspaceDbData {
+        WorkspaceDbData {
+            #[cfg(feature = "module_graph")]
+            modules: self.modules.clone(),
+            file_sources: self.file_sources.clone(),
+            projects: self.projects.clone(),
+        }
+    }
+
     pub fn fork(&self) -> WorkspaceDb {
         WorkspaceDb {
             files: self.files.clone(),
             file_sources: self.file_sources.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            projects: self.projects.clone(),
             storage: self.storage.clone().into_storage(),
         }
     }
 }
+
+// #region Salsa Database impls
 
 #[salsa::db]
 impl salsa::Database for WorkspaceDb {}
@@ -416,6 +673,25 @@ impl salsa::Database for WorkspaceDb {}
 impl biome_db::Db for WorkspaceDb {
     fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
         self.files.pin().get(path).copied()
+    }
+}
+
+#[salsa::db]
+impl ProjectDb for WorkspaceDb {
+    fn get_project(&self, project_key: &ProjectKey) -> Option<ProjectInput> {
+        self.projects.pin().get(project_key).copied()
+    }
+
+    fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
+        self.projects.pin().iter().find_map(|(key, project_data)| {
+            path.starts_with(project_data.path(self)).then_some(*key)
+        })
+    }
+
+    fn for_each_project(&self, f: &mut dyn FnMut(ProjectInput)) {
+        for project in self.projects.pin().values() {
+            f(*project);
+        }
     }
 }
 
@@ -470,6 +746,8 @@ impl LanguageDb for WorkspaceDb {
     }
 }
 
+// #endregion
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -484,7 +762,7 @@ mod tests {
     use biome_module_graph::{ModuleDb, PathInfoCache, resolve_html_module};
     #[cfg(feature = "module_graph")]
     use biome_project_layout::ProjectLayout;
-    use salsa::plumbing::AsId;
+    use salsa::plumbing::{AsId, ZalsaDatabase};
     use std::sync::Barrier;
     #[cfg(feature = "module_graph")]
     use std::sync::atomic::{AtomicBool, Ordering};
@@ -500,6 +778,19 @@ mod tests {
             JsParserOptions::default(),
         )
         .into()
+    }
+
+    fn assert_single_project_in_sync(db: &WorkspaceDb, project_key: ProjectKey) -> ProjectInput {
+        assert_eq!(db.projects.pin().len(), 1);
+        let indexed_project = db.get_project(&project_key).unwrap();
+
+        let ingredient = ProjectInput::ingredient(db);
+        let mut salsa_projects = ingredient.entries(db.zalsa());
+        let salsa_project = salsa_projects.next().unwrap().as_struct();
+        assert!(salsa_projects.next().is_none());
+        assert_eq!(indexed_project.as_id(), salsa_project.as_id());
+
+        indexed_project
     }
 
     /// Creates a database that can pause a write operation when Salsa starts
@@ -521,6 +812,7 @@ mod tests {
             files: Arc::default(),
             modules: Arc::default(),
             file_sources: Arc::default(),
+            projects: Arc::default(),
             storage,
         };
         ModuleGraphGeneration::new(&db, 0);
@@ -569,7 +861,7 @@ mod tests {
         let updated_file = db.upsert_file(path, parse_js("let b = 2;"), 0, vec![]);
 
         assert_eq!(file.as_id(), updated_file.as_id());
-        assert_eq!(db.get_file(path).unwrap().as_id(), file.as_id());
+        assert_eq!(db.get_parsed_source(path).unwrap().as_id(), file.as_id());
     }
 
     #[test]
@@ -581,7 +873,214 @@ mod tests {
         let updated_file = db.replace_file(path, parse_js("let b = 2;"), 0, vec![]);
 
         assert_ne!(file.as_id(), updated_file.as_id());
-        assert_eq!(db.get_file(path).unwrap().as_id(), updated_file.as_id());
+        assert_eq!(
+            db.get_parsed_source(path).unwrap().as_id(),
+            updated_file.as_id()
+        );
+    }
+
+    #[test]
+    fn insert_project_keeps_index_and_salsa_in_sync() {
+        let mut db = WorkspaceDb::default();
+        let path = Utf8PathBuf::from("project");
+
+        let project_key = db.insert_project(path.clone());
+        assert_eq!(db.insert_project(path.clone()), project_key);
+
+        let project = assert_single_project_in_sync(&db, project_key);
+        assert_eq!(project.path(&db), path.as_path());
+    }
+
+    #[test]
+    fn remove_project_removes_project_from_index() {
+        let mut db = WorkspaceDb::default();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = assert_single_project_in_sync(&db, project_key);
+
+        db.remove_project(project_key);
+
+        assert!(db.projects.pin().is_empty());
+        assert!(db.get_project(&project_key).is_none());
+
+        let ingredient = ProjectInput::ingredient(&db);
+        let mut salsa_projects = ingredient.entries(db.zalsa());
+        let salsa_project = salsa_projects.next().unwrap().as_struct();
+        assert!(salsa_projects.next().is_none());
+        assert_eq!(salsa_project.as_id(), project.as_id());
+    }
+
+    #[test]
+    fn insert_root_settings_keeps_index_and_salsa_in_sync() {
+        let mut db = WorkspaceDb::default();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = assert_single_project_in_sync(&db, project_key);
+        let mut settings = Settings::default();
+        settings.vcs_settings.client_kind = Some(VcsClientKind::Git);
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            settings.clone(),
+            ProjectUpdateMode::Setters,
+        );
+        db.insert_root_settings_with_mode(project_key, settings, ProjectUpdateMode::Setters);
+
+        let updated_project = assert_single_project_in_sync(&db, project_key);
+        assert_eq!(updated_project.as_id(), project.as_id());
+        assert_eq!(
+            updated_project.root_settings(&db).vcs_settings.client_kind,
+            Some(VcsClientKind::Git)
+        );
+    }
+
+    #[test]
+    fn insert_nested_setting_keeps_index_and_salsa_in_sync() {
+        let mut db = WorkspaceDb::default();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = assert_single_project_in_sync(&db, project_key);
+        let nested_path = Utf8PathBuf::from("project/package");
+        let mut settings = Settings::default();
+        settings.vcs_settings.client_kind = Some(VcsClientKind::Git);
+
+        db.insert_nested_setting_with_mode(
+            project_key,
+            nested_path.clone(),
+            settings,
+            ProjectUpdateMode::Setters,
+        );
+
+        let updated_project = assert_single_project_in_sync(&db, project_key);
+        assert_eq!(updated_project.as_id(), project.as_id());
+        assert_eq!(updated_project.nested_settings(&db).len(), 1);
+        assert_eq!(
+            db.get_nested_settings(project_key, &nested_path)
+                .unwrap()
+                .vcs_settings
+                .client_kind,
+            Some(VcsClientKind::Git)
+        );
+    }
+
+    #[test]
+    fn replacement_updates_retry_after_project_changes() {
+        let shared = SharedWorkspaceDb::default();
+        let mut db = shared.fork();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        drop(db);
+        let writers_ready = Arc::new(Barrier::new(2));
+
+        std::thread::scope(|scope| {
+            for path in ["project/a", "project/b"] {
+                let db = shared.fork();
+                let writers_ready = writers_ready.clone();
+                scope.spawn(move || {
+                    let path = NestedPath::new(path);
+                    let settings = Arc::new(Settings::default());
+                    let mut first_attempt = true;
+                    db.replace_project_with(project_key, |db, project| {
+                        if first_attempt {
+                            first_attempt = false;
+                            writers_ready.wait();
+                        }
+                        let mut nested_settings = project.nested_settings(db);
+                        nested_settings.insert(path.clone(), settings.clone());
+                        ProjectInput::new(
+                            db,
+                            project_key,
+                            project.path(db).to_path_buf(),
+                            project.root_settings(db),
+                            nested_settings,
+                        )
+                    })
+                    .unwrap();
+                });
+            }
+        });
+
+        let db = shared.fork();
+        assert_eq!(
+            db.get_project(&project_key)
+                .unwrap()
+                .nested_settings(&db)
+                .len(),
+            2
+        );
+    }
+
+    #[test]
+    fn replacement_update_does_not_restore_removed_project() {
+        let shared = SharedWorkspaceDb::default();
+        let mut db = shared.fork();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        drop(db);
+        let update_started = Arc::new(Barrier::new(2));
+        let project_removed = Arc::new(Barrier::new(2));
+
+        std::thread::scope(|scope| {
+            let db = shared.fork();
+            let writer = {
+                let update_started = update_started.clone();
+                let project_removed = project_removed.clone();
+                scope.spawn(move || {
+                    db.replace_project_with(project_key, |db, project| {
+                        update_started.wait();
+                        project_removed.wait();
+                        ProjectInput::new(
+                            db,
+                            project_key,
+                            project.path(db).to_path_buf(),
+                            Arc::new(Settings::default()),
+                            project.nested_settings(db),
+                        )
+                    })
+                })
+            };
+
+            update_started.wait();
+            shared.data().remove_project(project_key);
+            project_removed.wait();
+            assert!(writer.join().unwrap().is_none());
+        });
+
+        assert!(shared.fork().get_project(&project_key).is_none());
+    }
+
+    #[test]
+    fn store_nested_ignore_patterns_keeps_index_and_salsa_in_sync() {
+        let mut db = WorkspaceDb::default();
+        let root_path = Utf8PathBuf::from("/project");
+        let project_key = db.insert_project(root_path.clone());
+        let project = assert_single_project_in_sync(&db, project_key);
+        let mut settings = Settings::default();
+        settings.vcs_settings.client_kind = Some(VcsClientKind::Git);
+        settings.vcs_settings.use_ignore_file = Some(true.into());
+        settings
+            .vcs_settings
+            .store_root_ignore_patterns(root_path.as_path(), &[])
+            .unwrap();
+        db.insert_root_settings_with_mode(project_key, settings, ProjectUpdateMode::Setters);
+        let nested_path = root_path.join("package");
+        let ignored_path = nested_path.join("generated.js");
+
+        assert!(!project.root_settings(&db).vcs_settings.is_ignored(
+            ignored_path.as_path(),
+            false,
+            None
+        ));
+
+        db.store_nested_ignore_patterns_with_mode(
+            project_key,
+            vec![(nested_path, vec!["generated.js".to_string()])],
+            ProjectUpdateMode::Setters,
+        )
+        .unwrap();
+
+        let updated_project = assert_single_project_in_sync(&db, project_key);
+        assert_eq!(updated_project.as_id(), project.as_id());
+        assert!(updated_project.root_settings(&db).vcs_settings.is_ignored(
+            ignored_path.as_path(),
+            false,
+            None
+        ));
     }
 
     #[test]
