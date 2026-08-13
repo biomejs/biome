@@ -26,15 +26,6 @@ info: html/tags/tags2.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
- <div>
--  before<noscript>noscript long long long long long long long long</noscript
--  >after
-+  before<noscript>noscript long long long long long long long long</noscript>
-+  after
- </div>
- 
- <div>
 @@ -21,8 +21,8 @@
  <div>
    before<object data="horse.wav">
@@ -62,8 +53,8 @@ info: html/tags/tags2.html
 
 ```html
 <div>
-  before<noscript>noscript long long long long long long long long</noscript>
-  after
+  before<noscript>noscript long long long long long long long long</noscript
+  >after
 </div>
 
 <div>
