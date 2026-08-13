@@ -8,6 +8,7 @@ expression: snapshot
 ```svelte
 <div style:background-color="blue">Blue background</div>
 <div style:font-size="16px" style:line-height="1.5">Kebab case props</div>
+<div style:--theme-color={color}>Custom property</div>
 
 ```
 
@@ -116,19 +117,63 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@130..131 ">" [] [],
             },
         },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@131..133 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@133..137 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@137..142 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@142..143 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@143..156 "--theme-color" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@156..157 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@157..158 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@158..163 "color" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@163..164 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@164..165 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@165..180 "Custom property" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@180..181 "<" [] [],
+                slash_token: SLASH@181..182 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@182..185 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@185..186 ">" [] [],
+            },
+        },
     ],
-    eof_token: EOF@131..132 "" [Newline("\n")] [],
+    eof_token: EOF@186..187 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..132
+0: HTML_ROOT@0..187
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..131
+  3: HTML_ELEMENT_LIST@0..186
     0: HTML_ELEMENT@0..56
       0: HTML_OPENING_ELEMENT@0..35
         0: L_ANGLE@0..1 "<" [] []
@@ -194,6 +239,36 @@ HtmlRoot {
         2: HTML_TAG_NAME@127..130
           0: DIV_KW@127..130 "div" [] []
         3: R_ANGLE@130..131 ">" [] []
-  4: EOF@131..132 "" [Newline("\n")] []
+    2: HTML_ELEMENT@131..186
+      0: HTML_OPENING_ELEMENT@131..165
+        0: L_ANGLE@131..133 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@133..137
+          0: DIV_KW@133..137 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@137..164
+          0: SVELTE_STYLE_DIRECTIVE@137..164
+            0: STYLE_KW@137..142 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@142..164
+              0: COLON@142..143 ":" [] []
+              1: SVELTE_LITERAL@143..156
+                0: HTML_LITERAL@143..156 "--theme-color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@156..156
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@156..164
+                0: EQ@156..157 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@157..164
+                  0: L_CURLY@157..158 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@158..163
+                    0: HTML_LITERAL@158..163 "color" [] []
+                  2: R_CURLY@163..164 "}" [] []
+        3: R_ANGLE@164..165 ">" [] []
+      1: HTML_ELEMENT_LIST@165..180
+        0: HTML_CONTENT@165..180
+          0: HTML_LITERAL@165..180 "Custom property" [] []
+      2: HTML_CLOSING_ELEMENT@180..186
+        0: L_ANGLE@180..181 "<" [] []
+        1: SLASH@181..182 "/" [] []
+        2: HTML_TAG_NAME@182..185
+          0: DIV_KW@182..185 "div" [] []
+        3: R_ANGLE@185..186 ">" [] []
+  4: EOF@186..187 "" [Newline("\n")] []
 
 ```

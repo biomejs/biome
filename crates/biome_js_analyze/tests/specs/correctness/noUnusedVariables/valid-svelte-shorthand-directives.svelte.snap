@@ -24,6 +24,7 @@ let inputValue = "";
 
   <!-- style: shorthand -->
   <div style:color>Styled</div>
+  <div style:color|important>Important</div>
 
   <!-- style: shorthand with a mixed-case identifier -->
   <div style:fontWeight>Bold</div>

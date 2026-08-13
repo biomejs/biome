@@ -31,8 +31,8 @@ HtmlRoot {
                         class_token: CLASS_KW@5..10 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@10..11 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@11..19 "selected" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@11..19 "selected" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -75,8 +75,8 @@ HtmlRoot {
                         class_token: CLASS_KW@64..69 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@69..70 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@70..77 "primary" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@70..77 "primary" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -131,8 +131,8 @@ HtmlRoot {
             0: CLASS_KW@5..10 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@10..44
               0: COLON@10..11 ":" [] []
-              1: SVELTE_LITERAL@11..19
-                0: HTML_LITERAL@11..19 "selected" [] []
+              1: SVELTE_NAME@11..19
+                0: IDENT@11..19 "selected" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@19..19
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@19..44
                 0: EQ@19..20 "=" [] []
@@ -161,8 +161,8 @@ HtmlRoot {
             0: CLASS_KW@64..69 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@69..98
               0: COLON@69..70 ":" [] []
-              1: SVELTE_LITERAL@70..77
-                0: HTML_LITERAL@70..77 "primary" [] []
+              1: SVELTE_NAME@70..77
+                0: IDENT@70..77 "primary" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@77..77
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@77..98
                 0: EQ@77..78 "=" [] []

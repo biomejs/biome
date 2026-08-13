@@ -32,8 +32,8 @@ HtmlRoot {
                             HtmlBogus {
                                 items: [
                                     COLON@10..11 ":" [] [],
-                                    SvelteLiteral {
-                                        value_token: HTML_LITERAL@11..17 "active" [] [],
+                                    SvelteName {
+                                        ident_token: IDENT@11..17 "active" [] [],
                                     },
                                     SvelteDirectiveModifierList [],
                                     HtmlBogus {
@@ -87,8 +87,8 @@ HtmlRoot {
             0: CLASS_KW@5..10 "class" [] []
             1: HTML_BOGUS@10..27
               0: COLON@10..11 ":" [] []
-              1: SVELTE_LITERAL@11..17
-                0: HTML_LITERAL@11..17 "active" [] []
+              1: SVELTE_NAME@11..17
+                0: IDENT@11..17 "active" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
               3: HTML_BOGUS@17..27
                 0: EQ@17..18 "=" [] []

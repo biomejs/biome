@@ -8,6 +8,7 @@ expression: snapshot
 ```svelte
 <div class:active>Shorthand</div>
 <div class:cool class:lame={!cool}>Multiple shorthand</div>
+<div class:myClass />
 
 ```
 
@@ -31,8 +32,8 @@ HtmlRoot {
                         class_token: CLASS_KW@5..10 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@10..11 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@11..17 "active" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@11..17 "active" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: missing (optional),
@@ -66,8 +67,8 @@ HtmlRoot {
                         class_token: CLASS_KW@39..44 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@44..45 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@45..50 "cool" [] [Whitespace(" ")],
+                            property: SvelteName {
+                                ident_token: IDENT@45..50 "cool" [] [Whitespace(" ")],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: missing (optional),
@@ -77,8 +78,8 @@ HtmlRoot {
                         class_token: CLASS_KW@50..55 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@55..56 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@56..60 "lame" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@56..60 "lame" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -110,19 +111,40 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@92..93 ">" [] [],
             },
         },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@93..95 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: DIV_KW@95..99 "div" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteClassDirective {
+                    class_token: CLASS_KW@99..104 "class" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@104..105 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@105..113 "myClass" [] [Whitespace(" ")],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@113..114 "/" [] [],
+            r_angle_token: R_ANGLE@114..115 ">" [] [],
+        },
     ],
-    eof_token: EOF@93..94 "" [Newline("\n")] [],
+    eof_token: EOF@115..116 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..94
+0: HTML_ROOT@0..116
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..93
+  3: HTML_ELEMENT_LIST@0..115
     0: HTML_ELEMENT@0..33
       0: HTML_OPENING_ELEMENT@0..18
         0: L_ANGLE@0..1 "<" [] []
@@ -133,8 +155,8 @@ HtmlRoot {
             0: CLASS_KW@5..10 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@10..17
               0: COLON@10..11 ":" [] []
-              1: SVELTE_LITERAL@11..17
-                0: HTML_LITERAL@11..17 "active" [] []
+              1: SVELTE_NAME@11..17
+                0: IDENT@11..17 "active" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
               3: (empty)
         3: R_ANGLE@17..18 ">" [] []
@@ -157,16 +179,16 @@ HtmlRoot {
             0: CLASS_KW@39..44 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@44..50
               0: COLON@44..45 ":" [] []
-              1: SVELTE_LITERAL@45..50
-                0: HTML_LITERAL@45..50 "cool" [] [Whitespace(" ")]
+              1: SVELTE_NAME@45..50
+                0: IDENT@45..50 "cool" [] [Whitespace(" ")]
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@50..50
               3: (empty)
           1: SVELTE_CLASS_DIRECTIVE@50..68
             0: CLASS_KW@50..55 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@55..68
               0: COLON@55..56 ":" [] []
-              1: SVELTE_LITERAL@56..60
-                0: HTML_LITERAL@56..60 "lame" [] []
+              1: SVELTE_NAME@56..60
+                0: IDENT@56..60 "lame" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@60..60
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@60..68
                 0: EQ@60..61 "=" [] []
@@ -185,6 +207,21 @@ HtmlRoot {
         2: HTML_TAG_NAME@89..92
           0: DIV_KW@89..92 "div" [] []
         3: R_ANGLE@92..93 ">" [] []
-  4: EOF@93..94 "" [Newline("\n")] []
+    2: HTML_SELF_CLOSING_ELEMENT@93..115
+      0: L_ANGLE@93..95 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@95..99
+        0: DIV_KW@95..99 "div" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@99..113
+        0: SVELTE_CLASS_DIRECTIVE@99..113
+          0: CLASS_KW@99..104 "class" [] []
+          1: SVELTE_DIRECTIVE_VALUE@104..113
+            0: COLON@104..105 ":" [] []
+            1: SVELTE_NAME@105..113
+              0: IDENT@105..113 "myClass" [] [Whitespace(" ")]
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@113..113
+            3: (empty)
+      3: SLASH@113..114 "/" [] []
+      4: R_ANGLE@114..115 ">" [] []
+  4: EOF@115..116 "" [Newline("\n")] []
 
 ```
