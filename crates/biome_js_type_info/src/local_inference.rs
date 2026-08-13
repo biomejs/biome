@@ -3186,121 +3186,397 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 /// establish for it, e.g. `Typeof(String)` for `x` inside the consequent of
 /// `if (typeof x === "string")`, or `Truthy` inside the consequent of
 /// `if (x)`.
-///
-/// This is a purely syntactic check, scoped to the enclosing function. A
-/// guard whose consequent declares or assigns a binding with the same name
-/// is ignored, since it no longer says anything about that binding.
-///
-/// Guards can nest on the same name; see [`record_guard_predicate`] for how
-/// the predicates of nested guards combine.
 fn guard_narrowing_predicate(
     resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     id: &JsReferenceIdentifier,
 ) -> Option<NarrowingPredicate> {
     let name_token = id.name().ok()?;
-    let name = name_token.text();
-    let mut child = id.syntax().clone();
-    let mut found = None;
-    for ancestor in id.syntax().ancestors().skip(1) {
-        if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor) {
-            if if_stmt
-                .consequent()
-                .is_ok_and(|consequent| consequent.syntax() == &child)
-                && let Some(predicate) =
-                    guard_predicate(resolver, scope_id, &if_stmt, name, &name_token)
-                && !narrowing_invalidated_within(resolver, &child, &name_token)
-            {
-                record_guard_predicate(&mut found, predicate)?;
-            }
-        } else if let Some(case_clause) = JsCaseClause::cast_ref(&ancestor) {
-            if case_clause.test().is_ok_and(|test| test.syntax() != &child)
-                && let Some(predicate) =
-                    switch_case_predicate(resolver, &case_clause, name, &name_token)
-                && !narrowing_invalidated_within(resolver, &ancestor, &name_token)
-            {
-                record_guard_predicate(&mut found, predicate)?;
-            }
-        } else if is_narrowing_boundary(&ancestor) {
-            break;
-        }
-        child = ancestor;
-    }
-    found
+    GuardAnalysis::new(resolver, scope_id, name_token).narrowing_predicate(id)
 }
 
-/// Returns the predicate that the given `case` clause establishes for
-/// references with the given `name` in its statements, if any.
+/// Detects the narrowing guards that apply to one binding.
 ///
-/// Narrowing only applies when every preceding clause of the `switch`
-/// statement provably exits, since execution could otherwise fall through
-/// into the clause while the discriminant held a different value. The tests
-/// of preceding clauses still evaluate in order even when their clauses are
-/// not entered, so a write to `name` inside one of them also declines
-/// narrowing:
-///
-/// ```js
-/// switch (x) {
-///   case (x = 5, "nope"): break; // evaluates before "a" is tested
-///   case "a":
-///     x; // not narrowed: `x` no longer holds the matched value
-/// }
-/// ```
-fn switch_case_predicate(
-    resolver: &mut dyn RawTypeCollector,
-    case_clause: &JsCaseClause,
-    name: &str,
-    name_token: &TokenText,
-) -> Option<NarrowingPredicate> {
-    let test = case_clause.test().ok()?.omit_parentheses();
-    let value = string_literal_value(&test)?;
+/// Every check is decided against a single name, the one of the reference
+/// being narrowed, and guards that mention other bindings (the callee of a
+/// predicate call, the class of an `instanceof`) resolve them from the scope
+/// that reference resolves in. Both are fixed for the whole analysis, as is
+/// the resolver whose invalidation cache the scans share, so they live here
+/// instead of being threaded through every check.
+struct GuardAnalysis<'a> {
+    resolver: &'a mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    name_token: TokenText,
+}
 
-    let switch_stmt = case_clause
-        .syntax()
-        .ancestors()
-        .find_map(JsSwitchStatement::cast)?;
-    let discriminant = switch_stmt.discriminant().ok()?.omit_parentheses();
-    let member = if is_reference_to(&discriminant, name) {
-        None
-    } else {
-        Some(member_of_reference(&discriminant, name)?)
-    };
+impl<'a> GuardAnalysis<'a> {
+    fn new(
+        resolver: &'a mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        name_token: TokenText,
+    ) -> Self {
+        Self {
+            resolver,
+            scope_id,
+            name_token,
+        }
+    }
 
-    for clause in switch_stmt.cases() {
-        if clause.syntax() == case_clause.syntax() {
-            break;
+    /// The name of the binding being narrowed.
+    fn name(&self) -> &str {
+        self.name_token.text()
+    }
+
+    /// Returns the predicate the guards enclosing `id` establish for it.
+    ///
+    /// This is a purely syntactic check, scoped to the enclosing function. A
+    /// guard whose consequent declares or assigns a binding with the same
+    /// name is ignored, since it no longer says anything about that binding.
+    ///
+    /// Guards can nest on the same name; see [`record_guard_predicate`] for
+    /// how the predicates of nested guards combine.
+    fn narrowing_predicate(&mut self, id: &JsReferenceIdentifier) -> Option<NarrowingPredicate> {
+        let mut child = id.syntax().clone();
+        let mut found = None;
+        for ancestor in id.syntax().ancestors().skip(1) {
+            if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor) {
+                if if_stmt
+                    .consequent()
+                    .is_ok_and(|consequent| consequent.syntax() == &child)
+                    && let Some(predicate) = self.guard_predicate(&if_stmt)
+                    && !self.narrowing_invalidated_within(&child, self.name_token.clone())
+                {
+                    record_guard_predicate(&mut found, predicate)?;
+                }
+            } else if let Some(case_clause) = JsCaseClause::cast_ref(&ancestor) {
+                if case_clause.test().is_ok_and(|test| test.syntax() != &child)
+                    && let Some(predicate) = self.switch_case_predicate(&case_clause)
+                    && !self.narrowing_invalidated_within(&ancestor, self.name_token.clone())
+                {
+                    record_guard_predicate(&mut found, predicate)?;
+                }
+            } else if is_narrowing_boundary(&ancestor) {
+                break;
+            }
+            child = ancestor;
         }
-        if !clause_provably_exits(&clause) {
-            return None;
-        }
-        if let AnyJsSwitchClause::JsCaseClause(preceding) = &clause
-            && let Ok(preceding_test) = preceding.test()
-        {
-            if narrowing_invalidated_within(resolver, preceding_test.syntax(), name_token) {
+        found
+    }
+
+    /// Returns the predicate that the given `case` clause establishes for
+    /// references with the narrowed name in its statements, if any.
+    ///
+    /// Narrowing only applies when every preceding clause of the `switch`
+    /// statement provably exits, since execution could otherwise fall through
+    /// into the clause while the discriminant held a different value. The
+    /// tests of preceding clauses still evaluate in order even when their
+    /// clauses are not entered, so a write to the name inside one of them
+    /// also declines narrowing:
+    ///
+    /// ```js
+    /// switch (x) {
+    ///   case (x = 5, "nope"): break; // evaluates before "a" is tested
+    ///   case "a":
+    ///     x; // not narrowed: `x` no longer holds the matched value
+    /// }
+    /// ```
+    fn switch_case_predicate(&mut self, case_clause: &JsCaseClause) -> Option<NarrowingPredicate> {
+        let test = case_clause.test().ok()?.omit_parentheses();
+        let value = string_literal_value(&test)?;
+
+        let switch_stmt = case_clause
+            .syntax()
+            .ancestors()
+            .find_map(JsSwitchStatement::cast)?;
+        let discriminant = switch_stmt.discriminant().ok()?.omit_parentheses();
+        let member = if is_reference_to(&discriminant, self.name()) {
+            None
+        } else {
+            Some(member_of_reference(&discriminant, self.name())?)
+        };
+
+        for clause in switch_stmt.cases() {
+            if clause.syntax() == case_clause.syntax() {
+                break;
+            }
+            if !clause_provably_exits(&clause) {
                 return None;
             }
-            // For a member discriminant, a preceding test can also overwrite
-            // the compared member itself.
-            if member.is_some()
-                && member_write_invalidated_within(resolver, preceding_test.syntax(), name_token)
+            if let AnyJsSwitchClause::JsCaseClause(preceding) = &clause
+                && let Ok(preceding_test) = preceding.test()
             {
-                return None;
+                if self
+                    .narrowing_invalidated_within(preceding_test.syntax(), self.name_token.clone())
+                {
+                    return None;
+                }
+                // For a member discriminant, a preceding test can also overwrite
+                // the compared member itself.
+                if member.is_some() && self.member_write_invalidated_within(preceding_test.syntax())
+                {
+                    return None;
+                }
+            }
+        }
+
+        match member {
+            None => Some(NarrowingPredicate::StringEquals(value)),
+            Some(member) => {
+                // Writing to a member of the narrowed value inside the clause
+                // could change the compared member.
+                if self.member_write_invalidated_within(case_clause.syntax()) {
+                    return None;
+                }
+                Some(NarrowingPredicate::MemberEquals(Box::new(
+                    MemberEqualsPredicate { member, value },
+                )))
             }
         }
     }
 
-    match member {
-        None => Some(NarrowingPredicate::StringEquals(value)),
-        Some(member) => {
-            // Writing to a member of the narrowed value inside the clause
-            // could change the compared member.
-            if member_write_invalidated_within(resolver, case_clause.syntax(), name_token) {
-                return None;
+    /// Returns the predicate that the test of the given `if` statement
+    /// establishes for references with the narrowed name in its consequent,
+    /// if any.
+    fn guard_predicate(&mut self, if_stmt: &JsIfStatement) -> Option<NarrowingPredicate> {
+        let test = if_stmt.test().ok()?.omit_parentheses();
+        match &test {
+            // `if (x)`
+            AnyJsExpression::JsIdentifierExpression(_) => {
+                is_reference_to(&test, self.name()).then_some(NarrowingPredicate::Truthy)
             }
-            Some(NarrowingPredicate::MemberEquals(Box::new(
-                MemberEqualsPredicate { member, value },
-            )))
+            // `if (isFoo(x))`
+            AnyJsExpression::JsCallExpression(call) => self
+                .predicate_call_guard(if_stmt, call)
+                .map(|predicate| NarrowingPredicate::PredicateCall(Box::new(predicate))),
+            // `if (x instanceof Class)`
+            AnyJsExpression::JsInstanceofExpression(instanceof) => self
+                .instanceof_guard_class(if_stmt, instanceof)
+                .map(NarrowingPredicate::InstanceOf),
+            // `if (!x)`
+            AnyJsExpression::JsUnaryExpression(unary)
+                if matches!(unary.operator(), Ok(JsUnaryOperator::LogicalNot)) =>
+            {
+                let argument = unary.argument().ok()?.omit_parentheses();
+                is_reference_to(&argument, self.name()).then_some(NarrowingPredicate::Falsy)
+            }
+            // `if (typeof x === "<tag>")`, `if (x.member === "<value>")`, or
+            // `if (x === "<value>")`
+            AnyJsExpression::JsBinaryExpression(binary) => typeof_guard_tag(binary, self.name())
+                .map(NarrowingPredicate::Typeof)
+                .or_else(|| {
+                    self.member_equals_guard(if_stmt, binary)
+                        .map(|predicate| NarrowingPredicate::MemberEquals(Box::new(predicate)))
+                })
+                .or_else(|| {
+                    string_equals_guard(binary, self.name()).map(NarrowingPredicate::StringEquals)
+                }),
+            _ => None,
         }
+    }
+
+    /// Returns the predicate of a `<name>.<member> === "<value>"` comparison,
+    /// if the given binary expression is one.
+    ///
+    /// Handles both operand orders. Loose equality is not accepted: a test like
+    /// `x.kind == "1"` also passes when the member holds the number `1`, so
+    /// stripping the variants whose member is not the string `"1"` would narrow
+    /// away the value actually present at runtime.
+    fn member_equals_guard(
+        &mut self,
+        if_stmt: &JsIfStatement,
+        binary: &JsBinaryExpression,
+    ) -> Option<MemberEqualsPredicate> {
+        if !matches!(binary.operator().ok()?, JsBinaryOperator::StrictEquality) {
+            return None;
+        }
+
+        // Writing to a member of the narrowed value inside the consequent could
+        // change the compared member.
+        if let Ok(consequent) = if_stmt.consequent()
+            && self.member_write_invalidated_within(consequent.syntax())
+        {
+            return None;
+        }
+
+        let left = binary.left().ok()?.omit_parentheses();
+        let right = binary.right().ok()?.omit_parentheses();
+        member_of_reference(&left, self.name())
+            .zip(string_literal_value(&right))
+            .or_else(|| member_of_reference(&right, self.name()).zip(string_literal_value(&left)))
+            .map(|(member, value)| MemberEqualsPredicate { member, value })
+    }
+
+    /// Returns the predicate of an `isFoo(<name>)`-style call, if the given
+    /// call expression passes a reference with the narrowed name as one of its
+    /// arguments.
+    ///
+    /// Whether the callee is an actual type predicate is only decided during
+    /// resolution. A spread among the arguments before the reference makes the
+    /// mapping from its position to the callee's parameters ambiguous at
+    /// runtime, so no predicate is returned then.
+    fn predicate_call_guard(
+        &mut self,
+        if_stmt: &JsIfStatement,
+        call: &JsCallExpression,
+    ) -> Option<PredicateCallPredicate> {
+        let callee = call.callee().ok()?.omit_parentheses();
+        let callee_name = callee
+            .as_js_identifier_expression()?
+            .name()
+            .ok()?
+            .name()
+            .ok()?;
+
+        // The callee reference is resolved from the scope of the narrowed
+        // reference. A same-name binding declared in the consequent would
+        // shadow the callee the guard actually invoked.
+        if let Ok(consequent) = if_stmt.consequent()
+            && self.narrowing_invalidated_within(consequent.syntax(), callee_name.clone())
+        {
+            return None;
+        }
+
+        let mut argument_index = None;
+        for (index, argument) in call.arguments().ok()?.args().iter().enumerate() {
+            let Ok(AnyJsCallArgument::AnyJsExpression(expression)) = argument else {
+                return None;
+            };
+            if is_reference_to(&expression.omit_parentheses(), self.name()) {
+                argument_index = Some(index);
+                break;
+            }
+        }
+
+        Some(PredicateCallPredicate {
+            callee: TypeReference::from_name(self.scope_id, callee_name),
+            argument_index: argument_index?,
+        })
+    }
+
+    /// Returns a reference to the class an `instanceof` guard over a reference
+    /// with the narrowed name checks against, if the given expression is one.
+    fn instanceof_guard_class(
+        &mut self,
+        if_stmt: &JsIfStatement,
+        instanceof: &JsInstanceofExpression,
+    ) -> Option<TypeReference> {
+        let left = instanceof.left().ok()?.omit_parentheses();
+        if !is_reference_to(&left, self.name()) {
+            return None;
+        }
+
+        let right = instanceof.right().ok()?.omit_parentheses();
+        let class_name = right
+            .as_js_identifier_expression()?
+            .name()
+            .ok()?
+            .name()
+            .ok()?;
+
+        // The class reference is resolved from the scope of the narrowed
+        // reference. A same-name binding declared in the consequent would shadow
+        // the class the guard actually checked against.
+        if let Ok(consequent) = if_stmt.consequent()
+            && self.narrowing_invalidated_within(consequent.syntax(), class_name.clone())
+        {
+            return None;
+        }
+
+        Some(TypeReference::from_name(self.scope_id, class_name))
+    }
+
+    /// Returns whether `name_token` is invalidated as a narrowing target
+    /// somewhere inside `node`: either a `JsIdentifierBinding` with that name
+    /// is declared there, or the name is assigned to (written) within `node`.
+    ///
+    /// The scan is deliberately coarse: a write anywhere in `node` invalidates
+    /// every reference in it, even ones that precede the write. It also keys on
+    /// syntax kind rather than on scopes, so `enum name {}` counts (its id is a
+    /// `JsIdentifierBinding`) while `namespace name {}` does not (its name is a
+    /// `TsIdentifierBinding`). Neither outcome is observable: a reference under
+    /// such a declaration resolves to it, not to the guarded binding.
+    ///
+    /// This runs once per reference identifier inside a guarded consequent, so
+    /// a branch with many references would otherwise re-scan the same subtree
+    /// repeatedly. When the resolver provides a
+    /// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
+    /// the result is memoized there for the lifetime of that cache.
+    fn narrowing_invalidated_within(&mut self, node: &JsSyntaxNode, name_token: TokenText) -> bool {
+        let key = (
+            node.clone(),
+            Text::from(name_token),
+            NarrowingInvalidationKind::Binding,
+        );
+
+        if let Some(cache) = self.resolver.narrowing_invalidation_cache()
+            && let Some(&cached) = cache.get(&key)
+        {
+            return cached;
+        }
+
+        let name = key.1.text();
+        let invalidated = node.descendants().any(|descendant| {
+            let name_token = if let Some(binding) = JsIdentifierBinding::cast_ref(&descendant) {
+                binding.name_token()
+            } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&descendant) {
+                assignment.name_token()
+            } else {
+                return false;
+            };
+            name_token.is_ok_and(|token| token.text_trimmed() == name)
+        });
+
+        if let Some(cache) = self.resolver.narrowing_invalidation_cache() {
+            cache.insert(key, invalidated);
+        }
+
+        invalidated
+    }
+
+    /// Returns whether a member of the value with the narrowed name is written
+    /// to within `node`, e.g. `name.member = 1` or `name[key] = 1`.
+    ///
+    /// Like [`Self::narrowing_invalidated_within`], the scan is deliberately
+    /// coarse: a member write anywhere in `node` counts, even one that cannot
+    /// execute before the reference being narrowed. Results are memoized in the
+    /// resolver's narrowing invalidation cache, under
+    /// [`NarrowingInvalidationKind::MemberWrite`].
+    fn member_write_invalidated_within(&mut self, node: &JsSyntaxNode) -> bool {
+        let name = self.name_token.text();
+        let key = (
+            node.clone(),
+            Text::from(self.name_token.clone()),
+            NarrowingInvalidationKind::MemberWrite,
+        );
+
+        if let Some(cache) = self.resolver.narrowing_invalidation_cache()
+            && let Some(&cached) = cache.get(&key)
+        {
+            return cached;
+        }
+
+        let invalidated = node.descendants().any(|descendant| {
+            let object = match descendant.kind() {
+                JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
+                    JsStaticMemberAssignment::cast(descendant)
+                        .and_then(|assignment| assignment.object().ok())
+                }
+                JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
+                    JsComputedMemberAssignment::cast(descendant)
+                        .and_then(|assignment| assignment.object().ok())
+                }
+                _ => return false,
+            };
+            object
+                .map(AnyJsExpression::omit_parentheses)
+                .is_some_and(|object| is_reference_to(&object, name))
+        });
+
+        if let Some(cache) = self.resolver.narrowing_invalidation_cache() {
+            cache.insert(key, invalidated);
+        }
+
+        invalidated
     }
 }
 
@@ -3371,52 +3647,6 @@ fn record_guard_predicate(
     Some(())
 }
 
-/// Returns the predicate that the test of the given `if` statement
-/// establishes for references with the given `name` in its consequent, if
-/// any.
-fn guard_predicate(
-    resolver: &mut dyn RawTypeCollector,
-    scope_id: ScopeId,
-    if_stmt: &JsIfStatement,
-    name: &str,
-    name_token: &TokenText,
-) -> Option<NarrowingPredicate> {
-    let test = if_stmt.test().ok()?.omit_parentheses();
-    match &test {
-        // `if (x)`
-        AnyJsExpression::JsIdentifierExpression(_) => {
-            is_reference_to(&test, name).then_some(NarrowingPredicate::Truthy)
-        }
-        // `if (isFoo(x))`
-        AnyJsExpression::JsCallExpression(call) => {
-            predicate_call_guard(resolver, scope_id, if_stmt, call, name)
-                .map(|predicate| NarrowingPredicate::PredicateCall(Box::new(predicate)))
-        }
-        // `if (x instanceof Class)`
-        AnyJsExpression::JsInstanceofExpression(instanceof) => {
-            instanceof_guard_class(resolver, scope_id, if_stmt, instanceof, name)
-                .map(NarrowingPredicate::InstanceOf)
-        }
-        // `if (!x)`
-        AnyJsExpression::JsUnaryExpression(unary)
-            if matches!(unary.operator(), Ok(JsUnaryOperator::LogicalNot)) =>
-        {
-            let argument = unary.argument().ok()?.omit_parentheses();
-            is_reference_to(&argument, name).then_some(NarrowingPredicate::Falsy)
-        }
-        // `if (typeof x === "<tag>")`, `if (x.member === "<value>")`, or
-        // `if (x === "<value>")`
-        AnyJsExpression::JsBinaryExpression(binary) => typeof_guard_tag(binary, name)
-            .map(NarrowingPredicate::Typeof)
-            .or_else(|| {
-                member_equals_guard(resolver, if_stmt, binary, name, name_token)
-                    .map(|predicate| NarrowingPredicate::MemberEquals(Box::new(predicate)))
-            })
-            .or_else(|| string_equals_guard(binary, name).map(NarrowingPredicate::StringEquals)),
-        _ => None,
-    }
-}
-
 /// Returns the string of a `<name> === "<value>"` comparison, if the given
 /// binary expression is one.
 ///
@@ -3438,40 +3668,6 @@ fn string_equals_guard(binary: &JsBinaryExpression, name: &str) -> Option<Text> 
     } else {
         None
     }
-}
-
-/// Returns the predicate of a `<name>.<member> === "<value>"` comparison,
-/// if the given binary expression is one.
-///
-/// Handles both operand orders. Loose equality is not accepted: a test like
-/// `x.kind == "1"` also passes when the member holds the number `1`, so
-/// stripping the variants whose member is not the string `"1"` would narrow
-/// away the value actually present at runtime.
-fn member_equals_guard(
-    resolver: &mut dyn RawTypeCollector,
-    if_stmt: &JsIfStatement,
-    binary: &JsBinaryExpression,
-    name: &str,
-    name_token: &TokenText,
-) -> Option<MemberEqualsPredicate> {
-    if !matches!(binary.operator().ok()?, JsBinaryOperator::StrictEquality) {
-        return None;
-    }
-
-    // Writing to a member of the narrowed value inside the consequent could
-    // change the compared member.
-    if if_stmt.consequent().is_ok_and(|consequent| {
-        member_write_invalidated_within(resolver, consequent.syntax(), name_token)
-    }) {
-        return None;
-    }
-
-    let left = binary.left().ok()?.omit_parentheses();
-    let right = binary.right().ok()?.omit_parentheses();
-    member_of_reference(&left, name)
-        .zip(string_literal_value(&right))
-        .or_else(|| member_of_reference(&right, name).zip(string_literal_value(&left)))
-        .map(|(member, value)| MemberEqualsPredicate { member, value })
 }
 
 /// Returns the member name of a `<name>.<member>` expression.
@@ -3501,89 +3697,6 @@ fn string_literal_value(expr: &AnyJsExpression) -> Option<Text> {
         .as_any_js_literal_expression()?
         .as_js_string_literal_expression()?;
     unescaped_text_from_token(literal.value_token())
-}
-
-/// Returns the predicate of an `isFoo(<name>)`-style call, if the given
-/// call expression passes a reference with the given `name` as one of its
-/// arguments.
-///
-/// Whether the callee is an actual type predicate is only decided during
-/// resolution. A spread among the arguments before the reference makes the
-/// mapping from its position to the callee's parameters ambiguous at
-/// runtime, so no predicate is returned then.
-fn predicate_call_guard(
-    resolver: &mut dyn RawTypeCollector,
-    scope_id: ScopeId,
-    if_stmt: &JsIfStatement,
-    call: &JsCallExpression,
-    name: &str,
-) -> Option<PredicateCallPredicate> {
-    let callee = call.callee().ok()?.omit_parentheses();
-    let callee_name = callee
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?
-        .name()
-        .ok()?;
-
-    // The callee reference is resolved from the scope of the narrowed
-    // reference. A same-name binding declared in the consequent would
-    // shadow the callee the guard actually invoked.
-    if if_stmt.consequent().is_ok_and(|consequent| {
-        narrowing_invalidated_within(resolver, consequent.syntax(), &callee_name)
-    }) {
-        return None;
-    }
-
-    let mut argument_index = None;
-    for (index, argument) in call.arguments().ok()?.args().iter().enumerate() {
-        let Ok(AnyJsCallArgument::AnyJsExpression(expression)) = argument else {
-            return None;
-        };
-        if is_reference_to(&expression.omit_parentheses(), name) {
-            argument_index = Some(index);
-            break;
-        }
-    }
-
-    Some(PredicateCallPredicate {
-        callee: TypeReference::from_name(scope_id, callee_name),
-        argument_index: argument_index?,
-    })
-}
-
-/// Returns a reference to the class an `instanceof` guard over a reference
-/// with the given `name` checks against, if the given expression is one.
-fn instanceof_guard_class(
-    resolver: &mut dyn RawTypeCollector,
-    scope_id: ScopeId,
-    if_stmt: &JsIfStatement,
-    instanceof: &JsInstanceofExpression,
-    name: &str,
-) -> Option<TypeReference> {
-    let left = instanceof.left().ok()?.omit_parentheses();
-    if !is_reference_to(&left, name) {
-        return None;
-    }
-
-    let right = instanceof.right().ok()?.omit_parentheses();
-    let class_name = right
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?
-        .name()
-        .ok()?;
-
-    // The class reference is resolved from the scope of the narrowed
-    // reference. A same-name binding declared in the consequent would shadow
-    // the class the guard actually checked against.
-    if if_stmt.consequent().is_ok_and(|consequent| {
-        narrowing_invalidated_within(resolver, consequent.syntax(), &class_name)
-    }) {
-        return None;
-    }
-
-    Some(TypeReference::from_name(scope_id, class_name))
 }
 
 /// Returns the tag of a `typeof <name> === "<tag>"` comparison, if the given
@@ -3638,106 +3751,6 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
         .as_any_js_literal_expression()?
         .as_js_string_literal_expression()?;
     TypeofTag::from_literal(literal.inner_string_text().ok()?.text())
-}
-
-/// Returns whether `name` is invalidated as a narrowing target somewhere
-/// inside `node`: either a `JsIdentifierBinding` named `name` is declared
-/// there, or `name` is assigned to (written) within `node`.
-///
-/// The scan is deliberately coarse: a write anywhere in `node` invalidates
-/// every reference in it, even ones that precede the write. It also keys on
-/// syntax kind rather than on scopes, so `enum name {}` counts (its id is a
-/// `JsIdentifierBinding`) while `namespace name {}` does not (its name is a
-/// `TsIdentifierBinding`). Neither outcome is observable: a reference under
-/// such a declaration resolves to it, not to the guarded binding.
-///
-/// `typeof_guard_narrowed_tag` calls this once per reference identifier
-/// inside a guarded consequent, so a branch with many references would
-/// otherwise re-scan the same subtree repeatedly. When `resolver` provides a
-/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
-/// the result is memoized there for the lifetime of that cache.
-fn narrowing_invalidated_within(
-    resolver: &mut dyn RawTypeCollector,
-    node: &JsSyntaxNode,
-    name_token: &TokenText,
-) -> bool {
-    let name = name_token.text();
-    let key = (
-        node.clone(),
-        Text::from(name_token.clone()),
-        NarrowingInvalidationKind::Binding,
-    );
-
-    if let Some(cache) = resolver.narrowing_invalidation_cache()
-        && let Some(&cached) = cache.get(&key)
-    {
-        return cached;
-    }
-
-    let invalidated = node.descendants().any(|descendant| {
-        let name_token = if let Some(binding) = JsIdentifierBinding::cast_ref(&descendant) {
-            binding.name_token()
-        } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&descendant) {
-            assignment.name_token()
-        } else {
-            return false;
-        };
-        name_token.is_ok_and(|token| token.text_trimmed() == name)
-    });
-
-    if let Some(cache) = resolver.narrowing_invalidation_cache() {
-        cache.insert(key, invalidated);
-    }
-
-    invalidated
-}
-
-/// Returns whether a member of the value with the given `name` is written
-/// to within `node`, e.g. `name.member = 1` or `name[key] = 1`.
-///
-/// Like [`narrowing_invalidated_within`], the scan is deliberately coarse:
-/// a member write anywhere in `node` counts, even one that cannot execute
-/// before the reference being narrowed. Results are memoized in the
-/// resolver's narrowing invalidation cache, under
-/// [`NarrowingInvalidationKind::MemberWrite`].
-fn member_write_invalidated_within(
-    resolver: &mut dyn RawTypeCollector,
-    node: &JsSyntaxNode,
-    name_token: &TokenText,
-) -> bool {
-    let name = name_token.text();
-    let key = (
-        node.clone(),
-        Text::from(name_token.clone()),
-        NarrowingInvalidationKind::MemberWrite,
-    );
-
-    if let Some(cache) = resolver.narrowing_invalidation_cache()
-        && let Some(&cached) = cache.get(&key)
-    {
-        return cached;
-    }
-
-    let invalidated = node.descendants().any(|descendant| {
-        let object = match descendant.kind() {
-            JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => JsStaticMemberAssignment::cast(descendant)
-                .and_then(|assignment| assignment.object().ok()),
-            JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
-                JsComputedMemberAssignment::cast(descendant)
-                    .and_then(|assignment| assignment.object().ok())
-            }
-            _ => return false,
-        };
-        object
-            .map(AnyJsExpression::omit_parentheses)
-            .is_some_and(|object| is_reference_to(&object, name))
-    });
-
-    if let Some(cache) = resolver.narrowing_invalidation_cache() {
-        cache.insert(key, invalidated);
-    }
-
-    invalidated
 }
 
 /// Returns whether `node` is a boundary that `typeof` narrowing must not
