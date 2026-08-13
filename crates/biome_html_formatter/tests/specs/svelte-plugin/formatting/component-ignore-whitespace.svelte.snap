@@ -20,15 +20,7 @@ info: formatting/component-ignore-whitespace.svelte
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,13 @@
- <p><ExternalLink href="https://www.buymeacoffee.com">buy</ExternalLink>!</p>
- 
- <p>
--    <ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>!
-+    <ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>
-+    !
- </p>
- 
+@@ -7,5 +7,6 @@
  <p>
      <ExternalLink href="https://www.buymeacoffee.com">
          buy me a coffee
@@ -44,8 +36,7 @@ info: formatting/component-ignore-whitespace.svelte
 <p><ExternalLink href="https://www.buymeacoffee.com">buy</ExternalLink>!</p>
 
 <p>
-    <ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>
-    !
+    <ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>!
 </p>
 
 <p>
