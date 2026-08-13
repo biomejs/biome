@@ -161,6 +161,7 @@ define_categories! {
     "lint/correctness/noUnusedLabels": "https://biomejs.dev/linter/rules/no-unused-labels",
     "lint/correctness/noUnusedPrivateClassMembers": "https://biomejs.dev/linter/rules/no-unused-private-class-members",
     "lint/correctness/noUnusedVariables": "https://biomejs.dev/linter/rules/no-unused-variables",
+    "lint/correctness/noUselessLengthCheck": "https://biomejs.dev/linter/rules/no-useless-length-check",
     "lint/correctness/noVoidElementsWithChildren": "https://biomejs.dev/linter/rules/no-void-elements-with-children",
     "lint/correctness/noVoidTypeReturn": "https://biomejs.dev/linter/rules/no-void-type-return",
     "lint/correctness/noVueDataObjectDeclaration": "https://biomejs.dev/linter/rules/no-vue-data-object-declaration",
