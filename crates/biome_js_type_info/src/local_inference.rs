@@ -1206,13 +1206,7 @@ impl TypeData {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let predicate = assignment_narrowing_source(resolver, id, &name)
-                    .map(|source| {
-                        NarrowingPredicate::Assigned(
-                            resolver.reference_to_resolved_expression(scope_id, &source),
-                        )
-                    })
-                    .or_else(|| guard_narrowing_predicate(resolver, scope_id, id));
+                let predicate = narrowing_predicate(resolver, scope_id, id, name.clone());
                 let reference = TypeReference::from_name(scope_id, name);
                 match predicate {
                     Some(predicate) => {
@@ -3189,51 +3183,6 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
 }
 
-/// Returns the right-hand side of the nearest assignment to a reference
-/// that precedes it in the same statement list, if the assignment provably
-/// determines the reference's value.
-///
-/// This is a purely syntactic check. It bails out conservatively when any
-/// statement between the assignment and the reference -- or the reference's
-/// own statement, since loops re-evaluate their heads -- could write the
-/// value again or shadow its binding, and it does not look for assignments
-/// outside the enclosing function.
-fn assignment_narrowing_source(
-    resolver: &mut dyn RawTypeCollector,
-    id: &JsReferenceIdentifier,
-    name_token: &TokenText,
-) -> Option<AnyJsExpression> {
-    let name = name_token.text();
-    let containing_stmt = id
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .take_while(|ancestor| !is_narrowing_boundary(ancestor))
-        .find(|ancestor| {
-            ancestor
-                .parent()
-                .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
-        })?;
-    if narrowing_invalidated_within(resolver, &containing_stmt, name, name_token) {
-        return None;
-    }
-
-    let mut sibling = containing_stmt.prev_sibling();
-    while let Some(stmt) = sibling {
-        if let Some(source) = plain_assignment_rhs(&stmt, name) {
-            // A write within the right-hand side itself, such as a closure
-            // that reassigns the value, could occur after the assignment.
-            return (!narrowing_invalidated_within(resolver, source.syntax(), name, name_token))
-                .then_some(source);
-        }
-        if narrowing_invalidated_within(resolver, &stmt, name, name_token) {
-            return None;
-        }
-        sibling = stmt.prev_sibling();
-    }
-    None
-}
-
 /// Returns the right-hand side of a statement of the form `<name> = <expr>;`.
 fn plain_assignment_rhs(node: &JsSyntaxNode, name: &str) -> Option<AnyJsExpression> {
     let stmt = JsExpressionStatement::cast_ref(node)?;
@@ -3259,13 +3208,16 @@ fn plain_assignment_rhs(node: &JsSyntaxNode, name: &str) -> Option<AnyJsExpressi
 /// establish for it, e.g. `Typeof(String)` for `x` inside the consequent of
 /// `if (typeof x === "string")`, or `Truthy` inside the consequent of
 /// `if (x)`.
-fn guard_narrowing_predicate(
+fn narrowing_predicate(
     resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     id: &JsReferenceIdentifier,
+    name_token: TokenText,
 ) -> Option<NarrowingPredicate> {
-    let name_token = id.name().ok()?;
-    GuardAnalysis::new(resolver, scope_id, name_token).narrowing_predicate(id)
+    let mut analysis = GuardAnalysis::new(resolver, scope_id, name_token);
+    analysis
+        .assignment_predicate(id)
+        .or_else(|| analysis.narrowing_predicate(id))
 }
 
 /// Detects the narrowing guards that apply to one binding.
@@ -3556,6 +3508,69 @@ impl<'a> GuardAnalysis<'a> {
         }
 
         Some(TypeReference::from_name(self.scope_id, class_name))
+    }
+
+    /// Returns the predicate established by the nearest preceding assignment
+    /// to the narrowed binding, if there is one.
+    fn assignment_predicate(&mut self, id: &JsReferenceIdentifier) -> Option<NarrowingPredicate> {
+        let source = self.assignment_source(id)?;
+        let ty = self
+            .resolver
+            .reference_to_resolved_expression(self.scope_id, &source);
+        Some(NarrowingPredicate::Assigned(ty))
+    }
+
+    /// Returns the right-hand side of the nearest assignment to the narrowed
+    /// binding that precedes `id` in the same statement list, if the
+    /// assignment provably determines the reference's value.
+    ///
+    /// This is a purely syntactic check over the innermost enclosing
+    /// statement list: a reference inside a nested block, an `if` consequent,
+    /// or a `case` clause is never narrowed by an assignment in the block
+    /// around it. It bails out conservatively when any statement between the
+    /// assignment and the reference -- or the reference's own statement,
+    /// since loops re-evaluate their heads -- could write the value again or
+    /// shadow its binding.
+    fn assignment_source(&mut self, id: &JsReferenceIdentifier) -> Option<AnyJsExpression> {
+        let containing_stmt = id
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .take_while(|ancestor| !is_narrowing_boundary(ancestor))
+            .find(|ancestor| {
+                ancestor
+                    .parent()
+                    .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
+            })?;
+
+        // Every reference in a statement list reaches this point, so rule out
+        // the common case -- a name the list never writes to -- with a single
+        // scan that the whole list shares, before walking its statements one
+        // by one.
+        let statement_list = containing_stmt.parent()?;
+        if !self.narrowing_invalidated_within(&statement_list, self.name_token.clone()) {
+            return None;
+        }
+
+        if self.narrowing_invalidated_within(&containing_stmt, self.name_token.clone()) {
+            return None;
+        }
+
+        let mut sibling = containing_stmt.prev_sibling();
+        while let Some(stmt) = sibling {
+            if let Some(source) = plain_assignment_rhs(&stmt, self.name()) {
+                // A write within the right-hand side itself, such as a closure
+                // that reassigns the value, could occur after the assignment.
+                return (!self
+                    .narrowing_invalidated_within(source.syntax(), self.name_token.clone()))
+                .then_some(source);
+            }
+            if self.narrowing_invalidated_within(&stmt, self.name_token.clone()) {
+                return None;
+            }
+            sibling = stmt.prev_sibling();
+        }
+        None
     }
 
     /// Returns whether `name_token` is invalidated as a narrowing target
