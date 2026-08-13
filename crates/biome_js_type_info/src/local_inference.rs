@@ -3208,7 +3208,7 @@ fn typeof_guard_narrowed_tag(
                 .consequent()
                 .is_ok_and(|consequent| consequent.syntax() == &child)
                 && let Some(tag) = typeof_guard_tag(&if_stmt, name)
-                && !narrowing_invalidated_within(resolver, &child, name, &name_token)
+                && !narrowing_invalidated_within(resolver, &child, &name_token)
             {
                 match found {
                     None => found = Some(tag),
@@ -3295,9 +3295,9 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
 fn narrowing_invalidated_within(
     resolver: &mut dyn RawTypeCollector,
     node: &JsSyntaxNode,
-    name: &str,
     name_token: &TokenText,
 ) -> bool {
+    let name = name_token.text();
     let key = (node.clone(), Text::from(name_token.clone()));
 
     if let Some(cache) = resolver.narrowing_invalidation_cache()
