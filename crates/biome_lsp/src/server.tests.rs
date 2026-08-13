@@ -133,6 +133,34 @@ fn create_document_content_change_event() -> Vec<TextDocumentContentChangeEvent>
     ]
 }
 
+fn apply_ascii_text_edits(source: &str, edits: Vec<TextEdit>) -> String {
+    let position_to_offset = |position: Position| {
+        source
+            .split_inclusive('\n')
+            .take(position.line as usize)
+            .map(str::len)
+            .sum::<usize>()
+            + position.character as usize
+    };
+    let mut edits = edits
+        .into_iter()
+        .map(|edit| {
+            (
+                position_to_offset(edit.range.start),
+                position_to_offset(edit.range.end),
+                edit.new_text,
+            )
+        })
+        .collect::<Vec<_>>();
+    edits.sort_unstable_by_key(|(start, _, _)| std::cmp::Reverse(*start));
+
+    let mut output = source.to_string();
+    for (start, end, new_text) in edits {
+        output.replace_range(start..end, &new_text);
+    }
+    output
+}
+
 fn full_document_change(text: impl Into<String>) -> Vec<TextDocumentContentChangeEvent> {
     vec![TextDocumentContentChangeEvent {
         range: None,
@@ -4702,6 +4730,115 @@ async fn should_acknowledge_changes_in_settings_in_formatting() -> Result<()> {
 
     server.close_document().await?;
 
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_reparse_open_embedded_language_files_after_loading_settings() -> Result<()> {
+    let documents = [
+        (
+            uri!("document.astro"),
+            "astro",
+            "---\nconst foo= 1;\n---\n<p>{foo}</p>\n",
+            "<p>{foo}</p>",
+        ),
+        (
+            uri!("document.vue"),
+            "vue",
+            "<script setup>const foo= 1;</script><template><p>{{ foo }}</p></template>\n",
+            "<template",
+        ),
+        (
+            uri!("document.svelte"),
+            "svelte",
+            "<script>const foo= 1;</script><p>{foo}</p>\n",
+            "<p>{foo}</p>",
+        ),
+        (
+            uri!("document.html"),
+            "html",
+            "<script>const foo= 1;</script><p>foo</p>\n",
+            "<p>foo</p>",
+        ),
+        (
+            uri!("document.svg"),
+            "xml",
+            "<svg><style>circle{fill:red}</style><script>const foo= 1;</script><circle /></svg>\n",
+            "<circle />",
+        ),
+    ];
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), "{}");
+
+    let factory = ServerFactory::new_with_fs(fs.clone());
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+
+    for (uri, language_id, source, _) in &documents {
+        server
+            .open_named_document(source, uri.clone(), language_id)
+            .await?;
+    }
+
+    fs.insert(
+        to_utf8_file_path_buf(uri!("biome.json")),
+        r#"{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": {
+      "enabled": true
+    }
+  }
+}"#,
+    );
+    server.load_configuration().await?;
+
+    for (uri, _, source, expected_markup) in &documents {
+        let edits: Option<Vec<TextEdit>> = server
+            .request(
+                "textDocument/formatting",
+                "formatting",
+                DocumentFormattingParams {
+                    text_document: TextDocumentIdentifier { uri: uri.clone() },
+                    options: FormattingOptions::default(),
+                    work_done_progress_params: WorkDoneProgressParams {
+                        work_done_token: None,
+                    },
+                },
+            )
+            .await?
+            .context("formatting returned None")?;
+        let output = apply_ascii_text_edits(
+            source,
+            edits.context("formatting did not return an edit list")?,
+        );
+
+        assert!(output.contains("const foo = 1;"), "{output}");
+        assert!(output.contains(expected_markup), "{output}");
+    }
+
+    for (uri, _, _, _) in documents {
+        server
+            .notify(
+                "textDocument/didClose",
+                DidCloseTextDocumentParams {
+                    text_document: TextDocumentIdentifier { uri },
+                },
+            )
+            .await?;
+    }
     server.shutdown().await?;
     reader.abort();
 

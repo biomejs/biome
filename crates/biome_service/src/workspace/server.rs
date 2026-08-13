@@ -1098,10 +1098,7 @@ impl WorkspaceServerWithDb<'_> {
         node_cache: &mut NodeCache,
         settings: &SettingsWithEditor,
     ) -> Result<Vec<(AnyParse, EmbedContent, DocumentFileSource)>, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(
-            path,
-            settings.as_ref().experimental_full_html_support_enabled(),
-        );
+        let capabilities = self.features.get_deprecated_capabilities(*file_source);
         let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
@@ -2975,15 +2972,6 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             });
         }
 
-        if existing_version == Some(version) {
-            let parsed = {
-                let db = self.get_db();
-                db.get_file(path.as_path())
-                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
-            };
-            return self.finish_change_file(project_key, &path, parsed);
-        }
-
         let settings = self
             .projects
             .get_settings_based_on_path(project_key, &path)
@@ -3006,10 +2994,23 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let persist_node_cache = node_cache.is_some();
         let mut node_cache = node_cache.unwrap_or_default();
 
-        let document_source = self.get_file_source(
+        let document_source = self
+            .db_get_source(index)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        let path_source = DocumentFileSource::from_path(
             &path,
             settings.as_ref().experimental_full_html_support_enabled(),
         );
+        let source_changed = Self::should_prefer_path_source(document_source, path_source)
+            || Self::should_prefer_path_source(path_source, document_source);
+        let (index, document_source) = if source_changed {
+            (self.db_add_source(path_source), path_source)
+        } else {
+            (index, document_source)
+        };
+        if source_changed {
+            node_cache = NodeCache::default();
+        }
 
         let ParseResult {
             any_parse,
