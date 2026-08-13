@@ -332,10 +332,11 @@ export function numberGuard(v: number | string) {
     );
 }
 
-/// Pins the guard forms this slice deliberately leaves unhandled: they keep
-/// the declared type. `elseBranch` and `afterGuard` also read `x.length` from
-/// inside a handled consequent, so the snapshot still records narrowing
-/// somewhere and would change if narrowing regressed.
+/// Narrowing applies only to the consequent of a direct `typeof` equality
+/// test, so negated tests, conjunctions, `else` branches, and code after the
+/// guard keep the declared type. `elseBranch` and `afterGuard` also read
+/// `x.length` from inside a handled consequent, so the snapshot still records
+/// narrowing somewhere and would change if narrowing regressed.
 #[test]
 fn test_infer_module_types_leaves_unsupported_guard_forms_unnarrowed() {
     const SOURCE: &str = r#"

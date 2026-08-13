@@ -3438,6 +3438,15 @@ mod tests {
         assert_identity(&db, |s| {
             typeof_type(
                 &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    tag: raw::TypeofTag::String,
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
                 TypeofExpression::New(TypeofNewExpression {
                     callee: s.next(),
                     arguments: [
