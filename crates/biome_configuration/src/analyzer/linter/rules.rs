@@ -1447,7 +1447,7 @@ impl RuleName {
             Self::NoUselessEscapeInString => RuleGroup::Suspicious,
             Self::NoUselessFragments => RuleGroup::Complexity,
             Self::NoUselessLabel => RuleGroup::Complexity,
-            Self::NoUselessLengthCheck => RuleGroup::Correctness,
+            Self::NoUselessLengthCheck => RuleGroup::Nursery,
             Self::NoUselessLoneBlockStatements => RuleGroup::Complexity,
             Self::NoUselessRegexBackrefs => RuleGroup::Suspicious,
             Self::NoUselessRename => RuleGroup::Complexity,

@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+if (array.length === 0 || array.every(Boolean));
+
+if (array.length !== 0 && array.some(Boolean));
+
+if (array.length > 0 && array.some(Boolean));
+
+if (!array.length || array.every(Boolean));
+
+if ((array.length === 0) || (array.every(Boolean)));
+```
+
+# Diagnostics
+```
+invalid.js:1:5 lint/nursery/noUselessLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is useless
+  
+  > 1 │ if (array.length === 0 || array.every(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ if (array.length !== 0 && array.some(Boolean));
+  
+  i The .every() method already returns true for an empty array, and .some() already returns false, so this check has no effect on the result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/noUselessLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is useless
+  
+    1 │ if (array.length === 0 || array.every(Boolean));
+    2 │ 
+  > 3 │ if (array.length !== 0 && array.some(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ if (array.length > 0 && array.some(Boolean));
+  
+  i The .every() method already returns true for an empty array, and .some() already returns false, so this check has no effect on the result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/noUselessLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is useless
+  
+    3 │ if (array.length !== 0 && array.some(Boolean));
+    4 │ 
+  > 5 │ if (array.length > 0 && array.some(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ if (!array.length || array.every(Boolean));
+  
+  i The .every() method already returns true for an empty array, and .some() already returns false, so this check has no effect on the result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/noUselessLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is useless
+  
+    5 │ if (array.length > 0 && array.some(Boolean));
+    6 │ 
+  > 7 │ if (!array.length || array.every(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ if ((array.length === 0) || (array.every(Boolean)));
+  
+  i The .every() method already returns true for an empty array, and .some() already returns false, so this check has no effect on the result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noUselessLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is useless
+  
+    7 │ if (!array.length || array.every(Boolean));
+    8 │ 
+  > 9 │ if ((array.length === 0) || (array.every(Boolean)));
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The .every() method already returns true for an empty array, and .some() already returns false, so this check has no effect on the result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

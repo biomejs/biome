@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -34,6 +34,10 @@ declare_lint_rule! {
     /// if (array.length > 0 && array.some(Boolean));
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// if (array.every(Boolean) || array.length === 0);
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -45,11 +49,11 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// if (array.length === 0 || anotherCheck() || array.every(Boolean));
+    /// if (array.length === 0 || array.some(Boolean));
     /// ```
     ///
     /// ```js
-    /// if (array.length === 0 || array.some(Boolean));
+    /// if (foo().length === 0 || foo().every(Boolean));
     /// ```
     pub NoUselessLengthCheck {
         version: "next",
@@ -58,7 +62,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintUnicorn("no-useless-length-check").same()],
         recommended: false,
         severity: Severity::Warning,
-        fix_kind: FixKind::None,
     }
 }
 
@@ -82,13 +85,14 @@ impl Rule for NoUselessLengthCheck {
         // Left side must be a usable length check.
         let (left_base, length_kind) = extract_length_check(left.clone())?;
 
-        // Right side must call `.some()` / `.every()` on the same object.
+        // Right side must call `.some()` / `.every()` on the same identifier.
         let (right_base, method) = extract_some_every(right.clone())?;
 
-        // Match the length check against the method semantics.
-        //   `length === 0 || array.every(...)`   -> every is true on empty
-        //   `length !== 0 && array.some(...)`    -> some is false on empty
-        //   `length > 0 && array.some(...)`      -> some is false on empty
+        // `.every()` is true on an empty array, `.some()` on an empty array.
+        // So the length check is redundant only for the matching comparison.
+        //   `length === 0 || array.every(...)`  -> every is true on empty
+        //   `length !== 0 && array.some(...)`   -> some is false on empty
+        //   `length > 0 && array.some(...)`     -> some is false on empty
         let matches = match (is_or, length_kind) {
             (true, LengthKind::EqualZero) => method == "every",
             (false, LengthKind::NotEqualZero | LengthKind::GreaterZero) => method == "some",
@@ -99,9 +103,8 @@ impl Rule for NoUselessLengthCheck {
         }
 
         // The length check and the method call must target the same identifier.
-        // Impure expressions (calls, computed members, literals) are rejected:
-        // two syntactically identical calls may still return different arrays,
-        // so reporting them would be a false positive.
+        // Impure expressions (calls, computed members) are rejected: two
+        // syntactically identical calls may still return different arrays.
         if !same_identifier(&left_base, &right_base) {
             return None;
         }
@@ -134,8 +137,7 @@ enum LengthKind {
 }
 
 /// Extracts the base expression and kind of a length comparison such as
-/// `foo.length === 0`, `foo.length !== 0`, `foo.length > 0`, or
-/// `!foo.length`.
+/// `foo.length === 0`, `foo.length !== 0`, `foo.length > 0`, or `!foo.length`.
 fn extract_length_check(expr: AnyJsExpression) -> Option<(AnyJsExpression, LengthKind)> {
     let inner = expr.omit_parentheses();
 
@@ -149,7 +151,7 @@ fn extract_length_check(expr: AnyJsExpression) -> Option<(AnyJsExpression, Lengt
             let arg = unary.argument().ok()?.omit_parentheses();
             if let AnyJsExpression::JsStaticMemberExpression(static_member) = &arg {
                 if is_length_member(static_member) {
-                    let base = static_member.object().ok()?.omit_parentheses();
+                    let base = static_member.object().ok()?;
                     return Some((base, LengthKind::EqualZero));
                 }
             }
@@ -173,7 +175,7 @@ fn extract_length_check_binary(
 
     if let AnyJsExpression::JsStaticMemberExpression(static_member) = &left {
         if is_length_member(static_member) && is_zero_literal(&right) {
-            let base = static_member.object().ok()?.omit_parentheses();
+            let base = static_member.object().ok()?;
             return Some((base, kind));
         }
     }
@@ -197,26 +199,6 @@ fn is_zero_literal(expr: &AnyJsExpression) -> bool {
     }
 }
 
-/// Returns `true` only when both base expressions are the same identifier.
-/// Anything else (calls, computed member access, literals, ...) returns
-/// `false`, because it cannot be proven to reference the same object.
-fn same_identifier(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
-    let a_inner = a.clone().omit_parentheses();
-    let b_inner = b.clone().omit_parentheses();
-    let AnyJsExpression::JsIdentifierExpression(ai) = &a_inner else {
-        return false;
-    };
-    let AnyJsExpression::JsIdentifierExpression(bi) = &b_inner else {
-        return false;
-    };
-    let a_name = ai.name().ok().map(|n| n.syntax().text_trimmed().to_string());
-    let b_name = bi.name().ok().map(|n| n.syntax().text_trimmed().to_string());
-    match (a_name, b_name) {
-        (Some(a), Some(b)) => a == b,
-        _ => false,
-    }
-}
-
 /// Extracts the base expression and method name of a `.some()` / `.every()`
 /// call.
 fn extract_some_every(expr: AnyJsExpression) -> Option<(AnyJsExpression, &'static str)> {
@@ -228,12 +210,32 @@ fn extract_some_every(expr: AnyJsExpression) -> Option<(AnyJsExpression, &'stati
     let AnyJsExpression::JsStaticMemberExpression(member) = &callee else {
         return None;
     };
-    // Read the method name before moving the base expression out.
-    let method: String = member.member().ok()?.syntax().text_trimmed().to_string();
-    let base = member.object().ok()?;
-    match method.as_str() {
-        "some" => Some((base, "some")),
-        "every" => Some((base, "every")),
-        _ => None,
+    // Compare the method token text directly, without allocating a String.
+    let method = member.member().ok()?.syntax().text_trimmed();
+    let method = if method == "some" {
+        "some"
+    } else if method == "every" {
+        "every"
+    } else {
+        return None;
+    };
+    Some((member.object().ok()?, method))
+}
+
+/// Returns `true` only when both base expressions are the same identifier.
+/// Anything else (calls, computed member access, literals) returns `false`,
+/// because it cannot be proven to reference the same object.
+fn same_identifier(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
+    let a_inner = a.clone().omit_parentheses();
+    let b_inner = b.clone().omit_parentheses();
+    let AnyJsExpression::JsIdentifierExpression(ai) = &a_inner else {
+        return false;
+    };
+    let AnyJsExpression::JsIdentifierExpression(bi) = &b_inner else {
+        return false;
+    };
+    match (ai.name().ok(), bi.name().ok()) {
+        (Some(na), Some(nb)) => na.syntax().text_trimmed() == nb.syntax().text_trimmed(),
+        _ => false,
     }
 }

@@ -1451,7 +1451,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_useless_label::NoUselessLabelOptions>(),
     ));
     result.push((
-        "correctness",
+        "nursery",
         "noUselessLengthCheck",
         TypeId::of::<biome_rule_options::no_useless_length_check::NoUselessLengthCheckOptions>(),
     ));
