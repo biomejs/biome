@@ -585,14 +585,14 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// ### Invalid
     ///
-    /// ```markdown,expect_diagnostic
+    /// ```md,expect_diagnostic
     /// # A heading-1
     /// # A heading-1
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```markdown
+    /// ```md
     /// # A heading-1
     /// ```
     ///

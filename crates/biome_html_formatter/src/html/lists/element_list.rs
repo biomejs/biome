@@ -524,6 +524,10 @@ impl FormatHtmlElementList {
                 match child {
                     // A single word in text content
                     HtmlChild::Word(word) => {
+                        if let Some(r_angle_token) = borrowed_sibling_r_angle.take() {
+                            write!(f, [r_angle_token.format()])?;
+                        }
+
                         // when we encounter a word, we need to collect all subsequent words
                         // so we can use fill to format them together.
                         let mut fill = f.fill();
@@ -841,11 +845,15 @@ impl FormatHtmlElementList {
                         // Take any borrowed `>` from the previous sibling element
                         let current_borrowed_r_angle = borrowed_sibling_r_angle.take();
 
-                        let next_can_borrow = next_is_adjacent_inline
-                            && matches!(
-                                children_iter.peek(),
-                                Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
-                            );
+                        let next_word_borrows_r_angle = is_noscript_element(non_text)
+                            && matches!(children_iter.peek(), Some(HtmlChild::Word(_)));
+
+                        let next_can_borrow = next_word_borrows_r_angle
+                            || (next_is_adjacent_inline
+                                && matches!(
+                                    children_iter.peek(),
+                                    Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
+                                ));
 
                         // Create the element formatter with borrowing options
                         let element_format = format_element_with_borrowing(
@@ -854,7 +862,14 @@ impl FormatHtmlElementList {
                             next_can_borrow,
                         );
 
-                        if needs_outer_group {
+                        if next_word_borrows_r_angle {
+                            write!(
+                                f,
+                                [group(&format_args![&element_format, soft_line_break()])
+                                    .with_group_id(Some(non_text_group_id))]
+                            )?;
+                            last_nontext_had_trailing_line = false;
+                        } else if needs_outer_group {
                             // Wrap inline element in outer group with `line` before it.
                             // This makes the line break happen BEFORE the element when it doesn't fit.
                             // Pattern: group([line, group([element, line?])])
@@ -953,6 +968,9 @@ impl FormatHtmlElementList {
                             }
                         } else {
                             prev_inline_group_id = None;
+                            if next_word_borrows_r_angle {
+                                borrowed_sibling_r_angle = non_text.closing_r_angle_token();
+                            }
                         }
                     }
 
@@ -998,6 +1016,12 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
     element
         .name()
         .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
+}
+
+fn is_noscript_element(element: &AnyHtmlElement) -> bool {
+    element
+        .name()
+        .is_some_and(|name| name.text().eq_ignore_ascii_case("noscript"))
 }
 
 fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {

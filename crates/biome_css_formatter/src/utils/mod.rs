@@ -12,6 +12,7 @@ pub(crate) mod scss_each;
 pub(crate) mod scss_expression;
 pub(crate) mod scss_include_comments;
 pub(crate) mod scss_include_keyword_value;
+pub(crate) mod scss_interpolated_string;
 pub(crate) mod scss_keyword_argument_layout;
 pub(crate) mod scss_list_layout;
 pub(crate) mod scss_map_layout;

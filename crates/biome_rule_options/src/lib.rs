@@ -493,6 +493,7 @@ pub mod use_test_hooks_on_top;
 pub mod use_this_in_class_methods;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;
+pub mod use_top_level_heading;
 pub mod use_top_level_regex;
 pub mod use_trim_start_end;
 pub mod use_unicode_regex;

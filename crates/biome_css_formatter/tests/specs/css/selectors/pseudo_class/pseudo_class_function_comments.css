@@ -1,0 +1,32 @@
+:where(
+	/*  */
+	div
+) {
+	color: red;
+}
+
+:where(
+  /*  */
+  div) {
+  color: red;
+}
+
+:where/* before opening parenthesis */(div) {}
+
+:host(/* compound selector */ span:focus) {}
+
+:global(/* selector */ .class) {}
+
+:has(/* relative selector list */ > .child) {}
+
+:lang(/* value list */ en) {}
+
+:nth-child(/* nth */ 2n + 1) {}
+
+html:active-view-transition-type(/* custom identifier list */ forwards) {}
+
+:dir(/* identifier */ ltr) {}
+
+:state(/* identifier */ checked) {}
+
+:current(/* selector */ div) {}

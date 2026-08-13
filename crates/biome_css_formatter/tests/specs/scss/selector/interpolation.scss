@@ -44,3 +44,30 @@ ns|foo-#{$name},
 %placeholder-#{$name}{
 color:red;
 }
+
+:#{$name}/* before opening parenthesis */(bar) {}
+
+:#{$name}(
+	/* inside empty function */
+) {}
+
+:#{$name}(/* inside empty function */) {}
+
+:#{$name}(/* argument */ bar) {}
+
+::#{$name}/* before opening parenthesis */(bar) {}
+
+::#{$name}(
+	/* inside function */
+	bar
+) {}
+
+::#{$name}(
+  /* inside function */
+  bar) {}
+
+::#{$name}(/* inside empty function */) {}
+
+::#{$name}(
+  /* inside empty function */
+) {}

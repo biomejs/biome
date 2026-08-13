@@ -70,7 +70,7 @@ impl ScssInterpolatedStringQuotes {
     /// Replaces only the quote token.
     ///
     /// `ScssStringText` normalizes the content separately with `normalize_string`.
-    pub(super) fn write_quote_token(
+    pub(crate) fn write_quote_token(
         self,
         token: &CssSyntaxToken,
         f: &mut CssFormatter,

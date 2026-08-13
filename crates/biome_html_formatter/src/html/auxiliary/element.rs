@@ -1,14 +1,16 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
-use crate::utils::metadata::get_css_whitespace;
+use crate::utils::metadata::{get_css_whitespace, get_element_css_display};
 use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, HtmlElement, HtmlElementFields,
-    HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
+    HtmlElementList, HtmlRoot, HtmlSelfClosingElement,
+    HtmlSyntaxKind::{self, AUDIO_KW, OBJECT_KW, TEMPLATE_KW, VIDEO_KW},
+    HtmlSyntaxToken,
 };
-use biome_rowan::TokenText;
+use biome_parser::{TokenSet, token_set};
 use biome_string_case::StrLikeExtension;
 
 use super::{
@@ -29,14 +31,8 @@ fn is_verbatim_tag(tag_name: &str) -> bool {
         || get_css_whitespace(tag_name).preserves_content()
 }
 
-/// Helper to get token text from any tag name variant
-fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
-    match name {
-        AnyHtmlTagName::HtmlTagName(tag) => tag.value_token().ok().map(|t| t.token_text_trimmed()),
-        AnyHtmlTagName::HtmlComponentName(_) => None,
-        AnyHtmlTagName::HtmlMemberName(_) => None,
-    }
-}
+const STRUCTURAL_FALLBACK_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(AUDIO_KW, OBJECT_KW, VIDEO_KW);
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement {
@@ -162,8 +158,13 @@ impl FormatHtmlElement {
             // third one is either `HtmlRoot` or another `HtmlElement`
             .nth(2)
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
-        let is_template_element = get_tag_name_text(&tag_name)
-            .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
+        let tag_name_kind = tag_name.tag_name_kind();
+        let is_template_element = tag_name_kind == Some(TEMPLATE_KW);
+        // Although audio, video, and object are inline elements, their children describe
+        // resources or fallback content and retain their own display layout. Borrowing a tag
+        // boundary across a block-like edge child would incorrectly make it hug the parent tag.
+        let has_structural_fallback_children =
+            tag_name_kind.is_some_and(|kind| STRUCTURAL_FALLBACK_ELEMENTS.contains(kind));
         // The parser hands us a single `HtmlEmbeddedContent` child whenever it
         // read the content as raw text, which covers the tags below as well as
         // the blocks of a Vue single-file component, whose names are arbitrary.
@@ -253,11 +254,19 @@ impl FormatHtmlElement {
         // should NOT borrow tokens because their children are always multiline.
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
+            && (!has_structural_fallback_children
+                || children.iter().next().is_none_or(|child| {
+                    get_element_css_display(&child).is_externally_whitespace_sensitive(f)
+                }))
             && !content_has_leading_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
             && !children.is_empty()
+            && (!has_structural_fallback_children
+                || children.iter().next_back().is_none_or(|child| {
+                    get_element_css_display(&child).is_externally_whitespace_sensitive(f)
+                }))
             && !content_has_trailing_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes;
