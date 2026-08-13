@@ -290,7 +290,7 @@ fn astro_raw_text_element(
     name: Option<&CompletedMarker>,
     saw_is_raw: bool,
 ) -> Option<JsxRawTextElement> {
-    if !p.source_type.as_embedding_kind().is_astro() || !p.at(T![>]) {
+    if !is_astro(p) || !p.at(T![>]) {
         return None;
     }
     let name = name?;
@@ -649,7 +649,7 @@ impl ParseNodeList for JsxAttributeList {
             parse_jsx_attribute(p)
         };
         if !self.saw_astro_is_raw
-            && p.source_type.as_embedding_kind().is_astro()
+            && is_astro(p)
             && let Present(attribute) = &parsed
         {
             let text = p.text(attribute.range(p));
