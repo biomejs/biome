@@ -455,10 +455,19 @@ impl<'src> JsLexer<'src> {
         else {
             return false;
         };
+        // HTML ends raw text only at an "appropriate" end tag, so `</scriptx>`
+        // is content while `</script >` closes.
+        let ends_the_name = |rest: &str, len: usize| {
+            rest.as_bytes()
+                .get(len)
+                .is_none_or(|byte| matches!(byte, b'>' | b'/') || byte.is_ascii_whitespace())
+        };
         match element.closing_tag_name() {
-            Some(name) => rest
-                .get(..name.len())
-                .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name)),
+            Some(name) => {
+                rest.get(..name.len())
+                    .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+                    && ends_the_name(rest, name.len())
+            }
             // Component names are case-sensitive, so `is:raw` names match exactly.
             None => {
                 let JsxRawTextElement::Other(range) = element else {
@@ -466,7 +475,9 @@ impl<'src> JsLexer<'src> {
                 };
                 self.source
                     .get(usize::from(range.start())..usize::from(range.end()))
-                    .is_some_and(|name| rest.get(..name.len()) == Some(name))
+                    .is_some_and(|name| {
+                        rest.get(..name.len()) == Some(name) && ends_the_name(rest, name.len())
+                    })
             }
         }
     }

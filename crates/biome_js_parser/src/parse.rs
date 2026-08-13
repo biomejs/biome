@@ -573,6 +573,15 @@ mod astro_raw_and_comment_edges {
     }
 
     #[test]
+    fn raw_text_ends_only_at_an_appropriate_end_tag() {
+        assert_clean("x && <script>a</scriptx>b</script>");
+        assert_clean("x && <div is:raw></divx></div>");
+        // Whitespace before `>` still ends the tag, so only `a` is raw text.
+        let tree = assert_clean("x && <script>a</script >");
+        assert!(tree.contains("JSX_TEXT_LITERAL@13..14 \"a\""), "{tree}");
+    }
+
+    #[test]
     fn comment_only_expression_body_parses() {
         assert_clean("<!-- only a comment -->");
         let parse = parse(
