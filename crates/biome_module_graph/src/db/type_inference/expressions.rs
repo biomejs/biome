@@ -172,7 +172,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         InferredNarrowingPredicate::InstanceOf(self.resolve(guard))
                     }
                     RawNarrowingPredicate::MemberEquals(predicate) => {
-                        InferredNarrowingPredicate::MemberEquals(predicate.as_ref().clone())
+                        InferredNarrowingPredicate::MemberEquals(predicate.clone())
                     }
                     RawNarrowingPredicate::PredicateCall(predicate) => {
                         InferredNarrowingPredicate::PredicateCall(InferredPredicateCallPredicate {
@@ -3043,15 +3043,22 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// was walked all the way to a class without a base class; a chain that
     /// contains a link we cannot resolve to a class, such as a mixin call or
     /// an unresolved import, yields [`ExtendsChainLookup::Unknown`].
+    ///
+    /// `class A extends B {}` and `class B extends A {}` parse, so the walk
+    /// stops as soon as it revisits a class.
     fn class_extends_chain_contains(
         &mut self,
         class: InferredClass<'db>,
         needle: InferredClass<'db>,
     ) -> ExtendsChainLookup {
         let mut current = class;
+        let mut seen = FxHashSet::default();
         for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
             if current == needle {
                 return ExtendsChainLookup::Contains;
+            }
+            if !seen.insert(current) {
+                return ExtendsChainLookup::Unknown;
             }
             let Some(extends) = current.extends(self.db) else {
                 return ExtendsChainLookup::DoesNotContain;
