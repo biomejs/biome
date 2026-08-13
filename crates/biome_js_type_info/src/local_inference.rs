@@ -3512,11 +3512,13 @@ impl<'a> GuardAnalysis<'a> {
 
     /// Returns the predicate established by the nearest preceding assignment
     /// to the narrowed binding, if there is one.
+    ///
+    /// The assignment's right-hand side is taken as the collector already
+    /// inferred it, so a collector that records no expression types declines
+    /// assignment narrowing rather than inferring the value a second time.
     fn assignment_predicate(&mut self, id: &JsReferenceIdentifier) -> Option<NarrowingPredicate> {
         let source = self.assignment_source(id)?;
-        let ty = self
-            .resolver
-            .reference_to_resolved_expression(self.scope_id, &source);
+        let ty = self.resolver.recorded_expression_type(&source)?;
         Some(NarrowingPredicate::Assigned(ty))
     }
 

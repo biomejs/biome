@@ -173,6 +173,19 @@ pub trait RawTypeCollector {
         ]))))))
     }
 
+    /// Returns a reference to the type this collector already inferred for
+    /// `expression`, if it has one.
+    ///
+    /// Unlike [`Self::reference_to_resolved_expression`], this never infers
+    /// the expression. A caller that needs the type an expression had where
+    /// it was written must not re-infer it somewhere else: the same name can
+    /// resolve to a different binding at the other position, and inferring
+    /// an expression visits its own references, each of which may in turn
+    /// resolve to an expression written earlier.
+    fn recorded_expression_type(&mut self, _expression: &AnyJsExpression) -> Option<TypeReference> {
+        None
+    }
+
     /// Returns a scratch cache for memoizing guard-narrowing invalidation
     /// checks, if this collector wants to provide one.
     fn narrowing_invalidation_cache(

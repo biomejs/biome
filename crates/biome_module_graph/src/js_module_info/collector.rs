@@ -862,6 +862,12 @@ impl RawTypeCollector for JsModuleInfoCollector {
         }
     }
 
+    fn recorded_expression_type(&mut self, expression: &AnyJsExpression) -> Option<TypeReference> {
+        self.parsed_expressions
+            .get(&expression.range())
+            .map(|id| TypeReference::Resolved(RawTypeId::Local(*id)))
+    }
+
     fn reference_to_resolved_expression(
         &mut self,
         _scope_id: ScopeId,
