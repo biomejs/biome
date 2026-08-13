@@ -34,10 +34,6 @@ declare_lint_rule! {
     /// if (array.length > 0 && array.some(Boolean));
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// if (array.every(Boolean) || array.length === 0);
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```js
@@ -94,8 +90,8 @@ impl Rule for NoUselessLengthCheck {
         //   `length !== 0 && array.some(...)`   -> some is false on empty
         //   `length > 0 && array.some(...)`     -> some is false on empty
         let matches = match (is_or, length_kind) {
-            (true, LengthKind::EqualZero) => method == "every",
-            (false, LengthKind::NotEqualZero | LengthKind::GreaterZero) => method == "some",
+            (true, LengthKind::Zero) => method == "every",
+            (false, LengthKind::NonZero | LengthKind::Greater) => method == "some",
             _ => false,
         };
         if !matches {
@@ -124,6 +120,9 @@ impl Rule for NoUselessLengthCheck {
             )
             .note(markup! {
                 "The "<Emphasis>".every()"</Emphasis>" method already returns "<Emphasis>"true"</Emphasis>" for an empty array, and "<Emphasis>".some()"</Emphasis>" already returns "<Emphasis>"false"</Emphasis>", so this check has no effect on the result."
+            })
+            .note(markup! {
+                "Remove the redundant length check and keep only the "<Emphasis>".some()"</Emphasis>" or "<Emphasis>".every()"</Emphasis>" call."
             }),
         )
     }
@@ -131,9 +130,9 @@ impl Rule for NoUselessLengthCheck {
 
 #[derive(Clone, Copy, PartialEq)]
 enum LengthKind {
-    EqualZero,
-    NotEqualZero,
-    GreaterZero,
+    Zero,
+    NonZero,
+    Greater,
 }
 
 /// Extracts the base expression and kind of a length comparison such as
@@ -146,15 +145,15 @@ fn extract_length_check(expr: AnyJsExpression) -> Option<(AnyJsExpression, Lengt
     }
 
     // `!foo.length` reads as "length === 0".
-    if let AnyJsExpression::JsUnaryExpression(unary) = &inner {
-        if unary.operator_token().ok()?.kind() == BANG {
-            let arg = unary.argument().ok()?.omit_parentheses();
-            if let AnyJsExpression::JsStaticMemberExpression(static_member) = &arg {
-                if is_length_member(static_member) {
-                    let base = static_member.object().ok()?;
-                    return Some((base, LengthKind::EqualZero));
-                }
-            }
+    if let AnyJsExpression::JsUnaryExpression(unary) = &inner
+        && unary.operator_token().ok()?.kind() == BANG
+    {
+        let arg = unary.argument().ok()?.omit_parentheses();
+        if let AnyJsExpression::JsStaticMemberExpression(static_member) = &arg
+            && is_length_member(static_member)
+        {
+            let base = static_member.object().ok()?;
+            return Some((base, LengthKind::Zero));
         }
     }
 
@@ -165,19 +164,20 @@ fn extract_length_check_binary(
     binary: &JsBinaryExpression,
 ) -> Option<(AnyJsExpression, LengthKind)> {
     let kind = match binary.operator_token().ok()?.kind() {
-        EQ2 | EQ3 => LengthKind::EqualZero,
-        NEQ | NEQ2 => LengthKind::NotEqualZero,
-        R_ANGLE => LengthKind::GreaterZero,
+        EQ2 | EQ3 => LengthKind::Zero,
+        NEQ | NEQ2 => LengthKind::NonZero,
+        R_ANGLE => LengthKind::Greater,
         _ => return None,
     };
     let left = binary.left().ok()?.omit_parentheses();
     let right = binary.right().ok()?.omit_parentheses();
 
-    if let AnyJsExpression::JsStaticMemberExpression(static_member) = &left {
-        if is_length_member(static_member) && is_zero_literal(&right) {
-            let base = static_member.object().ok()?;
-            return Some((base, kind));
-        }
+    if let AnyJsExpression::JsStaticMemberExpression(static_member) = &left
+        && is_length_member(static_member)
+        && is_zero_literal(&right)
+    {
+        let base = static_member.object().ok()?;
+        return Some((base, kind));
     }
     None
 }
@@ -192,8 +192,14 @@ fn is_length_member(member: &JsStaticMemberExpression) -> bool {
 fn is_zero_literal(expr: &AnyJsExpression) -> bool {
     match expr {
         AnyJsExpression::AnyJsLiteralExpression(lit) => {
-            let text = lit.syntax().text_trimmed();
-            text == "0" || text == "0.0" || text == "-0"
+            let text = lit.syntax().text_trimmed().to_string();
+            // Accept any spelling of zero: `0`, `0.`, `.0`, `0.0`, `0.000`,
+            // `-0`, `-0.0`, and so on. `f64` parsing normalises all of these
+            // to `0.0` (including negative zero), which is what we want.
+            match text.parse::<f64>() {
+                Ok(value) => value == 0.0,
+                Err(_) => false,
+            }
         }
         _ => false,
     }
