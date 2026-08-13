@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{JsCallExpression, JsSyntaxKind};
+use biome_js_syntax::{JsCallExpression, JsSyntaxKind, is_function_boundary};
 use biome_rowan::AstNode;
 use biome_rule_options::no_conditional_expect::NoConditionalExpectOptions;
 
@@ -163,7 +163,7 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
             JsSyntaxKind::JS_CATCH_CLAUSE => return Some("catch clause"),
 
             // Stop at function boundaries (the test callback)
-            _ if crate::ast_utils::is_function_boundary(ancestor.kind()) => {
+            _ if is_function_boundary(ancestor.kind()) => {
                 break;
             }
 
