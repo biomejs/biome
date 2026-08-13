@@ -14697,12 +14697,19 @@ impl AnyCssDashedIdentifier {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclaration {
+    CssBogusDeclaration(CssBogusDeclaration),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
     ScssNestingDeclaration(ScssNestingDeclaration),
     ScssVariableDeclaration(ScssVariableDeclaration),
 }
 impl AnyCssDeclaration {
+    pub fn as_css_bogus_declaration(&self) -> Option<&CssBogusDeclaration> {
+        match &self {
+            Self::CssBogusDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
         match &self {
             Self::CssDeclarationWithSemicolon(item) => Some(item),
@@ -37351,6 +37358,11 @@ impl From<AnyCssDashedIdentifier> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusDeclaration> for AnyCssDeclaration {
+    fn from(node: CssBogusDeclaration) -> Self {
+        Self::CssBogusDeclaration(node)
+    }
+}
 impl From<CssDeclarationWithSemicolon> for AnyCssDeclaration {
     fn from(node: CssDeclarationWithSemicolon) -> Self {
         Self::CssDeclarationWithSemicolon(node)
@@ -37373,14 +37385,16 @@ impl From<ScssVariableDeclaration> for AnyCssDeclaration {
 }
 impl AstNode for AnyCssDeclaration {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssDeclarationWithSemicolon::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusDeclaration::KIND_SET
+        .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
         .union(ScssNestingDeclaration::KIND_SET)
         .union(ScssVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_DECLARATION_WITH_SEMICOLON
+            CSS_BOGUS_DECLARATION
+                | CSS_DECLARATION_WITH_SEMICOLON
                 | CSS_EMPTY_DECLARATION
                 | SCSS_NESTING_DECLARATION
                 | SCSS_VARIABLE_DECLARATION
@@ -37388,6 +37402,7 @@ impl AstNode for AnyCssDeclaration {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_DECLARATION => Self::CssBogusDeclaration(CssBogusDeclaration { syntax }),
             CSS_DECLARATION_WITH_SEMICOLON => {
                 Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
@@ -37404,6 +37419,7 @@ impl AstNode for AnyCssDeclaration {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssBogusDeclaration(it) => it.syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::ScssNestingDeclaration(it) => it.syntax(),
@@ -37412,6 +37428,7 @@ impl AstNode for AnyCssDeclaration {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssBogusDeclaration(it) => it.into_syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::ScssNestingDeclaration(it) => it.into_syntax(),
@@ -37422,6 +37439,7 @@ impl AstNode for AnyCssDeclaration {
 impl std::fmt::Debug for AnyCssDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssBogusDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
@@ -37432,6 +37450,7 @@ impl std::fmt::Debug for AnyCssDeclaration {
 impl From<AnyCssDeclaration> for SyntaxNode {
     fn from(n: AnyCssDeclaration) -> Self {
         match n {
+            AnyCssDeclaration::CssBogusDeclaration(it) => it.into_syntax(),
             AnyCssDeclaration::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssDeclaration::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssDeclaration::ScssNestingDeclaration(it) => it.into_syntax(),
@@ -49370,6 +49389,62 @@ impl From<CssBogusCustomIdentifier> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct CssBogusDeclaration {
+    syntax: SyntaxNode,
+}
+impl CssBogusDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusDeclaration")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusDeclaration> for SyntaxNode {
+    fn from(n: CssBogusDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBogusDeclaration> for SyntaxElement {
+    fn from(n: CssBogusDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusDocumentMatcher {
     syntax: SyntaxNode,
 }
@@ -50937,7 +51012,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusIfTestBooleanExpr | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclaration | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusIfTestBooleanExpr | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssAttrNameList {
     syntax_list: SyntaxList,

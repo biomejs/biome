@@ -3045,12 +3045,12 @@ light: #eaf0c6
   
 3945.scss:98:64 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a declaration item but instead found '@content;'.
+  × Expected a declaration item but instead found '@content'.
   
      96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
      97 │ 
    > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
-        │                                                                ^^^^^^^^^
+        │                                                                ^^^^^^^^
      99 │ 
     100 │ @function gcd($a,$b){
   
@@ -3059,7 +3059,7 @@ light: #eaf0c6
      96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
      97 │ 
    > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
-        │                                                                ^^^^^^^^^
+        │                                                                ^^^^^^^^
      99 │ 
     100 │ @function gcd($a,$b){
   

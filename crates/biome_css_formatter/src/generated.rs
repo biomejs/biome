@@ -12067,6 +12067,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusCustomIdentifier
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBogusDeclaration>
+    for crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusDeclaration,
+        crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusDeclaration,
+        crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssBogusDocumentMatcher>
     for crate::css::bogus::bogus_document_matcher::FormatCssBogusDocumentMatcher
 {
