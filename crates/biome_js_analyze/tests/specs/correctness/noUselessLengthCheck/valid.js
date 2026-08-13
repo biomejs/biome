@@ -11,3 +11,7 @@ const a = something();
 // should not generate diagnostics
 // Different base object: not the same array.
 if (a.length === 0 || b.some(Boolean));
+
+// should not generate diagnostics
+// Calls are impure: two identical calls may return different arrays.
+if (foo().length === 0 || foo().every(Boolean));

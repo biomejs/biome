@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// if (array.length === 0 || array.some(Boolean));
     /// ```
     pub NoUselessLengthCheck {
-        version: "1.0.0",
+        version: "next",
         name: "noUselessLengthCheck",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-length-check").same()],
@@ -98,8 +98,11 @@ impl Rule for NoUselessLengthCheck {
             return None;
         }
 
-        // The length check and the method call must target the same object.
-        if left_base.syntax().text_trimmed() != right_base.syntax().text_trimmed() {
+        // The length check and the method call must target the same identifier.
+        // Impure expressions (calls, computed members, literals) are rejected:
+        // two syntactically identical calls may still return different arrays,
+        // so reporting them would be a false positive.
+        if !same_identifier(&left_base, &right_base) {
             return None;
         }
 
@@ -190,6 +193,26 @@ fn is_zero_literal(expr: &AnyJsExpression) -> bool {
             let text = lit.syntax().text_trimmed();
             text == "0" || text == "0.0" || text == "-0"
         }
+        _ => false,
+    }
+}
+
+/// Returns `true` only when both base expressions are the same identifier.
+/// Anything else (calls, computed member access, literals, ...) returns
+/// `false`, because it cannot be proven to reference the same object.
+fn same_identifier(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
+    let a_inner = a.clone().omit_parentheses();
+    let b_inner = b.clone().omit_parentheses();
+    let AnyJsExpression::JsIdentifierExpression(ai) = &a_inner else {
+        return false;
+    };
+    let AnyJsExpression::JsIdentifierExpression(bi) = &b_inner else {
+        return false;
+    };
+    let a_name = ai.name().ok().map(|n| n.syntax().text_trimmed().to_string());
+    let b_name = bi.name().ok().map(|n| n.syntax().text_trimmed().to_string());
+    match (a_name, b_name) {
+        (Some(a), Some(b)) => a == b,
         _ => false,
     }
 }
