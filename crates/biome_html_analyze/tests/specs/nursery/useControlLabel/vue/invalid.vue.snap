@@ -8,6 +8,9 @@ expression: invalid.vue
 <template>
 	<button></button>
 	<menuitem />
+
+	<!-- A dynamic value inside a hidden child does not name the control. -->
+	<button><span aria-hidden="true">{{ label }}</span></button>
 </template>
 
 ```
@@ -23,7 +26,7 @@ invalid.vue:3:2 lint/nursery/useControlLabel ━━━━━━━━━━━�
   > 3 │ 	<button></button>
       │ 	^^^^^^^^^^^^^^^^^
     4 │ 	<menuitem />
-    5 │ </template>
+    5 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -43,8 +46,28 @@ invalid.vue:4:2 lint/nursery/useControlLabel ━━━━━━━━━━━�
     3 │ 	<button></button>
   > 4 │ 	<menuitem />
       │ 	^^^^^^^^^^^^
-    5 │ </template>
-    6 │ 
+    5 │ 
+    6 │ 	<!-- A dynamic value inside a hidden child does not name the control. -->
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:2 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    6 │ 	<!-- A dynamic value inside a hidden child does not name the control. -->
+  > 7 │ 	<button><span aria-hidden="true">{{ label }}</span></button>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ </template>
+    9 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   

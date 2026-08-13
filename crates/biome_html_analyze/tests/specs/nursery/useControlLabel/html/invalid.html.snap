@@ -39,6 +39,7 @@ expression: invalid.html
 
 <!-- PascalCase has no component semantics in `.html` files. -->
 <button><Icon /></button>
+<button><Icon></Icon></button>
 
 <!-- A decorative image supplies no accessible name. -->
 <button><img src="close.png" alt="" /></button>
@@ -347,8 +348,8 @@ invalid.html:35:1 lint/nursery/useControlLabel ━━━━━━━━━━━
     34 │ <!-- PascalCase has no component semantics in `.html` files. -->
   > 35 │ <button><Icon /></button>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    36 │ 
-    37 │ <!-- A decorative image supplies no accessible name. -->
+    36 │ <button><Icon></Icon></button>
+    37 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -360,15 +361,36 @@ invalid.html:35:1 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.html:38:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:36:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    37 │ <!-- A decorative image supplies no accessible name. -->
-  > 38 │ <button><img src="close.png" alt="" /></button>
+    34 │ <!-- PascalCase has no component semantics in `.html` files. -->
+    35 │ <button><Icon /></button>
+  > 36 │ <button><Icon></Icon></button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 
+    38 │ <!-- A decorative image supplies no accessible name. -->
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:39:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    38 │ <!-- A decorative image supplies no accessible name. -->
+  > 39 │ <button><img src="close.png" alt="" /></button>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    39 │ 
-    40 │ <!-- Void elements supply no accessible name. -->
+    40 │ 
+    41 │ <!-- Void elements supply no accessible name. -->
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -380,15 +402,15 @@ invalid.html:38:1 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.html:41:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:42:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    40 │ <!-- Void elements supply no accessible name. -->
-  > 41 │ <button><br /></button>
+    41 │ <!-- Void elements supply no accessible name. -->
+  > 42 │ <button><br /></button>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ 
-    43 │ <!-- A hidden input supplies no accessible name. -->
+    43 │ 
+    44 │ <!-- A hidden input supplies no accessible name. -->
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
@@ -400,14 +422,14 @@ invalid.html:41:1 lint/nursery/useControlLabel ━━━━━━━━━━━
 ```
 
 ```
-invalid.html:44:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:45:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This control element has no accessible label.
   
-    43 │ <!-- A hidden input supplies no accessible name. -->
-  > 44 │ <button><input type="hidden" /></button>
+    44 │ <!-- A hidden input supplies no accessible name. -->
+  > 45 │ <button><input type="hidden" /></button>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    45 │ 
+    46 │ 
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   

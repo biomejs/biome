@@ -15,8 +15,7 @@ declare_lint_rule! {
     /// A control with no accessible label is announced by assistive technology
     /// as an anonymous control (e.g. just "button"), leaving its purpose
     /// unclear. A label can come from text content anywhere inside the
-    /// control, or from an `aria-label`, `aria-labelledby`, or `title`
-    /// attribute.
+    /// control, `aria-label`, `aria-labelledby`, or `title` attribute.
     ///
     /// This rule checks native controls whose accessible name is expected to
     /// come from their own content or attributes (`button`, `menuitem`).
