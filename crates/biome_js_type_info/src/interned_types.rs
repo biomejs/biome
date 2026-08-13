@@ -2217,7 +2217,7 @@ pub enum NarrowingPredicate<'db> {
     /// The value is an instance of the referenced class.
     InstanceOf(TypeData<'db>),
     /// A member of the value strictly equals a string literal.
-    MemberEquals(raw::MemberEqualsPredicate),
+    MemberEquals(Box<raw::MemberEqualsPredicate>),
     /// The value was passed to a call whose callee may be a type predicate.
     PredicateCall(PredicateCallPredicate<'db>),
     /// The value strictly equals a string literal, with escape sequences
@@ -2744,7 +2744,7 @@ fn convert_typeof_expression<'db>(
                         NarrowingPredicate::InstanceOf(resolve_reference(guard))
                     }
                     raw::NarrowingPredicate::MemberEquals(predicate) => {
-                        NarrowingPredicate::MemberEquals(predicate.as_ref().clone())
+                        NarrowingPredicate::MemberEquals(predicate.clone())
                     }
                     raw::NarrowingPredicate::PredicateCall(predicate) => {
                         NarrowingPredicate::PredicateCall(PredicateCallPredicate {
