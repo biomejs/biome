@@ -466,7 +466,7 @@ impl WorkspaceDb {
                 let path = NestedPath::from(path);
                 let settings = Arc::new(settings);
                 self.replace_project_with(project_key, |db, project| {
-                    let mut nested_settings = project.nested_settings(db);
+                    let mut nested_settings = project.nested_settings(db).clone();
                     nested_settings.insert(path.clone(), settings.clone());
                     ProjectInput::new(
                         db,
@@ -481,7 +481,7 @@ impl WorkspaceDb {
                 let Some(project) = self.get_project(&project_key) else {
                     return;
                 };
-                let mut nested_settings = project.nested_settings(self);
+                let mut nested_settings = project.nested_settings(self).clone();
                 nested_settings.insert(path.into(), Arc::new(settings));
                 project.set_nested_settings(self).to(nested_settings);
             }
@@ -503,7 +503,7 @@ impl WorkspaceDb {
                         project_key,
                         project.path(db).to_path_buf(),
                         root_settings.clone(),
-                        project.nested_settings(db),
+                        project.nested_settings(db).clone(),
                     )
                 });
             }
@@ -587,7 +587,7 @@ impl WorkspaceDb {
                         project_key,
                         project.path(db).to_path_buf(),
                         update_root_settings(project.root_settings(db))?,
-                        project.nested_settings(db),
+                        project.nested_settings(db).clone(),
                     ))
                 })?
                 .ok_or_else(WorkspaceError::no_project)?;
@@ -981,7 +981,7 @@ mod tests {
                             first_attempt = false;
                             writers_ready.wait();
                         }
-                        let mut nested_settings = project.nested_settings(db);
+                        let mut nested_settings = project.nested_settings(db).clone();
                         nested_settings.insert(path.clone(), settings.clone());
                         ProjectInput::new(
                             db,
@@ -1029,7 +1029,7 @@ mod tests {
                             project_key,
                             project.path(db).to_path_buf(),
                             Arc::new(Settings::default()),
-                            project.nested_settings(db),
+                            project.nested_settings(db).clone(),
                         )
                     })
                 })

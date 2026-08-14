@@ -28,6 +28,9 @@ pub struct GetFileFeaturesParams<'a> {
 /// Type that holds all the settings and information for a project
 /// inside the workspace.
 ///
+/// This type identifies a single project, while the map that tracks
+/// multiple projects resides in the salsa databse.
+///
 /// ## Terminology
 ///
 /// Every project within a Biome workspace correlates with a single
@@ -52,7 +55,7 @@ pub struct ProjectInput {
 
     /// Optional nested settings, usually populated in monorepo
     /// projects.
-    #[returns(clone)]
+    #[returns(ref)]
     pub(crate) nested_settings: BTreeMap<NestedPath, Arc<Settings>>,
 }
 
@@ -76,7 +79,7 @@ pub trait ProjectDb: biome_db::Db {
     ) -> Option<Arc<Settings>> {
         let data = self.get_project(&project_key)?;
 
-        for (project_path, settings) in &data.nested_settings(self) {
+        for (project_path, settings) in data.nested_settings(self) {
             if file_path.starts_with(project_path.as_ref()) {
                 return Some(settings.clone());
             }
@@ -93,7 +96,7 @@ pub trait ProjectDb: biome_db::Db {
     ) -> Option<(Utf8PathBuf, Arc<Settings>)> {
         let data = self.get_project(&project_key)?;
 
-        for (project_path, settings) in &data.nested_settings(self) {
+        for (project_path, settings) in data.nested_settings(self) {
             if file_path.starts_with(project_path.as_ref()) {
                 return Some((project_path.as_ref().to_path_buf(), settings.clone()));
             }
