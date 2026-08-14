@@ -39,6 +39,22 @@ pub struct LocalTypeInput<'db> {
     pub type_id: InferredLocalTypeId,
 }
 
+/// Interned input for [`super::infer_binding_type_with_import_budget`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct BindingTypeWithImportBudgetInput<'db> {
+    pub lookup: BindingTypeInput<'db>,
+    pub remaining: u8,
+}
+
+/// Interned input for [`super::infer_local_type_with_import_budget`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct LocalTypeWithImportBudgetInput<'db> {
+    pub lookup: LocalTypeInput<'db>,
+    pub remaining: u8,
+}
+
 /// Interned input for [`super::infer_call_expression_type`].
 #[salsa::interned]
 #[derive(Debug)]

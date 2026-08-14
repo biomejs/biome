@@ -5,7 +5,10 @@
 //! same local-handle resolution path, allowing callers to inspect one type
 //! without resolving every type collected for the module.
 
-use super::{BindingTypeInput, ExpressionTypeInput, LocalTypeInput};
+use super::{
+    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, LocalTypeInput,
+    LocalTypeWithImportBudgetInput,
+};
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
@@ -113,19 +116,21 @@ pub fn infer_local_type<'db>(
 #[salsa::tracked(cycle_result=infer_binding_type_with_import_budget_cycle_result)]
 pub(crate) fn infer_binding_type_with_import_budget<'db>(
     db: &'db dyn ModuleDb,
-    input: BindingTypeInput<'db>,
-    remaining: u8,
+    input: BindingTypeWithImportBudgetInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    infer_binding_type_impl(db, input, ImportResolution::OnDemand { remaining })
+    let lookup = input.lookup(db);
+    let remaining = input.remaining(db);
+    infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
 }
 
 #[salsa::tracked(cycle_result=infer_local_type_with_import_budget_cycle_result)]
 pub(crate) fn infer_local_type_with_import_budget<'db>(
     db: &'db dyn ModuleDb,
-    input: LocalTypeInput<'db>,
-    remaining: u8,
+    input: LocalTypeWithImportBudgetInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    infer_local_type_impl(db, input, ImportResolution::OnDemand { remaining })
+    let lookup = input.lookup(db);
+    let remaining = input.remaining(db);
+    infer_local_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
 }
 
 fn infer_binding_type_impl<'db>(
@@ -196,8 +201,7 @@ fn infer_local_type_cycle_result<'db>(
 fn infer_binding_type_with_import_budget_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
-    _input: BindingTypeInput<'db>,
-    _remaining: u8,
+    _input: BindingTypeWithImportBudgetInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
 }
@@ -205,8 +209,7 @@ fn infer_binding_type_with_import_budget_cycle_result<'db>(
 fn infer_local_type_with_import_budget_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
-    _input: LocalTypeInput<'db>,
-    _remaining: u8,
+    _input: LocalTypeWithImportBudgetInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
 }

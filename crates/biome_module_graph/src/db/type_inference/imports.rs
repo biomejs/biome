@@ -4,7 +4,8 @@ use super::{
     resolver::{MAX_RAW_TYPE_RESOLUTION_DEPTH, ResolutionCtx},
 };
 use crate::db::queries::{
-    BindingTypeInput, LocalTypeInput, SymbolFromModuleInfo, infer_binding_type,
+    BindingTypeInput, BindingTypeWithImportBudgetInput, LocalTypeInput,
+    LocalTypeWithImportBudgetInput, SymbolFromModuleInfo, infer_binding_type,
     infer_binding_type_with_import_budget, infer_local_type, infer_local_type_with_import_budget,
     infer_module_types_bottom_up_for_import_depth, inference_module_sccs, namespace_export_names,
     resolved_export_origin,
@@ -840,7 +841,8 @@ fn inferred_type_from_binding_on_demand<'db>(
     let input = BindingTypeInput::new(db, module, range);
     match import_resolution {
         super::ImportResolution::OnDemand { remaining } => {
-            infer_binding_type_with_import_budget(db, input, remaining)
+            let input = BindingTypeWithImportBudgetInput::new(db, input, remaining);
+            infer_binding_type_with_import_budget(db, input)
         }
         super::ImportResolution::FromTables { .. } | super::ImportResolution::CycleFallback(_) => {
             infer_binding_type(db, input)
@@ -907,7 +909,8 @@ fn inferred_type_from_resolved_id_on_demand<'db>(
                 let input = LocalTypeInput::new(db, module, local_type_id);
                 match import_resolution {
                     super::ImportResolution::OnDemand { remaining } => {
-                        infer_local_type_with_import_budget(db, input, remaining)
+                        let input = LocalTypeWithImportBudgetInput::new(db, input, remaining);
+                        infer_local_type_with_import_budget(db, input)
                     }
                     super::ImportResolution::FromTables { .. }
                     | super::ImportResolution::CycleFallback(_) => infer_local_type(db, input),

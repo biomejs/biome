@@ -190,6 +190,10 @@ fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
     assert!(is_inferred_number(&db, ty));
     let events = db.take_salsa_events();
     assert_eq!(
+        function_query_will_execute_count_by_name(&db, BUDGETED_BINDING_QUERY, &events),
+        IMPORT_COUNT - 1
+    );
+    assert_eq!(
         function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         1
     );
