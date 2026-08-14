@@ -219,10 +219,7 @@ pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
 }
 
 #[salsa::tracked]
-fn prepare_module_types_bottom_up_for_import_depth(
-    db: &dyn ModuleDb,
-    module: ModuleInfo,
-) -> bool {
+fn prepare_module_types_bottom_up_for_import_depth(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
     let whole_module = start_whole_module_inference_at(
         TypeInferenceWholeModuleReason::ImportDepthLimit,
         TypeInferenceProfileOrigin::Inherited,

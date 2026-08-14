@@ -39,8 +39,7 @@ fn expression_range_by_source(
 }
 
 const BUDGETED_BINDING_QUERY: &str = "infer_binding_type_with_import_budget";
-const IMPORT_DEPTH_PREPARATION_QUERY: &str =
-    "prepare_module_types_bottom_up_for_import_depth";
+const IMPORT_DEPTH_PREPARATION_QUERY: &str = "prepare_module_types_bottom_up_for_import_depth";
 
 #[test]
 fn test_binding_query_does_not_infer_complete_module_tables() {
@@ -135,11 +134,7 @@ fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
     assert_function_query_was_not_run(&db, infer_module_types, source, &events);
     assert_function_query_was_not_run(&db, infer_module_types, index, &events);
     assert_eq!(
-        function_query_will_execute_count_by_name(
-            &db,
-            IMPORT_DEPTH_PREPARATION_QUERY,
-            &events,
-        ),
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         0
     );
 }
@@ -195,21 +190,13 @@ fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
     assert!(is_inferred_number(&db, ty));
     let events = db.take_salsa_events();
     assert_eq!(
-        function_query_will_execute_count_by_name(
-            &db,
-            IMPORT_DEPTH_PREPARATION_QUERY,
-            &events,
-        ),
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         1
     );
 
     db.clear_salsa_events();
     for root in roots.into_iter().skip(1) {
-        let input = BindingTypeInput::new(
-            &db,
-            root,
-            binding_range_by_name(&db, root, "result"),
-        );
+        let input = BindingTypeInput::new(&db, root, binding_range_by_name(&db, root, "result"));
         let ty = infer_binding_type(&db, input).expect("result type must be inferred");
         assert!(is_inferred_number(&db, ty));
     }
@@ -219,11 +206,7 @@ fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
         0
     );
     assert_eq!(
-        function_query_will_execute_count_by_name(
-            &db,
-            IMPORT_DEPTH_PREPARATION_QUERY,
-            &events,
-        ),
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         0
     );
 }
@@ -247,9 +230,7 @@ fn test_binding_query_bounds_fallbacks_in_a_dense_import_graph() {
         let imports = dependencies
             .iter()
             .map(|dependency| {
-                format!(
-                    "import {{ value{dependency} }} from './dense{dependency}.ts';"
-                )
+                format!("import {{ value{dependency} }} from './dense{dependency}.ts';")
             })
             .collect::<Vec<_>>()
             .join("\n");
@@ -279,11 +260,8 @@ fn test_binding_query_bounds_fallbacks_in_a_dense_import_graph() {
     let ty = infer_binding_type(&db, input).expect("root type must be inferred");
     assert!(InferredType::new(&db, ty).is_inferred());
     let events = db.take_salsa_events();
-    let preparation_count = function_query_will_execute_count_by_name(
-        &db,
-        IMPORT_DEPTH_PREPARATION_QUERY,
-        &events,
-    );
+    let preparation_count =
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events);
     assert!(
         (1..=MAX_DISTINCT_CUTOFF_MODULES).contains(&preparation_count),
         "fallback preparation must be bounded by cutoff modules, got {preparation_count}"
@@ -294,11 +272,7 @@ fn test_binding_query_bounds_fallbacks_in_a_dense_import_graph() {
     assert!(InferredType::new(&db, ty).is_inferred());
     let events = db.take_salsa_events();
     assert_eq!(
-        function_query_will_execute_count_by_name(
-            &db,
-            IMPORT_DEPTH_PREPARATION_QUERY,
-            &events,
-        ),
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         0
     );
 }
@@ -1085,11 +1059,7 @@ fn test_binding_query_handles_long_import_chains() {
         assert!(is_inferred_number(&db, ty));
         let events = db.take_salsa_events();
         assert_eq!(
-            function_query_will_execute_count_by_name(
-                &db,
-                IMPORT_DEPTH_PREPARATION_QUERY,
-                &events,
-            ),
+            function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
             1
         );
 
@@ -1116,11 +1086,7 @@ fn test_binding_query_handles_long_import_chains() {
     let events = db.take_salsa_events();
     assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
     assert_eq!(
-        function_query_will_execute_count_by_name(
-            &db,
-            IMPORT_DEPTH_PREPARATION_QUERY,
-            &events,
-        ),
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         0
     );
 
@@ -1137,11 +1103,7 @@ fn test_binding_query_handles_long_import_chains() {
     let events = db.take_salsa_events();
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
     assert_eq!(
-        function_query_will_execute_count_by_name(
-            &db,
-            IMPORT_DEPTH_PREPARATION_QUERY,
-            &events,
-        ),
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
         1
     );
 }

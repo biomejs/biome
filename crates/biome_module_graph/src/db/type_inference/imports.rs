@@ -327,12 +327,7 @@ pub(in crate::db) fn resolve_export_type_on_demand<'db>(
         return None;
     }
 
-    let ctx = ResolutionCtx::new(
-        db,
-        module,
-        &js_info,
-        super::ImportResolution::on_demand(),
-    );
+    let ctx = ResolutionCtx::new(db, module, &js_info, super::ImportResolution::on_demand());
     Some(ctx.resolve_export_name_on_demand(module, name))
 }
 
@@ -413,9 +408,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 if remaining == 0 {
                     return infer_module_types_bottom_up_for_import_depth(self.db, module)
-                    .map_or(InferredTypeData::Unknown, |types| {
-                        self.resolve_import_symbol_from_tables(module, types, symbol)
-                    });
+                        .map_or(InferredTypeData::Unknown, |types| {
+                            self.resolve_import_symbol_from_tables(module, types, symbol)
+                        });
                 }
 
                 let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {

@@ -484,10 +484,7 @@ fn build_shared_deep_import_db(
         names.push(name);
     }
     let terminal_name = format!("chain{import_count}.ts");
-    fs.insert(
-        terminal_name.clone().into(),
-        "export const value = 1;",
-    );
+    fs.insert(terminal_name.clone().into(), "export const value = 1;");
     names.push(terminal_name);
     for index in 0..root_count {
         let name = format!("root{index}.ts");
