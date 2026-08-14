@@ -185,6 +185,26 @@ fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
         });
 }
 
+const CREATE_ENV_ENTRY_COUNT: usize = 9;
+
+#[divan::bench(
+    name = "bench_infer_binding_type_create_env_like_call",
+    sample_size = 1
+)]
+fn bench_infer_binding_type_create_env_like_call(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let source = create_env_like_source(CREATE_ENV_ENTRY_COUNT);
+            let (db, module) = build_source_db("create_env.ts", &source);
+            let env_range = binding_range_by_name(&db, module, "env");
+            (db, module, env_range)
+        })
+        .bench_local_refs(|(db, module, env_range)| {
+            let input = BindingTypeInput::new(&*db, *module, *env_range);
+            divan::black_box(infer_binding_type(&*db, input));
+        });
+}
+
 #[divan::bench(name = "bench_distinct_binding_lookup_queries", sample_size = 1)]
 fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
     bencher
@@ -546,6 +566,82 @@ fn overloaded_function_source(overload_count: usize) -> String {
         source.push_str("): void;\n");
     }
     source.push_str("export const callback = () => {};\n");
+    source
+}
+
+fn create_env_like_source(entry_count: usize) -> String {
+    let mut source = String::from(
+        r#"
+interface Environment {
+    SERVER: boolean;
+}
+
+interface Schema {
+    nonempty(): Schema;
+}
+
+interface EnvOptions {
+    extends: unknown[];
+    runtimeEnv: Record<string, unknown>;
+    server: Record<string, Schema>;
+    skipValidation: boolean;
+}
+
+declare const processEnv: Record<string, string | undefined>;
+declare const schema: { string(): Schema };
+declare const shared: {
+    runtimeEnv: Record<string, unknown>;
+    server: Record<string, Schema>;
+};
+declare const preset: () => unknown;
+declare const production: string;
+declare const staging: string;
+declare const skipValidation: boolean;
+declare function requiredIn(
+    schema: Schema,
+    environments: string[],
+): Schema;
+declare function createEnv<T = Environment>(options: EnvOptions): T;
+
+export const env = createEnv({
+    extends: [
+        preset(),
+        preset(),
+        preset(),
+        preset(),
+        preset(),
+        preset(),
+        preset(),
+        preset(),
+    ],
+    runtimeEnv: {
+        ...shared.runtimeEnv,
+"#,
+    );
+
+    for index in 0..entry_count {
+        source.push_str(&format!("        ENV_{index}: processEnv.ENV_{index},\n"));
+    }
+
+    source.push_str(
+        r#"    },
+    server: {
+        ...shared.server,
+"#,
+    );
+
+    for index in 0..entry_count {
+        source.push_str(&format!(
+            "        ENV_{index}: requiredIn(schema.string().nonempty(), [production, staging]),\n"
+        ));
+    }
+
+    source.push_str(
+        r#"    },
+    skipValidation,
+});
+"#,
+    );
     source
 }
 
