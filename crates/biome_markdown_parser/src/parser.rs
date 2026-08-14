@@ -658,14 +658,6 @@ impl<'source> MarkdownParser<'source> {
         self.source.force_relex_at_line_start();
     }
 
-    /// Force re-lex the current token in CodeSpan context.
-    /// In this context, backslash is literal (not an escape character).
-    /// Used for autolinks where `\>` should be `\` + `>` as separate tokens.
-    pub(crate) fn relex_code_span(&mut self) {
-        self.source
-            .force_relex_in_context(MarkdownLexContext::CodeSpan);
-    }
-
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
     pub fn re_lex(&mut self, context: MarkdownReLexContext) -> MarkdownSyntaxKind {

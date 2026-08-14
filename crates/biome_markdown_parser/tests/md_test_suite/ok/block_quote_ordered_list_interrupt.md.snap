@@ -91,33 +91,13 @@ MdRoot {
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdInlineHtml {
-                                            value: MdInlineItemList [
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@35..36 "<" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@36..37 "b" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@37..38 ">" [] [],
-                                                },
-                                            ],
+                                            value_token: MD_HTML_LITERAL@35..38 "<b>" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@38..41 "tag" [] [],
                                         },
                                         MdInlineHtml {
-                                            value: MdInlineItemList [
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@41..42 "<" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@42..44 "/i" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@44..45 ">" [] [],
-                                                },
-                                            ],
+                                            value_token: MD_HTML_LITERAL@41..45 "</i>" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@45..46 "\n" [] [],
@@ -194,23 +174,11 @@ MdRoot {
                 0: MD_PARAGRAPH@35..46
                   0: MD_INLINE_ITEM_LIST@35..46
                     0: MD_INLINE_HTML@35..38
-                      0: MD_INLINE_ITEM_LIST@35..38
-                        0: MD_TEXTUAL@35..36
-                          0: MD_TEXTUAL_LITERAL@35..36 "<" [] []
-                        1: MD_TEXTUAL@36..37
-                          0: MD_TEXTUAL_LITERAL@36..37 "b" [] []
-                        2: MD_TEXTUAL@37..38
-                          0: MD_TEXTUAL_LITERAL@37..38 ">" [] []
+                      0: MD_HTML_LITERAL@35..38 "<b>" [] []
                     1: MD_TEXTUAL@38..41
                       0: MD_TEXTUAL_LITERAL@38..41 "tag" [] []
                     2: MD_INLINE_HTML@41..45
-                      0: MD_INLINE_ITEM_LIST@41..45
-                        0: MD_TEXTUAL@41..42
-                          0: MD_TEXTUAL_LITERAL@41..42 "<" [] []
-                        1: MD_TEXTUAL@42..44
-                          0: MD_TEXTUAL_LITERAL@42..44 "/i" [] []
-                        2: MD_TEXTUAL@44..45
-                          0: MD_TEXTUAL_LITERAL@44..45 ">" [] []
+                      0: MD_HTML_LITERAL@41..45 "</i>" [] []
                     3: MD_TEXTUAL@45..46
                       0: MD_TEXTUAL_LITERAL@45..46 "\n" [] []
   2: EOF@46..46 "" [] []

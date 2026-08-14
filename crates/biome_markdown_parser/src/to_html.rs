@@ -1571,8 +1571,9 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
 
 /// Render inline HTML.
 fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
-    let content = collect_raw_inline_text(&html.value());
-    out.push_str(&content);
+    if let Ok(token) = html.value_token() {
+        out.push_str(token.text());
+    }
 }
 
 /// Render an entity reference into the current buffer.
