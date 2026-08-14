@@ -25,7 +25,7 @@ pub struct GetFileFeaturesParams<'a> {
     pub not_requested_features: FeatureName,
 }
 
-/// Type that holds all the settings and information for different projects
+/// Type that holds all the settings and information for a project
 /// inside the workspace.
 ///
 /// ## Terminology
