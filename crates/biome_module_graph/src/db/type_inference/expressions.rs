@@ -2332,13 +2332,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {
-                    if ty
-                        .conditional_type_shallow(self.db)
-                        .is_none_or(|conditional| !conditional.is_truthy())
-                    {
-                        FilterAction::Retained
-                    } else {
+                    if self.excluded_from_subset(ty, subset) {
                         FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
                 }
             },
@@ -2379,24 +2376,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {
-                    if ty
-                        .conditional_type_shallow(self.db)
-                        .is_none_or(|conditional| !conditional.is_falsy())
-                    {
-                        FilterAction::Retained
-                    } else {
+                    if self.excluded_from_subset(ty, subset) {
                         FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
                 }
             },
             ConditionalSubset::NonNullish => {
-                if ty
-                    .conditional_type_shallow(self.db)
-                    .is_none_or(|conditional| !conditional.is_nullish())
-                {
-                    FilterAction::Retained
-                } else {
+                if self.excluded_from_subset(ty, subset) {
                     FilterAction::Stripped
+                } else {
+                    FilterAction::Retained
                 }
             }
             ConditionalSubset::Typeof(tag) => {
@@ -3119,21 +3110,22 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// of a truthy target, such as a class or an interface, are objects that
     /// can never be falsy. Targets without a conditional class, such as
     /// generic type parameters, exclude nothing.
+    /// Returns whether `ty` provably cannot belong to `subset`, judged from
+    /// its own shallow classification.
+    fn excluded_from_subset(&self, ty: InferredTypeData<'db>, subset: ConditionalSubset) -> bool {
+        ty.conditional_type_shallow(self.db)
+            .is_some_and(|conditional| excluded_from_subset(conditional, subset))
+    }
+
     fn instance_excluded_from_subset(
         &self,
         target: InferredTypeData<'db>,
         subset: ConditionalSubset,
     ) -> bool {
-        let target = target.expand_canonical_global(self.db);
-        let Some(conditional) = target.conditional_type_shallow(self.db) else {
-            return false;
-        };
-        match subset {
-            ConditionalSubset::Falsy => conditional.is_truthy(),
-            ConditionalSubset::Truthy => conditional.is_falsy(),
-            ConditionalSubset::NonNullish => conditional.is_nullish(),
-            ConditionalSubset::Typeof(_) => false,
-        }
+        target
+            .expand_canonical_global(self.db)
+            .conditional_type_shallow(self.db)
+            .is_some_and(|conditional| excluded_from_subset(conditional, subset))
     }
 
     /// Returns the tag the `typeof` operator evaluates to for instances of
@@ -3237,6 +3229,21 @@ fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
 ///
 /// A replacement character marks a lossy unescape, such as a lone surrogate
 /// escape; equality can be neither proven nor refuted then.
+/// Returns whether a value classified as `conditional` provably cannot
+/// belong to `subset`.
+///
+/// A `typeof` subset never excludes anything here: truthiness says nothing
+/// about which `typeof` tag a value has, so those variants are decided by
+/// their tag instead.
+fn excluded_from_subset(conditional: ConditionalType, subset: ConditionalSubset) -> bool {
+    match subset {
+        ConditionalSubset::Falsy => conditional.is_truthy(),
+        ConditionalSubset::Truthy => conditional.is_falsy(),
+        ConditionalSubset::NonNullish => conditional.is_nullish(),
+        ConditionalSubset::Typeof(_) => false,
+    }
+}
+
 fn literal_string_may_equal(literal: &str, value: &str) -> bool {
     let unescaped = unescape_js_string_text(literal);
     unescaped == value || unescaped.contains('\u{fffd}') || value.contains('\u{fffd}')
