@@ -61,7 +61,15 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
 
-    VariantList.parse_list(p);
+    if class_chunk_has_colon(p) {
+        VariantList.parse_list(p);
+    } else {
+        // Every variant ends in a `:`, so a class without one can't start
+        // with variants; complete the empty list directly instead of
+        // parsing segments only to rewind.
+        let variants = p.start();
+        variants.complete(p, TW_VARIANT_LIST);
+    }
 
     if p.at(T![-]) {
         p.bump_with_context(T![-], TailwindLexContext::SawNegative);
@@ -208,6 +216,24 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_ARBITRARY_CANDIDATE))
+}
+
+/// Whether the class chunk at the current position contains a `:` before
+/// the next whitespace.
+///
+/// Both variant forms end in a `:` (`parse_variant_expression` and
+/// `parse_arbitrary_variant` rewind without one), so a chunk without a
+/// colon can never begin with variants. Bytes the scan treats as
+/// whitespace must also be token boundaries in the lexer; anything else
+/// merely scans into the next chunk, which can only report a colon that
+/// makes the caller fall back to the ordinary variant attempt.
+fn class_chunk_has_colon(p: &TailwindParser) -> bool {
+    let text = p.source().text().as_bytes();
+    let start = usize::from(p.source().position());
+    text[start..]
+        .iter()
+        .take_while(|byte| !matches!(byte, b' ' | b'\t' | b'\n' | b'\r'))
+        .any(|&byte| byte == b':')
 }
 
 pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
