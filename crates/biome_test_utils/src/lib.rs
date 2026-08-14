@@ -60,7 +60,6 @@ use biome_service::workspace::{
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_string_case::StrLikeExtension;
-#[cfg(feature = "module_graph")]
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
