@@ -32,8 +32,8 @@ HtmlRoot {
                         class_token: CLASS_KW@5..10 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@10..11 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@11..15 "foo" [] [Whitespace(" ")],
+                            property: SvelteName {
+                                ident_token: IDENT@11..15 "foo" [] [Whitespace(" ")],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: missing (optional),
@@ -43,8 +43,8 @@ HtmlRoot {
                         class_token: CLASS_KW@15..20 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@20..21 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@21..24 "bar" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@21..24 "bar" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -63,8 +63,8 @@ HtmlRoot {
                         class_token: CLASS_KW@33..38 "class" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@38..39 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@39..42 "baz" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@39..42 "baz" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -119,16 +119,16 @@ HtmlRoot {
             0: CLASS_KW@5..10 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@10..15
               0: COLON@10..11 ":" [] []
-              1: SVELTE_LITERAL@11..15
-                0: HTML_LITERAL@11..15 "foo" [] [Whitespace(" ")]
+              1: SVELTE_NAME@11..15
+                0: IDENT@11..15 "foo" [] [Whitespace(" ")]
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@15..15
               3: (empty)
           1: SVELTE_CLASS_DIRECTIVE@15..33
             0: CLASS_KW@15..20 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@20..33
               0: COLON@20..21 ":" [] []
-              1: SVELTE_LITERAL@21..24
-                0: HTML_LITERAL@21..24 "bar" [] []
+              1: SVELTE_NAME@21..24
+                0: IDENT@21..24 "bar" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@24..24
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@24..33
                 0: EQ@24..25 "=" [] []
@@ -141,8 +141,8 @@ HtmlRoot {
             0: CLASS_KW@33..38 "class" [] []
             1: SVELTE_DIRECTIVE_VALUE@38..50
               0: COLON@38..39 ":" [] []
-              1: SVELTE_LITERAL@39..42
-                0: HTML_LITERAL@39..42 "baz" [] []
+              1: SVELTE_NAME@39..42
+                0: IDENT@39..42 "baz" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@42..42
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@42..50
                 0: EQ@42..43 "=" [] []

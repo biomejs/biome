@@ -1197,8 +1197,20 @@ impl EmbeddedReferencesBuilder {
                 }
                 value
             }
-            AnySvelteDirective::SvelteStyleDirective(_)
-            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+            AnySvelteDirective::SvelteStyleDirective(directive) => {
+                let value = directive.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
+            AnySvelteDirective::SvelteClassDirective(directive) => {
+                let value = directive.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
         };
 
         self.register_svelte_binding_property(value.property().ok())
@@ -1210,8 +1222,8 @@ impl EmbeddedReferencesBuilder {
     ) -> Option<()> {
         let token = match property? {
             AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
-            AnySvelteBindingProperty::SvelteMemberProperty(_)
-            | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
+            AnySvelteBindingProperty::SvelteLiteral(_)
+            | AnySvelteBindingProperty::SvelteMemberProperty(_) => return None,
         };
 
         self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());

@@ -31,8 +31,8 @@ HtmlRoot {
                         style_token: STYLE_KW@5..10 "style" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@10..11 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@11..16 "color" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@11..16 "color" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -75,8 +75,8 @@ HtmlRoot {
                         style_token: STYLE_KW@50..55 "style" [] [],
                         value: SvelteDirectiveValue {
                             colon_token: COLON@55..56 ":" [] [],
-                            property: SvelteLiteral {
-                                value_token: HTML_LITERAL@56..61 "width" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@56..61 "width" [] [],
                             },
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
@@ -131,8 +131,8 @@ HtmlRoot {
             0: STYLE_KW@5..10 "style" [] []
             1: SVELTE_DIRECTIVE_VALUE@10..26
               0: COLON@10..11 ":" [] []
-              1: SVELTE_LITERAL@11..16
-                0: HTML_LITERAL@11..16 "color" [] []
+              1: SVELTE_NAME@11..16
+                0: IDENT@11..16 "color" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..26
                 0: EQ@16..17 "=" [] []
@@ -161,8 +161,8 @@ HtmlRoot {
             0: STYLE_KW@50..55 "style" [] []
             1: SVELTE_DIRECTIVE_VALUE@55..76
               0: COLON@55..56 ":" [] []
-              1: SVELTE_LITERAL@56..61
-                0: HTML_LITERAL@56..61 "width" [] []
+              1: SVELTE_NAME@56..61
+                0: IDENT@56..61 "width" [] []
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@61..61
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@61..76
                 0: EQ@61..62 "=" [] []

@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-hyphenated-shorthand-directives.svelte
+---
+# Input
+```svelte
+<script>
+const active = false;
+const color = "red";
+const condition = true;
+const actualColor = "blue";
+</script>
+
+<!-- Hyphenated shorthands cannot name a binding, so they must not register a
+     reference. `active` and `color` stay unused: the property is a single
+     token and is never split on the hyphen. -->
+<div class:is-active class:active-state style:background-color style:color-scheme>Text</div>
+
+<!-- Shorthands are case-sensitive: `Active` must not resolve to `active`. -->
+<div class:Active>Cased</div>
+
+<!-- Longhand directive property names are not references; only their
+     initializers are. -->
+<div class:active={condition} style:color={actualColor}>Identifier longhand</div>
+
+<!-- CSS-only longhand properties remain complete literals. -->
+<div
+    class:is-active={condition}
+    style:background-color={actualColor}
+    style:--theme-color={actualColor}
+>CSS properties</div>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-hyphenated-shorthand-directives.svelte:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable active is unused.
+  
+    1 │ <script>
+  > 2 │ const active = false;
+      │       ^^^^^^
+    3 │ const color = "red";
+    4 │ const condition = true;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend active with an underscore.
+  
+    1 1 │   
+    2   │ - const·active·=·false;
+      2 │ + const·_active·=·false;
+    3 3 │   const color = "red";
+    4 4 │   const condition = true;
+  
+
+```
+
+```
+invalid-svelte-hyphenated-shorthand-directives.svelte:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable color is unused.
+  
+    1 │ <script>
+    2 │ const active = false;
+  > 3 │ const color = "red";
+      │       ^^^^^
+    4 │ const condition = true;
+    5 │ const actualColor = "blue";
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend color with an underscore.
+  
+    1 1 │   
+    2 2 │   const active = false;
+    3   │ - const·color·=·"red";
+      3 │ + const·_color·=·"red";
+    4 4 │   const condition = true;
+    5 5 │   const actualColor = "blue";
+  
+
+```

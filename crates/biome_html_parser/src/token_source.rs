@@ -63,7 +63,8 @@ pub(crate) enum HtmlLexContext {
     /// Outside of this context, the lexer doesn't yield any particular keywords.
     Svelte,
 
-    /// The binding properties in Svelte are special and require a special lexing. They accept everything until `=` is found.
+    /// Lexes Svelte `class:` and `style:` properties as a single token until a
+    /// directive modifier, initializer, whitespace, or the tag end is found.
     SvelteBindingLiteral,
 
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:

@@ -20,7 +20,7 @@ use biome_parser::{Marker, Parser, SyntaxFeature, TokenSet, token_set};
 use biome_rowan::TextRange;
 use biome_unicode_table::{
     Dispatch::{DIG, DOL, IDT, UNI, ZER},
-    is_js_id_continue, lookup_byte,
+    is_js_id_continue, is_js_ident, lookup_byte,
 };
 use std::ops::Sub;
 
@@ -1040,8 +1040,13 @@ fn parse_svelte_binding_property(p: &mut HtmlParser) -> ParsedSyntax {
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(HTML_LITERAL, super::inside_tag_context(p));
-    Present(m.complete(p, SVELTE_LITERAL))
+    if is_js_ident(p.cur_text()) {
+        p.bump_remap_with_context(IDENT, HtmlLexContext::Svelte);
+        Present(m.complete(p, SVELTE_NAME))
+    } else {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::Svelte);
+        Present(m.complete(p, SVELTE_LITERAL))
+    }
 }
 
 /// Parses `...rest`

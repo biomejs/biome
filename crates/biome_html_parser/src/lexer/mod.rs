@@ -900,7 +900,7 @@ impl<'src> HtmlLexer<'src> {
     fn consume_svelte_literal(&mut self) -> HtmlSyntaxKind {
         while let Some(current) = self.current_byte() {
             let dispatched = lookup_byte(current);
-            if dispatched == WHS || dispatched == EQL || dispatched == MOR {
+            if matches!(dispatched, WHS | EQL | MOR | PIP) {
                 break;
             }
             self.advance(1);
