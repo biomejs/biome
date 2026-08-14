@@ -11,6 +11,8 @@ use biome_module_graph::{
     },
 };
 
+const CALL_ARGUMENT_QUERY: &str = "infer_call_argument_type";
+
 #[test]
 fn argument_requests_have_distinct_static_contracts() {
     assert_ne!(
@@ -124,6 +126,12 @@ fn expected_call_argument_request_skips_requested_non_spread_argument() {
         declare function schedule(kind: "async", task: (value: number) => Promise<void>): void;
         schedule("sync", (value) => load(value));
     "#;
+    const CHANGED_CALLEE_SOURCE: &str = r#"
+        import { load } from "./source.ts";
+        declare function schedule(kind: "noop", task: (value: number) => void): void;
+        declare function schedule(kind: "async", task: (value: number) => Promise<void>): void;
+        schedule("sync", (value) => load(value));
+    "#;
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/source.ts".into(),
@@ -131,20 +139,17 @@ fn expected_call_argument_request_skips_requested_non_spread_argument() {
     );
     fs.insert("/src/index.ts".into(), SOURCE);
 
-    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let mut db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let source_module = db
+        .module_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("source module must exist");
     let module = db
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
     let callee = expression_range_by_source(&db, module, SOURCE, "schedule");
     let kind = expression_range_by_source(&db, module, SOURCE, r#""sync""#);
     let callback = expression_range_by_source(&db, module, SOURCE, "(value) => load(value)");
-    let kind_input = ExpressionTypeInput::new(&db, module, kind);
-    let callback_input = ExpressionTypeInput::new(&db, module, callback);
-
-    db.clear_salsa_events();
-    let ty = execute_type_inference_request(
-        &db,
-        TypeInferenceCaller::new("test", "skipRequestedArgument"),
+    let request = || {
         ExpectedCallArgumentTypeRequest::new(
             module,
             callback,
@@ -155,14 +160,99 @@ fn expected_call_argument_request_skips_requested_non_spread_argument() {
             ]
             .into_boxed_slice(),
             1,
-        ),
+        )
+    };
+
+    {
+        let callee_input = ExpressionTypeInput::new(&db, module, callee);
+        let kind_input = ExpressionTypeInput::new(&db, module, kind);
+        let callback_input = ExpressionTypeInput::new(&db, module, callback);
+
+        db.clear_salsa_events();
+        let ty = execute_type_inference_request(
+            &db,
+            TypeInferenceCaller::new("test", "skipRequestedArgument"),
+            request(),
+        )
+        .expect("argument type must be inferred");
+        assert!(InferredType::new(&db, ty).function_returns_void());
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, infer_expression_type, callee_input, &events);
+        assert_function_query_was_run(&db, infer_expression_type, kind_input, &events);
+        assert_function_query_was_not_run(&db, infer_expression_type, callback_input, &events);
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, CALL_ARGUMENT_QUERY, &events),
+            1
+        );
+
+        db.clear_salsa_events();
+        let ty = execute_type_inference_request(
+            &db,
+            TypeInferenceCaller::new("test", "skipRequestedArgument"),
+            request(),
+        )
+        .expect("cached argument type must be inferred");
+        assert!(InferredType::new(&db, ty).function_returns_void());
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_expression_type, callee_input, &events);
+        assert_function_query_was_not_run(&db, infer_expression_type, kind_input, &events);
+        assert_function_query_was_not_run(&db, infer_expression_type, callback_input, &events);
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, CALL_ARGUMENT_QUERY, &events),
+            0
+        );
+    }
+
+    fs.insert(
+        "/src/source.ts".into(),
+        "export async function load(value: string) { return value; }",
+    );
+    let source_kind = resolve_js_module_kind_for_test(&fs, "/src/source.ts", true);
+    salsa::Setter::to(source_module.set_kind(&mut db), source_kind);
+    db.clear_salsa_events();
+    let ty = execute_type_inference_request(
+        &db,
+        TypeInferenceCaller::new("test", "skipRequestedArgument"),
+        request(),
     )
-    .expect("argument type must be inferred");
+    .expect("argument type must remain inferred");
     assert!(InferredType::new(&db, ty).function_returns_void());
     let events = db.take_salsa_events();
+    let callee_input = ExpressionTypeInput::new(&db, module, callee);
+    let kind_input = ExpressionTypeInput::new(&db, module, kind);
+    let callback_input = ExpressionTypeInput::new(&db, module, callback);
+    assert_function_query_was_not_run(&db, infer_expression_type, callee_input, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, kind_input, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, callback_input, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, CALL_ARGUMENT_QUERY, &events),
+        0
+    );
 
+    fs.insert("/src/index.ts".into(), CHANGED_CALLEE_SOURCE);
+    let module_kind = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+    salsa::Setter::to(module.set_kind(&mut db), module_kind);
+    db.clear_salsa_events();
+    assert!(
+        execute_type_inference_request(
+            &db,
+            TypeInferenceCaller::new("test", "skipRequestedArgument"),
+            request(),
+        )
+        .is_none()
+    );
+    let events = db.take_salsa_events();
+    let callee_input = ExpressionTypeInput::new(&db, module, callee);
+    let kind_input = ExpressionTypeInput::new(&db, module, kind);
+    let callback_input = ExpressionTypeInput::new(&db, module, callback);
+    assert_function_query_was_run(&db, infer_expression_type, callee_input, &events);
     assert_function_query_was_run(&db, infer_expression_type, kind_input, &events);
     assert_function_query_was_not_run(&db, infer_expression_type, callback_input, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, CALL_ARGUMENT_QUERY, &events),
+        1
+    );
 }
 
 #[test]
