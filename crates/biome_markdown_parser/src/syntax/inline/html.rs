@@ -1,11 +1,9 @@
-use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
-use crate::lexer::MarkdownLexContext;
 use crate::syntax::inline_span_crosses_setext;
 
 // #region is_inline_html — top-level dispatcher and HTML construct predicates
@@ -558,26 +556,22 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // Look ahead to find the closing > and check if content is valid
-    let source = p.source_after_current();
-
-    // Skip the < and find >
-    let after_open = &source[1..];
-    let close_pos = match after_open.find('>') {
-        Some(pos) => pos,
-        None => return Absent, // No closing >
+    let content_len = {
+        let source = p.source_after_current();
+        let after_open = &source[1..];
+        let close_pos = match after_open.find('>') {
+            Some(pos) => pos,
+            None => return Absent,
+        };
+        let content = &after_open[..close_pos];
+        if content.contains('\n')
+            || content.contains('\r')
+            || (!is_uri_autolink(content) && !is_email_autolink(content))
+        {
+            return Absent;
+        }
+        content.len()
     };
-
-    // Check for newline before > (not allowed in autolinks)
-    let content = &after_open[..close_pos];
-    if content.contains('\n') || content.contains('\r') {
-        return Absent;
-    }
-
-    // Must be either URI or email autolink
-    if !is_uri_autolink(content) && !is_email_autolink(content) {
-        return Absent;
-    }
 
     // Valid autolink - parse it
     let m = p.start();
@@ -585,25 +579,16 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
     // <
     p.bump(L_ANGLE);
 
-    // Content as inline item list containing textual nodes.
-    // Autolinks don't process backslash escapes, but the lexer may combine
-    // `\>` into a single escape token. We re-lex in CodeSpan context where
-    // backslash is literal, so `\` and `>` are separate tokens.
-    p.relex_code_span();
-
     let content_m = p.start();
-    while !p.at(R_ANGLE) && !p.at(T![EOF]) && !p.at_inline_end() {
-        let text_m = p.start();
-        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
-        text_m.complete(p, MD_TEXTUAL);
-    }
+    let text_m = p.start();
+    let end = p.cur_range().start() + TextSize::from(content_len as u32);
+    p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+    p.bump(MD_TEXTUAL_LITERAL);
+    text_m.complete(p, MD_TEXTUAL);
     content_m.complete(p, MD_INLINE_ITEM_LIST);
 
     // >
     p.expect(R_ANGLE);
-
-    // Re-lex back to regular context
-    p.force_relex_regular();
 
     Present(m.complete(p, MD_AUTOLINK))
 }

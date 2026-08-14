@@ -2294,6 +2294,9 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     if p.at(T![EOF]) {
         return Absent;
     }
+    if p.at(TILDE) {
+        p.re_lex_span(tilde_textual_end(p), MD_TEXTUAL_LITERAL);
+    }
     // A construct token that turned out to be plain text (failed emphasis
     // marker, unmatched bracket, ...) would become a one-character node and
     // split the surrounding prose. Re-lex it as plain text so it merges with
@@ -2307,6 +2310,24 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     // as their specific token kinds, but MdTextual expects MD_TEXTUAL_LITERAL.
     p.bump_remap(MD_TEXTUAL_LITERAL);
     Present(m.complete(p, MD_TEXTUAL))
+}
+
+fn tilde_textual_end(p: &MarkdownParser) -> TextSize {
+    let start = p.cur_range().start();
+    let source = p.source_after_current();
+    let mut offset = source.bytes().take_while(|byte| *byte == b'~').count();
+
+    for (_, character) in source[offset..].char_indices() {
+        if matches!(
+            character,
+            '\n' | '\r' | '*' | '_' | '`' | '~' | '<' | '>' | '[' | ']' | '\\' | '!' | '&'
+        ) {
+            break;
+        }
+        offset += character.len_utf8();
+    }
+
+    start + TextSize::from(offset as u32)
 }
 
 /// Construct tokens that, once they fail to open a construct, read as plain

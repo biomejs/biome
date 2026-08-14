@@ -42,13 +42,7 @@ MdRoot {
                     l_tick_token: BACKTICK@27..28 "`" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@28..29 "*" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@29..41 "not emphasis" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@41..42 "*" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@28..42 "*not emphasis*" [] [],
                         },
                     ],
                     r_tick_token: BACKTICK@42..43 "`" [] [],
@@ -142,16 +136,7 @@ MdRoot {
                     l_angle_token: L_ANGLE@200..201 "<" [] [],
                     value: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@201..221 "https://example.com/" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@221..222 "*" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@222..234 "not-emphasis" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@234..235 "*" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@201..235 "https://example.com/*not-emphasis*" [] [],
                         },
                     ],
                     r_angle_token: R_ANGLE@235..236 ">" [] [],
@@ -320,12 +305,8 @@ MdRoot {
         1: MD_INLINE_CODE@27..43
           0: BACKTICK@27..28 "`" [] []
           1: MD_INLINE_ITEM_LIST@28..42
-            0: MD_TEXTUAL@28..29
-              0: MD_TEXTUAL_LITERAL@28..29 "*" [] []
-            1: MD_TEXTUAL@29..41
-              0: MD_TEXTUAL_LITERAL@29..41 "not emphasis" [] []
-            2: MD_TEXTUAL@41..42
-              0: MD_TEXTUAL_LITERAL@41..42 "*" [] []
+            0: MD_TEXTUAL@28..42
+              0: MD_TEXTUAL_LITERAL@28..42 "*not emphasis*" [] []
           2: BACKTICK@42..43 "`" [] []
         2: MD_TEXTUAL@43..44
           0: MD_TEXTUAL_LITERAL@43..44 "\n" [] []
@@ -384,14 +365,8 @@ MdRoot {
         1: MD_AUTOLINK@200..236
           0: L_ANGLE@200..201 "<" [] []
           1: MD_INLINE_ITEM_LIST@201..235
-            0: MD_TEXTUAL@201..221
-              0: MD_TEXTUAL_LITERAL@201..221 "https://example.com/" [] []
-            1: MD_TEXTUAL@221..222
-              0: MD_TEXTUAL_LITERAL@221..222 "*" [] []
-            2: MD_TEXTUAL@222..234
-              0: MD_TEXTUAL_LITERAL@222..234 "not-emphasis" [] []
-            3: MD_TEXTUAL@234..235
-              0: MD_TEXTUAL_LITERAL@234..235 "*" [] []
+            0: MD_TEXTUAL@201..235
+              0: MD_TEXTUAL_LITERAL@201..235 "https://example.com/*not-emphasis*" [] []
           2: R_ANGLE@235..236 ">" [] []
         2: MD_TEXTUAL@236..237
           0: MD_TEXTUAL_LITERAL@236..237 "\n" [] []
