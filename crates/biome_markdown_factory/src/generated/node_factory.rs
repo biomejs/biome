@@ -199,10 +199,10 @@ pub fn md_inline_emphasis(
         ],
     ))
 }
-pub fn md_inline_html(value: MdInlineItemList) -> MdInlineHtml {
+pub fn md_inline_html(value_token: SyntaxToken) -> MdInlineHtml {
     MdInlineHtml::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INLINE_HTML,
-        [Some(SyntaxElement::Node(value.into_syntax()))],
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn md_inline_image(

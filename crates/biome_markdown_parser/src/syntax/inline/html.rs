@@ -2,6 +2,7 @@ use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
@@ -395,7 +396,7 @@ fn is_html_attr_name_continue(b: u8) -> bool {
 
 /// Parse raw inline HTML per CommonMark §6.8.
 ///
-/// Grammar: MdInlineHtml = value: MdInlineItemList
+/// Grammar: MdInlineHtml = value: 'md_html_literal'
 ///
 /// Includes: open tags, close tags, comments, processing instructions,
 /// declarations, and CDATA sections.
@@ -427,35 +428,10 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // Valid inline HTML - create the node
-    // Use checkpoint so we can rewind if token boundaries don't align
-    let checkpoint = p.checkpoint();
     let m = p.start();
-
-    // Create content as inline item list containing textual nodes
-    let content = p.start();
-
-    // Track remaining bytes to consume
-    let mut remaining = html_len;
-
-    while remaining > 0 && !p.at(T![EOF]) {
-        let token_len = p.cur_text().len();
-
-        // If the current token is larger than remaining bytes, token boundaries
-        // don't align with our validated HTML - rewind and treat as text
-        if token_len > remaining {
-            m.abandon(p);
-            p.rewind(checkpoint);
-            return Absent;
-        }
-
-        let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        text_m.complete(p, MD_TEXTUAL);
-        remaining -= token_len;
-    }
-
-    content.complete(p, MD_INLINE_ITEM_LIST);
+    let end = p.cur_range().start() + TextSize::from(html_len as u32);
+    p.re_lex_span(end, MD_HTML_LITERAL);
+    p.bump(MD_HTML_LITERAL);
 
     Present(m.complete(p, MD_INLINE_HTML))
 }

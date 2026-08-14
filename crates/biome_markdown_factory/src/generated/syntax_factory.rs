@@ -435,7 +435,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && MdInlineItemList::can_cast(element.kind())
+                    && element.kind() == MD_HTML_LITERAL
                 {
                     slots.mark_present();
                     current_element = elements.next();
