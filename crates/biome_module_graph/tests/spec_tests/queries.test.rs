@@ -38,6 +38,9 @@ fn expression_range_by_source(
         .unwrap_or_else(|| panic!("{expected} expression must exist"))
 }
 
+const BUDGETED_BINDING_QUERY: &str = "infer_binding_type_with_import_budget";
+const IMPORT_DEPTH_PREPARATION_QUERY: &str = "prepare_module_types_bottom_up_for_import_depth";
+
 #[test]
 fn test_binding_query_does_not_infer_complete_module_tables() {
     let fs = MemoryFileSystem::default();
@@ -130,6 +133,152 @@ fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
     let events = db.take_salsa_events();
     assert_function_query_was_not_run(&db, infer_module_types, source, &events);
     assert_function_query_was_not_run(&db, infer_module_types, index, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+        0
+    );
+}
+
+#[test]
+fn test_binding_queries_reuse_a_deep_import_chain_across_roots() {
+    const IMPORT_COUNT: usize = 129;
+    const ROOT_COUNT: usize = 64;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = (0..=IMPORT_COUNT)
+        .map(|index| format!("/src/chain{index}.ts"))
+        .collect::<Vec<_>>();
+    for (index, path) in paths.iter().enumerate().take(IMPORT_COUNT) {
+        fs.insert(
+            path.clone().into(),
+            format!(
+                "import {{ value as next }} from './chain{}.ts'; export const value = next;",
+                index + 1
+            ),
+        );
+    }
+    fs.insert(
+        paths[IMPORT_COUNT].clone().into(),
+        "export const value = 1;",
+    );
+    for root_index in 0..ROOT_COUNT {
+        let path = format!("/src/root{root_index}.ts");
+        fs.insert(
+            path.clone().into(),
+            "import { value } from './chain0.ts'; export const result = value;",
+        );
+        paths.push(path);
+    }
+
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let roots = (0..ROOT_COUNT)
+        .map(|root_index| {
+            db.module_for_path(Utf8Path::new(&format!("/src/root{root_index}.ts")))
+                .expect("root module must exist")
+        })
+        .collect::<Vec<_>>();
+
+    let first_root = roots[0];
+    let first_input = BindingTypeInput::new(
+        &db,
+        first_root,
+        binding_range_by_name(&db, first_root, "result"),
+    );
+    db.clear_salsa_events();
+    let ty = infer_binding_type(&db, first_input).expect("result type must be inferred");
+    assert!(is_inferred_number(&db, ty));
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, BUDGETED_BINDING_QUERY, &events),
+        IMPORT_COUNT - 1
+    );
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+        1
+    );
+
+    db.clear_salsa_events();
+    for root in roots.into_iter().skip(1) {
+        let input = BindingTypeInput::new(&db, root, binding_range_by_name(&db, root, "result"));
+        let ty = infer_binding_type(&db, input).expect("result type must be inferred");
+        assert!(is_inferred_number(&db, ty));
+    }
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, BUDGETED_BINDING_QUERY, &events),
+        0
+    );
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+        0
+    );
+}
+
+#[test]
+fn test_binding_query_bounds_fallbacks_in_a_dense_import_graph() {
+    const MODULE_COUNT: usize = 160;
+    const IMPORT_FANOUT: usize = 8;
+    const MAX_DISTINCT_CUTOFF_MODULES: usize = MODULE_COUNT - 128;
+
+    let fs = MemoryFileSystem::default();
+    let paths = (0..MODULE_COUNT)
+        .map(|index| format!("/src/dense{index}.ts"))
+        .collect::<Vec<_>>();
+    fs.insert(
+        paths[0].clone().into(),
+        "export const value0 = { leaf: 1 };",
+    );
+    for (index, path) in paths.iter().enumerate().skip(1) {
+        let dependencies = (index.saturating_sub(IMPORT_FANOUT)..index).collect::<Vec<_>>();
+        let imports = dependencies
+            .iter()
+            .map(|dependency| {
+                format!("import {{ value{dependency} }} from './dense{dependency}.ts';")
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let members = dependencies
+            .iter()
+            .map(|dependency| format!("value{dependency}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        fs.insert(
+            path.clone().into(),
+            format!("{imports}\nexport const value{index} = {{ {members} }};"),
+        );
+    }
+
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let root = db
+        .module_for_path(Utf8Path::new(&paths[MODULE_COUNT - 1]))
+        .expect("root module must exist");
+    let input = BindingTypeInput::new(
+        &db,
+        root,
+        binding_range_by_name(&db, root, &format!("value{}", MODULE_COUNT - 1)),
+    );
+
+    db.clear_salsa_events();
+    let ty = infer_binding_type(&db, input).expect("root type must be inferred");
+    assert!(InferredType::new(&db, ty).is_inferred());
+    let events = db.take_salsa_events();
+    let preparation_count =
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events);
+    assert!(
+        (1..=MAX_DISTINCT_CUTOFF_MODULES).contains(&preparation_count),
+        "fallback preparation must be bounded by cutoff modules, got {preparation_count}"
+    );
+
+    db.clear_salsa_events();
+    let ty = infer_binding_type(&db, input).expect("cached root type must be inferred");
+    assert!(InferredType::new(&db, ty).is_inferred());
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+        0
+    );
 }
 
 #[test]
@@ -912,6 +1061,11 @@ fn test_binding_query_handles_long_import_chains() {
         db.clear_salsa_events();
         let ty = infer_binding_type(&db, input).expect("value type must be inferred");
         assert!(is_inferred_number(&db, ty));
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+            1
+        );
 
         db.clear_salsa_events();
         let ty = infer_binding_type(&db, input).expect("cached value type must be inferred");
@@ -935,6 +1089,10 @@ fn test_binding_query_handles_long_import_chains() {
     assert!(is_inferred_number(&db, ty));
     let events = db.take_salsa_events();
     assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+        0
+    );
 
     let terminal = db
         .module_for_path(Utf8Path::new(&paths[0]))
@@ -948,6 +1106,10 @@ fn test_binding_query_handles_long_import_chains() {
     assert!(is_inferred_string(&db, ty));
     let events = db.take_salsa_events();
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, IMPORT_DEPTH_PREPARATION_QUERY, &events,),
+        1
+    );
 }
 
 #[test]

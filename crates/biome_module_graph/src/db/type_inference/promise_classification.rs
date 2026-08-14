@@ -220,7 +220,7 @@ fn classify_expression(
                                     db,
                                     state.module,
                                     &js_info,
-                                    ImportResolution::on_demand(state.module),
+                                    ImportResolution::on_demand(),
                                 );
                                 let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
                                     return Indeterminate;
@@ -329,7 +329,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::on_demand(state.module),
+                            ImportResolution::on_demand(),
                         );
                         let mut ty = ctx.resolve_qualifier(&qualifier);
                         for member in &members {
@@ -479,7 +479,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::on_demand(state.module),
+                                ImportResolution::on_demand(),
                             );
                             let ty = ctx.resolve(return_ty);
                             let result = match state.projection {
@@ -641,7 +641,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::on_demand(state.module),
+                                ImportResolution::on_demand(),
                             );
                             return match is_array_of_promise_type(
                                 db,
@@ -664,7 +664,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::on_demand(state.module),
+                                ImportResolution::on_demand(),
                             );
                             let ty = ctx.resolve_raw_type_id(type_id);
                             let Some(awaited) = ctx.resolve_await_expression(ty) else {
@@ -824,7 +824,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::on_demand(state.module),
+                            ImportResolution::on_demand(),
                         );
                         let target = ctx.resolve_raw_type_id(type_id);
                         let instance = InferredTypeData::instance_of(db, target, Box::default());

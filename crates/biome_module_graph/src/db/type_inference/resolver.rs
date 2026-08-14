@@ -39,7 +39,7 @@ const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
     /// Resolves imported symbols through export and lookup queries.
-    OnDemand { root: ModuleInfo, remaining: u8 },
+    OnDemand { remaining: u8 },
     /// Reads imports from complete module tables while blocking cyclic edges.
     FromTables { root: ModuleInfo },
     /// Reads imports from complete module tables while blocking the active cycle.
@@ -47,9 +47,8 @@ pub(in crate::db) enum ImportResolution<'a> {
 }
 
 impl ImportResolution<'_> {
-    pub(in crate::db) fn on_demand(root: ModuleInfo) -> Self {
+    pub(in crate::db) fn on_demand() -> Self {
         Self::OnDemand {
-            root,
             remaining: MAX_ON_DEMAND_IMPORT_DEPTH,
         }
     }
