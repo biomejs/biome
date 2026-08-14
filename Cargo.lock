@@ -555,6 +555,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_embeds"
+version = "0.1.0"
+dependencies = [
+ "biome_db",
+ "biome_fs",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_module_graph",
+ "biome_parser",
+ "biome_project_layout",
+ "biome_rowan",
+ "camino",
+ "papaya",
+ "salsa",
+]
+
+[[package]]
 name = "biome_flags"
 version = "0.0.0"
 dependencies = [
@@ -985,6 +1005,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_fs",
  "biome_glob",
  "biome_js_factory",
@@ -1011,7 +1032,6 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
- "biome_workspace_db",
  "bitvec",
  "camino",
  "codspeed-criterion-compat",
@@ -1559,6 +1579,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_formatter",
  "biome_fs",
  "biome_html_formatter",
@@ -1579,7 +1600,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
- "biome_workspace_db",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
@@ -1788,6 +1808,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_fs",
  "biome_graphql_analyze",
  "biome_graphql_parser",
@@ -1813,7 +1834,6 @@ dependencies = [
  "biome_service",
  "biome_test_utils",
  "biome_text_edit",
- "biome_workspace_db",
  "camino",
 ]
 
@@ -1832,6 +1852,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_formatter",
  "biome_fs",
  "biome_glob",
@@ -1875,10 +1896,10 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
- "biome_workspace_db",
  "biome_yaml_formatter",
  "biome_yaml_parser",
  "biome_yaml_syntax",
+ "boxcar",
  "bpaf",
  "camino",
  "codspeed-divan-compat",
@@ -1987,6 +2008,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_formatter",
  "biome_fs",
  "biome_html_parser",
@@ -2003,7 +2025,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_string_case",
- "biome_workspace_db",
  "camino",
  "countme",
  "json_comments",
@@ -2063,27 +2084,6 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "biome_workspace_db"
-version = "0.1.0"
-dependencies = [
- "biome_db",
- "biome_fs",
- "biome_html_parser",
- "biome_html_syntax",
- "biome_js_parser",
- "biome_js_syntax",
- "biome_languages",
- "biome_module_graph",
- "biome_parser",
- "biome_project_layout",
- "biome_rowan",
- "boxcar",
- "camino",
- "papaya",
- "salsa",
 ]
 
 [[package]]

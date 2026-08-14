@@ -4,6 +4,7 @@ use super::{
     SearchCapabilities, format_on_type_noop, matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FixedFileResult, FormatterCapabilities,
@@ -41,7 +42,6 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{debug_span, error, instrument};

@@ -19,7 +19,7 @@ biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
-biome_workspace_db           = { path = "./crates/biome_workspace_db" }
+biome_embeds                 = { path = "./crates/biome_embeds" }
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }

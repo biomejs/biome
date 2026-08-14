@@ -9,6 +9,7 @@ use super::{
     UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 #[cfg(feature = "js_embeds")]
 use crate::embed::EmbedContent;
 #[cfg(feature = "js_embeds")]
@@ -104,7 +105,6 @@ use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
@@ -831,6 +831,26 @@ fn parse_js_matched_embed(
         }
     }
 }
+
+// #[salsa::tracked]
+// fn debug_syntax_tree_impl<'db>(
+//     db: &'db dyn ProjectDb,
+//     project_key: ProjectKey,
+//     path: &'db Utf8Path,
+// ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+//     let settings = db
+//         .get_settings_based_on_path(project_key, path)
+//         .ok_or_else(WorkspaceError::no_project)?;
+//
+//     let parse = db.parsed_source_for_path(path);
+//
+//     let syntax: JsSyntaxNode = parse.syntax(&db);
+//     let tree: AnyJsRoot = parse.tree(&db);
+//     GetSyntaxTreeResult {
+//         cst: format!("{syntax:#?}"),
+//         ast: format!("{tree:#?}"),
+//     }
+// }
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,

@@ -1,5 +1,5 @@
-use crate::embedded::bindings::EmbeddedBinding;
-use crate::embedded::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use crate::bindings::EmbeddedBinding;
+use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
 use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,

@@ -8,6 +8,7 @@ use super::{
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::css::go_to::resolve_definition;
 use crate::file_handlers::{
@@ -45,7 +46,6 @@ use biome_languages::DocumentFileSource;
 use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{error, info};

@@ -15,7 +15,7 @@ use biome_module_graph::{
 };
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
-use biome_workspace_db::WorkspaceDb;
+use biome_service::db::WorkspaceDb;
 use divan::Bencher;
 use std::sync::Arc;
 

@@ -12,11 +12,11 @@ use biome_module_graph::{
 };
 use biome_project_layout::ProjectLayout;
 use biome_service::Workspace;
+use biome_service::db::WorkspaceDb;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
-use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub fn add_js_modules(

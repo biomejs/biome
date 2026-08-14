@@ -6,6 +6,7 @@ use super::{
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
@@ -28,7 +29,6 @@ use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::NodeParse;
 use biome_rowan::{AstNode, NodeCache};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{debug, debug_span, error};
