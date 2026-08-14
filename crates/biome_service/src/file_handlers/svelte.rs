@@ -10,15 +10,16 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
-use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
 use biome_js_syntax::{JsLanguage, TextRange, TextSize};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
-use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
 use regex::{Match, Regex};
@@ -103,6 +104,7 @@ impl ExtensionHandler for SvelteFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -137,16 +139,18 @@ impl ExtensionHandler for SvelteFileHandler {
     }
 }
 
-fn parse(
-    _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
-    _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let source_type = file_source.to_js_file_source().unwrap_or_default();
+#[salsa::interned]
+struct ParseSvelteInput {
+    file: FileSource,
+    document_source: JsFileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_svelte_file<'db>(db: &'db dyn Db, input: ParseSvelteInput<'db>) -> AnyParse {
+    let text = input.file(db).content(db);
+    let source_type = input.document_source(db);
     let (script, script_file_source) = if source_type.is_svelte_source_module() {
-        (text, source_type)
+        (text.as_str(), source_type)
     } else {
         (
             SvelteFileHandler::input(text),
@@ -156,26 +160,64 @@ fn parse(
 
     debug!("Parsing file with language {:?}", script_file_source);
 
-    let parse = parse_js_with_cache(
-        script,
-        script_file_source,
-        JsParserOptions::default(),
-        cache,
-    );
+    parse_js(script, script_file_source, JsParserOptions::default()).into()
+}
+
+fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_svelte_file(file_db, ParseSvelteInput::new(file_db, file, source_type));
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
+    _biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
+) -> ParseResult {
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let (script, script_file_source) = if source_type.is_svelte_source_module() {
+        (code, source_type)
+    } else {
+        (
+            SvelteFileHandler::input(code),
+            SvelteFileHandler::file_source(code),
+        )
+    };
+
+    debug!("Parsing file with language {:?}", script_file_source);
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse: parse_js_with_cache(
+            script,
+            script_file_source,
+            JsParserOptions::default(),
+            node_cache,
+        )
+        .into(),
         language: Some(file_source),
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -184,7 +226,7 @@ fn format(
     } else {
         0
     };
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
@@ -200,16 +242,8 @@ pub(crate) fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        range,
-        workspace_db,
-    )
+    javascript::format_range(biome_path, document_file_source, parse, settings, range)
 }
 
 pub(crate) fn format_on_type(
@@ -218,16 +252,8 @@ pub(crate) fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(
-        biome_path,
-        document_file_source,
-        parse,
-        settings,
-        offset,
-        workspace_db,
-    )
+    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

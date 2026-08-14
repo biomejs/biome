@@ -1,37 +1,46 @@
 use crate::{SemanticModel, SemanticModelOptions, semantic_model};
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
+use biome_db::FileSource;
 use biome_languages::JsFileSource;
 use biome_languages::LanguageDb;
+use biome_parser::{AnyParse, AnyParsedSource};
 
-#[salsa::tracked(returns(ref))]
-pub fn semantic_model_from_source(db: &dyn LanguageDb, file: ParsedSource) -> SemanticModel {
-    let parsed = file.parsed(db);
-    let path = file.path(db);
-    let source = db.source_from_index(file.document_source_index(db));
-    let source_type = source
-        .map_or(JsFileSource::try_from(path.as_path()).ok(), |s| {
-            s.to_js_file_source()
-        })
-        .unwrap_or_default();
-    semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type))
+#[salsa::interned]
+#[derive(Debug)]
+pub struct SemanticInput {
+    file_source: FileSource,
+    parsed: AnyParse,
 }
 
 #[salsa::tracked(returns(ref))]
-pub fn semantic_model_from_snippet(db: &dyn LanguageDb, file: ParsedSnippet) -> SemanticModel {
-    let parsed = file.parsed(db);
-    let source = db.source_from_index(file.document_source_index(db));
+pub fn semantic_model_from_source<'db>(
+    db: &'db dyn LanguageDb,
+    input: SemanticInput<'db>,
+) -> SemanticModel {
+    let path = input.file_source(db).path(db);
+    let source = db.source_from_path(path);
     let source_type = source
-        .and_then(|s| s.to_js_file_source())
+        .map_or(JsFileSource::try_from(path).ok(), |s| s.to_js_file_source())
         .unwrap_or_default();
-    semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type))
+    semantic_model(
+        &input.parsed(db).tree(),
+        SemanticModelOptions::from(&source_type),
+    )
 }
 
-pub fn js_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
+pub fn js_semantic_model<'db, Db>(
+    db: &'db Db,
+    file: FileSource,
+    parse: &'db AnyParsedSource,
+) -> &'db SemanticModel
 where
     Db: LanguageDb,
 {
-    match file {
-        AnyParsedSource::ParsedSource(source) => semantic_model_from_source(db, *source),
-        AnyParsedSource::ParsedSnippet(snippet) => semantic_model_from_snippet(db, *snippet),
+    match parse {
+        AnyParsedSource::ParsedSource(source) => {
+            semantic_model_from_source(db, SemanticInput::new(db, file, source.clone()))
+        }
+        AnyParsedSource::ParsedSnippet(snippet) => {
+            semantic_model_from_source(db, SemanticInput::new(db, file, snippet.parsed.clone()))
+        }
     }
 }

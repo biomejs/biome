@@ -232,7 +232,6 @@ fn setup_benchmark(
             path: BiomePath::new(TARGET_PATH),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })

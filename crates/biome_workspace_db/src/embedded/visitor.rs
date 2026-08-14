@@ -1,6 +1,6 @@
+use crate::embedded::EmbeddedSource;
 use crate::embedded::bindings::EmbeddedBinding;
 use crate::embedded::references::{EmbeddedTypeReference, EmbeddedValueReference};
-use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
@@ -60,8 +60,9 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
 #[salsa::tracked(returns(ref))]
 pub fn embedded_bindings_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Vec<Vec<EmbeddedBinding>> {
+    let file = source.file_source(db);
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return Vec::new();
     };
@@ -69,7 +70,7 @@ pub fn embedded_bindings_from_source(
         return Vec::new();
     };
 
-    let html_root: HtmlRoot = file.parsed(db).tree();
+    let html_root: HtmlRoot = source.parsed(db).tree();
     let mut builder = EmbeddedBindingsBuilder::new();
 
     if host_file_source.is_vue() {
@@ -78,8 +79,8 @@ pub fn embedded_bindings_from_source(
         builder.visit_svelte_html_root(&html_root);
     }
 
-    for snippet in file.snippets(db) {
-        let Some(file_source) = db.source_from_index(snippet.document_source_index(db)) else {
+    for snippet in source.snippets(db) {
+        let Some(file_source) = db.source_from_index(snippet.document_source_index()) else {
             continue;
         };
         let Some(js_file_source) = file_source.to_js_file_source() else {
@@ -88,12 +89,12 @@ pub fn embedded_bindings_from_source(
 
         if js_file_source.is_embedded_source()
             || host_file_source.is_svelte()
-            || is_script_element_snippet(&html_root, snippet.content_range(db))
+            || is_script_element_snippet(&html_root, snippet.content_range())
         {
             let block_kind = block_kind_from_js_source(&js_file_source)
-                .or_else(|| block_kind_for_snippet(&html_root, snippet.content_range(db)));
+                .or_else(|| block_kind_for_snippet(&html_root, snippet.content_range()));
             builder.visit_js_source_snippet(
-                &snippet.parsed(db).tree(),
+                &snippet.parsed().tree(),
                 &host_file_source,
                 block_kind.as_ref(),
             );
@@ -116,9 +117,9 @@ pub fn embedded_bindings_from_source(
 #[salsa::tracked(returns(ref))]
 pub fn embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Vec<Vec<EmbeddedValueReference>> {
-    let Some(builder) = collect_embedded_references(db, file) else {
+    let Some(builder) = collect_embedded_references(db, source) else {
         return Vec::new();
     };
 
@@ -134,9 +135,9 @@ pub fn embedded_references_from_source(
 #[salsa::tracked(returns(ref))]
 pub fn embedded_type_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Vec<Vec<EmbeddedTypeReference>> {
-    let Some(builder) = collect_embedded_references(db, file) else {
+    let Some(builder) = collect_embedded_references(db, source) else {
         return Vec::new();
     };
 
@@ -151,8 +152,9 @@ pub fn embedded_type_references_from_source(
 
 fn collect_embedded_references(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    source: EmbeddedSource<'_>,
 ) -> Option<EmbeddedReferencesBuilder> {
+    let file = source.file_source(db);
     let host_source = db.source_from_index(file.document_source_index(db))?;
     let is_svelte = host_source
         .to_html_file_source()
@@ -160,8 +162,8 @@ fn collect_embedded_references(
 
     let mut builder = EmbeddedReferencesBuilder::new();
 
-    for snippet in file.snippets(db) {
-        let Some(file_source) = db.source_from_index(snippet.document_source_index(db)) else {
+    for snippet in source.snippets(db) {
+        let Some(file_source) = db.source_from_index(snippet.document_source_index()) else {
             continue;
         };
         let Some(js_file_source) = file_source.to_js_file_source() else {
@@ -172,14 +174,14 @@ fn collect_embedded_references(
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
-            builder.visit_non_source_snippet(&snippet.parsed(db).tree(), &js_file_source);
+            builder.visit_non_source_snippet(&snippet.parsed().tree(), &js_file_source);
         }
     }
 
     if let Some(html_file_source) = host_source.to_html_file_source()
         && html_file_source.supports_components()
     {
-        let html_root: HtmlRoot = file.parsed(db).tree();
+        let html_root: HtmlRoot = source.parsed(db).tree();
         builder.visit_html_root(&html_root, &html_file_source);
     }
 

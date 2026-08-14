@@ -1,7 +1,10 @@
 use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVisitor};
-use crate::html_module_info::{HtmlEmbeddedContent, HtmlImport, HtmlModuleInfo};
+use crate::html_module_info::{
+    HtmlCssPropertyRegistration, HtmlEmbeddedContent, HtmlImport, HtmlModuleInfo,
+};
 use crate::module_graph::ModuleGraphFsProxy;
+use biome_css_semantic::db::css_property_definitions;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector};
 use biome_html_syntax::{
@@ -62,6 +65,7 @@ impl<'a> HtmlModuleVisitor<'a> {
         let mut referenced_classes = Vec::new();
         let mut imported_stylesheets = Vec::new();
         let mut import_paths = ImportPathMap::default();
+        let mut property_registrations = Vec::new();
 
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
@@ -89,6 +93,15 @@ impl<'a> HtmlModuleVisitor<'a> {
                 // CSS block: collect class definitions (with applicability scoping).
                 HtmlEmbeddedContent::Css(css_root, file_source, content_offset) => {
                     collect_css_classes(css_root, &mut style_classes, file_source, *content_offset);
+                    property_registrations.extend(
+                        css_property_definitions(css_root)
+                            .into_iter()
+                            .map(|definition| HtmlCssPropertyRegistration {
+                                name: definition.name_token().clone(),
+                                range: definition.range() + *content_offset,
+                                applicability: file_source.embedding_applicability(),
+                            }),
+                    );
                     let css_info =
                         CssModuleVisitor::new(css_root.clone(), self.directory, self.fs_proxy)
                             .visit();
@@ -110,6 +123,7 @@ impl<'a> HtmlModuleVisitor<'a> {
             referenced_classes,
             imported_stylesheets,
             import_paths,
+            property_registrations,
         )
     }
 

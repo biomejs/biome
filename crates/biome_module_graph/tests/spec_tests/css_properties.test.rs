@@ -1,10 +1,11 @@
-use biome_db::Db;
 use biome_fs::BiomePath;
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, css_property_definitions};
 use biome_project_layout::ProjectLayout;
 use camino::Utf8Path;
 
-use super::support::{add_js_modules, build_css_db, build_module_db_via_workspace};
+use super::support::{
+    add_css_modules, add_js_modules, build_css_db, build_module_db_via_workspace,
+};
 
 const PROPERTY: &str =
     "@property --value { syntax: '<color>'; inherits: true; initial-value: red; }";
@@ -183,13 +184,14 @@ fn css_property_query_preserves_branch_specific_continuations() {
 
 #[test]
 fn css_property_query_reads_the_current_semantic_model() {
-    let (_, mut db) = build_css_db(&[("/value.css", PROPERTY)]);
-    let parsed = db
-        .parsed_source_for_path(Utf8Path::new("/value.css"))
-        .unwrap();
-    let replacement =
-        biome_css_parser::parse_css(".value{}", Default::default(), Default::default());
-    salsa::Setter::to(parsed.set_parsed(&mut db), replacement.into());
+    let (fs, mut db) = build_css_db(&[("/value.css", PROPERTY)]);
+    fs.insert("/value.css".into(), ".value{}");
+    add_css_modules(
+        &mut db,
+        &fs,
+        &ProjectLayout::default(),
+        &[BiomePath::new("/value.css")],
+    );
     let module = db.module_for_path(Utf8Path::new("/value.css")).unwrap();
     assert!(
         css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--value", module)).is_empty()

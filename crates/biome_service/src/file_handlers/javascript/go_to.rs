@@ -1,5 +1,6 @@
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
+use biome_db::Db;
 #[cfg(feature = "module_graph")]
 use biome_fs::BiomePath;
 use biome_js_semantic::js_semantic_model;
@@ -24,8 +25,9 @@ use std::ops::Add;
 
 /// Source-side capability: given a cursor position, identify what binding the user clicked on.
 pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let semantic_model = js_semantic_model(&params.workspace_db, &params.parsed_source);
-    let root: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
+    let file = params.workspace_db.file_source_for_path(&params.path)?;
+    let semantic_model = js_semantic_model(&params.workspace_db, file, &params.parsed_source);
+    let root: AnyJsRoot = params.parsed_source.tree();
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {
         TokenAtOffset::Single(token) => token,
@@ -195,7 +197,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         #[cfg(not(feature = "module_graph"))]
         DefinitionReference::HtmlComponent { .. } => return None,
         DefinitionReference::LocalEmbedded { range, .. } => {
-            let offset = params.parsed_source.diagnostic_offset(&params.workspace_db);
+            let offset = params.parsed_source.diagnostic_offset();
             if let Some(offset) = offset {
                 result.store(params.path.clone(), range.add(offset))
             }

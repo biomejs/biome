@@ -19,7 +19,7 @@ use crate::syntax::reference::normalize_reference_label;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct MarkdownParserOptions {
     /// Maximum nesting depth for block quotes and lists.
     ///

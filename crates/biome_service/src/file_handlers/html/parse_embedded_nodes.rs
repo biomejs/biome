@@ -4,9 +4,13 @@ use crate::embed::html::{
     SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
-use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
+use crate::file_handlers::{
+    DocumentFileSource, ParseEmbedResult, ParseEmbeddedCaches, ParseEmbeddedParams,
+};
+use crate::settings::SettingsWithEditor;
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssLanguage, TextSize};
+use biome_css_syntax::CssLanguage;
+use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
@@ -23,31 +27,25 @@ use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleAp
 use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
-use biome_parser::AnyParse;
+use biome_parser::{AnyParse, ParsedSnippet};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 
-pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
-    let ParseEmbeddedParams {
-        any_parse,
-        path,
-        file_source,
-        settings,
-        node_cache,
-    } = params;
-    let mut nodes = Vec::new();
+fn parse_embeds(
+    any_parse: &AnyParse,
+    path: &BiomePath,
+    settings: &SettingsWithEditor,
+    file_source: HtmlFileSource,
+    caches: &mut ParseEmbeddedCaches,
+) -> ParseEmbedResult {
     let html_root: HtmlRoot = any_parse.tree();
-    let Some(file_source) = file_source.to_html_file_source() else {
-        return ParseEmbedResult::default();
-    };
-
-    let doc_file_source = DocumentFileSource::Html(file_source);
-
     let mut ctx = EmbedParseContext {
-        cache: node_cache,
         biome_path: path,
         host_file_source: &file_source,
         settings,
+        caches,
     };
+    let doc_file_source = DocumentFileSource::Html(file_source);
+    let mut nodes = Vec::new();
 
     match file_source.variant() {
         HtmlVariant::Standard(text_expression) => {
@@ -404,7 +402,38 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         }
     }
 
-    ParseEmbedResult { nodes }
+    ParseEmbedResult {
+        nodes: nodes
+            .into_iter()
+            .map(|(parsed, content, file_source)| {
+                (
+                    ParsedSnippet {
+                        parsed,
+                        element_range: content.element_range,
+                        content_range: content.content_range,
+                        content_offset: content.content_offset,
+                        document_source_index: None,
+                    },
+                    file_source,
+                )
+            })
+            .collect(),
+    }
+}
+
+pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
+    let ParseEmbeddedParams {
+        any_parse,
+        path,
+        file_source,
+        settings,
+        caches,
+    } = params;
+    let Some(file_source) = file_source.to_html_file_source() else {
+        return ParseEmbedResult::default();
+    };
+
+    parse_embeds(any_parse, path, settings, file_source, caches)
 }
 
 // Pass 3: control flow blocks via registry
@@ -729,7 +758,7 @@ fn build_svelte_text_expression_candidate(
 /// Build an `EmbedCandidate::Directive` from a Vue directive initializer clause.
 ///
 /// Vue directives use quoted string values (`@click="handler()"`).
-/// The JS content is the inner text without quotes, offset by +1 for the opening quote.
+/// The JS content and its range exclude the surrounding quotes.
 fn build_vue_directive_candidate(
     initializer: &HtmlAttributeInitializerClause,
     is_event_handler: bool,
@@ -738,14 +767,13 @@ fn build_vue_directive_candidate(
     let html_string = value_node.as_html_string()?;
     let content_token = html_string.value_token().ok()?;
     let inner_text = html_string.inner_string_text().ok()?;
-    let token_range = content_token.text_trimmed_range();
-    let inner_offset = token_range.start() + TextSize::from(1);
+    let content_range = inner_text.source_range(content_token.text_range());
 
     Some(EmbedCandidate::Directive {
         content: EmbedContent {
             element_range: initializer.range(),
-            content_range: token_range,
-            content_offset: inner_offset,
+            content_range,
+            content_offset: content_range.start(),
             text: inner_text,
         },
         is_event_handler,
@@ -935,7 +963,7 @@ fn embedded_css_file_source(
     base.with_embedding_kind(embedding_kind)
 }
 
-impl EmbedParseContext<'_, '_> {
+impl EmbedParseContext<'_, '_, '_> {
     /// Runs the detector on a candidate and, if matched, parses the embed.
     /// Returns the raw `ParsedEmbed` for callers that need to inspect the
     /// resolved JS file source before deciding what to do with the node
@@ -1103,7 +1131,7 @@ fn parse_matched_embed(
                 content.content_offset,
                 js_source,
                 options,
-                ctx.cache,
+                &mut ctx.caches.javascript,
             );
 
             Some(ParsedEmbed {
@@ -1134,7 +1162,7 @@ fn parse_matched_embed(
                 content.text.text(),
                 css_source,
                 content.content_offset,
-                ctx.cache,
+                &mut ctx.caches.css,
                 options,
             );
 
@@ -1152,7 +1180,7 @@ fn parse_matched_embed(
             let parse = parse_json_with_offset_and_cache(
                 content.text.text(),
                 content.content_offset,
-                ctx.cache,
+                &mut ctx.caches.json,
                 options,
             );
 

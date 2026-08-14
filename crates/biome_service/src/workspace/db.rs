@@ -2,9 +2,8 @@
 use crate::module_graph::PathInfoCache;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind, PathInfoCache};
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::FileSource;
 use biome_languages::DocumentFileSource;
-use biome_parser::AnyParse;
 use biome_workspace_db::{ParsedSourceUpdateMode, SharedWorkspaceDb, WorkspaceDb, WorkspaceDbData};
 use camino::Utf8Path;
 use parking_lot::Mutex;
@@ -14,8 +13,6 @@ use std::ops::Deref;
 use std::panic::resume_unwind;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::error;
-
-use crate::embed::EmbedContent;
 
 /// Represents the state of the database in the workspace.
 pub struct DbState {
@@ -242,32 +239,30 @@ impl DbState {
         }
     }
 
-    pub(crate) fn update_parsed_file(
+    pub(crate) fn upsert_file_source(
         &self,
         path: &Utf8Path,
-        parsed: AnyParse,
+        content: String,
         language_index: usize,
-        snippets: Vec<(AnyParse, EmbedContent, usize)>,
-    ) -> ParsedSource {
+        version: Option<i32>,
+    ) -> FileSource {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let parsed_snippets = create_parsed_snippets(&db, snippets);
                 db.update_or_insert_file(
                     path,
-                    parsed,
+                    content,
                     language_index,
-                    parsed_snippets,
+                    version,
                     ParsedSourceUpdateMode::Replace,
                 )
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                let parsed_snippets = create_parsed_snippets(db, snippets);
                 db.update_or_insert_file(
                     path,
-                    parsed,
+                    content,
                     language_index,
-                    parsed_snippets,
+                    version,
                     ParsedSourceUpdateMode::Setters,
                 )
             }),
@@ -278,6 +273,13 @@ impl DbState {
         match &self.storage {
             DbStorage::Shared(shared_db) => shared_db.fork().data().unload_path(path),
             DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
+        }
+    }
+
+    pub(crate) fn remove_file_source(&self, path: &Utf8Path) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => shared_db.fork().data().remove_file_source(path),
+            DbStorage::Owned(db) => db.with_setter(|db| db.remove_file_source(path)),
         }
     }
 
@@ -318,29 +320,9 @@ impl DbState {
     }
 }
 
-fn create_parsed_snippets(
-    db: &WorkspaceDb,
-    snippets: Vec<(AnyParse, EmbedContent, usize)>,
-) -> Vec<ParsedSnippet> {
-    snippets
-        .into_iter()
-        .map(|(parse, content, index)| {
-            ParsedSnippet::new(
-                db,
-                parse,
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-                index,
-            )
-        })
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::JsFileSource;
     use camino::Utf8PathBuf;
     use std::panic::AssertUnwindSafe;
@@ -349,15 +331,6 @@ mod tests {
     use std::time::Duration;
 
     static_assertions::assert_not_impl_any!(DbReadGuard: Send);
-
-    fn parse_js(source: &str) -> AnyParse {
-        parse(
-            source,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into()
-    }
 
     /// Waits until a setter-based update is running or waiting to run.
     fn wait_for_pending_setter(state: &DbState) {
@@ -382,7 +355,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.upsert_file_source(&path, "let a = 1;".to_string(), 0, None);
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -408,7 +381,7 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.upsert_file_source(&path, "let b = 2;".to_string(), 0, None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -429,7 +402,7 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp());
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.upsert_file_source(&path, "let a = 1;".to_string(), 0, None);
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -438,7 +411,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.upsert_file_source(&path, "let b = 2;".to_string(), 0, None);
             })
         };
 
@@ -463,14 +436,14 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp());
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.upsert_file_source(&path, "let a = 1;".to_string(), 0, None);
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.upsert_file_source(&path, "let b = 2;".to_string(), 0, None);
             })
         };
 
@@ -488,7 +461,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.upsert_file_source(&path, "let a = 1;".to_string(), 0, None);
     }
 
     #[test]
@@ -497,7 +470,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.upsert_file_source(&path, "let a = 1;".to_string(), 0, None);
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_file(&path).is_some());
@@ -507,7 +480,7 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp());
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.upsert_file_source(&path, "let a = 1;".to_string(), 0, None);
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -516,7 +489,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.upsert_file_source(&path, "let b = 2;".to_string(), 0, None);
                 done_tx.send(()).unwrap();
             })
         };

@@ -3,9 +3,6 @@ use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::traverse::{UpwardTraversalAction, UpwardTraversalVisitor};
 use crate::{CssPropertyDefinition, JsImportPath, JsImportPhase, JsModuleInfo};
 use biome_console::markup;
-use biome_css_semantic::db::{
-    css_property_definitions_from_snippet, css_property_definitions_from_source,
-};
 use biome_fs::normalize_path;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -364,18 +361,18 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         path: &Utf8Path,
         before: Option<TextSize>,
     ) -> Option<CssPropertyDefinition> {
-        self.db.css_module_info_for_path(path)?;
-        let parsed = self.db.parsed_source_for_path(path)?;
-        let definition = css_property_definitions_from_source(self.db, parsed)
+        let info = self.db.css_module_info_for_path(path)?;
+        let definition = info
+            .property_registrations
             .iter()
             .rev()
             .find(|definition| {
-                definition.name() == self.name
-                    && before.is_none_or(|before| definition.range().start() < before)
+                definition.name.text() == self.name
+                    && before.is_none_or(|before| definition.range.start() < before)
             })?;
         Some(CssPropertyDefinition {
             module_path: normalize_path(path),
-            range: definition.range(),
+            range: definition.range,
         })
     }
 
@@ -400,36 +397,21 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             })
             .collect::<Vec<_>>();
 
-        if let Some(source) = self.db.parsed_source_for_path(path) {
-            for snippet in source.snippets(self.db) {
-                let Some(file_source) = self
-                    .db
-                    .source_from_index(snippet.document_source_index(self.db))
-                    .and_then(|source| source.to_css_file_source())
-                else {
-                    continue;
-                };
-                if only_global && !file_source.embedding_applicability().is_global() {
-                    continue;
-                }
-                contexts.extend(
-                    css_property_definitions_from_snippet(self.db, *snippet)
-                        .iter()
-                        .filter(|definition| definition.name() == self.name)
-                        .map(|definition| {
-                            // Parsed snippet trees exclude their parser base offset.
-                            let range = definition.range() + snippet.content_offset(self.db);
-                            HtmlPropertyContext {
-                                position: range.start(),
-                                kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
-                                    module_path: normalize_path(path),
-                                    range,
-                                }),
-                            }
-                        }),
-                );
-            }
-        }
+        contexts.extend(
+            info.property_registrations
+                .iter()
+                .filter(|definition| {
+                    (!only_global || definition.applicability.is_global())
+                        && definition.name.text() == self.name
+                })
+                .map(|definition| HtmlPropertyContext {
+                    position: definition.range.start(),
+                    kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
+                        module_path: normalize_path(path),
+                        range: definition.range,
+                    }),
+                }),
+        );
 
         contexts.sort_by_key(|context| context.position);
         contexts

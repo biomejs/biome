@@ -18,15 +18,16 @@ use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::markdown::{
     MarkdownFormatterConfiguration, MarkdownFormatterEnabled, MarkdownLinterEnabled,
 };
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
+use biome_languages::LanguageDb;
 use biome_markdown_analyze::analyze;
 use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
-use biome_parser::NodeParse;
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
@@ -250,6 +251,7 @@ impl ExtensionHandler for MarkdownFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -295,17 +297,50 @@ fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<MarkdownLanguage>(path)
 }
 
+#[salsa::interned]
+struct ParseMarkdownInput {
+    file: FileSource,
+    options: MarkdownParserOptions,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_markdown_file<'db>(db: &'db dyn Db, input: ParseMarkdownInput<'db>) -> AnyParse {
+    let mut node_cache = NodeCache::default();
+    parse_markdown_with_cache(
+        input.file(db).content(db),
+        &mut node_cache,
+        input.options(db),
+    )
+    .into()
+}
+
 fn parse(
-    _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
+    biome_path: &BiomePath,
     settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = db
+        .file_and_source_from_path(biome_path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let options = settings.parse_options::<MarkdownLanguage>(biome_path, &file_source);
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_markdown_file(file_db, ParseMarkdownInput::new(file_db, file, options));
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
+    biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
-    let options = settings.parse_options::<MarkdownLanguage>(_biome_path, &file_source);
-    let parse = parse_markdown_with_cache(text, cache, options);
-    let any_parse =
-        NodeParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics()).into();
+    let options = settings.parse_options::<MarkdownLanguage>(biome_path, &file_source);
+    let any_parse = parse_markdown_with_cache(code, node_cache, options).into();
 
     ParseResult {
         any_parse,
@@ -313,13 +348,9 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: MarkdownSyntaxNode = parse.syntax(&workspace_db);
-    let tree: MdRoot = parse.tree(&workspace_db);
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: MarkdownSyntaxNode = parse.syntax();
+    let tree: MdRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -331,11 +362,9 @@ fn debug_formatter_ir(
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -345,13 +374,12 @@ fn debug_formatter_ir(
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
-    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
@@ -365,7 +393,7 @@ pub(crate) fn format(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting Markdown file", path =? params.path, language =? params.language)
         .entered();
-    let root: MdRoot = params.parsed_source.tree(&params.workspace_db);
+    let root: MdRoot = params.parsed_source.tree();
 
     let analyzer_options = params.settings.analyzer_options::<MarkdownLanguage>(
         params.path,
@@ -401,7 +429,7 @@ fn lint(params: LintParams) -> LintResults {
         process_lint.process_signal(signal)
     });
 
-    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    let diagnostics = params.parsed_source.serde_diagnostics();
 
     process_lint.into_result(diagnostics, analyze_diagnostics)
 }
@@ -412,7 +440,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings: workspace,
         path,
-        workspace_db,
+        workspace_db: _,
         project_layout,
         language: _,
         skip,
@@ -424,10 +452,11 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         working_directory,
         compute_actions,
         analyzer_cache,
+        ..
     } = params;
 
-    let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
-    let tree: MdRoot = parsed_source.tree(&workspace_db);
+    let _ = debug_span!("Code actions Markdown", range =? range, path =? path).entered();
+    let tree: MdRoot = parsed_source.tree();
     let analyzer_options = workspace.analyzer_options::<MarkdownLanguage>(
         params.path,
         working_directory,
@@ -456,7 +485,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     analyze(&tree, filter, &analyzer_options, |signal| {
         if compute_actions {
             actions.extend(
@@ -495,7 +524,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let mut tree: MdRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut tree: MdRoot = params.parsed_source.tree();
 
     // Compute final rules (taking `overrides` into account)
     let rules = params

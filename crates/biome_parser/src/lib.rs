@@ -739,13 +739,13 @@ pub trait SyntaxFeature: Sized {
 ///
 /// It can be dynamically downcast into a concrete [SyntaxNode] or [AstNode] of
 /// the corresponding language, generally through a language-specific capability
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct NodeParse {
     pub(crate) root: SendNode,
     pub(crate) diagnostics: Vec<ParseDiagnostic>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum AnyParse {
     Node(NodeParse),
     EmbeddedNode(EmbeddedNodeParse),
@@ -986,7 +986,7 @@ impl NodeParse {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EmbeddedNodeParse {
     pub root: EmbeddedSendNode,
     pub diagnostics: Vec<ParseDiagnostic>,
@@ -1040,5 +1040,181 @@ impl EmbeddedNodeParse {
         N::Language: 'static,
     {
         N::unwrap_cast(self.syntax::<N::Language>().node)
+    }
+}
+
+/// Represents embedded content extracted from HTML documents.
+///
+/// This struct stores parsing metadata and provides access to the parsed
+/// content with offset-aware positioning to maintain correct source locations.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ParsedSnippet {
+    pub parsed: AnyParse,
+
+    /// The range of the entire script element in the HTML document,
+    /// including the opening and closing tags.
+    pub element_range: TextRange,
+
+    /// The range of just the JavaScript content within the script element,
+    /// excluding the script tags themselves.
+    pub content_range: TextRange,
+
+    /// The offset where the JavaScript content starts in the parent document.
+    /// This is used for offset-aware parsing.
+    pub content_offset: TextSize,
+
+    /// The index of the snippet's document source.
+    ///
+    /// Newly parsed snippets use `None` until the workspace registers their
+    /// document source.
+    pub document_source_index: Option<usize>,
+}
+
+impl ParsedSnippet {
+    pub fn content_offset(&self) -> TextSize {
+        self.content_offset
+    }
+    pub fn content_range(&self) -> TextRange {
+        self.content_range
+    }
+    pub fn element_range(&self) -> TextRange {
+        self.element_range
+    }
+    pub fn parsed(&self) -> &AnyParse {
+        &self.parsed
+    }
+
+    /// Returns the registered document source index.
+    ///
+    /// Callers must register the snippet's document source before invoking this
+    /// method.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `document_source_index` is `None`.
+    pub fn document_source_index(&self) -> usize {
+        self.document_source_index
+            .expect("The workspace must register this index.")
+    }
+
+    pub fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        self.parsed.clone().into_serde_diagnostics()
+    }
+
+    pub fn has_errors(&self) -> bool {
+        self.parsed.has_errors()
+    }
+
+    pub fn error_count(&self) -> usize {
+        self.parsed.diagnostics().len()
+    }
+}
+
+/// Convenient type for source
+#[derive(Debug, Clone)]
+pub enum AnyParsedSource {
+    /// This is the root of a file.
+    ParsedSource(AnyParse),
+    /// This is the root of a snippet, inside a file.
+    ParsedSnippet(ParsedSnippet),
+}
+
+impl AnyParsedSource {
+    pub fn tree<N>(&self) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::ParsedSource(parsed) => parsed.tree::<N>(),
+            Self::ParsedSnippet(parsed) => parsed.parsed.tree::<N>(),
+        }
+    }
+
+    pub fn into_language_root<N>(self) -> Option<N>
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::ParsedSource(parsed) => parsed.into_language_root(),
+            Self::ParsedSnippet(_) => None,
+        }
+    }
+
+    pub fn syntax<L>(&self) -> SyntaxNode<L>
+    where
+        L: Language + 'static,
+    {
+        match self {
+            Self::ParsedSource(parsed) => parsed.syntax(),
+            Self::ParsedSnippet(parsed) => parsed.parsed.syntax(),
+        }
+    }
+
+    pub fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        match self {
+            Self::ParsedSource(parsed) => parsed.clone().into_serde_diagnostics(),
+            Self::ParsedSnippet(parsed) => parsed.parsed.clone().into_serde_diagnostics(),
+        }
+    }
+
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        match self {
+            Self::ParsedSource(parsed) => parsed.diagnostics(),
+            Self::ParsedSnippet(parsed) => parsed.parsed.diagnostics(),
+        }
+    }
+
+    pub fn diagnostic_offset(&self) -> Option<TextSize> {
+        match self {
+            Self::ParsedSource(_) => None,
+            Self::ParsedSnippet(snippet) => Some(snippet.content_offset()),
+        }
+    }
+
+    pub fn unwrap_as_send_node(&self) -> SendNode {
+        match self {
+            Self::ParsedSource(source) => source.unwrap_as_send_node(),
+            Self::ParsedSnippet(_) => panic!("Cannot unwrap ParsedSnippet into SendNode"),
+        }
+    }
+
+    pub fn any_parse(&self) -> &AnyParse {
+        match self {
+            Self::ParsedSource(source) => source,
+            Self::ParsedSnippet(snippet) => &snippet.parsed,
+        }
+    }
+
+    pub fn has_errors(&self) -> bool {
+        match self {
+            Self::ParsedSource(source) => source.has_errors(),
+            Self::ParsedSnippet(snippet) => snippet.has_errors(),
+        }
+    }
+}
+
+impl From<AnyParse> for AnyParsedSource {
+    fn from(source: AnyParse) -> Self {
+        Self::ParsedSource(source)
+    }
+}
+
+impl From<ParsedSnippet> for AnyParsedSource {
+    fn from(snippet: ParsedSnippet) -> Self {
+        Self::ParsedSnippet(snippet)
+    }
+}
+
+impl From<&AnyParse> for AnyParsedSource {
+    fn from(source: &AnyParse) -> Self {
+        Self::ParsedSource(source.clone())
+    }
+}
+
+impl From<&ParsedSnippet> for AnyParsedSource {
+    fn from(snippet: &ParsedSnippet) -> Self {
+        Self::ParsedSnippet(snippet.clone())
     }
 }
