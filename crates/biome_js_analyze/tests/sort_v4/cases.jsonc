@@ -272,6 +272,16 @@
 	"md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex", // responsive, min/max
 	"md:hover:flex hover:flex flex md:flex",              // compound
 
+	// ─── container-query and child variants ────────────────────────
+	// `@sm`/`@md` glue the container root to a size; `@max-*` descend,
+	// `*`/`**` are the child / descendant variants. Cross-checked
+	// against prettier-plugin-tailwindcss 0.8.0.
+	"flex sm:flex @sm:flex @md:flex @max-lg:flex",        // breakpoints then containers
+	"@lg:flex @sm:flex @md:flex flex",                    // container sizes ascending
+	"flex *:flex **:flex hover:flex",                     // child / descendant variants
+	"@container:flex flex @sm:flex",                      // bare `@container` is not sortable
+	"@:flex flex",                                        // `@` without a size is not sortable
+
 	// ─── variants + important suffix ───────────────────────────────
 	// The important suffix reuses the underlying utility key, so it
 	// composes with variant weight.

@@ -453,6 +453,21 @@ sorted: flex max-lg:flex max-sm:flex sm:flex md:flex min-lg:flex
 input:  md:hover:flex hover:flex flex md:flex
 sorted: flex hover:flex md:flex md:hover:flex
 ---
+input:  flex sm:flex @sm:flex @md:flex @max-lg:flex
+sorted: flex sm:flex @max-lg:flex @sm:flex @md:flex
+---
+input:  @lg:flex @sm:flex @md:flex flex
+sorted: flex @sm:flex @md:flex @lg:flex
+---
+input:  flex *:flex **:flex hover:flex
+sorted: flex *:flex **:flex hover:flex
+---
+input:  @container:flex flex @sm:flex
+sorted: @container:flex flex @sm:flex
+---
+input:  @:flex flex
+sorted: @:flex flex
+---
 input:  p-2! flex!
 sorted: flex! p-2!
 ---
