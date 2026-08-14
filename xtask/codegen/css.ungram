@@ -37,6 +37,7 @@
 SyntaxElement = SyntaxElement
 
 CssBogus = SyntaxElement*
+CssBogusDeclaration = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
@@ -709,6 +710,7 @@ AnyCssDeclaration =
 	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
+	| CssBogusDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock

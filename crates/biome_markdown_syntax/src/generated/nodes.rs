@@ -676,11 +676,11 @@ impl MdInlineHtml {
     }
     pub fn as_fields(&self) -> MdInlineHtmlFields {
         MdInlineHtmlFields {
-            value: self.value(),
+            value_token: self.value_token(),
         }
     }
-    pub fn value(&self) -> MdInlineItemList {
-        support::list(&self.syntax, 0usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
 }
 impl Serialize for MdInlineHtml {
@@ -693,7 +693,7 @@ impl Serialize for MdInlineHtml {
 }
 #[derive(Serialize)]
 pub struct MdInlineHtmlFields {
-    pub value: MdInlineItemList,
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineImage {
@@ -2763,7 +2763,10 @@ impl std::fmt::Debug for MdInlineHtml {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdInlineHtml")
-                .field("value", &self.value())
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("MdInlineHtml").finish()

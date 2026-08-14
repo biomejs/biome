@@ -228,6 +228,16 @@ fn html_style_attribute_rejects_qualified_rules() {
 }
 
 #[test]
+fn html_style_attribute_reports_invalid_declaration() {
+    for content in [
+        r#"<div style="9fill-opacity:1;"></div>"#,
+        r#"<div style="color(display-p3 0.4549 0.8745 0.5451);fill-opacity:1;"></div>"#,
+    ] {
+        assert_diagnostics("/project/file.html", content);
+    }
+}
+
+#[test]
 fn html_non_style_attribute_is_not_parsed_as_css() {
     assert_no_diagnostics(
         "/project/file.html",

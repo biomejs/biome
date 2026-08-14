@@ -356,7 +356,7 @@ MdAutolink =
 // Raw inline HTML per CommonMark §6.8
 // Includes: open tags, closing tags, comments, processing instructions,
 // declarations, and CDATA sections
-MdInlineHtml = value: MdInlineItemList
+MdInlineHtml = value: 'md_html_literal'
 
 // &amp;
 // ^^^^^

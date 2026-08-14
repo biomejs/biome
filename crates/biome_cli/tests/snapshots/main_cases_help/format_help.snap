@@ -251,7 +251,7 @@ Options that control internal CLI and daemon server logging.
 
 Available positional items:
     PATH                      The optional `PATH` arguments accept one or more paths to files or
-                              directories. If omitted, Biome processes files in the current working
+                              directories. If omitted, Biome formats files in the current working
                               directory.
 
 Available options:
@@ -285,16 +285,16 @@ Available options:
                               standard output.
                               Biome uses `PATH` to select settings and determine the input type from
                               its extension. Virtual paths don't need to exist or belong to the
-                              project and bypass `files.includes` and VCS ignore checks.
+                              project. They bypass `files.includes` and VCS ignore checks.
                               Example:
                               ```shell
                               echo 'let a;' | biome format --stdin-file-path=file.js
                               ```
         --write               Applies formatting changes.
         --fix                 Alias for `--write`.
-        --staged              Processes only staged files. This option is intended for local use.
-        --changed             Processes only files changed by commits since the merge base between
-                              `REF` and `HEAD`. `REF` comes from `--since` or `vcs.defaultBranch`.
+        --staged              Formats only staged files. This option is intended for local use.
+        --changed             Formats only files with committed changes compared to the configured
+                              `vcs.defaultBranch` or the base reference specified by `--since`.
                               Staged and unstaged changes are not included. This option is intended
                               for CI.
         --since=REF           Sets the base reference used by `--changed`, overriding

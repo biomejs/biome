@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/closing-tag-fill-width/default-width.vue
+---
+
+# Input
+
+```vue
+<template>
+  <a-long-long-long-element>foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element>
+  <span>short content</span>
+</template>
+
+<template><a-long-long-long-element
+>foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
+><span
+>short content</span
+></template>
+
+```
+
+
+# Formatted
+
+```vue
+<template>
+	<a-long-long-long-element
+		>foo bar foo bar foo bar foo bar foo bar foo bar foo
+		bar</a-long-long-long-element
+	>
+	<span>short content</span>
+</template>
+
+<template
+	><a-long-long-long-element
+		>foo bar foo bar foo bar foo bar foo bar foo bar foo
+		bar</a-long-long-long-element
+	><span>short content</span></template
+>
+
+```
