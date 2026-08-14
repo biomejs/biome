@@ -204,6 +204,22 @@ fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
         });
 }
 
+#[divan::bench(
+    name = "bench_binding_queries_across_shared_deep_import_chain",
+    sample_size = 1
+)]
+fn bench_binding_queries_across_shared_deep_import_chain(bencher: Bencher) {
+    bencher
+        .with_inputs(|| build_shared_deep_import_db(129, 64))
+        .bench_local_values(|(db, roots)| {
+            for (module, range) in roots {
+                let input = BindingTypeInput::new(&db, module, range);
+                divan::black_box(infer_binding_type(&db, input));
+            }
+            db
+        });
+}
+
 #[divan::bench(name = "bench_distinct_local_type_lookup_queries", sample_size = 1)]
 fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
     bencher
@@ -448,6 +464,73 @@ fn build_source_db(name: &str, content: &str) -> (WorkspaceDb, ModuleInfo) {
         .pin()
         .insert(path.as_path().to_path_buf(), module);
     (db, module)
+}
+
+fn build_shared_deep_import_db(
+    import_count: usize,
+    root_count: usize,
+) -> (WorkspaceDb, Vec<(ModuleInfo, TextRange)>) {
+    let fs = MemoryFileSystem::default();
+    let mut names = Vec::with_capacity(import_count + root_count + 1);
+    for index in 0..import_count {
+        let name = format!("chain{index}.ts");
+        fs.insert(
+            name.clone().into(),
+            format!(
+                "import {{ value as next }} from './chain{}.ts'; export const value = next;",
+                index + 1
+            ),
+        );
+        names.push(name);
+    }
+    let terminal_name = format!("chain{import_count}.ts");
+    fs.insert(
+        terminal_name.clone().into(),
+        "export const value = 1;",
+    );
+    names.push(terminal_name);
+    for index in 0..root_count {
+        let name = format!("root{index}.ts");
+        fs.insert(
+            name.clone().into(),
+            "import { value } from './chain0.ts'; export const result = value;",
+        );
+        names.push(name);
+    }
+
+    let db = WorkspaceDb::default();
+    let mut roots = Vec::with_capacity(root_count);
+    for name in names {
+        let path = BiomePath::new(&name);
+        let root = get_js_root(&fs, &path);
+        let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+        let (module_info, _, _) = resolve_js_module_with_inference_mode(
+            root,
+            &path,
+            &fs,
+            &ProjectLayout::default(),
+            semantic_model,
+            &PathInfoCache::default(),
+            TypeInferenceMode::RawTypesOnly,
+        );
+        let module = ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), module);
+        if name.starts_with("root") {
+            roots.push(module);
+        }
+    }
+
+    let roots = roots
+        .into_iter()
+        .map(|module| (module, binding_range_by_name(&db, module, "result")))
+        .collect();
+    (db, roots)
 }
 
 fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> TextRange {

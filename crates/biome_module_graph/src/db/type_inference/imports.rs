@@ -10,7 +10,6 @@ use crate::db::queries::{
     resolved_export_origin,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::type_inference::TypeInferenceCodeReference;
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ModuleGraphGeneration, ResolvedPath};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeReference,
@@ -332,7 +331,7 @@ pub(in crate::db) fn resolve_export_type_on_demand<'db>(
         db,
         module,
         &js_info,
-        super::ImportResolution::on_demand(module),
+        super::ImportResolution::on_demand(),
     );
     Some(ctx.resolve_export_name_on_demand(module, name))
 }
@@ -407,21 +406,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .map_or(InferredTypeData::Unknown, |types| {
                     self.resolve_import_symbol_from_tables(module, types, symbol)
                 }),
-            super::ImportResolution::OnDemand { root, remaining } => {
+            super::ImportResolution::OnDemand { remaining } => {
                 let sccs = inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
                 if module == self.module || sccs.contains_cycle_between(self.module, module) {
                     return InferredTypeData::Unknown;
                 }
                 if remaining == 0 {
-                    return infer_module_types_bottom_up_for_import_depth(
-                        self.db,
-                        module,
-                        TypeInferenceCodeReference::new(
-                            file!(),
-                            line!(),
-                            "ResolutionCtx::resolve_import_symbol",
-                        ),
-                    )
+                    return infer_module_types_bottom_up_for_import_depth(self.db, module)
                     .map_or(InferredTypeData::Unknown, |types| {
                         self.resolve_import_symbol_from_tables(module, types, symbol)
                     });
@@ -438,7 +429,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     module,
                     &js_info,
                     super::ImportResolution::OnDemand {
-                        root,
                         remaining: remaining - 1,
                     },
                 );
@@ -854,8 +844,8 @@ fn inferred_type_from_binding_on_demand<'db>(
 
     let input = BindingTypeInput::new(db, module, range);
     match import_resolution {
-        super::ImportResolution::OnDemand { root, remaining } => {
-            infer_binding_type_with_import_budget(db, input, root, remaining)
+        super::ImportResolution::OnDemand { remaining } => {
+            infer_binding_type_with_import_budget(db, input, remaining)
         }
         super::ImportResolution::FromTables { .. } | super::ImportResolution::CycleFallback(_) => {
             infer_binding_type(db, input)
@@ -921,8 +911,8 @@ fn inferred_type_from_resolved_id_on_demand<'db>(
             } else {
                 let input = LocalTypeInput::new(db, module, local_type_id);
                 match import_resolution {
-                    super::ImportResolution::OnDemand { root, remaining } => {
-                        infer_local_type_with_import_budget(db, input, root, remaining)
+                    super::ImportResolution::OnDemand { remaining } => {
+                        infer_local_type_with_import_budget(db, input, remaining)
                     }
                     super::ImportResolution::FromTables { .. }
                     | super::ImportResolution::CycleFallback(_) => infer_local_type(db, input),
