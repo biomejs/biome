@@ -83,6 +83,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx
+    /// <svg aria-hidden><rect /></svg>
+    /// ```
+    ///
+    /// ```jsx
     /// <svg role="img" aria-label="">
     ///     <span id="">Pass</span>
     /// </svg>
@@ -123,11 +127,14 @@ impl Rule for NoSvgWithoutTitle {
             return None;
         }
 
-        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden")
-            && let Some(attr_static_val) = aria_hidden_attr.as_static_value()
-        {
-            let attr_text = attr_static_val.text();
-            if attr_text == "true" {
+        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden") {
+            // In JSX the boolean shorthand `aria-hidden` (an attribute with no
+            // initializer) is equivalent to `aria-hidden={true}`, so it hides
+            // the svg from the accessibility tree and no title is required.
+            aria_hidden_attr.initializer()?;
+            if let Some(attr_static_val) = aria_hidden_attr.as_static_value()
+                && attr_static_val.text() == "true"
+            {
                 return None;
             }
         }
