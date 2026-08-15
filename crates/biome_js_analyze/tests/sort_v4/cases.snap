@@ -490,7 +490,7 @@ input:  text-primary-foreground bg-primary hover:bg-primary/90
 sorted: text-primary-foreground bg-primary hover:bg-primary/90
 ---
 input:  px-4 has-[>svg]:px-3 h-9 py-2
-sorted: has-[>svg]:px-3 h-9 py-2 px-4
+sorted: h-9 px-4 py-2 has-[>svg]:px-3
 ---
 input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50
 sorted: hover:text-accent-foreground bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 border shadow-xs

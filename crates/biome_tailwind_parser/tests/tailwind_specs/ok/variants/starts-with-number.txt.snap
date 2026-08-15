@@ -25,6 +25,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..3 "2xl" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@3..4 ":" [] [],
             ],
@@ -51,6 +53,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..3
             0: TW_NAMED_VARIANT_SEGMENT@0..3
               0: TW_VARIANT_SEGMENT@0..3 "2xl" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@3..4 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@4..9

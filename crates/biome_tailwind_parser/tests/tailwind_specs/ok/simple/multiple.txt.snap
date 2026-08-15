@@ -33,6 +33,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@7..12 "focus" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@12..13 ":" [] [],
             ],
@@ -70,6 +72,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@7..12
             0: TW_NAMED_VARIANT_SEGMENT@7..12
               0: TW_VARIANT_SEGMENT@7..12 "focus" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@12..13 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@13..25

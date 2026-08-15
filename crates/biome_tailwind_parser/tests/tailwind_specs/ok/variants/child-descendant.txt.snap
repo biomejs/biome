@@ -24,6 +24,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..1 "*" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@1..2 ":" [] [],
             ],
@@ -41,6 +43,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@7..9 "**" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@9..10 ":" [] [],
             ],
@@ -67,6 +71,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..1
             0: TW_NAMED_VARIANT_SEGMENT@0..1
               0: TW_VARIANT_SEGMENT@0..1 "*" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@1..2 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@2..7
@@ -78,6 +84,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@7..9
             0: TW_NAMED_VARIANT_SEGMENT@7..9
               0: TW_VARIANT_SEGMENT@7..9 "**" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@9..10 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@10..14
