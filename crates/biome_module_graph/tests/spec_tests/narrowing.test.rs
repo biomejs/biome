@@ -929,3 +929,43 @@ export function afterGuard(x: number | string) {
         &fs,
     );
 }
+
+#[test]
+fn test_infer_module_types_declines_narrowing_for_contradictory_equality_guards() {
+    const SOURCE: &str = r#"
+export function stringEquals(x: "a" | "b" | "c") {
+    if (x === "a") {
+        if (x === "b") {
+            x;
+        }
+    }
+}
+
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function memberEquals(s: Choice) {
+    if (s.kind === "left") {
+        if (s.kind === "right") {
+            s;
+        }
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    // The inner guard compares against a different literal than the outer
+    // guard on the same value/member, so the tests cannot both have passed;
+    // narrowing for `StringEquals` and `MemberEquals` must be declined the
+    // same way it already is for contradictory `typeof` guards.
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_declines_narrowing_for_contradictory_equality_guards",
+        &db,
+        &fs,
+    );
+}

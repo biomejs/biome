@@ -3616,10 +3616,12 @@ fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
 /// }
 /// ```
 ///
-/// The exception is two `typeof` guards comparing against different tags.
-/// `typeof x` evaluates to a single string, so the tests cannot both have
-/// passed for the same value, and we decline to narrow rather than pick one
-/// of the tags:
+/// The exception is nested guards comparing the same value or member
+/// against different literals: `typeof` against different tags,
+/// `StringEquals` against different strings, or `MemberEquals` on the same
+/// member against different strings. Each of these can only hold for one
+/// value at a time, so the tests cannot both have passed for the same
+/// value, and we decline to narrow rather than pick one of the literals:
 ///
 /// ```js
 /// if (typeof x === "number") {
@@ -3630,7 +3632,7 @@ fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
 /// ```
 ///
 /// Returns `Some(())` after recording, and `None` for the contradicting
-/// case above.
+/// cases above.
 fn record_guard_predicate(
     found: &mut Option<NarrowingPredicate>,
     predicate: NarrowingPredicate,
@@ -3639,6 +3641,18 @@ fn record_guard_predicate(
         (Some(NarrowingPredicate::Typeof(existing)), NarrowingPredicate::Typeof(tag))
             if existing != tag =>
         {
+            return None;
+        }
+        (
+            Some(NarrowingPredicate::StringEquals(existing)),
+            NarrowingPredicate::StringEquals(value),
+        ) if existing != value => {
+            return None;
+        }
+        (
+            Some(NarrowingPredicate::MemberEquals(existing)),
+            NarrowingPredicate::MemberEquals(next),
+        ) if existing.member == next.member && existing.value != next.value => {
             return None;
         }
         (Some(_), _) => {}

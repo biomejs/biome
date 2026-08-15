@@ -215,4 +215,20 @@ mod test {
             assert_eq!(actual.text(), *expected, "failed test case: {token_text}");
         }
     }
+
+    #[test]
+    fn test_unescape_js_string_text_borrows_when_unescaped() {
+        assert!(matches!(
+            unescape_js_string_text("hello world"),
+            Cow::Borrowed("hello world")
+        ));
+    }
+
+    #[test]
+    fn test_unescape_js_string_text_owns_when_escaped() {
+        assert!(matches!(
+            unescape_js_string_text("hello\\nworld"),
+            Cow::Owned(string) if string == "hello\nworld"
+        ));
+    }
 }
