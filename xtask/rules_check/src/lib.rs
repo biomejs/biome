@@ -79,6 +79,17 @@ pub fn check_rules() -> anyhow::Result<()> {
                 )));
             }
 
+            if R::METADATA.domains.contains(&RuleDomain::Tailwind)
+                && !R::METADATA
+                    .docs
+                    .lines()
+                    .any(|line| line.trim() == "## Recognized class strings")
+            {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' belongs to the Tailwind domain but its documentation has no '## Recognized class strings' section. Add the section used by the other Tailwind rules, which links to the top-level `tailwind` configuration."
+                )));
+            }
+
             // The umbrella `@eslint-react/eslint-plugin` (`EslintReactXyz`) re-exports the
             // rules of its subset plugins (react-x, react-dom, react-jsx, react-rsc,
             // react-naming-convention). A rule that cites one side of this relationship

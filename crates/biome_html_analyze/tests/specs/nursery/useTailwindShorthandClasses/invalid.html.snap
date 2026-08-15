@@ -8,6 +8,7 @@ expression: invalid.html
 <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
 <div CLASS="w-4 h-4"></div>
 <div class="content-center justify-center"></div>
+<div className="w-4 h-4"></div>
 
 ```
 
@@ -99,7 +100,7 @@ invalid.html:3:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
   > 3 │ <div CLASS="w-4 h-4"></div>
       │             ^^^
     4 │ <div class="content-center justify-center"></div>
-    5 │ 
+    5 │ <div className="w-4 h-4"></div>
   
   i Compressible utility used here.
   
@@ -108,7 +109,7 @@ invalid.html:3:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
   > 3 │ <div CLASS="w-4 h-4"></div>
       │                 ^^^
     4 │ <div class="content-center justify-center"></div>
-    5 │ 
+    5 │ <div className="w-4 h-4"></div>
   
   i Using fewer classes reduces duplication and improves readability.
   
@@ -123,7 +124,7 @@ invalid.html:3:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
     3   │ - <div·CLASS="w-4·h-4"></div>
       3 │ + <div·CLASS="size-4"></div>
     4 4 │   <div class="content-center justify-center"></div>
-    5 5 │   
+    5 5 │   <div className="w-4 h-4"></div>
   
 
 ```
@@ -137,7 +138,8 @@ invalid.html:4:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
     3 │ <div CLASS="w-4 h-4"></div>
   > 4 │ <div class="content-center justify-center"></div>
       │             ^^^^^^^^^^^^^^
-    5 │ 
+    5 │ <div className="w-4 h-4"></div>
+    6 │ 
   
   i Compressible utility used here.
   
@@ -145,7 +147,8 @@ invalid.html:4:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
     3 │ <div CLASS="w-4 h-4"></div>
   > 4 │ <div class="content-center justify-center"></div>
       │                            ^^^^^^^^^^^^^^
-    5 │ 
+    5 │ <div className="w-4 h-4"></div>
+    6 │ 
   
   i Using fewer classes reduces duplication and improves readability.
   
@@ -159,7 +162,44 @@ invalid.html:4:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
     3 3 │   <div CLASS="w-4 h-4"></div>
     4   │ - <div·class="content-center·justify-center"></div>
       4 │ + <div·class="place-content-center"></div>
-    5 5 │   
+    5 5 │   <div className="w-4 h-4"></div>
+    6 6 │   
+  
+
+```
+
+```
+invalid.html:5:17 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ <div CLASS="w-4 h-4"></div>
+    4 │ <div class="content-center justify-center"></div>
+  > 5 │ <div className="w-4 h-4"></div>
+      │                 ^^^
+    6 │ 
+  
+  i Compressible utility used here.
+  
+    3 │ <div CLASS="w-4 h-4"></div>
+    4 │ <div class="content-center justify-center"></div>
+  > 5 │ <div className="w-4 h-4"></div>
+      │                     ^^^
+    6 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    3 3 │   <div CLASS="w-4 h-4"></div>
+    4 4 │   <div class="content-center justify-center"></div>
+    5   │ - <div·className="w-4·h-4"></div>
+      5 │ + <div·className="size-4"></div>
+    6 6 │   
   
 
 ```

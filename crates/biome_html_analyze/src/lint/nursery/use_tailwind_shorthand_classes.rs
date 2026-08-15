@@ -42,6 +42,11 @@ declare_lint_rule! {
     /// <div class="size-4"></div>
     /// ```
     ///
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
+    ///
     /// ## Known limitations
     ///
     /// This rule currently doesn't check bare strings inside framework-specific class collections,
