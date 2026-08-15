@@ -212,6 +212,16 @@ pub(crate) fn read_most_recent_log_file(
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
 fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String) {
+    // `max_log_files` makes the appender list the log directory before it opens
+    // the first log file, and `tracing-appender` writes a failed listing straight
+    // to stderr. The directory doesn't exist on a first run, so editors report
+    // that as a language server error even though logging then works fine.
+    //
+    // The error is ignored on purpose: `build` below creates the directory too,
+    // so a real failure still reaches its `expect`, and no subscriber exists yet
+    // for a warning to reach.
+    let _ = fs::create_dir_all(&log_path);
+
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
         .filename_prefix(log_file_name_prefix)
