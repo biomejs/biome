@@ -349,3 +349,37 @@ pub(crate) fn is_jsx_factory_import(binding: &JsIdentifierBinding, factory_name:
         .name_token()
         .is_ok_and(|name| name.text_trimmed() == factory_name)
 }
+
+/// Returns `true` when a call expression targets a React effect hook callback API.
+///
+/// It matches both direct calls and static-member calls based on the callee member name
+/// (for example `useEffect(...)` and `React.useEffect(...)`).
+///
+/// This function is intentionally syntactic and does not verify symbol resolution/imports.
+pub(crate) fn is_effect_call(call: &JsCallExpression) -> bool {
+    let Ok(callee) = call.callee() else {
+        return false;
+    };
+
+    let Some(name) = callee.get_callee_member_name() else {
+        return false;
+    };
+
+    let name = name.text_trimmed().to_string();
+    matches!(
+        name.as_str(),
+        "useEffect" | "useLayoutEffect" | "useInsertionEffect"
+    )
+}
+
+/// Returns the first argument of an effect call as an expression.
+///
+/// For effect hooks, this is typically the setup callback:
+/// `useEffect(() => { ... }, deps)`.
+///
+/// If the call has no first argument, or the first argument is not an expression,
+/// this returns `None`.
+pub(crate) fn effect_callback(call: &JsCallExpression) -> Option<AnyJsExpression> {
+    let [callback_arg] = call.arguments().ok()?.get_arguments_by_index([0]);
+    callback_arg?.as_any_js_expression().cloned()
+}
