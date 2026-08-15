@@ -438,6 +438,27 @@ sorted: block flex!
 input:  [display:block]! [color:red]
 sorted: [display:block]! [color:red]
 ---
+input:  flex! !flex flex
+sorted: !flex flex flex!
+---
+input:  block !flex flex
+sorted: !flex block flex
+---
+input:  p-4 !p-2 p-2! !p-4
+sorted: !p-2 !p-4 p-2! p-4
+---
+input:  hover:flex hover:!p-4 !flex md:p-4 md:!flex
+sorted: !flex hover:flex hover:!p-4 md:!flex md:p-4
+---
+input:  !-m-4 -m-4 !m-4 m-4
+sorted: !-m-4 !m-4 -m-4 m-4
+---
+input:  !bg-red-500/50 bg-red-500/50 ![color:red] [color:red]
+sorted: !bg-red-500/50 bg-red-500/50 ![color:red] [color:red]
+---
+input:  !flex! flex !hover:flex
+sorted: !flex! !hover:flex flex
+---
 input:  mt-4 -mt-2!
 sorted: -mt-2! mt-4
 ---

@@ -364,6 +364,12 @@ impl PendingSortKey {
             return Self::Unknown;
         };
 
+        // The legacy leading `!` and the trailing `!` are each fine on
+        // their own; Tailwind rejects a candidate spelling both.
+        if node.legacy_important_token().is_some() && node.excl_token().is_some() {
+            return Self::Unknown;
+        }
+
         let is_negative = node.negative_token().is_some();
 
         let Ok(inner) = node.candidate() else {

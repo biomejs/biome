@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..16 "border-spacing-y" [] [],
@@ -51,7 +52,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..22
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..22
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..22
         0: TW_BASE@0..16 "border-spacing-y" [] []
         1: DASH@16..17 "-" [] []
         2: TW_ARBITRARY_VALUE@17..22
@@ -62,7 +64,7 @@ TwRoot {
               1: IDENT@19..21 "px" [] []
           2: R_BRACKET@21..22 "]" [] []
         3: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@22..23 "" [Newline("\n")] []
 
 ```

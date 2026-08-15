@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@0..1 "[" [] [],
@@ -61,6 +62,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@26..27 "[" [] [],
@@ -83,6 +85,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@69..70 "[" [] [],
@@ -125,6 +128,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@92..93 "[" [] [],
@@ -197,7 +201,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..26
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@0..26
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@0..26
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..6 "width" [] []
         2: COLON@6..7 ":" [] []
@@ -222,11 +227,12 @@ TwRoot {
             3: R_PAREN@23..24 ")" [] []
         4: R_BRACKET@24..26 "]" [] [Whitespace(" ")]
         5: (empty)
-      3: (empty)
+      4: (empty)
     1: TW_FULL_CANDIDATE@26..69
       0: TW_VARIANT_LIST@26..26
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@26..69
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@26..69
         0: L_BRACKET@26..27 "[" [] []
         1: TW_PROPERTY@27..43 "background-image" [] []
         2: COLON@43..44 ":" [] []
@@ -239,11 +245,12 @@ TwRoot {
             3: R_PAREN@66..67 ")" [] []
         4: R_BRACKET@67..69 "]" [] [Whitespace(" ")]
         5: (empty)
-      3: (empty)
+      4: (empty)
     2: TW_FULL_CANDIDATE@69..92
       0: TW_VARIANT_LIST@69..69
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@69..92
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@69..92
         0: L_BRACKET@69..70 "[" [] []
         1: TW_PROPERTY@70..75 "color" [] []
         2: COLON@75..76 ":" [] []
@@ -268,11 +275,12 @@ TwRoot {
             3: R_PAREN@89..90 ")" [] []
         4: R_BRACKET@90..92 "]" [] [Whitespace(" ")]
         5: (empty)
-      3: (empty)
+      4: (empty)
     3: TW_FULL_CANDIDATE@92..141
       0: TW_VARIANT_LIST@92..92
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@92..141
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@92..141
         0: L_BRACKET@92..93 "[" [] []
         1: TW_PROPERTY@93..114 "grid-template-columns" [] []
         2: COLON@114..115 ":" [] []
@@ -308,7 +316,7 @@ TwRoot {
             3: R_PAREN@139..140 ")" [] []
         4: R_BRACKET@140..141 "]" [] []
         5: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@141..142 "" [Newline("\n")] []
 
 ```
