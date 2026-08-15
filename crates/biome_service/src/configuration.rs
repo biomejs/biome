@@ -1187,7 +1187,7 @@ mod tests {
 
         assert_eq!(
             ProjectScanComputer::new(&configuration)
-                .with_rule_selectors(&[], &[DomainSelector("react").into()])
+                .with_rule_selectors(&[], &[DomainSelector("test").into()])
                 .compute(),
             ScanKind::NoScanner
         );

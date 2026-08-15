@@ -9,7 +9,6 @@ use biome_js_syntax::{
     JsLogicalOperator, JsReferenceIdentifier, JsSyntaxNode, JsUnaryOperator, JsxExpressionChild,
     JsxTagExpression, binding_ext::AnyJsBindingDeclaration, jsx_ext::AnyJsxElement,
 };
-use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
 
@@ -284,9 +283,13 @@ fn is_logical_left_hand_side_safe_by_type(
     ctx: &RuleContext<NoLeakedRender>,
     expr: &AnyJsExpression,
 ) -> bool {
-    ctx.type_of_expression(expr)
-        .and_then(InferredType::is_never_leaked_render_value)
-        .unwrap_or(false)
+    let Some(ty) = ctx.type_of_expression(expr) else {
+        return false;
+    };
+    if ty.is_nullish() {
+        return false;
+    }
+    ty.is_never_leaked_render_value().unwrap_or(false)
 }
 
 /// Whether the ternary alternate is always truthy. `null`/`undefined` still
