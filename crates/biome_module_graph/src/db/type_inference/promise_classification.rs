@@ -22,11 +22,13 @@ use crate::db::queries::{
 };
 use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
+use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
     TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
-    interned_types::{ReturnType, TypeData as InferredTypeData},
+    interned_types::{
+        ReturnType, TypeData as InferredTypeData, TypeSubstitution, TypeTransformResult,
+    },
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -278,6 +280,16 @@ fn classify_expression(
                                     .map(|binding| (id, binding))
                             });
                         if let Some((binding_id, binding)) = binding {
+                            if !qualifier.type_parameters.is_empty()
+                                && matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                )
+                            {
+                                return Indeterminate;
+                            }
                             if matches!(
                                 state.projection,
                                 Projection::FunctionReturn
@@ -458,21 +470,32 @@ fn classify_expression(
                         let Some(return_ty) = function.return_type.as_type() else {
                             return DoesNotReturnPromise;
                         };
-                        if matches!(state.projection, Projection::FunctionReturn)
-                            && let TypeReference::Resolved(resolved) = return_ty
-                            && resolved.level() == TypeResolverLevel::Thin
-                            && matches!(
-                                js_info.raw_types.get(resolved.id().index()),
-                                Some(RawTypeData::TypeofExpression(expression))
-                                    if matches!(expression.as_ref(), TypeofExpression::Call(_))
-                            )
+                        // Only function-return projections can follow a returned call. The next
+                        // target is the call expression itself, so map them to their equivalent
+                        // expression projections while retaining whether the result is awaited.
+                        // Other projections classify values rather than function returns; `None`
+                        // leaves them on the regular resolution path.
+                        let returned_call_projection = match state.projection {
+                            Projection::FunctionReturn => Some(Projection::Promise),
+                            Projection::ArrayFunctionReturn => Some(Projection::ArrayPromise),
+                            Projection::AwaitedArrayFunctionReturn => {
+                                Some(Projection::AwaitedArrayPromise)
+                            }
+                            Projection::Promise
+                            | Projection::PromiseTarget
+                            | Projection::ArrayPromise
+                            | Projection::AwaitedArrayPromise => None,
+                        };
+                        if let Some(projection) = returned_call_projection
+                            && let Some(returned_call) =
+                                returned_call_reference(&js_info, return_ty, function.is_async)
                         {
                             ClassificationState {
                                 module: state.module,
-                                target: ClassificationTarget::Reference(return_ty.clone()),
+                                target: ClassificationTarget::Reference(returned_call),
                                 mode: MemberLookupMode::Value,
                                 members: Box::default(),
-                                projection: Projection::Promise,
+                                projection,
                             }
                         } else {
                             let mut ctx = ResolutionCtx::new(
@@ -496,6 +519,25 @@ fn classify_expression(
                                 | Projection::ArrayPromise
                                 | Projection::AwaitedArrayPromise => unreachable!(),
                             };
+                            if matches!(result, Some(false)) {
+                                for parameter in &function.type_parameters {
+                                    let parameter = ctx.resolve(parameter);
+                                    let TypeTransformResult::Transformed(substituted) = ty
+                                        .substitute_type(
+                                            db,
+                                            TypeSubstitution {
+                                                generic: parameter,
+                                                replacement: InferredTypeData::Unknown,
+                                            },
+                                        )
+                                    else {
+                                        return Indeterminate;
+                                    };
+                                    if substituted != ty {
+                                        return Indeterminate;
+                                    }
+                                }
+                            }
                             return match result {
                                 Some(true) => ReturnsPromise,
                                 Some(false) => DoesNotReturnPromise,
@@ -611,6 +653,17 @@ fn classify_expression(
                         | TypeofExpression::Typeof(_)
                         | TypeofExpression::UnaryMinus(_) => return Indeterminate,
                     },
+                    RawTypeData::InstanceOf(instance)
+                        if !instance.type_parameters.is_empty()
+                            && matches!(
+                                state.projection,
+                                Projection::FunctionReturn
+                                    | Projection::ArrayFunctionReturn
+                                    | Projection::AwaitedArrayFunctionReturn
+                            ) =>
+                    {
+                        return Indeterminate;
+                    }
                     RawTypeData::InstanceOf(instance) => match state.projection {
                         Projection::FunctionReturn
                         | Projection::ArrayFunctionReturn
@@ -1001,4 +1054,47 @@ fn sole_call_signature(members: &[TypeMember]) -> Result<Option<&TypeMember>, ()
     } else {
         Ok(call_signature)
     }
+}
+
+fn returned_call_reference(
+    js_info: &JsModuleInfo,
+    return_ty: &TypeReference,
+    is_async: bool,
+) -> Option<TypeReference> {
+    let TypeReference::Resolved(resolved) = return_ty else {
+        return None;
+    };
+    if resolved.level() != TypeResolverLevel::Thin {
+        return None;
+    }
+    let raw = js_info.raw_types.get(resolved.id().index())?;
+
+    let (return_ty, raw) = if is_async {
+        let RawTypeData::InstanceOf(instance) = raw else {
+            return None;
+        };
+        let TypeReference::Qualifier(qualifier) = &instance.ty else {
+            return None;
+        };
+        if !qualifier.is_promise() {
+            return None;
+        }
+        let return_ty = qualifier.type_parameters.first()?;
+        let TypeReference::Resolved(resolved) = return_ty else {
+            return None;
+        };
+        if resolved.level() != TypeResolverLevel::Thin {
+            return None;
+        }
+        let raw = js_info.raw_types.get(resolved.id().index())?;
+        (return_ty, raw)
+    } else {
+        (return_ty, raw)
+    };
+    matches!(
+        raw,
+        RawTypeData::TypeofExpression(expression)
+            if matches!(expression.as_ref(), TypeofExpression::Call(_))
+    )
+    .then(|| return_ty.clone())
 }

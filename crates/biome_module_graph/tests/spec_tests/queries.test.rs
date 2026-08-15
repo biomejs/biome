@@ -707,6 +707,98 @@ fn test_expression_array_promise_query_skips_sibling_type_queries() {
 }
 
 #[test]
+fn test_expression_array_promise_query_skips_returned_call_arguments() {
+    const SOURCE: &str = r#"
+        import { argument } from "./argument.ts";
+        declare function invoke(value: number): Array<Promise<void>>;
+        declare function invokeAwaited(value: number): Promise<Array<Promise<void>>>;
+        declare function invokeGeneric<T>(value: T): Array<Promise<void>>;
+        declare function invokeArray<T>(value: T): Array<T>;
+        declare function identity<T>(value: T): T;
+        interface Holder<T> {
+            get(): T;
+        }
+        declare const holder: Holder<Array<Promise<void>>>;
+        const callback = () => invoke(argument);
+        const awaitedCallback = () => invokeAwaited(argument);
+        const asyncCallback = async () => invoke(argument);
+        const genericIndependentCallback = () => invokeGeneric(argument);
+        const genericArrayCallback = () => invokeArray(Promise.resolve());
+        const genericCallback = () => identity(Promise.resolve([Promise.resolve()]));
+        const holderCallback = () => holder.get();
+        callback();
+        await awaitedCallback();
+        await asyncCallback();
+        genericIndependentCallback();
+        genericArrayCallback();
+        await genericCallback();
+        holderCallback();
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/argument.ts".into(), "export const argument = 1;");
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/argument.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let expressions = [
+        "callback()",
+        "await awaitedCallback()",
+        "await asyncCallback()",
+        "genericIndependentCallback()",
+    ]
+    .map(|source| {
+        ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, SOURCE, source),
+        )
+    });
+
+    db.clear_salsa_events();
+    for expression in expressions {
+        assert_eq!(
+            infer_expression_is_array_of_promises(&db, expression),
+            TypeInferenceClassification::Match
+        );
+    }
+    let generic_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "await genericCallback()"),
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, generic_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    let generic_array_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "genericArrayCallback()"),
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, generic_array_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    let holder_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "holderCallback()"),
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, holder_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    let events = db.take_salsa_events();
+
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, BUDGETED_BINDING_QUERY, &events),
+        0
+    );
+}
+
+#[test]
 fn test_expression_array_promise_query_unwraps_awaited_function_returns_selectively() {
     const SOURCE: &str = r#"
         interface Noise {
