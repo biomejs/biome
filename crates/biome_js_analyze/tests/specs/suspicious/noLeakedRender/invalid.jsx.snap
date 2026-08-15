@@ -97,7 +97,7 @@ const MyComponent7 = () => {
 ```
 invalid.jsx:6:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value: 0 will be rendered as visible text instead of nothing.
   
     4 │ 	return (
     5 │ 		<>
@@ -108,7 +108,7 @@ invalid.jsx:6:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -116,7 +116,7 @@ invalid.jsx:6:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
 ```
 invalid.jsx:7:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value: 0 will be rendered as visible text instead of nothing.
   
     5 │ 		<>
     6 │ 			{0 && <Something />}
@@ -127,7 +127,7 @@ invalid.jsx:7:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -146,7 +146,7 @@ invalid.jsx:8:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -165,7 +165,7 @@ invalid.jsx:9:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -173,7 +173,7 @@ invalid.jsx:9:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
 ```
 invalid.jsx:10:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value: 0 will be rendered as visible text instead of nothing.
   
      8 │ 			{-0 && <Something />}
      9 │ 			{-0.0 && <Something />}
@@ -184,7 +184,7 @@ invalid.jsx:10:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -203,7 +203,7 @@ invalid.jsx:11:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -211,7 +211,7 @@ invalid.jsx:11:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:12:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value: an empty string will be rendered as visible text instead of nothing.
   
     10 │ 			{0n && <Something />}
     11 │ 			{-0n && <Something />}
@@ -222,7 +222,7 @@ invalid.jsx:12:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -241,7 +241,7 @@ invalid.jsx:13:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -259,7 +259,7 @@ invalid.jsx:19:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -277,7 +277,7 @@ invalid.jsx:23:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -295,7 +295,7 @@ invalid.jsx:27:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -314,7 +314,7 @@ invalid.jsx:32:9 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -332,7 +332,7 @@ invalid.jsx:37:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -350,7 +350,7 @@ invalid.jsx:41:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -374,7 +374,7 @@ invalid.jsx:47:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -392,7 +392,7 @@ invalid.jsx:57:12 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -410,7 +410,7 @@ invalid.jsx:61:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -428,7 +428,7 @@ invalid.jsx:65:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -446,7 +446,7 @@ invalid.jsx:73:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -465,7 +465,7 @@ invalid.jsx:81:10 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -473,7 +473,7 @@ invalid.jsx:81:10 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:82:10 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value: 0 will be rendered as visible text instead of nothing.
   
     80 │ 	return <>
     81 │ 		<div> {isNan && 'NaN'} </div>
@@ -484,7 +484,7 @@ invalid.jsx:82:10 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```
@@ -492,7 +492,7 @@ invalid.jsx:82:10 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:83:9 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value: an empty string will be rendered as visible text instead of nothing.
   
     81 │ 		<div> {isNan && 'NaN'} </div>
     82 │ 		<div> {isZero && 'Zero'} </div>
@@ -503,7 +503,7 @@ invalid.jsx:83:9 lint/suspicious/noLeakedRender ━━━━━━━━━━�
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
-  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
   
 
 ```

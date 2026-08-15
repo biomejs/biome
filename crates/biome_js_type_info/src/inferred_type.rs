@@ -962,6 +962,44 @@ impl<'db> InferredType<'db> {
         .ok()
     }
 
+    /// Returns whether this type can never produce a leaked render value:
+    /// a falsy primitive (`0`, `NaN`, or `""`) that React renders as visible
+    /// text instead of nothing. `false`, `null`, and `undefined` are safe.
+    ///
+    /// Returns `None` when variant traversal cannot establish a result because
+    /// it encounters an unresolved or recursive type, or exceeds its limit.
+    pub fn is_never_leaked_render_value(self) -> Option<bool> {
+        self.try_all_variants_match(|data| match data {
+            TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Undefined
+            | TypeData::VoidKeyword
+            | TypeData::Function(_)
+            | TypeData::Class(_)
+            | TypeData::Constructor(_)
+            | TypeData::Object(_)
+            | TypeData::ObjectKeyword
+            | TypeData::Interface(_)
+            | TypeData::Tuple(_)
+            | TypeData::Symbol
+            | TypeData::Global
+            | TypeData::Module(_)
+            | TypeData::Namespace(_)
+            | TypeData::InstanceOf(_) => true,
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::Boolean(_) | Literal::Object(_) | Literal::RegExp(_) => true,
+                Literal::String(string) => !string.as_str().is_empty(),
+                Literal::Number(number) => number.to_f64().is_some_and(|n| n != 0. && !n.is_nan()),
+                Literal::BigInt(text) => {
+                    canonicalize_js_bigint_literal(text.text()).as_deref() != Some("0n")
+                }
+                Literal::Template(_) => false,
+            },
+            _ => false,
+        })
+        .ok()
+    }
+
     /// Returns whether every variant of a nullish union is nullish or an ignored
     /// primitive. Non-union types return `Some(false)`.
     ///

@@ -305,6 +305,10 @@ impl TypedService {
             .as_ref()
             .is_some_and(|model| model.binding(reference).is_some())
     }
+
+    pub fn model(&self) -> Option<&SemanticModel> {
+        self.model.as_ref()
+    }
 }
 
 impl FromServices for TypedService {

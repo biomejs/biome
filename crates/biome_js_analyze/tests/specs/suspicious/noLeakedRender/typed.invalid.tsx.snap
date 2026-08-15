@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typed.invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+type Props = {
+	readonly count: number;
+	readonly label: string;
+	readonly optionalCount: number | undefined;
+	readonly nullableLabel: string | null;
+	readonly selectedUser: { readonly name: string } | null;
+};
+
+function Component({
+	count,
+	label,
+	optionalCount,
+	nullableLabel,
+	selectedUser,
+}: Props) {
+	return (
+		<div>
+			{count && <span>Count: {count}</span>}
+			{label && <span>{label}</span>}
+			{optionalCount && <span>Count: {optionalCount}</span>}
+			{nullableLabel && <span>{nullableLabel}</span>}
+			<p>{count ? "has count" : selectedUser}</p>
+		</div>
+	);
+}
+
+```
+
+# Diagnostics
+```
+typed.invalid.tsx:19:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    17 │ 	return (
+    18 │ 		<div>
+  > 19 │ 			{count && <span>Count: {count}</span>}
+       │ 			 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 			{label && <span>{label}</span>}
+    21 │ 			{optionalCount && <span>Count: {optionalCount}</span>}
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+typed.invalid.tsx:20:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    18 │ 		<div>
+    19 │ 			{count && <span>Count: {count}</span>}
+  > 20 │ 			{label && <span>{label}</span>}
+       │ 			 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 			{optionalCount && <span>Count: {optionalCount}</span>}
+    22 │ 			{nullableLabel && <span>{nullableLabel}</span>}
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+typed.invalid.tsx:21:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    19 │ 			{count && <span>Count: {count}</span>}
+    20 │ 			{label && <span>{label}</span>}
+  > 21 │ 			{optionalCount && <span>Count: {optionalCount}</span>}
+       │ 			 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 			{nullableLabel && <span>{nullableLabel}</span>}
+    23 │ 			<p>{count ? "has count" : selectedUser}</p>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+typed.invalid.tsx:22:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    20 │ 			{label && <span>{label}</span>}
+    21 │ 			{optionalCount && <span>Count: {optionalCount}</span>}
+  > 22 │ 			{nullableLabel && <span>{nullableLabel}</span>}
+       │ 			 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 			<p>{count ? "has count" : selectedUser}</p>
+    24 │ 		</div>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression.
+  
+
+```
+
+```
+typed.invalid.tsx:23:8 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    21 │ 			{optionalCount && <span>Count: {optionalCount}</span>}
+    22 │ 			{nullableLabel && <span>{nullableLabel}</span>}
+  > 23 │ 			<p>{count ? "has count" : selectedUser}</p>
+       │ 			    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 		</div>
+    25 │ 	);
+  
+  i This happens when you use ternary operators in JSX with alternate values that could be variables.
+  
+  i Replace with a safe alternate value like an empty string, null or another JSX element.
+  
+
+```

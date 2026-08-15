@@ -9,10 +9,11 @@ use biome_js_syntax::{
     JsLogicalOperator, JsReferenceIdentifier, JsSyntaxNode, JsUnaryOperator, JsxExpressionChild,
     JsxTagExpression, binding_ext::AnyJsBindingDeclaration, jsx_ext::AnyJsxElement,
 };
+use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_leaked_render::NoLeakedRenderOptions;
 
-use crate::services::semantic::Semantic;
+use crate::services::typed::Typed;
 
 declare_lint_rule! {
     /// Prevent problematic leaked values from being rendered.
@@ -90,7 +91,7 @@ declare_lint_rule! {
         version: "2.3.8",
         name: "noLeakedRender",
         language: "jsx",
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::Types],
         sources: &[
             RuleSource::EslintReact("jsx-no-leaked-render").inspired(),
         ],
@@ -99,15 +100,21 @@ declare_lint_rule! {
     }
 }
 
+/// The specific falsy value that would leak into the rendered output, when known.
+pub enum LeakedValueKind {
+    Zero,
+    EmptyString,
+    Generic,
+}
+
 impl Rule for NoLeakedRender {
-    type Query = Semantic<NoLeakedRenderQuery>;
-    type State = ();
+    type Query = Typed<NoLeakedRenderQuery>;
+    type State = LeakedValueKind;
     type Signals = Option<Self::State>;
     type Options = NoLeakedRenderOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
-        let model = ctx.model();
 
         if !is_inside_jsx_expression(query.syntax()).unwrap_or_default() {
             return None;
@@ -158,6 +165,10 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
 
+                if is_logical_left_hand_side_safe_by_type(ctx, &left) {
+                    return None;
+                }
+
                 if let AnyJsExpression::JsIdentifierExpression(ident) = &left {
                     let name = ident.name().ok()?;
                     // Use the semantic model to resolve the variable binding and check
@@ -165,12 +176,15 @@ impl Rule for NoLeakedRender {
                     // Safe: let isOpen = false; let isError = errorCount > 0; let isEqual = a === b;
                     // Unsafe: let emptyStr = '';
 
-                    if let Some(variable) = find_variable(model, &name) {
+                    if let Some(variable) =
+                        ctx.model().and_then(|model| find_variable(model, &name))
+                    {
                         match variable {
                             AnyJsExpression::AnyJsLiteralExpression(expr)
-                                if is_unsafe_literal(&expr)? => {
-                                    return Some(());
-                                }
+                                if is_unsafe_literal(&expr)? =>
+                            {
+                                return Some(leaked_value_kind(&expr));
+                            }
                             AnyJsExpression::JsUnaryExpression(_)
                             | AnyJsExpression::JsBinaryExpression(_)
                             | AnyJsExpression::JsCallExpression(_) => return None,
@@ -181,10 +195,10 @@ impl Rule for NoLeakedRender {
                 if let AnyJsExpression::AnyJsLiteralExpression(literal) = left
                     && is_unsafe_literal(&literal)?
                 {
-                    return Some(());
+                    return Some(leaked_value_kind(&literal));
                 }
 
-                Some(())
+                Some(LeakedValueKind::Generic)
             }
             NoLeakedRenderQuery::JsConditionalExpression(expr) => {
                 let alternate = expr.alternate().ok()?;
@@ -195,29 +209,38 @@ impl Rule for NoLeakedRender {
                     return None;
                 }
 
-                Some(())
+                if is_conditional_alternate_safe_by_type(ctx, &alternate) {
+                    return None;
+                }
+
+                Some(LeakedValueKind::Generic)
             }
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
         match node {
             NoLeakedRenderQuery::JsLogicalExpression(_) => {
+                let message = match state {
+                    LeakedValueKind::Zero => markup! {
+                        "Potential leaked value: "<Emphasis>"0"</Emphasis>" will be rendered as visible text instead of nothing."
+                    }.to_owned(),
+                    LeakedValueKind::EmptyString => markup! {
+                        "Potential leaked value: an empty string will be rendered as visible text instead of nothing."
+                    }.to_owned(),
+                    LeakedValueKind::Generic => markup! {
+                        "Potential leaked value that might cause unintended rendering."
+                    }.to_owned(),
+                };
                 Some(
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        node.range(),
-                        markup! {
-                            "Potential leaked value that might cause unintended rendering."
-                        },
-                    )
+                    RuleDiagnostic::new(rule_category!(), node.range(), message)
                     .note(markup! {
                         "JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output."
                     })
                     .note(markup! {
-                        "Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression."
+                        "Make sure the condition is explicitly boolean. Use !!value, value > 0, or a ternary expression."
                     })
                 )
             }
@@ -234,7 +257,7 @@ impl Rule for NoLeakedRender {
                         "This happens when you use ternary operators in JSX with alternate values that could be variables."
                     })
                     .note(markup! {
-                        "Replace with a safe alternate value like an empty string , null or another JSX element."
+                        "Replace with a safe alternate value like an empty string, null or another JSX element."
                     })
                 )
             }
@@ -256,6 +279,26 @@ fn is_inside_jsx_expression(node: &JsSyntaxNode) -> Option<bool> {
     )
 }
 
+/// Whether the left-hand side can never be `0`, `NaN`, or `""` by type.
+fn is_logical_left_hand_side_safe_by_type(
+    ctx: &RuleContext<NoLeakedRender>,
+    expr: &AnyJsExpression,
+) -> bool {
+    ctx.type_of_expression(expr)
+        .and_then(InferredType::is_never_leaked_render_value)
+        .unwrap_or(false)
+}
+
+/// Whether the ternary alternate is always truthy. `null`/`undefined` still
+/// flagged, to nudge an explicit `null` or JSX element instead.
+fn is_conditional_alternate_safe_by_type(
+    ctx: &RuleContext<NoLeakedRender>,
+    expr: &AnyJsExpression,
+) -> bool {
+    ctx.type_of_expression(expr)
+        .is_some_and(|ty| ty.is_always_truthy())
+}
+
 fn find_variable(model: &SemanticModel, name: &JsReferenceIdentifier) -> Option<AnyJsExpression> {
     let binding = model.binding(name)?;
     let declaration = binding.tree().declaration()?;
@@ -265,6 +308,17 @@ fn find_variable(model: &SemanticModel, name: &JsReferenceIdentifier) -> Option<
 
     let expr = declarator.initializer()?.expression().ok()?;
     Some(expr)
+}
+
+/// Classifies an already-confirmed-unsafe literal for the diagnostic message.
+/// Only called after `is_unsafe_literal` returns `Some(true)`.
+fn leaked_value_kind(literal: &AnyJsLiteralExpression) -> LeakedValueKind {
+    match literal {
+        AnyJsLiteralExpression::JsStringLiteralExpression(_) => LeakedValueKind::EmptyString,
+        AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+        | AnyJsLiteralExpression::JsBigintLiteralExpression(_) => LeakedValueKind::Zero,
+        _ => LeakedValueKind::Generic,
+    }
 }
 
 fn is_unsafe_literal(literal: &AnyJsLiteralExpression) -> Option<bool> {

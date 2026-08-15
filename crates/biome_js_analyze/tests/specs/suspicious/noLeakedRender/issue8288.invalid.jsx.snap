@@ -30,7 +30,7 @@ issue8288.invalid.jsx:5:19 lint/suspicious/noLeakedRender ━━━━━━━�
   
   i This happens when you use ternary operators in JSX with alternate values that could be variables.
   
-  i Replace with a safe alternate value like an empty string , null or another JSX element.
+  i Replace with a safe alternate value like an empty string, null or another JSX element.
   
 
 ```
