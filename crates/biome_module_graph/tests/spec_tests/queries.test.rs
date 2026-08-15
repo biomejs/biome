@@ -712,15 +712,27 @@ fn test_expression_array_promise_query_skips_returned_call_arguments() {
         import { argument } from "./argument.ts";
         declare function invoke(value: number): Array<Promise<void>>;
         declare function invokeAwaited(value: number): Promise<Array<Promise<void>>>;
+        declare function invokeGeneric<T>(value: T): Array<Promise<void>>;
+        declare function invokeArray<T>(value: T): Array<T>;
         declare function identity<T>(value: T): T;
+        interface Holder<T> {
+            get(): T;
+        }
+        declare const holder: Holder<Array<Promise<void>>>;
         const callback = () => invoke(argument);
         const awaitedCallback = () => invokeAwaited(argument);
         const asyncCallback = async () => invoke(argument);
+        const genericIndependentCallback = () => invokeGeneric(argument);
+        const genericArrayCallback = () => invokeArray(Promise.resolve());
         const genericCallback = () => identity(Promise.resolve([Promise.resolve()]));
+        const holderCallback = () => holder.get();
         callback();
         await awaitedCallback();
         await asyncCallback();
+        genericIndependentCallback();
+        genericArrayCallback();
         await genericCallback();
+        holderCallback();
     "#;
     let fs = MemoryFileSystem::default();
     fs.insert("/src/argument.ts".into(), "export const argument = 1;");
@@ -734,6 +746,7 @@ fn test_expression_array_promise_query_skips_returned_call_arguments() {
         "callback()",
         "await awaitedCallback()",
         "await asyncCallback()",
+        "genericIndependentCallback()",
     ]
     .map(|source| {
         ExpressionTypeInput::new(
@@ -757,6 +770,24 @@ fn test_expression_array_promise_query_skips_returned_call_arguments() {
     );
     assert_eq!(
         infer_expression_is_array_of_promises(&db, generic_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    let generic_array_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "genericArrayCallback()"),
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, generic_array_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    let holder_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "holderCallback()"),
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, holder_expression),
         TypeInferenceClassification::Indeterminate
     );
     let events = db.take_salsa_events();

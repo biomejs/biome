@@ -26,7 +26,9 @@ use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath, SymbolF
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
     TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
-    interned_types::{ReturnType, TypeData as InferredTypeData},
+    interned_types::{
+        ReturnType, TypeData as InferredTypeData, TypeSubstitution, TypeTransformResult,
+    },
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -278,6 +280,16 @@ fn classify_expression(
                                     .map(|binding| (id, binding))
                             });
                         if let Some((binding_id, binding)) = binding {
+                            if !qualifier.type_parameters.is_empty()
+                                && matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                )
+                            {
+                                return Indeterminate;
+                            }
                             if matches!(
                                 state.projection,
                                 Projection::FunctionReturn
@@ -444,17 +456,6 @@ fn classify_expression(
                         ) {
                             return DoesNotReturnPromise;
                         }
-                        if !function.type_parameters.is_empty()
-                            && matches!(
-                                state.projection,
-                                Projection::ArrayFunctionReturn
-                                    | Projection::AwaitedArrayFunctionReturn
-                            )
-                        {
-                            // Call arguments are required to substitute a generic return before
-                            // its array shape is known.
-                            return Indeterminate;
-                        }
                         if function.is_async {
                             match state.projection {
                                 Projection::FunctionReturn => return ReturnsPromise,
@@ -518,6 +519,25 @@ fn classify_expression(
                                 | Projection::ArrayPromise
                                 | Projection::AwaitedArrayPromise => unreachable!(),
                             };
+                            if matches!(result, Some(false)) {
+                                for parameter in &function.type_parameters {
+                                    let parameter = ctx.resolve(parameter);
+                                    let TypeTransformResult::Transformed(substituted) = ty
+                                        .substitute_type(
+                                            db,
+                                            TypeSubstitution {
+                                                generic: parameter,
+                                                replacement: InferredTypeData::Unknown,
+                                            },
+                                        )
+                                    else {
+                                        return Indeterminate;
+                                    };
+                                    if substituted != ty {
+                                        return Indeterminate;
+                                    }
+                                }
+                            }
                             return match result {
                                 Some(true) => ReturnsPromise,
                                 Some(false) => DoesNotReturnPromise,
@@ -633,6 +653,17 @@ fn classify_expression(
                         | TypeofExpression::Typeof(_)
                         | TypeofExpression::UnaryMinus(_) => return Indeterminate,
                     },
+                    RawTypeData::InstanceOf(instance)
+                        if !instance.type_parameters.is_empty()
+                            && matches!(
+                                state.projection,
+                                Projection::FunctionReturn
+                                    | Projection::ArrayFunctionReturn
+                                    | Projection::AwaitedArrayFunctionReturn
+                            ) =>
+                    {
+                        return Indeterminate;
+                    }
                     RawTypeData::InstanceOf(instance) => match state.projection {
                         Projection::FunctionReturn
                         | Projection::ArrayFunctionReturn
