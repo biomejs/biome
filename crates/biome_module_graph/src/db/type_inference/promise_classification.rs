@@ -486,11 +486,8 @@ fn classify_expression(
                             | Projection::AwaitedArrayPromise => None,
                         };
                         if let Some(projection) = returned_call_projection
-                            && let Some(returned_call) = returned_call_reference(
-                                &js_info,
-                                return_ty,
-                                function.is_async,
-                            )
+                            && let Some(returned_call) =
+                                returned_call_reference(&js_info, return_ty, function.is_async)
                         {
                             ClassificationState {
                                 module: state.module,
