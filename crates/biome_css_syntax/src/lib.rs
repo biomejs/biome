@@ -4,6 +4,7 @@
 mod generated;
 mod css_escape;
 mod dimension_ext;
+mod function_ext;
 mod import_ext;
 pub mod keywords;
 mod number_ext;

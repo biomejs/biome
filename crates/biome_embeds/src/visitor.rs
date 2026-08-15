@@ -1,5 +1,6 @@
 use crate::bindings::EmbeddedBinding;
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use biome_css_syntax::{CssFunction, CssRoot};
 use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
@@ -154,9 +155,9 @@ fn collect_embedded_references(
     file: ParsedSource,
 ) -> Option<EmbeddedReferencesBuilder> {
     let host_source = db.source_from_index(file.document_source_index(db))?;
-    let is_svelte = host_source
-        .to_html_file_source()
-        .is_some_and(|s| s.is_svelte());
+    let host_html_source = host_source.to_html_file_source();
+    let is_svelte = host_html_source.is_some_and(|source| source.is_svelte());
+    let is_vue = host_html_source.is_some_and(|source| source.is_vue());
 
     let mut builder = EmbeddedReferencesBuilder::new();
 
@@ -164,19 +165,23 @@ fn collect_embedded_references(
         let Some(file_source) = db.source_from_index(snippet.document_source_index(db)) else {
             continue;
         };
-        let Some(js_file_source) = file_source.to_js_file_source() else {
-            continue;
-        };
-        // Templates always; for Svelte also the sibling `<script>` blocks.
-        // A Svelte component's `<script module>` and `<script>` compile to
-        // one module and share a top-level scope, so a binding used only in
-        // the other block must still count as used.
-        if !js_file_source.is_embedded_source() || is_svelte {
-            builder.visit_non_source_snippet(&snippet.parsed(db).tree(), &js_file_source);
+        if let Some(js_file_source) = file_source.to_js_file_source() {
+            // Templates always; for Svelte also the sibling `<script>` blocks.
+            // A Svelte component's `<script module>` and `<script>` compile to
+            // one module and share a top-level scope, so a binding used only in
+            // the other block must still count as used.
+            if !js_file_source.is_embedded_source() || is_svelte {
+                builder.visit_non_source_snippet(&snippet.parsed(db).tree(), &js_file_source);
+            }
+        } else if is_vue && file_source.is_css_like() {
+            // Vue `<style>` blocks can reference script bindings through the
+            // `v-bind()` CSS function.
+            let css_root: CssRoot = snippet.parsed(db).tree();
+            builder.visit_css_snippet(&css_root);
         }
     }
 
-    if let Some(html_file_source) = host_source.to_html_file_source()
+    if let Some(html_file_source) = host_html_source
         && html_file_source.supports_components()
     {
         let html_root: HtmlRoot = file.parsed(db).tree();
@@ -1182,6 +1187,19 @@ impl EmbeddedReferencesBuilder {
 
     fn register_type_reference(&mut self, range: TextRange, text: TokenText) {
         self.type_references.push((range, text));
+    }
+
+    /// Registers the script bindings referenced by a Vue `<style>` block.
+    ///
+    /// A Vue `<style>` block reaches the script through the `v-bind()` CSS
+    /// function, as in `width: v-bind(size)`.
+    fn visit_css_snippet(&mut self, root: &CssRoot) {
+        for function in root.syntax().descendants().filter_map(CssFunction::cast) {
+            let Some(binding) = function.vue_v_bind_binding() else {
+                continue;
+            };
+            self.register_reference(function.range(), binding);
+        }
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {
