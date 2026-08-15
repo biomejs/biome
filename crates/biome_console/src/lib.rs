@@ -39,11 +39,15 @@ pub trait Console: Send + Sync + RefUnwindSafe {
     fn print(&mut self, level: LogLevel, args: Markup);
 
     /// Prints content that is data rather than console UI, such as source code
-    /// echoed back to the caller, and must reach the output as it is.
+    /// echoed back to the caller.
     ///
     /// [Self::print] takes markup, which the terminal implementation renders
     /// with colour escapes and an ASCII fallback for symbols such as `✔`.
     /// Neither belongs in content the caller may redirect into a file.
+    ///
+    /// This is not byte-transparent: an implementation writing to a terminal
+    /// still replaces the characters that terminal would read as commands
+    /// rather than as text, so printing a file cannot drive the terminal.
     ///
     /// It adds no line at the end.
     fn print_verbatim(&mut self, level: LogLevel, content: &str);
