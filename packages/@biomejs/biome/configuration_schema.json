@@ -5687,20 +5687,8 @@
 			]
 		},
 		"NoTailwindArbitraryValueOptions": {
-			"description": "Options for the `noTailwindArbitraryValue` rule.\n\nControls which attributes and utility functions are checked for arbitrary values.",
+			"description": "Options for the `noTailwindArbitraryValue` rule.",
 			"type": "object",
-			"properties": {
-				"attributes": {
-					"description": "Additional attributes that will be checked.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"functions": {
-					"description": "Names of the functions or tagged templates that will be checked.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				}
-			},
 			"additionalProperties": false
 		},
 		"NoTemplateCurlyInStringConfiguration": {

@@ -1,14 +1,12 @@
 {
 	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"tailwind": {
+		"functions": ["clsx", "cn", "classnames", "tw"]
+	},
 	"linter": {
 		"rules": {
 			"nursery": {
-				"noTailwindArbitraryValue": {
-					"level": "error",
-					"options": {
-						"functions": ["clsx", "cn", "classnames", "tw", "tw.*"]
-					}
-				}
+				"noTailwindArbitraryValue": "error"
 			}
 		}
 	}

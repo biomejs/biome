@@ -1,12 +1,13 @@
+use crate::tailwind::host_range;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, inner_string_text};
-use biome_rowan::{TextRange, TextSize};
+use biome_html_syntax::HtmlAttribute;
+use biome_rowan::TextRange;
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_tailwind_parser::parse_tailwind;
-use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
+use biome_tailwind_logic::no_tailwind_arbitrary_value::analyze_tailwind_arbitrary_values;
+use biome_tailwind_logic::syntax_service::TailwindSyntax;
 
 declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
@@ -42,28 +43,18 @@ declare_lint_rule! {
     /// <div class="[&:nth-child(3)]:px-2"></div>
     /// ```
     ///
-    /// ## Options
+    /// ## Tailwind configuration
     ///
-    /// By default, this rule checks the `class` attribute. The `attributes`
-    /// option adds more HTML attributes to check.
+    /// Use the top-level `tailwind` configuration to control which attributes
+    /// contain Tailwind classes. Specified arrays replace the defaults.
     ///
-    /// ```json,options
+    /// ```json
     /// {
-    ///     "options": {
-    ///         "attributes": ["classList"]
+    ///     "tailwind": {
+    ///         "attributes": ["class", "classList"]
     ///     }
     /// }
     /// ```
-    ///
-    /// ```html,use_options,expect_diagnostic
-    /// <div classList="w-[400px]"></div>
-    /// ```
-    ///
-    /// ### attributes
-    ///
-    /// Additional HTML attribute names to check.
-    ///
-    /// Default: `[]` (the `class` attribute is always checked).
     ///
     pub NoTailwindArbitraryValue {
         version: "2.5.7",
@@ -76,55 +67,20 @@ declare_lint_rule! {
 }
 
 impl Rule for NoTailwindArbitraryValue {
-    type Query = Ast<HtmlAttribute>;
+    type Query = TailwindSyntax<HtmlAttribute>;
     type State = TextRange;
     type Signals = Vec<TextRange>;
     type Options = NoTailwindArbitraryValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let attribute = ctx.query();
-        let options = ctx.options();
-
-        let Some(name) = attribute
-            .name()
-            .ok()
-            .and_then(|name| name.value_token().ok())
-            .map(|token| token.token_text_trimmed())
-        else {
-            return vec![];
-        };
-
-        if !is_html_class_attribute(name.text(), options) {
-            return vec![];
-        }
-
-        let Some(initializer) = attribute.initializer() else {
-            return vec![];
-        };
-        let Ok(AnyHtmlAttributeInitializer::HtmlString(html_string)) = initializer.value() else {
-            return vec![];
-        };
-        let Ok(token) = html_string.value_token() else {
-            return vec![];
-        };
-
-        let text = inner_string_text(&token);
-        if !text.text().contains('[') {
-            return vec![];
-        }
-
-        // HTML attribute values are always quoted per spec
-        let content_start = token.text_trimmed_range().start() + TextSize::from(1);
-
-        let parse = parse_tailwind(text.text());
-        arbitrary_ranges(&parse.tree().candidates(), content_start)
+        analyze_tailwind_arbitrary_values(&ctx.query().tailwind_root().candidates())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                host_range(ctx.query().node(), *range)?,
                 markup! { "Found an arbitrary value in a Tailwind CSS class." },
             )
             .note(markup! {
@@ -136,13 +92,3 @@ impl Rule for NoTailwindArbitraryValue {
         )
     }
 }
-
-fn is_html_class_attribute(name: &str, options: &NoTailwindArbitraryValueOptions) -> bool {
-    name.eq_ignore_ascii_case("class")
-        || options
-            .attributes
-            .iter()
-            .flatten()
-            .any(|attribute| attribute.as_ref().eq_ignore_ascii_case(name))
-}
-

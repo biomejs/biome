@@ -8536,20 +8536,9 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	allowReassign?: boolean;
 }
 /**
-	* Options for the `noTailwindArbitraryValue` rule.
-
-Controls which attributes and utility functions are checked for arbitrary values. 
-	 */
-export interface NoTailwindArbitraryValueOptions {
-	/**
-	 * Additional attributes that will be checked.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be checked.
-	 */
-	functions?: string[];
-}
+ * Options for the `noTailwindArbitraryValue` rule.
+ */
+export type NoTailwindArbitraryValueOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
