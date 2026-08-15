@@ -6,6 +6,7 @@ mod lint;
 mod registry;
 mod services;
 mod suppression_action;
+mod tailwind;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
@@ -40,6 +41,7 @@ use biome_languages::HtmlFileSource;
 use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -140,6 +142,7 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(TwSyntaxService::default());
     services.insert_service(Arc::new(AriaRoles));
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
