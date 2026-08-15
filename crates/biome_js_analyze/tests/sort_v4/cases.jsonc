@@ -287,6 +287,13 @@
 	"md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex", // responsive, min/max
 	"md:hover:flex hover:flex flex md:flex",              // compound
 
+	// Variant stacks that weigh the same tie on the whole candidate
+	// text, so the variant spelling decides before the utility name.
+	// Expected order cross-checked against tailwindcss 4.3.3.
+	"sm:hover:block hover:sm:flex",     // `h` < `s` beats `block` < `flex`
+	"hover:sm:p-4 sm:hover:p-2",
+	"@sm:block @sm/main:flex",          // `/` < `:` beats `block` < `flex`
+
 	// ─── container-query and child variants ────────────────────────
 	// `@sm`/`@md` glue the container root to a size; `@max-*` descend,
 	// `*`/`**` are the child / descendant variants. Cross-checked

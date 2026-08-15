@@ -474,6 +474,15 @@ sorted: flex max-lg:flex max-sm:flex sm:flex md:flex min-lg:flex
 input:  md:hover:flex hover:flex flex md:flex
 sorted: flex hover:flex md:flex md:hover:flex
 ---
+input:  sm:hover:block hover:sm:flex
+sorted: hover:sm:flex sm:hover:block
+---
+input:  hover:sm:p-4 sm:hover:p-2
+sorted: hover:sm:p-4 sm:hover:p-2
+---
+input:  @sm:block @sm/main:flex
+sorted: @sm/main:flex @sm:block
+---
 input:  flex sm:flex @sm:flex @md:flex @max-lg:flex
 sorted: flex sm:flex @max-lg:flex @sm:flex @md:flex
 ---
