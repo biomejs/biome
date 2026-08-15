@@ -108,3 +108,13 @@ jest.mock('../path/to/go', () => ({
 export default function App() {
   return <div />;
 }
+
+// `use`-prefixed bindings that are not functions are not hooks
+function factory() {
+  const useColors = true;
+  const useLabel = "label";
+  const useCount = 42;
+  const useConfig = { enabled: true };
+  const useStore = createStore({ count: 0 });
+  return useColors;
+}
