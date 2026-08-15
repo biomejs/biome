@@ -20,6 +20,10 @@ name    = "js_analyzer"
 harness = false
 name    = "use_sorted_classes_parser"
 
+[[bench]]
+harness = false
+name    = "use_sorted_classes_v4"
+
 [dependencies]
 biome_analyze             = { workspace = true }
 biome_analyze_macros      = { workspace = true }

@@ -43,6 +43,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@30..36 "hidden" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -77,6 +78,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@30..36
         0: TW_BASE@30..36 "hidden" [] []
+        1: (empty)
       3: (empty)
   2: EOF@36..37 "" [Newline("\n")] []
 

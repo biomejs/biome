@@ -80,12 +80,17 @@ TwArbitraryCandidate =
 	']'
 	modifier: AnyTwModifier?
 
-// Static candidates are candidates that don't take any arguments.
+// Static candidates are candidates that don't take any arguments. A
+// modifier can still follow the bare name: `@container/sidebar` names
+// the container, and invalid forms like `flex/50` must stay one
+// candidate so the class survives as a unit.
 //
 // underline
 // box-border
+// @container/sidebar
 TwStaticCandidate =
 	base: 'tw_base'
+	modifier: AnyTwModifier?
 
 // Functional candidates are candidates that can take an argument.
 //

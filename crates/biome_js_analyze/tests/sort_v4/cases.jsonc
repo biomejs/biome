@@ -122,6 +122,21 @@
 	"outline outline-2 outline-none border-t",        // border-top before the outline family
 	"blur blur-sm grayscale invert",                  // filter utilities in signature order
 
+	// ─── bare utilities with modifiers ─────────────────────────────
+	// A handful of utilities compile bare with a modifier:
+	// `@container/sidebar` names the container, `shadow/50` and
+	// `drop-shadow/50` set the shadow color opacity. Statics take no
+	// modifier, so `flex/50` stays one unknown class. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"@container flex pointer-events-none visible container", // container-type leads the property order
+	"@container/sidebar @container flex",   // the name adds a declaration, so the named form leads
+	"@container! @container flex",
+	"shadow/50 shadow shadow-lg",
+	"drop-shadow/50 drop-shadow blur",
+	"flex/50 flex",
+	"group/item peer/tab flex",             // group/peer scopes are no utilities — unknown-front parity
+
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep
 	// their relative input order (stable sort).
@@ -281,6 +296,43 @@
 	"flex *:flex **:flex hover:flex",                     // child / descendant variants
 	"@container:flex flex @sm:flex",                      // bare `@container` is not sortable
 	"@:flex flex",                                        // `@` without a size is not sortable
+
+	// ─── variant modifiers ─────────────────────────────────────────
+	// Only group/peer compounds and container queries accept a
+	// `/modifier`; a bare variant sorts before its modified forms and
+	// container sizes ignore the modifier, tying with the bare form on
+	// candidate text. A modifier anywhere else invalidates the class.
+	// Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"group-hover/menu:flex group-hover:flex flex",
+	"group-hover/b:flex group-hover/a:flex group-hover/[.5]:flex flex",
+	"peer-checked/foo:flex peer-checked:flex flex",
+	"@sm/main:flex @sm:flex @sm/apple:flex flex",
+	"hover/foo:flex flex",                    // modifier invalid on plain variants
+	"has-hover/5:flex not-hover/5:flex flex", // invalid on has-/not- compounds
+	"min-[600px]/5:flex max-lg/5:flex flex",  // invalid on breakpoints
+
+	// ─── breakpoint and container sizes ────────────────────────────
+	// Sizes compare by unit text first, then magnitude (descending for
+	// `max-*`), so arbitrary pixel sizes group before the rem-valued
+	// named sizes; equal lengths share a rank and the candidate text
+	// decides. A size that can't resolve to a length is invalid.
+
+	"@[400px]:flex @sm:flex flex",
+	"@[400px]/name:flex @[400px]:flex flex",
+	"@min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex flex",
+	"@max-[100px]:flex @max-lg:flex @max-[900px]:flex flex",
+	"@min-[24rem]:flex @sm:flex flex",        // 24rem = @sm, rank shared
+	"min-[40rem]:flex sm:flex flex",          // 40rem = sm, rank shared
+	"min-sm:flex sm:flex flex",
+	"min-[100px]:flex min-[900px]:flex sm:flex flex",
+	"min-abc:flex max-abc:flex @max-abc:flex flex",
+
+	// ─── arbitrary selector text ───────────────────────────────────
+	// Selectors compare with `_` decoded to a space, `\_` to a literal
+	// underscore.
+
+	"[&>*]:flex [&_p]:flex [&.a]:flex flex",
 
 	// ─── variants + important suffix ───────────────────────────────
 	// The important suffix reuses the underlying utility key, so it

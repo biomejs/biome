@@ -1327,10 +1327,14 @@ impl TwStaticCandidate {
     pub fn as_fields(&self) -> TwStaticCandidateFields {
         TwStaticCandidateFields {
             base_token: self.base_token(),
+            modifier: self.modifier(),
         }
     }
     pub fn base_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
+    }
+    pub fn modifier(&self) -> Option<AnyTwModifier> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for TwStaticCandidate {
@@ -1344,6 +1348,7 @@ impl Serialize for TwStaticCandidate {
 #[derive(Serialize)]
 pub struct TwStaticCandidateFields {
     pub base_token: SyntaxResult<SyntaxToken>,
+    pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwVariantExpression {
@@ -3445,6 +3450,7 @@ impl std::fmt::Debug for TwStaticCandidate {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwStaticCandidate")
                 .field("base_token", &support::DebugSyntaxResult(self.base_token()))
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .finish()
         } else {
             f.debug_struct("TwStaticCandidate").finish()
