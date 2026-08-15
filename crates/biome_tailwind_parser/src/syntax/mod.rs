@@ -4,10 +4,12 @@ use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
 use crate::token_source::TailwindLexContext;
+use biome_parser::Parser;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
+use biome_rowan::TextRange;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_unicode_table::{Dispatch::WHS, lookup_byte};
@@ -48,18 +50,82 @@ impl ParseNodeList for CandidateList {
         &mut self,
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
-    ) -> biome_parser::parse_recovery::RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
-                .enable_recovery_on_line_break(),
-            expected_candidate,
-        )
+    ) -> RecoveryResult {
+        parsed_element.or_recover(p, &CandidateRecovery, expected_candidate)
+    }
+}
+
+/// Recovers a malformed class into one bogus candidate that ends at the
+/// next whitespace gap. Whitespace between classes is trivia, so a
+/// token-set recovery on `WHITESPACE` never stops and one bad class would
+/// swallow every class after it.
+struct CandidateRecovery;
+
+/// Recovers a malformed value or modifier inside a class into a bogus node
+/// that ends at the next whitespace gap or at a trailing `!`. Unlike
+/// [CandidateRecovery] it takes nothing when the parser already sits past
+/// a gap: the piece is simply missing, and the next class starts there.
+struct PieceRecovery(TailwindSyntaxKind);
+
+impl ParseRecovery for PieceRecovery {
+    type Kind = TailwindSyntaxKind;
+    type Parser<'source> = TailwindParser<'source>;
+    const RECOVERED_KIND: Self::Kind = TW_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.source().had_trivia_before() || p.at(T![!])
+    }
+
+    fn recover(&self, p: &mut Self::Parser<'_>) -> RecoveryResult {
+        if p.at(EOF) {
+            return Err(RecoveryError::Eof);
+        }
+        if self.is_at_recovered(p) {
+            return Err(RecoveryError::AlreadyRecovered);
+        }
+        if p.is_speculative_parsing() {
+            return Err(RecoveryError::RecoveryDisabled);
+        }
+
+        let m = p.start();
+        while !(p.at(EOF) || self.is_at_recovered(p)) {
+            p.bump_any();
+        }
+        Ok(m.complete(p, self.0))
+    }
+}
+
+impl ParseRecovery for CandidateRecovery {
+    type Kind = TailwindSyntaxKind;
+    type Parser<'source> = TailwindParser<'source>;
+    const RECOVERED_KIND: Self::Kind = TW_BOGUS_CANDIDATE;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.source().had_trivia_before()
+    }
+
+    fn recover(&self, p: &mut Self::Parser<'_>) -> RecoveryResult {
+        if p.at(EOF) {
+            return Err(RecoveryError::Eof);
+        }
+        if p.is_speculative_parsing() {
+            return Err(RecoveryError::RecoveryDisabled);
+        }
+
+        // The offending token itself may sit after a gap; always take it,
+        // then run to the next gap.
+        let m = p.start();
+        p.bump_any();
+        while !(p.at(EOF) || self.is_at_recovered(p)) {
+            p.bump_any();
+        }
+        Ok(m.complete(p, Self::RECOVERED_KIND))
     }
 }
 
 fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
+    let checkpoint_position = p.source().position();
     let m = p.start();
 
     if class_chunk_has_colon(p) {
@@ -84,14 +150,22 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         p.bump_with_context(T![-], TailwindLexContext::SawNegative);
     }
 
+    // Variants, the legacy `!`, and the sign are all glued to the
+    // utility. A gap after them (`hover: flex`) ends the class early:
+    // what was consumed is a bogus candidate and the next class starts
+    // after the gap.
+    if p.source().position() > checkpoint_position && p.source().had_trivia_before() {
+        let end = p.last_end().unwrap_or(checkpoint_position);
+        p.error(expected_candidate(
+            p,
+            TextRange::new(checkpoint_position, end),
+        ));
+        return Present(m.complete(p, TW_BOGUS_CANDIDATE));
+    }
+
     let candidate = parse_arbitrary_candidate(p)
         .or_else(|| parse_functional_or_static_candidate(p))
-        .or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
-                .enable_recovery_on_line_break(),
-            expected_candidate,
-        );
+        .or_recover(p, &CandidateRecovery, expected_candidate);
 
     match candidate {
         Ok(_) => {}
@@ -162,12 +236,7 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
     }
 
     p.expect(T![-]);
-    match parse_value(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]])
-            .enable_recovery_on_line_break(),
-        expected_value,
-    ) {
+    match parse_value(p).or_recover(p, &PieceRecovery(TW_BOGUS_VALUE), expected_value) {
         Ok(_) => {}
         Err(_) => {
             m.abandon(p);
@@ -265,15 +334,18 @@ fn class_chunk_has_colon(p: &TailwindParser) -> bool {
 
 pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
+    let slash = p.cur_range();
     if !p.expect(T![/]) {
         m.abandon(p);
         return Absent;
     }
-    match parse_value(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, NEWLINE, T![!]]),
-        expected_value,
-    ) {
+    if p.source().had_trivia_before() {
+        // `bg-red-500/ flex`: the value is missing and the next class
+        // starts after the gap.
+        p.error(expected_value(p, TextRange::empty(slash.end())));
+        return Present(m.complete(p, TW_MODIFIER));
+    }
+    match parse_value(p).or_recover(p, &PieceRecovery(TW_BOGUS_MODIFIER), expected_value) {
         Ok(_) => {}
         Err(_) => {
             m.abandon(p);

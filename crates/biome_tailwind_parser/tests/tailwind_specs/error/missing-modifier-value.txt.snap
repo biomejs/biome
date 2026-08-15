@@ -21,15 +21,16 @@ TwRoot {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
-            candidate: TwBogusCandidate {
-                items: [
-                    TW_BASE@0..2 "bg" [] [],
-                    DASH@2..3 "-" [] [],
-                    TwNamedValue {
-                        value_token: TW_VALUE@3..12 "green-500" [] [],
-                    },
-                    SLASH@12..13 "/" [] [],
-                ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@3..12 "green-500" [] [],
+                },
+                modifier: TwModifier {
+                    slash_token: SLASH@12..13 "/" [] [],
+                    value: missing (required),
+                },
             },
             excl_token: missing (optional),
         },
@@ -48,12 +49,14 @@ TwRoot {
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_BOGUS_CANDIDATE@0..13
+      3: TW_FUNCTIONAL_CANDIDATE@0..13
         0: TW_BASE@0..2 "bg" [] []
         1: DASH@2..3 "-" [] []
         2: TW_NAMED_VALUE@3..12
           0: TW_VALUE@3..12 "green-500" [] []
-        3: SLASH@12..13 "/" [] []
+        3: TW_MODIFIER@12..13
+          0: SLASH@12..13 "/" [] []
+          1: (empty)
       4: (empty)
   2: EOF@13..14 "" [Newline("\n")] []
 
@@ -62,18 +65,18 @@ TwRoot {
 ## Diagnostics
 
 ```
-missing-modifier-value.txt:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing-modifier-value.txt:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a value but instead found the end of the file.
+  × Expected a value but instead found ''.
   
-    1 │ bg-green-500/
-  > 2 │ 
-      │ 
+  > 1 │ bg-green-500/
+      │              
+    2 │ 
   
   i Expected a value here.
   
-    1 │ bg-green-500/
-  > 2 │ 
-      │ 
+  > 1 │ bg-green-500/
+      │              
+    2 │ 
   
 ```

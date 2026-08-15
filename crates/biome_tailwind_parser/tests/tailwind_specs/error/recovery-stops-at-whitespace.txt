@@ -1,0 +1,6 @@
+p-4 group-%:flex flex block
+p-4 flex hover: block m-2
+flex! !p-4 p-2 [color:red] -m-4
+bg-red-500/ flex p-4
+p- flex block
+w-[1px] bg-red-500/% flex
