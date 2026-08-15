@@ -142,7 +142,7 @@ impl ProcessFile for FormatProcessFile {
         })?;
 
         if file_features.is_ignored() {
-            console.append(markup! {{content}});
+            console.append_verbatim(content);
             // Write error last because files may generally be long
             console.error(markup! {
                 <Warn>"The content was not formatted because the path `"{biome_path.as_str()}"` is ignored."</Warn>
@@ -159,7 +159,7 @@ impl ProcessFile for FormatProcessFile {
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
             }
-            console.append(markup! {{content}});
+            console.append_verbatim(content);
             return Ok(());
         };
         if file_features.supports_format() {
@@ -186,12 +186,10 @@ impl ProcessFile for FormatProcessFile {
             if result.format_with_errors_disabled {
                 return Err(WorkspaceError::format_with_errors_disabled().into());
             }
-            console.append(markup! {{source}});
+            console.append_verbatim(source);
             Ok(())
         } else {
-            console.append(markup! {
-                {content}
-            });
+            console.append_verbatim(content);
             console.error(markup! {
                 <Warn>"The content was not formatted because the formatter is currently disabled."</Warn>
             });

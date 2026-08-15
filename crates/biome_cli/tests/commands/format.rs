@@ -2,7 +2,9 @@ use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH,
     CONFIG_FORMAT, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
-use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
+use crate::snap_test::{
+    SnapshotPayload, assert_file_contents, markup_to_string, message_to_string,
+};
 use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED, assert_cli_snapshot, run_cli,
 };
@@ -1272,6 +1274,44 @@ fn format_stdin_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_stdin_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_stdin_keeps_non_ascii_source() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Both symbols are in the ASCII fallback table the console applies to
+    // diagnostics; the source echoed back to stdout must not go through it.
+    console
+        .in_buffer
+        .push("const a = \"\u{26a0}\u{2714}\"".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "mock.js"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    assert_eq!(
+        message_to_string(message),
+        "const a = \"\u{26a0}\u{2714}\";\n"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_keeps_non_ascii_source",
         fs,
         console,
         result,

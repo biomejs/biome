@@ -1,6 +1,6 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{BufferConsole, Markup, markup};
+use biome_console::{BufferConsole, Markup, Message, markup, write_verbatim};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node as format_css_node;
 use biome_css_parser::{CssParserOptions, parse_css};
@@ -503,10 +503,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
         }
 
         for message in &console.out_buffer {
-            let content = markup_to_string(markup! {
-                {message.content}
-            });
-            cli_snapshot.messages.push(content)
+            cli_snapshot.messages.push(message_to_string(message))
         }
 
         cli_snapshot
@@ -518,6 +515,25 @@ pub fn markup_to_string(markup: Markup) -> String {
     let mut write = Termcolor(NoColor::new(&mut buffer));
     let mut fmt = Formatter::new(&mut write);
     fmt.write_markup(markup).unwrap();
+
+    String::from_utf8(buffer).unwrap()
+}
+
+/// Renders a message the way the console it was printed to would render it.
+///
+/// Verbatim messages reach the real console without the markup rewrites, so
+/// rendering them as markup here would show something the user never sees.
+pub fn message_to_string(message: &Message) -> String {
+    if !message.verbatim {
+        return markup_to_string(markup! {
+            {message.content}
+        });
+    }
+
+    let mut buffer = Vec::new();
+    for node in &message.content.0 {
+        write_verbatim(&mut buffer, &node.content).unwrap();
+    }
 
     String::from_utf8(buffer).unwrap()
 }

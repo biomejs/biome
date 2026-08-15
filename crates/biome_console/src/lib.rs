@@ -11,7 +11,8 @@ mod markup;
 mod utils;
 mod write;
 
-pub use self::markup::{Markup, MarkupBuf, MarkupElement, MarkupNode};
+pub use self::markup::{Markup, MarkupBuf, MarkupElement, MarkupNode, MarkupNodeBuf};
+pub use self::write::write_verbatim;
 pub use biome_markup::markup;
 pub use utils::*;
 
@@ -36,6 +37,16 @@ pub trait Console: Send + Sync + RefUnwindSafe {
 
     /// Prints a message (formatted using [markup!]) to the console.
     fn print(&mut self, level: LogLevel, args: Markup);
+
+    /// Prints content that is data rather than console UI, such as source code
+    /// echoed back to the caller, and must reach the output as it is.
+    ///
+    /// [Self::print] takes markup, which the terminal implementation renders
+    /// with colour escapes and an ASCII fallback for symbols such as `✔`.
+    /// Neither belongs in content the caller may redirect into a file.
+    ///
+    /// It adds no line at the end.
+    fn print_verbatim(&mut self, level: LogLevel, content: &str);
 
     /// It reads from a source, and if this source contains something, it's converted into a [String]
     fn read(&mut self) -> Option<String>;
@@ -63,6 +74,10 @@ pub trait ConsoleExt: Console {
     ///
     /// It doesn't add any line
     fn append(&mut self, args: Markup);
+
+    /// Prints content that is data rather than console UI with level
+    /// [LogLevel::Log]. See [Console::print_verbatim].
+    fn append_verbatim(&mut self, content: &str);
 }
 
 impl<T: Console + ?Sized> ConsoleExt for T {
@@ -76,6 +91,10 @@ impl<T: Console + ?Sized> ConsoleExt for T {
 
     fn append(&mut self, args: Markup) {
         self.print(LogLevel::Log, args);
+    }
+
+    fn append_verbatim(&mut self, content: &str) {
+        self.print_verbatim(LogLevel::Log, content);
     }
 }
 
@@ -174,6 +193,15 @@ impl Console for EnvConsole {
         write!(out, "").unwrap();
     }
 
+    fn print_verbatim(&mut self, level: LogLevel, content: &str) {
+        let mut out = match level {
+            LogLevel::Error => self.err.lock(),
+            LogLevel::Log => self.out.lock(),
+        };
+
+        write::write_verbatim(&mut out, content).unwrap();
+    }
+
     fn read(&mut self) -> Option<String> {
         // Here we check if stdin is redirected. If not, we bail.
         //
@@ -210,6 +238,10 @@ impl BufferConsole {
 pub struct Message {
     pub level: LogLevel,
     pub content: MarkupBuf,
+    /// Set when the message came from [Console::print_verbatim], so a consumer
+    /// that renders the buffer knows not to apply the terminal rewrites it
+    /// applies to markup.
+    pub verbatim: bool,
 }
 
 impl Console for BufferConsole {
@@ -217,6 +249,7 @@ impl Console for BufferConsole {
         self.out_buffer.push(Message {
             level,
             content: args.to_owned(),
+            verbatim: false,
         });
     }
 
@@ -224,8 +257,21 @@ impl Console for BufferConsole {
         self.out_buffer.push(Message {
             level,
             content: args.to_owned(),
+            verbatim: false,
         });
     }
+
+    fn print_verbatim(&mut self, level: LogLevel, content: &str) {
+        self.out_buffer.push(Message {
+            level,
+            content: MarkupBuf(vec![MarkupNodeBuf {
+                elements: Vec::new(),
+                content: content.into(),
+            }]),
+            verbatim: true,
+        });
+    }
+
     fn read(&mut self) -> Option<String> {
         if self.in_buffer.is_empty() {
             None
@@ -249,6 +295,7 @@ impl Console for FileBufferConsole {
         self.out.push(Message {
             level,
             content: args.to_owned(),
+            verbatim: false,
         });
     }
 
@@ -256,6 +303,18 @@ impl Console for FileBufferConsole {
         self.out.push(Message {
             level,
             content: args.to_owned(),
+            verbatim: false,
+        });
+    }
+
+    fn print_verbatim(&mut self, level: LogLevel, content: &str) {
+        self.out.push(Message {
+            level,
+            content: MarkupBuf(vec![MarkupNodeBuf {
+                elements: Vec::new(),
+                content: content.into(),
+            }]),
+            verbatim: true,
         });
     }
 
