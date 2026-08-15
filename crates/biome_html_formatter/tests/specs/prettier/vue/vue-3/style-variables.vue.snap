@@ -50,11 +50,8 @@ info: vue/vue-3/style-variables.vue
  
  <!-- Not style -->
  <custom vars="     {row   }">Not A style</custom>
-@@ -17,8 +11,12 @@
- <template>
-   <style vars="     {row   }"></style>
- </template>
--
+@@ -20,5 +14,10 @@
+ 
  <!-- Not attribute -->
  <style>
 -<vars>{not:{a:attribute}}</vars>
@@ -83,6 +80,7 @@ info: vue/vue-3/style-variables.vue
 <template>
   <style vars="     {row   }"></style>
 </template>
+
 <!-- Not attribute -->
 <style>
 <
