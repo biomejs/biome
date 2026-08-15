@@ -1,17 +1,22 @@
 use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use biome_html_syntax::{AnyHtmlElement, AnyHtmlTagName, HtmlAttributeName, HtmlTagName};
+use biome_html_syntax::{
+    AnyHtmlElement, AnyHtmlTagName, HtmlAttributeName,
+    HtmlSyntaxKind::{self, *},
+    HtmlTagName,
+};
+use biome_parser::{TokenSet, token_set};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 use crate::{
     HtmlFormatter,
-    utils::css_display::{CssDisplay, get_css_display},
+    utils::css_display::{CssDisplay, get_css_display_from_tag},
 };
 
 /// HTML tags that have a "block" layout, or anything that is not inline by default.
 ///
 /// **NOTE**: This list is kept for reference but is no longer used directly.
-/// Use [`crate::utils::css_display::get_css_display`] instead for accurate CSS display values.
+/// Use [`crate::utils::css_display::get_css_display_from_tag`] instead for accurate CSS display values.
 ///
 /// ### References
 ///  - <https://html.spec.whatwg.org/#flow-content-3>
@@ -35,7 +40,6 @@ pub const HTML_BLOCK_TAGS: &[&str] = &[
     "header",
     "hr",
     "legend",
-    "listing",
     "main",
     "p",
     "plaintext",
@@ -170,7 +174,6 @@ pub const HTML_ALL_TAGS: &[&str] = &[
     "li",
     "li",
     "link",
-    "listing",
     "main",
     "map",
     "mark",
@@ -794,20 +797,135 @@ pub static MATHML_ALL_TAGS: &[&str] = &[
     "semantics",
 ];
 
-/// Whether the given tag name is a known HTML element. See also: [`HTML_ALL_TAGS`].
-pub(crate) fn is_canonical_html_tag_name(tag_name: &str) -> bool {
-    match tag_name.to_ascii_lowercase_cow() {
-        Cow::Owned(name) => HTML_ALL_TAGS.binary_search(&name.as_str()).is_ok(),
-        Cow::Borrowed(name) => HTML_ALL_TAGS.binary_search(&name).is_ok(),
-    }
-}
+const CANONICAL_HTML_TAGS: TokenSet<HtmlSyntaxKind> = token_set!(
+    A_KW,
+    ABBR_KW,
+    ADDRESS_KW,
+    AREA_KW,
+    ARTICLE_KW,
+    ASIDE_KW,
+    AUDIO_KW,
+    B_KW,
+    BASE_KW,
+    BASEFONT_KW,
+    BDI_KW,
+    BDO_KW,
+    BIG_KW,
+    BLOCKQUOTE_KW,
+    BODY_KW,
+    BR_KW,
+    BUTTON_KW,
+    CANVAS_KW,
+    CAPTION_KW,
+    CENTER_KW,
+    CITE_KW,
+    CODE_KW,
+    COL_KW,
+    COLGROUP_KW,
+    DATA_KW,
+    DATALIST_KW,
+    DD_KW,
+    DETAILS_KW,
+    DFN_KW,
+    DIALOG_KW,
+    DIR_KW,
+    DIV_KW,
+    DL_KW,
+    DT_KW,
+    EM_KW,
+    EMBED_KW,
+    FIELDSET_KW,
+    FIGCAPTION_KW,
+    FIGURE_KW,
+    FOOTER_KW,
+    FORM_KW,
+    H1_KW,
+    H2_KW,
+    H3_KW,
+    H4_KW,
+    H5_KW,
+    H6_KW,
+    HEAD_KW,
+    HEADER_KW,
+    HGROUP_KW,
+    HR_KW,
+    HTML_KW,
+    I_KW,
+    IFRAME_KW,
+    IMG_KW,
+    INPUT_KW,
+    KBD_KW,
+    LABEL_KW,
+    LEGEND_KW,
+    LI_KW,
+    LINK_KW,
+    MAIN_KW,
+    MAP_KW,
+    MARK_KW,
+    MENU_KW,
+    META_KW,
+    METER_KW,
+    NAV_KW,
+    NOEMBED_KW,
+    NOFRAMES_KW,
+    NOSCRIPT_KW,
+    OBJECT_KW,
+    OL_KW,
+    OPTGROUP_KW,
+    OPTION_KW,
+    OUTPUT_KW,
+    P_KW,
+    PARAM_KW,
+    PICTURE_KW,
+    PLAINTEXT_KW,
+    PRE_KW,
+    PROGRESS_KW,
+    Q_KW,
+    RP_KW,
+    RT_KW,
+    RUBY_KW,
+    S_KW,
+    SAMP_KW,
+    SCRIPT_KW,
+    SEARCH_KW,
+    SECTION_KW,
+    SELECT_KW,
+    SLOT_KW,
+    SMALL_KW,
+    SOURCE_KW,
+    SPAN_KW,
+    STRONG_KW,
+    STYLE_KW,
+    SUB_KW,
+    SUMMARY_KW,
+    SUP_KW,
+    TABLE_KW,
+    TBODY_KW,
+    TD_KW,
+    TEMPLATE_KW,
+    TEXTAREA_KW,
+    TFOOT_KW,
+    TH_KW,
+    THEAD_KW,
+    TIME_KW,
+    TITLE_KW,
+    TR_KW,
+    TRACK_KW,
+    U_KW,
+    UL_KW,
+    VAR_KW,
+    VIDEO_KW,
+    WBR_KW,
+    XMP_KW
+);
 
 /// Whether the given tag name is a known HTML element. See also: [`HTML_ALL_TAGS`].
 pub(crate) fn is_canonical_html_tag(tag_name: &HtmlTagName) -> bool {
-    let Ok(tag_name) = tag_name.value_token() else {
+    let Ok(token) = tag_name.value_token() else {
         return false;
     };
-    is_canonical_html_tag_name(tag_name.text_trimmed())
+    let kind = token.kind();
+    CANONICAL_HTML_TAGS.contains(kind)
 }
 
 /// Whether a tag should be lowercased in the current formatting context.
@@ -895,10 +1013,19 @@ pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
         };
     }
 
-    if let Some(tag_name) = element.name() {
-        get_css_display(&tag_name)
-    } else {
-        CssDisplay::Inline
+    match element {
+        AnyHtmlElement::HtmlElement(element) => element
+            .name()
+            .as_ref()
+            .map_or(CssDisplay::Inline, get_css_display_from_tag),
+        AnyHtmlElement::HtmlSelfClosingElement(element) => element
+            .name()
+            .as_ref()
+            .map_or(CssDisplay::Inline, get_css_display_from_tag),
+        AnyHtmlElement::AnyHtmlContent(_)
+        | AnyHtmlElement::HtmlBogusElement(_)
+        | AnyHtmlElement::HtmlProcessingInstruction(_)
+        | AnyHtmlElement::HtmlCdataSection(_) => CssDisplay::Inline,
     }
 }
 
@@ -933,29 +1060,40 @@ impl CssWhitespace {
 /// Gets the CSS whitespace handling mode for an HTML element, based on its tag name.
 ///
 /// See: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space>
-pub(crate) fn get_css_whitespace(tag_name: &str) -> CssWhitespace {
+const PRE_WHITESPACE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(PLAINTEXT_KW, PRE_KW, XMP_KW);
+
+fn get_css_whitespace_by_kind(kind: HtmlSyntaxKind) -> CssWhitespace {
     // Mirrors Prettier's CSS white-space lookup:
     // prettier/src/language-html/constants.evaluate.js
     // prettier/src/language-html/utilities/index.js#getNodeCssStyleWhiteSpace
     //
     // Final tag mapping in Prettier:
-    // - listing, plaintext, pre, xmp: "pre"
+    // - plaintext, pre, xmp: "pre"
     // - textarea: "pre-wrap"
     // - nobr: "nowrap"
     // - table: "initial" (effectively treated as default "normal")
 
-    // The cow makes this have a lower allocation chance. Also, this intentionally
-    // avoids using multiple `eq_ignore_ascii_case` checks because this optimizes
-    // into SIMD instructions, and overall less CPU instructions.
-    let tag_name = tag_name.to_ascii_lowercase_cow();
-    let tag_name = tag_name.as_ref();
+    if PRE_WHITESPACE_ELEMENTS.contains(kind) {
+        CssWhitespace::Pre
+    } else {
+        match kind {
+            TEXTAREA_KW => CssWhitespace::PreWrap,
+            NOBR_KW => CssWhitespace::PreserveNoWrap,
+            _ => CssWhitespace::Normal,
+        }
+    }
+}
+
+pub(crate) fn get_css_whitespace(tag_name: &AnyHtmlTagName) -> CssWhitespace {
     match tag_name {
-        "listing" | "plaintext" | "pre" | "xmp" => CssWhitespace::Pre,
-        "textarea" => CssWhitespace::PreWrap,
-        "nobr" => CssWhitespace::PreserveNoWrap,
-        // In Prettier this is "initial", which computes to the initial value (`normal`).
-        "table" => CssWhitespace::Normal,
-        _ => CssWhitespace::Normal,
+        AnyHtmlTagName::HtmlTagName(tag_name) => tag_name
+            .value_token()
+            .map_or(CssWhitespace::Normal, |token| {
+                get_css_whitespace_by_kind(token.kind())
+            }),
+        AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => {
+            CssWhitespace::Normal
+        }
     }
 }
 
@@ -970,6 +1108,17 @@ mod tests {
             let mut sorted = HTML_ALL_TAGS.to_vec();
             sorted.sort_unstable();
             panic!("All tags array is not sorted. Here it is sorted {sorted:?}");
+        }
+    }
+
+    #[test]
+    fn canonical_html_tag_set_contains_all_classified_tags() {
+        for tag in HTML_ALL_TAGS {
+            assert!(
+                HtmlSyntaxKind::from_keyword(tag)
+                    .is_some_and(|kind| CANONICAL_HTML_TAGS.contains(kind)),
+                "Canonical tag '{tag}' is missing from the token set"
+            );
         }
     }
 
@@ -1018,36 +1167,32 @@ mod tests {
     }
 
     #[test]
-    fn test_is_canonical_html_tag_name_should_match_case_insensitive() {
-        let cases = ["div", "DIV", "Div"];
-        for case in cases {
-            assert!(
-                is_canonical_html_tag_name(case),
-                "Did not recognize '{case}' as a canonical HTML tag name, but it should be."
-            );
-        }
-    }
-
-    #[test]
     fn test_get_css_whitespace_matches_prettier() {
         // From Prettier's computed `CSS_WHITE_SPACE_TAGS` mapping:
         // prettier/src/language-html/constants.evaluate.js
-        assert_eq!(get_css_whitespace("pre"), CssWhitespace::Pre);
-        assert_eq!(get_css_whitespace("listing"), CssWhitespace::Pre);
-        assert_eq!(get_css_whitespace("plaintext"), CssWhitespace::Pre);
-        assert_eq!(get_css_whitespace("xmp"), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace_by_kind(PRE_KW), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace_by_kind(PLAINTEXT_KW), CssWhitespace::Pre);
+        assert_eq!(get_css_whitespace_by_kind(XMP_KW), CssWhitespace::Pre);
 
-        assert_eq!(get_css_whitespace("textarea"), CssWhitespace::PreWrap);
-        assert_eq!(get_css_whitespace("nobr"), CssWhitespace::PreserveNoWrap);
+        assert_eq!(
+            get_css_whitespace_by_kind(TEXTAREA_KW),
+            CssWhitespace::PreWrap
+        );
+        assert_eq!(
+            get_css_whitespace_by_kind(NOBR_KW),
+            CssWhitespace::PreserveNoWrap
+        );
 
         // Prettier returns the CSS value "initial" for table, which computes to `normal`.
-        assert_eq!(get_css_whitespace("table"), CssWhitespace::Normal);
+        assert_eq!(
+            get_css_whitespace_by_kind(HtmlSyntaxKind::TABLE_KW),
+            CssWhitespace::Normal
+        );
 
         // Default value
-        assert_eq!(get_css_whitespace("div"), CssWhitespace::Normal);
-
-        // Case-insensitive
-        assert_eq!(get_css_whitespace("PRE"), CssWhitespace::Pre);
-        assert_eq!(get_css_whitespace("NoBr"), CssWhitespace::PreserveNoWrap);
+        assert_eq!(
+            get_css_whitespace_by_kind(HtmlSyntaxKind::DIV_KW),
+            CssWhitespace::Normal
+        );
     }
 }
