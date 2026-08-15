@@ -71,6 +71,10 @@
 			"description": "Indicates whether this configuration file is at the root of a Biome\nproject. By default, this is `true`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 		},
+		"tailwind": {
+			"description": "Configures how Biome recognizes Tailwind class strings.",
+			"anyOf": [{ "$ref": "#/$defs/TailwindConfiguration" }, { "type": "null" }]
+		},
 		"vcs": {
 			"description": "The version control integration configuration.",
 			"anyOf": [{ "$ref": "#/$defs/VcsConfiguration" }, { "type": "null" }]
@@ -15887,6 +15891,28 @@
 						{ "$ref": "#/$defs/UseStrictModeConfiguration" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"TailwindConfiguration": {
+			"description": "Tells Biome where your code lists Tailwind CSS classes, so the Tailwind\nlint rules know which strings to check.",
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Attributes whose values are Tailwind classes, such as `class` in\n`<div class=\"px-2 py-2\">`.\n\nDefaults to `class` and `className`. In HTML, attribute names match\nregardless of case.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"mergeFunctions": {
+					"description": "Functions that combine Tailwind classes, such as `clsx` and `cn`.\n\nBiome checks every string passed to these functions, like both strings\nin `cn(\"px-2\", \"py-2\")`. When an object is passed, Biome checks its\nkeys: in `cn({ \"px-2\": isActive })`, it checks `\"px-2\"`.\n\nProperties of these functions are checked too, so listing `tw` also\ncovers `` tw.div`px-2` `` and `tw.div(\"px-2\")`.\n\nDefaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cn`, `cc`, `cnb`, and\n`ctl`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"variantFunctions": {
+					"description": "Functions that describe a component's styles with an object, such as\n`cva` and `tv`.\n\nBiome checks every string passed directly to these functions. In an\nobject passed to them, Biome checks the classes under these properties:\n\n- `base`, `class`, and `className`: classes that always apply.\n- `variants`: classes for each version of the component, such as each\n  button size.\n- `slots`: classes for each part of the component, such as its icon.\n- `compoundVariants` and `compoundSlots`: only the `class` and\n  `className` of each entry.\n\nOther properties, such as `defaultVariants`, hold names rather than\nclasses, so Biome skips them. For example, Biome checks `\"rounded\"`,\n`\"px-2\"`, and `\"px-4\"` here, but not `\"small\"`:\n\n```js\ncva(\"rounded\", {\n    variants: {\n        size: { small: \"px-2\", large: \"px-4\" },\n    },\n    defaultVariants: { size: \"small\" },\n});\n```\n\nDefaults to `cva` and `tv`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

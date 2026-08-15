@@ -18,6 +18,8 @@ declare_lint_rule! {
     /// This rule checks color utilities, including variants and opacity modifiers.
     /// It allows custom color names, `black`, `white`, `transparent`, `current`, and `inherit`.
     /// This rule does not check arbitrary values such as `bg-[#ff00aa]`.
+    /// It does not read your Tailwind CSS theme, so redefining a default palette name
+    /// does not exempt it.
     ///
     /// ## Examples
     ///
@@ -40,6 +42,11 @@ declare_lint_rule! {
     /// ```html
     /// <div class="bg-white text-black border-transparent fill-current stroke-inherit"></div>
     /// ```
+    ///
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
     /// ## Options
     ///

@@ -82,6 +82,10 @@ project. By default, this is `true`.
 	 */
 	root?: Bool;
 	/**
+	 * Configures how Biome recognizes Tailwind class strings.
+	 */
+	tailwind?: TailwindConfiguration;
+	/**
 	 * The version control integration configuration.
 	 */
 	vcs?: VcsConfiguration;
@@ -401,6 +405,64 @@ export interface MarkdownConfiguration {
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
+/**
+	* Tells Biome where your code lists Tailwind CSS classes, so the Tailwind
+lint rules know which strings to check. 
+	 */
+export interface TailwindConfiguration {
+	/**
+	* Attributes whose values are Tailwind classes, such as `class` in
+`<div class="px-2 py-2">`.
+
+Defaults to `class` and `className`. In HTML, attribute names match
+regardless of case. 
+	 */
+	attributes?: string[];
+	/**
+	* Functions that combine Tailwind classes, such as `clsx` and `cn`.
+
+Biome checks every string passed to these functions, like both strings
+in `cn("px-2", "py-2")`. When an object is passed, Biome checks its
+keys: in `cn({ "px-2": isActive })`, it checks `"px-2"`.
+
+Properties of these functions are checked too, so listing `tw` also
+covers `` tw.div`px-2` `` and `tw.div("px-2")`.
+
+Defaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cn`, `cc`, `cnb`, and
+`ctl`. 
+	 */
+	mergeFunctions?: string[];
+	/**
+	* Functions that describe a component's styles with an object, such as
+`cva` and `tv`.
+
+Biome checks every string passed directly to these functions. In an
+object passed to them, Biome checks the classes under these properties:
+
+- `base`, `class`, and `className`: classes that always apply.
+- `variants`: classes for each version of the component, such as each
+  button size.
+- `slots`: classes for each part of the component, such as its icon.
+- `compoundVariants` and `compoundSlots`: only the `class` and
+  `className` of each entry.
+
+Other properties, such as `defaultVariants`, hold names rather than
+classes, so Biome skips them. For example, Biome checks `"rounded"`,
+`"px-2"`, and `"px-4"` here, but not `"small"`:
+
+```js
+cva("rounded", {
+    variants: {
+        size: { small: "px-2", large: "px-4" },
+    },
+    defaultVariants: { size: "small" },
+});
+```
+
+Defaults to `cva` and `tv`. 
+	 */
+	variantFunctions?: string[];
+}
 /**
  * Settings for integrating Biome with version control.
  */
