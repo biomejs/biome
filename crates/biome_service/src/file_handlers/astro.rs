@@ -1,5 +1,6 @@
 use super::SearchCapabilities;
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities,
@@ -14,7 +15,6 @@ use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
-use biome_workspace_db::WorkspaceDb;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;
 

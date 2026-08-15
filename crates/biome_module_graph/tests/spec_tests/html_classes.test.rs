@@ -2,6 +2,7 @@ use biome_fs::MemoryFileSystem;
 use biome_languages::HtmlFileSource;
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_module_graph::{ModuleDb, traverse_import_tree_for_html_classes};
+use biome_service::db::WorkspaceDb;
 use camino::Utf8Path;
 
 use super::support::{
@@ -13,7 +14,7 @@ fn classes(
     path: &str,
     source: HtmlFileSource,
     styles: &[(&str, biome_languages::CssFileSource)],
-) -> (biome_workspace_db::WorkspaceDb, Vec<String>) {
+) -> (WorkspaceDb, Vec<String>) {
     let fs = MemoryFileSystem::default();
     fs.insert(path.into(), "<div class=\"card\"></div>");
     let embedded = styles

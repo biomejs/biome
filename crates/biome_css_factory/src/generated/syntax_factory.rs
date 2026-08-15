@@ -19,6 +19,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_ATTR_NAME
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_CUSTOM_IDENTIFIER
+            | CSS_BOGUS_DECLARATION
             | CSS_BOGUS_DOCUMENT_MATCHER
             | CSS_BOGUS_FONT_FAMILY_NAME
             | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
@@ -8559,6 +8560,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_PARENTHESIZED_EXPRESSION, children)
+            }
+            SCSS_PARTIAL_COMBINATOR_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyCssSelector::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T ! [>] | T ! [+] | T ! [~])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_PARTIAL_COMBINATOR_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_PARTIAL_COMBINATOR_SELECTOR, children)
             }
             SCSS_PLACEHOLDER_SELECTOR => {
                 let mut elements = (&children).into_iter();

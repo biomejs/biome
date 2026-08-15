@@ -415,6 +415,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         }
         "ScssParentSelectorValue" => lang::ScssParentSelectorValue::KIND_SET.iter().next(),
         "ScssParenthesizedExpression" => lang::ScssParenthesizedExpression::KIND_SET.iter().next(),
+        "ScssPartialCombinatorSelector" => {
+            lang::ScssPartialCombinatorSelector::KIND_SET.iter().next()
+        }
         "ScssPlaceholderSelector" => lang::ScssPlaceholderSelector::KIND_SET.iter().next(),
         "ScssPlainImport" => lang::ScssPlainImport::KIND_SET.iter().next(),
         "ScssReturnAtRule" => lang::ScssReturnAtRule::KIND_SET.iter().next(),
@@ -717,6 +720,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssParentSelector" => &[("suffix", 1)],
         "ScssParentSelectorSuffix" => &[("items", 0)],
         "ScssParenthesizedExpression" => &[("expression", 1)],
+        "ScssPartialCombinatorSelector" => &[("left", 0)],
         "ScssPlaceholderSelector" => &[("name", 1)],
         "ScssPlainImport" => &[("url", 0), ("layer", 1), ("supports", 2), ("media", 3)],
         "ScssReturnAtRule" => &[("value", 1)],

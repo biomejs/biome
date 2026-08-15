@@ -2432,6 +2432,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
+See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
+	 */
+	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
+	/**
 	* Disallow specific object properties.
 See https://biomejs.dev/linter/rules/no-js-restricted-properties 
 	 */
@@ -2546,6 +2551,11 @@ See https://biomejs.dev/linter/rules/no-react-string-refs
 See https://biomejs.dev/linter/rules/no-restricted-dependencies 
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
+	/**
+	* Disallow legacy Svelte {@const} tags.
+See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
+	 */
+	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
 	/**
 	* Disallow unnecessary $state wrapping of reactive classes.
 See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap 
@@ -2714,6 +2724,11 @@ See https://biomejs.dev/linter/rules/use-qwik-loader-location
 See https://biomejs.dev/linter/rules/use-react-async-server-function 
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
+	/**
+	* Validate files with React Compiler.
+See https://biomejs.dev/linter/rules/use-react-compiler 
+	 */
+	useReactCompiler?: UseReactCompilerConfiguration;
 	/**
 	* Enforce a specific function type for React function components.
 See https://biomejs.dev/linter/rules/use-react-function-component-definition 
@@ -4700,6 +4715,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidPropertyInitValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidPropertyInitValueOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -4769,6 +4787,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoSvelteLegacyConstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteLegacyConstOptions;
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
@@ -4865,6 +4886,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactCompilerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactCompilerOptions;
 export type UseReactFunctionComponentDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactFunctionComponentDefinitionOptions;
@@ -6567,6 +6591,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoInvalidPropertyInitValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidPropertyInitValueOptions;
+}
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsRestrictedPropertiesOptions;
@@ -6665,6 +6693,10 @@ export interface RuleWithNoReactStringRefsOptions {
 export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
+}
+export interface RuleWithNoSvelteLegacyConstOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteLegacyConstOptions;
 }
 export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	fix?: FixKind;
@@ -6805,6 +6837,10 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
+}
+export interface RuleWithUseReactCompilerOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactCompilerOptions;
 }
 export interface RuleWithUseReactFunctionComponentDefinitionOptions {
 	fix?: FixKind;
@@ -8359,6 +8395,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	* Restriction entries for object/property access.
@@ -8401,6 +8438,7 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
@@ -8593,6 +8631,12 @@ export interface UseNullishCoalescingOptions {
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactCompilerOptions {
+	/**
+	 * Which functions React Compiler analyzes. Defaults to `infer`.
+	 */
+	compilationMode?: CompilationMode;
+}
 export interface UseReactFunctionComponentDefinitionOptions {
 	/**
 	 * The function style to enforce for named React components.
@@ -9364,6 +9408,10 @@ export type TestFunctionKind = "it" | "test";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
+/**
+ * Controls which functions React Compiler analyzes.
+ */
+export type CompilationMode = "infer" | "annotation" | "all";
 export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
@@ -9828,6 +9876,7 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
@@ -9852,6 +9901,7 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
@@ -9870,6 +9920,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDisposables"
@@ -9896,6 +9947,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
@@ -9908,6 +9960,7 @@ export type Category =
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
+	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

@@ -8,6 +8,7 @@ use super::{
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::css::go_to::resolve_definition;
 use crate::file_handlers::{
@@ -42,9 +43,9 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{error, info};
@@ -169,6 +170,11 @@ impl ServiceLanguage for CssLanguage {
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
+        let report_scss_exclusive_syntax = cfg!(feature = "report_scss_exclusive_syntax")
+            && file_source
+                .to_css_file_source()
+                .is_some_and(|source| matches!(source.as_embedding_kind(), CssEmbeddingKind::None));
+
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
                 .allow_wrong_line_comments
@@ -195,7 +201,7 @@ impl ServiceLanguage for CssLanguage {
                 .unwrap_or_default(),
             grit_metavariables: false,
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
-            report_scss_exclusive_syntax: cfg!(feature = "report_scss_exclusive_syntax"),
+            report_scss_exclusive_syntax,
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
@@ -995,6 +1001,7 @@ fn search(
 mod test {
     use super::*;
     use biome_languages::CssFileSource;
+    use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind};
 
     #[test]
     fn inherit_global_format_settings() {
@@ -1028,5 +1035,20 @@ mod test {
             parse_options.report_scss_exclusive_syntax,
             cfg!(feature = "report_scss_exclusive_syntax")
         );
+    }
+
+    #[test]
+    fn resolve_parse_options_disables_scss_reporting_for_embedded_css() {
+        let parse_options = CssLanguage::resolve_parse_options(
+            &OverrideSettings::default(),
+            &CssParserSettings::default(),
+            &BiomePath::new("test.html"),
+            &DocumentFileSource::Css(
+                CssFileSource::css()
+                    .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html)),
+            ),
+        );
+
+        assert!(!parse_options.report_scss_exclusive_syntax);
     }
 }

@@ -3,8 +3,9 @@
 // Codegen scope is intentionally narrow — only the long phf maps,
 // sets, and arrays are emitted. Structural types (`NamedValueType`,
 // `CssDataType`, `ThemeNamespace`, `NamedBranch`, `ArbitraryBranch`,
-// `Negative`, `UtilityEntry`, `FunctionalEntry`) live in the hand-written
-// sibling `tailwind_preset_v4_types.rs` and are imported here.
+// `Negative`, `UtilityEntry`, `FunctionalEntry`, `VariantKind`,
+// `VariantCompare`, `VariantEntry`) live in the hand-written sibling
+// `tailwind_preset_v4_types.rs` and are imported here.
 
 import type {
 	ArbitraryBranch,
@@ -13,6 +14,11 @@ import type {
 	NamedBranch,
 	PropertySort,
 } from "./extract-utilities.js";
+import type {
+	ExtractedVariant,
+	ExtractedVariants,
+	ThemeValue,
+} from "./extract-variants.js";
 import {
 	THEME_NAMESPACES,
 	type ThemeNamespacePrefix,
@@ -26,14 +32,15 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! Source references (Tailwind v4):
 //! - property-order:  https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/property-order.ts
 //! - utilities:       https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utilities.ts
+//! - variants:        https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/variants.ts
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
-    ThemeNamespace, UtilityEntry,
+    ArbitraryBranch, CssDataType, FunctionalEntry, ModifierKind, NamedBranch, NamedValueType,
+    Negative::*, ThemeNamespace, UtilityEntry, VariantCompare, VariantEntry, VariantKind,
 };
 `;
 
@@ -284,9 +291,10 @@ function formatNamedBranch(
 	keywordIdx: Map<string, number>,
 ): string {
 	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Theme":
-			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${sig}, ${count})`;
+			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${m}, ${sig}, ${count})`;
 		case "Keyword": {
 			const key = b.keywords.join("\0");
 			const pool = keywordIdx.get(key);
@@ -295,10 +303,10 @@ function formatNamedBranch(
 					`keyword pool missing entry for: ${b.keywords.join(",")}`,
 				);
 			}
-			return `NamedBranch::Keyword(${pool}, ${sig}, ${count})`;
+			return `NamedBranch::Keyword(${pool}, ${m}, ${sig}, ${count})`;
 		}
 		case "Typed":
-			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${sig}, ${count})`;
+			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${m}, ${sig}, ${count})`;
 	}
 }
 
@@ -307,11 +315,12 @@ function formatArbitraryBranch(
 	sigIdx: (sort: PropertySort) => number,
 ): string {
 	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Typed":
-			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${sig}, ${count})`;
+			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${m}, ${sig}, ${count})`;
 		case "Fallback":
-			return `ArbitraryBranch::Fallback(${sig}, ${count})`;
+			return `ArbitraryBranch::Fallback(${m}, ${sig}, ${count})`;
 	}
 }
 
@@ -332,10 +341,32 @@ function renderThemeKeys(keys: Map<ThemeNamespacePrefix, Set<string>>): string {
 	return blocks.join("");
 }
 
+function renderVariants(variants: ExtractedVariant[]): string {
+	const lines = variants.map(
+		(v) =>
+			`    ${rustString(v.name)} => VariantEntry { kind: VariantKind::${v.kind}, order: ${v.order}, compare: VariantCompare::${v.compare}, compounds: ${v.compounds}, compounds_with: ${v.compounds_with} },`,
+	);
+	return `pub(super) static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
+function renderThemeValueMap(mapName: string, values: ThemeValue[]): string {
+	const lines = values.map(
+		({ name, value }) => `    ${rustString(name)} => ${rustString(value)},`,
+	);
+	return `pub(super) static ${mapName}: phf::Map<&'static str, &'static str> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
 export function renderRust(input: {
 	propertyOrder: string[];
 	themeKeys: Map<ThemeNamespacePrefix, Set<string>>;
 	utilities: ExtractedUtilities;
+	variants: ExtractedVariants;
 }): string {
 	const { pool: keywordPool, idxOf: keywordIdx } = collectKeywordPool(
 		input.utilities,
@@ -351,6 +382,9 @@ export function renderRust(input: {
 		renderSignaturePool(signaturePool),
 		renderStaticUtilities(input.utilities, sigIdx),
 		renderFunctionalUtilities(input.utilities, sigIdx, keywordIdx),
+		renderVariants(input.variants.variants),
+		renderThemeValueMap("BREAKPOINT_VALUES", input.variants.breakpoints),
+		renderThemeValueMap("CONTAINER_VALUES", input.variants.containers),
 		renderThemeKeys(input.themeKeys),
 	].join("\n");
 }

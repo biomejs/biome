@@ -66,6 +66,7 @@ biome_css_formatter  = { path = "../biome_css_formatter" }
 biome_css_parser     = { path = "../biome_css_parser" }
 biome_db             = { path = "../biome_db" }
 biome_deserialize    = { path = "../biome_deserialize" }
+biome_embeds         = { path = "../biome_embeds" }
 biome_html_formatter = { path = "../biome_html_formatter" }
 biome_html_parser    = { path = "../biome_html_parser" }
 biome_js_formatter   = { path = "../biome_js_formatter" }
@@ -73,8 +74,7 @@ biome_js_parser      = { path = "../biome_js_parser" }
 biome_json_parser    = { path = "../biome_json_parser" }
 biome_json_value     = { path = "../biome_json_value" }
 biome_service        = { path = "../biome_service", features = ["html_embeds", "testing"] }
-biome_workspace_db   = { path = "../biome_workspace_db" }
-divan                = { package = "codspeed-divan-compat", version = "=4.4.1" }
+divan                = { package = "codspeed-divan-compat", version = "=5.0.1" }
 insta                = { workspace = true }
 walkdir              = { workspace = true }
 

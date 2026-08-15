@@ -13,6 +13,8 @@ use biome_html_syntax::HtmlLanguage;
 #[cfg(feature = "lang_js")]
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::Language;
 use std::{collections::BTreeMap, str::FromStr};
 
@@ -66,6 +68,8 @@ impl RulesVisitor {
         biome_json_analyze::visit_registry(&mut visitor);
         #[cfg(feature = "lang_js")]
         biome_js_analyze::visit_registry(&mut visitor);
+        #[cfg(feature = "lang_md")]
+        biome_markdown_analyze::visit_registry(&mut visitor);
 
         visitor
     }
@@ -142,6 +146,17 @@ impl RegistryVisitor<HtmlLanguage> for RulesVisitor {
             + 'static,
     {
         self.store_rule::<R, HtmlLanguage>();
+    }
+}
+
+#[cfg(feature = "lang_md")]
+impl RegistryVisitor<MarkdownLanguage> for RulesVisitor {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, MarkdownLanguage>();
     }
 }
 

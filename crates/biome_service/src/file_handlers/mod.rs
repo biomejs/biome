@@ -32,6 +32,7 @@ use self::css::CssFileHandler;
 use self::javascript::JsFileHandler;
 use self::{json::JsonFileHandler, unknown::UnknownFileHandler};
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 pub use crate::file_handlers::astro::AstroFileHandler;
@@ -93,7 +94,6 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::TokenText;
 use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TextRange, TextSize};
 use biome_text_edit::TextEdit;
-use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 #[cfg(feature = "lang_html")]
 use html::HtmlFileHandler;

@@ -32,6 +32,10 @@ new Boolean(!!x);
 const b0 = false;
 const b1 = false;
 const boolean = !Boolean(b0 && b1);
+
+// Test case for issue #11289 - should preserve parentheses
+const result = Boolean(foo ? bar : baz) ? "X" : "Y";
+
 ```
 
 # Diagnostics
@@ -252,6 +256,8 @@ invalid.js:28:18 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━
     27 │ const b1 = false;
   > 28 │ const boolean = !Boolean(b0 && b1);
        │                  ^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // Test case for issue #11289 - should preserve parentheses
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
@@ -259,5 +265,24 @@ invalid.js:28:18 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━
   
     28 │ const·boolean·=·!Boolean(b0·&&·b1);
        │                  -------           
+
+```
+
+```
+invalid.js:31:16 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid redundant `Boolean` call
+  
+    30 │ // Test case for issue #11289 - should preserve parentheses
+  > 31 │ const result = Boolean(foo ? bar : baz) ? "X" : "Y";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+  
+  i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
+  
+  i Safe fix: Remove redundant `Boolean` call
+  
+    31 │ const·result·=·Boolean(foo·?·bar·:·baz)·?·"X"·:·"Y";
+       │                -------                              
 
 ```

@@ -57,7 +57,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24.18.1
+          node-version: 24.19.0
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -69,7 +69,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Set release infos
         if: needs.check.outputs.prerelease == 'true'
@@ -123,7 +123,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24.18.1
+          node-version: 24.19.0
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos

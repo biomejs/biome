@@ -40,6 +40,9 @@ jobs:
           - os: depot-windows-2022
           - os: depot-ubuntu-24.04-arm-16
     steps:
+      - name: Enable Git long paths
+        if: matrix.os == 'depot-windows-2022'
+        run: git config --system core.longpaths true
       - name: Checkout PR Branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install toolchain
@@ -77,7 +80,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install cargo-deny
-        uses: taiki-e/install-action@6a1bd70eaac3c8bdf093356838d7ee09fda951cf # v2.85.5
+        uses: taiki-e/install-action@6c6fd71fe4fb72c3697d269963d0e15df8adedad # v2.85.10
         with:
           tool: cargo-deny
       - run: cargo deny check bans
@@ -92,6 +95,9 @@ jobs:
           - os: depot-windows-2022-16
           - os: depot-ubuntu-24.04-arm-16
     steps:
+      - name: Enable Git long paths
+        if: matrix.os == 'depot-windows-2022-16'
+        run: git config --system core.longpaths true
       - name: Checkout PR branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install toolchain

@@ -56,7 +56,7 @@ pub enum MarkdownSyntaxKind {
     MD_BOGUS,
     MD_BOGUS_BLOCK,
     MD_BOGUS_BULLET,
-    MD_DOCUMENT,
+    MD_ROOT,
     MD_BLOCK_LIST,
     MD_HASH_LIST,
     MD_HASH,

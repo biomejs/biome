@@ -4,36 +4,26 @@
 use std::any::TypeId;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter, Write};
+use std::mem;
 use std::str::FromStr;
-use std::{mem, slice};
 
 use anyhow::bail;
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
-    RuleCategory, RuleDomain, RuleFilter, RuleGroup, RuleMetadata,
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleDomain, RuleGroup,
+    RuleMetadata,
 };
 use biome_configuration::Configuration;
-use biome_css_analyze::CssAnalyzerServices;
-use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
-use biome_diagnostics::{DiagnosticExt, Severity};
+use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
-use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
-use biome_json_analyze::JsonAnalyzeServices;
-use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_languages::{
-    DocumentFileSource, HtmlFileSource,
-    javascript::{JsEmbeddingKind, JsFileSource},
-};
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_ruledoc_utils::{
     AnalyzerServicesBuilder, CodeBlock, DiagnosticConsoleWriter, DiagnosticWriter,
-    OptionsParsingMode, parse_rule_options,
+    OptionsParsingMode, RuleCodeAnalyzer, parse_rule_options,
 };
-use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
@@ -213,12 +203,23 @@ pub fn check_rules() -> anyhow::Result<()> {
         }
     }
 
+    impl RegistryVisitor<MarkdownLanguage> for LintRulesVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
     biome_graphql_analyze::visit_registry(&mut visitor);
     biome_html_analyze::visit_registry(&mut visitor);
+    biome_markdown_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups, errors } = visitor;
     if !errors.is_empty() {
@@ -246,279 +247,36 @@ fn assert_lint(
     rule_language: &'static str,
     test: &CodeBlock,
     code: &str,
-    config: Option<Configuration>,
+    configuration: Option<Configuration>,
     services_builder: &mut AnalyzerServicesBuilder,
 ) -> anyhow::Result<()> {
     if test.ignore {
         return Ok(());
     }
 
-    // Record the diagnostics emitted by the lint rule to later check if
-    // what was emitted matches the expectations set for this code block.
     let mut diagnostics = DiagnosticConsoleWriter::default();
-
-    let document_file_source = if rule_language == "html" {
-        // HACK: Force HTML analysis for rules that come from the HTML analyzer
-        DocumentFileSource::Html(
-            HtmlFileSource::try_from_extension(&test.tag)
-                .unwrap_or_else(|_| HtmlFileSource::html()),
-        )
-    } else {
-        test.document_file_source_from_path()
-    };
-
-    match document_file_source {
-        DocumentFileSource::Js(file_source) => {
-            // Temporary support for astro, svelte and vue code blocks
-            let (code, file_source) = match file_source.as_embedding_kind() {
-                JsEmbeddingKind::Astro { .. } => (
-                    biome_service::file_handlers::AstroFileHandler::input(code),
-                    JsFileSource::ts(),
-                ),
-                JsEmbeddingKind::Svelte { .. } => (
-                    biome_service::file_handlers::SvelteFileHandler::input(code),
-                    biome_service::file_handlers::SvelteFileHandler::file_source(code),
-                ),
-                JsEmbeddingKind::Vue { .. } => (
-                    biome_service::file_handlers::VueFileHandler::input(code),
-                    biome_service::file_handlers::VueFileHandler::file_source(code),
-                ),
-                _ => (code, file_source),
-            };
-
-            let parse = biome_js_parser::parse(code, file_source, JsParserOptions::default());
-
-            if parse.has_errors() {
-                for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(test.file_path())
-                        .with_file_source_code(code);
-                    diagnostics.write_parse_error(error);
-                }
-            } else {
-                let root = parse.tree();
-
-                let rule_filter = RuleFilter::Rule(group, rule);
-                let filter = AnalysisFilter {
-                    enabled_rules: Some(slice::from_ref(&rule_filter)),
-                    ..AnalysisFilter::default()
-                };
-
-                let options = test.create_analyzer_options::<JsLanguage>(config)?;
-
-                let services = services_builder.build_for_js_parse(
-                    Utf8PathBuf::from(test.file_path()),
-                    parse,
-                    file_source,
-                );
-
-                biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(ActionFilter::rule_fix()) {
-                            diag = diag.add_code_suggestion(action.into());
-                        }
-
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
-            }
-        }
-        DocumentFileSource::Json(file_source) => {
-            let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
-
-            if parse.has_errors() {
-                for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(test.file_path())
-                        .with_file_source_code(code);
-                    diagnostics.write_parse_error(error);
-                }
-            } else {
-                let root = parse.tree();
-
-                let rule_filter = RuleFilter::Rule(group, rule);
-                let filter = AnalysisFilter {
-                    enabled_rules: Some(slice::from_ref(&rule_filter)),
-                    ..AnalysisFilter::default()
-                };
-
-                let options = test.create_analyzer_options::<JsonLanguage>(config)?;
-                let json_services = JsonAnalyzeServices {
-                    file_source,
-                    configuration_provider: None,
-                    project_layout: None,
-                };
-                biome_json_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    json_services,
-                    &[],
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            for action in signal.actions(ActionFilter::rule_fix()) {
-                                if !action.is_suppression() {
-                                    diag = diag.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diag
-                                .with_file_path(test.file_path())
-                                .with_file_source_code(code);
-                            diagnostics.write_diagnostic(error);
-                        }
-
-                        ControlFlow::<()>::Continue(())
-                    },
-                );
-            }
-        }
-        DocumentFileSource::Css(file_source) => {
-            let parse_options = CssParserOptions::from(&file_source);
-
-            let parse = biome_css_parser::parse_css(code, file_source, parse_options);
-
-            if parse.has_errors() {
-                for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(test.file_path())
-                        .with_file_source_code(code);
-                    diagnostics.write_parse_error(error);
-                }
-            } else {
-                let root = parse.tree();
-
-                let rule_filter = RuleFilter::Rule(group, rule);
-                let filter = AnalysisFilter {
-                    enabled_rules: Some(slice::from_ref(&rule_filter)),
-                    ..AnalysisFilter::default()
-                };
-
-                let options = test.create_analyzer_options::<CssLanguage>(config)?;
-                let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
-                let services = CssAnalyzerServices::default()
-                    .with_file_source(file_source)
-                    .with_semantic_model(&semantic_model);
-                biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(ActionFilter::rule_fix()) {
-                            diag = diag.add_code_suggestion(action.into());
-                        }
-
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
-            }
-        }
-        DocumentFileSource::Graphql(..) => {
-            let parse = biome_graphql_parser::parse_graphql(code);
-
-            if parse.has_errors() {
-                for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(test.file_path())
-                        .with_file_source_code(code);
-                    diagnostics.write_parse_error(error);
-                }
-            } else {
-                let root = parse.tree();
-
-                let rule_filter = RuleFilter::Rule(group, rule);
-                let filter = AnalysisFilter {
-                    enabled_rules: Some(slice::from_ref(&rule_filter)),
-                    ..AnalysisFilter::default()
-                };
-
-                let options = test.create_analyzer_options::<GraphqlLanguage>(config)?;
-
-                biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(ActionFilter::rule_fix()) {
-                            diag = diag.add_code_suggestion(action.into());
-                        }
-
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
-            }
-        }
-        DocumentFileSource::Html(source) => {
-            let parse = biome_html_parser::parse_html(code, HtmlParserOptions::from(&source));
-
-            if parse.has_errors() {
-                for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(test.file_path())
-                        .with_file_source_code(code);
-                    diagnostics.write_parse_error(error);
-                }
-            } else {
-                let root = parse.tree();
-
-                let rule_filter = RuleFilter::Rule(group, rule);
-                let filter = AnalysisFilter {
-                    enabled_rules: Some(slice::from_ref(&rule_filter)),
-                    ..AnalysisFilter::default()
-                };
-
-                let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
-
-                biome_html_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    source,
-                    biome_html_analyze::HtmlAnalyzerServices::default(),
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            for action in signal.actions(ActionFilter::rule_fix()) {
-                                diag = diag.add_code_suggestion(action.into());
-                            }
-
-                            let error = diag
-                                .with_file_path(test.file_path())
-                                .with_file_source_code(code);
-                            diagnostics.write_diagnostic(error);
-                        }
-
-                        ControlFlow::<()>::Continue(())
-                    },
-                );
-            }
-        }
-        DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
-        DocumentFileSource::Markdown(..) => todo!("Markdown analysis is not yet supported"),
-        DocumentFileSource::Yaml(..) => todo!("Yaml analysis is not yet supported"),
-
-        // Unknown code blocks should be ignored by tests
-        DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
+    RuleCodeAnalyzer {
+        group,
+        rule,
+        rule_language,
+        code_block: test,
+        code,
+        configuration,
+        services_builder,
+        writer: &mut diagnostics,
     }
+    .analyze()?;
 
     if diagnostics.has_parse_error {
         // Fail if there is a parse error...
-        diagnostics.print_all_diagnostics();
+        diagnostics.print_all_diagnostics()?;
         bail!(
             "Analysis of '{group}/{rule}' on the following code block resulted in a parse error.\n\n{code}"
         );
     } else if test.expect_diagnostic {
         // ...or if the analysis does not return exactly one diagnostic...
         if diagnostics.all_diagnostics.len() != 1 {
-            diagnostics.print_all_diagnostics();
+            diagnostics.print_all_diagnostics()?;
             bail!(
                 "Analysis of '{group}/{rule}' on the following code block returned {num_diagnostics} diagnostics, but a single diagnostic was expected.\n\n{code}",
                 num_diagnostics = diagnostics.all_diagnostics.len()
@@ -526,14 +284,14 @@ fn assert_lint(
         }
     } else if test.expect_diff {
         // ...or there is no diff...
-        if diagnostics.all_diagnostics.is_empty() {
+        if diagnostics.action_count == 0 {
             bail!(
                 "Analysis of '{group}/{rule}' on the following code block returned no diff where one was expected.\n\n{code}",
             );
         }
     } else if !diagnostics.all_diagnostics.is_empty() {
         // ...or if the analysis returns a diagnostic when none are expected.
-        diagnostics.print_all_diagnostics();
+        diagnostics.print_all_diagnostics()?;
         bail!(
             "Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}"
         );
@@ -601,12 +359,7 @@ fn parse_documentation(
             }
             Event::Text(text) => {
                 if let Some((_, block)) = &mut language {
-                    if let Some(inner_text) = text.strip_prefix("# ") {
-                        // Lines prefixed with "# " are hidden from the public documentation
-                        write!(block, "{inner_text}")?;
-                    } else {
-                        write!(block, "{text}")?;
-                    }
+                    write!(block, "{text}")?;
                 }
             }
             Event::Start(Tag::Heading { level, .. }) => {

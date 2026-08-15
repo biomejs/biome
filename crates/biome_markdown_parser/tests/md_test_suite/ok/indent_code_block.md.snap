@@ -21,7 +21,7 @@ Regular paragraph here.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdIndentCodeBlock {
@@ -101,7 +101,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..121
+0: MD_ROOT@0..121
   0: (empty)
   1: MD_BLOCK_LIST@0..121
     0: MD_INDENT_CODE_BLOCK@0..62

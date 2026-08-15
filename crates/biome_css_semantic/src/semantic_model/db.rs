@@ -4,7 +4,7 @@ use biome_css_syntax::AnyCssRoot;
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
 use biome_rowan::{TextRange, TokenText};
 
-/// The name and source range of an effective `@property` rule.
+/// The name and source range of an `@property` registration candidate.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CssPropertyDefinition {
     name: TokenText,
@@ -33,7 +33,7 @@ pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) ->
     semantic_model(&parsed)
 }
 
-/// Returns effective `@property` rules from a parsed CSS document.
+/// Returns `@property` registration candidates from a parsed CSS document.
 #[salsa::tracked(returns(ref))]
 pub fn css_property_definitions_from_source(
     db: &dyn Db,
@@ -43,7 +43,7 @@ pub fn css_property_definitions_from_source(
     collect_property_definitions(css_model_from_parsed_source(db, file))
 }
 
-/// Returns effective `@property` rules from an embedded CSS document.
+/// Returns `@property` registration candidates from an embedded CSS document.
 #[salsa::tracked(returns(ref))]
 pub fn css_property_definitions_from_snippet(
     db: &dyn Db,
@@ -56,7 +56,7 @@ pub fn css_property_definitions_from_snippet(
 fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
     model
         .global_custom_variables()
-        .at_properties()
+        .at_property_registration_candidates()
         .map(|property| CssPropertyDefinition {
             name: property.name().clone(),
             range: property.range(),
@@ -75,15 +75,15 @@ pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db 
 mod tests {
     use super::css_model_from_parsed_source;
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::property_syntax::{
+        PropertySyntax, PropertySyntaxComponentName, PropertySyntaxResult, PropertySyntaxType,
+    };
     use biome_db::ParsedSource;
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
     };
     use biome_languages::css::CssFileSource;
     use biome_languages::{DocumentFileSource, LanguageDb};
-    use biome_property_codec::{
-        PropertySyntax, PropertySyntaxComponentName, PropertySyntaxResult, PropertySyntaxType,
-    };
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::Storage;
 

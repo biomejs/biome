@@ -12,6 +12,7 @@ use super::{
 #[cfg(not(feature = "html_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use crate::embed::EmbedContent;
 use crate::file_handlers::html::go_to::{resolve_binding_html, resolve_definition};
@@ -74,7 +75,6 @@ use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
 use std::fmt::Debug;

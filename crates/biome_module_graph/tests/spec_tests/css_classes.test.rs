@@ -6,7 +6,7 @@ use biome_module_graph::{
     resolve_css_module, transitive_importers_of, traverse_import_tree_for_classes,
 };
 use biome_project_layout::ProjectLayout;
-use biome_workspace_db::WorkspaceDb;
+use biome_service::db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 

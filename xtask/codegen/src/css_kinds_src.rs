@@ -706,6 +706,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "SCSS_MAP_EXPRESSION",
         "SCSS_MAP_EXPRESSION_PAIR",
         "SCSS_MAP_EXPRESSION_PAIR_LIST",
+        "SCSS_PARTIAL_COMBINATOR_SELECTOR",
         "SCSS_PARENT_SELECTOR",
         "SCSS_PARENT_SELECTOR_SUFFIX",
         "SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST",
@@ -741,6 +742,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",
         // Bogus nodes
         "CSS_BOGUS",
+        "CSS_BOGUS_DECLARATION",
         "CSS_BOGUS_BLOCK",
         "CSS_BOGUS_KEYFRAMES_ITEM",
         "CSS_BOGUS_RULE",

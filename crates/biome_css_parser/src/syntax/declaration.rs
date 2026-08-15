@@ -34,10 +34,10 @@ struct DeclarationListParseRecovery {
 impl ParseRecovery for DeclarationListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_DECLARATION;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        p.at(self.end_kind) || p.at(T![;])
     }
 }
 

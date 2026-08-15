@@ -18,6 +18,13 @@ pub struct MarkdownConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<MarkdownFormatterConfiguration>,
+
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_linter_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linter: Option<MarkdownLinterConfiguration>,
 }
 
 pub type MarkdownFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
@@ -77,4 +84,16 @@ pub struct MarkdownFormatterConfiguration {
     #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prose_wrap: Option<ProseWrap>,
+}
+
+/// Options that change how the Markdown linter behaves
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct MarkdownLinterConfiguration {
+    /// Control the linter for Markdown files.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<MarkdownLinterEnabled>,
 }

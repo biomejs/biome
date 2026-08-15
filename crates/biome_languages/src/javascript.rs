@@ -517,7 +517,12 @@ impl JsFileSource {
         self.embedding_kind.is_svelte_source_module()
     }
 
-    pub fn file_extension(&self) -> &str {
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub fn file_extension(&self) -> &'static str {
         match self.language {
             Language::JavaScript => {
                 if matches!(self.variant, LanguageVariant::Jsx) {

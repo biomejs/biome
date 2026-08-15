@@ -10,12 +10,14 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssRoot, AnyCssSelector,
-    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
-    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
-    CssMediaQueryList, CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode,
-    CssSyntaxToken, ScssAtRootAtRule, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
-    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssListExpression,
+    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
+    AnyCssPseudoElement, AnyCssRoot, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
+    CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
+    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
+    CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
+    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootSelector,
+    ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
+    ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction, ScssListExpression,
     ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration,
     T, TextLen, TextSize, is_in_scss_include_arguments,
 };
@@ -125,6 +127,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_else_clause_comment)
             .or_else(handle_empty_custom_property_container_comment)
             .or_else(handle_function_comment)
+            .or_else(handle_pseudo_function_boundary_comment)
             .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
             .or_else(handle_scss_variable_declaration_comment)
@@ -341,6 +344,76 @@ fn handle_function_comment(
         CommentPlacement::leading(following_node.clone(), comment)
     } else {
         CommentPlacement::Default(comment)
+    }
+}
+
+fn handle_pseudo_function_boundary_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(name) = comment
+        .preceding_node()
+        .and_then(AnyCssSelectorIdentifier::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+    let Some(function) = name.syntax().parent() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let is_functional_pseudo_class =
+        AnyCssPseudoClass::cast_ref(&function).is_some_and(|pseudo_class| {
+            !matches!(
+                pseudo_class,
+                AnyCssPseudoClass::CssBogusPseudoClass(_)
+                    | AnyCssPseudoClass::CssPseudoClassIdentifier(_)
+            )
+        });
+    let is_functional_pseudo_element =
+        AnyCssPseudoElement::cast_ref(&function).is_some_and(|pseudo_element| {
+            !matches!(
+                pseudo_element,
+                AnyCssPseudoElement::CssBogusPseudoElement(_)
+                    | AnyCssPseudoElement::CssPseudoElementIdentifier(_)
+            )
+        });
+    if !is_functional_pseudo_class && !is_functional_pseudo_element {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(l_paren) = name
+        .syntax()
+        .next_sibling_or_token()
+        .and_then(|element| element.into_token())
+        .filter(|token| token.kind() == T!['('])
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    // Comments before `(` are not part of the function contents.
+    if comment.piece().text_range().start() < l_paren.text_trimmed_range().end() {
+        return CommentPlacement::leading(name.into_syntax(), comment);
+    }
+
+    // Empty functions can expose a following node outside this function.
+    let following_argument = comment
+        .following_node()
+        .filter(|following| following.ancestors().any(|ancestor| ancestor == function));
+    if let Some(following_argument) = following_argument {
+        return CommentPlacement::leading(following_argument.clone(), comment);
+    }
+
+    // Empty functions have no argument node that can own the comment.
+    let is_empty_function = ScssInterpolatedPseudoClassFunction::cast_ref(&function)
+        .is_some_and(|function| function.arguments().is_none())
+        || ScssInterpolatedPseudoElementFunction::cast_ref(&function)
+            .is_some_and(|function| function.arguments().is_none())
+        || CssPseudoElementFunction::cast_ref(&function)
+            .is_some_and(|function| function.items().is_empty());
+
+    if is_empty_function {
+        CommentPlacement::dangling(function, comment)
+    } else {
+        CommentPlacement::leading(name.into_syntax(), comment)
     }
 }
 
