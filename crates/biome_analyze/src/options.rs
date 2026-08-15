@@ -83,6 +83,9 @@ pub struct AnalyzerConfiguration {
     /// The JSX fragment factory function identifier (e.g., "Fragment")
     /// Only applies when jsx_runtime is ReactClassic.
     jsx_fragment_factory: Option<Box<str>>,
+
+    /// Configures which attributes and functions contain Tailwind classes.
+    tailwind: TailwindOptions,
 }
 
 impl AnalyzerConfiguration {
@@ -128,6 +131,11 @@ impl AnalyzerConfiguration {
         preferred_indentation: PreferredIndentation,
     ) -> Self {
         self.preferred_indentation = preferred_indentation;
+        self
+    }
+
+    pub fn with_tailwind(mut self, tailwind: TailwindOptions) -> Self {
+        self.tailwind = tailwind;
         self
     }
 }
@@ -230,6 +238,43 @@ impl AnalyzerOptions {
 
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.configuration.preferred_indentation
+    }
+
+    pub fn tailwind(&self) -> &TailwindOptions {
+        &self.configuration.tailwind
+    }
+}
+
+/// User-provided names that Tailwind-aware analyzer queries use to identify class strings.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TailwindOptions {
+    attributes: Option<Arc<[Box<str>]>>,
+    functions: Option<Arc<[Box<str>]>>,
+}
+
+impl TailwindOptions {
+    /// Creates analyzer options from optional replacement lists.
+    pub fn new(attributes: Option<Box<[Box<str>]>>, functions: Option<Box<[Box<str>]>>) -> Self {
+        Self {
+            attributes: attributes.map(Arc::from),
+            functions: functions.map(Arc::from),
+        }
+    }
+
+    /// Returns the configured attribute replacement list, or `None` when language defaults apply.
+    pub fn attributes(&self) -> Option<&[Box<str>]> {
+        self.attributes.as_deref()
+    }
+
+    /// Returns the configured function replacement list, or `None` when defaults apply.
+    pub fn functions(&self) -> Option<&[Box<str>]> {
+        self.functions.as_deref()
+    }
+}
+
+impl Default for TailwindOptions {
+    fn default() -> Self {
+        Self::new(None, None)
     }
 }
 

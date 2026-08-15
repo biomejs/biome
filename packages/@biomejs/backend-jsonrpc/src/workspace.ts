@@ -78,6 +78,10 @@ project. By default, this is `true`.
 	 */
 	root?: Bool;
 	/**
+	 * Configures how Biome recognizes Tailwind class strings.
+	 */
+	tailwind?: TailwindConfiguration;
+	/**
 	 * The version control integration configuration.
 	 */
 	vcs?: VcsConfiguration;
@@ -376,6 +380,24 @@ match these patterns.
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
+/**
+ * Configures how Biome recognizes Tailwind class strings.
+ */
+export interface TailwindConfiguration {
+	/**
+	* Attribute names whose values contain Tailwind classes.
+
+Defaults to `class` for HTML and to `class` and `className` for JSX. 
+	 */
+	attributes?: string[];
+	/**
+	* Function and tagged-template names whose arguments contain Tailwind classes.
+
+Defaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`,
+`cnb`, and `ctl`. 
+	 */
+	functions?: string[];
+}
 /**
  * Settings for integrating Biome with version control.
  */

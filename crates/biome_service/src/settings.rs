@@ -1,6 +1,6 @@
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
-use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerOptions, AnalyzerRules, options::TailwindOptions};
 #[cfg(feature = "lang_css")]
 use biome_configuration::CssConfiguration;
 #[cfg(feature = "lang_js")]
@@ -98,6 +98,9 @@ pub struct Settings {
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
 
+    /// Settings used to recognize Tailwind class strings.
+    pub tailwind: TailwindOptions,
+
     // TODO: remove once HTML full support is stable
     #[cfg(feature = "lang_html")]
     pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
@@ -181,6 +184,10 @@ impl Settings {
                     .map(|p| p.as_path().to_path_buf()),
                 linter,
             )?;
+        }
+
+        if let Some(tailwind) = configuration.tailwind {
+            self.tailwind = tailwind.into();
         }
 
         // assist part
