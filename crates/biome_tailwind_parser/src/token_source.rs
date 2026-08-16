@@ -18,13 +18,7 @@ pub(crate) struct TailwindTokenSource<'source> {
     /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.
     had_trivia_before: bool,
 }
-/// A [TokenSourceCheckpoint] that also remembers whether the token at the
-/// checkpoint had trivia before it, so a rewind leaves
-/// [TailwindTokenSource::had_trivia_before] consistent with the lexer.
-pub(crate) struct TailwindTokenSourceCheckpoint {
-    inner: TokenSourceCheckpoint<TailwindSyntaxKind>,
-    had_trivia_before: bool,
-}
+pub(crate) type TailwindTokenSourceCheckpoint = TokenSourceCheckpoint<TailwindSyntaxKind>;
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum TailwindLexContext {
@@ -105,21 +99,16 @@ impl<'source> TailwindTokenSource<'source> {
     /// Creates a checkpoint to which it can later return using [Self::rewind].
     pub fn checkpoint(&self) -> TailwindTokenSourceCheckpoint {
         TailwindTokenSourceCheckpoint {
-            inner: TokenSourceCheckpoint {
-                trivia_len: self.trivia_list.len() as u32,
-                lexer_checkpoint: self.lexer.checkpoint(),
-            },
-            had_trivia_before: self.had_trivia_before,
+            trivia_len: self.trivia_list.len() as u32,
+            lexer_checkpoint: self.lexer.checkpoint(),
         }
     }
 
     /// Restores the token source to a previous state
     pub fn rewind(&mut self, checkpoint: TailwindTokenSourceCheckpoint) {
-        assert!(self.trivia_list.len() >= checkpoint.inner.trivia_len as usize);
-        self.trivia_list
-            .truncate(checkpoint.inner.trivia_len as usize);
-        self.had_trivia_before = checkpoint.had_trivia_before;
-        self.lexer.rewind(checkpoint.inner.lexer_checkpoint);
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
     }
 
     /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.

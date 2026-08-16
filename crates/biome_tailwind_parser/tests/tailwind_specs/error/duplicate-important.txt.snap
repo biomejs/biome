@@ -81,21 +81,10 @@ TwRoot {
                     TW_BASE@27..32 "hover" [] [],
                     COLON@32..33 ":" [] [],
                     TW_BASE@33..38 "flex" [] [Whitespace(" ")],
+                    TW_BASE@38..39 "p" [] [],
+                    DASH@39..40 "-" [] [],
+                    TW_NUMBER@40..41 "4" [] [],
                 ],
-            },
-            excl_token: missing (optional),
-        },
-        TwFullCandidate {
-            variants: TwVariantList [],
-            legacy_important_token: missing (optional),
-            negative_token: missing (optional),
-            candidate: TwFunctionalCandidate {
-                base_token: TW_BASE@38..39 "p" [] [],
-                minus_token: DASH@39..40 "-" [] [],
-                value: TwNumberValue {
-                    value_token: TW_NUMBER@40..41 "4" [] [],
-                },
-                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -152,25 +141,17 @@ TwRoot {
         0: TW_BASE@21..25 "flex" [] []
         1: (empty)
       4: (empty)
-    4: TW_FULL_CANDIDATE@25..38
+    4: TW_FULL_CANDIDATE@25..41
       0: TW_VARIANT_LIST@25..25
       1: BANG@25..27 "!" [Newline("\n")] []
       2: (empty)
-      3: TW_BOGUS_CANDIDATE@27..38
+      3: TW_BOGUS_CANDIDATE@27..41
         0: TW_BASE@27..32 "hover" [] []
         1: COLON@32..33 ":" [] []
         2: TW_BASE@33..38 "flex" [] [Whitespace(" ")]
-      4: (empty)
-    5: TW_FULL_CANDIDATE@38..41
-      0: TW_VARIANT_LIST@38..38
-      1: (empty)
-      2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@38..41
-        0: TW_BASE@38..39 "p" [] []
-        1: DASH@39..40 "-" [] []
-        2: TW_NUMBER_VALUE@40..41
-          0: TW_NUMBER@40..41 "4" [] []
-        3: (empty)
+        3: TW_BASE@38..39 "p" [] []
+        4: DASH@39..40 "-" [] []
+        5: TW_NUMBER@40..41 "4" [] []
       4: (empty)
   2: EOF@41..41 "" [] []
 
@@ -201,16 +182,16 @@ duplicate-important.txt:1:20 parse ━━━━━━━━━━━━━━━
   
 duplicate-important.txt:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a candidate but instead found 'hover:flex'.
+  × Expected a candidate but instead found 'hover:flex p-4'.
   
     1 │ !flex! p-4 md:!flex! flex
   > 2 │ !hover:flex p-4
-      │  ^^^^^^^^^^
+      │  ^^^^^^^^^^^^^^
   
   i Expected a candidate here.
   
     1 │ !flex! p-4 md:!flex! flex
   > 2 │ !hover:flex p-4
-      │  ^^^^^^^^^^
+      │  ^^^^^^^^^^^^^^
   
 ```

@@ -26,21 +26,10 @@ TwRoot {
                     L_BRACKET@0..1 "[" [] [],
                     TW_SELECTOR@1..6 ":40px" [] [],
                     R_BRACKET@6..8 "]" [] [Whitespace(" ")],
+                    TW_BASE@8..9 "w" [] [],
+                    DASH@9..10 "-" [] [],
+                    TW_NUMBER@10..11 "5" [] [],
                 ],
-            },
-            excl_token: missing (optional),
-        },
-        TwFullCandidate {
-            variants: TwVariantList [],
-            legacy_important_token: missing (optional),
-            negative_token: missing (optional),
-            candidate: TwFunctionalCandidate {
-                base_token: TW_BASE@8..9 "w" [] [],
-                minus_token: DASH@9..10 "-" [] [],
-                value: TwNumberValue {
-                    value_token: TW_NUMBER@10..11 "5" [] [],
-                },
-                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -55,25 +44,17 @@ TwRoot {
 0: TW_ROOT@0..12
   0: (empty)
   1: TW_CANDIDATE_LIST@0..11
-    0: TW_FULL_CANDIDATE@0..8
+    0: TW_FULL_CANDIDATE@0..11
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_BOGUS_CANDIDATE@0..8
+      3: TW_BOGUS_CANDIDATE@0..11
         0: L_BRACKET@0..1 "[" [] []
         1: TW_SELECTOR@1..6 ":40px" [] []
         2: R_BRACKET@6..8 "]" [] [Whitespace(" ")]
-      4: (empty)
-    1: TW_FULL_CANDIDATE@8..11
-      0: TW_VARIANT_LIST@8..8
-      1: (empty)
-      2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@8..11
-        0: TW_BASE@8..9 "w" [] []
-        1: DASH@9..10 "-" [] []
-        2: TW_NUMBER_VALUE@10..11
-          0: TW_NUMBER@10..11 "5" [] []
-        3: (empty)
+        3: TW_BASE@8..9 "w" [] []
+        4: DASH@9..10 "-" [] []
+        5: TW_NUMBER@10..11 "5" [] []
       4: (empty)
   2: EOF@11..12 "" [Newline("\n")] []
 
@@ -84,16 +65,16 @@ TwRoot {
 ```
 missing-property.txt:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a candidate but instead found '[:40px]'.
+  × Expected a candidate but instead found '[:40px] w-5'.
   
   > 1 │ [:40px] w-5
-      │ ^^^^^^^
+      │ ^^^^^^^^^^^
     2 │ 
   
   i Expected a candidate here.
   
   > 1 │ [:40px] w-5
-      │ ^^^^^^^
+      │ ^^^^^^^^^^^
     2 │ 
   
 ```

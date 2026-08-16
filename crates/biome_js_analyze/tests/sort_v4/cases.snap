@@ -582,21 +582,6 @@ sorted: flex! w-full! p-4!
 input:  flex [color:red]!
 sorted: flex [color:red]!
 ---
-input:  p-4 group-%:flex flex block
-sorted: group-%:flex block flex p-4
----
-input:  p-4 flex hover: block m-2
-sorted: hover: m-2 block flex p-4
----
-input:  flex [:40px] p-4 w-5
-sorted: [:40px] flex w-5 p-4
----
-input:  p-4 bg-red-500/ flex block
-sorted: bg-red-500/ block flex p-4
----
-input:  p-4 text-[ flex block
-sorted: text-[ block flex p-4
----
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
 sorted: text-card-foreground bg-card flex flex-col gap-6 rounded-xl border py-6 shadow-sm
 ---

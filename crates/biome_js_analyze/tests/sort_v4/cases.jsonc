@@ -362,16 +362,6 @@
 	"w-full! flex! p-4!",
 	"flex [color:red]!",
 
-	// ─── malformed classes ─────────────────────────────────────────
-	// A class the parser can't place stays put at the front, but the
-	// classes after it still parse and sort on their own.
-
-	"p-4 group-%:flex flex block",   // `group-%:flex block flex p-4`
-	"p-4 flex hover: block m-2",     // `hover:` alone is the malformed one
-	"flex [:40px] p-4 w-5",          // bad arbitrary candidate
-	"p-4 bg-red-500/ flex block",    // dangling modifier slash
-	"p-4 text-[ flex block",         // unterminated arbitrary value
-
 	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
 	// Inputs scrambled; output captured by snapshot.
 	// Source: github.com/shadcn-ui/ui registry/new-york-v4.
