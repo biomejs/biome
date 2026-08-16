@@ -3103,13 +3103,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         ExtendsChainLookup::Unknown
     }
 
-    /// Returns whether instances of the given `target` type provably fall
-    /// outside the given `subset`.
-    ///
-    /// The conditional class of an instance comes from its target: instances
-    /// of a truthy target, such as a class or an interface, are objects that
-    /// can never be falsy. Targets without a conditional class, such as
-    /// generic type parameters, exclude nothing.
     /// Returns whether `ty` provably cannot belong to `subset`, judged from
     /// its own shallow classification.
     fn excluded_from_subset(&self, ty: InferredTypeData<'db>, subset: ConditionalSubset) -> bool {
@@ -3117,6 +3110,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             .is_some_and(|conditional| excluded_from_subset(conditional, subset))
     }
 
+    /// Returns whether instances of the given `target` type provably fall
+    /// outside the given `subset`.
+    ///
+    /// The conditional class of an instance comes from its target: instances
+    /// of a truthy target, such as a class or an interface, are objects that
+    /// can never be falsy. Targets without a conditional class, such as
+    /// generic type parameters, exclude nothing.
     fn instance_excluded_from_subset(
         &self,
         target: InferredTypeData<'db>,
@@ -3224,11 +3224,6 @@ fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
         .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
 }
 
-/// Returns whether a literal string with the given raw `literal` source
-/// text may strictly equal the unescaped `value`.
-///
-/// A replacement character marks a lossy unescape, such as a lone surrogate
-/// escape; equality can be neither proven nor refuted then.
 /// Returns whether a value classified as `conditional` provably cannot
 /// belong to `subset`.
 ///
@@ -3244,6 +3239,11 @@ fn excluded_from_subset(conditional: ConditionalType, subset: ConditionalSubset)
     }
 }
 
+/// Returns whether a literal string with the given raw `literal` source
+/// text may strictly equal the unescaped `value`.
+///
+/// A replacement character marks a lossy unescape, such as a lone surrogate
+/// escape; equality can be neither proven nor refuted then.
 fn literal_string_may_equal(literal: &str, value: &str) -> bool {
     let unescaped = unescape_js_string_text(literal);
     unescaped == value || unescaped.contains('\u{fffd}') || value.contains('\u{fffd}')
