@@ -588,6 +588,7 @@ pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuild
         eof_token,
         bom_token: None,
         frontmatter: None,
+        processing_instruction: None,
         directive: None,
     }
 }
@@ -596,6 +597,7 @@ pub struct HtmlRootBuilder {
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     frontmatter: Option<AnyAstroFrontmatterElement>,
+    processing_instruction: Option<HtmlProcessingInstruction>,
     directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
@@ -605,6 +607,13 @@ impl HtmlRootBuilder {
     }
     pub fn with_frontmatter(mut self, frontmatter: AnyAstroFrontmatterElement) -> Self {
         self.frontmatter = Some(frontmatter);
+        self
+    }
+    pub fn with_processing_instruction(
+        mut self,
+        processing_instruction: HtmlProcessingInstruction,
+    ) -> Self {
+        self.processing_instruction = Some(processing_instruction);
         self
     }
     pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
@@ -617,6 +626,8 @@ impl HtmlRootBuilder {
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.frontmatter
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.processing_instruction
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.directive
                     .map(|token| SyntaxElement::Node(token.into_syntax())),

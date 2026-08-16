@@ -29,6 +29,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -290,7 +291,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..385
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..385
     0: HTML_ELEMENT@0..385
       0: HTML_OPENING_ELEMENT@0..116
         0: L_ANGLE@0..1 "<" [] []
@@ -452,6 +454,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@381..384
           0: SVG_KW@381..384 "svg" [] []
         3: R_ANGLE@384..385 ">" [] []
-  4: EOF@385..386 "" [Newline("\n")] []
+  5: EOF@385..386 "" [Newline("\n")] []
 
 ```

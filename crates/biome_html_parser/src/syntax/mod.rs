@@ -140,13 +140,13 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // content from being incorrectly lexed as a FENCE token.
     p.set_after_frontmatter(true);
 
-    let allow_directive = parse_doc_type(p).is_absent();
+    parse_processing_instruction(p).ok();
+    parse_doc_type(p).ok();
     // Only a real `.vue` document has single-file-component blocks. Plain HTML
     // parsed with the Vue extensions turned on keeps ordinary element nesting,
     // where an unknown top-level tag is a custom element rather than a block.
     ElementList {
         vue_sfc_top_level: Vue.is_supported(p) && !p.options().is_html(),
-        allow_directive,
     }
     .parse_list(p);
 
@@ -582,7 +582,6 @@ struct ElementList {
     /// component. Only the outermost list, so that a `<docs>` nested inside a
     /// `<template>` stays ordinary markup.
     vue_sfc_top_level: bool,
-    allow_directive: bool,
 }
 
 impl ParseNodeList for ElementList {
@@ -591,17 +590,6 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if self.allow_directive {
-            if p.at(T![<?]) {
-                return parse_processing_instruction(p);
-            }
-
-            self.allow_directive = false;
-            if p.at(T![<]) && p.nth_at(1, T![!]) {
-                return parse_doc_type(p);
-            }
-        }
-
         parse_html_element(p, self.vue_sfc_top_level)
     }
 

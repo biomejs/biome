@@ -22,6 +22,7 @@ declare_lint_rule! {
     /// Check out React documentation for [explanation on the why does React need keys.](https://react.dev/learn/rendering-lists#why-does-react-need-keys)
     ///
     /// This rule is intended for use in both React and Qwik applications to prevent missing key props in JSX elements inside iterators.
+    /// It does not report diagnostics in Astro files.
     ///
     /// ## Examples
     ///

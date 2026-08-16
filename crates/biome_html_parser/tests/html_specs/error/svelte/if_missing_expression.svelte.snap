@@ -23,6 +23,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteIfBlock {
@@ -117,7 +118,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..88
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..88
     0: SVELTE_IF_BLOCK@0..44
       0: SVELTE_IF_OPENING_BLOCK@0..38
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -176,7 +178,7 @@ HtmlRoot {
         0: SV_CURLY_SLASH@82..85 "{/" [Newline("\n")] []
         1: IF_KW@85..87 "if" [] []
         2: R_CURLY@87..88 "}" [] []
-  4: EOF@88..89 "" [Newline("\n")] []
+  5: EOF@88..89 "" [Newline("\n")] []
 
 ```
 

@@ -588,22 +588,28 @@ impl HtmlRoot {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_directive(self, element: Option<HtmlDirective>) -> Self {
+    pub fn with_processing_instruction(self, element: Option<HtmlProcessingInstruction>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_directive(self, element: Option<HtmlDirective>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
     pub fn with_html(self, element: HtmlElementList) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_eof_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
 }

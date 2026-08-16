@@ -87,6 +87,7 @@ doctype text outside a doctype
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: HtmlDirective {
         l_angle_token: L_ANGLE@0..1 "<" [] [],
         excl_token: BANG@1..2 "!" [] [],
@@ -505,7 +506,8 @@ HtmlRoot {
 0: HTML_ROOT@0..824
   0: (empty)
   1: (empty)
-  2: HTML_DIRECTIVE@0..15
+  2: (empty)
+  3: HTML_DIRECTIVE@0..15
     0: L_ANGLE@0..1 "<" [] []
     1: BANG@1..2 "!" [] []
     2: DOCTYPE_KW@2..10 "doctype" [] [Whitespace(" ")]
@@ -515,7 +517,7 @@ HtmlRoot {
     6: (empty)
     7: (empty)
     8: R_ANGLE@14..15 ">" [] []
-  3: HTML_ELEMENT_LIST@15..823
+  4: HTML_ELEMENT_LIST@15..823
     0: HTML_ELEMENT@15..823
       0: HTML_OPENING_ELEMENT@15..32
         0: L_ANGLE@15..17 "<" [Newline("\n")] []
@@ -805,6 +807,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@818..822
           0: HTML_KW@818..822 "html" [] []
         3: R_ANGLE@822..823 ">" [] []
-  4: EOF@823..824 "" [Newline("\n")] []
+  5: EOF@823..824 "" [Newline("\n")] []
 
 ```
