@@ -13,6 +13,8 @@ export function Component() {
 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
 			<div className="scale-x-50 scale-y-50 scale-z-50" />
 			<div className="content-center justify-center" />
+			<div className="!border-x !border-y" />
+			<div className="!content-center !justify-center" />
 		</>
 	);
 }
@@ -204,7 +206,7 @@ invalid.jsx:8:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
    > 8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
        │ 			                ^^^^^^^^^^
      9 │ 			<div className="content-center justify-center" />
-    10 │ 		</>
+    10 │ 			<div className="!border-x !border-y" />
   
   i Compressible utility used here.
   
@@ -213,7 +215,7 @@ invalid.jsx:8:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
    > 8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
        │ 			                           ^^^^^^^^^^
      9 │ 			<div className="content-center justify-center" />
-    10 │ 		</>
+    10 │ 			<div className="!border-x !border-y" />
   
   i Compressible utility used here.
   
@@ -222,7 +224,7 @@ invalid.jsx:8:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
    > 8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
        │ 			                                      ^^^^^^^^^^
      9 │ 			<div className="content-center justify-center" />
-    10 │ 		</>
+    10 │ 			<div className="!border-x !border-y" />
   
   i Using fewer classes reduces duplication and improves readability.
   
@@ -237,7 +239,7 @@ invalid.jsx:8:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
      8    │ - → → → <div·className="scale-x-50·scale-y-50·scale-z-50"·/>
         8 │ + → → → <div·className="scale-50·scale-3d"·/>
      9  9 │         <div className="content-center justify-center" />
-    10 10 │       </>
+    10 10 │         <div className="!border-x !border-y" />
   
 
 ```
@@ -251,8 +253,8 @@ invalid.jsx:9:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
      8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
    > 9 │ 			<div className="content-center justify-center" />
        │ 			                ^^^^^^^^^^^^^^
-    10 │ 		</>
-    11 │ 	);
+    10 │ 			<div className="!border-x !border-y" />
+    11 │ 			<div className="!content-center !justify-center" />
   
   i Compressible utility used here.
   
@@ -260,8 +262,8 @@ invalid.jsx:9:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
      8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
    > 9 │ 			<div className="content-center justify-center" />
        │ 			                               ^^^^^^^^^^^^^^
-    10 │ 		</>
-    11 │ 	);
+    10 │ 			<div className="!border-x !border-y" />
+    11 │ 			<div className="!content-center !justify-center" />
   
   i Using fewer classes reduces duplication and improves readability.
   
@@ -275,8 +277,81 @@ invalid.jsx:9:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
      8  8 │         <div className="scale-x-50 scale-y-50 scale-z-50" />
      9    │ - → → → <div·className="content-center·justify-center"·/>
         9 │ + → → → <div·className="place-content-center"·/>
-    10 10 │       </>
-    11 11 │     );
+    10 10 │         <div className="!border-x !border-y" />
+    11 11 │         <div className="!content-center !justify-center" />
+  
+
+```
+
+```
+invalid.jsx:10:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+     9 │ 			<div className="content-center justify-center" />
+  > 10 │ 			<div className="!border-x !border-y" />
+       │ 			                ^^^^^^^^^
+    11 │ 			<div className="!content-center !justify-center" />
+    12 │ 		</>
+  
+  i Compressible utility used here.
+  
+     8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+     9 │ 			<div className="content-center justify-center" />
+  > 10 │ 			<div className="!border-x !border-y" />
+       │ 			                          ^^^^^^^^^
+    11 │ 			<div className="!content-center !justify-center" />
+    12 │ 		</>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    10 │ → → → <div·className="!border-x·!border-y"·/>
+       │                              ------------    
+
+```
+
+```
+invalid.jsx:11:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  > 11 │ 			<div className="!content-center !justify-center" />
+       │ 			                ^^^^^^^^^^^^^^^
+    12 │ 		</>
+    13 │ 	);
+  
+  i Compressible utility used here.
+  
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  > 11 │ 			<div className="!content-center !justify-center" />
+       │ 			                                ^^^^^^^^^^^^^^^
+    12 │ 		</>
+    13 │ 	);
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     9  9 │         <div className="content-center justify-center" />
+    10 10 │         <div className="!border-x !border-y" />
+    11    │ - → → → <div·className="!content-center·!justify-center"·/>
+       11 │ + → → → <div·className="!place-content-center"·/>
+    12 12 │       </>
+    13 13 │     );
   
 
 ```

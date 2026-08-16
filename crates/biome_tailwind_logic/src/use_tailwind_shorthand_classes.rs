@@ -513,12 +513,17 @@ fn apply_auto_fix(
                         new_static = new_static.with_modifier(modifier);
                     }
                     let new_static = new_static.build();
-                    let new_full = make::tw_full_candidate(
+                    let mut new_full = make::tw_full_candidate(
                         to_modify.variants(),
                         AnyTwCandidate::TwStaticCandidate(new_static),
-                    )
-                    .build();
-                    mutation.replace_node(to_modify, new_full);
+                    );
+                    if let Some(legacy_important) = to_modify.legacy_important_token() {
+                        new_full = new_full.with_legacy_important_token(legacy_important);
+                    }
+                    if let Some(excl_token) = to_modify.excl_token() {
+                        new_full = new_full.with_excl_token(excl_token);
+                    }
+                    mutation.replace_node(to_modify, new_full.build());
                 }
                 _ => return None,
             }
