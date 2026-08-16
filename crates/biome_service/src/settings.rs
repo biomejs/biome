@@ -1,3 +1,11 @@
+mod query;
+
+pub use query::SettingsIdentity;
+#[cfg(test)]
+pub(crate) use query::SettingsQuerySelection;
+pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
+
+use crate::projects::ProjectDb;
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
@@ -112,6 +120,39 @@ pub struct Settings {
 }
 
 impl Settings {
+    pub fn format_options<L>(
+        &self,
+        override_indices: &[usize],
+        input: L::FormatOptionsInput,
+    ) -> L::FormatOptions
+    where
+        L: ServiceLanguage,
+    {
+        let language_settings = &L::lookup_settings(&self.languages).formatter;
+        L::resolve_format_options(
+            &self.formatter,
+            &self.override_settings,
+            language_settings,
+            override_indices,
+            input,
+        )
+    }
+
+    pub(crate) fn with_inline_configuration(&self, configuration: Configuration) -> Self {
+        let mut settings = self.clone();
+        let workspace_directory = self.source.as_ref().and_then(|source| {
+            source
+                .as_ref()
+                .source
+                .as_ref()
+                .and_then(|source| source.1.clone())
+        });
+
+        // TODO handle error
+        let _ = settings.merge_with_configuration(configuration, workspace_directory, vec![]);
+        settings
+    }
+
     pub fn experimental_full_html_support_enabled(&self) -> bool {
         #[cfg(feature = "lang_html")]
         {
@@ -315,13 +356,24 @@ impl Settings {
 
     /// Returns linter rules taking overrides into account.
     pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<'_, Rules>> {
+        let indices = self
+            .override_settings
+            .patterns
+            .iter()
+            .enumerate()
+            .filter_map(|(index, pattern)| pattern.is_file_included(path).then_some(index))
+            .collect::<Vec<_>>();
+        self.as_linter_rules_by_indices(&indices)
+    }
+
+    pub(crate) fn as_linter_rules_by_indices(&self, indices: &[usize]) -> Option<Cow<'_, Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
-        let overrides = &self.override_settings;
-        for pattern in overrides.patterns.iter() {
+        for &index in indices {
+            let Some(pattern) = self.override_settings.patterns.get(index) else {
+                continue;
+            };
             let pattern_rules = pattern.linter.rules.as_ref();
-            if let Some(pattern_rules) = pattern_rules
-                && pattern.is_file_included(path)
-            {
+            if let Some(pattern_rules) = pattern_rules {
                 result = if let Some(mut result) = result.take() {
                     // Override rules
                     result.to_mut().merge_with(pattern_rules.clone());
@@ -336,13 +388,27 @@ impl Settings {
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
     pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<'_, RuleDomains>> {
+        let indices = self
+            .override_settings
+            .patterns
+            .iter()
+            .enumerate()
+            .filter_map(|(index, pattern)| pattern.is_file_included(path).then_some(index))
+            .collect::<Vec<_>>();
+        self.as_linter_domains_by_indices(&indices)
+    }
+
+    pub(crate) fn as_linter_domains_by_indices(
+        &self,
+        indices: &[usize],
+    ) -> Option<Cow<'_, RuleDomains>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
-        let overrides = &self.override_settings;
-        for pattern in overrides.patterns.iter() {
+        for &index in indices {
+            let Some(pattern) = self.override_settings.patterns.get(index) else {
+                continue;
+            };
             let pattern_rules = pattern.linter.domains.as_ref();
-            if let Some(pattern_rules) = pattern_rules
-                && pattern.is_file_included(path)
-            {
+            if let Some(pattern_rules) = pattern_rules {
                 result = if let Some(mut result) = result.take() {
                     // Override rules
                     result.to_mut().merge_with(pattern_rules.clone());
@@ -358,13 +424,27 @@ impl Settings {
 
     /// Returns assists rules taking overrides into account.
     pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<'_, Actions>> {
+        let indices = self
+            .override_settings
+            .patterns
+            .iter()
+            .enumerate()
+            .filter_map(|(index, pattern)| pattern.is_file_included(path).then_some(index))
+            .collect::<Vec<_>>();
+        self.as_assist_actions_by_indices(&indices)
+    }
+
+    pub(crate) fn as_assist_actions_by_indices(
+        &self,
+        indices: &[usize],
+    ) -> Option<Cow<'_, Actions>> {
         let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
-        let overrides = &self.override_settings;
-        for pattern in overrides.patterns.iter() {
+        for &index in indices {
+            let Some(pattern) = self.override_settings.patterns.get(index) else {
+                continue;
+            };
             let pattern_rules = pattern.assist.actions.as_ref();
-            if let Some(pattern_rules) = pattern_rules
-                && pattern.is_file_included(path)
-            {
+            if let Some(pattern_rules) = pattern_rules {
                 result = if let Some(mut result) = result.take() {
                     // Override rules
                     result.to_mut().merge_with(pattern_rules.clone());
@@ -485,7 +565,27 @@ impl From<&ScanKind> for ModuleGraphResolutionKind {
     }
 }
 
-pub type SettingsWithEditor<'a> = SettingsHandle<'a, (Option<Configuration>, EditorFeatures)>;
+#[derive(Debug)]
+pub struct SettingsEditorState {
+    features: EditorFeatures,
+    query: SettingsQuery,
+}
+
+impl SettingsEditorState {
+    pub(crate) fn new(query: SettingsQuery) -> Self {
+        Self {
+            features: EditorFeatures::default(),
+            query,
+        }
+    }
+
+    pub(crate) fn with_editor_features(mut self, features: EditorFeatures) -> Self {
+        self.features = features;
+        self
+    }
+}
+
+pub type SettingsWithEditor<'a> = SettingsHandle<'a, SettingsEditorState>;
 
 #[derive(
     Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Serialize, serde::Deserialize,
@@ -563,13 +663,27 @@ impl<'a, E> AsRef<Settings> for SettingsHandle<'a, E> {
     }
 }
 
-impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
-    fn configuration(&self) -> Option<&Configuration> {
-        self.editor.0.as_ref()
+impl<'a> SettingsHandle<'a, SettingsEditorState> {
+    fn features(&self) -> &EditorFeatures {
+        &self.editor.features
     }
 
-    fn features(&self) -> &EditorFeatures {
-        &self.editor.1
+    pub(crate) fn query(&self) -> &SettingsQuery {
+        &self.editor.query
+    }
+
+    pub(crate) fn with_selected_settings<R>(
+        &self,
+        db: &dyn ProjectDb,
+        resolve: impl FnOnce(&Settings, &[usize]) -> R,
+    ) -> R {
+        let query = self.query();
+        if let Some(settings) = query.inline_settings() {
+            return resolve(settings.as_ref(), query.override_indices());
+        }
+        let selection = query.selection();
+        let settings = selection.selected_settings(db, query.project());
+        resolve(settings.as_ref(), selection.override_indices())
     }
 
     /// Whether the editor needs document services. Current features that need it:
@@ -582,40 +696,19 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
         self.as_ref().source.clone()
     }
 
-    fn as_merged_settings(&self) -> Settings {
-        self.configuration()
-            .map(|editor| {
-                let mut settings = self.inner.read().unwrap().clone();
-                let workspace_directory = self.as_ref().source.as_ref().and_then(|source| {
-                    source
-                        .as_ref()
-                        .source
-                        .as_ref()
-                        .and_then(|source| source.1.clone())
-                });
-
-                // TODO handle error
-                let _ =
-                    settings.merge_with_configuration(editor.clone(), workspace_directory, vec![]);
-
-                settings
-            })
-            .unwrap_or(self.as_ref().clone())
+    fn effective_settings(&self) -> &Settings {
+        self.query()
+            .inline_settings()
+            .map_or_else(|| self.as_ref(), AsRef::as_ref)
     }
+
     /// Resolve the formatting options for the given language
-    pub fn format_options<L>(
-        &self,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> L::FormatOptions
+    pub fn format_options<L>(&self, input: L::FormatOptionsInput) -> L::FormatOptions
     where
         L: ServiceLanguage,
     {
-        let settings = self.as_merged_settings();
-        let formatter = &settings.formatter;
-        let overrides = &settings.override_settings;
-        let language_settings = &L::lookup_settings(&settings.languages).formatter;
-        L::resolve_format_options(formatter, overrides, language_settings, path, file_source)
+        let settings = self.effective_settings();
+        settings.format_options::<L>(self.query().override_indices(), input)
     }
 
     pub fn parse_options<L>(
@@ -626,7 +719,7 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.as_merged_settings();
+        let settings = self.effective_settings();
         let overrides = &settings.override_settings;
         let language_settings = &L::lookup_settings(&settings.languages).parser;
 
@@ -635,6 +728,7 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
 
     pub fn analyzer_options<L>(
         &self,
+        db: &dyn ProjectDb,
         path: &BiomePath,
         working_directory: Option<&Utf8Path>,
         file_source: &DocumentFileSource,
@@ -643,21 +737,28 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.as_merged_settings();
-        let linter_settings = &L::lookup_settings(&settings.languages).linter;
-        let environment = L::resolve_environment(&settings);
-        let mut options = L::resolve_analyzer_options(
-            &settings,
-            linter_settings,
-            environment,
-            path,
-            file_source,
-            suppression_reason,
-        );
-        if let Some(wd) = working_directory {
-            options = options.with_working_directory(wd);
-        }
-        options
+        self.with_selected_settings(db, |settings, override_indices| {
+            let linter_settings = &L::lookup_settings(&settings.languages).linter;
+            let environment = L::resolve_environment(settings);
+            let mut options = L::resolve_analyzer_options(
+                settings,
+                linter_settings,
+                environment,
+                override_indices,
+                path,
+                file_source,
+                suppression_reason,
+            );
+            if let Some(wd) = working_directory {
+                options = options.with_working_directory(wd);
+            }
+            options
+        })
+    }
+
+    pub(crate) fn linter_rules(&self) -> Option<Cow<'_, Rules>> {
+        self.effective_settings()
+            .as_linter_rules_by_indices(self.query().override_indices())
     }
 
     /// Whether the linter is enabled for this file path
@@ -665,8 +766,7 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.as_merged_settings();
-        L::linter_enabled_for_file_path(&settings, path)
+        L::linter_enabled_for_file_path(self.effective_settings(), path)
     }
 
     /// Whether the formatter is enabled for this file path
@@ -674,8 +774,7 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.as_merged_settings();
-        L::formatter_enabled_for_file_path(&settings, path)
+        L::formatter_enabled_for_file_path(self.effective_settings(), path)
     }
 
     /// Whether the assist is enabled for this file path
@@ -683,8 +782,7 @@ impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.as_merged_settings();
-        L::assist_enabled_for_file_path(&settings, path)
+        L::assist_enabled_for_file_path(self.effective_settings(), path)
     }
 }
 
@@ -1058,6 +1156,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Fully resolved formatter options type for this language
     type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display + Default;
 
+    /// Path-independent input needed to resolve formatter options for this language.
+    type FormatOptionsInput;
+
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
@@ -1086,9 +1187,14 @@ pub trait ServiceLanguage: biome_rowan::Language {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
+        override_indices: &[usize],
+        input: Self::FormatOptionsInput,
+    ) -> Self::FormatOptions;
+
+    fn format_options_input(
         path: &BiomePath,
         file_source: &DocumentFileSource,
-    ) -> Self::FormatOptions;
+    ) -> Self::FormatOptionsInput;
 
     /// Resolve the linter options from the global (workspace level),
     /// per-language and editor provided formatter settings
@@ -1096,6 +1202,7 @@ pub trait ServiceLanguage: biome_rowan::Language {
         global: &Settings,
         language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
+        override_indices: &[usize],
         path: &BiomePath,
         file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -1493,6 +1600,12 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
 }
 
 impl Settings {
+    pub fn matching_override_indices(&self, path: &Utf8Path) -> Box<[usize]> {
+        self.override_settings
+            .matching_indices(path)
+            .into_boxed_slice()
+    }
+
     /// Whether the formatter should format with parsing errors, for this file path
     pub fn format_with_errors_enabled_for_this_file_path(&self, path: &Utf8Path) -> bool {
         self.override_settings
@@ -1539,15 +1652,33 @@ pub struct OverrideSettings {
 }
 
 impl OverrideSettings {
+    fn matching_indices(&self, path: &Utf8Path) -> Vec<usize> {
+        self.patterns
+            .iter()
+            .enumerate()
+            .filter_map(|(index, pattern)| pattern.is_file_included(path).then_some(index))
+            .collect()
+    }
+
     /// It scans the current override rules and return the formatting options that of the first override is matched
     #[cfg(feature = "lang_js")]
     pub fn override_js_format_options(
         &self,
         path: &Utf8Path,
+        options: JsFormatOptions,
+    ) -> JsFormatOptions {
+        let indices = self.matching_indices(path);
+        self.override_js_format_options_by_indices(&indices, options)
+    }
+
+    #[cfg(feature = "lang_js")]
+    pub(crate) fn override_js_format_options_by_indices(
+        &self,
+        indices: &[usize],
         mut options: JsFormatOptions,
     ) -> JsFormatOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_js_format_options(&mut options);
             }
         }
@@ -1560,35 +1691,42 @@ impl OverrideSettings {
         path: &BiomePath,
         base_set: &Option<rustc_hash::FxHashSet<Box<str>>>,
     ) -> rustc_hash::FxHashSet<Box<str>> {
-        self.patterns
+        let indices = self.matching_indices(path);
+        self.override_js_globals_by_indices(&indices, base_set)
+    }
+
+    #[cfg(feature = "lang_js")]
+    pub(crate) fn override_js_globals_by_indices(
+        &self,
+        indices: &[usize],
+        base_set: &Option<rustc_hash::FxHashSet<Box<str>>>,
+    ) -> rustc_hash::FxHashSet<Box<str>> {
+        indices
             .iter()
-            // Reverse the traversal as only the last override takes effect
             .rev()
-            .find_map(|pattern| {
-                if pattern.languages.javascript.globals.is_some() && pattern.is_file_included(path)
-                {
-                    pattern.languages.javascript.globals.clone()
-                } else {
-                    None
-                }
-            })
+            .filter_map(|&index| self.patterns.get(index))
+            .find_map(|pattern| pattern.languages.javascript.globals.clone())
             .or_else(|| base_set.clone())
             .unwrap_or_default()
     }
 
     #[cfg(feature = "lang_js")]
     pub fn override_jsx_runtime(&self, path: &BiomePath, base_setting: JsxRuntime) -> JsxRuntime {
-        self.patterns
+        let indices = self.matching_indices(path);
+        self.override_jsx_runtime_by_indices(&indices, base_setting)
+    }
+
+    #[cfg(feature = "lang_js")]
+    pub(crate) fn override_jsx_runtime_by_indices(
+        &self,
+        indices: &[usize],
+        base_setting: JsxRuntime,
+    ) -> JsxRuntime {
+        indices
             .iter()
-            // Reverse the traversal as only the last override takes effect
             .rev()
-            .find_map(|pattern| {
-                if pattern.is_file_included(path) {
-                    pattern.languages.javascript.environment.jsx_runtime
-                } else {
-                    None
-                }
-            })
+            .filter_map(|&index| self.patterns.get(index))
+            .find_map(|pattern| pattern.languages.javascript.environment.jsx_runtime)
             .unwrap_or(base_setting)
     }
 
@@ -1598,8 +1736,18 @@ impl OverrideSettings {
         path: &Utf8Path,
         options: &mut GritFormatOptions,
     ) {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        let indices = self.matching_indices(path);
+        self.apply_override_grit_format_options_by_indices(&indices, options);
+    }
+
+    #[cfg(feature = "lang_grit")]
+    pub(crate) fn apply_override_grit_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut GritFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_grit_format_options(options);
             }
         }
@@ -1611,8 +1759,18 @@ impl OverrideSettings {
         path: &Utf8Path,
         options: &mut HtmlFormatOptions,
     ) {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        let indices = self.matching_indices(path);
+        self.apply_override_html_format_options_by_indices(&indices, options);
+    }
+
+    #[cfg(feature = "lang_html")]
+    pub(crate) fn apply_override_html_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut HtmlFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_html_format_options(options);
             }
         }
@@ -1673,8 +1831,18 @@ impl OverrideSettings {
         path: &Utf8Path,
         options: &mut CssFormatOptions,
     ) {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        let indices = self.matching_indices(path);
+        self.apply_override_css_format_options_by_indices(&indices, options);
+    }
+
+    #[cfg(feature = "lang_css")]
+    pub(crate) fn apply_override_css_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut CssFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_css_format_options(options);
             }
         }
@@ -1699,8 +1867,17 @@ impl OverrideSettings {
         path: &Utf8Path,
         options: &mut JsonFormatOptions,
     ) {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        let indices = self.matching_indices(path);
+        self.apply_override_json_format_options_by_indices(&indices, options);
+    }
+
+    pub(crate) fn apply_override_json_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut JsonFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_json_format_options(options);
             }
         }
@@ -1713,8 +1890,18 @@ impl OverrideSettings {
         path: &Utf8Path,
         options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
     ) {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        let indices = self.matching_indices(path);
+        self.apply_override_graphql_format_options_by_indices(&indices, options);
+    }
+
+    #[cfg(feature = "lang_graphql")]
+    pub(crate) fn apply_override_graphql_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_graphql_format_options(options);
             }
         }
@@ -1724,10 +1911,19 @@ impl OverrideSettings {
     pub fn override_analyzer_rules(
         &self,
         path: &Utf8Path,
+        analyzer_rules: AnalyzerRules,
+    ) -> AnalyzerRules {
+        let indices = self.matching_indices(path);
+        self.override_analyzer_rules_by_indices(&indices, analyzer_rules)
+    }
+
+    pub(crate) fn override_analyzer_rules_by_indices(
+        &self,
+        indices: &[usize],
         mut analyzer_rules: AnalyzerRules,
     ) -> AnalyzerRules {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
                     #[cfg(feature = "lang_js")]
                     push_to_analyzer_rules(

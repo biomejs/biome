@@ -1,6 +1,6 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
-use crate::settings::{Settings, SettingsWithEditor};
+use crate::settings::{Settings, SettingsIdentity, SettingsSelectionKey, SettingsWithEditor};
 use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
 use biome_fs::{ConfigName, FileSystem};
 use biome_languages::DocumentFileSource;
@@ -51,12 +51,12 @@ pub struct ProjectInput {
     /// Usually inferred from the **top-level** configuration file,
     /// e.g. `biome.json`.
     #[returns(clone)]
-    pub(crate) root_settings: Arc<Settings>,
+    pub(crate) root_settings: SettingsIdentity,
 
     /// Optional nested settings, usually populated in monorepo
     /// projects.
     #[returns(ref)]
-    pub(crate) nested_settings: BTreeMap<NestedPath, Arc<Settings>>,
+    pub(crate) nested_settings: BTreeMap<NestedPath, SettingsIdentity>,
 }
 
 #[salsa::db]
@@ -66,6 +66,37 @@ pub trait ProjectDb: biome_db::Db {
     fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey>;
 
     fn for_each_project(&self, f: &mut dyn FnMut(ProjectInput));
+
+    fn get_settings_context_for_path(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<(
+        ProjectInput,
+        SettingsSelectionKey,
+        Utf8PathBuf,
+        SettingsIdentity,
+    )> {
+        let project = self.get_project(&project_key)?;
+
+        for (settings_path, settings) in project.nested_settings(self) {
+            if file_path.starts_with(settings_path.as_ref()) {
+                return Some((
+                    project,
+                    SettingsSelectionKey::Nested(settings_path.clone()),
+                    settings_path.as_ref().to_path_buf(),
+                    settings.clone(),
+                ));
+            }
+        }
+
+        Some((
+            project,
+            SettingsSelectionKey::Root,
+            project.path(self).to_path_buf(),
+            project.root_settings(self),
+        ))
+    }
 
     fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
         Some(self.get_project(&project_key)?.path(self).to_path_buf())
@@ -77,15 +108,8 @@ pub trait ProjectDb: biome_db::Db {
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<Arc<Settings>> {
-        let data = self.get_project(&project_key)?;
-
-        for (project_path, settings) in data.nested_settings(self) {
-            if file_path.starts_with(project_path.as_ref()) {
-                return Some(settings.clone());
-            }
-        }
-
-        Some(data.root_settings(self).clone())
+        self.get_settings_context_for_path(project_key, file_path)
+            .map(|(_, _, _, settings)| settings.clone_arc())
     }
 
     /// Retrieves the correct settings and working directory for the given project.
@@ -94,15 +118,8 @@ pub trait ProjectDb: biome_db::Db {
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, Arc<Settings>)> {
-        let data = self.get_project(&project_key)?;
-
-        for (project_path, settings) in data.nested_settings(self) {
-            if file_path.starts_with(project_path.as_ref()) {
-                return Some((project_path.as_ref().to_path_buf(), settings.clone()));
-            }
-        }
-
-        Some((data.path(self).clone(), data.root_settings(self).clone()))
+        self.get_settings_context_for_path(project_key, file_path)
+            .map(|(_, _, working_directory, settings)| (working_directory, settings.clone_arc()))
     }
 
     /// Retrieves the correct settings for the given project.
@@ -118,7 +135,7 @@ pub trait ProjectDb: biome_db::Db {
             .find_map(|(project_path, settings)| {
                 file_path
                     .starts_with(project_path.as_ref())
-                    .then(|| settings.clone())
+                    .then(|| settings.clone_arc())
             })
     }
 
@@ -129,7 +146,7 @@ pub trait ProjectDb: biome_db::Db {
 
     fn get_root_settings(&self, project_key: ProjectKey) -> Option<Arc<Settings>> {
         self.get_project(&project_key)
-            .map(|data| data.root_settings(self).clone())
+            .map(|data| data.root_settings(self).clone_arc())
     }
 
     /// Returns whether a path is force-ignored using a forced negation (`!!`)
@@ -140,10 +157,8 @@ pub trait ProjectDb: biome_db::Db {
         };
 
         // Deprecated: Check `experimentalScannerIgnores` too.
-        let ignore_entries = &project_data
-            .root_settings(self)
-            .files
-            .scanner_ignore_entries;
+        let root_settings = project_data.root_settings(self);
+        let ignore_entries = &root_settings.as_ref().files.scanner_ignore_entries;
         if path.components().any(|component| {
             ignore_entries
                 .iter()
@@ -158,8 +173,8 @@ pub trait ProjectDb: biome_db::Db {
         let includes = nested_settings
             .iter()
             .find(|(project_path, _)| path.starts_with(project_path.as_ref()))
-            .map_or(&root_settings.files.includes, |(_, settings)| {
-                &settings.files.includes
+            .map_or(&root_settings.as_ref().files.includes, |(_, settings)| {
+                &settings.as_ref().files.includes
             });
         includes.is_force_ignored(path)
     }
@@ -201,6 +216,7 @@ pub trait ProjectDb: biome_db::Db {
             && features.iter().all(|feature| {
                 project_data
                     .root_settings(self)
+                    .as_ref()
                     .is_path_ignored_for_feature(path, feature)
             });
 
@@ -254,6 +270,7 @@ pub trait ProjectDb: biome_db::Db {
                     && requested_features.iter().all(|feature| {
                         project_data
                             .root_settings(self)
+                            .as_ref()
                             .is_path_ignored_for_feature(path, feature)
                     });
 
@@ -266,6 +283,7 @@ pub trait ProjectDb: biome_db::Db {
                 for feature in requested_features.iter() {
                     if project_data
                         .root_settings(self)
+                        .as_ref()
                         .is_path_ignored_for_feature(path, feature)
                         || settings.is_path_ignored_for_feature(path, feature)
                     {
@@ -302,8 +320,8 @@ pub trait ProjectDb: biome_db::Db {
         let includes = nested_settings
             .iter()
             .find(|(project_path, _)| path.starts_with(project_path.as_ref()))
-            .map_or(&root_settings.files.includes, |(_, settings)| {
-                &settings.files.includes
+            .map_or(&root_settings.as_ref().files.includes, |(_, settings)| {
+                &settings.as_ref().files.includes
             });
         let mut is_included = if is_dir {
             includes.is_dir_included(path)
@@ -330,6 +348,7 @@ pub trait ProjectDb: biome_db::Db {
         // package we are analyzing, so we ignore the `path` for those.
         let is_ignored_by_vcs = project_data
             .root_settings(self)
+            .as_ref()
             .vcs_settings
             .is_ignored(path, is_dir, root_path);
 
@@ -360,7 +379,7 @@ pub trait ProjectDb: biome_db::Db {
 }
 
 /// A project path ordered by how deeply it is nested.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct NestedPath(Utf8PathBuf);
 
 impl NestedPath {

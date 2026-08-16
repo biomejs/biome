@@ -7,7 +7,7 @@ use super::{
     matches_on_type_char,
 };
 use crate::WorkspaceError;
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::css::go_to::resolve_definition;
@@ -16,7 +16,8 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::{CodeAction, GetSyntaxTreeResult, PatternId, PullActionsResult};
 use crate::workspace::{FixFileMode, SearchQuery};
@@ -42,8 +43,8 @@ use biome_formatter::{
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_languages::DocumentFileSource;
 use biome_languages::css::CssEmbeddingKind;
+use biome_languages::{CssFileSource, DocumentFileSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -151,6 +152,7 @@ impl ServiceLanguage for CssLanguage {
     type LinterSettings = CssLinterSettings;
     type AssistSettings = CssAssistSettings;
     type FormatOptions = CssFormatOptions;
+    type FormatOptionsInput = CssFileSource;
     type ParserSettings = CssParserSettings;
     type ParserOptions = CssParserOptions;
 
@@ -162,6 +164,13 @@ impl ServiceLanguage for CssLanguage {
 
     fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
         None
+    }
+
+    fn format_options_input(
+        _path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::FormatOptionsInput {
+        file_source.to_css_file_source().unwrap_or_default()
     }
 
     fn resolve_parse_options(
@@ -213,51 +222,49 @@ impl ServiceLanguage for CssLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        override_indices: &[usize],
+        source: CssFileSource,
     ) -> Self::FormatOptions {
-        let indent_style = language
-            .indent_style
-            .or(global.indent_style)
-            .unwrap_or_default();
-        let line_width = language
-            .line_width
-            .or(global.line_width)
-            .unwrap_or_default();
-        let indent_width = language
-            .indent_width
-            .or(global.indent_width)
-            .unwrap_or_default();
+        let mut options = CssFormatOptions::new(source)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
+            .with_quote_style(language.quote_style.unwrap_or_default())
+            .with_delimiter_spacing(
+                language
+                    .delimiter_spacing
+                    .or(global.delimiter_spacing)
+                    .unwrap_or_default(),
+            )
+            .with_trailing_newline(
+                language
+                    .trailing_newline
+                    .or(global.trailing_newline)
+                    .unwrap_or_default(),
+            );
 
-        let line_ending = language
-            .line_ending
-            .or(global.line_ending)
-            .unwrap_or_default();
-
-        let trailing_newline = language
-            .trailing_newline
-            .or(global.trailing_newline)
-            .unwrap_or_default();
-
-        let mut options = CssFormatOptions::new(
-            document_file_source
-                .to_css_file_source()
-                .unwrap_or_default(),
-        )
-        .with_indent_style(indent_style)
-        .with_indent_width(indent_width)
-        .with_line_width(line_width)
-        .with_line_ending(line_ending)
-        .with_quote_style(language.quote_style.unwrap_or_default())
-        .with_delimiter_spacing(
-            language
-                .delimiter_spacing
-                .or(global.delimiter_spacing)
-                .unwrap_or_default(),
-        )
-        .with_trailing_newline(trailing_newline);
-
-        overrides.apply_override_css_format_options(path, &mut options);
+        overrides.apply_override_css_format_options_by_indices(override_indices, &mut options);
 
         options
     }
@@ -266,6 +273,7 @@ impl ServiceLanguage for CssLanguage {
         global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
+        override_indices: &[usize],
         file_path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -285,7 +293,7 @@ impl ServiceLanguage for CssLanguage {
             .unwrap_or_default();
 
         let configuration = AnalyzerConfiguration::default()
-            .with_rules(to_analyzer_rules(global, file_path.as_path()))
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices))
             .with_preferred_quote(preferred_quote);
 
         AnalyzerOptions::default()
@@ -374,6 +382,50 @@ impl ServiceLanguage for CssLanguage {
             .unwrap_or_default()
             .into()
     }
+}
+
+#[salsa::interned]
+struct CssFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    source: CssFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_css_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: CssFormatOptionsInput<'db>,
+) -> CssFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<CssLanguage>(input.override_indices(db), input.source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> CssFormatOptions {
+    let query = settings.query();
+    let source = CssLanguage::format_options_input(path, source);
+    if query.inline_settings().is_some() {
+        return settings.format_options::<CssLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = CssFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        source,
+    );
+    resolved_css_format_options(&query_db, input)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -479,7 +531,7 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -506,7 +558,7 @@ fn format(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -525,7 +577,7 @@ fn format_range(
     range: TextRange,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
@@ -540,7 +592,7 @@ fn format_on_type(
     offset: TextSize,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
 
@@ -597,8 +649,9 @@ fn lint(params: LintParams) -> LintResults {
         };
     };
 
-    let settings = &params.settings;
+    let settings = params.settings;
     let analyzer_options = settings.analyzer_options::<CssLanguage>(
+        &params.workspace_db,
         params.path,
         params.working_directory,
         &params.language,
@@ -611,13 +664,12 @@ fn lint(params: LintParams) -> LintResults {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
-        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -682,7 +734,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
-        analyzer_cache,
     } = params;
     let tree = parsed_source.tree(&workspace_db);
     let Some(file_source) = language.to_css_file_source() else {
@@ -693,6 +744,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
 
     let analyzer_options = settings.analyzer_options::<CssLanguage>(
+        &workspace_db,
         path,
         working_directory,
         &language,
@@ -704,13 +756,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
-        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -789,12 +840,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         error!("Could not determine the file source of the file");
         return Ok(None);
     };
-    // Compute final rules (taking `overrides` into account)
-    let rules = params
-        .settings
-        .as_ref()
-        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<CssLanguage>(
+        &params.workspace_db,
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
@@ -805,7 +852,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         disabled_rules,
         analyzer_options,
         fixable_rules,
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.biome_path.as_path())
@@ -820,11 +867,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
-        &params,
-        rules,
-        tree.syntax().text_range_with_trivia().len().into(),
-    );
+    let mut process_fix_all =
+        ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {
@@ -1009,8 +1053,8 @@ mod test {
             &FormatSettings::default(),
             &OverrideSettings::default(),
             &CssFormatterSettings::default(),
-            &BiomePath::new(""),
-            &DocumentFileSource::Css(CssFileSource::css()),
+            &[],
+            CssFileSource::css(),
         );
         assert_eq!(
             format_options,

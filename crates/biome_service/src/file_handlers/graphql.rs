@@ -5,7 +5,7 @@ use super::{
     format_on_type_noop, matches_on_type_char,
 };
 use crate::WorkspaceError;
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -13,7 +13,8 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::FixFileMode;
 use crate::workspace::{CodeAction, GetSyntaxTreeResult, PullActionsResult};
@@ -98,11 +99,50 @@ impl From<GraphqlAssistConfiguration> for GraphqlAssistSettings {
     }
 }
 
+#[salsa::interned]
+struct GraphqlFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_graphql_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: GraphqlFormatOptionsInput<'db>,
+) -> GraphqlFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<GraphqlLanguage>(input.override_indices(db), ())
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    _path: &BiomePath,
+    _source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> GraphqlFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<GraphqlLanguage>(());
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input =
+        GraphqlFormatOptionsInput::new(&query_db, selected_settings, query.override_indices());
+    resolved_graphql_format_options(&query_db, input)
+}
+
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = GraphqlFormatterSettings;
     type LinterSettings = GraphqlLinterSettings;
     type AssistSettings = GraphqlAssistSettings;
     type FormatOptions = GraphqlFormatOptions;
+    type FormatOptionsInput = ();
     type ParserSettings = ();
     type ParserOptions = ();
 
@@ -124,12 +164,18 @@ impl ServiceLanguage for GraphqlLanguage {
     ) -> Self::ParserOptions {
     }
 
+    fn format_options_input(
+        _path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> Self::FormatOptionsInput {
+    }
+
     fn resolve_format_options(
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &BiomePath,
-        _document_file_source: &DocumentFileSource,
+        override_indices: &[usize],
+        _input: (),
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -143,12 +189,10 @@ impl ServiceLanguage for GraphqlLanguage {
             .indent_width
             .or(global.indent_width)
             .unwrap_or_default();
-
         let line_ending = language
             .line_ending
             .or(global.line_ending)
             .unwrap_or_default();
-
         let bracket_spacing = language
             .bracket_spacing
             .or(global.bracket_spacing)
@@ -167,21 +211,22 @@ impl ServiceLanguage for GraphqlLanguage {
             .with_quote_style(language.quote_style.unwrap_or_default())
             .with_trailing_newline(trailing_newline);
 
-        overrides.apply_override_graphql_format_options(path, &mut options);
+        overrides.apply_override_graphql_format_options_by_indices(override_indices, &mut options);
 
         options
     }
 
     fn resolve_analyzer_options(
-        global: &Settings,
+        settings: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
+        override_indices: &[usize],
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        let configuration =
-            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(to_analyzer_rules_by_indices(settings, override_indices));
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
             .with_configuration(configuration)
@@ -368,7 +413,7 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -385,7 +430,7 @@ fn format(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -404,7 +449,7 @@ fn format_range(
     range: TextRange,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let printed = biome_graphql_formatter::format_range(options, &tree, range)?;
@@ -419,7 +464,7 @@ fn format_on_type(
     offset: TextSize,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
 
@@ -479,8 +524,8 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting GraphQL file", path =? params.path, language =? params.language)
         .entered();
-    let workspace_settings = &params.settings;
-    let analyzer_options = workspace_settings.analyzer_options::<GraphqlLanguage>(
+    let analyzer_options = params.settings.analyzer_options::<GraphqlLanguage>(
+        &params.workspace_db,
         params.path,
         params.working_directory,
         &params.language,
@@ -493,13 +538,12 @@ fn lint(params: LintParams) -> LintResults {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
-        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -539,13 +583,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
-        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
     let tree = parsed_source.tree(&workspace_db);
     let _ = trace_span!("Parsed file", tree =? tree).entered();
 
     let analyzer_options = settings.analyzer_options::<GraphqlLanguage>(
+        &workspace_db,
         path,
         working_directory,
         &language,
@@ -557,13 +601,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout)
-        .with_cache(analyzer_cache)
         .finish();
 
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
@@ -616,12 +659,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: GraphqlRoot = params.parsed_source.tree(&params.workspace_db);
 
-    // Compute final rules (taking `overrides` into account)
-    let rules = params
-        .settings
-        .as_ref()
-        .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<GraphqlLanguage>(
+        &params.workspace_db,
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
@@ -632,7 +671,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         disabled_rules,
         analyzer_options,
         fixable_rules,
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.biome_path.as_path())
@@ -647,11 +686,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
-        &params,
-        rules,
-        tree.syntax().text_range_with_trivia().len().into(),
-    );
+    let mut process_fix_all =
+        ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {

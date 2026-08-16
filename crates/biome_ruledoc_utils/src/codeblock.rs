@@ -80,12 +80,14 @@ impl CodeBlock {
         let language_settings = &L::lookup_settings(&settings.languages).linter;
         let environment = L::resolve_environment(&settings);
         let suppression_reason = None;
+        let path = BiomePath::new(self.file_path());
 
         Ok(L::resolve_analyzer_options(
             &settings,
             language_settings,
             environment,
-            &BiomePath::new(self.file_path()),
+            &settings.matching_override_indices(path.as_path()),
+            &path,
             &self.document_file_source(),
             suppression_reason,
         ))

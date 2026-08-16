@@ -34,13 +34,11 @@ impl TestFormatLanguage for JsTestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = &settings.languages.javascript.formatter;
-        let options = Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
-            &BiomePath::new(""),
-            file_source,
+        let path = BiomePath::new("");
+        let input = Self::ServiceLanguage::format_options_input(&path, file_source);
+        let options = settings.format_options::<Self::ServiceLanguage>(
+            &settings.matching_override_indices(path.as_path()),
+            input,
         );
         JsFormatLanguage::new(options)
     }

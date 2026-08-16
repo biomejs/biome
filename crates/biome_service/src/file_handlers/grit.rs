@@ -6,7 +6,8 @@ use super::{
 };
 use crate::db::WorkspaceDb;
 use crate::settings::{
-    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    FormatSettings, OverrideSettings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
@@ -27,6 +28,7 @@ use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
+use biome_languages::GritFileSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use tracing::debug_span;
@@ -88,6 +90,7 @@ impl ServiceLanguage for GritLanguage {
     type LinterSettings = GritLinterSettings;
     type AssistSettings = GritAssistSettings;
     type FormatOptions = GritFormatOptions;
+    type FormatOptionsInput = GritFileSource;
     type ParserSettings = ();
     type ParserOptions = ();
     type EnvironmentSettings = ();
@@ -102,6 +105,13 @@ impl ServiceLanguage for GritLanguage {
         None
     }
 
+    fn format_options_input(
+        _path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::FormatOptionsInput {
+        file_source.to_grit_file_source().unwrap_or_default()
+    }
+
     fn resolve_parse_options(
         _overrides: &OverrideSettings,
         _language: &Self::ParserSettings,
@@ -111,44 +121,45 @@ impl ServiceLanguage for GritLanguage {
     }
 
     fn resolve_format_options(
-        global: &crate::settings::FormatSettings,
-        overrides: &crate::settings::OverrideSettings,
+        global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &biome_fs::BiomePath,
-        file_source: &super::DocumentFileSource,
+        override_indices: &[usize],
+        source: GritFileSource,
     ) -> Self::FormatOptions {
-        let indent_style = language
-            .indent_style
-            .or(global.indent_style)
-            .unwrap_or_default();
-        let line_width = language
-            .line_width
-            .or(global.line_width)
-            .unwrap_or_default();
-        let indent_width = language
-            .indent_width
-            .or(global.indent_width)
-            .unwrap_or_default();
+        let mut options = GritFormatOptions::new(source)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
+            .with_trailing_newline(
+                language
+                    .trailing_newline
+                    .or(global.trailing_newline)
+                    .unwrap_or_default(),
+            );
 
-        let line_ending = language
-            .line_ending
-            .or(global.line_ending)
-            .unwrap_or_default();
-
-        let trailing_newline = language
-            .trailing_newline
-            .or(global.trailing_newline)
-            .unwrap_or_default();
-
-        let mut options =
-            GritFormatOptions::new(file_source.to_grit_file_source().unwrap_or_default())
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_line_ending(line_ending)
-                .with_trailing_newline(trailing_newline);
-
-        overrides.apply_override_grit_format_options(path, &mut options);
+        overrides.apply_override_grit_format_options_by_indices(override_indices, &mut options);
 
         options
     }
@@ -157,6 +168,7 @@ impl ServiceLanguage for GritLanguage {
         _global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
+        _override_indices: &[usize],
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -246,6 +258,50 @@ impl ServiceLanguage for GritLanguage {
             .unwrap_or_default()
             .into()
     }
+}
+
+#[salsa::interned]
+struct GritFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    source: GritFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_grit_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: GritFormatOptionsInput<'db>,
+) -> GritFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<GritLanguage>(input.override_indices(db), input.source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> GritFormatOptions {
+    let query = settings.query();
+    let source = GritLanguage::format_options_input(path, source);
+    if query.inline_settings().is_some() {
+        return settings.format_options::<GritLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = GritFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        source,
+    );
+    resolved_grit_format_options(&query_db, input)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -346,7 +402,7 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -363,7 +419,7 @@ fn format(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -383,7 +439,7 @@ fn format_range(
     range: TextRange,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let printed = biome_grit_formatter::format_range(options, &tree, range)?;
@@ -399,7 +455,7 @@ fn format_on_type(
     offset: TextSize,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
 
