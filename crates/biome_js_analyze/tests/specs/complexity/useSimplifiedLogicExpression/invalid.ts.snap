@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+let x: boolean | undefined;
+let y: boolean;
+y = x || false;
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    1 │ let x: boolean | undefined;
+    2 │ let y: boolean;
+  > 3 │ y = x || false;
+      │     ^^^^^^^^^^
+    4 │ 
+  
+  i Unsafe fix: Discard redundant terms from the logical expression.
+  
+    3 │ y·=·x·||·false;
+      │      --------- 
+
+```
