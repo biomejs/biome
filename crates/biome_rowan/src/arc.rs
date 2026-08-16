@@ -304,6 +304,35 @@ pub(crate) struct ThinArc<H, T> {
     phantom: PhantomData<(H, T)>,
 }
 
+struct ThinArcLayout {
+    layout: Layout,
+    slice_offset: usize,
+    usable_size: usize,
+}
+
+fn thin_arc_layout<H, T>(num_items: usize) -> ThinArcLayout {
+    assert_ne!(mem::size_of::<T>(), 0, "Need to think about ZST");
+
+    let inner_to_data_offset = offset_of!(ArcInner<HeaderSlice<H, [T; 0]>>, data);
+    let data_to_slice_offset = offset_of!(HeaderSlice<H, [T; 0]>, slice);
+    let slice_offset = inner_to_data_offset + data_to_slice_offset;
+    let slice_size = mem::size_of::<T>()
+        .checked_mul(num_items)
+        .expect("size overflows");
+    let usable_size = slice_offset
+        .checked_add(slice_size)
+        .expect("size overflows");
+    let align = mem::align_of::<ArcInner<HeaderSlice<H, [T; 0]>>>();
+    let size = usable_size.wrapping_add(align - 1) & !(align - 1);
+    assert!(size >= usable_size, "size overflows");
+
+    ThinArcLayout {
+        layout: Layout::from_size_align(size, align).expect("invalid layout"),
+        slice_offset,
+        usable_size,
+    }
+}
+
 unsafe impl<H: Sync + Send, T: Sync + Send> Send for ThinArc<H, T> {}
 unsafe impl<H: Sync + Send, T: Sync + Send> Sync for ThinArc<H, T> {}
 
@@ -344,35 +373,15 @@ impl<H, T> ThinArc<H, T> {
     where
         I: Iterator<Item = T> + ExactSizeIterator,
     {
-        assert_ne!(mem::size_of::<T>(), 0, "Need to think about ZST");
-
         let num_items = items.len();
-
-        // Offset of the start of the slice in the allocation.
-        let inner_to_data_offset = offset_of!(ArcInner<HeaderSlice<H, [T; 0]>>, data);
-        let data_to_slice_offset = offset_of!(HeaderSlice<H, [T; 0]>, slice);
-        let slice_offset = inner_to_data_offset + data_to_slice_offset;
-
-        // Compute the size of the real payload.
-        let slice_size = mem::size_of::<T>()
-            .checked_mul(num_items)
-            .expect("size overflows");
-        let usable_size = slice_offset
-            .checked_add(slice_size)
-            .expect("size overflows");
-
-        // Round up size to alignment.
-        let align = mem::align_of::<ArcInner<HeaderSlice<H, [T; 0]>>>();
-        let size = usable_size.wrapping_add(align - 1) & !(align - 1);
-        assert!(size >= usable_size, "size overflows");
-        let layout = Layout::from_size_align(size, align).expect("invalid layout");
+        let allocation = thin_arc_layout::<H, T>(num_items);
 
         let ptr: *mut ArcInner<HeaderSlice<H, [T; 0]>>;
         unsafe {
-            let buffer = alloc::alloc(layout);
+            let buffer = alloc::alloc(allocation.layout);
 
             if buffer.is_null() {
-                alloc::handle_alloc_error(layout);
+                alloc::handle_alloc_error(allocation.layout);
             }
 
             // // Synthesize the fat pointer. We do this by claiming we have a direct
@@ -396,7 +405,7 @@ impl<H, T> ThinArc<H, T> {
             ptr::write(ptr::addr_of_mut!((*ptr).data.length), num_items);
             if num_items != 0 {
                 let mut current = ptr::addr_of_mut!((*ptr).data.slice) as *mut T;
-                debug_assert_eq!(current as usize - buffer as usize, slice_offset);
+                debug_assert_eq!(current as usize - buffer as usize, allocation.slice_offset);
                 for _ in 0..num_items {
                     ptr::write(
                         current,
@@ -412,7 +421,7 @@ impl<H, T> ThinArc<H, T> {
                 );
 
                 // We should have consumed the buffer exactly.
-                debug_assert_eq!(current as *mut u8, buffer.add(usable_size));
+                debug_assert_eq!(current as *mut u8, buffer.add(allocation.usable_size));
             }
             assert!(
                 items.next().is_none(),
@@ -423,6 +432,39 @@ impl<H, T> ThinArc<H, T> {
         Self {
             ptr: unsafe { ptr::NonNull::new_unchecked(ptr) },
             phantom: PhantomData,
+        }
+    }
+
+    /// Releases this reference. If it is the final reference, moves each slice item into
+    /// `drop_item`, drops the header, and deallocates the backing allocation.
+    pub(crate) fn drop_with<F>(self, mut drop_item: F)
+    where
+        F: FnMut(T),
+    {
+        let ptr = thin_to_thick(self.ptr.as_ptr());
+        mem::forget(self);
+
+        if unsafe { (*ptr).count.fetch_sub(1, Release) } != 1 {
+            return;
+        }
+
+        // SAFETY: reaching a zero strong count gives this call exclusive ownership of the
+        // allocation. `from_header_and_iter` initializes the header and exactly `length` items;
+        // each is moved out once here, then the allocation is released with the same layout.
+        unsafe {
+            (*ptr).count.load(Acquire);
+
+            let length = (*ptr).data.length;
+            let header = ptr::read(ptr::addr_of!((*ptr).data.header));
+            drop(header);
+
+            let items = ptr::addr_of_mut!((*ptr).data.slice) as *mut T;
+            for index in 0..length {
+                drop_item(ptr::read(items.add(index)));
+            }
+
+            let allocation = thin_arc_layout::<H, T>(length);
+            alloc::dealloc(ptr.cast::<u8>(), allocation.layout);
         }
     }
 }

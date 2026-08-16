@@ -1,6 +1,8 @@
 use std::convert::TryFrom;
 use std::fmt::Formatter;
 use std::iter::Enumerate;
+#[cfg(test)]
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
     borrow::{Borrow, Cow},
     fmt,
@@ -24,6 +26,16 @@ pub(super) struct GreenNodeHead {
     text_len: TextSize,
     #[cfg(feature = "countme")]
     _c: countme::Count<GreenNode>,
+}
+
+#[cfg(test)]
+static DROPPED_GREEN_NODE_HEADS: AtomicUsize = AtomicUsize::new(0);
+
+#[cfg(test)]
+impl Drop for GreenNodeHead {
+    fn drop(&mut self) {
+        DROPPED_GREEN_NODE_HEADS.fetch_add(1, Ordering::Relaxed);
+    }
 }
 
 #[cfg(feature = "countme")]
@@ -78,7 +90,7 @@ impl PartialEq for GreenNodeData {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub(crate) struct GreenNode {
-    ptr: ThinArc<GreenNodeHead, Slot>,
+    ptr: ManuallyDrop<ThinArc<GreenNodeHead, Slot>>,
 }
 
 impl ToOwned for GreenNodeData {
@@ -289,14 +301,16 @@ impl GreenNode {
             Arc::into_thin(data)
         };
 
-        Self { ptr: data }
+        Self {
+            ptr: ManuallyDrop::new(data),
+        }
     }
 
     #[inline]
     pub(crate) fn into_raw(self) -> ptr::NonNull<GreenNodeData> {
         // SAFETY: casting from `HeaderSlice<GreenNodeHead, [green::node::Slot]>` to `GreenNodeData`
         // if safe since `GreenNodeData` is marked as `repr(transparent)`
-        Arc::from_thin(self.ptr).into_raw().cast()
+        Arc::from_thin(Self::into_thin_arc(self)).into_raw().cast()
     }
 
     #[inline]
@@ -305,7 +319,39 @@ impl GreenNode {
             let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
             mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc)
         };
-        Self { ptr: arc }
+        Self {
+            ptr: ManuallyDrop::new(arc),
+        }
+    }
+
+    fn into_thin_arc(self) -> ThinArc<GreenNodeHead, Slot> {
+        let mut this = ManuallyDrop::new(self);
+        unsafe { ManuallyDrop::take(&mut this.ptr) }
+    }
+}
+
+impl Drop for GreenNode {
+    fn drop(&mut self) {
+        let root = unsafe { ManuallyDrop::take(&mut self.ptr) };
+        let mut pending = Vec::new();
+        let mut current = Some(root);
+
+        while let Some(node) = current {
+            let mut next = None;
+            node.drop_with(|slot| match slot {
+                Slot::Node { node, .. } => {
+                    let node = Self::into_thin_arc(node);
+                    if next.is_none() {
+                        next = Some(node);
+                    } else {
+                        pending.push(node);
+                    }
+                }
+                Slot::Token { token, .. } => drop(token),
+                Slot::Empty { .. } => {}
+            });
+            current = next.or_else(|| pending.pop());
+        }
     }
 }
 
@@ -501,8 +547,17 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
+    use std::{env, process::Command, sync::atomic::Ordering, thread};
+
+    use super::DROPPED_GREEN_NODE_HEADS;
     use crate::GreenNode;
+    use crate::NodeOrToken;
+    use crate::arc::Arc;
+    use crate::green::RawSyntaxKind;
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+
+    const DEEP_DROP_CHILD: &str = "BIOME_ROWAN_DEEP_DROP_CHILD";
+    const BRANCHING_DROP_CHILD: &str = "BIOME_ROWAN_BRANCHING_DROP_CHILD";
 
     fn build_test_list() -> GreenNode {
         let mut builder: RawSyntaxTreeBuilder = RawSyntaxTreeBuilder::new();
@@ -562,5 +617,111 @@ mod tests {
 
         // Has 3 slots, one is missing
         assert_eq!(root.slots().len(), 3);
+    }
+
+    #[test]
+    fn drops_deep_tree_on_small_stack() {
+        if env::var_os(DEEP_DROP_CHILD).is_some() {
+            DROPPED_GREEN_NODE_HEADS.store(0, Ordering::Relaxed);
+
+            let thread = thread::Builder::new()
+                .stack_size(512 * 1024)
+                .spawn(|| {
+                    let mut root = GreenNode::new(RawSyntaxKind(0), []);
+
+                    for _ in 0..20_000 {
+                        root = GreenNode::new(RawSyntaxKind(0), [Some(NodeOrToken::Node(root))]);
+                    }
+
+                    drop(root);
+                })
+                .unwrap();
+
+            thread.join().unwrap();
+            assert_eq!(DROPPED_GREEN_NODE_HEADS.load(Ordering::Relaxed), 20_001);
+            return;
+        }
+
+        let status = Command::new(env::current_exe().unwrap())
+            .arg("drops_deep_tree_on_small_stack")
+            .arg("--nocapture")
+            .env(DEEP_DROP_CHILD, "1")
+            .status()
+            .unwrap();
+
+        assert!(status.success());
+    }
+
+    #[test]
+    fn dropping_parent_preserves_shared_child() {
+        let child = GreenNode::new(RawSyntaxKind(1), []);
+        let retained = child.clone();
+        let parent = GreenNode::new(
+            RawSyntaxKind(2),
+            [
+                Some(NodeOrToken::Node(child.clone())),
+                Some(NodeOrToken::Node(child)),
+            ],
+        );
+
+        assert!(!retained.ptr.with_arc(Arc::is_unique));
+        drop(parent);
+
+        assert!(retained.ptr.with_arc(Arc::is_unique));
+        assert_eq!(retained.kind(), RawSyntaxKind(1));
+        assert_eq!(retained.slots().len(), 0);
+    }
+
+    #[test]
+    fn dropping_branching_tree_reclaims_unique_nodes_and_preserves_shared_child() {
+        if env::var_os(BRANCHING_DROP_CHILD).is_none() {
+            let status = Command::new(env::current_exe().unwrap())
+                .arg("dropping_branching_tree_reclaims_unique_nodes_and_preserves_shared_child")
+                .arg("--nocapture")
+                .env(BRANCHING_DROP_CHILD, "1")
+                .status()
+                .unwrap();
+
+            assert!(status.success());
+            return;
+        }
+
+        DROPPED_GREEN_NODE_HEADS.store(0, Ordering::Relaxed);
+
+        let shared = GreenNode::new(RawSyntaxKind(1), []);
+        let retained = shared.clone();
+        let left = GreenNode::new(
+            RawSyntaxKind(2),
+            [Some(NodeOrToken::Node(GreenNode::new(
+                RawSyntaxKind(3),
+                [],
+            )))],
+        );
+        let right = GreenNode::new(
+            RawSyntaxKind(4),
+            [Some(NodeOrToken::Node(GreenNode::new(
+                RawSyntaxKind(5),
+                [],
+            )))],
+        );
+        let root = GreenNode::new(
+            RawSyntaxKind(6),
+            [
+                Some(NodeOrToken::Node(left)),
+                Some(NodeOrToken::Node(shared.clone())),
+                Some(NodeOrToken::Node(right)),
+                Some(NodeOrToken::Node(shared)),
+            ],
+        );
+
+        drop(root);
+
+        assert_eq!(DROPPED_GREEN_NODE_HEADS.load(Ordering::Relaxed), 5);
+        assert!(retained.ptr.with_arc(Arc::is_unique));
+        assert_eq!(retained.kind(), RawSyntaxKind(1));
+        assert_eq!(retained.slots().len(), 0);
+
+        drop(retained);
+        assert_eq!(DROPPED_GREEN_NODE_HEADS.load(Ordering::Relaxed), 6);
     }
 }
