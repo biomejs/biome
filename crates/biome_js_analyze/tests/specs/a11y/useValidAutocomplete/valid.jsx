@@ -6,6 +6,12 @@
 	<input type="text" autocomplete="off" />
 	<input type="text" autocomplete="on" />
 	<input type="text" autocomplete="billing family-name" />
+	<input type="tel" autocomplete="work tel" />
+	<input type="tel" autocomplete="mobile tel" />
+	<input type="text" autocomplete="home email" />
+	<input type="tel" autocomplete="fax tel-national" />
+	<input type="text" autocomplete="pager impp" />
+	<input type="tel" autocomplete="billing fax tel-extension" />
 	<input type="text" autocomplete="section-blue shipping street-address" />
 	<input type="text" autocomplete="section-somewhere shipping work email" />
 	<input type="text" autocomplete />
