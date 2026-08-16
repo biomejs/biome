@@ -112,8 +112,12 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
     LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap")]);
-static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
-    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noTailwindArbitraryValue")]);
+static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
+    ]
+});
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),

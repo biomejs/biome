@@ -862,15 +862,15 @@ impl TwArbitraryVariantSegment {
     pub fn as_fields(&self) -> TwArbitraryVariantSegmentFields {
         TwArbitraryVariantSegmentFields {
             l_brack_token: self.l_brack_token(),
-            value: self.value(),
+            value_token: self.value_token(),
             r_brack_token: self.r_brack_token(),
         }
     }
     pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 1usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -887,7 +887,7 @@ impl Serialize for TwArbitraryVariantSegment {
 #[derive(Serialize)]
 pub struct TwArbitraryVariantSegmentFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value_token: SyntaxResult<SyntaxToken>,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1327,10 +1327,14 @@ impl TwStaticCandidate {
     pub fn as_fields(&self) -> TwStaticCandidateFields {
         TwStaticCandidateFields {
             base_token: self.base_token(),
+            modifier: self.modifier(),
         }
     }
     pub fn base_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
+    }
+    pub fn modifier(&self) -> Option<AnyTwModifier> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for TwStaticCandidate {
@@ -1344,6 +1348,7 @@ impl Serialize for TwStaticCandidate {
 #[derive(Serialize)]
 pub struct TwStaticCandidateFields {
     pub base_token: SyntaxResult<SyntaxToken>,
+    pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwVariantExpression {
@@ -1362,10 +1367,18 @@ impl TwVariantExpression {
     pub fn as_fields(&self) -> TwVariantExpressionFields {
         TwVariantExpressionFields {
             segments: self.segments(),
+            glued_value: self.glued_value(),
+            modifier: self.modifier(),
         }
     }
     pub fn segments(&self) -> TwVariantSegmentList {
         support::list(&self.syntax, 0usize)
+    }
+    pub fn glued_value(&self) -> Option<TwArbitraryVariantSegment> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn modifier(&self) -> Option<AnyTwModifier> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for TwVariantExpression {
@@ -1379,6 +1392,8 @@ impl Serialize for TwVariantExpression {
 #[derive(Serialize)]
 pub struct TwVariantExpressionFields {
     pub segments: TwVariantSegmentList,
+    pub glued_value: Option<TwArbitraryVariantSegment>,
+    pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDimension {
@@ -2848,7 +2863,10 @@ impl std::fmt::Debug for TwArbitraryVariantSegment {
                     "l_brack_token",
                     &support::DebugSyntaxResult(self.l_brack_token()),
                 )
-                .field("value", &self.value())
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
                 .field(
                     "r_brack_token",
                     &support::DebugSyntaxResult(self.r_brack_token()),
@@ -3432,6 +3450,7 @@ impl std::fmt::Debug for TwStaticCandidate {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwStaticCandidate")
                 .field("base_token", &support::DebugSyntaxResult(self.base_token()))
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .finish()
         } else {
             f.debug_struct("TwStaticCandidate").finish()
@@ -3479,6 +3498,11 @@ impl std::fmt::Debug for TwVariantExpression {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwVariantExpression")
                 .field("segments", &self.segments())
+                .field(
+                    "glued_value",
+                    &support::DebugOptionalElement(self.glued_value()),
+                )
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .finish()
         } else {
             f.debug_struct("TwVariantExpression").finish()

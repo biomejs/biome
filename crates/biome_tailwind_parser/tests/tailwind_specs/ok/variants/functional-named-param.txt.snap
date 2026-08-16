@@ -29,6 +29,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@5..13 "disabled" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@13..14 ":" [] [],
             ],
@@ -63,6 +65,8 @@ TwRoot {
             1: DASH@4..5 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@5..13
               0: TW_VARIANT_SEGMENT@5..13 "disabled" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@13..14 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@14..26

@@ -4,6 +4,7 @@ use super::{
     LintParams, LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
     format_on_type_noop, matches_on_type_char,
 };
+use crate::db::WorkspaceDb;
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
@@ -27,7 +28,6 @@ use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use tracing::debug_span;
 

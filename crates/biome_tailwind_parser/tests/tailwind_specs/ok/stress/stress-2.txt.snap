@@ -68,6 +68,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@63..70 "visible" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@70..71 ":" [] [],
             ],
@@ -126,6 +128,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@115..122 "border" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -137,6 +140,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@122..127 "focus" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@127..128 ":" [] [],
             ],
@@ -163,6 +168,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@147..154 "visible" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@154..155 ":" [] [],
             ],
@@ -189,6 +196,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@168..175 "visible" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@175..176 ":" [] [],
             ],
@@ -211,6 +220,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@190..198 "disabled" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@198..199 ":" [] [],
             ],
@@ -233,6 +244,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@218..226 "disabled" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@226..227 ":" [] [],
             ],
@@ -297,6 +310,8 @@ TwRoot {
             1: DASH@62..63 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@63..70
               0: TW_VARIANT_SEGMENT@63..70 "visible" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@70..71 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@71..81
@@ -341,6 +356,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@115..122
         0: TW_BASE@115..122 "border" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     8: TW_FULL_CANDIDATE@122..141
       0: TW_VARIANT_LIST@122..128
@@ -348,6 +364,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@122..127
             0: TW_NAMED_VARIANT_SEGMENT@122..127
               0: TW_VARIANT_SEGMENT@122..127 "focus" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@127..128 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@128..141
@@ -366,6 +384,8 @@ TwRoot {
             1: DASH@146..147 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@147..154
               0: TW_VARIANT_SEGMENT@147..154 "visible" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@154..155 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@155..162
@@ -384,6 +404,8 @@ TwRoot {
             1: DASH@167..168 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@168..175
               0: TW_VARIANT_SEGMENT@168..175 "visible" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@175..176 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@176..190
@@ -399,6 +421,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@190..198
             0: TW_NAMED_VARIANT_SEGMENT@190..198
               0: TW_VARIANT_SEGMENT@190..198 "disabled" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@198..199 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@199..218
@@ -414,6 +438,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@218..226
             0: TW_NAMED_VARIANT_SEGMENT@218..226
               0: TW_VARIANT_SEGMENT@218..226 "disabled" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@226..227 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@227..237

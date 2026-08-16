@@ -314,6 +314,12 @@ pub(crate) enum HtmlChildListLayout {
     Multiline,
 }
 
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum SeparatorPlacement {
+    InsideGroup,
+    OutsideGroup,
+}
+
 /// Metadata about the children used to determine layout decisions.
 #[derive(Copy, Clone, Debug, Default)]
 struct ChildrenMeta {
@@ -481,11 +487,10 @@ impl FormatHtmlElementList {
             // Prettier's `ifBreak("", softline)` pattern where we conditionally add a line break
             // before the current element only if the previous element's group fits on a single line.
             let mut prev_inline_group_id: Option<GroupId> = None;
-            // Tracks the borrowed `>` token from the previous sibling's closing tag.
-            // When two inline elements are adjacent with no whitespace (`</span><span`),
-            // Prettier borrows the `>` from the first element's closing tag and prints it
-            // as part of the next element's opening tag group. This ensures they stay "touching".
+            // A following element or word prints the borrowed closing `>` so any break occurs
+            // inside the preceding tag rather than between whitespace-sensitive siblings.
             let mut borrowed_sibling_r_angle: Option<HtmlSyntaxToken> = None;
+            let mut borrowed_closing_tag = self.borrowed_tokens.borrowed_closing_tag.as_ref();
 
             let mut is_first_child = true;
 
@@ -524,18 +529,18 @@ impl FormatHtmlElementList {
                 match child {
                     // A single word in text content
                     HtmlChild::Word(word) => {
-                        if let Some(r_angle_token) = borrowed_sibling_r_angle.take() {
-                            write!(f, [r_angle_token.format()])?;
+                        if let Some(r_angle) = borrowed_sibling_r_angle.take() {
+                            write!(f, [r_angle.format()])?;
                         }
 
-                        // when we encounter a word, we need to collect all subsequent words
-                        // so we can use fill to format them together.
+                        // Hold back one word so the final fill entry can include a closing tag.
                         let mut fill = f.fill();
-                        fill.entry(&soft_line_break_or_space(), word);
+                        let mut last_word = word;
                         loop {
                             match children_iter.peek() {
                                 Some(HtmlChild::Word(next_word)) => {
-                                    fill.entry(&soft_line_break_or_space(), next_word);
+                                    fill.entry(&soft_line_break_or_space(), last_word);
+                                    last_word = next_word;
                                     children_iter.next();
                                 }
                                 Some(
@@ -562,6 +567,28 @@ impl FormatHtmlElementList {
                                     break;
                                 }
                             }
+                        }
+
+                        // A borrowed closing tag shares the final fill entry because the text and
+                        // tag must remain adjacent while their combined width determines wrapping.
+                        let hugged_closing_tag = if children_iter.peek().is_none()
+                            && self.is_container_whitespace_sensitive
+                        {
+                            borrowed_closing_tag.take()
+                        } else {
+                            None
+                        };
+
+                        if let Some(closing_tag) = hugged_closing_tag {
+                            fill.entry(
+                                &soft_line_break_or_space(),
+                                &format_with(|f| {
+                                    write!(f, [last_word])?;
+                                    format_partial_closing_tag(f, closing_tag)
+                                }),
+                            );
+                        } else {
+                            fill.entry(&soft_line_break_or_space(), last_word);
                         }
                         fill.finish()?;
 
@@ -758,9 +785,19 @@ impl FormatHtmlElementList {
                                 false
                             };
 
+                        // Borrowing the closing `>` moves a necessary break inside
+                        // the tag instead of inserting rendered whitespace before text.
+                        let next_word_borrows_r_angle =
+                            matches!(children_iter.peek(), Some(HtmlChild::Word(_)))
+                                && css_display.is_externally_whitespace_sensitive(f)
+                                && matches!(non_text, AnyHtmlElement::HtmlElement(_))
+                                && non_text.closing_r_angle_token().is_some();
+
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::Word(_)) => {
-                                if css_display.is_externally_whitespace_sensitive(f) {
+                                if next_word_borrows_r_angle {
+                                    Some(LineMode::Soft)
+                                } else if css_display.is_externally_whitespace_sensitive(f) {
                                     // not allowed to add whitespace if the next one is externally whitespace sensitive
                                     // ```html
                                     // <a>link</a>more text
@@ -830,9 +867,23 @@ impl FormatHtmlElementList {
 
                         child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
 
-                        let format_separator = line_mode.map(|mode| {
-                            format_with(move |f| f.write_element(FormatElement::Line(mode)))
-                        });
+                        let separator_placement = if next_word_borrows_r_angle {
+                            SeparatorPlacement::InsideGroup
+                        } else if force_multiline {
+                            SeparatorPlacement::OutsideGroup
+                        } else {
+                            match line_mode {
+                                Some(mode) if mode.is_hard() => SeparatorPlacement::OutsideGroup,
+                                _ => SeparatorPlacement::InsideGroup,
+                            }
+                        };
+                        let format_separator = |placement| {
+                            line_mode
+                                .filter(|_| separator_placement == placement)
+                                .map(|mode| {
+                                    format_with(move |f| f.write_element(FormatElement::Line(mode)))
+                                })
+                        };
 
                         // When the previous element was an inline element directly followed by this
                         // inline element (no whitespace), we need to conditionally add a line break.
@@ -845,31 +896,20 @@ impl FormatHtmlElementList {
                         // Take any borrowed `>` from the previous sibling element
                         let current_borrowed_r_angle = borrowed_sibling_r_angle.take();
 
-                        let next_word_borrows_r_angle = is_noscript_element(non_text)
-                            && matches!(children_iter.peek(), Some(HtmlChild::Word(_)));
-
-                        let next_can_borrow = next_word_borrows_r_angle
-                            || (next_is_adjacent_inline
-                                && matches!(
-                                    children_iter.peek(),
-                                    Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
-                                ));
+                        let next_can_borrow = next_is_adjacent_inline
+                            && matches!(
+                                children_iter.peek(),
+                                Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
+                            );
 
                         // Create the element formatter with borrowing options
                         let element_format = format_element_with_borrowing(
                             non_text,
                             current_borrowed_r_angle,
-                            next_can_borrow,
+                            next_can_borrow || next_word_borrows_r_angle,
                         );
 
-                        if next_word_borrows_r_angle {
-                            write!(
-                                f,
-                                [group(&format_args![&element_format, soft_line_break()])
-                                    .with_group_id(Some(non_text_group_id))]
-                            )?;
-                            last_nontext_had_trailing_line = false;
-                        } else if needs_outer_group {
+                        if needs_outer_group {
                             // Wrap inline element in outer group with `line` before it.
                             // This makes the line break happen BEFORE the element when it doesn't fit.
                             // Pattern: group([line, group([element, line?])])
@@ -893,8 +933,12 @@ impl FormatHtmlElementList {
                                     f,
                                     [group(&format_args![
                                         soft_line_break_or_space(),
-                                        group(&memoized).with_group_id(Some(inner_group_id)),
-                                        format_separator
+                                        group(&format_args![
+                                            &memoized,
+                                            format_separator(SeparatorPlacement::InsideGroup)
+                                        ])
+                                        .with_group_id(Some(inner_group_id)),
+                                        format_separator(SeparatorPlacement::OutsideGroup)
                                     ])
                                     .with_group_id(Some(non_text_group_id))]
                                 )?;
@@ -909,18 +953,24 @@ impl FormatHtmlElementList {
                                     [group(&format_args![
                                         if_group_fits_on_line(&soft_line_break())
                                             .with_group_id(Some(prev_id)),
-                                        group(&element_format)
-                                            .with_group_id(Some(non_text_group_id)),
-                                        format_separator
+                                        group(&format_args![
+                                            &element_format,
+                                            format_separator(SeparatorPlacement::InsideGroup)
+                                        ])
+                                        .with_group_id(Some(non_text_group_id)),
+                                        format_separator(SeparatorPlacement::OutsideGroup)
                                     ])]
                                 )?;
                             } else {
                                 write!(
                                     f,
                                     [
-                                        group(&element_format)
-                                            .with_group_id(Some(non_text_group_id)),
-                                        format_separator
+                                        group(&format_args![
+                                            &element_format,
+                                            format_separator(SeparatorPlacement::InsideGroup)
+                                        ])
+                                        .with_group_id(Some(non_text_group_id)),
+                                        format_separator(SeparatorPlacement::OutsideGroup)
                                     ]
                                 )?;
                             }
@@ -943,16 +993,24 @@ impl FormatHtmlElementList {
                                     [group(&format_args![
                                         if_group_fits_on_line(&soft_line_break())
                                             .with_group_id(Some(prev_id)),
-                                        group(&memoized).with_group_id(Some(non_text_group_id)),
-                                        format_separator
+                                        group(&format_args![
+                                            &memoized,
+                                            format_separator(SeparatorPlacement::InsideGroup)
+                                        ])
+                                        .with_group_id(Some(non_text_group_id)),
+                                        format_separator(SeparatorPlacement::OutsideGroup)
                                     ])]
                                 )?;
                             } else {
                                 write!(
                                     f,
                                     [
-                                        group(&memoized).with_group_id(Some(non_text_group_id)),
-                                        format_separator
+                                        group(&format_args![
+                                            &memoized,
+                                            format_separator(SeparatorPlacement::InsideGroup)
+                                        ])
+                                        .with_group_id(Some(non_text_group_id)),
+                                        format_separator(SeparatorPlacement::OutsideGroup)
                                     ]
                                 )?;
                             }
@@ -962,15 +1020,13 @@ impl FormatHtmlElementList {
                         // Track this element's group ID if it's followed by another adjacent inline element
                         if next_is_adjacent_inline {
                             prev_inline_group_id = Some(non_text_group_id);
-                            // Store the closing r_angle token from this element for the next sibling
-                            if next_can_borrow {
-                                borrowed_sibling_r_angle = non_text.closing_r_angle_token();
-                            }
                         } else {
                             prev_inline_group_id = None;
-                            if next_word_borrows_r_angle {
-                                borrowed_sibling_r_angle = non_text.closing_r_angle_token();
-                            }
+                        }
+
+                        if next_can_borrow || next_word_borrows_r_angle {
+                            // Store the closing r_angle token from this element for the next sibling
+                            borrowed_sibling_r_angle = non_text.closing_r_angle_token();
                         }
                     }
 
@@ -989,7 +1045,7 @@ impl FormatHtmlElementList {
             }
 
             // Print borrowed closing tag
-            if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
+            if let Some(closing_tag) = borrowed_closing_tag {
                 let closing_tag_format =
                     format_with(|f| format_partial_closing_tag(f, closing_tag));
                 write!(f, [closing_tag_format])?;
@@ -1016,12 +1072,6 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
     element
         .name()
         .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
-}
-
-fn is_noscript_element(element: &AnyHtmlElement) -> bool {
-    element
-        .name()
-        .is_some_and(|name| name.text().eq_ignore_ascii_case("noscript"))
 }
 
 fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {

@@ -13,6 +13,7 @@ use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_tailwind_logic::syntax_service::{TailwindClassString, TailwindClassStringHost};
 
 /// Trait for option types that specify which class attributes and functions to check.
 pub trait ClassStringOptions {
@@ -65,6 +66,17 @@ impl ClassStringOptions for NoTailwindArbitraryValueOptions {
                 .all(|(m, p)| m == "*" || m == p);
             all_parts_match && matcher_parts.next().is_none() && name_parts.next().is_none()
         })
+    }
+}
+
+impl TailwindClassStringHost for AnyClassStringLike {
+    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+        match self {
+            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(),
+            Self::JsxString(node) => node.tailwind_class_string(),
+            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(),
+            Self::JsLiteralMemberName(node) => node.tailwind_class_string(),
+        }
     }
 }
 

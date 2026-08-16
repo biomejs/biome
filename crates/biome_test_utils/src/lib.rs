@@ -48,7 +48,8 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
-use biome_service::projects::Projects;
+#[cfg(feature = "module_graph")]
+use biome_service::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
@@ -59,8 +60,6 @@ use biome_service::workspace::{
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_string_case::StrLikeExtension;
-#[cfg(feature = "module_graph")]
-use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
@@ -180,9 +179,6 @@ pub fn create_parser_options<L: ServiceLanguage>(
         return None;
     };
 
-    let projects = Projects::default();
-    let key = projects.insert_project(Utf8PathBuf::from(""));
-
     if loaded_configuration.has_errors() {
         let configuration_path = loaded_configuration.file_path.unwrap().clone();
         diagnostics.extend(
@@ -202,7 +198,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
-        let mut settings = projects.get_mut_root_settings(key).unwrap_or_default();
+        let mut settings = Settings::default();
         settings
             .merge_with_configuration(
                 configuration,
@@ -227,9 +223,6 @@ pub fn create_formatting_options<L>(
 where
     L: ServiceLanguage,
 {
-    let projects = Projects::default();
-    let key = projects.insert_project(Utf8PathBuf::from(""));
-
     let Ok((source, loaded_configuration)) = load_configuration_for_test_file(input_file) else {
         return Default::default();
     };
@@ -252,7 +245,7 @@ where
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
-        let mut settings = projects.get_mut_root_settings(key).unwrap_or_default();
+        let mut settings = Settings::default();
         settings
             .merge_with_configuration(
                 configuration,

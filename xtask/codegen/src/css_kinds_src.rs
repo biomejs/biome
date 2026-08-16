@@ -742,6 +742,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",
         // Bogus nodes
         "CSS_BOGUS",
+        "CSS_BOGUS_DECLARATION",
         "CSS_BOGUS_BLOCK",
         "CSS_BOGUS_KEYFRAMES_ITEM",
         "CSS_BOGUS_RULE",

@@ -22,6 +22,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@0..20 "border" [] [Whitespace("              ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -33,6 +34,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@20..25 "focus" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@25..26 ":" [] [],
             ],
@@ -63,6 +66,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@0..20
         0: TW_BASE@0..20 "border" [] [Whitespace("              ")]
+        1: (empty)
       3: (empty)
     1: TW_FULL_CANDIDATE@20..38
       0: TW_VARIANT_LIST@20..26
@@ -70,6 +74,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@20..25
             0: TW_NAMED_VARIANT_SEGMENT@20..25
               0: TW_VARIANT_SEGMENT@20..25 "focus" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@25..26 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@26..38

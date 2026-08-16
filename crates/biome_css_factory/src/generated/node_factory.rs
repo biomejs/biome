@@ -5889,6 +5889,16 @@ where
         slots,
     ))
 }
+pub fn css_bogus_declaration<I>(slots: I) -> CssBogusDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_DECLARATION,
+        slots,
+    ))
+}
 pub fn css_bogus_document_matcher<I>(slots: I) -> CssBogusDocumentMatcher
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

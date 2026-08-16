@@ -29,6 +29,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@26..31 "grid" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -80,6 +81,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@87..92 "hover" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@92..93 ":" [] [],
                 TwArbitraryVariant {
@@ -92,6 +95,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@99..108 "underline" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -116,6 +120,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@26..31
         0: TW_BASE@26..31 "grid" [] [Whitespace(" ")]
+        1: (empty)
       3: (empty)
     1: TW_FULL_CANDIDATE@31..58
       0: TW_VARIANT_LIST@31..53
@@ -153,6 +158,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@87..92
             0: TW_NAMED_VARIANT_SEGMENT@87..92
               0: TW_VARIANT_SEGMENT@87..92 "hover" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@92..93 ":" [] []
         2: TW_ARBITRARY_VARIANT@93..98
           0: L_BRACKET@93..94 "[" [] []
@@ -162,6 +169,7 @@ TwRoot {
       1: (empty)
       2: TW_STATIC_CANDIDATE@99..108
         0: TW_BASE@99..108 "underline" [] []
+        1: (empty)
       3: (empty)
   2: EOF@108..109 "" [Newline("\n")] []
 

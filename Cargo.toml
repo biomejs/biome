@@ -19,7 +19,7 @@ biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
-biome_workspace_db           = { path = "./crates/biome_workspace_db" }
+biome_embeds                 = { path = "./crates/biome_embeds" }
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
@@ -99,6 +99,7 @@ biome_service                = { path = "./crates/biome_service" }
 biome_string_case            = { path = "./crates/biome_string_case", version = "0.5.7", features = ["biome_rowan"] }
 biome_suppression            = { path = "./crates/biome_suppression", version = "0.5.7" }
 biome_tailwind_factory       = { path = "./crates/biome_tailwind_factory", version = "0.0.1" }
+biome_tailwind_logic         = { path = "./crates/biome_tailwind_logic", version = "0.1.0" }
 biome_tailwind_parser        = { path = "./crates/biome_tailwind_parser", version = "0.0.1" }
 biome_tailwind_syntax        = { path = "./crates/biome_tailwind_syntax", version = "0.0.1" }
 biome_test_utils             = { path = "./crates/biome_test_utils" }

@@ -1,6 +1,7 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, AnyVueDirective,
-    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, is_quoted, static_value::StaticValue,
+    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, HtmlString, is_quoted,
+    static_value::StaticValue,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, TokenText};
@@ -73,6 +74,11 @@ impl AnyHtmlAttributeInitializer {
 }
 
 impl HtmlAttribute {
+    /// Returns the attribute value when its initializer is an HTML string.
+    pub fn html_string(&self) -> Option<HtmlString> {
+        self.initializer()?.value().ok()?.as_html_string().cloned()
+    }
+
     /// Extracts the value from an attribute's initializer.
     ///
     /// Returns `None` if the attribute has no initializer or the value cannot be extracted.

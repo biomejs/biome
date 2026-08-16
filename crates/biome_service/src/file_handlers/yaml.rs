@@ -1,4 +1,5 @@
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{
     Capabilities, DebugCapabilities, EditorCapabilities, EnabledForPath, ExtensionHandler,
     FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
@@ -16,7 +17,6 @@ use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::NodeParse;
 use biome_rowan::NodeCache;
-use biome_workspace_db::WorkspaceDb;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};

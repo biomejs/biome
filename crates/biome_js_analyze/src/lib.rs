@@ -27,6 +27,7 @@ use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -44,6 +45,7 @@ mod services;
 pub mod shared;
 mod suppression_action;
 mod syntax;
+mod tailwind;
 pub mod utils;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
@@ -227,6 +229,7 @@ where
     });
 
     services.insert_service(Arc::new(AriaRoles));
+    services.insert_service(TwSyntaxService::default());
     services.insert_service(source_type);
     if let Some(module_db) = module_db {
         services.insert_service(module_db);

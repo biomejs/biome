@@ -1,6 +1,6 @@
 use crate::parser::TailwindParser;
-use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
+use crate::syntax::parse_modifier;
 use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -124,6 +124,21 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
 
     segments.complete(p, TW_VARIANT_SEGMENT_LIST);
 
+    if p.at(T!['[']) && !p.source().had_trivia_before() {
+        // A bracketed value can glue directly to the last segment with no
+        // `-` separator: `@[400px]:` is the container root plus an
+        // arbitrary size. Whitespace before the `[` means it starts the
+        // next class instead.
+        parse_arbitrary_variant_segment(p).or_add_diagnostic(p, expected_value);
+    }
+
+    // A variant can carry a modifier (`group-hover/menu:`, `@sm/main:`).
+    // When the `:` check below fails, the rewind hands the `/` back to the
+    // candidate's own modifier parsing (`bg-red-500/50`).
+    if p.at(T![/]) {
+        parse_modifier(p).or_add_diagnostic(p, expected_value);
+    }
+
     if !p.at(COLON) {
         // if we don't reach a colon, we haven't actually parsed a variant.
         m.abandon(p);
@@ -158,11 +173,13 @@ fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    // The bracket body is a raw selector, not a CSS value list, so it is read
+    // as one opaque `tw_selector` token like the top-level `TwArbitraryVariant`
+    // — this keeps combinators (`has-[>svg]`, `[+p]`, `[~span]`) inside the
+    // selector instead of erroring on them in the CSS-value grammar.
     let m = p.start();
-    p.expect_with_context(T!['['], TailwindLexContext::CssValue);
-    if !parse_css_generic_component_value_list(p) {
-        p.error(expected_value(p, p.cur_range()));
-    }
+    p.expect_with_context(T!['['], TailwindLexContext::ArbitraryVariant);
+    p.expect_with_context(TW_SELECTOR, TailwindLexContext::ArbitraryVariant);
     p.expect(T![']']);
     Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
 }

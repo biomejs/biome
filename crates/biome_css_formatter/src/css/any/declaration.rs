@@ -8,6 +8,7 @@ impl FormatRule<AnyCssDeclaration> for FormatAnyCssDeclaration {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssDeclaration, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssDeclaration::CssBogusDeclaration(node) => node.format().fmt(f),
             AnyCssDeclaration::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
             AnyCssDeclaration::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssDeclaration::ScssNestingDeclaration(node) => node.format().fmt(f),

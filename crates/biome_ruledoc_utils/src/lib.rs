@@ -24,8 +24,8 @@ use biome_module_graph::{
 };
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_service::db::WorkspaceDb;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8PathBuf;
 use std::collections::HashMap;
 use std::hash::BuildHasher;
