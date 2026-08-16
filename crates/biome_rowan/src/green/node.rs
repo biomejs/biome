@@ -337,19 +337,29 @@ impl Drop for GreenNode {
         let mut current = Some(root);
 
         while let Some(node) = current {
+            let mut node = Arc::from_thin(node);
             let mut next = None;
-            node.drop_with(|slot| match slot {
-                Slot::Node { node, .. } => {
-                    let node = Self::into_thin_arc(node);
-                    if next.is_none() {
-                        next = Some(node);
-                    } else {
-                        pending.push(node);
+            if let Some(node) = Arc::get_mut(&mut node) {
+                for slot in node.slice_mut() {
+                    let rel_offset = slot.rel_offset();
+                    if matches!(slot, Slot::Node { .. }) {
+                        let Slot::Node { node, .. } =
+                            mem::replace(slot, Slot::Empty { rel_offset })
+                        else {
+                            unreachable!();
+                        };
+
+                        let node = Self::into_thin_arc(node);
+                        if next.is_none() {
+                            next = Some(node);
+                        } else {
+                            pending.push(node);
+                        }
                     }
                 }
-                Slot::Token { token, .. } => drop(token),
-                Slot::Empty { .. } => {}
-            });
+            }
+
+            drop(node);
             current = next.or_else(|| pending.pop());
         }
     }
@@ -549,7 +559,7 @@ impl FusedIterator for Children<'_> {}
 mod tests {
     use std::{env, process::Command, sync::atomic::Ordering, thread};
 
-    use super::DROPPED_GREEN_NODE_HEADS;
+    use super::{DROPPED_GREEN_NODE_HEADS, Slot};
     use crate::GreenNode;
     use crate::NodeOrToken;
     use crate::arc::Arc;
@@ -670,6 +680,24 @@ mod tests {
         assert!(retained.ptr.with_arc(Arc::is_unique));
         assert_eq!(retained.kind(), RawSyntaxKind(1));
         assert_eq!(retained.slots().len(), 0);
+    }
+
+    #[test]
+    fn dropping_parent_preserves_shared_subtree() {
+        let grandchild = GreenNode::new(RawSyntaxKind(1), []);
+        let child = GreenNode::new(RawSyntaxKind(2), [Some(NodeOrToken::Node(grandchild))]);
+        let retained = child.clone();
+        let parent = GreenNode::new(RawSyntaxKind(3), [Some(NodeOrToken::Node(child))]);
+
+        drop(parent);
+
+        assert!(retained.ptr.with_arc(Arc::is_unique));
+        let slot = retained.slots().next().unwrap();
+        let Slot::Node { node, .. } = slot else {
+            panic!("shared subtree was modified while dropping its parent");
+        };
+        assert_eq!(node.kind(), RawSyntaxKind(1));
+        assert_eq!(node.slots().len(), 0);
     }
 
     #[test]
