@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
     JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::use_jsx_key_in_iterable::UseJsxKeyInIterableOptions;
 
@@ -87,6 +88,12 @@ impl Rule for UseJsxKeyInIterable {
         let node = ctx.query();
         let model = ctx.model();
         let options = ctx.options();
+        let file_source = ctx.source_type::<JsFileSource>();
+
+        if file_source.as_embedding_kind().is_astro() {
+            return vec![].into_boxed_slice();
+        }
+
         match node {
             UseJsxKeyInIterableQuery::JsArrayExpression(node) => {
                 handle_collections(node, model, options)
@@ -429,10 +436,9 @@ fn handle_jsx_child(
                     ranges.push(open_node.range());
                 }
             }
-            AnyJsxChild::JsxSelfClosingElement(node)
-                if !has_key_attribute(&node.attributes()) => {
-                    ranges.push(node.range());
-                }
+            AnyJsxChild::JsxSelfClosingElement(node) if !has_key_attribute(&node.attributes()) => {
+                ranges.push(node.range());
+            }
             AnyJsxChild::JsxExpressionChild(node) => {
                 let expr = node.expression()?;
                 if let Some(child_ranges) =
@@ -441,10 +447,9 @@ fn handle_jsx_child(
                     ranges.extend(child_ranges);
                 }
             }
-            AnyJsxChild::JsxFragment(node)
-                if options.check_shorthand_fragments() => {
-                    ranges.push(node.range())
-                }
+            AnyJsxChild::JsxFragment(node) if options.check_shorthand_fragments() => {
+                ranges.push(node.range())
+            }
             _ => {}
         }
     }

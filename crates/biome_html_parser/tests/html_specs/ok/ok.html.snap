@@ -20,6 +20,7 @@ HtmlRoot {
         l_angle_token: L_ANGLE@0..1 "<" [] [],
         excl_token: BANG@1..2 "!" [] [],
         doctype_token: DOCTYPE_KW@2..9 "doctype" [] [],
+        name_token: missing (optional),
         html_token: missing (optional),
         quirk_token: missing (optional),
         public_id_token: missing (optional),
@@ -45,7 +46,8 @@ HtmlRoot {
     4: (empty)
     5: (empty)
     6: (empty)
-    7: R_ANGLE@9..10 ">" [] []
+    7: (empty)
+    8: R_ANGLE@9..10 ">" [] []
   3: HTML_ELEMENT_LIST@10..10
   4: EOF@10..10 "" [] []
 

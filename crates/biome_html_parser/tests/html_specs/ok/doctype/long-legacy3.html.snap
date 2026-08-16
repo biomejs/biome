@@ -22,6 +22,7 @@ HtmlRoot {
         l_angle_token: L_ANGLE@0..1 "<" [] [],
         excl_token: BANG@1..2 "!" [] [],
         doctype_token: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")],
+        name_token: missing (optional),
         html_token: HTML_KW@10..15 "HTML" [] [Whitespace(" ")],
         quirk_token: HTML_LITERAL@15..22 "PUBLIC" [] [Whitespace(" ")],
         public_id_token: HTML_STRING_LITERAL@22..58 "\"-//W3C//DTD HTML 4.01 Frameset//EN\"" [] [],
@@ -43,11 +44,12 @@ HtmlRoot {
     0: L_ANGLE@0..1 "<" [] []
     1: BANG@1..2 "!" [] []
     2: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")]
-    3: HTML_KW@10..15 "HTML" [] [Whitespace(" ")]
-    4: HTML_LITERAL@15..22 "PUBLIC" [] [Whitespace(" ")]
-    5: HTML_STRING_LITERAL@22..58 "\"-//W3C//DTD HTML 4.01 Frameset//EN\"" [] []
-    6: HTML_STRING_LITERAL@58..102 "\"http://www.w3.org/TR/html4/frameset.dtd\"" [Newline("\n"), Whitespace("  ")] []
-    7: R_ANGLE@102..103 ">" [] []
+    3: (empty)
+    4: HTML_KW@10..15 "HTML" [] [Whitespace(" ")]
+    5: HTML_LITERAL@15..22 "PUBLIC" [] [Whitespace(" ")]
+    6: HTML_STRING_LITERAL@22..58 "\"-//W3C//DTD HTML 4.01 Frameset//EN\"" [] []
+    7: HTML_STRING_LITERAL@58..102 "\"http://www.w3.org/TR/html4/frameset.dtd\"" [Newline("\n"), Whitespace("  ")] []
+    8: R_ANGLE@102..103 ">" [] []
   3: HTML_ELEMENT_LIST@103..103
   4: EOF@103..104 "" [Newline("\n")] []
 

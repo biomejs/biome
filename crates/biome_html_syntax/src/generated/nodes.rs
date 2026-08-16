@@ -1048,6 +1048,7 @@ impl HtmlDirective {
             l_angle_token: self.l_angle_token(),
             excl_token: self.excl_token(),
             doctype_token: self.doctype_token(),
+            name_token: self.name_token(),
             html_token: self.html_token(),
             quirk_token: self.quirk_token(),
             public_id_token: self.public_id_token(),
@@ -1064,20 +1065,23 @@ impl HtmlDirective {
     pub fn doctype_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn html_token(&self) -> Option<SyntaxToken> {
+    pub fn name_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 3usize)
     }
-    pub fn quirk_token(&self) -> Option<SyntaxToken> {
+    pub fn html_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 4usize)
     }
-    pub fn public_id_token(&self) -> Option<SyntaxToken> {
+    pub fn quirk_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 5usize)
     }
-    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+    pub fn public_id_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 6usize)
     }
+    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 7usize)
+    }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 7usize)
+        support::required_token(&self.syntax, 8usize)
     }
 }
 impl Serialize for HtmlDirective {
@@ -1093,6 +1097,7 @@ pub struct HtmlDirectiveFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub doctype_token: SyntaxResult<SyntaxToken>,
+    pub name_token: Option<SyntaxToken>,
     pub html_token: Option<SyntaxToken>,
     pub quirk_token: Option<SyntaxToken>,
     pub public_id_token: Option<SyntaxToken>,
@@ -5116,6 +5121,7 @@ pub enum AnyHtmlElement {
     AnyHtmlContent(AnyHtmlContent),
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
+    HtmlDirective(HtmlDirective),
     HtmlElement(HtmlElement),
     HtmlProcessingInstruction(HtmlProcessingInstruction),
     HtmlSelfClosingElement(HtmlSelfClosingElement),
@@ -5136,6 +5142,12 @@ impl AnyHtmlElement {
     pub fn as_html_cdata_section(&self) -> Option<&HtmlCdataSection> {
         match &self {
             Self::HtmlCdataSection(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_directive(&self) -> Option<&HtmlDirective> {
+        match &self {
+            Self::HtmlDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -7036,6 +7048,10 @@ impl std::fmt::Debug for HtmlDirective {
                 .field(
                     "doctype_token",
                     &support::DebugSyntaxResult(self.doctype_token()),
+                )
+                .field(
+                    "name_token",
+                    &support::DebugOptionalElement(self.name_token()),
                 )
                 .field(
                     "html_token",
@@ -12223,6 +12239,11 @@ impl From<HtmlCdataSection> for AnyHtmlElement {
         Self::HtmlCdataSection(node)
     }
 }
+impl From<HtmlDirective> for AnyHtmlElement {
+    fn from(node: HtmlDirective) -> Self {
+        Self::HtmlDirective(node)
+    }
+}
 impl From<HtmlElement> for AnyHtmlElement {
     fn from(node: HtmlElement) -> Self {
         Self::HtmlElement(node)
@@ -12243,6 +12264,7 @@ impl AstNode for AnyHtmlElement {
     const KIND_SET: SyntaxKindSet<Language> = AnyHtmlContent::KIND_SET
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
+        .union(HtmlDirective::KIND_SET)
         .union(HtmlElement::KIND_SET)
         .union(HtmlProcessingInstruction::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
@@ -12250,6 +12272,7 @@ impl AstNode for AnyHtmlElement {
         match kind {
             HTML_BOGUS_ELEMENT
             | HTML_CDATA_SECTION
+            | HTML_DIRECTIVE
             | HTML_ELEMENT
             | HTML_PROCESSING_INSTRUCTION
             | HTML_SELF_CLOSING_ELEMENT => true,
@@ -12261,6 +12284,7 @@ impl AstNode for AnyHtmlElement {
         let res = match syntax.kind() {
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
+            HTML_DIRECTIVE => Self::HtmlDirective(HtmlDirective { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
             HTML_PROCESSING_INSTRUCTION => {
                 Self::HtmlProcessingInstruction(HtmlProcessingInstruction { syntax })
@@ -12281,6 +12305,7 @@ impl AstNode for AnyHtmlElement {
         match self {
             Self::HtmlBogusElement(it) => it.syntax(),
             Self::HtmlCdataSection(it) => it.syntax(),
+            Self::HtmlDirective(it) => it.syntax(),
             Self::HtmlElement(it) => it.syntax(),
             Self::HtmlProcessingInstruction(it) => it.syntax(),
             Self::HtmlSelfClosingElement(it) => it.syntax(),
@@ -12291,6 +12316,7 @@ impl AstNode for AnyHtmlElement {
         match self {
             Self::HtmlBogusElement(it) => it.into_syntax(),
             Self::HtmlCdataSection(it) => it.into_syntax(),
+            Self::HtmlDirective(it) => it.into_syntax(),
             Self::HtmlElement(it) => it.into_syntax(),
             Self::HtmlProcessingInstruction(it) => it.into_syntax(),
             Self::HtmlSelfClosingElement(it) => it.into_syntax(),
@@ -12304,6 +12330,7 @@ impl std::fmt::Debug for AnyHtmlElement {
             Self::AnyHtmlContent(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlProcessingInstruction(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
@@ -12316,6 +12343,7 @@ impl From<AnyHtmlElement> for SyntaxNode {
             AnyHtmlElement::AnyHtmlContent(it) => it.into_syntax(),
             AnyHtmlElement::HtmlBogusElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlDirective(it) => it.into_syntax(),
             AnyHtmlElement::HtmlElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlProcessingInstruction(it) => it.into_syntax(),
             AnyHtmlElement::HtmlSelfClosingElement(it) => it.into_syntax(),
