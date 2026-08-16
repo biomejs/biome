@@ -19,6 +19,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteAwaitBlock {
@@ -67,7 +68,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..90
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..90
     0: SVELTE_AWAIT_BLOCK@0..90
       0: SVELTE_AWAIT_OPENING_BLOCK@0..81
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -93,6 +95,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@81..84 "{/" [Newline("\n")] []
         1: AWAIT_KW@84..89 "await" [] []
         2: R_CURLY@89..90 "}" [] []
-  4: EOF@90..91 "" [Newline("\n")] []
+  5: EOF@90..91 "" [Newline("\n")] []
 
 ```

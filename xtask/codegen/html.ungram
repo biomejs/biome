@@ -48,16 +48,18 @@ VueBogusDirectiveArgument = SyntaxElement*
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
 	frontmatter: AnyAstroFrontmatterElement?
+	processing_instruction: HtmlProcessingInstruction?
 	directive: HtmlDirective?
 	html: HtmlElementList
 	eof: 'EOF'
 
-// <!DOCTYPE html>
-// ^^^^^^^^^^^^^^^
+// <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN">
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 HtmlDirective =
 	'<'
 	'!'
 	doctype: 'doctype'
+	name: 'html_literal'?
 	html: 'html'?
 	quirk: 'html_literal'?
 	public_id: 'html_string_literal'?

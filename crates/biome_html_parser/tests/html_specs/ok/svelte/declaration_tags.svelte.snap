@@ -39,6 +39,7 @@ let source = 1;
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -202,7 +203,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..351
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..351
     0: HTML_ELEMENT@0..34
       0: HTML_OPENING_ELEMENT@0..8
         0: L_ANGLE@0..1 "<" [] []
@@ -309,6 +311,6 @@ HtmlRoot {
       1: HTML_TEXT_EXPRESSION@335..350
         0: HTML_LITERAL@335..350 "var invalid = 1" [] []
       2: R_CURLY@350..351 "}" [] []
-  4: EOF@351..352 "" [Newline("\n")] []
+  5: EOF@351..352 "" [Newline("\n")] []
 
 ```
