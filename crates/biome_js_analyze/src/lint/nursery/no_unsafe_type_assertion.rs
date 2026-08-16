@@ -184,7 +184,6 @@ impl Rule for NoUnsafeTypeAssertion {
     }
 }
 
-// Copied from `biome_js_type_info::local_inference::is_const_reference_type`.
 fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
     let Some(reference_type) = type_annotation.as_ts_reference_type() else {
         return false;
