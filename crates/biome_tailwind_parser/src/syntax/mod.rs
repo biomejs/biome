@@ -75,10 +75,7 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     // Tailwind's legacy important spelling puts the `!` right before the
     // utility, after the variants and before the sign (`hover:!flex`,
     // `!-m-4`).
-    let legacy_important = p.at(T![!]);
-    if legacy_important {
-        p.bump(T![!]);
-    }
+    let legacy_important = p.eat(T![!]);
 
     if p.at(T![-]) {
         p.bump_with_context(T![-], TailwindLexContext::SawNegative);
