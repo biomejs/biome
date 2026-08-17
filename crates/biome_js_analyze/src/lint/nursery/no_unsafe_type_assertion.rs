@@ -2,8 +2,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyTsType, TsAsAssignment, TsAsExpression, TsTypeAssertionAssignment,
-    TsTypeAssertionExpression,
+    AnyTsType, TsAsAssignment, TsAsExpression, TsTypeAssertionAssignment, TsTypeAssertionExpression,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions;
@@ -115,6 +114,39 @@ declare_node_union! {
         | TsTypeAssertionExpression
 }
 
+impl Rule for NoUnsafeTypeAssertion {
+    type Query = Ast<AnyTsTypeAssertionLike>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = NoUnsafeTypeAssertionOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let ty = ctx.query().ty()?;
+        (!is_const_reference_type(&ty)).then_some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let query = ctx.query();
+        let range = query.diagnostic_range()?;
+
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                    "Avoid unsafe type assertions."
+                },
+            )
+            .note(markup! {
+                "Type assertions override the type for this expression, which can hide type errors and lead to runtime errors."
+            })
+            .note(markup! {
+                "Use a "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables">"type annotation"</Hyperlink>", the "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator">"satisfies operator"</Hyperlink>", a "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates">"type predicate"</Hyperlink>", or "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#control-flow-analysis">"control-flow narrowing"</Hyperlink>" instead."
+            }),
+        )
+    }
+}
+
 impl AnyTsTypeAssertionLike {
     fn ty(&self) -> Option<AnyTsType> {
         match self {
@@ -148,39 +180,6 @@ impl AnyTsTypeAssertionLike {
                 .text_trimmed_range()
                 .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
         })
-    }
-}
-
-impl Rule for NoUnsafeTypeAssertion {
-    type Query = Ast<AnyTsTypeAssertionLike>;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = NoUnsafeTypeAssertionOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let ty = ctx.query().ty()?;
-        (!is_const_reference_type(&ty)).then_some(())
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let query = ctx.query();
-        let range = query.diagnostic_range()?;
-
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "Avoid unsafe type assertions."
-                },
-            )
-            .note(markup! {
-                "Type assertions override the type for this expression, which can hide type errors and lead to runtime errors."
-            })
-            .note(markup! {
-                "Use a "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables">"type annotation"</Hyperlink>", the "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator">"satisfies operator"</Hyperlink>", a "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates">"type predicate"</Hyperlink>", or "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#control-flow-analysis">"control-flow narrowing"</Hyperlink>" instead."
-            }),
-        )
     }
 }
 

@@ -97,6 +97,50 @@ pub struct DescendingSelector {
     high: (TextRange, Specificity),
     low: (TextRange, Specificity),
 }
+
+impl Rule for NoDescendingSpecificity {
+    type Query = Semantic<AnyCssRoot>;
+    type State = DescendingSelector;
+    type Signals = Box<[Self::State]>;
+    type Options = NoDescendingSpecificityOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let model = ctx.model();
+        let root = ctx.root();
+        let mut visited_rules = FxHashSet::default();
+        let mut visited_selectors = FxHashMap::default();
+        let mut descending_selectors = Vec::new();
+        for rule in model.rules() {
+            find_descending_selector(
+                &root,
+                &rule,
+                model,
+                &mut visited_rules,
+                &mut visited_selectors,
+                &mut descending_selectors,
+            );
+        }
+        descending_selectors.into_boxed_slice()
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.low.0,
+                markup! {
+                    "Descending specificity selector found. This selector specificity is "{node.low.1.to_string()}
+                },
+            ).detail(node.high.0, markup!(
+                "This selector specificity is "{node.high.1.to_string()}
+            ))
+                .note(markup! {
+                    "Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">"MDN web docs"</Hyperlink>" for more details."
+            }),
+        )
+    }
+}
+
 /// find tail selector
 /// ```css
 /// a b:hover {
@@ -178,48 +222,5 @@ fn find_descending_selector(
                 descending_selectors,
             );
         }
-    }
-}
-
-impl Rule for NoDescendingSpecificity {
-    type Query = Semantic<AnyCssRoot>;
-    type State = DescendingSelector;
-    type Signals = Box<[Self::State]>;
-    type Options = NoDescendingSpecificityOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let model = ctx.model();
-        let root = ctx.root();
-        let mut visited_rules = FxHashSet::default();
-        let mut visited_selectors = FxHashMap::default();
-        let mut descending_selectors = Vec::new();
-        for rule in model.rules() {
-            find_descending_selector(
-                &root,
-                &rule,
-                model,
-                &mut visited_rules,
-                &mut visited_selectors,
-                &mut descending_selectors,
-            );
-        }
-        descending_selectors.into_boxed_slice()
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.low.0,
-                markup! {
-                    "Descending specificity selector found. This selector specificity is "{node.low.1.to_string()}
-                },
-            ).detail(node.high.0, markup!(
-                "This selector specificity is "{node.high.1.to_string()}
-            ))
-                .note(markup! {
-                    "Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">"MDN web docs"</Hyperlink>" for more details."
-            }),
-        )
     }
 }

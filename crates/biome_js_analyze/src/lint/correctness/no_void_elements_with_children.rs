@@ -46,18 +46,6 @@ declare_node_union! {
     pub NoVoidElementsWithChildrenQuery = JsxElement | JsCallExpression | JsxSelfClosingElement
 }
 
-const VOID_ELEMENTS: [&str; 16] = [
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
-    "meta", "param", "source", "track", "wbr",
-];
-
-fn void_dom_element_name(element_name: &str) -> Option<&'static str> {
-    VOID_ELEMENTS
-        .iter()
-        .copied()
-        .find(|candidate| *candidate == element_name)
-}
-
 pub enum NoVoidElementsWithChildrenCause {
     /// The cause affects React using JSX code
     Jsx {
@@ -95,92 +83,6 @@ pub struct NoVoidElementsWithChildrenState {
     element_name: &'static str,
     /// It tracks the causes that triggers the rule
     cause: NoVoidElementsWithChildrenCause,
-}
-
-impl NoVoidElementsWithChildrenState {
-    fn new(element_name: &'static str, cause: NoVoidElementsWithChildrenCause) -> Self {
-        Self {
-            element_name,
-            cause,
-        }
-    }
-
-    fn has_children_cause(&self) -> bool {
-        match &self.cause {
-            NoVoidElementsWithChildrenCause::Jsx {
-                children_prop,
-                children_cause,
-                ..
-            } => *children_cause || children_prop.is_some(),
-            NoVoidElementsWithChildrenCause::ReactCreateElement {
-                children_prop,
-                children_cause,
-                ..
-            } => *children_cause || children_prop.is_some(),
-        }
-    }
-
-    fn has_dangerous_prop_cause(&self) -> bool {
-        match &self.cause {
-            NoVoidElementsWithChildrenCause::Jsx {
-                dangerous_prop_cause,
-                ..
-            } => dangerous_prop_cause.is_some(),
-            NoVoidElementsWithChildrenCause::ReactCreateElement {
-                dangerous_prop_cause,
-                ..
-            } => dangerous_prop_cause.is_some(),
-        }
-    }
-
-    fn diagnostic_message(&self) -> MarkupBuf {
-        let has_children_cause = self.has_children_cause();
-        let has_dangerous_cause = self.has_dangerous_prop_cause();
-        match (has_children_cause, has_dangerous_cause) {
-            (true, true) => {
-                (markup! {
-                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>
-                    ", or the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            }
-            (true, false) => {
-                (markup! {
-                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>"."
-                }).to_owned()
-            }
-            (false, true) => {
-                (markup! {
-                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            },
-            _ => unreachable!("At least a cause must be set")
-
-        }
-    }
-
-    fn action_message(&self) -> MarkupBuf {
-        let has_children_cause = self.has_children_cause();
-        let has_dangerous_cause = self.has_dangerous_prop_cause();
-        match (has_children_cause, has_dangerous_cause) {
-            (true, true) => {
-                (markup! {
-                    "Remove the "<Emphasis>"children"</Emphasis>" and the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            }
-            (true, false) => {
-                (markup! {
-                   "Remove the "<Emphasis>"children"</Emphasis>"."
-                }).to_owned()
-            }
-            (false, true) => {
-                (markup! {
-                  "Remove the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            },
-            _ => unreachable!("At least a cause must be set")
-
-        }
-    }
 }
 
 impl Rule for NoVoidElementsWithChildren {
@@ -387,5 +289,102 @@ impl Rule for NoVoidElementsWithChildren {
             state.action_message(),
             mutation,
         ))
+    }
+}
+const VOID_ELEMENTS: [&str; 16] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
+    "meta", "param", "source", "track", "wbr",
+];
+
+fn void_dom_element_name(element_name: &str) -> Option<&'static str> {
+    VOID_ELEMENTS
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == element_name)
+}
+
+impl NoVoidElementsWithChildrenState {
+    fn new(element_name: &'static str, cause: NoVoidElementsWithChildrenCause) -> Self {
+        Self {
+            element_name,
+            cause,
+        }
+    }
+
+    fn has_children_cause(&self) -> bool {
+        match &self.cause {
+            NoVoidElementsWithChildrenCause::Jsx {
+                children_prop,
+                children_cause,
+                ..
+            } => *children_cause || children_prop.is_some(),
+            NoVoidElementsWithChildrenCause::ReactCreateElement {
+                children_prop,
+                children_cause,
+                ..
+            } => *children_cause || children_prop.is_some(),
+        }
+    }
+
+    fn has_dangerous_prop_cause(&self) -> bool {
+        match &self.cause {
+            NoVoidElementsWithChildrenCause::Jsx {
+                dangerous_prop_cause,
+                ..
+            } => dangerous_prop_cause.is_some(),
+            NoVoidElementsWithChildrenCause::ReactCreateElement {
+                dangerous_prop_cause,
+                ..
+            } => dangerous_prop_cause.is_some(),
+        }
+    }
+
+    fn diagnostic_message(&self) -> MarkupBuf {
+        let has_children_cause = self.has_children_cause();
+        let has_dangerous_cause = self.has_dangerous_prop_cause();
+        match (has_children_cause, has_dangerous_cause) {
+            (true, true) => {
+                (markup! {
+                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>
+                    ", or the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            }
+            (true, false) => {
+                (markup! {
+                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>"."
+                }).to_owned()
+            }
+            (false, true) => {
+                (markup! {
+                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            },
+            _ => unreachable!("At least a cause must be set")
+
+        }
+    }
+
+    fn action_message(&self) -> MarkupBuf {
+        let has_children_cause = self.has_children_cause();
+        let has_dangerous_cause = self.has_dangerous_prop_cause();
+        match (has_children_cause, has_dangerous_cause) {
+            (true, true) => {
+                (markup! {
+                    "Remove the "<Emphasis>"children"</Emphasis>" and the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            }
+            (true, false) => {
+                (markup! {
+                   "Remove the "<Emphasis>"children"</Emphasis>"."
+                }).to_owned()
+            }
+            (false, true) => {
+                (markup! {
+                  "Remove the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            },
+            _ => unreachable!("At least a cause must be set")
+
+        }
     }
 }
