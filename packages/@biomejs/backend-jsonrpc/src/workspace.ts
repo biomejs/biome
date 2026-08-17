@@ -2715,6 +2715,11 @@ See https://biomejs.dev/linter/rules/use-named-capture-group
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
 	/**
+	* Disallow anonymous cascade layers.
+See https://biomejs.dev/linter/rules/use-named-layer 
+	 */
+	useNamedLayer?: UseNamedLayerConfiguration;
+	/**
 	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
 	 */
@@ -4895,6 +4900,9 @@ export type UseMathMinMaxConfiguration =
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNamedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedLayerOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -6852,6 +6860,10 @@ export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
 }
+export interface RuleWithUseNamedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedLayerOptions;
+}
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8641,6 +8653,7 @@ export type UseImportsFirstOptions = {};
 export type UseIncludesOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
+export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
  */
@@ -9986,6 +9999,7 @@ export type Category =
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikLoaderLocation"
@@ -10002,8 +10016,8 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
-	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useTopLevelHeading"

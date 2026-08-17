@@ -2074,6 +2074,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_named_capture_group::UseNamedCaptureGroupOptions>(),
     ));
     result.push((
+        "nursery",
+        "useNamedLayer",
+        TypeId::of::<biome_rule_options::use_named_layer::UseNamedLayerOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useNamespaceKeyword",
         TypeId::of::<biome_rule_options::use_namespace_keyword::UseNamespaceKeywordOptions>(),
