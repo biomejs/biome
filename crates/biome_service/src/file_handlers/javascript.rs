@@ -9,6 +9,7 @@ use super::{
     UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 #[cfg(feature = "js_embeds")]
 use crate::embed::EmbedContent;
 #[cfg(feature = "js_embeds")]
@@ -104,7 +105,6 @@ use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
@@ -228,6 +228,29 @@ impl From<JsxRuntime> for JsEnvironmentSettings {
     }
 }
 
+/// Public properties of the Vue component instance. Vue's compiler exposes them to every
+/// template expression, so they are never declared in user code.
+///
+/// Vue 2-only members (`$children`, `$listeners`, `$scopedSlots`, `$set`, `$delete`, `$on`,
+/// `$off`, `$once`, `$destroy`) are intentionally excluded, because Vue 2 is end of life.
+///
+/// See <https://vuejs.org/api/component-instance.html>
+const VUE_TEMPLATE_INSTANCE_PROPERTIES: [&str; 13] = [
+    "$attrs",
+    "$data",
+    "$el",
+    "$emit",
+    "$forceUpdate",
+    "$nextTick",
+    "$options",
+    "$parent",
+    "$props",
+    "$refs",
+    "$root",
+    "$slots",
+    "$watch",
+];
+
 impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
@@ -349,7 +372,7 @@ impl ServiceLanguage for JsLanguage {
         _language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let preferred_quote = global
@@ -425,6 +448,26 @@ impl ServiceLanguage for JsLanguage {
                     ]
                     .map(Into::into),
                 );
+
+                // Vue's public instance properties are exposed to every template
+                // expression by the compiler, but are never declared in user code.
+                // Inside `<script setup>` they are genuinely undeclared: Vue requires
+                // `useSlots()`, `defineProps()`, etc. instead.
+                if let Some(snippet_source) = file_source.to_js_file_source()
+                    && snippet_source.as_embedding_kind().is_vue()
+                    && !snippet_source.is_embedded_source()
+                {
+                    globals.extend(
+                        VUE_TEMPLATE_INSTANCE_PROPERTIES
+                            .iter()
+                            .copied()
+                            .map(Into::into),
+                    );
+
+                    if snippet_source.as_embedding_kind().is_vue_event_handler() {
+                        globals.push("$event".into());
+                    }
+                }
             } else if source_type.as_embedding_kind().is_astro() {
                 globals.extend(["Astro"].map(Into::into));
             } else if source_type.as_embedding_kind().is_svelte() {
@@ -788,6 +831,26 @@ fn parse_js_matched_embed(
         }
     }
 }
+
+// #[salsa::tracked]
+// fn debug_syntax_tree_impl<'db>(
+//     db: &'db dyn ProjectDb,
+//     project_key: ProjectKey,
+//     path: &'db Utf8Path,
+// ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+//     let settings = db
+//         .get_settings_based_on_path(project_key, path)
+//         .ok_or_else(WorkspaceError::no_project)?;
+//
+//     let parse = db.parsed_source_for_path(path);
+//
+//     let syntax: JsSyntaxNode = parse.syntax(&db);
+//     let tree: AnyJsRoot = parse.tree(&db);
+//     GetSyntaxTreeResult {
+//         cst: format!("{syntax:#?}"),
+//         ast: format!("{tree:#?}"),
+//     }
+// }
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,

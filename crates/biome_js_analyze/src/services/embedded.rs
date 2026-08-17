@@ -1,13 +1,13 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
-use biome_languages::LanguageDb;
-use biome_rowan::TokenText;
-use biome_workspace_db::embedded::bindings::{
+use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
-use biome_workspace_db::embedded::references::{
+use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used,
 };
+use biome_languages::LanguageDb;
+use biome_rowan::TokenText;
 use camino::Utf8PathBuf;
 use std::rc::Rc;
 

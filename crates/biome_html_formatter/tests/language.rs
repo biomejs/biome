@@ -1,3 +1,5 @@
+use biome_configuration::{Configuration, HtmlConfiguration, html::HtmlFormatterConfiguration};
+use biome_formatter::FormatLanguage;
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_html_formatter::HtmlFormatLanguage;
@@ -40,5 +42,27 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
             file_source,
         );
         HtmlFormatLanguage::new(options)
+    }
+
+    fn configure_formatter(
+        &self,
+        configuration: &mut Configuration,
+        format_language: &Self::FormatLanguage,
+    ) {
+        let options = format_language.options();
+        configuration.html = Some(HtmlConfiguration {
+            experimental_full_support_enabled: Some(true.into()),
+            formatter: Some(HtmlFormatterConfiguration {
+                enabled: Some(true.into()),
+                attribute_position: Some(options.attribute_position()),
+                bracket_same_line: Some(options.bracket_same_line()),
+                whitespace_sensitivity: Some(options.whitespace_sensitivity()),
+                indent_script_and_style: Some(options.indent_script_and_style()),
+                self_close_void_elements: Some(options.self_close_void_elements()),
+                trailing_newline: Some(options.trailing_newline()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
     }
 }

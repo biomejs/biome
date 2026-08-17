@@ -91,7 +91,6 @@ pub use crate::{
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 
-pub mod db;
 use crate::module_graph::SerializedModuleInfo;
 use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};

@@ -27,6 +27,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@29..32 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlSingleTextExpression {
@@ -52,12 +53,13 @@ HtmlRoot {
       0: HTML_LITERAL@3..29 "const items = [1, 2, 3];\n" [Newline("\n")] []
     2: FENCE@29..32 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@32..72
+  3: (empty)
+  4: HTML_ELEMENT_LIST@32..72
     0: HTML_SINGLE_TEXT_EXPRESSION@32..72
       0: L_CURLY@32..35 "{" [Newline("\n"), Newline("\n")] []
       1: HTML_TEXT_EXPRESSION@35..71
         0: HTML_LITERAL@35..71 "items.map(item => <div>{item}</div>)" [] []
       2: R_CURLY@71..72 "}" [] []
-  4: EOF@72..73 "" [Newline("\n")] []
+  5: EOF@72..73 "" [Newline("\n")] []
 
 ```

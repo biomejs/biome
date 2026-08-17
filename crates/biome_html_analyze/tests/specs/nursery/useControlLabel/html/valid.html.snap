@@ -1,0 +1,41 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<button>Submit</button>
+
+<button aria-label="Close"></button>
+
+<button aria-labelledby="save-label"></button>
+<span id="save-label">Save</span>
+
+<button title="Close"></button>
+
+<button><span>Delete</span></button>
+
+<button><img src="close.png" alt="Close" /></button>
+
+<!-- A labeling attribute on a non-self-closing child supplies the accessible label. -->
+<button><span aria-label="Delete"></span></button>
+
+<!-- An icon button is named by the title or labeling attribute of its inline SVG. -->
+<button><svg><title>Save</title></svg></button>
+<button><svg aria-label="Save"></svg></button>
+
+<!-- A hidden child alongside real text still leaves the control named. -->
+<button><span aria-hidden="true"></span>Save</button>
+
+<!-- Hidden from the accessibility tree; no label needed. -->
+<button aria-hidden="true"></button>
+
+<!-- Not a control this rule checks; `area` is covered by `useAltText`. -->
+<area href="#" />
+
+<!-- Not a control at all. -->
+<div></div>
+
+```

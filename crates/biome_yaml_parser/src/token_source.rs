@@ -98,7 +98,7 @@ impl TokenSource for YamlTokenSource<'_> {
                 false,
             ));
 
-            self.next_non_trivia_token(false)
+            self.next_non_trivia_token(true)
         }
     }
 

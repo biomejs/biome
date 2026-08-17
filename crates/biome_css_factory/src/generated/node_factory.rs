@@ -4302,6 +4302,34 @@ pub fn scss_parenthesized_expression(
         ],
     ))
 }
+pub fn scss_partial_combinator_selector(
+    combinator_token: SyntaxToken,
+) -> ScssPartialCombinatorSelectorBuilder {
+    ScssPartialCombinatorSelectorBuilder {
+        combinator_token,
+        left: None,
+    }
+}
+pub struct ScssPartialCombinatorSelectorBuilder {
+    combinator_token: SyntaxToken,
+    left: Option<AnyCssSelector>,
+}
+impl ScssPartialCombinatorSelectorBuilder {
+    pub fn with_left(mut self, left: AnyCssSelector) -> Self {
+        self.left = Some(left);
+        self
+    }
+    pub fn build(self) -> ScssPartialCombinatorSelector {
+        ScssPartialCombinatorSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_PARTIAL_COMBINATOR_SELECTOR,
+            [
+                self.left
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.combinator_token)),
+            ],
+        ))
+    }
+}
 pub fn scss_placeholder_selector(
     percent_token: SyntaxToken,
     name: AnyCssSelectorCustomIdentifier,
@@ -5858,6 +5886,16 @@ where
 {
     CssBogusCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER,
+        slots,
+    ))
+}
+pub fn css_bogus_declaration<I>(slots: I) -> CssBogusDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_DECLARATION,
         slots,
     ))
 }

@@ -20,6 +20,10 @@ name    = "js_analyzer"
 harness = false
 name    = "use_sorted_classes_parser"
 
+[[bench]]
+harness = false
+name    = "use_sorted_classes_v4"
+
 [dependencies]
 biome_analyze             = { workspace = true }
 biome_analyze_macros      = { workspace = true }
@@ -31,6 +35,7 @@ biome_db                  = { workspace = true }
 biome_deserialize         = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros  = { workspace = true }
 biome_diagnostics         = { workspace = true }
+biome_embeds              = { workspace = true }
 biome_fs                  = { workspace = true }
 biome_glob                = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_js_factory          = { workspace = true }
@@ -44,11 +49,13 @@ biome_module_replacements = { workspace = true }
 biome_package             = { workspace = true }
 biome_parser              = { workspace = true }
 biome_project_layout      = { workspace = true }
+biome_react_compiler      = { workspace = true }
 biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
 biome_rule_options        = { workspace = true }
 biome_string_case         = { workspace = true, features = ["biome_rowan"] }
 biome_suppression         = { workspace = true }
+biome_tailwind_logic      = { workspace = true }
 biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }

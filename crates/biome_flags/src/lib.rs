@@ -33,33 +33,154 @@ impl BiomeEnv {
     pub const ENV_VARIABLES: &[&BiomeEnvVariable] = &[
         &BiomeEnvVariable::new(
             "BIOME_DISTRIBUTION",
-            "Override the detected distribution channel of Biome. Acceptable values: npm, homebrew or standalone",
+            r#"Overrides the installation source detected by `biome upgrade`.
+
+The following installation sources are supported:
+
+- `npm`: updates Biome by running an npm-compatible package manager command.
+- `homebrew`: updates Biome by running `brew upgrade biome`.
+- `standalone`: updates the standalone Biome binary directly.
+
+Use this when `biome upgrade` cannot correctly detect how Biome was installed, such as a Homebrew installation under a custom prefix.
+
+```shell
+BIOME_DISTRIBUTION=homebrew biome upgrade
+```"#,
+        ),
+        &BiomeEnvVariable::new(
+            "BIOME_LOG_FILE",
+            r#"Writes internal CLI logs from commands such as `check`, `lint`, `format`, and `ci` to the specified file.
+
+Use this to save detailed CLI logs while investigating unexpected behavior.
+
+```shell
+BIOME_LOG_FILE=biome-debug.log BIOME_LOG_LEVEL=debug biome check .
+```"#,
         ),
         &BiomeEnvVariable::new(
             "BIOME_LOG_PATH",
-            "The directory where the logs of the Biome Daemon are stored.",
+            r#"Directory where the Biome daemon stores its log files.
+
+Use this to keep daemon logs in a project-specific directory while troubleshooting an editor integration.
+
+```shell
+BIOME_LOG_PATH="$PWD/.biome-logs" biome start
+```"#,
         ),
         &BiomeEnvVariable::new(
             "BIOME_LOG_PREFIX_NAME",
-            "A prefix that's added to the name of the log. Default: `server.log.`",
+            r#"Prefix added to daemon log file names. Defaults to `server.log`.
+
+Use this to distinguish logs from different projects that share a log directory.
+
+```shell
+BIOME_LOG_PREFIX_NAME=my-project.log biome start
+```"#,
         ),
         &BiomeEnvVariable::new(
             "BIOME_LOG_LEVEL",
-            "The level of logging. Possible values: none, tracing, debug, info, warn, error. Default: info.",
+            r#"Controls internal logging for commands such as `check`, `lint`, `format`, and `ci`. Defaults to `none`.
+
+The following logging levels are supported:
+
+- `none`: Disables internal logging.
+- `info`: Shows general information about Biome's operation.
+- `warn`: Shows warnings and errors.
+- `error`: Shows only errors.
+- `debug`: Shows detailed information useful for debugging.
+- `tracing`: Shows the most detailed logs, including span timing.
+
+Use this to inspect Biome's internal CLI activity while checking a project.
+
+```shell
+BIOME_LOG_LEVEL=debug biome check .
+```"#,
         ),
         &BiomeEnvVariable::new(
             "BIOME_LOG_KIND",
-            "What the log should look like. Possible values: pretty, compact, json. Default: pretty.",
+            r#"Controls the internal log format for commands such as `check`, `lint`, `format`, and `ci`. Defaults to `pretty`.
+
+The following log formats are supported:
+
+- `pretty`: Displays human-readable, multiline logs with terminal styling.
+- `compact`: Displays logs in a condensed, human-readable format.
+- `json`: Displays machine-readable JSON logs.
+
+Use this to collect machine-readable internal logs in CI. Set `BIOME_LOG_LEVEL` to enable logging.
+
+```shell
+BIOME_LOG_LEVEL=info BIOME_LOG_KIND=json biome ci .
+```"#,
         ),
-        &BiomeEnvVariable::new("BIOME_CONFIG_PATH", "A path to the configuration file"),
-        &BiomeEnvVariable::new("BIOME_THREADS", "The number of threads to use in CI."),
+        &BiomeEnvVariable::new(
+            "BIOME_CONFIG_PATH",
+            r#"Path to a Biome configuration file or directory.
+
+Use this to apply a shared configuration stored outside the current directory.
+
+```shell
+BIOME_CONFIG_PATH="$HOME/.config/biome/biome.json" biome check .
+```"#,
+        ),
+        &BiomeEnvVariable::new(
+            "BIOME_THREADS",
+            r#"Number of worker threads used by `biome ci`. Defaults to automatic selection.
+
+Use this to limit CPU usage in a constrained CI runner.
+
+```shell
+BIOME_THREADS=2 biome ci .
+```"#,
+        ),
         &BiomeEnvVariable::new(
             "BIOME_WATCHER_KIND",
-            "The kind of watcher to use. Possible values: polling, recommended, none. Default: recommended.",
+            r#"Selects the file watcher used by the Biome daemon. Defaults to `recommended`.
+
+The following file-watching strategies are supported:
+
+- `recommended`: Uses the strategy recommended by the operating system.
+- `polling`: Periodically checks for changes. This can be slower but may work better on mounted or network filesystems.
+- `none`: Disables file watching. The daemon and editor integrations will not detect file changes.
+
+Use polling when native file notifications are unreliable, such as on a network drive or mounted filesystem.
+
+```shell
+BIOME_WATCHER_KIND=polling biome start
+```"#,
         ),
         &BiomeEnvVariable::new(
             "BIOME_WATCHER_POLLING_INTERVAL",
-            "The polling interval in milliseconds. This is only applicable when using the polling watcher. Default: 2000.",
+            r#"Polling interval, in milliseconds, used by the Biome daemon when `BIOME_WATCHER_KIND` is set to `polling`. Defaults to `2000` milliseconds (two seconds).
+
+Use this to adjust how quickly the polling watcher detects changes.
+
+```shell
+BIOME_WATCHER_KIND=polling BIOME_WATCHER_POLLING_INTERVAL=1000 biome start
+```"#,
+        ),
+        &BiomeEnvVariable::new(
+            "BIOME_BINARY",
+            r#"Overrides the Biome binary used by the `@biomejs/biome` npm package. If this variable is not set, the package automatically selects the correct binary for your platform.
+
+Use this to run a system-installed or locally built binary through the `@biomejs/biome` package.
+
+```shell
+BIOME_BINARY=/usr/local/bin/biome npx @biomejs/biome check
+```"#,
+        ),
+        &BiomeEnvVariable::new(
+            "RUST_BACKTRACE",
+            r#"Captures a backtrace if Biome panics, which can help identify where the panic occurred.
+
+Use this when reporting a Biome panic to include a stack trace that can help locate the problem.
+
+```shell
+RUST_BACKTRACE=1 biome check .
+```
+
+:::note
+`RUST_BACKTRACE` is a Rust environment variable, not a Biome-specific option. Biome supports it because it is built with Rust and uses Rust's backtrace support when reporting a panic.
+:::"#,
         ),
     ];
 }

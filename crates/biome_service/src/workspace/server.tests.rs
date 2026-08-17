@@ -165,8 +165,22 @@ fn change_file_resumes_module_update_after_cancellation() {
         Utf8PathBuf::from(INDEX_PATH),
         b"import { task } from './base';\ntask();",
     );
-    let (mut workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
-    workspace.db_state = db::DbState::lsp();
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
 
     workspace
         .update_settings(UpdateSettingsParams {

@@ -59,8 +59,12 @@ TwCandidateList = AnyTwFullCandidate*
 AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 
 // A Candidate is essentially a CSS class from an end user perspective. It's what the end user puts inside the `class` attribute in their HTML, separated by spaces.
+// The important flag is written as a trailing `!` (`flex!`); the leading
+// form (`!flex`) is Tailwind's legacy spelling and is still accepted, but a
+// candidate can't carry both.
 TwFullCandidate =
 	variants: TwVariantList
+	legacy_important: '!'?
 	negative: '-'?
 	candidate: AnyTwCandidate
 	'!'?
@@ -80,12 +84,17 @@ TwArbitraryCandidate =
 	']'
 	modifier: AnyTwModifier?
 
-// Static candidates are candidates that don't take any arguments.
+// Static candidates are candidates that don't take any arguments. A
+// modifier can still follow the bare name: `@container/sidebar` names
+// the container, and invalid forms like `flex/50` must stay one
+// candidate so the class survives as a unit.
 //
 // underline
 // box-border
+// @container/sidebar
 TwStaticCandidate =
 	base: 'tw_base'
+	modifier: AnyTwModifier?
 
 // Functional candidates are candidates that can take an argument.
 //
@@ -115,6 +124,10 @@ TwArbitraryVariant =
 	']'
 
 // Non-arbitrary variants are represented as syntax-level segment lists.
+// A bracketed value can glue directly to the last segment with no `-`
+// separator (`@[400px]:` is the container root plus an arbitrary size),
+// and a variant can carry a modifier: named group/peer scopes
+// (`group-hover/menu:`) and named container queries (`@sm/main:`).
 //
 // hover:text-red-500
 // ^^^^^
@@ -122,6 +135,8 @@ TwArbitraryVariant =
 // ^^^^^^^^^^^^^^^^^^^^^^^
 TwVariantExpression =
 	segments: TwVariantSegmentList
+	glued_value: TwArbitraryVariantSegment?
+	modifier: AnyTwModifier?
 
 TwVariantSegmentList =
 	AnyTwVariantSegment ('-' AnyTwVariantSegment)*
@@ -137,7 +152,7 @@ TwNamedVariantSegment =
 
 TwArbitraryVariantSegment =
 	'['
-	value: CssGenericComponentValueList
+	value: 'tw_selector'
 	']'
 
 TwCssVariableVariantSegment =

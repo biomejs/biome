@@ -1,3 +1,5 @@
+#[cfg(feature = "module_graph")]
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 #[cfg(feature = "module_graph")]
@@ -16,8 +18,6 @@ use biome_module_graph::{
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, AstSeparatedList, TextSize, TokenAtOffset, TokenText};
-#[cfg(feature = "module_graph")]
-use biome_workspace_db::WorkspaceDb;
 #[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 use std::ops::Add;

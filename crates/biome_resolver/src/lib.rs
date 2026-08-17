@@ -226,9 +226,11 @@ fn resolve_module_with_package_json(
         DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
         DiscoverableManifest::Off => Err(ResolveError::NotFound),
     };
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
-        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
-    }) {
+    if let Some(path) = tsconfig
+        .as_ref()
+        .ok()
+        .and_then(|tsconfig| resolve_paths_mapping(specifier, tsconfig, fs, options).ok())
+    {
         return Ok(path);
     }
 
@@ -433,7 +435,6 @@ fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
 fn resolve_paths_mapping(
     specifier: &str,
     tsconfig_json: &TsConfigJson,
-    package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
@@ -444,16 +445,12 @@ fn resolve_paths_mapping(
         .ok_or(ResolveError::NotFound)?;
 
     let resolve_specifier = |specifier: &str| {
-        if is_relative_specifier(specifier) {
-            resolve_relative_path(
-                specifier,
-                &tsconfig_json.compiler_options.paths_base,
-                fs,
-                options,
-            )
-        } else {
-            resolve_dependency(specifier, package_path, fs, options)
-        }
+        resolve_relative_path(
+            specifier,
+            &tsconfig_json.compiler_options.paths_base,
+            fs,
+            options,
+        )
     };
 
     let resolve_target = |target: &str, glob_replacement: Option<&str>| match glob_replacement {

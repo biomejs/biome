@@ -19,9 +19,11 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@0..7 "border" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -33,9 +35,12 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@7..12 "focus" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@12..13 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@13..20 "outline" [] [],
@@ -61,24 +66,29 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..7
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_STATIC_CANDIDATE@0..7
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..7
         0: TW_BASE@0..7 "border" [] [Whitespace(" ")]
-      3: (empty)
+        1: (empty)
+      4: (empty)
     1: TW_FULL_CANDIDATE@7..25
       0: TW_VARIANT_LIST@7..13
         0: TW_VARIANT_EXPRESSION@7..12
           0: TW_VARIANT_SEGMENT_LIST@7..12
             0: TW_NAMED_VARIANT_SEGMENT@7..12
               0: TW_VARIANT_SEGMENT@7..12 "focus" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@12..13 ":" [] []
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@13..25
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@13..25
         0: TW_BASE@13..20 "outline" [] []
         1: DASH@20..21 "-" [] []
         2: TW_NAMED_VALUE@21..25
           0: TW_VALUE@21..25 "none" [] []
         3: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@25..26 "" [Newline("\n")] []
 
 ```

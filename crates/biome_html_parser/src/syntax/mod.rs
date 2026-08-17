@@ -140,6 +140,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // content from being incorrectly lexed as a FENCE token.
     p.set_after_frontmatter(true);
 
+    parse_processing_instruction(p).ok();
     parse_doc_type(p).ok();
     // Only a real `.vue` document has single-file-component blocks. Plain HTML
     // parsed with the Vue extensions turned on keeps ordinary element nesting,
@@ -167,6 +168,8 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 
     if p.at(T![html]) {
         p.eat_with_context(T![html], HtmlLexContext::Doctype);
+    } else if p.at(HTML_LITERAL) {
+        p.eat_with_context(HTML_LITERAL, HtmlLexContext::Doctype);
     }
 
     if p.at(HTML_LITERAL) {
@@ -189,17 +192,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// The framework flavor of the file currently being parsed.
 #[inline(always)]
 fn html_framework(p: &HtmlParser) -> HtmlFramework {
-    if Vue.is_supported(p) {
-        HtmlFramework::Vue
-    } else if Svelte.is_supported(p) {
-        HtmlFramework::Svelte
-    } else if Astro.is_supported(p) {
-        HtmlFramework::Astro
-    } else if Angular.is_supported(p) {
-        HtmlFramework::Angular
-    } else {
-        HtmlFramework::Plain
-    }
+    p.options().framework()
 }
 
 /// The lexer context to use inside a `<...>` tag. `framework` selects the directive
@@ -213,6 +206,20 @@ fn html_framework(p: &HtmlParser) -> HtmlFramework {
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     HtmlLexContext::InsideTag {
+        framework: html_framework(p),
+    }
+}
+
+#[inline(always)]
+fn regular_context(p: &HtmlParser) -> HtmlLexContext {
+    HtmlLexContext::Regular {
+        framework: html_framework(p),
+    }
+}
+
+#[inline(always)]
+fn html_text_re_lex_context(p: &HtmlParser) -> HtmlReLexContext {
+    HtmlReLexContext::HtmlText {
         framework: html_framework(p),
     }
 }
@@ -391,14 +398,14 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
 
     if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
-        p.expect_with_context(T![>], HtmlLexContext::Regular);
+        p.expect_with_context(T![>], regular_context(p));
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
         if should_be_self_closing {
             if p.at(T![/]) {
                 p.bump_with_context(T![/], inside_tag_context(p));
             }
-            p.expect_with_context(T![>], HtmlLexContext::Regular);
+            p.expect_with_context(T![>], regular_context(p));
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
         p.expect_with_context(
@@ -422,7 +429,7 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
                     _ => unreachable!(),
                 })
             } else {
-                HtmlLexContext::Regular
+                regular_context(p)
             },
         );
 
@@ -430,7 +437,7 @@ fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> Pa
 
         // if the lexer found a keyword, rewind and lex as text
         if is_at_keyword(p) {
-            p.re_lex(HtmlReLexContext::HtmlText);
+            p.re_lex(html_text_re_lex_context(p));
         }
 
         if is_raw_text {
@@ -534,7 +541,7 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool)
         T![<] => parse_element(p, at_vue_sfc_top_level),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
-            |p| parse_double_text_expression(p, HtmlLexContext::Regular),
+            |p| parse_double_text_expression(p, regular_context(p)),
             |p, m| disabled_interpolation(p, m.range(p)),
         ),
         T!["{@"] => parse_svelte_at_block(p),
@@ -556,13 +563,13 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool)
         // handled them first.
         _ if is_at_keyword(p) => {
             let m = p.start();
-            p.re_lex(HtmlReLexContext::HtmlText);
-            p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
+            p.re_lex(html_text_re_lex_context(p));
+            p.bump_with_context(HTML_LITERAL, regular_context(p));
             Present(m.complete(p, HTML_CONTENT))
         }
         HTML_LITERAL => {
             let m = p.start();
-            p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
+            p.bump_with_context(HTML_LITERAL, regular_context(p));
             Present(m.complete(p, HTML_CONTENT))
         }
         _ => Absent,
@@ -587,10 +594,7 @@ impl ParseNodeList for ElementList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        let at_l_angle0 = p.at(T![<]);
-        let at_slash1 = p.nth_at(1, T![/]);
-        let at_eof = p.at(EOF);
-        at_l_angle0 && at_slash1 || at_eof
+        p.at(EOF) || p.at(T![<]) && p.nth_at(1, T![/])
     }
 
     fn recover(
@@ -798,14 +802,14 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
 
     if p.at(T!["{{"]) {
         if HtmlSyntaxFeatures::DoubleTextExpressions.is_supported(p) {
-            parse_double_text_expression(p, HtmlLexContext::Regular).ok();
+            parse_double_text_expression(p, regular_context(p)).ok();
         } else {
             p.bump_remap_with_context(
                 HTML_LITERAL,
                 match kind {
                     HTML_TAG_NAME | HTML_ATTRIBUTE_NAME | HTML_COMPONENT_NAME
                     | HTML_MEMBER_NAME => inside_tag_context(p),
-                    _ => HtmlLexContext::Regular,
+                    _ => regular_context(p),
                 },
             )
         }
@@ -816,7 +820,7 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
                 HTML_TAG_NAME | HTML_ATTRIBUTE_NAME | HTML_COMPONENT_NAME | HTML_MEMBER_NAME => {
                     inside_tag_context(p)
                 }
-                _ => HtmlLexContext::Regular,
+                _ => regular_context(p),
             },
         );
     } else {
@@ -826,7 +830,7 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
                 HTML_TAG_NAME | HTML_ATTRIBUTE_NAME | HTML_COMPONENT_NAME | HTML_MEMBER_NAME => {
                     inside_tag_context(p)
                 }
-                _ => HtmlLexContext::Regular,
+                _ => regular_context(p),
             },
         );
     }

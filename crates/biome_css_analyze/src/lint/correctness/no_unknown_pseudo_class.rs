@@ -1,11 +1,11 @@
-#![expect(clippy::disallowed_methods, reason = "This rule needs the complete pseudo-class syntax.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule needs the complete pseudo-class syntax."
+)]
 
-use crate::{
-    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
-    utils::{
-        is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class,
-        is_page_pseudo_class, vendor_prefixed,
-    },
+use crate::utils::{
+    is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class, is_page_pseudo_class,
+    vendor_prefixed,
 };
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -18,6 +18,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
     CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
     CssPseudoElementSelector, CssSyntaxToken, ScssInterpolatedPseudoClassFunction,
+    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;

@@ -2443,6 +2443,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
+See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
+	 */
+	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
+	/**
 	* Disallow specific object properties.
 See https://biomejs.dev/linter/rules/no-js-restricted-properties 
 	 */
@@ -2558,6 +2563,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow legacy Svelte {@const} tags.
+See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
+	 */
+	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
+	/**
 	* Disallow unnecessary $state wrapping of reactive classes.
 See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap 
 	 */
@@ -2587,6 +2597,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-template-expression
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
+	/**
+	* Disallow TypeScript type assertions other than const assertions.
+See https://biomejs.dev/linter/rules/no-unsafe-type-assertion 
+	 */
+	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
@@ -2645,6 +2660,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
+	/**
+	* Enforce that interactive control elements have an accessible label.
+See https://biomejs.dev/linter/rules/use-control-label 
+	 */
+	useControlLabel?: UseControlLabelConfiguration;
 	/**
 	* Detects a disposable object assigned to a variable without using or await using syntax.
 See https://biomejs.dev/linter/rules/use-disposables 
@@ -2726,6 +2746,11 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
+	* Validate files with React Compiler.
+See https://biomejs.dev/linter/rules/use-react-compiler 
+	 */
+	useReactCompiler?: UseReactCompilerConfiguration;
+	/**
 	* Enforce a specific function type for React function components.
 See https://biomejs.dev/linter/rules/use-react-function-component-definition 
 	 */
@@ -2770,6 +2795,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
 	 */
 	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
+	/**
+	* Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
+See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes 
+	 */
+	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
 	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
@@ -4712,6 +4742,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidPropertyInitValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidPropertyInitValueOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -4781,6 +4814,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoSvelteLegacyConstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteLegacyConstOptions;
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
@@ -4799,6 +4835,9 @@ export type NoUnnecessaryTemplateExpressionConfiguration =
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
+export type NoUnsafeTypeAssertionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeTypeAssertionOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -4829,6 +4868,9 @@ export type UseBaselineConfiguration =
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
+export type UseControlLabelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseControlLabelOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
@@ -4877,6 +4919,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactCompilerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactCompilerOptions;
 export type UseReactFunctionComponentDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactFunctionComponentDefinitionOptions;
@@ -4904,6 +4949,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
+export type UseTailwindShorthandClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindShorthandClassesOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -6594,6 +6642,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoInvalidPropertyInitValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidPropertyInitValueOptions;
+}
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsRestrictedPropertiesOptions;
@@ -6693,6 +6745,10 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoSvelteLegacyConstOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteLegacyConstOptions;
+}
 export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6718,6 +6774,10 @@ export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
+}
+export interface RuleWithNoUnsafeTypeAssertionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeTypeAssertionOptions;
 }
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
@@ -6760,6 +6820,10 @@ export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentTestItOptions;
+}
+export interface RuleWithUseControlLabelOptions {
+	level: RulePlainConfiguration;
+	options?: UseControlLabelOptions;
 }
 export interface RuleWithUseDisposablesOptions {
 	fix?: FixKind;
@@ -6833,6 +6897,10 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactCompilerOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactCompilerOptions;
+}
 export interface RuleWithUseReactFunctionComponentDefinitionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6874,6 +6942,11 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
+}
+export interface RuleWithUseTailwindShorthandClassesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindShorthandClassesOptions;
 }
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
@@ -8386,6 +8459,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	* Restriction entries for object/property access.
@@ -8428,6 +8502,7 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
@@ -8460,6 +8535,7 @@ export type NoTopLevelLiteralsOptions = {};
 export type NoUndeclaredClassesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
+export type NoUnsafeTypeAssertionOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -8549,6 +8625,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+/**
+ * Configuration for the `useControlLabel` lint rule.
+ */
+export type UseControlLabelOptions = {};
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export interface UseDomQuerySelectorOptions {
@@ -8620,6 +8700,12 @@ export interface UseNullishCoalescingOptions {
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactCompilerOptions {
+	/**
+	 * Which functions React Compiler analyzes. Defaults to `infer`.
+	 */
+	compilationMode?: CompilationMode;
+}
 export interface UseReactFunctionComponentDefinitionOptions {
 	/**
 	 * The function style to enforce for named React components.
@@ -8654,6 +8740,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseStringStartsEndsWithOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
+export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -9391,6 +9478,10 @@ export type TestFunctionKind = "it" | "test";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
+/**
+ * Controls which functions React Compiler analyzes.
+ */
+export type CompilationMode = "infer" | "annotation" | "all";
 export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
@@ -9855,6 +9946,7 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
@@ -9879,12 +9971,14 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
+	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -9897,8 +9991,10 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
+	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useDomQuerySelector"
@@ -9923,6 +10019,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
@@ -9933,8 +10030,10 @@ export type Category =
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTestHooksInOrder"
+	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
+	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

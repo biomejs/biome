@@ -9518,6 +9518,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParenthesizedExpress
         FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: parenthesized_expression :: FormatScssParenthesizedExpression :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::ScssPartialCombinatorSelector>
+    for crate::scss::selectors::partial_combinator_selector::FormatScssPartialCombinatorSelector
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssPartialCombinatorSelector,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssPartialCombinatorSelector>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssPartialCombinatorSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssPartialCombinatorSelector,
+        crate::scss::selectors::partial_combinator_selector::FormatScssPartialCombinatorSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: selectors :: partial_combinator_selector :: FormatScssPartialCombinatorSelector :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssPartialCombinatorSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssPartialCombinatorSelector,
+        crate::scss::selectors::partial_combinator_selector::FormatScssPartialCombinatorSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: selectors :: partial_combinator_selector :: FormatScssPartialCombinatorSelector :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssPlaceholderSelector>
     for crate::scss::selectors::placeholder_selector::FormatScssPlaceholderSelector
 {
@@ -12032,6 +12064,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusCustomIdentifier
         FormatOwnedWithRule::new(
             self,
             crate::css::bogus::bogus_custom_identifier::FormatCssBogusCustomIdentifier::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusDeclaration>
+    for crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusDeclaration,
+        crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusDeclaration,
+        crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_declaration::FormatCssBogusDeclaration::default(),
         )
     }
 }

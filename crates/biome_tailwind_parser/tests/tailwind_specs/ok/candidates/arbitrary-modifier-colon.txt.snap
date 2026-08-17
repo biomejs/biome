@@ -1,0 +1,249 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-red-500/[color:var(--alpha)] group-hover/[a:b]:flex @[400px]/[n:m]:flex
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@3..10 "red-500" [] [],
+                },
+                modifier: TwModifier {
+                    slash_token: SLASH@10..11 "/" [] [],
+                    value: TwArbitraryValue {
+                        l_brack_token: L_BRACKET@11..12 "[" [] [],
+                        value: CssGenericComponentValueList [
+                            CssIdentifier {
+                                ident_token: IDENT@12..17 "color" [] [],
+                            },
+                            CssGenericDelimiter {
+                                value: COLON@17..18 ":" [] [],
+                            },
+                            CssFunction {
+                                name: CssIdentifier {
+                                    ident_token: IDENT@18..21 "var" [] [],
+                                },
+                                l_paren_token: L_PAREN@21..22 "(" [] [],
+                                parameters: CssParameterList [
+                                    CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssDashedIdentifier {
+                                                ident_token: IDENT@22..29 "--alpha" [] [],
+                                            },
+                                        ],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@29..30 ")" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACKET@30..32 "]" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@32..37 "group" [] [],
+                        },
+                        DASH@37..38 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@38..43 "hover" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: TwModifier {
+                        slash_token: SLASH@43..44 "/" [] [],
+                        value: TwArbitraryValue {
+                            l_brack_token: L_BRACKET@44..45 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    ident_token: IDENT@45..46 "a" [] [],
+                                },
+                                CssGenericDelimiter {
+                                    value: COLON@46..47 ":" [] [],
+                                },
+                                CssIdentifier {
+                                    ident_token: IDENT@47..48 "b" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@48..49 "]" [] [],
+                        },
+                    },
+                },
+                COLON@49..50 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@50..55 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@55..56 "@" [] [],
+                        },
+                    ],
+                    glued_value: TwArbitraryVariantSegment {
+                        l_brack_token: L_BRACKET@56..57 "[" [] [],
+                        value_token: TW_SELECTOR@57..62 "400px" [] [],
+                        r_brack_token: R_BRACKET@62..63 "]" [] [],
+                    },
+                    modifier: TwModifier {
+                        slash_token: SLASH@63..64 "/" [] [],
+                        value: TwArbitraryValue {
+                            l_brack_token: L_BRACKET@64..65 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    ident_token: IDENT@65..66 "n" [] [],
+                                },
+                                CssGenericDelimiter {
+                                    value: COLON@66..67 ":" [] [],
+                                },
+                                CssIdentifier {
+                                    ident_token: IDENT@67..68 "m" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@68..69 "]" [] [],
+                        },
+                    },
+                },
+                COLON@69..70 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@70..74 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@74..75 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..75
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..74
+    0: TW_FULL_CANDIDATE@0..32
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..32
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_NAMED_VALUE@3..10
+          0: TW_VALUE@3..10 "red-500" [] []
+        3: TW_MODIFIER@10..32
+          0: SLASH@10..11 "/" [] []
+          1: TW_ARBITRARY_VALUE@11..32
+            0: L_BRACKET@11..12 "[" [] []
+            1: CSS_GENERIC_COMPONENT_VALUE_LIST@12..30
+              0: CSS_IDENTIFIER@12..17
+                0: IDENT@12..17 "color" [] []
+              1: CSS_GENERIC_DELIMITER@17..18
+                0: COLON@17..18 ":" [] []
+              2: CSS_FUNCTION@18..30
+                0: CSS_IDENTIFIER@18..21
+                  0: IDENT@18..21 "var" [] []
+                1: L_PAREN@21..22 "(" [] []
+                2: CSS_PARAMETER_LIST@22..29
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@22..29
+                    0: CSS_COMPONENT_VALUE_LIST@22..29
+                      0: CSS_DASHED_IDENTIFIER@22..29
+                        0: IDENT@22..29 "--alpha" [] []
+                3: R_PAREN@29..30 ")" [] []
+            2: R_BRACKET@30..32 "]" [] [Whitespace(" ")]
+      4: (empty)
+    1: TW_FULL_CANDIDATE@32..55
+      0: TW_VARIANT_LIST@32..50
+        0: TW_VARIANT_EXPRESSION@32..49
+          0: TW_VARIANT_SEGMENT_LIST@32..43
+            0: TW_NAMED_VARIANT_SEGMENT@32..37
+              0: TW_VARIANT_SEGMENT@32..37 "group" [] []
+            1: DASH@37..38 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@38..43
+              0: TW_VARIANT_SEGMENT@38..43 "hover" [] []
+          1: (empty)
+          2: TW_MODIFIER@43..49
+            0: SLASH@43..44 "/" [] []
+            1: TW_ARBITRARY_VALUE@44..49
+              0: L_BRACKET@44..45 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@45..48
+                0: CSS_IDENTIFIER@45..46
+                  0: IDENT@45..46 "a" [] []
+                1: CSS_GENERIC_DELIMITER@46..47
+                  0: COLON@46..47 ":" [] []
+                2: CSS_IDENTIFIER@47..48
+                  0: IDENT@47..48 "b" [] []
+              2: R_BRACKET@48..49 "]" [] []
+        1: COLON@49..50 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@50..55
+        0: TW_BASE@50..55 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@55..74
+      0: TW_VARIANT_LIST@55..70
+        0: TW_VARIANT_EXPRESSION@55..69
+          0: TW_VARIANT_SEGMENT_LIST@55..56
+            0: TW_NAMED_VARIANT_SEGMENT@55..56
+              0: TW_VARIANT_SEGMENT@55..56 "@" [] []
+          1: TW_ARBITRARY_VARIANT_SEGMENT@56..63
+            0: L_BRACKET@56..57 "[" [] []
+            1: TW_SELECTOR@57..62 "400px" [] []
+            2: R_BRACKET@62..63 "]" [] []
+          2: TW_MODIFIER@63..69
+            0: SLASH@63..64 "/" [] []
+            1: TW_ARBITRARY_VALUE@64..69
+              0: L_BRACKET@64..65 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@65..68
+                0: CSS_IDENTIFIER@65..66
+                  0: IDENT@65..66 "n" [] []
+                1: CSS_GENERIC_DELIMITER@66..67
+                  0: COLON@66..67 ":" [] []
+                2: CSS_IDENTIFIER@67..68
+                  0: IDENT@67..68 "m" [] []
+              2: R_BRACKET@68..69 "]" [] []
+        1: COLON@69..70 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@70..74
+        0: TW_BASE@70..74 "flex" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@74..75 "" [Newline("\n")] []
+
+```
