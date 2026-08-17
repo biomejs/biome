@@ -16,7 +16,7 @@ y = x && true;
 
 # Diagnostics
 ```
-invalid.ts:6:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:6:5 lint/complexity/useSimplifiedLogicExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Logical expression contains unnecessary complexity.
   
@@ -27,15 +27,11 @@ invalid.ts:6:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━�
     7 │ y = x && true;
     8 │ 
   
-  i Unsafe fix: Discard redundant terms from the logical expression.
-  
-    6 │ y·=·x·||·false;
-      │      --------- 
 
 ```
 
 ```
-invalid.ts:7:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:5 lint/complexity/useSimplifiedLogicExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Logical expression contains unnecessary complexity.
   
@@ -45,9 +41,5 @@ invalid.ts:7:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━�
       │     ^^^^^^^^^
     8 │ 
   
-  i Unsafe fix: Discard redundant terms from the logical expression.
-  
-    7 │ y·=·x·&&·true;
-      │      -------- 
 
 ```

@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_diagnostics::{Applicability, Severity};
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
@@ -176,15 +176,16 @@ impl Rule for UseSimplifiedLogicExpression {
             "Discard redundant terms from the logical expression."
         };
 
-        let applicability = if *is_safe {
-            Applicability::Always
-        } else {
-            Applicability::MaybeIncorrect
-        };
+        if !is_safe {
+            // Without type information we cannot verify that the non-literal operand is
+            // boolean, so we suppress the auto-fix to avoid silently changing runtime
+            // behaviour (e.g. `x || false` where `x: boolean | undefined`).
+            return None;
+        }
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
-            applicability,
+            ctx.metadata().applicability(),
             markup! { ""{message}"" }.to_owned(),
             mutation,
         ))
