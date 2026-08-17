@@ -317,6 +317,8 @@ Available options:
                               set to `true`. Defaults to `false`.
         --profile-rules       Reports how long each rule takes to run. It excludes the time spent
                               preparing the analysis, such as building the semantic model.
+        --profile-type-inference  Enables type-inference profiling output, grouped and ranked by
+                              source file.
         --stdin-file-path=PATH  Reads code from standard input and writes the processed code to
                               standard output.
                               Biome uses `PATH` to select settings and determine the input type from
