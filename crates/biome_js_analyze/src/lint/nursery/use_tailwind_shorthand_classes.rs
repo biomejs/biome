@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// to a recognized helper function such as `clsx`.
     ///
     pub UseTailwindShorthandClasses {
-        version: "next",
+        version: "2.5.9",
         name: "useTailwindShorthandClasses",
         language: "jsx",
         domains: &[RuleDomain::Tailwind],

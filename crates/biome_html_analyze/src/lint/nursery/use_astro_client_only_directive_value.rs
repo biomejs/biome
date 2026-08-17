@@ -38,7 +38,7 @@ declare_lint_rule! {
     ///
     /// - [Astro client directives](https://docs.astro.build/en/reference/directives-reference/#clientonly)
     pub UseAstroClientOnlyDirectiveValue {
-        version: "next",
+        version: "2.5.9",
         name: "useAstroClientOnlyDirectiveValue",
         language: "html",
         recommended: false,
