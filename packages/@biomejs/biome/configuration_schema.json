@@ -7188,6 +7188,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedLayer": {
+					"description": "Disallow anonymous cascade layers.\nSee https://biomejs.dev/linter/rules/use-named-layer",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedLayerConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNullishCoalescing": {
 					"description": "Enforce using the nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
 					"anyOf": [
@@ -12080,6 +12087,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedLayerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedLayerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamespaceKeywordOptions": {
 			"type": "object",
 			"properties": {
@@ -16080,6 +16096,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseNamedLayerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedLayerOptions" }
+			]
+		},
+		"UseNamedLayerOptions": { "type": "object", "additionalProperties": false },
 		"UseNamespaceKeywordConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
