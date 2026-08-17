@@ -67,8 +67,7 @@ pub fn infer_module_types<'db>(
                 );
                 whole_module
             });
-            let result =
-                resolve_raw_types(db, module, &js_info, ImportResolution::on_demand(module));
+            let result = resolve_raw_types(db, module, &js_info, ImportResolution::on_demand());
             if let Some(whole_module) = whole_module {
                 whole_module.complete();
             }
@@ -179,8 +178,9 @@ pub(crate) fn inference_module_sccs(
 
 // #region EXTERNAL INFERENCE ENTRY POINTS
 
-// The scheduler remains untracked because `infer_module_types` caches each
-// module result while this explicit work list prevents recursive stack growth.
+// The scheduler is shared by tracked and untracked entry points. Its module
+// queries cache inferred tables while this explicit work list prevents
+// recursive stack growth.
 /// Infers a module after preparing its resolved static import and re-export
 /// dependencies.
 ///
@@ -213,16 +213,26 @@ pub fn infer_module_types_bottom_up<'db>(
 pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
-    implementation: TypeInferenceCodeReference,
 ) -> Option<&'db InferredModuleTypes<'db>> {
+    prepare_module_types_bottom_up_for_import_depth(db, module)
+        .then(|| infer_module_types_from_tables(db, module, module))?
+}
+
+#[salsa::tracked]
+fn prepare_module_types_bottom_up_for_import_depth(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
     let whole_module = start_whole_module_inference_at(
         TypeInferenceWholeModuleReason::ImportDepthLimit,
         TypeInferenceProfileOrigin::Inherited,
-        implementation,
+        TypeInferenceCodeReference::new(
+            file!(),
+            line!(),
+            "prepare_module_types_bottom_up_for_import_depth",
+        ),
     );
-    let result = infer_module_types_bottom_up_impl(db, module, ModuleInferenceMode::FromTables);
+    let prepared =
+        infer_module_types_bottom_up_impl(db, module, ModuleInferenceMode::FromTables).is_some();
     whole_module.complete();
-    result
+    prepared
 }
 
 fn infer_module_types_bottom_up_impl<'db>(

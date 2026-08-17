@@ -209,6 +209,8 @@ dependencies = [
  "biome_json_syntax",
  "biome_languages",
  "biome_lsp",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_migrate",
  "biome_module_graph",
  "biome_package",
@@ -300,6 +302,8 @@ dependencies = [
  "biome_js_syntax",
  "biome_json_analyze",
  "biome_json_syntax",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_string_case",
  "proc-macro2",
  "pulldown-cmark",
@@ -348,7 +352,6 @@ dependencies = [
  "biome_module_graph",
  "biome_plugin_loader",
  "biome_project_layout",
- "biome_property_codec",
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",
@@ -443,7 +446,6 @@ dependencies = [
  "biome_db",
  "biome_formatter",
  "biome_languages",
- "biome_property_codec",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -455,11 +457,16 @@ dependencies = [
 name = "biome_css_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_console",
  "biome_css_factory",
  "biome_css_parser",
+ "biome_diagnostics",
+ "biome_formatter",
  "biome_rowan",
  "biome_string_case",
+ "biome_unicode_table",
  "camino",
+ "insta",
  "schemars",
  "serde",
 ]
@@ -547,6 +554,26 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "biome_embeds"
+version = "0.1.0"
+dependencies = [
+ "biome_db",
+ "biome_fs",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_module_graph",
+ "biome_parser",
+ "biome_project_layout",
+ "biome_rowan",
+ "camino",
+ "papaya",
+ "salsa",
 ]
 
 [[package]]
@@ -866,6 +893,7 @@ dependencies = [
  "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_logic",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
  "biome_test_utils",
@@ -980,6 +1008,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_fs",
  "biome_glob",
  "biome_js_factory",
@@ -995,17 +1024,18 @@ dependencies = [
  "biome_parser",
  "biome_plugin_loader",
  "biome_project_layout",
+ "biome_react_compiler",
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_logic",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
- "biome_workspace_db",
  "camino",
  "codspeed-criterion-compat",
  "either",
@@ -1410,6 +1440,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_markdown_analyze"
+version = "0.1.0"
+dependencies = [
+ "biome_analyze",
+ "biome_analyze_macros",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_languages",
+ "biome_markdown_factory",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
+ "biome_rowan",
+ "biome_rule_options",
+ "biome_suppression",
+ "biome_test_utils",
+ "camino",
+ "filetime",
+ "insta",
+ "schemars",
+ "serde",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_markdown_factory"
 version = "0.0.1"
 dependencies = [
@@ -1526,6 +1582,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_formatter",
  "biome_fs",
  "biome_html_formatter",
@@ -1546,7 +1603,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
- "biome_workspace_db",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
@@ -1665,16 +1721,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_property_codec"
-version = "0.1.0"
+name = "biome_react_compiler"
+version = "0.0.0"
 dependencies = [
  "biome_console",
- "biome_css_syntax",
  "biome_diagnostics",
- "biome_formatter",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_line_index",
  "biome_rowan",
- "biome_unicode_table",
- "insta",
+ "indexmap",
+ "react_compiler",
+ "react_compiler_ast",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+ "serde_json",
 ]
 
 [[package]]
@@ -1741,23 +1804,39 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_console",
+ "biome_css_analyze",
+ "biome_css_parser",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_fs",
+ "biome_graphql_analyze",
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_parser",
  "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_json_analyze",
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_markdown_analyze",
+ "biome_markdown_parser",
+ "biome_markdown_syntax",
  "biome_module_graph",
  "biome_project_layout",
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
- "biome_workspace_db",
+ "biome_text_edit",
  "camino",
 ]
 
@@ -1776,6 +1855,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_formatter",
  "biome_fs",
  "biome_glob",
@@ -1804,6 +1884,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_markdown_analyze",
  "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
@@ -1818,10 +1899,10 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
- "biome_workspace_db",
  "biome_yaml_formatter",
  "biome_yaml_parser",
  "biome_yaml_syntax",
+ "boxcar",
  "bpaf",
  "camino",
  "codspeed-divan-compat",
@@ -1887,6 +1968,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_tailwind_logic"
+version = "0.1.0"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_diagnostics",
+ "biome_html_syntax",
+ "biome_js_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_tailwind_factory",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
+ "insta",
+ "phf 0.13.1",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
 name = "biome_tailwind_parser"
 version = "0.0.1"
 dependencies = [
@@ -1930,6 +2030,7 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_formatter",
  "biome_fs",
  "biome_html_parser",
@@ -1946,7 +2047,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_string_case",
- "biome_workspace_db",
  "camino",
  "countme",
  "json_comments",
@@ -2009,27 +2109,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_workspace_db"
-version = "0.1.0"
-dependencies = [
- "biome_db",
- "biome_fs",
- "biome_html_parser",
- "biome_html_syntax",
- "biome_js_parser",
- "biome_js_syntax",
- "biome_languages",
- "biome_module_graph",
- "biome_parser",
- "biome_project_layout",
- "biome_rowan",
- "boxcar",
- "camino",
- "papaya",
- "salsa",
-]
-
-[[package]]
 name = "biome_yaml_factory"
 version = "0.0.1"
 dependencies = [
@@ -2075,11 +2154,13 @@ dependencies = [
  "biome_unicode_table",
  "biome_yaml_factory",
  "biome_yaml_syntax",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
- "tracing",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -3535,6 +3616,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
 
 [[package]]
+name = "hmac-sha256"
+version = "1.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec9d92d097f4749b64e8cc33d924d9f40a2d4eb91402b458014b781f5733d60f"
+
+[[package]]
 name = "htmlize"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4324,9 +4411,9 @@ dependencies = [
 
 [[package]]
 name = "mimalloc"
-version = "0.1.50"
+version = "0.1.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3627c4272df786b9260cabaa46aec1d59c93ede723d4c3ef646c503816b0640"
+checksum = "e1ee66a4b64c74f4ef288bcbb9192ad9c3feaad75193129ac8509af543894fd8"
 dependencies = [
  "libmimalloc-sys",
 ]
@@ -5090,6 +5177,158 @@ dependencies = [
 ]
 
 [[package]]
+name = "react_compiler"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_ast",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_inference",
+ "react_compiler_lowering",
+ "react_compiler_optimization",
+ "react_compiler_reactive_scopes",
+ "react_compiler_ssa",
+ "react_compiler_typeinference",
+ "react_compiler_validation",
+ "rustc-hash 2.1.3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_ast"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "rustc-hash 2.1.3",
+ "serde",
+ "serde-transcode",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_diagnostics"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "rustc-hash 2.1.3",
+ "serde",
+]
+
+[[package]]
+name = "react_compiler_hir"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "rustc-hash 2.1.3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_inference"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_lowering",
+ "react_compiler_optimization",
+ "react_compiler_ssa",
+ "react_compiler_utils",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_lowering"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_ast",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_optimization"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_lowering",
+ "react_compiler_ssa",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_reactive_scopes"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "hmac-sha256",
+ "indexmap",
+ "react_compiler_ast",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+ "serde_json",
+]
+
+[[package]]
+name = "react_compiler_ssa"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_typeinference"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "react_compiler_ssa",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_utils"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "react_compiler_validation"
+version = "0.1.0"
+source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+dependencies = [
+ "indexmap",
+ "react_compiler_diagnostics",
+ "react_compiler_hir",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5247,38 +5486,27 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_css_analyze",
- "biome_css_parser",
- "biome_css_semantic",
  "biome_css_syntax",
  "biome_diagnostics",
- "biome_fs",
  "biome_graphql_analyze",
- "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_html_analyze",
- "biome_html_parser",
  "biome_html_syntax",
  "biome_js_analyze",
- "biome_js_parser",
  "biome_js_syntax",
  "biome_json_analyze",
- "biome_json_parser",
  "biome_json_syntax",
- "biome_languages",
- "biome_module_graph",
- "biome_project_layout",
- "biome_rowan",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_ruledoc_utils",
- "biome_service",
- "camino",
  "pulldown-cmark",
 ]
 
 [[package]]
 name = "rust-lapper"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2274b9cc4f205bc0945b7be3e4fc1a102b0b7119ba6482faaedb9c4f76dde5d1"
+checksum = "5aafed57460ca80eb88c33989af3a31348dbde8e68f86f4fe2107c1a5fcd55b8"
 dependencies = [
  "num-traits",
 ]
@@ -5553,6 +5781,15 @@ checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
 dependencies = [
  "serde_core",
  "serde_derive",
+]
+
+[[package]]
+name = "serde-transcode"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "590c0e25c2a5bb6e85bf5c1bce768ceb86b316e7a01bdf07d2cb4ec2271990e2"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -7392,6 +7629,8 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_markdown_analyze",
+ "biome_markdown_syntax",
  "biome_rowan",
  "biome_service",
  "biome_string_case",

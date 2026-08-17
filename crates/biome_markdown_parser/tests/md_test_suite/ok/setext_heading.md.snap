@@ -28,7 +28,7 @@ that spans lines
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdSetextHeader {
@@ -127,7 +127,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..127
+0: MD_ROOT@0..127
   0: (empty)
   1: MD_BLOCK_LIST@0..127
     0: MD_SETEXT_HEADER@0..19

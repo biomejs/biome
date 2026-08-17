@@ -6,6 +6,7 @@ use super::{
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -37,7 +38,6 @@ use biome_graphql_syntax::{
     GraphqlLanguage, GraphqlRoot, GraphqlSyntaxKind, GraphqlSyntaxNode, TextRange, TextSize,
 };
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, TokenAtOffset};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{debug_span, info, trace_span};

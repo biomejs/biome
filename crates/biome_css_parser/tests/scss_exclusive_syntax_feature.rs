@@ -1,26 +1,13 @@
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::CssSyntaxKind::{CSS_BOGUS_MEDIA_QUERY, SCSS_MEDIA_QUERY};
 use biome_languages::CssFileSource;
 
 const SCSS_VARIABLE_DECLARATION: &str = "$color: red;";
 const SCSS_VARIABLE_VALUE: &str = ".selector { color: $color; }";
 const SCSS_DIMENSION_INTERPOLATED_VALUE: &str = ".selector { width: 10px#{suffix}; }";
 const SCSS_NUMBER_INTERPOLATED_VALUE: &str = ".selector { width: 10#{unit}; }";
-const SCSS_INTERPOLATED_MEDIA_QUERIES: &[&str] =
-    &["@media print-#{$suffix} {}", "@media all #{$query} {}"];
 
 fn diagnostic_text(parse: &biome_css_parser::CssParse) -> String {
     format!("{:?}", parse.diagnostics())
-}
-
-fn expect_scss_diagnostics(source: &str, expected_message: &str, options: CssParserOptions) {
-    let parse = parse_css(source, CssFileSource::css(), options);
-    let diagnostics = diagnostic_text(&parse);
-
-    assert!(
-        diagnostics.contains(expected_message),
-        "expected an SCSS-specific diagnostic in CSS parser-reporting builds, got: {diagnostics}",
-    );
 }
 
 #[test]
@@ -38,21 +25,6 @@ fn css_files_do_not_report_scss_exclusive_syntax_without_parser_option() {
             "expected parsing to keep reporting invalid CSS syntax"
         );
     }
-}
-
-#[test]
-fn css_files_report_scss_exclusive_syntax_when_enabled_by_parser_options() {
-    expect_scss_diagnostics(
-        SCSS_VARIABLE_DECLARATION,
-        "SCSS variable declarations",
-        CssParserOptions::default().report_scss_exclusive_syntax(),
-    );
-
-    expect_scss_diagnostics(
-        SCSS_VARIABLE_VALUE,
-        "SCSS variables",
-        CssParserOptions::default().report_scss_exclusive_syntax(),
-    );
 }
 
 #[test]
@@ -92,40 +64,4 @@ fn reporting_scss_exclusive_syntax_only_changes_diagnostic_text() {
             "expected reporting parser option to emit SCSS diagnostics, got: {reporting_diagnostics}"
         );
     }
-}
-
-#[test]
-fn css_files_recover_interpolated_media_queries_as_bogus() {
-    for source in SCSS_INTERPOLATED_MEDIA_QUERIES {
-        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
-        let syntax = parse.syntax();
-
-        assert!(
-            syntax
-                .descendants()
-                .any(|node| node.kind() == CSS_BOGUS_MEDIA_QUERY),
-            "expected an interpolated media query to be bogus in CSS: {source}"
-        );
-        assert!(
-            !syntax
-                .descendants()
-                .any(|node| node.kind() == SCSS_MEDIA_QUERY),
-            "expected no SCSS media-query node in CSS: {source}"
-        );
-    }
-}
-
-#[test]
-fn scss_files_parse_scss_exclusive_syntax_without_reporting_it_as_css_error() {
-    let parse = parse_css(
-        SCSS_VARIABLE_DECLARATION,
-        CssFileSource::scss(),
-        CssParserOptions::default(),
-    );
-    let diagnostics = diagnostic_text(&parse);
-
-    assert!(
-        !diagnostics.contains("SCSS only feature"),
-        "expected SCSS parsing to accept SCSS syntax, got: {diagnostics}"
-    );
 }

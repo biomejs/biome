@@ -2,6 +2,7 @@ use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
@@ -221,8 +222,9 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
             break;
         }
 
-        // DESIGN PRINCIPLE #1: Use CodeSpan context so backslash is literal
+        let end = code_span_text_end(p, opening_count);
         let text_m = p.start();
+        p.re_lex_span(end, MD_TEXTUAL_LITERAL);
         p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
         text_m.complete(p, MD_TEXTUAL);
     }
@@ -237,4 +239,29 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, MD_INLINE_CODE))
+}
+
+fn code_span_text_end(p: &MarkdownParser, opening_count: usize) -> TextSize {
+    let start = p.cur_range().start();
+    let source = p.source_after_current();
+    let bytes = source.as_bytes();
+    let mut offset = 0;
+
+    while offset < bytes.len() {
+        match bytes[offset] {
+            b'\n' | b'\r' => break,
+            b'`' => {
+                let run_start = offset;
+                while offset < bytes.len() && bytes[offset] == b'`' {
+                    offset += 1;
+                }
+                if offset - run_start == opening_count {
+                    return start + TextSize::from(run_start as u32);
+                }
+            }
+            _ => offset += 1,
+        }
+    }
+
+    start + TextSize::from(offset as u32)
 }

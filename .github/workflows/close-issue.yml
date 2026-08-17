@@ -17,7 +17,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24.18.1
+          node-version: 24.19.0
 
       - name: Find stale issues
         id: find-stale

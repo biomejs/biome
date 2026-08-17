@@ -513,6 +513,35 @@ impl DocumentFileSource {
             Self::Ignore | Self::Unknown => false,
         }
     }
+
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// Returns an empty string for [`Self::Ignore`] and [`Self::Unknown`].
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub fn file_extension(&self) -> &'static str {
+        match self {
+            #[cfg(feature = "lang_js")]
+            Self::Js(js) => js.file_extension(),
+            #[cfg(feature = "lang_json")]
+            Self::Json(json) => json.file_extension(),
+            #[cfg(feature = "lang_css")]
+            Self::Css(css) => css.file_extension(),
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(graphql) => graphql.file_extension(),
+            #[cfg(feature = "lang_html")]
+            Self::Html(html) => html.file_extension(),
+            #[cfg(feature = "lang_grit")]
+            Self::Grit(grit) => grit.file_extension(),
+            #[cfg(feature = "lang_md")]
+            Self::Markdown(markdown) => markdown.file_extension(),
+            #[cfg(feature = "lang_yaml")]
+            Self::Yaml(yaml) => yaml.file_extension(),
+            Self::Ignore | Self::Unknown => "",
+        }
+    }
 }
 
 impl std::fmt::Display for DocumentFileSource {

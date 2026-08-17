@@ -462,6 +462,26 @@
 				}
 			]
 		},
+		"CompilationMode": {
+			"description": "Controls which functions React Compiler analyzes.",
+			"oneOf": [
+				{
+					"description": "Analyze functions that follow React conventions: components\n(capitalized functions that create JSX or call hooks) and hooks\n(`use`-prefixed functions).",
+					"type": "string",
+					"const": "infer"
+				},
+				{
+					"description": "Analyze only functions annotated with a `\"use memo\"` directive.",
+					"type": "string",
+					"const": "annotation"
+				},
+				{
+					"description": "Analyze every function. This can report React-specific diagnostics in\nnon-React code, such as utility functions that update module-level\nstate.",
+					"type": "string",
+					"const": "all"
+				}
+			]
+		},
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -4522,6 +4542,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidPropertyInitValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidPropertyInitValueOptions" }
+			]
+		},
+		"NoInvalidPropertyInitValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidUseBeforeDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5588,6 +5618,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteLegacyConstConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteLegacyConstOptions" }
+			]
+		},
+		"NoSvelteLegacyConstOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteUnnecessaryStateWrapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6036,6 +6076,16 @@
 			]
 		},
 		"NoUnsafePlusOperandsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnsafeTypeAssertionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeTypeAssertionOptions" }
+			]
+		},
+		"NoUnsafeTypeAssertionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6762,6 +6812,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidPropertyInitValue": {
+					"description": "Checks that the initial-value of an @property rule follows the value format declared by its syntax.\nSee https://biomejs.dev/linter/rules/no-invalid-property-init-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidPropertyInitValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsRestrictedProperties": {
 					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-js-restricted-properties",
 					"anyOf": [
@@ -6923,6 +6980,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteLegacyConst": {
+					"description": "Disallow legacy Svelte {@const} tags.\nSee https://biomejs.dev/linter/rules/no-svelte-legacy-const",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteLegacyConstConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvelteUnnecessaryStateWrap": {
 					"description": "Disallow unnecessary $state wrapping of reactive classes.\nSee https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
 					"anyOf": [
@@ -6962,6 +7026,13 @@
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeTypeAssertion": {
+					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7040,6 +7111,13 @@
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentTestItConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useControlLabel": {
+					"description": "Enforce that interactive control elements have an accessible label.\nSee https://biomejs.dev/linter/rules/use-control-label",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseControlLabelConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7157,6 +7235,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactCompiler": {
+					"description": "Validate files with React Compiler.\nSee https://biomejs.dev/linter/rules/use-react-compiler",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactCompilerConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useReactFunctionComponentDefinition": {
 					"description": "Enforce a specific function type for React function components.\nSee https://biomejs.dev/linter/rules/use-react-function-component-definition",
 					"anyOf": [
@@ -7219,6 +7304,13 @@
 					"description": "Require keyed {#each} blocks in Svelte templates.\nSee https://biomejs.dev/linter/rules/use-svelte-require-each-key",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSvelteRequireEachKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTailwindShorthandClasses": {
+					"description": "Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.\nSee https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindShorthandClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9322,6 +9414,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoInvalidPropertyInitValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidPropertyInitValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoInvalidUseBeforeDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -10238,6 +10339,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSvelteLegacyConstOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteLegacyConstOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSvelteUnnecessaryStateWrapOptions": {
 			"type": "object",
 			"properties": {
@@ -10564,6 +10674,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeTypeAssertionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeTypeAssertionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11396,6 +11515,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseControlLabelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseControlLabelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDateNowOptions": {
 			"type": "object",
 			"properties": {
@@ -12173,6 +12301,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactCompilerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactCompilerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReactFunctionComponentDefinitionOptions": {
 			"type": "object",
 			"properties": {
@@ -12423,6 +12560,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSymbolDescriptionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTailwindShorthandClassesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindShorthandClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15204,6 +15351,17 @@
 			]
 		},
 		"UseConstOptions": { "type": "object", "additionalProperties": false },
+		"UseControlLabelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseControlLabelOptions" }
+			]
+		},
+		"UseControlLabelOptions": {
+			"description": "Configuration for the `useControlLabel` lint rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseDateNowConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16219,6 +16377,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseReactCompilerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactCompilerOptions" }
+			]
+		},
+		"UseReactCompilerOptions": {
+			"type": "object",
+			"properties": {
+				"compilationMode": {
+					"description": "Which functions React Compiler analyzes. Defaults to `infer`.",
+					"anyOf": [{ "$ref": "#/$defs/CompilationMode" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseReactFunctionComponentDefinitionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16620,6 +16794,16 @@
 			]
 		},
 		"UseSymbolDescriptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindShorthandClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindShorthandClassesOptions" }
+			]
+		},
+		"UseTailwindShorthandClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

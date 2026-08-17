@@ -5,8 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, JsYieldExpression,
-    TextRange, WalkEvent,
+    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsForVariableDeclaration, JsLanguage,
+    JsVariableDeclaration, JsYieldExpression, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 use biome_rule_options::use_await::UseAwaitOptions;
@@ -14,11 +14,11 @@ use biome_rule_options::use_await::UseAwaitOptions;
 declare_lint_rule! {
     /// Ensure `async` functions utilize `await`.
     ///
-    /// This rule reports `async` functions that lack an `await` expression. As `async`
-    /// functions return a promise, the use of `await` is often necessary to capture the
-    /// resolved value and handle the asynchronous operation appropriately. Without `await`,
-    /// the function operates synchronously and might not leverage the advantages of async
-    /// functions.
+    /// This rule reports `async` functions that lack an `await` expression or another
+    /// operation that requires async semantics. As `async` functions return a promise, the
+    /// use of `await` is often necessary to capture the resolved value and handle the
+    /// asynchronous operation appropriately. Without `await`, the function operates
+    /// synchronously and might not leverage the advantages of async functions.
     ///
     /// ## Examples
     ///
@@ -51,6 +51,12 @@ declare_lint_rule! {
     /// // Async generators that use `yield*` with an async iterable
     /// async function* delegateToAsyncIterable() {
     ///   yield* otherAsyncIterable();
+    /// }
+    ///
+    /// // `await using` awaits asynchronous resource disposal
+    /// async function consumeResource() {
+    ///   await using resource = acquire();
+    ///   consume(resource);
     /// }
     /// ```
     pub UseAwait {
@@ -93,6 +99,10 @@ impl Visitor for MissingAwaitVisitor {
                         *has_await = true;
                     } else if let Some(for_of) = JsForOfStatement::cast_ref(node) {
                         *has_await = *has_await || for_of.await_token().is_some();
+                    } else if let Some(declaration) = JsVariableDeclaration::cast_ref(node) {
+                        *has_await = *has_await || declaration.await_token().is_some();
+                    } else if let Some(declaration) = JsForVariableDeclaration::cast_ref(node) {
+                        *has_await = *has_await || declaration.await_token().is_some();
                     } else if let Some(yield_expr) = JsYieldExpression::cast_ref(node) {
                         *has_await = *has_await
                             || yield_expr

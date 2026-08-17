@@ -24,16 +24,18 @@
 //! ---------
 //! ```
 
-use crate::parser::MarkdownParser;
+use crate::parser::{DeferredInlineFlavor, MarkdownParser, MarkdownParserCheckpoint};
+use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::inline::EmphasisContext;
-use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
+use crate::syntax::parse_any_inline;
+use biome_markdown_syntax::{MarkdownSyntaxKind, T, kind::MarkdownSyntaxKind::*};
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
-
-use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
-use crate::syntax::parse_any_inline;
+use std::rc::Rc;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
 const MAX_HEADER_HASHES: usize = 6;
@@ -63,27 +65,17 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // Check hash count BEFORE starting to parse (via lookahead).
-    // The lexer emits all consecutive `#` chars as a single HASH token,
-    // so we need to verify the token length doesn't exceed 6 before consuming it.
-    let hash_count = p.lookahead(|p| {
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        if p.at(T![#]) { p.cur_text().len() } else { 0 }
-    });
-
-    // Validate hash count (must be 1-6)
-    // Diagnostic for >6 hashes is emitted in parse_any_block before try_parse
-    if hash_count > MAX_HEADER_HASHES {
-        // Not a valid header - let it be parsed as paragraph
-        return Absent;
-    }
-
+    let mut hash_list = ParseMdList::new(p);
     let m = p.start();
 
     p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
-    // Parse opening hashes (MdHashList containing MdHash nodes)
-    parse_hash_list(p);
+    hash_list.parse_list(p);
+    if p.at(T![#]) {
+        m.abandon(p);
+        hash_list.rewind(p);
+        return Absent;
+    }
 
     // Per CommonMark §4.2: opening hashes must be followed by space, tab, or end of line.
     // `#foo` is NOT a valid header; `# foo`, `#\tfoo`, or `#\n` are valid.
@@ -97,6 +89,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
         if !token_starts_with_whitespace {
             // No space/tab after hashes - not a valid header (e.g., "#foo")
             m.abandon(p);
+            hash_list.rewind(p);
             return Absent;
         }
     }
@@ -113,27 +106,56 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
 }
 
 /// Parse the opening hash sequence for an ATX header.
-///
-/// The lexer emits all consecutive `#` characters as a single HASH token.
-/// We determine the heading level from the token's text length.
-///
-/// Creates MdHashList containing a single MdHash node that wraps the token.
-///
-/// Returns the number of hashes (heading level).
-fn parse_hash_list(p: &mut MarkdownParser) -> usize {
-    let m = p.start();
-    let count = if p.at(T![#]) {
-        let len = p.cur_text().len();
-        // Wrap the HASH token in an MdHash node to match grammar
-        let hash_m = p.start();
-        p.bump(T![#]);
-        hash_m.complete(p, MD_HASH);
-        len
-    } else {
-        0
-    };
-    m.complete(p, MD_HASH_LIST);
-    count
+pub(crate) struct ParseMdList {
+    current_level: usize,
+    checkpoint: MarkdownParserCheckpoint,
+}
+
+impl ParseMdList {
+    fn new(p: &MarkdownParser) -> Self {
+        Self {
+            current_level: 0,
+            checkpoint: p.checkpoint(),
+        }
+    }
+
+    fn rewind(self, p: &mut MarkdownParser) {
+        p.rewind(self.checkpoint);
+    }
+}
+
+impl ParseNodeList for ParseMdList {
+    type Kind = MarkdownSyntaxKind;
+    type Parser<'source> = MarkdownParser<'source>;
+    const LIST_KIND: Self::Kind = MD_HASH_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        let m = p.start();
+        p.expect(T![#]);
+        self.current_level += 1;
+        let hash = m.complete(p, MD_HASH);
+
+        if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('#') {
+            p.force_relex_at_line_start();
+        }
+
+        Present(hash)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        self.current_level == MAX_HEADER_HASHES || !p.at(T![#])
+    }
+
+    fn recover(
+        &mut self,
+        _p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        match parsed_element {
+            Absent => Err(RecoveryError::AlreadyRecovered),
+            Present(m) => Ok(m),
+        }
+    }
 }
 
 /// Parse header content - inline content for the header.
@@ -150,6 +172,7 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
     let prev_context = set_header_emphasis_context(p);
 
     // Parse content as a paragraph containing inline items
+    let deferred = p.start_deferred_inline(DeferredInlineFlavor::AtxParagraph);
     let m = p.start();
     let inline_m = p.start();
 
@@ -193,6 +216,7 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
 
     inline_m.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_PARAGRAPH);
+    p.finish_deferred_inline(deferred);
 
     // Restore previous emphasis context
     p.set_emphasis_context(prev_context);
@@ -257,7 +281,7 @@ fn header_content_source_len(p: &mut MarkdownParser) -> usize {
 
 /// Build an emphasis context for header content and install it on the parser.
 /// Returns the previous context so it can be restored.
-fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext> {
+fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisContext>> {
     let source_len = header_content_source_len(p);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {
@@ -269,7 +293,7 @@ fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
     let context = EmphasisContext::new(inline_source, base_offset, |label| {
         p.has_link_reference_definition(label)
     });
-    p.set_emphasis_context(Some(context))
+    p.set_new_emphasis_context(context)
 }
 
 /// Check if the current position has a trailing hash sequence.
@@ -287,7 +311,7 @@ fn is_trailing_hash_sequence(p: &mut MarkdownParser) -> bool {
     let checkpoint = p.checkpoint();
 
     // Consume the single HASH token (contains all consecutive hashes)
-    p.bump(T![#]);
+    while p.eat(T![#]) {}
 
     // Skip any trailing whitespace after hashes (may include newline in same token)
     // Also check MD_HARD_LINE_LITERAL (5+ trailing spaces before newline)
@@ -352,7 +376,7 @@ pub(crate) fn parse_trailing_hashes(p: &mut MarkdownParser) {
         }
 
         // Consume the trailing hash token and wrap in MdHash node
-        if p.at(T![#]) {
+        while p.at(T![#]) {
             let hash_m = p.start();
             p.bump(T![#]);
             hash_m.complete(p, MD_HASH);

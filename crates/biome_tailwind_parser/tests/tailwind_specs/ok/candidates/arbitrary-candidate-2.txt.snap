@@ -25,9 +25,12 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..4 "dark" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@4..5 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@5..6 "[" [] [],
@@ -78,9 +81,12 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..4
             0: TW_NAMED_VARIANT_SEGMENT@0..4
               0: TW_VARIANT_SEGMENT@0..4 "dark" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@4..5 ":" [] []
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@5..41
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@5..41
         0: L_BRACKET@5..6 "[" [] []
         1: TW_PROPERTY@6..18 "--pattern-fg" [] []
         2: COLON@18..19 ":" [] []
@@ -100,7 +106,7 @@ TwRoot {
           0: SLASH@38..39 "/" [] []
           1: TW_NUMBER_VALUE@39..41
             0: TW_NUMBER@39..41 "10" [] []
-      3: (empty)
+      4: (empty)
   2: EOF@41..42 "" [Newline("\n")] []
 
 ```

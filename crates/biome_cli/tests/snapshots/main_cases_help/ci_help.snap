@@ -301,7 +301,7 @@ Options that control internal CLI and daemon server logging.
 
 Available positional items:
     PATH                      The optional `PATH` arguments accept one or more paths to files or
-                              directories. If omitted, Biome processes files in the current working
+                              directories. If omitted, Biome checks files in the current working
                               directory.
 
 Available options:
@@ -312,8 +312,8 @@ Available options:
                               set to `true`. Defaults to `false`.
         --enforce-assist=<true|false>  Enforces assist actions and causes the command to fail if
                               required actions are not applied. Defaults to `true`.
-        --changed             Processes only files changed by commits since the merge base between
-                              `REF` and `HEAD`. `REF` comes from `--since` or `vcs.defaultBranch`.
+        --changed             Checks only files with committed changes compared to the configured
+                              `vcs.defaultBranch` or the base reference specified by `--since`.
                               Staged and unstaged changes are not included. This option is intended
                               for CI.
         --since=REF           Sets the base reference used by `--changed`, overriding

@@ -1627,6 +1627,25 @@ impl<'src> CssLexer<'src> {
             return T![ident];
         }
 
+        // Tailwind variant names may be container-query variants, such as
+        // `@xl` in `@variant @xl`. The default CSS lexer would lex the
+        // leading `@` as its own token, so consume the `@`-prefixed run as
+        // a single identifier here.
+        if matches!(dispatched, AT_)
+            && self
+                .peek_byte()
+                .is_some_and(|byte| matches!(lookup_byte(byte), DIG | ZER | IDT | UNI | MIN))
+        {
+            self.advance(1);
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
+        }
+
         self.consume_token(current)
     }
 

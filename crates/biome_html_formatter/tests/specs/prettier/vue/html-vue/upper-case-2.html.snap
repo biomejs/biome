@@ -27,19 +27,15 @@ info: vue/html-vue/upper-case-2.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,9 +3,9 @@
+@@ -3,7 +3,7 @@
  <!doctype html>
  <html>
    <body>
 -    <div v-if="foo === 'foo'"></div>
 +    <div v-if="foo ===    'foo'"></div>
      <script>
--      new Vue({ el: "#app" });
--    </script>
-+  new Vue({el: '#app'})
-+      </script>
-   </body>
- </html>
+       new Vue({ el: "#app" });
+     </script>
 ```
 
 # Output
@@ -52,8 +48,8 @@ info: vue/html-vue/upper-case-2.html
   <body>
     <div v-if="foo ===    'foo'"></div>
     <script>
-  new Vue({el: '#app'})
-      </script>
+      new Vue({ el: "#app" });
+    </script>
   </body>
 </html>
 ```

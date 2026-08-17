@@ -25,12 +25,16 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..3 "2xl" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@3..4 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@4..9 "table" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -51,11 +55,15 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..3
             0: TW_NAMED_VARIANT_SEGMENT@0..3
               0: TW_VARIANT_SEGMENT@0..3 "2xl" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@3..4 ":" [] []
       1: (empty)
-      2: TW_STATIC_CANDIDATE@4..9
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@4..9
         0: TW_BASE@4..9 "table" [] []
-      3: (empty)
+        1: (empty)
+      4: (empty)
   2: EOF@9..10 "" [Newline("\n")] []
 
 ```

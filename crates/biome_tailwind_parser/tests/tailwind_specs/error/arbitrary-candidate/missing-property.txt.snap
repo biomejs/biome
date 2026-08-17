@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwBogusCandidate {
                 items: [
@@ -46,14 +47,15 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..11
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_BOGUS_CANDIDATE@0..11
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@0..11
         0: L_BRACKET@0..1 "[" [] []
         1: TW_SELECTOR@1..6 ":40px" [] []
         2: R_BRACKET@6..8 "]" [] [Whitespace(" ")]
         3: TW_BASE@8..9 "w" [] []
         4: DASH@9..10 "-" [] []
         5: TW_NUMBER@10..11 "5" [] []
-      3: (empty)
+      4: (empty)
   2: EOF@11..12 "" [Newline("\n")] []
 
 ```

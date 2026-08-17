@@ -15,11 +15,8 @@ info: formatting/inline-element-break-long-nonewline.svelte
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,23 +1,31 @@
- <span
--    ><span>looooooooooong</span
-+    ><span
-+        >looooooooooong</span
+@@ -2,7 +2,9 @@
+     ><span>looooooooooong</span
      >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
          ><span>hi</span><span>hi</span></span
 -    ></span> <span>hi</span>
@@ -28,17 +25,9 @@ info: formatting/inline-element-break-long-nonewline.svelte
 +<span>hi</span>
  <div>
      <span
--        ><span>looooooooooong</span
-+        ><span
-+            >looooooooooong</span
-         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
-             ><span>hi</span><span>hi</span></span
-         ></span
-     ><span>hi</span>
-     <span
--        ><span>looooooooooong</span
-+        ><span
-+            >looooooooooong</span
+         ><span>looooooooooong</span
+@@ -14,10 +16,12 @@
+         ><span>looooooooooong</span
          >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
              ><span>hi</span><span>hi</span></span
 -        ></span>
@@ -46,9 +35,7 @@ info: formatting/inline-element-break-long-nonewline.svelte
 +    >
  </div>
  <span
--    ><span>looooooooooong</span
-+    ><span
-+        >looooooooooong</span
+     ><span>looooooooooong</span
      >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
          ><span>hi</span><span>hi</span></span
 -    ></span>
@@ -60,8 +47,7 @@ info: formatting/inline-element-break-long-nonewline.svelte
 
 ```svelte
 <span
-    ><span
-        >looooooooooong</span
+    ><span>looooooooooong</span
     >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
         ><span>hi</span><span>hi</span></span
     ></span
@@ -69,23 +55,20 @@ info: formatting/inline-element-break-long-nonewline.svelte
 <span>hi</span>
 <div>
     <span
-        ><span
-            >looooooooooong</span
+        ><span>looooooooooong</span
         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
             ><span>hi</span><span>hi</span></span
         ></span
     ><span>hi</span>
     <span
-        ><span
-            >looooooooooong</span
+        ><span>looooooooooong</span
         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
             ><span>hi</span><span>hi</span></span
         ></span
     >
 </div>
 <span
-    ><span
-        >looooooooooong</span
+    ><span>looooooooooong</span
     >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
         ><span>hi</span><span>hi</span></span
     ></span
@@ -94,6 +77,6 @@ info: formatting/inline-element-break-long-nonewline.svelte
 
 # Lines exceeding max width of 80 characters
 ```
-   13:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
-   20:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+   11:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+   17:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
 ```

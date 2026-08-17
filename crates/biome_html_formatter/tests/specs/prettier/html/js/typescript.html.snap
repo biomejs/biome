@@ -119,24 +119,7 @@ info: html/js/typescript.html
      return "Hello, " + person.firstName + " " + person.lastName;
    }
  
-@@ -26,13 +22,9 @@
- <script lang="ts">
-   class Student {
-     fullName: string;
--    constructor(
--      public firstName: string,
--      public middleInitial: string,
--      public lastName: string,
--    ) {
--      this.fullName = firstName + " " + middleInitial + " " + lastName;
--    }
-+    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-+    this.fullName = firstName + " " + middleInitial + " " + lastName;
-+  }
-   }
- 
-   interface Person {
-@@ -40,7 +32,7 @@
+@@ -40,7 +36,7 @@
      lastName: string;
    }
  
@@ -145,7 +128,7 @@ info: html/js/typescript.html
      return "Hello, " + person.firstName + " " + person.lastName;
    }
  
-@@ -49,41 +41,38 @@
+@@ -49,41 +45,38 @@
    document.body.innerHTML = greeter(user);
  </script>
  <script lang="tsx">
@@ -230,9 +213,13 @@ info: html/js/typescript.html
 <script lang="ts">
   class Student {
     fullName: string;
-    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-    this.fullName = firstName + " " + middleInitial + " " + lastName;
-  }
+    constructor(
+      public firstName: string,
+      public middleInitial: string,
+      public lastName: string,
+    ) {
+      this.fullName = firstName + " " + middleInitial + " " + lastName;
+    }
   }
 
   interface Person {
@@ -289,6 +276,5 @@ info: html/js/typescript.html
 # Lines exceeding max width of 80 characters
 ```
     4:     constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-   25:     constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-   44:   class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
+   48:   class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
 ```

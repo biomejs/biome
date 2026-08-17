@@ -27,6 +27,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@23..26 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlSelfClosingElement {
@@ -54,7 +55,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..23 "const RE = /\\d{4}/\n" [Newline("\n")] []
     2: FENCE@23..26 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@26..35
+  3: (empty)
+  4: HTML_ELEMENT_LIST@26..35
     0: HTML_SELF_CLOSING_ELEMENT@26..35
       0: L_ANGLE@26..29 "<" [Newline("\n"), Newline("\n")] []
       1: HTML_TAG_NAME@29..33
@@ -62,6 +64,6 @@ HtmlRoot {
       2: HTML_ATTRIBUTE_LIST@33..33
       3: SLASH@33..34 "/" [] []
       4: R_ANGLE@34..35 ">" [] []
-  4: EOF@35..36 "" [Newline("\n")] []
+  5: EOF@35..36 "" [Newline("\n")] []
 
 ```

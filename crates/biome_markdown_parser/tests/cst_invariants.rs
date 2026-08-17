@@ -1,6 +1,7 @@
 use biome_markdown_parser::parse_markdown;
 use biome_markdown_syntax::{
     MarkdownSyntaxKind, MdContinuationIndent, MdListMarkerPrefix, MdOrderedListItem,
+    MdReferenceLink,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, TextRange};
 
@@ -346,4 +347,44 @@ fn no_fixture_has_bullet_list_newline_siblings() {
         "fixtures with MdNewline as a direct MdBulletList child:\n{}",
         offenders.join("\n")
     );
+}
+
+#[test]
+fn deferred_references_preserve_cst_and_container_metadata() {
+    let input = "> - *[foo*][ref]\n>\n> [ref]: /uri\n";
+    let parsed = parse_markdown(input);
+
+    assert_eq!(parsed.syntax().to_string(), input);
+    assert!(parsed.diagnostics().is_empty());
+    assert!(
+        parsed
+            .syntax()
+            .descendants()
+            .any(|node| MdReferenceLink::can_cast(node.kind()))
+    );
+    assert!(!parsed.list_tightness().is_empty());
+    assert!(!parsed.list_item_indents().is_empty());
+    assert!(!parsed.quote_indents().is_empty());
+}
+
+#[test]
+fn deferred_references_preserve_headings_and_diagnostics() {
+    let heading = "# *[foo*][ref]\n\n[ref]: /uri\n";
+    let parsed = parse_markdown(heading);
+
+    assert_eq!(parsed.syntax().to_string(), heading);
+    assert!(
+        parsed
+            .syntax()
+            .descendants()
+            .any(|node| MdReferenceLink::can_cast(node.kind()))
+    );
+
+    let invalid = format!("{} [ref]\n\n[ref]: /uri\n", ">".repeat(101));
+    let parsed = parse_markdown(&invalid);
+    assert_eq!(parsed.syntax().to_string(), invalid);
+    assert!(!parsed.diagnostics().is_empty());
+    assert!(parsed.diagnostics().windows(2).all(|diagnostics| {
+        diagnostics[0].span().map(TextRange::start) <= diagnostics[1].span().map(TextRange::start)
+    }));
 }

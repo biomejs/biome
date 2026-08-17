@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use biome_db::ParsedSource;
 use biome_db::testing::{
     Events, assert_function_query_was_not_run, assert_function_query_was_run,
-    function_query_will_execute_position,
+    function_query_will_execute_count_by_name, function_query_will_execute_position,
 };
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_formatter::context::JsFormatOptions;

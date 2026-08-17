@@ -256,7 +256,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 {
                     let is_v_on = directive
                         .name_token()
-                        .is_ok_and(|t| t.text_trimmed() == "v-on");
+                        .is_ok_and(|t| t.text_trimmed() == "v-on" && directive.arg().is_some());
                     if let Some(candidate) = build_vue_directive_candidate(&initializer, is_v_on) {
                         ctx.parse_and_push(
                             &candidate,

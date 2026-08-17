@@ -1,6 +1,7 @@
 #![deny(clippy::use_self)]
 
 pub mod configuration;
+pub mod db;
 pub mod diagnostics;
 pub mod documentation;
 pub mod file_handlers;

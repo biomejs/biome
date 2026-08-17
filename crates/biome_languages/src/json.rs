@@ -233,6 +233,18 @@ impl JsonFileSource {
         self.variant
     }
 
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        match self.variant {
+            JsonFileVariant::Standard => "json",
+            JsonFileVariant::Jsonc => "jsonc",
+        }
+    }
+
     pub fn is_well_known_json_file(file_name: &str) -> bool {
         Self::WELL_KNOWN_JSON_FILES
             .binary_search(&file_name)

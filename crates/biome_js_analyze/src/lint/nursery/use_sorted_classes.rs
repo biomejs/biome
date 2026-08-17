@@ -1,14 +1,15 @@
+mod arbitrary_value_match;
 mod sort;
 pub mod sort_v4;
+mod sort_v4_variants;
 mod tailwind_preset_v4;
 mod tailwind_preset_v4_types;
-mod arbitrary_value_match;
 
 use self::sort::{get_sort_class_name_range, sort_class_name};
 use crate::JsRuleAction;
 use crate::shared::any_class_string_like::AnyClassStringLike;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_analyze::shared::sorted_classes::sort_config::DEFAULT_SORT_CONFIG;
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
@@ -205,7 +206,9 @@ impl Rule for UseSortedClasses {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 let is_double_quote = string_literal
                     .value_token()
-                    .map_or(ctx.preferred_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
+                    .map_or(ctx.preferred_quote().is_double(), |token| {
+                        token.text_trimmed().starts_with('"')
+                    });
                 let replacement = js_string_literal_expression(if is_double_quote {
                     js_string_literal(state)
                 } else {
@@ -224,7 +227,9 @@ impl Rule for UseSortedClasses {
             AnyClassStringLike::JsxString(jsx_string_node) => {
                 let is_double_quote = jsx_string_node
                     .value_token()
-                    .map_or(ctx.preferred_jsx_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
+                    .map_or(ctx.preferred_jsx_quote().is_double(), |token| {
+                        token.text_trimmed().starts_with('"')
+                    });
                 let replacement = jsx_string(if is_double_quote {
                     js_string_literal(state)
                 } else {

@@ -10,14 +10,14 @@ use biome_yaml_syntax::{T, YamlSyntaxKind};
 use super::{
     YamlParser,
     parse_error::{
-        expected_flow_mapping_closing_quote, expected_flow_mapping_entry,
+        expected_flow_mapping_closing_brace, expected_flow_mapping_entry,
         expected_flow_sequence_closing_bracket, expected_flow_sequence_entry,
     },
     property::{PropertyList, is_at_property},
 };
 
 pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -105,7 +105,7 @@ fn parse_flow_mapping(p: &mut YamlParser) -> CompletedMarker {
     p.bump(T!['{']);
     FlowMapEntryList.parse_list(p);
     if !p.eat(T!['}']) {
-        p.error(expected_flow_mapping_closing_quote(p.cur_range()));
+        p.error(expected_flow_mapping_closing_brace(p.cur_range()));
     }
 
     m.complete(p, YAML_FLOW_MAPPING)
@@ -154,7 +154,7 @@ impl ParseSeparatedList for FlowSequenceEntryList {
                 Present(alias_node)
             }
         } else {
-            let property_list = PropertyList.parse_list(p);
+            let property_list = PropertyList::default().parse_list(p);
             let property_empty = property_list.range(p).is_empty();
 
             if is_at_flow_json_node(p) {
@@ -271,7 +271,7 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![?]);
 
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -303,7 +303,7 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_flow_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {

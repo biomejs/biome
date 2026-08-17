@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..1 "w" [] [],
@@ -39,6 +40,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@10..11 "w" [] [],
@@ -59,6 +61,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@20..21 "w" [] [],
@@ -90,7 +93,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..10
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..10
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..10
         0: TW_BASE@0..1 "w" [] []
         1: DASH@1..2 "-" [] []
         2: TW_ARBITRARY_VALUE@2..10
@@ -101,11 +105,12 @@ TwRoot {
               1: IDENT@6..8 "px" [] []
           2: R_BRACKET@8..10 "]" [] [Whitespace(" ")]
         3: (empty)
-      3: (empty)
+      4: (empty)
     1: TW_FULL_CANDIDATE@10..20
       0: TW_VARIANT_LIST@10..10
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@10..20
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@10..20
         0: TW_BASE@10..11 "w" [] []
         1: DASH@11..12 "-" [] []
         2: TW_ARBITRARY_VALUE@12..20
@@ -116,11 +121,12 @@ TwRoot {
               1: PERCENT@17..18 "%" [] []
           2: R_BRACKET@18..20 "]" [] [Whitespace(" ")]
         3: (empty)
-      3: (empty)
+      4: (empty)
     2: TW_FULL_CANDIDATE@20..28
       0: TW_VARIANT_LIST@20..20
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@20..28
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@20..28
         0: TW_BASE@20..21 "w" [] []
         1: DASH@21..22 "-" [] []
         2: TW_ARBITRARY_VALUE@22..28
@@ -130,7 +136,7 @@ TwRoot {
               0: CSS_NUMBER_LITERAL@23..27 "1e-2" [] []
           2: R_BRACKET@27..28 "]" [] []
         3: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@28..29 "" [Newline("\n")] []
 
 ```

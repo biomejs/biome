@@ -2,78 +2,60 @@ use biome_rowan::Text;
 use rustc_hash::FxHashMap;
 use std::iter::FusedIterator;
 
-/// Import paths stored in source order with lookup by specifier.
-///
-/// [`Self::insert`] keeps only the last occurrence of a specifier. [`Self::push`]
-/// keeps every occurrence for languages where an import's position is
-/// significant. In both cases, [`Self::get`] returns the last stored occurrence.
+/// Import occurrences stored in source order with aggregate lookup by specifier.
 #[derive(Clone, Debug)]
 pub struct ImportPathMap<P> {
     entries: Vec<(Text, P)>,
-    indices: FxHashMap<Text, usize>,
+    summaries: FxHashMap<Text, P>,
 }
 
 impl<P> Default for ImportPathMap<P> {
     fn default() -> Self {
         Self {
             entries: Vec::new(),
-            indices: FxHashMap::default(),
+            summaries: FxHashMap::default(),
         }
     }
 }
 
-impl<P> ImportPathMap<P> {
-    /// Replaces an earlier import with the same specifier and moves the new
-    /// value to its source-order position.
+impl<P: Clone> ImportPathMap<P> {
+    /// Appends an import occurrence and replaces its lookup summary.
     pub(crate) fn insert(&mut self, specifier: Text, path: P) {
-        self.insert_with(specifier, path, |_, _| {});
+        self.entries.push((specifier.clone(), path.clone()));
+        self.summaries.insert(specifier, path);
     }
 
-    /// Inserts an import after merging an earlier occurrence with the new path.
-    pub(crate) fn insert_with(
-        &mut self,
-        specifier: Text,
-        mut path: P,
-        merge: impl FnOnce(&P, &mut P),
-    ) {
-        if let Some(index) = self.indices.get(specifier.text()).copied() {
-            debug_assert!(index < self.entries.len());
-            merge(&self.entries[index].1, &mut path);
-            self.entries.remove(index);
-            self.indices.remove(specifier.text());
-            for entry_index in self.indices.values_mut() {
-                if *entry_index > index {
-                    *entry_index -= 1;
-                }
-            }
+    /// Appends an import occurrence and merges it into the specifier's lookup summary.
+    pub(crate) fn insert_with(&mut self, specifier: Text, path: P, merge: impl FnOnce(&P, &mut P)) {
+        let mut summary = path.clone();
+        if let Some(previous) = self.summaries.get(specifier.text()) {
+            merge(previous, &mut summary);
         }
-
-        let index = self.entries.len();
         self.entries.push((specifier.clone(), path));
-        self.indices.insert(specifier, index);
+        self.summaries.insert(specifier, summary);
     }
 
-    /// Appends an import without removing earlier occurrences of its specifier.
+    /// Appends an import occurrence and replaces its lookup summary.
     pub(crate) fn push(&mut self, specifier: Text, path: P) {
-        let index = self.entries.len();
-        self.entries.push((specifier.clone(), path));
-        self.indices.insert(specifier, index);
+        self.entries.push((specifier.clone(), path.clone()));
+        self.summaries.insert(specifier, path);
     }
+}
 
-    /// Returns the last path stored for `specifier`.
+impl<P> ImportPathMap<P> {
+    /// Returns the aggregate path stored for `specifier`.
     pub fn get(&self, specifier: &str) -> Option<&P> {
-        let index = *self.indices.get(specifier)?;
-        self.entries.get(index).map(|(_, path)| path)
+        self.summaries.get(specifier)
     }
 
-    /// Returns import paths in source order.
+    /// Returns import paths in source order, including repeated specifiers.
     pub fn iter(&self) -> ImportPathMapIterator<'_, P> {
         ImportPathMapIterator {
             inner: self.entries.iter(),
         }
     }
 
-    /// Returns specifiers and paths in source order.
+    /// Returns specifiers and paths in source order, including repeated specifiers.
     pub fn named_iter(
         &self,
     ) -> impl DoubleEndedIterator<Item = (&Text, &P)> + ExactSizeIterator + FusedIterator {
@@ -82,7 +64,7 @@ impl<P> ImportPathMap<P> {
             .map(|(specifier, path)| (specifier, path))
     }
 
-    /// Returns the number of stored imports.
+    /// Returns the number of import occurrences.
     pub fn len(&self) -> usize {
         self.entries.len()
     }

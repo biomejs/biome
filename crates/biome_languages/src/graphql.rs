@@ -29,6 +29,15 @@ impl GraphqlFileSource {
         }
     }
 
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        "graphql"
+    }
+
     /// Try to return the GraphQL file source corresponding to this file name from well-known files
     pub fn try_from_well_known(_: &Utf8Path) -> Result<Self, FileSourceError> {
         // TODO: to be implemented

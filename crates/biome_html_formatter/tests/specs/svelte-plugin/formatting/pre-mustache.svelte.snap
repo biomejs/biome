@@ -78,24 +78,6 @@ info: formatting/pre-mustache.svelte
 			this line is intended using tabs which should be preserved</pre>
 ```
 
-# Errors
-```
-pre-mustache.svelte:4:99 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Text expressions aren't supported.
-  
-    2 │   world!   {JSON.stringify({   foo:'bar'},null,
-    3 │   2)}Goodbye.
-  > 4 │   this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
-      │                                                                                                   ^^^^^^^^^^^
-    5 │   <code>const asd = {
-    6 │     variable };</code>
-  
-  i Remove it or enable the parsing using the html.parser.interpolation option.
-  
-
-```
-
 # Lines exceeding max width of 80 characters
 ```
     4:   this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
