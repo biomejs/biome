@@ -1200,6 +1200,7 @@ export type JsonTrailingCommas = "none" | "all";
  * Rule domains
  */
 export type RuleDomain =
+	| "astro"
 	| "drizzle"
 	| "react"
 	| "reactNative"

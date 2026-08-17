@@ -7920,6 +7920,11 @@
 			"description": "Rule domains",
 			"oneOf": [
 				{
+					"description": "Astro framework rules",
+					"type": "string",
+					"const": "astro"
+				},
+				{
 					"description": "Drizzle ORM rules",
 					"type": "string",
 					"const": "drizzle"
