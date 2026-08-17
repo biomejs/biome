@@ -98,6 +98,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown").same()],
     }
 }
+
 declare_node_union! {
   pub AnyPseudoLike =
       CssPseudoClassFunctionCompoundSelector
@@ -112,52 +113,6 @@ declare_node_union! {
       | ScssInterpolatedPseudoClassFunction
       | CssBogusPseudoClass
       | CssPageSelectorPseudo
-}
-
-impl AnyPseudoLike {
-    fn name(&self) -> Option<CssSyntaxToken> {
-        let ident = match self {
-            Self::CssBogusPseudoClass(_) => return None,
-            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
-            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
-            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),
-            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name(),
-            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => selector_list.name(),
-            Self::CssPseudoClassFunctionSelector(selector) => selector.name(),
-            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name(),
-            Self::CssPseudoClassFunctionValueList(func_value_list) => func_value_list.name(),
-            Self::CssPseudoClassIdentifier(ident) => {
-                return css_selector_identifier_token(ident.name().ok()?);
-            }
-            Self::ScssInterpolatedPseudoClassFunction(_) => return None,
-            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
-        };
-
-        ident.ok()?.value_token().ok()
-    }
-
-    fn name_range(&self) -> Option<TextRange> {
-        self.name().map(|name| name.text_trimmed_range())
-    }
-}
-
-fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
-    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
-    name.as_css_identifier()?.value_token().ok()
-}
-
-fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
-    let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
-    while let Some(prev) = &prev_element {
-        let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
-        if let Some(selector) = maybe_selector.as_ref() {
-            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
-                .contains(&selector.to_trimmed_text().trim_matches(':'));
-        };
-        prev_element = prev.prev_sibling();
-    }
-
-    false
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -262,6 +217,54 @@ impl Rule for NoUnknownPseudoClass {
         Some(diag)
     }
 }
+
+impl AnyPseudoLike {
+    fn name(&self) -> Option<CssSyntaxToken> {
+        let ident = match self {
+            Self::CssBogusPseudoClass(_) => return None,
+            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
+            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),
+            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name(),
+            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionSelector(selector) => selector.name(),
+            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionValueList(func_value_list) => func_value_list.name(),
+            Self::CssPseudoClassIdentifier(ident) => {
+                return css_selector_identifier_token(ident.name().ok()?);
+            }
+            Self::ScssInterpolatedPseudoClassFunction(_) => return None,
+            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
+        };
+
+        ident.ok()?.value_token().ok()
+    }
+
+    fn name_range(&self) -> Option<TextRange> {
+        self.name().map(|name| name.text_trimmed_range())
+    }
+}
+
+fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
+    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    name.as_css_identifier()?.value_token().ok()
+}
+
+fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
+    let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
+    while let Some(prev) = &prev_element {
+        let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
+        if let Some(selector) = maybe_selector.as_ref() {
+            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
+                .contains(&selector.to_trimmed_text().trim_matches(':'));
+        };
+        prev_element = prev.prev_sibling();
+    }
+
+    false
+}
+
+
 
 fn should_ignore(name: &str, options: &NoUnknownPseudoClassOptions) -> bool {
     for ignore_pattern in &options.ignore {
