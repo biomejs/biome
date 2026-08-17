@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_diagnostics::Severity;
+use biome_diagnostics::{Applicability, Severity};
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
@@ -62,8 +62,13 @@ declare_lint_rule! {
 
 impl Rule for UseSimplifiedLogicExpression {
     type Query = Ast<JsLogicalExpression>;
-    /// First element of tuple is if the expression is simplified by [De Morgan's Law](https://en.wikipedia.org/wiki/De_Morgan%27s_laws) rule, the second element is the expression to replace.
-    type State = (bool, AnyJsExpression);
+    /// `(is_de_morgan, replacement_expression, is_safe)`
+    ///
+    /// - `is_de_morgan`: whether the simplification applies De Morgan's law
+    /// - `replacement_expression`: the expression to substitute for the logical expression
+    /// - `is_safe`: when `false`, the fix is `MaybeIncorrect` because the non-literal operand
+    ///   may not be boolean (e.g. `x || false` where `x: boolean | undefined`)
+    type State = (bool, AnyJsExpression, bool);
     type Signals = Option<Self::State>;
     type Options = UseSimplifiedLogicExpressionOptions;
 
@@ -80,26 +85,33 @@ impl Rule for UseSimplifiedLogicExpression {
                     )
                 ) =>
             {
-                return Some((false, right));
+                return Some((false, right, true));
             }
             biome_js_syntax::JsLogicalOperator::LogicalOr => {
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
                 {
-                    return simplify_or_expression(literal, right).map(|expr| (false, expr));
+                    // `false || expr` → `expr` and `true || expr` → `true` are always safe.
+                    return simplify_or_expression(literal, right)
+                        .map(|expr| (false, expr, true));
                 }
 
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = right
                 {
-                    return simplify_or_expression(literal, left).map(|expr| (false, expr));
+                    // `expr || true` → `true` is always safe (returns the literal, not expr).
+                    // `expr || false` → `expr` is only safe when `expr` is boolean; without
+                    // type information we cannot verify this, so the fix is MaybeIncorrect.
+                    let is_safe = literal_value(&literal)? != false;
+                    return simplify_or_expression(literal, left)
+                        .map(|expr| (false, expr, is_safe));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
                     return simplify_de_morgan(node)
-                        .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr)));
+                        .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr), true));
                 }
             }
             biome_js_syntax::JsLogicalOperator::LogicalAnd => {
@@ -107,19 +119,26 @@ impl Rule for UseSimplifiedLogicExpression {
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
                 {
-                    return simplify_and_expression(literal, right).map(|expr| (false, expr));
+                    // `true && expr` → `expr` and `false && expr` → `false` are always safe.
+                    return simplify_and_expression(literal, right)
+                        .map(|expr| (false, expr, true));
                 }
 
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = right
                 {
-                    return simplify_and_expression(literal, left).map(|expr| (false, expr));
+                    // `expr && false` → `false` is always safe (returns the literal, not expr).
+                    // `expr && true` → `expr` is only safe when `expr` is boolean; without
+                    // type information we cannot verify this, so the fix is MaybeIncorrect.
+                    let is_safe = literal_value(&literal)? != true;
+                    return simplify_and_expression(literal, left)
+                        .map(|expr| (false, expr, is_safe));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
                     return simplify_de_morgan(node)
-                        .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr)));
+                        .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr), true));
                 }
             }
             _ => return None,
@@ -144,7 +163,7 @@ impl Rule for UseSimplifiedLogicExpression {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let (is_simplified_by_de_morgan, expr) = state;
+        let (is_simplified_by_de_morgan, expr, is_safe) = state;
 
         mutation.replace_node(
             AnyJsExpression::JsLogicalExpression(node.clone()),
@@ -157,12 +176,26 @@ impl Rule for UseSimplifiedLogicExpression {
             "Discard redundant terms from the logical expression."
         };
 
+        let applicability = if *is_safe {
+            Applicability::Always
+        } else {
+            Applicability::MaybeIncorrect
+        };
+
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
+            applicability,
             markup! { ""{message}"" }.to_owned(),
             mutation,
         ))
+    }
+}
+
+fn literal_value(literal: &JsBooleanLiteralExpression) -> Option<bool> {
+    match literal.value_token().ok()?.kind() {
+        T![true] => Some(true),
+        T![false] => Some(false),
+        _ => None,
     }
 }
 
@@ -205,11 +238,7 @@ fn keep_expression_if_literal(
     expression: AnyJsExpression,
     expected_value: bool,
 ) -> Option<AnyJsExpression> {
-    let eval_value = match literal.value_token().ok()?.kind() {
-        T![true] => true,
-        T![false] => false,
-        _ => return None,
-    };
+    let eval_value = literal_value(&literal)?;
     if eval_value == expected_value {
         Some(expression)
     } else {

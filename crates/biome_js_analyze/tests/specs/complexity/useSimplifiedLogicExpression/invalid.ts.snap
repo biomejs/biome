@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// expr || false and expr && true produce diagnostics with unsafe fixes
+// because the non-literal operand may not be boolean (e.g. boolean | undefined).
+var x: boolean | undefined;
+var y: boolean;
+y = x || false;
+y = x && true;
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    4 │ var x: boolean | undefined;
+    5 │ var y: boolean;
+  > 6 │ y = x || false;
+      │     ^^^^^^^^^^
+    7 │ y = x && true;
+    8 │ 
+  
+  i Unsafe fix: Discard redundant terms from the logical expression.
+  
+    6 │ y·=·x·||·false;
+      │      --------- 
+
+```
+
+```
+invalid.ts:7:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    5 │ var y: boolean;
+    6 │ y = x || false;
+  > 7 │ y = x && true;
+      │     ^^^^^^^^^
+    8 │ 
+  
+  i Unsafe fix: Discard redundant terms from the logical expression.
+  
+    7 │ y·=·x·&&·true;
+      │      -------- 
+
+```

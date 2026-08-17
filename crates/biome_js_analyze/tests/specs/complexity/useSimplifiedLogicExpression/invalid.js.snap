@@ -11,7 +11,7 @@ const nonNullExp = 123;
 const r3 = null ?? nonNullExp;
 const boolExpr1 = true;
 const boolExpr2 = false;
-const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/ 
+const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/
 
 ```
 
@@ -78,7 +78,7 @@ invalid.js:8:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
   
     6 │ const boolExpr1 = true;
     7 │ const boolExpr2 = false;
-  > 8 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/·
+  > 8 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/
       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     9 │ 
   
@@ -86,8 +86,8 @@ invalid.js:8:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
   
     6 6 │   const boolExpr1 = true;
     7 7 │   const boolExpr2 = false;
-    8   │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/·
-      8 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/·)·/*4*/·
+    8   │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/
+      8 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/)·/*4*/
     9 9 │   
   
 
