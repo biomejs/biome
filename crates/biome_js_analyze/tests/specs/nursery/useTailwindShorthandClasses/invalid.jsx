@@ -7,6 +7,8 @@ export function Component() {
 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
 			<div className="scale-x-50 scale-y-50 scale-z-50" />
 			<div className="content-center justify-center" />
+			<div className="!border-x !border-y" />
+			<div className="!content-center !justify-center" />
 		</>
 	);
 }

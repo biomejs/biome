@@ -1,10 +1,10 @@
 use std::cmp::Ordering;
 
-use biome_rowan::{AstNode, AstNodeList, SyntaxNodeText, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxNodeText, TextRange, TextSize, TokenText};
 use biome_string_case::Collator;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
-    TwRoot,
+    TailwindSyntaxNode, TailwindSyntaxToken, TwRoot,
 };
 
 use super::tailwind_preset_v4::{
@@ -53,18 +53,8 @@ pub fn sort_class_list(root: &TwRoot) -> String {
         .collect();
 
     // `Vec::sort_by` is stable, so Unknown-vs-Unknown comparisons returning
-    // `Equal` keep input order. Known entries whose keys tie — possible
-    // when variants share a rank (`@sm/main:flex` with `@sm:flex`) —
-    // break the tie on full candidate text, mirroring Tailwind's final
-    // candidate-string comparison.
-    keyed.sort_by(|a, b| {
-        compare(&a.0, &b.0).then_with(|| match (&a.0, &b.0) {
-            (SortKey::Known { .. }, SortKey::Known { .. }) => {
-                TwNameCollator.cmp(a.1.chars(), b.1.chars())
-            }
-            _ => Ordering::Equal,
-        })
-    });
+    // `Equal` keep input order.
+    keyed.sort_by(|a, b| compare(&a.0, &b.0));
 
     // Sort is in-place; total text length is unchanged. Pre-size the output
     // so chunked emission never re-allocates.
@@ -92,9 +82,151 @@ enum SortKey {
         /// Total declaration count — Tailwind's tie-break after the
         /// signature (wider utilities sort first).
         count: u8,
-        name: NameKey,
-        important: bool,
+        /// The whole candidate text (variants, sign, name, `!`).
+        /// Tailwind's last tiebreak compares this text with
+        /// [TwNameCollator].
+        text: CandidateText,
     },
+}
+
+/// A candidate's whole text as an allocation-free view into the syntax
+/// tree, ordered the way Tailwind's `compare()` orders raw candidates.
+// TODO: equality compares text chunk-wise and cannot short-circuit on
+// syntax kind mismatches; switch to a structural node comparison once a
+// generic `is_node_equal` is available.
+#[derive(Clone, Debug)]
+struct CandidateText(TailwindSyntaxNode);
+
+impl PartialEq for CandidateText {
+    fn eq(&self, other: &Self) -> bool {
+        self.text() == other.text()
+    }
+}
+
+impl Eq for CandidateText {}
+
+impl CandidateText {
+    fn text(&self) -> SyntaxNodeText {
+        self.0.text_trimmed()
+    }
+
+    /// [TwNameCollator] order over the whole text. Two candidates in one
+    /// bucket usually share their entire variant prefix (`hover:p-2` /
+    /// `hover:p-4`), so the shared prefix is skipped bytewise and only the
+    /// tail from the first difference goes through the collator — backed
+    /// up to the start of a digit run (`p-12` / `p-1a` compare `12` with
+    /// `1`) or of a multi-byte character, so the result is exactly the
+    /// collator's.
+    fn compare(&self, other: &Self) -> Ordering {
+        let mut a = TextChunks::new(&self.0);
+        let mut b = TextChunks::new(&other.0);
+        // Bytes shared so far, and how many of the last shared bytes are
+        // ASCII digits, or belong to a multi-byte character the two texts
+        // may diverge inside of (only one of the two can be non-zero).
+        let mut shared = 0usize;
+        let mut trailing_digits = 0usize;
+        let mut trailing_char_bytes = 0usize;
+        loop {
+            let (Some(x), Some(y)) = (a.rest(), b.rest()) else {
+                return match (a.rest().is_some(), b.rest().is_some()) {
+                    (false, false) => Ordering::Equal,
+                    (false, true) => Ordering::Less,
+                    (true, false) => Ordering::Greater,
+                    (true, true) => unreachable!(),
+                };
+            };
+            let n = x.len().min(y.len());
+            let diverged = x[..n].iter().zip(&y[..n]).position(|(p, q)| p != q);
+            let matched = diverged.unwrap_or(n);
+            for &byte in &x[..matched] {
+                if byte.is_ascii_digit() {
+                    trailing_digits += 1;
+                    trailing_char_bytes = 0;
+                } else if byte.is_ascii() {
+                    trailing_digits = 0;
+                    trailing_char_bytes = 0;
+                } else if (byte & 0xC0) == 0x80 {
+                    // Continuation byte: still inside the character.
+                    trailing_char_bytes += 1;
+                } else {
+                    // Lead byte: a new multi-byte character starts here.
+                    trailing_digits = 0;
+                    trailing_char_bytes = 1;
+                }
+            }
+            shared += matched;
+            if diverged.is_some() {
+                break;
+            }
+            a.advance(n);
+            b.advance(n);
+        }
+        // Both texts share every byte before `restart`, so it is a
+        // character boundary in both.
+        let restart = TextSize::from((shared - trailing_digits - trailing_char_bytes) as u32);
+        let tail = |text: SyntaxNodeText| text.slice(TextRange::new(restart, text.len()));
+        TwNameCollator.cmp(tail(self.text()).chars(), tail(other.text()).chars())
+    }
+}
+
+/// Cursor over the byte chunks of a node's trimmed text, one token at a
+/// time, without allocating.
+struct TextChunks {
+    range: TextRange,
+    /// The current token and the part of its text inside `range`, in
+    /// token-local offsets.
+    current: Option<(TailwindSyntaxToken, TextRange)>,
+    offset: usize,
+}
+
+impl TextChunks {
+    fn new(node: &TailwindSyntaxNode) -> Self {
+        let mut chunks = Self {
+            range: node.text_trimmed_range(),
+            current: None,
+            offset: 0,
+        };
+        chunks.enter(node.first_token());
+        chunks
+    }
+
+    /// Make `token` current, skipping ahead over tokens with no text inside
+    /// the trimmed range; a token past the range ends the walk.
+    fn enter(&mut self, mut token: Option<TailwindSyntaxToken>) {
+        self.offset = 0;
+        self.current = None;
+        while let Some(candidate) = token {
+            if candidate.text_range().start() >= self.range.end() {
+                return;
+            }
+            if let Some(inside) = candidate.text_range().intersect(self.range)
+                && !inside.is_empty()
+            {
+                let local = inside - candidate.text_range().start();
+                self.current = Some((candidate, local));
+                return;
+            }
+            token = candidate.next_token();
+        }
+    }
+
+    /// The unread bytes of the current chunk, or `None` at the end.
+    fn rest(&self) -> Option<&[u8]> {
+        let (token, local) = self.current.as_ref()?;
+        Some(&token.text().as_bytes()[usize::from(local.start()) + self.offset..usize::from(local.end())])
+    }
+
+    fn advance(&mut self, bytes: usize) {
+        self.offset += bytes;
+        let done = self
+            .current
+            .as_ref()
+            .is_some_and(|(_, local)| self.offset >= usize::from(local.len()));
+        if done {
+            let next = self.current.as_ref().and_then(|(token, _)| token.next_token());
+            self.enter(next);
+        }
+    }
 }
 
 /// A classified candidate whose variants are resolved but not yet
@@ -107,8 +239,7 @@ enum PendingSortKey {
     Known {
         signature: Signature,
         count: u8,
-        name: NameKey,
-        important: bool,
+        text: CandidateText,
         variants: Vec<VariantKey>,
     },
 }
@@ -120,7 +251,7 @@ enum PendingSortKey {
 /// the `propertySort` that Tailwind's `compileAstNodes` computes per
 /// candidate.
 ///
-/// This is the primary Tailwind sort key; `count`, name, and importance
+/// This is the primary Tailwind sort key; `count` and the candidate text
 /// only break signature ties.
 #[derive(Clone, Debug)]
 enum Signature {
@@ -192,41 +323,20 @@ impl Ord for Signature {
     }
 }
 
-/// The candidate's name — the negative sign plus the `base-value/modifier`
-/// text, without variants or the important suffix — held as an
-/// allocation-free view into the syntax tree. Candidates inside one
-/// (property, count) bucket order by natural comparison of this name,
-/// which is the order Tailwind emits utilities in: `getClassOrder` ranks
-/// `m-2 m-4 m-auto m-px` and `block flow-root inline-block` by name, not
-/// by utility registration order.
-// TODO: the derived equality compares text chunk-wise and cannot
-// short-circuit on syntax kind mismatches; switch to a structural node
-// comparison once a generic `is_node_equal` is available.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-struct NameKey {
-    negative: bool,
-    text: Option<SyntaxNodeText>,
-}
-
-impl NameKey {
-    fn compare(&self, other: &Self) -> Ordering {
-        fn chars(key: &NameKey) -> impl Iterator<Item = char> + '_ {
-            let sign = key.negative.then_some('-');
-            let text = key.text.as_ref().map(|text| text.chars()).into_iter().flatten();
-            sign.into_iter().chain(text)
-        }
-        TwNameCollator.cmp(chars(self), chars(other))
-    }
-}
-
-/// Orders candidate names the way Tailwind's own `compare()` does:
-/// plain code-point order, except that digit sequences compare as
-/// integers (`p-75` < `p-700`, `red-50` < `red-100`). Code-point order
-/// places `-` before digits, digits before `[`, and `[` before letters
-/// (`-m-4` < `m-4`, `w-4` < `w-[1px]` < `w-auto`), matching the order
-/// Tailwind emits candidates in — which is why this does not reuse
+/// Orders candidates inside one (variant weight, signature, count)
+/// bucket the way Tailwind's own `compare()` does on the whole
+/// candidate text: plain code-point order, except that digit sequences
+/// compare as integers (`p-75` < `p-700`, `red-50` < `red-100`). Code-point
+/// order places `!` and `-` before digits, digits before `[`, and `[`
+/// before letters (`-m-4` < `m-4`, `w-4` < `w-[1px]` < `w-auto`,
+/// `flex` < `flex!`), matching the order Tailwind emits candidates in —
+/// which is why this does not reuse
 /// [biome_string_case::CldrAsciiCollator]: CLDR collation places
 /// punctuation before digits and interleaves letter case.
+///
+/// Because the text starts with the variants, two candidates whose
+/// variants weigh the same but read differently (`hover:sm:flex` and
+/// `sm:hover:block`) order by their variant spelling before their name.
 struct TwNameCollator;
 
 impl Collator for TwNameCollator {
@@ -254,10 +364,13 @@ impl PendingSortKey {
             return Self::Unknown;
         };
 
+        // The legacy leading `!` and the trailing `!` are each fine on
+        // their own; Tailwind rejects a candidate spelling both.
+        if node.legacy_important_token().is_some() && node.excl_token().is_some() {
+            return Self::Unknown;
+        }
+
         let is_negative = node.negative_token().is_some();
-        // An important candidate (`flex!`) sorts exactly where its plain
-        // twin does; `compare` breaks exact-key ties plain-first.
-        let is_important = node.excl_token().is_some();
 
         let Ok(inner) = node.candidate() else {
             return Self::Unknown;
@@ -391,11 +504,7 @@ impl PendingSortKey {
             Some((signature, count)) => Self::Known {
                 signature,
                 count,
-                name: NameKey {
-                    negative: is_negative,
-                    text: Some(inner.syntax().text_trimmed()),
-                },
-                important: is_important,
+                text: CandidateText(node.syntax().clone()),
                 variants,
             },
         }
@@ -409,8 +518,7 @@ impl PendingSortKey {
             Self::Known {
                 signature,
                 count,
-                name,
-                important,
+                text,
                 variants,
             } => {
                 let Some(variant_weight) = variant_groups.weight_for(&variants) else {
@@ -420,8 +528,7 @@ impl PendingSortKey {
                     variant_weight,
                     signature,
                     count,
-                    name,
-                    important,
+                    text,
                 }
             }
         }
@@ -444,15 +551,13 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
                 variant_weight: v1,
                 signature: s1,
                 count: c1,
-                name: n1,
-                important: i1,
+                text: t1,
             },
             SortKey::Known {
                 variant_weight: v2,
                 signature: s2,
                 count: c2,
-                name: n2,
-                important: i2,
+                text: t2,
             },
             // Variants sort outermost — a plain utility before any
             // variant (`flex hover:flex sm:flex`).
@@ -462,12 +567,10 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
             // Wider utilities (e.g. `sr-only` setting 9 properties) win
             // a signature tie so they sort before narrower utilities.
             .then_with(|| c2.cmp(c1))
-            // Candidates with one placement order by name, the way
+            // Bucket ties order by the whole candidate text, the way
             // Tailwind emits them (`m-2 m-4 m-auto m-px`,
-            // `collapse invisible visible`).
-            .then_with(|| n1.compare(n2))
-            // A plain utility precedes its important twin (`flex flex!`).
-            .then_with(|| i1.cmp(i2)),
+            // `collapse invisible visible`, `flex flex!`).
+            .then_with(|| t1.compare(t2)),
     }
 }
 
@@ -690,30 +793,26 @@ mod tests {
     use super::*;
     use biome_tailwind_parser::parse_tailwind;
 
+    /// A known key with the given placement whose text is the placeholder
+    /// candidate `x`, for tests that only exercise the placement.
     fn known(property_idx: u16, property_count: u8) -> SortKey {
+        let parsed = parse_tailwind("x");
+        let candidate = parsed.tree().candidates().iter().next().unwrap();
         SortKey::Known {
             variant_weight: VariantWeight::default(),
             signature: Signature::Property(property_idx),
             count: property_count,
-            name: NameKey::default(),
-            important: false,
+            text: CandidateText(candidate.syntax().clone()),
         }
     }
 
-    /// The name of a known key — sign plus candidate text — materialized
-    /// for assertion messages.
+    /// The candidate text of a known key, materialized for assertion
+    /// messages.
     fn name_text(key: &SortKey) -> String {
-        let SortKey::Known { name, .. } = key else {
+        let SortKey::Known { text, .. } = key else {
             panic!("expected a known key");
         };
-        let mut out = String::new();
-        if name.negative {
-            out.push('-');
-        }
-        if let Some(text) = &name.text {
-            out.push_str(&text.to_string());
-        }
-        out
+        text.text().to_string()
     }
 
     fn nat_cmp(a: &str, b: &str) -> Ordering {
@@ -738,6 +837,45 @@ mod tests {
     /// way `sort_class_list` does. Needed to exercise variant-against-variant
     /// ordering: [classify] builds groups per candidate, so every lone
     /// variant lands in group 0 and compares equal to any other.
+    #[test]
+    fn candidate_text_compare_matches_the_collator() {
+        // Every pair from a corpus that hits the fast path's edges: shared
+        // variant prefixes, digit runs cut at the divergence (`p-12` /
+        // `p-1a`), prefixes of one another, divergence inside a multi-byte
+        // character (`w-é` / `w-è` share the lead byte), and both `!`
+        // spellings.
+        let corpus = "p-1 p-12 p-1a p-2 p-4 p-40 p-400 p-4! !p-4 hover:p-4 hover:p-2 \
+            hover:sm:flex sm:hover:flex sm:hover:block hover:sm:block \
+            @sm:block @sm/main:flex @sm:flex bg-red-500/50 bg-red-500/[.35] \
+            bg-red-500/[.3] w-1/2 w-1/3 w-[1px] w-[10px] w-auto -m-4 m-4 -m-px \
+            [color:red] [color:red]! w-é w-è w-éa w-éb w-ü w-ǖ flex \
+            flex! !flex text-red-500 text-red-50 text-red-5000 p-4/50 hover:!p-4";
+        let parsed = parse_tailwind(corpus);
+        let texts: Vec<CandidateText> = parsed
+            .tree()
+            .candidates()
+            .iter()
+            .map(|c| CandidateText(c.syntax().clone()))
+            .collect();
+        for a in &texts {
+            for b in &texts {
+                let expected = TwNameCollator.cmp(a.text().chars(), b.text().chars());
+                assert_eq!(
+                    a.compare(b),
+                    expected,
+                    "{} vs {}",
+                    a.text(),
+                    b.text()
+                );
+            }
+        }
+    }
+
+    /// Sort a class string end to end.
+    fn sort(input: &str) -> String {
+        sort_class_list(&parse_tailwind(input).tree())
+    }
+
     fn classify_all(input: &str) -> Vec<SortKey> {
         let parsed = parse_tailwind(input);
         let pending: Vec<PendingSortKey> = parsed
@@ -819,16 +957,22 @@ mod tests {
 
     #[test]
     fn compare_breaks_exact_key_tie_plain_before_important() {
-        let plain = known(5, 1);
-        let important = SortKey::Known {
-            variant_weight: VariantWeight::default(),
-            signature: Signature::Property(5),
-            count: 1,
-            name: NameKey::default(),
-            important: true,
-        };
+        let plain = classify("flex");
+        let important = classify("flex!");
         assert_eq!(compare(&plain, &important), Ordering::Less);
         assert_eq!(compare(&important, &plain), Ordering::Greater);
+    }
+
+    #[test]
+    fn compare_breaks_bucket_tie_by_variant_spelling_before_name() {
+        // `hover:sm:` and `sm:hover:` weigh the same, so Tailwind falls
+        // through to the whole candidate text, where the variant spelling
+        // comes before the utility name.
+        assert_eq!(
+            sort("sm:hover:block hover:sm:flex"),
+            "hover:sm:flex sm:hover:block"
+        );
+        assert_eq!(sort("@sm:block @sm/main:flex"), "@sm/main:flex @sm:block");
     }
 
     #[test]
@@ -853,7 +997,7 @@ mod tests {
 
     #[test]
     fn compare_breaks_bucket_tie_by_name_before_importance() {
-        // `p-2! p-4`: the name decides, the important suffix does not
+        // `p-2! p-4`: the name decides; the important suffix does not
         // pull `p-4` ahead of `p-2!`.
         let important_two = classify("p-2!");
         let plain_four = classify("p-4");
@@ -1101,10 +1245,7 @@ mod tests {
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
         let key = classify("[display:block]");
         let SortKey::Known {
-            signature,
-            count,
-            important: false,
-            ..
+            signature, count, ..
         } = &key
         else {
             panic!("expected a plain known key");
@@ -1140,50 +1281,39 @@ mod tests {
             variant_weight,
             signature,
             count,
-            name,
-            important: false,
+            ..
         } = classify("flex")
         else {
             panic!("expected `flex` to classify as a plain known key");
         };
-        assert_eq!(
-            classify("flex!"),
-            SortKey::Known {
-                variant_weight,
-                signature,
-                count,
-                name,
-                important: true,
-            }
-        );
+        let SortKey::Known {
+            variant_weight: important_weight,
+            signature: important_signature,
+            count: important_count,
+            text,
+        } = classify("flex!")
+        else {
+            panic!("expected `flex!` to classify as a known key");
+        };
+        assert_eq!(important_weight, variant_weight);
+        assert_eq!(important_signature, signature);
+        assert_eq!(important_count, count);
+        assert_eq!(text.text(), "flex!");
     }
 
     #[test]
     fn important_suffix_classifies_functional_and_arbitrary_candidates() {
-        assert!(matches!(
-            classify("p-4!"),
-            SortKey::Known {
-                important: true,
-                ..
-            }
-        ));
-        assert!(matches!(
-            classify("[display:block]!"),
-            SortKey::Known {
-                important: true,
-                ..
-            }
-        ));
+        assert!(matches!(classify("p-4!"), SortKey::Known { .. }));
+        assert!(matches!(classify("[display:block]!"), SortKey::Known { .. }));
+        assert_eq!(sort("p-4! p-4 [display:block]! [display:block]"), "[display:block] [display:block]! p-4 p-4!");
     }
 
     #[test]
     fn variants_classify_and_keep_importance() {
         // A recognized variant places the candidate; `!` still rides
         // through as the final tiebreak.
-        assert!(matches!(
-            classify("hover:flex!"),
-            SortKey::Known { important: true, .. }
-        ));
+        assert!(matches!(classify("hover:flex!"), SortKey::Known { .. }));
+        assert_eq!(sort("hover:flex! hover:flex"), "hover:flex hover:flex!");
         // A variant sorts after its variantless twin.
         assert_eq!(
             compare(&classify("flex"), &classify("hover:flex")),
@@ -1244,13 +1374,21 @@ mod tests {
 
     #[test]
     fn variants_resolving_equal_lengths_share_a_rank() {
-        // `min-[40rem]` and `sm` both resolve 40rem, so their keys tie;
-        // `sort_class_list` breaks the tie on candidate text.
+        // `min-[40rem]` and `sm` both resolve 40rem, so their variant
+        // weights tie and the candidate text decides.
         let keys = classify_all("min-[40rem]:flex sm:flex");
-        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Equal);
-        // A container modifier does not participate in ordering.
+        assert_eq!(weight_of(&keys[0]), weight_of(&keys[1]));
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+        // A container modifier does not participate in the weight.
         let keys = classify_all("@sm/main:flex @sm:flex");
-        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Equal);
+        assert_eq!(weight_of(&keys[0]), weight_of(&keys[1]));
+    }
+
+    fn weight_of(key: &SortKey) -> &VariantWeight {
+        let SortKey::Known { variant_weight, .. } = key else {
+            panic!("expected a known key");
+        };
+        variant_weight
     }
 
     #[test]
@@ -1340,9 +1478,9 @@ mod tests {
         // The sign comes from the full candidate, outside the inner
         // candidate node.
         assert_eq!(text_of("-mt-2"), "-mt-2");
-        // The important suffix is not part of the name; it is a separate
-        // final tiebreak.
-        assert_eq!(text_of("p-4!"), "p-4");
+        // The important suffix and the variants ride along too.
+        assert_eq!(text_of("p-4!"), "p-4!");
+        assert_eq!(text_of("hover:p-4"), "hover:p-4");
     }
 
     // endregion: sort key classification

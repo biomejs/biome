@@ -997,6 +997,7 @@ impl TwFullCandidate {
     pub fn as_fields(&self) -> TwFullCandidateFields {
         TwFullCandidateFields {
             variants: self.variants(),
+            legacy_important_token: self.legacy_important_token(),
             negative_token: self.negative_token(),
             candidate: self.candidate(),
             excl_token: self.excl_token(),
@@ -1005,14 +1006,17 @@ impl TwFullCandidate {
     pub fn variants(&self) -> TwVariantList {
         support::list(&self.syntax, 0usize)
     }
-    pub fn negative_token(&self) -> Option<SyntaxToken> {
+    pub fn legacy_important_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 1usize)
     }
+    pub fn negative_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
     pub fn candidate(&self) -> SyntaxResult<AnyTwCandidate> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 3usize)
     }
     pub fn excl_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 3usize)
+        support::token(&self.syntax, 4usize)
     }
 }
 impl Serialize for TwFullCandidate {
@@ -1026,6 +1030,7 @@ impl Serialize for TwFullCandidate {
 #[derive(Serialize)]
 pub struct TwFullCandidateFields {
     pub variants: TwVariantList,
+    pub legacy_important_token: Option<SyntaxToken>,
     pub negative_token: Option<SyntaxToken>,
     pub candidate: SyntaxResult<AnyTwCandidate>,
     pub excl_token: Option<SyntaxToken>,
@@ -3034,6 +3039,10 @@ impl std::fmt::Debug for TwFullCandidate {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwFullCandidate")
                 .field("variants", &self.variants())
+                .field(
+                    "legacy_important_token",
+                    &support::DebugOptionalElement(self.legacy_important_token()),
+                )
                 .field(
                     "negative_token",
                     &support::DebugOptionalElement(self.negative_token()),

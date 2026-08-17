@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwBogusCandidate {
                 items: [
@@ -47,7 +48,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..15
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_BOGUS_CANDIDATE@0..15
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@0..15
         0: L_BRACKET@0..1 "[" [] []
         1: TW_SELECTOR@1..8 "foo:bar" [] []
         2: R_BRACKET@8..9 "]" [] []
@@ -55,7 +57,7 @@ TwRoot {
         4: TW_VALUE@10..13 "mod" [] []
         5: COLON@13..14 ":" [] []
         6: TW_BASE@14..15 "x" [] []
-      3: (empty)
+      4: (empty)
   2: EOF@15..16 "" [Newline("\n")] []
 
 ```
