@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNamedLayer {
-        version: "next",
+        version: "2.5.9",
         name: "useNamedLayer",
         language: "css",
         recommended: false,

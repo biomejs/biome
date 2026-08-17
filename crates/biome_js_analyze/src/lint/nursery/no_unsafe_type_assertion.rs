@@ -98,7 +98,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoUnsafeTypeAssertion {
-        version: "next",
+        version: "2.5.9",
         name: "noUnsafeTypeAssertion",
         language: "ts",
         recommended: false,
