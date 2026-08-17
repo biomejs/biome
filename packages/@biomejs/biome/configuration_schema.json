@@ -7093,6 +7093,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAstroClientOnlyDirectiveValue": {
+					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAwaitThenable": {
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
@@ -7950,6 +7957,11 @@
 		"RuleDomain": {
 			"description": "Rule domains",
 			"oneOf": [
+				{
+					"description": "Astro framework rules",
+					"type": "string",
+					"const": "astro"
+				},
 				{
 					"description": "Drizzle ORM rules",
 					"type": "string",
@@ -11286,6 +11298,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseAsConstAssertionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14986,6 +15007,16 @@
 			]
 		},
 		"UseAsConstAssertionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseAstroClientOnlyDirectiveValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroClientOnlyDirectiveValueOptions" }
+			]
+		},
+		"UseAstroClientOnlyDirectiveValueOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

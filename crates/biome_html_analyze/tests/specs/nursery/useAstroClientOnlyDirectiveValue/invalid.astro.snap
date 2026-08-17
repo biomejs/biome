@@ -1,0 +1,30 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<ReactComponent client:only />
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:17 lint/nursery/useAstroClientOnlyDirectiveValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i client:only is missing a framework value.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <ReactComponent client:only />
+      │                 ^^^^^^^^^^^
+    3 │ 
+  
+  i Astro skips server rendering for client:only, so it cannot infer which renderer should load the component.
+  
+  i Add the component framework as the directive value, for example client:only="react".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
