@@ -759,6 +759,7 @@ mod tests {
         assert_eq!(
             project
                 .root_settings(&*retained_db)
+                .as_ref()
                 .vcs_settings
                 .client_kind,
             None
@@ -783,6 +784,7 @@ mod tests {
         assert_eq!(
             updated_project
                 .root_settings(&*retained_db)
+                .as_ref()
                 .vcs_settings
                 .client_kind,
             Some(VcsClientKind::Git)
@@ -801,7 +803,14 @@ mod tests {
             let db = state.fork();
             let project = db.get_project(&project_key).unwrap();
             assert_eq!(project.path(&*db), path.as_path());
-            assert_eq!(project.root_settings(&*db).vcs_settings.client_kind, None);
+            assert_eq!(
+                project
+                    .root_settings(&*db)
+                    .as_ref()
+                    .vcs_settings
+                    .client_kind,
+                None
+            );
             project
         };
 
@@ -812,7 +821,11 @@ mod tests {
             let updated_project = db.get_project(&project_key).unwrap();
             assert_eq!(updated_project.as_id(), project.as_id());
             assert_eq!(
-                updated_project.root_settings(&*db).vcs_settings.client_kind,
+                updated_project
+                    .root_settings(&*db)
+                    .as_ref()
+                    .vcs_settings
+                    .client_kind,
                 Some(VcsClientKind::Git)
             );
         }

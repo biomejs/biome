@@ -1372,6 +1372,7 @@ version = "0.1.0"
 dependencies = [
  "biome_console",
  "biome_db",
+ "biome_fs",
  "biome_rowan",
  "biome_string_case",
  "camino",

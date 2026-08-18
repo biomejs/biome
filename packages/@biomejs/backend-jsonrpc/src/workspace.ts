@@ -10557,6 +10557,7 @@ For example, if inside an Astro file, a top-level return statement is allowed.
 export interface JsonFileSource {
 	allowComments: boolean;
 	allowTrailingCommas: boolean;
+	kind: JsonSourceKind;
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
@@ -10643,6 +10644,7 @@ The versions are ordered in increasing order; The newest version comes last.
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
+export type JsonSourceKind = "regular" | "biomeJson" | "packageJson";
 /**
  * It represents the extension of the file
  */
