@@ -4,7 +4,7 @@
 //   pnpm --filter tailwindcss-config-analyzer execute:v4
 //
 // Output:
-//   crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs
+//   crates/biome_tailwind_logic/src/sorted_classes/tailwind_preset_v4.rs
 
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
@@ -24,7 +24,7 @@ import { THEME_NAMESPACES } from "./theme-namespaces.js";
 
 const ROOT_PACKAGE_NAME = "@biomejs/monorepo";
 const OUTPUT_PATH =
-	"crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs";
+	"crates/biome_tailwind_logic/src/sorted_classes/tailwind_preset_v4.rs";
 
 async function findRepoRoot(): Promise<string> {
 	let cwd = path.dirname(fileURLToPath(import.meta.url));

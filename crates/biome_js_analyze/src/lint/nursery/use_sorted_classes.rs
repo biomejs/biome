@@ -1,27 +1,25 @@
-mod arbitrary_value_match;
+// `sort` owns only the engine-independent diagnostic-range and
+// template-literal helpers; the class sorting itself lives in
+// `biome_tailwind_logic::sorted_classes`, shared with the HTML rule.
 mod sort;
-pub mod sort_v4;
-mod sort_v4_variants;
-mod tailwind_preset_v4;
-mod tailwind_preset_v4_types;
 
-use self::sort::{get_sort_class_name_range, sort_class_name};
+use self::sort::{TemplateLiteralSpaceContext, get_sort_class_name_range};
 use crate::JsRuleAction;
 use crate::shared::any_class_string_like::AnyClassStringLike;
-use biome_analyze::shared::sorted_classes::sort_config::DEFAULT_SORT_CONFIG;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_tailwind_logic::sorted_classes::{EMPTY_REGISTRY, TailwindRegistry, sort_class_string};
 
 declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
     ///
-    /// This rule implements the same sorting algorithm as [Tailwind CSS](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted), but supports any utility class framework including [UnoCSS](https://unocss.dev/).
+    /// This rule sorts classes the way [Tailwind CSS v4](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted) and its Prettier plugin do: utilities in the order Tailwind emits them, variants after plain utilities and grouped by variant, and classes the rule doesn't recognize kept at the front in their original order.
     ///
     /// It is analogous to [`prettier-plugin-tailwindcss`](https://github.com/tailwindlabs/prettier-plugin-tailwindcss).
     ///
@@ -29,7 +27,7 @@ declare_lint_rule! {
     /// :::caution
     /// ## Important notes
     ///
-    /// This rule is a work in progress, and is only partially implemented. Progress is being tracked in the following GitHub issue: https://github.com/biomejs/biome/issues/1274
+    /// Progress on this rule is tracked in the following GitHub issue: https://github.com/biomejs/biome/issues/1274
     ///
     /// Currently, utility class sorting is **not part of the formatter**, and is implemented as a linter rule instead, with an automatic fix. The fix is, at this stage, classified as unsafe. This means that **it won't be applied automatically** as part of IDE actions such as "fix on save".
     ///
@@ -39,9 +37,8 @@ declare_lint_rule! {
     ///
     /// Notably, keep in mind that the following features are not supported yet:
     ///
-    /// - Screen variant sorting (e.g. `md:`, `max-lg:`). Only static, dynamic and arbitrary variants are supported.
-    /// - Custom utilities and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
-    /// - Options such as `prefix` and `separator`.
+    /// - The `prefix` option and Tailwind CSS v3 configuration files.
+    /// - Utilities, variants, and theme values your project adds, whether in CSS (`@theme`, `@utility`, `@custom-variant`) or through JavaScript (`@plugin`, `@config`), which Biome cannot execute.
     ///
     /// Please don't report issues about these features.
     /// :::
@@ -109,35 +106,16 @@ declare_lint_rule! {
     /// ### Sort-related
     ///
     /// :::caution
-    /// At the moment, this rule does not support customizing the sort options. Instead, the default Tailwind CSS configuration is hard-coded.
+    /// At the moment, this rule does not support customizing the sort options. Instead, the default Tailwind CSS v4 theme is built in.
     /// :::
     ///
     /// ## Differences with [Prettier](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)
     ///
-    /// The main key difference is that Tailwind CSS and its Prettier plugin read and execute the `tailwind.config.js` JavaScript file, which Biome can't do. Instead, Biome implements a simpler version of the configuration. The trade-offs are explained below.
+    /// The main key difference is that Tailwind CSS and its Prettier plugin load your stylesheet through Tailwind itself, executing any JavaScript it pulls in (`@plugin`, `@config`, and for v3 `tailwind.config.js`), which Biome doesn't do. Instead, Biome sorts with Tailwind's default theme built in. The trade-offs are explained below.
     ///
-    /// ### Values are not known
+    /// ### Custom additions are not known
     ///
-    /// The rule has no knowledge of values such as colors, font sizes, or spacing values, which are normally defined in a configuration file like `tailwind.config.js`. Instead, the rule matches utilities that support values in a simpler way: if they start with a known utility prefix, such as `px-` or `text-`, they're considered valid.
-    ///
-    /// This has two implications:
-    ///
-    /// - **False positives:** classes can be wrongly recognized as utilities even though their values are incorrect.
-    ///   For example, if there's a `px-` utility defined in the configuration, it will match all of the following classes:
-    ///   `px-2`, `px-1337`, `px-[not-actually-valid]`, `px-literally-anything`.
-    ///
-    /// - **No distinction between different utilities that share the same prefix:** for example,
-    ///   `text-red-500` and `text-lg` are both interpreted as the same type of utility by this rule,
-    ///    even though the former refers to a color and the latter to a font size. This results in all
-    ///    utilities that share the same prefix being sorted together, regardless of their actual values.
-    ///
-    /// ### Custom additions must be specified
-    ///
-    /// The built-in Tailwind CSS preset (enabled by default) contains the set of utilities and variants that are available with the default configuration. More utilities and variants can be added through Tailwind CSS plugins. In Biome, these need to be manually specified in the Biome configuration file in order to "extend" the preset.
-    ///
-    /// ### Presets can't be modified
-    ///
-    /// In Tailwind CSS, core plugins (which provide the default utilities and variants) can be disabled. In Biome, however, there is no way to disable parts of a preset: it's all or nothing. A work-around is to, instead of using a preset, manually specify all utilities and variants in the Biome configuration file.
+    /// The rule knows the utilities, variants, breakpoints, and theme values that Tailwind CSS v4 ships with, and orders them the way Tailwind does. Anything your project adds — `@theme` keys, `@utility` and `@custom-variant` registrations, `@plugin`, `@config`, or a v3 config file — and the `prefix` option remain unknown to it, and classes it does not recognize are left where the Prettier plugin would put them: at the front, in their original order.
     ///
     /// ### Whitespace is collapsed
     ///
@@ -155,6 +133,46 @@ declare_lint_rule! {
     }
 }
 
+/// Sort a class string with the Tailwind v4 engine, preserving the
+/// template-literal semantics the v3 path handled: a class glued to a
+/// `${…}` interpolation is held out of sorting, and a boundary space next
+/// to an interpolation is kept. Only the sortable middle goes through
+/// [`sort_class_string`].
+fn sort_class_name_v4(
+    class_name: &TokenText,
+    template_ctx: &Option<TemplateLiteralSpaceContext>,
+    registry: &TailwindRegistry,
+) -> String {
+    let (ignore_prefix, ignore_postfix) = template_ctx
+        .as_ref()
+        .map_or((false, false), |ctx| ctx.get_ignore_flags());
+
+    let mut classes = class_name.split_whitespace();
+    let prefix = ignore_prefix.then(|| classes.next()).flatten();
+    let postfix = ignore_postfix.then(|| classes.next_back()).flatten();
+
+    let middle = classes.collect::<Vec<_>>().join(" ");
+    let sorted_middle = sort_class_string(&middle, registry);
+
+    let mut parts: Vec<&str> = Vec::with_capacity(3);
+    parts.extend(prefix);
+    if !sorted_middle.is_empty() {
+        parts.push(sorted_middle.as_str());
+    }
+    parts.extend(postfix);
+    let mut result = parts.join(" ");
+
+    if let Some(ctx) = template_ctx {
+        if ctx.keep_leading() {
+            result.insert(0, ' ');
+        }
+        if ctx.keep_trailing() {
+            result.push(' ');
+        }
+    }
+    result
+}
+
 impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = Box<str>;
@@ -169,7 +187,7 @@ impl Rule for UseSortedClasses {
             && let Some(value) = node.value()
         {
             let template_ctx = sort::get_template_literal_space_context(node);
-            let sorted_value: String = sort_class_name(&value, &DEFAULT_SORT_CONFIG, &template_ctx);
+            let sorted_value: String = sort_class_name_v4(&value, &template_ctx, &EMPTY_REGISTRY);
             if sorted_value.is_empty() {
                 return None;
             }
@@ -254,3 +272,4 @@ impl Rule for UseSortedClasses {
         ))
     }
 }
+

@@ -24,7 +24,7 @@ pub enum NamedValueType {
 
 // CSS data types (from infer-data-type.ts). Bracketed arbitrary values use
 // AST predicates — see sort_v4::resolve_arbitrary_branch.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum CssDataType {
     Color,

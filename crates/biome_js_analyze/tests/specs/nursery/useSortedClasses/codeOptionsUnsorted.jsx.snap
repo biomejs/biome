@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: codeOptionsUnsorted.jsx
 ---
 # Input
@@ -194,7 +193,7 @@ codeOptionsUnsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     11 11 │     {/* SHOULD emit diagnostics (class attribute supported by default) */}
     12 12 │     <div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
     13    │ - → <div·class="flex·custom-layout·items-center·justify-center·h-screen·bg-gray-200·bar·text-lg·font-bold"·/>
-       13 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·font-bold·text-lg"·/>
+       13 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·text-lg·font-bold"·/>
     14 14 │     <div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
     15 15 │     <div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
   
@@ -362,7 +361,7 @@ codeOptionsUnsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     17 17 │     <div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
     18 18 │     <div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
     19    │ - → <div·class="underline·custom-text·foo·text-2xl·font-semibold·my-2"·/>
-       19 │ + → <div·class="custom-text·foo·my-2·font-semibold·text-2xl·underline"·/>
+       19 │ + → <div·class="custom-text·foo·my-2·text-2xl·font-semibold·underline"·/>
     20 20 │     <div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     21 21 │     <div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
   
@@ -418,7 +417,7 @@ codeOptionsUnsorted.jsx:21:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     19 19 │     <div class="underline custom-text foo text-2xl font-semibold my-2" />
     20 20 │     <div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     21    │ - → <div·class="gap-8·bg-indigo-100·text-indigo-900·p-3·border-l-4·border-indigo-500·custom-border"·/>
-       21 │ + → <div·class="custom-border·gap-8·border-indigo-500·border-l-4·bg-indigo-100·p-3·text-indigo-900"·/>
+       21 │ + → <div·class="custom-border·gap-8·border-l-4·border-indigo-500·bg-indigo-100·p-3·text-indigo-900"·/>
     22 22 │   </>;
     23 23 │   
   

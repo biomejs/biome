@@ -1,4 +1,4 @@
-use biome_js_analyze::lint::nursery::use_sorted_classes::sort_v4::sort_class_list;
+use biome_tailwind_logic::sorted_classes::{TailwindRegistry, sort_class_list};
 use biome_tailwind_parser::parse_tailwind;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
@@ -44,6 +44,7 @@ const CLASS_STRING_FIXTURES: &[(&str, &str)] = &[
 ];
 
 fn bench_use_sorted_classes_v4(c: &mut Criterion) {
+    let registry = TailwindRegistry::default();
     let mut group = c.benchmark_group("use_sorted_classes_v4");
 
     for (name, content) in CLASS_STRING_FIXTURES {
@@ -53,7 +54,12 @@ fn bench_use_sorted_classes_v4(c: &mut Criterion) {
             BenchmarkId::new("parse_and_sort", name),
             content,
             |b, input| {
-                b.iter(|| black_box(sort_class_list(&parse_tailwind(black_box(input)).tree())));
+                b.iter(|| {
+                    black_box(sort_class_list(
+                        &parse_tailwind(black_box(input)).tree(),
+                        &registry,
+                    ))
+                });
             },
         );
     }

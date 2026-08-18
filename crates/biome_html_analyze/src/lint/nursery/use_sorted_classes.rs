@@ -1,10 +1,6 @@
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
 };
-use biome_analyze::shared::sorted_classes::{
-    sort::sort_class_name,
-    sort_config::DEFAULT_SORT_CONFIG,
-};
 use biome_console::markup;
 use biome_html_factory::make;
 use biome_html_syntax::{
@@ -13,13 +9,14 @@ use biome_html_syntax::{
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_tailwind_logic::sorted_classes::{EMPTY_REGISTRY, sort_class_string};
 
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
     ///
-    /// This rule implements the same sorting algorithm as [Tailwind CSS](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted), but supports any utility class framework including [UnoCSS](https://unocss.dev/).
+    /// This rule sorts classes the way [Tailwind CSS v4](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted) and its Prettier plugin do: utilities in the order Tailwind emits them, variants after plain utilities and grouped by variant, and classes the rule doesn't recognize kept at the front in their original order.
     ///
     /// It is analogous to [`prettier-plugin-tailwindcss`](https://github.com/tailwindlabs/prettier-plugin-tailwindcss).
     ///
@@ -91,7 +88,7 @@ impl Rule for UseSortedClasses {
         let inner_text = inner_string_text(&value_token);
         let value_str = inner_text.text();
 
-        let sorted_value = sort_class_name(&inner_text, &DEFAULT_SORT_CONFIG);
+        let sorted_value = sort_class_string(value_str, &EMPTY_REGISTRY);
         if sorted_value.is_empty() {
             return None;
         }

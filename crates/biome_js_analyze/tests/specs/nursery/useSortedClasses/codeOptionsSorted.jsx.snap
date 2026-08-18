@@ -51,3 +51,88 @@ clsx({
 });
 
 ```
+
+# Diagnostics
+```
+codeOptionsSorted.jsx:9:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     7 │ 	{/* utility sorting */}
+     8 │ 	<div class="custom-style1 foo rounded-lg bg-blue-500 p-4 text-center text-white shadow-lg" />
+   > 9 │ 	<div class="custom-layout bar flex h-screen items-center justify-center bg-gray-200 font-bold text-lg" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<div class="custom-grid m-6 grid grid-cols-3 gap-4 rounded-md border border-gray-300 p-6 shadow-md" />
+    11 │ 	<div class="custom-alert absolute top-0 right-0 m-4 rounded-full bg-red-600 p-2 text-sm text-white" />
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     7  7 │     {/* utility sorting */}
+     8  8 │     <div class="custom-style1 foo rounded-lg bg-blue-500 p-4 text-center text-white shadow-lg" />
+     9    │ - → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·font-bold·text-lg"·/>
+        9 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·text-lg·font-bold"·/>
+    10 10 │     <div class="custom-grid m-6 grid grid-cols-3 gap-4 rounded-md border border-gray-300 p-6 shadow-md" />
+    11 11 │     <div class="custom-alert absolute top-0 right-0 m-4 rounded-full bg-red-600 p-2 text-sm text-white" />
+  
+
+```
+
+```
+codeOptionsSorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    13 │ 	<div class="custom-list flex-col space-y-4 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow-md" />
+    14 │ 	<div class="custom-background foo relative m-2 h-64 w-full overflow-hidden bg-cover bg-no-repeat" />
+  > 15 │ 	<div class="custom-text foo my-2 font-semibold text-2xl underline" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	<div class="custom-container bar flex-wrap items-start justify-between bg-purple-200 p-5 text-purple-700" />
+    17 │ 	<div class="custom-border gap-8 border-indigo-500 border-l-4 bg-indigo-100 p-3 text-indigo-900" />
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    13 13 │     <div class="custom-list flex-col space-y-4 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow-md" />
+    14 14 │     <div class="custom-background foo relative m-2 h-64 w-full overflow-hidden bg-cover bg-no-repeat" />
+    15    │ - → <div·class="custom-text·foo·my-2·font-semibold·text-2xl·underline"·/>
+       15 │ + → <div·class="custom-text·foo·my-2·text-2xl·font-semibold·underline"·/>
+    16 16 │     <div class="custom-container bar flex-wrap items-start justify-between bg-purple-200 p-5 text-purple-700" />
+    17 17 │     <div class="custom-border gap-8 border-indigo-500 border-l-4 bg-indigo-100 p-3 text-indigo-900" />
+  
+
+```
+
+```
+codeOptionsSorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    15 │ 	<div class="custom-text foo my-2 font-semibold text-2xl underline" />
+    16 │ 	<div class="custom-container bar flex-wrap items-start justify-between bg-purple-200 p-5 text-purple-700" />
+  > 17 │ 	<div class="custom-border gap-8 border-indigo-500 border-l-4 bg-indigo-100 p-3 text-indigo-900" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ </>;
+    19 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    15 15 │     <div class="custom-text foo my-2 font-semibold text-2xl underline" />
+    16 16 │     <div class="custom-container bar flex-wrap items-start justify-between bg-purple-200 p-5 text-purple-700" />
+    17    │ - → <div·class="custom-border·gap-8·border-indigo-500·border-l-4·bg-indigo-100·p-3·text-indigo-900"·/>
+       17 │ + → <div·class="custom-border·gap-8·border-l-4·border-indigo-500·bg-indigo-100·p-3·text-indigo-900"·/>
+    18 18 │   </>;
+    19 19 │   
+  
+
+```

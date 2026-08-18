@@ -43,8 +43,8 @@ use biome_tailwind_syntax::{
 };
 use smallvec::SmallVec;
 
-use super::tailwind_preset_v4::{BREAKPOINT_VALUES, CONTAINER_VALUES, VARIANTS};
 use super::tailwind_preset_v4_types::{VariantCompare, VariantEntry, VariantKind};
+use super::tailwind_registry::TailwindRegistry;
 
 /// The variants a candidate carries, as the set of [VariantGroups]
 /// indices they occupy — a bitset compared as one big number.
@@ -119,19 +119,24 @@ fn trimmed_word_len(words: &[u64]) -> usize {
 /// container modifiers never participate in ordering — `@sm/main:` ties
 /// `@sm:` on length and the candidate text breaks the tie.
 ///
-/// Equality is defined as `cmp(..) == Equal`, NOT structurally: Tailwind
-/// gives variants that compare equal one shared rank (`@sm/main:` and
-/// `@sm:` resolve the same container width), and [VariantGroups] relies
-/// on `dedup` collapsing exactly the keys the comparator ties.
+/// Keys carry no `Eq`/`Ord`: two keys are "equal" when
+/// [compare_variant_keys] ties them, which needs the registry (a custom
+/// variant's order lives there), and [VariantGroups] relies on that
+/// comparator to collapse exactly the keys Tailwind gives one shared
+/// rank (`@sm/main:` and `@sm:` resolve the same container width).
+///
+/// Roots borrow from the registry — a `&'static str` out of the preset's
+/// `phf` tables or a `&str` into the registry's own map keys — so
+/// building a key allocates nothing.
 #[derive(Clone, Debug)]
-pub(super) enum VariantKey {
-    Static(&'static str),
+pub(super) enum VariantKey<'r> {
+    Static(&'r str),
     Functional {
-        root: &'static str,
+        root: &'r str,
         value: Option<VariantValue>,
     },
     Compound {
-        root: &'static str,
+        root: &'r str,
         variant: Box<Self>,
         /// The `/scope` name, as an allocation-free view of the modifier's
         /// value node (its inner value for bracketed forms, so
@@ -140,14 +145,6 @@ pub(super) enum VariantKey {
     },
     Arbitrary(Text),
 }
-
-impl PartialEq for VariantKey {
-    fn eq(&self, other: &Self) -> bool {
-        self.cmp(other) == Ordering::Equal
-    }
-}
-
-impl Eq for VariantKey {}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(super) enum VariantValue {
@@ -162,44 +159,61 @@ enum VariantSegment {
     CssVariable,
 }
 
-pub(super) struct VariantGroups {
+pub(super) struct VariantGroups<'r> {
     /// Distinct variant keys in ascending order; a key's rank — its
     /// weight-bit index — is its position here.
-    ranked: Vec<VariantKey>,
+    ranked: Vec<VariantKey<'r>>,
+    registry: &'r TailwindRegistry,
 }
 
-impl VariantGroups {
-    pub(super) fn new<'a>(variants: impl IntoIterator<Item = &'a VariantKey>) -> Self {
-        // Each distinct key's index is its rank. Equality is defined as
-        // comparing equal, so `dedup` collapses exactly the keys Tailwind
+impl<'r> VariantGroups<'r> {
+    pub(super) fn new<'a>(
+        variants: impl IntoIterator<Item = &'a VariantKey<'r>>,
+        registry: &'r TailwindRegistry,
+    ) -> Self
+    where
+        'r: 'a,
+    {
+        // Each distinct key's index is its rank. Keys the comparator ties
+        // collapse into one, so `dedup_by` keeps exactly the keys Tailwind
         // gives one shared rank (`@sm/main:` with `@sm:`).
-        let mut ranked: Vec<VariantKey> = variants.into_iter().cloned().collect();
-        ranked.sort();
-        ranked.dedup();
-        Self { ranked }
+        let mut ranked: Vec<VariantKey<'r>> = variants.into_iter().cloned().collect();
+        ranked.sort_by(|a, b| compare_variant_keys(a, b, registry));
+        ranked.dedup_by(|a, b| compare_variant_keys(a, b, registry) == Ordering::Equal);
+        Self { ranked, registry }
     }
 
     /// Returns `None` if a variant was not part of the list the ranks
     /// were built from. Unreachable when the ranks come from these same
     /// candidates, so callers fold it into `Unknown`.
-    pub(super) fn weight_for(&self, variants: &[VariantKey]) -> Option<VariantWeight> {
+    pub(super) fn weight_for(&self, variants: &[VariantKey<'r>]) -> Option<VariantWeight> {
         let mut weight = VariantWeight::default();
         for variant in variants {
-            weight.set(self.ranked.binary_search(variant).ok()?);
+            weight.set(
+                self.ranked
+                    .binary_search_by(|probe| compare_variant_keys(probe, variant, self.registry))
+                    .ok()?,
+            );
         }
         Some(weight)
     }
 }
 
-pub(super) fn variant_keys_from_candidate(candidate: &TwFullCandidate) -> Option<Vec<VariantKey>> {
+pub(super) fn variant_keys_from_candidate<'r>(
+    candidate: &TwFullCandidate,
+    registry: &'r TailwindRegistry,
+) -> Option<Vec<VariantKey<'r>>> {
     let mut variants = Vec::new();
     for variant in candidate.variants() {
-        variants.push(variant_key_from_variant(&variant.ok()?)?);
+        variants.push(variant_key_from_variant(&variant.ok()?, registry)?);
     }
     Some(variants)
 }
 
-fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
+fn variant_key_from_variant<'r>(
+    variant: &AnyTwVariant,
+    registry: &'r TailwindRegistry,
+) -> Option<VariantKey<'r>> {
     match variant {
         AnyTwVariant::TwArbitraryVariant(variant) => Some(VariantKey::Arbitrary(
             variant.selector_token().ok()?.token_text_trimmed().into(),
@@ -213,7 +227,7 @@ fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
                     glued.value_token().ok()?.token_text_trimmed().into(),
                 ));
             }
-            let key = variant_key_from_segments(&segments)?;
+            let key = variant_key_from_segments(&segments, registry)?;
             match expression.modifier() {
                 None => Some(key),
                 Some(modifier) => attach_modifier(key, &modifier),
@@ -228,7 +242,7 @@ fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
 /// compound (`group-hover/menu:`) or of a container query (`@sm/main:`,
 /// `@max-[959px]/name:`); on any other variant it invalidates the whole
 /// candidate (`hover/foo:flex` sorts as unknown).
-fn attach_modifier(key: VariantKey, modifier: &AnyTwModifier) -> Option<VariantKey> {
+fn attach_modifier<'r>(key: VariantKey<'r>, modifier: &AnyTwModifier) -> Option<VariantKey<'r>> {
     let value = modifier_value(modifier)?;
     match key {
         VariantKey::Compound { root, variant, .. } if matches!(root, "group" | "peer") => {
@@ -280,17 +294,22 @@ fn variant_segments(segments: TwVariantSegmentList) -> Option<Vec<VariantSegment
     Some(result)
 }
 
-fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> {
+fn variant_key_from_segments<'r>(
+    segments: &[VariantSegment],
+    registry: &'r TailwindRegistry,
+) -> Option<VariantKey<'r>> {
     match segments.first()? {
         VariantSegment::Arbitrary(selector) if segments.len() == 1 => {
             Some(VariantKey::Arbitrary(selector.clone()))
         }
         VariantSegment::Named(name) => {
-            let Some((root, entry, value_segments)) = variant_root_from_segments(segments) else {
+            let Some((root, entry, value_segments)) =
+                variant_root_from_segments(segments, registry)
+            else {
                 // `@sm` glues the container root to its size with no `-` for
                 // the segment splitter to see (unlike `@max-lg` / `@min-[…]`,
                 // whose root is a registered dashed prefix).
-                return glued_container_variant(name);
+                return glued_container_variant(name, registry);
             };
             match entry.kind {
                 VariantKind::Static if value_segments.is_empty() => Some(VariantKey::Static(root)),
@@ -299,7 +318,7 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
                     // A breakpoint or container size that cannot resolve
                     // to a length (`min-abc:`, `@max-[var(--w)]:`) is not
                     // a valid variant, so the candidate sorts as unknown.
-                    if !length_value_resolves(entry.compare, &value) {
+                    if !length_value_resolves(entry.compare, &value, registry) {
                         return None;
                     }
                     Some(VariantKey::Functional {
@@ -309,7 +328,7 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
                 }
                 VariantKind::Compound => Some(VariantKey::Compound {
                     root,
-                    variant: Box::new(variant_key_from_segments(value_segments)?),
+                    variant: Box::new(variant_key_from_segments(value_segments, registry)?),
                     modifier: None,
                 }),
                 VariantKind::Static => None,
@@ -324,6 +343,10 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
 /// at 18 bytes; a test asserts the registry stays within the bound.
 const LONGEST_VARIANT_NAME: usize = 24;
 
+/// Longest variant name the root probe reassembles on the stack; a custom
+/// `@custom-variant` name past this is not resolved.
+const VARIANT_JOIN_BUFFER: usize = 64;
+
 /// Match the longest run of leading named segments against a registered
 /// variant root and return its entry plus the remaining value segments.
 ///
@@ -332,10 +355,12 @@ const LONGEST_VARIANT_NAME: usize = 24;
 /// root `group-has`, `group-hover:` is all root) is only decidable
 /// here. The name is reassembled without allocating in a stack buffer,
 /// the way [`sort_v4`](super::sort_v4) joins static utility names.
-fn variant_root_from_segments(
-    segments: &[VariantSegment],
-) -> Option<(&'static str, &'static VariantEntry, &[VariantSegment])> {
-    let mut buf = [0u8; LONGEST_VARIANT_NAME];
+fn variant_root_from_segments<'r, 's>(
+    segments: &'s [VariantSegment],
+    registry: &'r TailwindRegistry,
+) -> Option<(&'r str, &'r VariantEntry, &'s [VariantSegment])> {
+    let max_len = LONGEST_VARIANT_NAME.max(registry.longest_variant_name);
+    let mut buf = [0u8; VARIANT_JOIN_BUFFER];
     let mut len = 0;
     let mut best = None;
 
@@ -346,7 +371,7 @@ fn variant_root_from_segments(
         let segment = segment.text();
         let start = if index == 0 { 0 } else { len + 1 };
         let end = start + segment.len();
-        if end > LONGEST_VARIANT_NAME {
+        if end > max_len || end > buf.len() {
             // No registered name is this long, and prefixes only grow.
             break;
         }
@@ -355,10 +380,9 @@ fn variant_root_from_segments(
         }
         buf[start..end].copy_from_slice(segment.as_bytes());
         len = end;
-
         // Joining `str`s with an ASCII byte always forms valid UTF-8.
         let probe = str::from_utf8(&buf[..len]).ok()?;
-        if let Some((&name, entry)) = VARIANTS.get_entry(probe) {
+        if let Some((name, entry)) = registry.get_variant(probe) {
             best = Some((name, entry, index + 1));
         }
     }
@@ -372,9 +396,12 @@ fn variant_root_from_segments(
 /// registry and the size is a no-copy [TokenText] slice past the `@`. A
 /// remainder that is not a known container size (`@container`) is not a
 /// sortable variant, matching Tailwind.
-fn glued_container_variant(name: &TokenText) -> Option<VariantKey> {
+fn glued_container_variant<'r>(
+    name: &TokenText,
+    registry: &'r TailwindRegistry,
+) -> Option<VariantKey<'r>> {
     let value = name.text().strip_prefix('@')?;
-    if !CONTAINER_VALUES.contains_key(value) {
+    if !registry.container_contains(value) {
         return None;
     }
     let value = name
@@ -391,15 +418,21 @@ fn glued_container_variant(name: &TokenText) -> Option<VariantKey> {
 /// theme value (`min-sm` resolves, `min-abc` does not) and an arbitrary
 /// size must not depend on a CSS variable. An unresolvable size makes the
 /// whole candidate invalid rather than merely unsorted.
-fn length_value_resolves(compare: VariantCompare, value: &VariantValue) -> bool {
-    let map = match compare {
-        VariantCompare::Default => return true,
-        VariantCompare::BreakpointAsc | VariantCompare::BreakpointDesc => &BREAKPOINT_VALUES,
-        VariantCompare::ContainerAsc | VariantCompare::ContainerDesc => &CONTAINER_VALUES,
-    };
-    match value {
-        VariantValue::Named(name) => map.contains_key(name.text()),
-        VariantValue::Arbitrary(text) => !text.text().contains("var("),
+fn length_value_resolves(
+    compare: VariantCompare,
+    value: &VariantValue,
+    registry: &TailwindRegistry,
+) -> bool {
+    match compare {
+        VariantCompare::Default => true,
+        VariantCompare::BreakpointAsc | VariantCompare::BreakpointDesc => match value {
+            VariantValue::Named(name) => registry.breakpoint_contains(name.text()),
+            VariantValue::Arbitrary(text) => !text.text().contains("var("),
+        },
+        VariantCompare::ContainerAsc | VariantCompare::ContainerDesc => match value {
+            VariantValue::Named(name) => registry.container_contains(name.text()),
+            VariantValue::Arbitrary(text) => !text.text().contains("var("),
+        },
     }
 }
 
@@ -411,31 +444,27 @@ fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantVal
     }
 }
 
-impl Ord for VariantKey {
-    /// Ranks variants the way Tailwind's own `Variants.compare` does, so
-    /// [VariantGroups] can position each distinct variant of a class
-    /// list. Arbitrary selectors sort after every registered variant and
-    /// among themselves by decoded selector text; registered variants
-    /// sort by Tailwind's `order`, then per shape (see
-    /// [compare_same_order_variant_keys]). This is a total order, and
-    /// `Equal` between structurally different keys is meaningful:
-    /// Tailwind gives such variants one shared rank, and the candidate
-    /// text breaks the tie downstream.
-    fn cmp(&self, other: &Self) -> Ordering {
-        match (self, other) {
-            (Self::Arbitrary(left), Self::Arbitrary(right)) => {
-                decoded_chars(left.text().chars()).cmp(decoded_chars(right.text().chars()))
-            }
-            (Self::Arbitrary(_), _) => Ordering::Greater,
-            (_, Self::Arbitrary(_)) => Ordering::Less,
-            _ => compare_registered_variant_keys(self, other),
+/// Ranks variants the way Tailwind's own `Variants.compare` does, so
+/// [VariantGroups] can position each distinct variant of a class list.
+/// Arbitrary selectors sort after every registered variant and among
+/// themselves by decoded selector text; registered variants sort by
+/// Tailwind's `order` (a custom variant's from the registry), then per
+/// shape (see [compare_same_order_variant_keys]). This is a total order,
+/// and `Equal` between structurally different keys is meaningful:
+/// Tailwind gives such variants one shared rank, and the candidate text
+/// breaks the tie downstream.
+pub(super) fn compare_variant_keys(
+    left: &VariantKey<'_>,
+    right: &VariantKey<'_>,
+    registry: &TailwindRegistry,
+) -> Ordering {
+    match (left, right) {
+        (VariantKey::Arbitrary(left), VariantKey::Arbitrary(right)) => {
+            decoded_chars(left.text().chars()).cmp(decoded_chars(right.text().chars()))
         }
-    }
-}
-
-impl PartialOrd for VariantKey {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        (VariantKey::Arbitrary(_), _) => Ordering::Greater,
+        (_, VariantKey::Arbitrary(_)) => Ordering::Less,
+        _ => compare_registered_variant_keys(left, right, registry),
     }
 }
 
@@ -456,18 +485,21 @@ fn decoded_chars<I: Iterator<Item = char>>(chars: I) -> impl Iterator<Item = cha
     })
 }
 
-fn compare_registered_variant_keys(left: &VariantKey, right: &VariantKey) -> Ordering {
-    let Some(left_entry) = variant_entry(left) else {
+fn compare_registered_variant_keys(
+    left: &VariantKey<'_>,
+    right: &VariantKey<'_>,
+    registry: &TailwindRegistry,
+) -> Ordering {
+    let Some(left_entry) = variant_entry(left, registry) else {
         return Ordering::Greater;
     };
-    let Some(right_entry) = variant_entry(right) else {
+    let Some(right_entry) = variant_entry(right, registry) else {
         return Ordering::Less;
     };
 
-    left_entry
-        .order
-        .cmp(&right_entry.order)
-        .then_with(|| compare_same_order_variant_keys(left, left_entry, right, right_entry))
+    left_entry.order.cmp(&right_entry.order).then_with(|| {
+        compare_same_order_variant_keys(left, left_entry, right, right_entry, registry)
+    })
 }
 
 /// Order two registered variants that share Tailwind's `order`, the way
@@ -479,10 +511,11 @@ fn compare_registered_variant_keys(left: &VariantKey, right: &VariantKey) -> Ord
 /// `sm:`) with no root or value fallback; everything else compares by
 /// root text, then functional value.
 fn compare_same_order_variant_keys(
-    left: &VariantKey,
+    left: &VariantKey<'_>,
     left_entry: &VariantEntry,
-    right: &VariantKey,
+    right: &VariantKey<'_>,
     right_entry: &VariantEntry,
+    registry: &TailwindRegistry,
 ) -> Ordering {
     if let (
         VariantKey::Compound {
@@ -497,13 +530,12 @@ fn compare_same_order_variant_keys(
         },
     ) = (left, right)
     {
-        return left_variant
-            .cmp(right_variant)
+        return compare_variant_keys(left_variant, right_variant, registry)
             .then_with(|| compare_modifiers(left_modifier.as_ref(), right_modifier.as_ref()));
     }
 
     if left_entry.compare != VariantCompare::Default && left_entry.compare == right_entry.compare {
-        return compare_lengths(left, right, left_entry.compare);
+        return compare_lengths(left, right, left_entry.compare, registry);
     }
 
     variant_root(left)
@@ -528,7 +560,12 @@ fn compare_modifiers(left: Option<&SyntaxNodeText>, right: Option<&SyntaxNodeTex
 /// [compare_length_values]. An unresolvable side sorts first ascending
 /// and last descending; unresolvable named or `var(`-dependent sizes
 /// never get here because [length_value_resolves] rejects the candidate.
-fn compare_lengths(left: &VariantKey, right: &VariantKey, compare: VariantCompare) -> Ordering {
+fn compare_lengths(
+    left: &VariantKey<'_>,
+    right: &VariantKey<'_>,
+    compare: VariantCompare,
+    registry: &TailwindRegistry,
+) -> Ordering {
     let ascending = matches!(
         compare,
         VariantCompare::BreakpointAsc | VariantCompare::ContainerAsc
@@ -538,8 +575,8 @@ fn compare_lengths(left: &VariantKey, right: &VariantKey, compare: VariantCompar
         VariantCompare::ContainerAsc | VariantCompare::ContainerDesc
     );
     match (
-        resolved_length(left, container),
-        resolved_length(right, container),
+        resolved_length(left, container, registry),
+        resolved_length(right, container, registry),
     ) {
         (None, None) => Ordering::Equal,
         (None, Some(_)) if ascending => Ordering::Less,
@@ -550,18 +587,29 @@ fn compare_lengths(left: &VariantKey, right: &VariantKey, compare: VariantCompar
     }
 }
 
-fn resolved_length(key: &VariantKey, container: bool) -> Option<&str> {
-    let map = if container {
-        &CONTAINER_VALUES
-    } else {
-        &BREAKPOINT_VALUES
-    };
+fn resolved_length<'a>(
+    key: &'a VariantKey<'_>,
+    container: bool,
+    registry: &'a TailwindRegistry,
+) -> Option<&'a str> {
     match key {
-        VariantKey::Static(root) => map.get(root).copied(),
+        VariantKey::Static(root) => {
+            if container {
+                registry.get_container_value(root)
+            } else {
+                registry.get_breakpoint_value(root)
+            }
+        }
         VariantKey::Functional {
             value: Some(VariantValue::Named(name)),
             ..
-        } => map.get(name.text()).copied(),
+        } => {
+            if container {
+                registry.get_container_value(name.text())
+            } else {
+                registry.get_breakpoint_value(name.text())
+            }
+        }
         VariantKey::Functional {
             value: Some(VariantValue::Arbitrary(text)),
             ..
@@ -616,12 +664,15 @@ fn leading_integer(value: &str) -> Option<i64> {
         Some(b'+') => (false, &value[1..]),
         _ => (false, value),
     };
-    let end = digits.bytes().take_while(|byte| byte.is_ascii_digit()).count();
+    let end = digits
+        .bytes()
+        .take_while(|byte| byte.is_ascii_digit())
+        .count();
     let magnitude: i64 = digits[..end].parse().ok()?;
     Some(if negative { -magnitude } else { magnitude })
 }
 
-fn compare_functional_values(left: &VariantKey, right: &VariantKey) -> Ordering {
+fn compare_functional_values(left: &VariantKey<'_>, right: &VariantKey<'_>) -> Ordering {
     match (variant_value(left), variant_value(right)) {
         (None, None) => Ordering::Equal,
         (None, Some(_)) => Ordering::Less,
@@ -630,11 +681,14 @@ fn compare_functional_values(left: &VariantKey, right: &VariantKey) -> Ordering 
     }
 }
 
-fn variant_entry(key: &VariantKey) -> Option<&'static VariantEntry> {
-    VARIANTS.get(variant_root(key))
+fn variant_entry<'r>(
+    key: &VariantKey<'_>,
+    registry: &'r TailwindRegistry,
+) -> Option<&'r VariantEntry> {
+    registry.get_variant_entry(variant_root(key))
 }
 
-fn variant_root(key: &VariantKey) -> &str {
+fn variant_root<'a>(key: &'a VariantKey<'_>) -> &'a str {
     match key {
         VariantKey::Static(root)
         | VariantKey::Functional { root, .. }
@@ -643,7 +697,7 @@ fn variant_root(key: &VariantKey) -> &str {
     }
 }
 
-fn variant_value(key: &VariantKey) -> Option<&VariantValue> {
+fn variant_value<'a>(key: &'a VariantKey<'_>) -> Option<&'a VariantValue> {
     match key {
         VariantKey::Functional { value, .. } => value.as_ref(),
         _ => None,
@@ -669,6 +723,7 @@ impl PartialOrd for VariantValue {
 
 #[cfg(test)]
 mod tests {
+    use super::super::tailwind_preset_v4::VARIANTS;
     use super::*;
 
     #[test]
