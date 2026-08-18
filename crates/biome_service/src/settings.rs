@@ -1025,6 +1025,9 @@ impl From<biome_configuration::MarkdownConfiguration>
 {
     fn from(markdown: biome_configuration::MarkdownConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
+        if let Some(parser) = markdown.parser {
+            language_setting.parser = parser.into();
+        }
         if let Some(formatter) = markdown.formatter {
             language_setting.formatter = formatter.into();
         }

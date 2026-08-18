@@ -1501,6 +1501,7 @@ dependencies = [
 name = "biome_markdown_parser"
 version = "0.0.1"
 dependencies = [
+ "biome_configuration",
  "biome_console",
  "biome_diagnostics",
  "biome_markdown_factory",

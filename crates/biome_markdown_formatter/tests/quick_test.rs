@@ -1,5 +1,6 @@
 use biome_markdown_formatter::{MdFormatLanguage, context::MdFormatOptions};
-use biome_markdown_parser::parse_markdown;
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown, parse_markdown_with_cache};
+use biome_rowan::NodeCache;
 
 #[ignore]
 #[test]
@@ -55,7 +56,11 @@ fn quick_test() {
 #[test]
 fn formats_crlf_frontmatter() {
     let source = "---\r\n# ---\r\n---\r\n\r\n#   Heading\r\n";
-    let parse = parse_markdown(source);
+    let parse = parse_markdown_with_cache(
+        source,
+        &mut NodeCache::default(),
+        MarkdownParserOptions::default().with_frontmatter(true),
+    );
     let options = MdFormatOptions::default();
     let formatted =
         biome_formatter::format_node(&parse.syntax(), MdFormatLanguage::new(options), false)

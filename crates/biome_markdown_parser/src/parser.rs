@@ -25,13 +25,22 @@ pub struct MarkdownParserOptions {
     ///
     /// This limits recursion on pathological input to avoid stack overflow.
     pub max_nesting_depth: usize,
-    // Reserved for future GFM options
+    pub(crate) frontmatter: bool,
+}
+
+impl MarkdownParserOptions {
+    /// Controls whether a complete `---` pair at the start of the document is parsed as frontmatter.
+    pub fn with_frontmatter(mut self, frontmatter: bool) -> Self {
+        self.frontmatter = frontmatter;
+        self
+    }
 }
 
 impl Default for MarkdownParserOptions {
     fn default() -> Self {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
+            frontmatter: false,
         }
     }
 }
