@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "style": { "useTemplate": "error" },
+      "nursery": { "useSortedClasses": "error" }
+    }
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+const b = "x";
+---
+<ul>
+	<li>{`a${b}`}</li>
+	<li class={`a${b}`}>
+		{
+			(<div class="foo bar p-4 px-2" />)
+		}
+	</li>
+</ul>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

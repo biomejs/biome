@@ -63,7 +63,9 @@ use biome_html_formatter::{
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
-use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{
+    HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode, HtmlTextExpression,
+};
 #[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
@@ -975,26 +977,46 @@ pub(crate) fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree(&workspace_db);
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(AnyEmbeddedContent::cast);
+    // Snippets are keyed by the range of the node whose single content
+    // token holds the embedded source: `<script>`/`<style>` bodies and
+    // Astro frontmatter (`AnyEmbeddedContent`), whose whitespace is part
+    // of the token text, and `{…}` / `{{…}}` text expressions in element
+    // bodies and attribute values (`HtmlTextExpression`), whose
+    // surrounding whitespace is trivia that the snippet's source already
+    // covers.
+    let iterator = tree.syntax().descendants().filter_map(|node| {
+        if let Some(element) = AnyEmbeddedContent::cast_ref(&node) {
+            Some((element.range(), element.value_token(), false))
+        } else {
+            HtmlTextExpression::cast(node).map(|expression| {
+                (
+                    expression.range(),
+                    expression.html_literal_token().ok(),
+                    true,
+                )
+            })
+        }
+    });
 
-    for element in iterator {
+    for (range, value_token, is_text_expression) in iterator {
         let Some(snippet_index) = new_snippets
             .iter()
-            .position(|snippet| snippet.range == element.range())
+            .position(|snippet| snippet.range == range)
         else {
             continue;
         };
         let snippet = new_snippets.swap_remove(snippet_index);
 
-        if let Some(value_token) = element.value_token() {
+        if let Some(value_token) = value_token {
             let new_token_text = if snippet.needs_reindent {
                 // The formatted code doesn't carry the host's nesting
                 // indentation. Re-apply it to every line so the embed
                 // lines up with its surroundings.
-                let old_text = value_token.text_trimmed();
+                let old_text = if is_text_expression {
+                    value_token.text()
+                } else {
+                    value_token.text_trimmed()
+                };
                 let leading_trivia = read_leading_trivia(old_text);
                 let trailing_trivia = read_trailing_trivia(old_text);
                 let indent_prefix = content_indent_prefix(&leading_trivia);
@@ -1012,7 +1034,11 @@ pub(crate) fn update_snippets(
                 snippet.new_code
             };
 
-            mutation.replace_token(value_token, ident(&new_token_text));
+            if is_text_expression {
+                mutation.replace_token_discard_trivia(value_token, ident(&new_token_text));
+            } else {
+                mutation.replace_token(value_token, ident(&new_token_text));
+            }
         }
     }
 
