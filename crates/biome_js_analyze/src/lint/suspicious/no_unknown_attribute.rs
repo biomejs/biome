@@ -5,7 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_package::PackageJson;
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::{AstNode, Text, TokenText};
 use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
 use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
@@ -88,14 +88,14 @@ declare_lint_rule! {
 
 pub enum NoUnknownAttributeState {
     UnknownProp {
-        name: Box<str>,
+        name: Text,
     },
     UnknownPropWithStandardName {
-        name: Box<str>,
-        standard_name: Box<str>,
+        name: Text,
+        standard_name: &'static str,
     },
     InvalidPropOnTag {
-        name: Box<str>,
+        name: &'static str,
         tag_name: TokenText,
         allowed_tags: &'static [&'static str],
     },
@@ -127,13 +127,13 @@ impl Rule for NoUnknownAttribute {
         {
             return None;
         }
-        let name = if let Some(element) = DOM_PROPERTIES_IGNORE_CASE
+        let name: &str = if let Some(element) = DOM_PROPERTIES_IGNORE_CASE
             .iter()
             .find(|element| element.eq_ignore_ascii_case(&node_name))
         {
             element
         } else {
-            &node_name.text()
+            node_name.text()
         };
 
         let parent = node.syntax().parent()?.parent()?;
@@ -166,12 +166,10 @@ impl Rule for NoUnknownAttribute {
             return None;
         }
 
-        let allowed_tags = ATTRIBUTE_TAGS_LOOKUP.get(name);
-
-        if let Some(allowed_tags) = allowed_tags {
+        if let Some((&name, &allowed_tags)) = ATTRIBUTE_TAGS_LOOKUP.get_key_value(name) {
             if !allowed_tags.contains(&tag_name.trim()) {
                 return Some(NoUnknownAttributeState::InvalidPropOnTag {
-                    name: (*name).into(),
+                    name,
                     tag_name,
                     allowed_tags,
                 });
@@ -180,17 +178,17 @@ impl Rule for NoUnknownAttribute {
         }
 
         if let Some(standard_name) = get_standard_name(ctx, name) {
-            if standard_name != *name {
+            if standard_name != name {
                 return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
-                    name: (*name).into(),
-                    standard_name: standard_name.into(),
+                    name: node_name,
+                    standard_name,
                 });
             }
             return None;
         }
 
         Some(NoUnknownAttributeState::UnknownProp {
-            name: (*name).into(),
+            name: node_name,
         })
     }
 
@@ -202,7 +200,7 @@ impl Rule for NoUnknownAttribute {
                     rule_category!(),
                     node.range(),
                     markup! {
-                        "The property '"{name}"' is not a valid DOM attribute."
+                        "The property '"{name.text()}"' is not a valid DOM attribute."
                     },
                 )
                 .note(markup! {
@@ -220,14 +218,14 @@ impl Rule for NoUnknownAttribute {
                     rule_category!(),
                     node.range(),
                     markup! {
-                        "Property '"{name}"' is not a valid React prop name."
+                        "Property '"{name.text()}"' is not a valid React prop name."
                     },
                 )
                 .note(markup! {
                     "React uses camelCased props, while HTML uses kebab-cased attributes."
                 })
                 .note(markup! {
-                        "Use '"{standard_name}"' instead of '"{name}"' for React components."
+                        "Use '"{standard_name}"' instead of '"{name.text()}"' for React components."
                 }),
             ),
             NoUnknownAttributeState::InvalidPropOnTag {
