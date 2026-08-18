@@ -443,6 +443,27 @@ fn test_resolve_typescript_path_aliases2() {
 }
 
 #[test]
+fn test_resolve_typescript_path_alias_without_dot_prefix() {
+    let base_dir = get_fixtures_path("resolver_cases_9");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "@/styles/styles.css",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                extensions: &["css"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/src/styles/styles.css"
+        )))
+    );
+}
+
+#[test]
 fn test_resolve_type_definitions() {
     let base_dir = get_fixtures_path("resolver_cases_5");
     let fs = OsFileSystem::new(base_dir.clone());

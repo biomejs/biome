@@ -22,6 +22,7 @@ Nested backticks: `` foo`bar ``
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -118,7 +119,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..152
   0: (empty)
-  1: MD_BLOCK_LIST@0..152
+  1: (empty)
+  2: MD_BLOCK_LIST@0..152
     0: MD_PARAGRAPH@0..24
       0: MD_INLINE_ITEM_LIST@0..24
         0: MD_TEXTUAL@0..17
@@ -173,6 +175,6 @@ MdRoot {
           2: BACKTICK@149..151 "``" [] []
         2: MD_TEXTUAL@151..152
           0: MD_TEXTUAL_LITERAL@151..152 "\n" [] []
-  2: EOF@152..152 "" [] []
+  3: EOF@152..152 "" [] []
 
 ```

@@ -19,6 +19,7 @@ fn main() {
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -46,7 +47,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..45
   0: (empty)
-  1: MD_BLOCK_LIST@0..45
+  1: (empty)
+  2: MD_BLOCK_LIST@0..45
     0: MD_FENCED_CODE_BLOCK@0..45
       0: MD_INDENT_TOKEN_LIST@0..0
       1: TRIPLE_BACKTICK@0..3 "```" [] []
@@ -58,6 +60,6 @@ MdRoot {
           0: MD_CODE_LITERAL@7..45 "\nfn main() {\n    println!(\"Hello\");\n}\n" [] []
       4: MD_INDENT_TOKEN_LIST@45..45
       5: (empty)
-  2: EOF@45..45 "" [] []
+  3: EOF@45..45 "" [] []
 
 ```

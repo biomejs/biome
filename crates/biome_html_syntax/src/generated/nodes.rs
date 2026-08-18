@@ -1048,6 +1048,7 @@ impl HtmlDirective {
             l_angle_token: self.l_angle_token(),
             excl_token: self.excl_token(),
             doctype_token: self.doctype_token(),
+            name_token: self.name_token(),
             html_token: self.html_token(),
             quirk_token: self.quirk_token(),
             public_id_token: self.public_id_token(),
@@ -1064,20 +1065,23 @@ impl HtmlDirective {
     pub fn doctype_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn html_token(&self) -> Option<SyntaxToken> {
+    pub fn name_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 3usize)
     }
-    pub fn quirk_token(&self) -> Option<SyntaxToken> {
+    pub fn html_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 4usize)
     }
-    pub fn public_id_token(&self) -> Option<SyntaxToken> {
+    pub fn quirk_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 5usize)
     }
-    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+    pub fn public_id_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 6usize)
     }
+    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 7usize)
+    }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 7usize)
+        support::required_token(&self.syntax, 8usize)
     }
 }
 impl Serialize for HtmlDirective {
@@ -1093,6 +1097,7 @@ pub struct HtmlDirectiveFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub doctype_token: SyntaxResult<SyntaxToken>,
+    pub name_token: Option<SyntaxToken>,
     pub html_token: Option<SyntaxToken>,
     pub quirk_token: Option<SyntaxToken>,
     pub public_id_token: Option<SyntaxToken>,
@@ -1387,6 +1392,7 @@ impl HtmlRoot {
         HtmlRootFields {
             bom_token: self.bom_token(),
             frontmatter: self.frontmatter(),
+            processing_instruction: self.processing_instruction(),
             directive: self.directive(),
             html: self.html(),
             eof_token: self.eof_token(),
@@ -1398,14 +1404,17 @@ impl HtmlRoot {
     pub fn frontmatter(&self) -> Option<AnyAstroFrontmatterElement> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn directive(&self) -> Option<HtmlDirective> {
+    pub fn processing_instruction(&self) -> Option<HtmlProcessingInstruction> {
         support::node(&self.syntax, 2usize)
     }
+    pub fn directive(&self) -> Option<HtmlDirective> {
+        support::node(&self.syntax, 3usize)
+    }
     pub fn html(&self) -> HtmlElementList {
-        support::list(&self.syntax, 3usize)
+        support::list(&self.syntax, 4usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
 }
 impl Serialize for HtmlRoot {
@@ -1420,6 +1429,7 @@ impl Serialize for HtmlRoot {
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub frontmatter: Option<AnyAstroFrontmatterElement>,
+    pub processing_instruction: Option<HtmlProcessingInstruction>,
     pub directive: Option<HtmlDirective>,
     pub html: HtmlElementList,
     pub eof_token: SyntaxResult<SyntaxToken>,
@@ -7038,6 +7048,10 @@ impl std::fmt::Debug for HtmlDirective {
                     &support::DebugSyntaxResult(self.doctype_token()),
                 )
                 .field(
+                    "name_token",
+                    &support::DebugOptionalElement(self.name_token()),
+                )
+                .field(
                     "html_token",
                     &support::DebugOptionalElement(self.html_token()),
                 )
@@ -7428,6 +7442,10 @@ impl std::fmt::Debug for HtmlRoot {
                 .field(
                     "frontmatter",
                     &support::DebugOptionalElement(self.frontmatter()),
+                )
+                .field(
+                    "processing_instruction",
+                    &support::DebugOptionalElement(self.processing_instruction()),
                 )
                 .field(
                     "directive",

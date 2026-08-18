@@ -1,0 +1,270 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+!flex hover:!p-4 !-m-4 ![color:red] !bg-red-500/50 !@container/main !w-full flex! !flex
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@0..1 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@1..6 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@6..11 "hover" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@11..12 ":" [] [],
+            ],
+            legacy_important_token: BANG@12..13 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@13..14 "p" [] [],
+                minus_token: DASH@14..15 "-" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@15..17 "4" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@17..18 "!" [] [],
+            negative_token: DASH@18..19 "-" [] [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@19..20 "m" [] [],
+                minus_token: DASH@20..21 "-" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@21..23 "4" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@23..24 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwArbitraryCandidate {
+                l_brack_token: L_BRACKET@24..25 "[" [] [],
+                property_token: TW_PROPERTY@25..30 "color" [] [],
+                colon_token: COLON@30..31 ":" [] [],
+                value: CssGenericComponentValueList [
+                    CssIdentifier {
+                        ident_token: IDENT@31..34 "red" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACKET@34..36 "]" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@36..37 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@37..39 "bg" [] [],
+                minus_token: DASH@39..40 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@40..47 "red-500" [] [],
+                },
+                modifier: TwModifier {
+                    slash_token: SLASH@47..48 "/" [] [],
+                    value: TwNumberValue {
+                        value_token: TW_NUMBER@48..51 "50" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@51..52 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@52..62 "@container" [] [],
+                modifier: TwModifier {
+                    slash_token: SLASH@62..63 "/" [] [],
+                    value: TwNamedValue {
+                        value_token: TW_VALUE@63..68 "main" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@68..69 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@69..70 "w" [] [],
+                minus_token: DASH@70..71 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@71..76 "full" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@76..80 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: BANG@80..82 "!" [] [Whitespace(" ")],
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: BANG@82..83 "!" [] [],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@83..87 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@87..87 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..87
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..87
+    0: TW_FULL_CANDIDATE@0..6
+      0: TW_VARIANT_LIST@0..0
+      1: BANG@0..1 "!" [] []
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@1..6
+        0: TW_BASE@1..6 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@6..17
+      0: TW_VARIANT_LIST@6..12
+        0: TW_VARIANT_EXPRESSION@6..11
+          0: TW_VARIANT_SEGMENT_LIST@6..11
+            0: TW_NAMED_VARIANT_SEGMENT@6..11
+              0: TW_VARIANT_SEGMENT@6..11 "hover" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@11..12 ":" [] []
+      1: BANG@12..13 "!" [] []
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@13..17
+        0: TW_BASE@13..14 "p" [] []
+        1: DASH@14..15 "-" [] []
+        2: TW_NUMBER_VALUE@15..17
+          0: TW_NUMBER@15..17 "4" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@17..23
+      0: TW_VARIANT_LIST@17..17
+      1: BANG@17..18 "!" [] []
+      2: DASH@18..19 "-" [] []
+      3: TW_FUNCTIONAL_CANDIDATE@19..23
+        0: TW_BASE@19..20 "m" [] []
+        1: DASH@20..21 "-" [] []
+        2: TW_NUMBER_VALUE@21..23
+          0: TW_NUMBER@21..23 "4" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@23..36
+      0: TW_VARIANT_LIST@23..23
+      1: BANG@23..24 "!" [] []
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@24..36
+        0: L_BRACKET@24..25 "[" [] []
+        1: TW_PROPERTY@25..30 "color" [] []
+        2: COLON@30..31 ":" [] []
+        3: CSS_GENERIC_COMPONENT_VALUE_LIST@31..34
+          0: CSS_IDENTIFIER@31..34
+            0: IDENT@31..34 "red" [] []
+        4: R_BRACKET@34..36 "]" [] [Whitespace(" ")]
+        5: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@36..51
+      0: TW_VARIANT_LIST@36..36
+      1: BANG@36..37 "!" [] []
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@37..51
+        0: TW_BASE@37..39 "bg" [] []
+        1: DASH@39..40 "-" [] []
+        2: TW_NAMED_VALUE@40..47
+          0: TW_VALUE@40..47 "red-500" [] []
+        3: TW_MODIFIER@47..51
+          0: SLASH@47..48 "/" [] []
+          1: TW_NUMBER_VALUE@48..51
+            0: TW_NUMBER@48..51 "50" [] [Whitespace(" ")]
+      4: (empty)
+    5: TW_FULL_CANDIDATE@51..68
+      0: TW_VARIANT_LIST@51..51
+      1: BANG@51..52 "!" [] []
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@52..68
+        0: TW_BASE@52..62 "@container" [] []
+        1: TW_MODIFIER@62..68
+          0: SLASH@62..63 "/" [] []
+          1: TW_NAMED_VALUE@63..68
+            0: TW_VALUE@63..68 "main" [] [Whitespace(" ")]
+      4: (empty)
+    6: TW_FULL_CANDIDATE@68..76
+      0: TW_VARIANT_LIST@68..68
+      1: BANG@68..69 "!" [] []
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@69..76
+        0: TW_BASE@69..70 "w" [] []
+        1: DASH@70..71 "-" [] []
+        2: TW_NAMED_VALUE@71..76
+          0: TW_VALUE@71..76 "full" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    7: TW_FULL_CANDIDATE@76..82
+      0: TW_VARIANT_LIST@76..76
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@76..80
+        0: TW_BASE@76..80 "flex" [] []
+        1: (empty)
+      4: BANG@80..82 "!" [] [Whitespace(" ")]
+    8: TW_FULL_CANDIDATE@82..87
+      0: TW_VARIANT_LIST@82..82
+      1: BANG@82..83 "!" [] []
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@83..87
+        0: TW_BASE@83..87 "flex" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@87..87 "" [] []
+
+```

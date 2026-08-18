@@ -29,9 +29,11 @@ TwRoot {
                 },
                 COLON@1..2 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@2..7 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -48,9 +50,11 @@ TwRoot {
                 },
                 COLON@9..10 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@10..14 "flex" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -75,9 +79,11 @@ TwRoot {
           2: (empty)
         1: COLON@1..2 ":" [] []
       1: (empty)
-      2: TW_STATIC_CANDIDATE@2..7
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@2..7
         0: TW_BASE@2..7 "flex" [] [Whitespace(" ")]
-      3: (empty)
+        1: (empty)
+      4: (empty)
     1: TW_FULL_CANDIDATE@7..14
       0: TW_VARIANT_LIST@7..10
         0: TW_VARIANT_EXPRESSION@7..9
@@ -88,9 +94,11 @@ TwRoot {
           2: (empty)
         1: COLON@9..10 ":" [] []
       1: (empty)
-      2: TW_STATIC_CANDIDATE@10..14
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@10..14
         0: TW_BASE@10..14 "flex" [] []
-      3: (empty)
+        1: (empty)
+      4: (empty)
   2: EOF@14..14 "" [] []
 
 ```

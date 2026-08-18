@@ -27,6 +27,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@29..32 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlBogusTextExpression {
@@ -81,7 +82,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..29 "const items = [1, 2, 3];\n" [Newline("\n")] []
     2: FENCE@29..32 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@32..71
+  3: (empty)
+  4: HTML_ELEMENT_LIST@32..71
     0: HTML_BOGUS_TEXT_EXPRESSION@32..53
       0: L_CURLY@32..35 "{" [Newline("\n"), Newline("\n")] []
       1: HTML_LITERAL@35..53 "items.map(item =>" [] [Whitespace(" ")]
@@ -106,7 +108,7 @@ HtmlRoot {
         3: R_ANGLE@69..70 ">" [] []
     2: HTML_CONTENT@70..71
       0: HTML_LITERAL@70..71 ")" [] []
-  4: EOF@71..72 "" [Newline("\n")] []
+  5: EOF@71..72 "" [Newline("\n")] []
 
 ```
 
