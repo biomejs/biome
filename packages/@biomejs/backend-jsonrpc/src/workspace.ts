@@ -1200,6 +1200,7 @@ export type JsonTrailingCommas = "none" | "all";
  * Rule domains
  */
 export type RuleDomain =
+	| "astro"
 	| "drizzle"
 	| "react"
 	| "reactNative"
@@ -2587,6 +2588,11 @@ See https://biomejs.dev/linter/rules/no-unsafe-plus-operands
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
 	/**
+	* Disallow TypeScript type assertions other than const assertions.
+See https://biomejs.dev/linter/rules/no-unsafe-type-assertion 
+	 */
+	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
+	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
 	 */
@@ -2630,6 +2636,11 @@ See https://biomejs.dev/linter/rules/use-array-some
 	 */
 	useArraySome?: UseArraySomeConfiguration;
 	/**
+	* Require a value for Astro's client:only directive.
+See https://biomejs.dev/linter/rules/use-astro-client-only-directive-value 
+	 */
+	useAstroClientOnlyDirectiveValue?: UseAstroClientOnlyDirectiveValueConfiguration;
+	/**
 	* Enforce that await is only used on Promise values.
 See https://biomejs.dev/linter/rules/use-await-thenable 
 	 */
@@ -2644,6 +2655,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
+	/**
+	* Enforce that interactive control elements have an accessible label.
+See https://biomejs.dev/linter/rules/use-control-label 
+	 */
+	useControlLabel?: UseControlLabelConfiguration;
 	/**
 	* Detects a disposable object assigned to a variable without using or await using syntax.
 See https://biomejs.dev/linter/rules/use-disposables 
@@ -2704,6 +2720,11 @@ See https://biomejs.dev/linter/rules/use-math-min-max
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
+	* Disallow anonymous cascade layers.
+See https://biomejs.dev/linter/rules/use-named-layer 
+	 */
+	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
 	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
@@ -2774,6 +2795,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
 	 */
 	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
+	/**
+	* Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
+See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes 
+	 */
+	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
 	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
@@ -4808,6 +4834,9 @@ export type NoUnnecessaryTemplateExpressionConfiguration =
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
+export type NoUnsafeTypeAssertionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeTypeAssertionOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -4829,6 +4858,9 @@ export type NoVueVOnNumberValuesConfiguration =
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
+export type UseAstroClientOnlyDirectiveValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
@@ -4838,6 +4870,9 @@ export type UseBaselineConfiguration =
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
+export type UseControlLabelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseControlLabelOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
@@ -4874,6 +4909,9 @@ export type UseMathMinMaxConfiguration =
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNamedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedLayerOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -4916,6 +4954,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
+export type UseTailwindShorthandClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindShorthandClassesOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -6724,6 +6765,10 @@ export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
 }
+export interface RuleWithNoUnsafeTypeAssertionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeTypeAssertionOptions;
+}
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
@@ -6753,6 +6798,10 @@ export interface RuleWithUseArraySomeOptions {
 	level: RulePlainConfiguration;
 	options?: UseArraySomeOptions;
 }
+export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
+	level: RulePlainConfiguration;
+	options?: UseAstroClientOnlyDirectiveValueOptions;
+}
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
@@ -6765,6 +6814,10 @@ export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentTestItOptions;
+}
+export interface RuleWithUseControlLabelOptions {
+	level: RulePlainConfiguration;
+	options?: UseControlLabelOptions;
 }
 export interface RuleWithUseDisposablesOptions {
 	fix?: FixKind;
@@ -6819,6 +6872,10 @@ export interface RuleWithUseMathMinMaxOptions {
 export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
+}
+export interface RuleWithUseNamedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedLayerOptions;
 }
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
@@ -6883,6 +6940,11 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
+}
+export interface RuleWithUseTailwindShorthandClassesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindShorthandClassesOptions;
 }
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
@@ -8471,6 +8533,7 @@ export type NoTopLevelLiteralsOptions = {};
 export type NoUndeclaredClassesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
+export type NoUnsafeTypeAssertionOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -8511,6 +8574,7 @@ export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVOnNumberValuesOptions = {};
 export type UseArraySomeOptions = {};
+export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 /**
  * Options for the `useBaseline` rule.
@@ -8560,6 +8624,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+/**
+ * Configuration for the `useControlLabel` lint rule.
+ */
+export type UseControlLabelOptions = {};
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export interface UseDomQuerySelectorOptions {
@@ -8599,6 +8667,7 @@ export type UseImportsFirstOptions = {};
 export type UseIncludesOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
+export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
  */
@@ -8671,6 +8740,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseStringStartsEndsWithOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
+export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -9908,6 +9978,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
+	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -9917,12 +9988,14 @@ export type Category =
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/useArraySome"
+	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
+	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useDomQuerySelector"
@@ -9941,6 +10014,7 @@ export type Category =
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikLoaderLocation"
@@ -9957,6 +10031,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
+	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"

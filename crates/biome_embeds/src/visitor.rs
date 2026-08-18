@@ -10,8 +10,8 @@ use biome_html_syntax::{
 };
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
-    AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression,
-    AnyJsIdentifierReference, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
+    AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
+    AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsIdentifierAssignment, JsImport, JsModuleItemList, JsReferenceIdentifier,
@@ -839,6 +839,16 @@ impl EmbeddedBindingsBuilder {
 
     fn visit_js_export(&mut self, export: JsExport) -> Option<()> {
         let clause = export.export_clause().ok()?;
+
+        // `export const foo = ...`, `export function foo() {}`, etc. declare a
+        // binding just like their non-exported counterparts. This matters for
+        // Svelte's `<script module>` and Vue's non-`setup` `<script>`, whose
+        // top-level bindings (exported or not) are visible from sibling
+        // script blocks.
+        if let Some(declaration_clause) = clause.as_any_js_declaration_clause() {
+            self.register_exported_declaration(declaration_clause);
+        }
+
         let default_clause = clause.as_js_export_default_expression_clause()?;
         let expression = default_clause.expression().ok()?;
         let object_expr = expression.as_js_object_expression()?;
@@ -893,6 +903,40 @@ impl EmbeddedBindingsBuilder {
             }
         }
 
+        Some(())
+    }
+
+    fn register_exported_declaration(
+        &mut self,
+        declaration: &AnyJsDeclarationClause,
+    ) -> Option<()> {
+        match declaration {
+            AnyJsDeclarationClause::JsVariableDeclarationClause(clause) => {
+                for declarator in clause.declaration().ok()?.declarators().iter().flatten() {
+                    let id = declarator.id().ok()?;
+                    self.visit_any_js_binding_pattern(&id)?;
+                }
+            }
+            AnyJsDeclarationClause::JsFunctionDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::JsClassDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsEnumDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsInterfaceDeclaration(decl) => {
+                self.register_ts_identifier_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => {
+                self.register_ts_identifier_binding(decl.binding_identifier());
+            }
+            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            _ => {}
+        }
         Some(())
     }
 

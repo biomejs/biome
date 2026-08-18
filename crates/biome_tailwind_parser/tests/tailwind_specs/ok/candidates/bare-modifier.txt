@@ -1,0 +1,1 @@
+@container @container/sidebar shadow/50 flex/50 drop-shadow/50 @container:flex @sm:@container/main

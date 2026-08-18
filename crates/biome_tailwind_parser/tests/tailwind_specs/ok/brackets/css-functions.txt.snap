@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..1 "w" [] [],
@@ -78,6 +79,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@34..36 "bg" [] [],
@@ -122,6 +124,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@56..58 "bg" [] [],
@@ -177,6 +180,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@96..102 "shadow" [] [],
@@ -235,6 +239,7 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@137..146 "grid-cols" [] [],
@@ -309,7 +314,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..34
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..34
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..34
         0: TW_BASE@0..1 "w" [] []
         1: DASH@1..2 "-" [] []
         2: TW_ARBITRARY_VALUE@2..34
@@ -344,11 +350,12 @@ TwRoot {
               3: R_PAREN@31..32 ")" [] []
           2: R_BRACKET@32..34 "]" [] [Whitespace(" ")]
         3: (empty)
-      3: (empty)
+      4: (empty)
     1: TW_FULL_CANDIDATE@34..56
       0: TW_VARIANT_LIST@34..34
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@34..56
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@34..56
         0: TW_BASE@34..36 "bg" [] []
         1: DASH@36..37 "-" [] []
         2: TW_ARBITRARY_VALUE@37..56
@@ -374,11 +381,12 @@ TwRoot {
               3: R_PAREN@53..54 ")" [] []
           2: R_BRACKET@54..56 "]" [] [Whitespace(" ")]
         3: (empty)
-      3: (empty)
+      4: (empty)
     2: TW_FULL_CANDIDATE@56..96
       0: TW_VARIANT_LIST@56..56
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@56..96
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@56..96
         0: TW_BASE@56..58 "bg" [] []
         1: DASH@58..59 "-" [] []
         2: TW_ARBITRARY_VALUE@59..96
@@ -411,11 +419,12 @@ TwRoot {
               3: R_PAREN@93..94 ")" [] []
           2: R_BRACKET@94..96 "]" [] [Whitespace(" ")]
         3: (empty)
-      3: (empty)
+      4: (empty)
     3: TW_FULL_CANDIDATE@96..137
       0: TW_VARIANT_LIST@96..96
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@96..137
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@96..137
         0: TW_BASE@96..102 "shadow" [] []
         1: DASH@102..103 "-" [] []
         2: TW_ARBITRARY_VALUE@103..137
@@ -451,11 +460,12 @@ TwRoot {
               3: R_PAREN@134..135 ")" [] []
           2: R_BRACKET@135..137 "]" [] [Whitespace(" ")]
         3: (empty)
-      3: (empty)
+      4: (empty)
     4: TW_FULL_CANDIDATE@137..174
       0: TW_VARIANT_LIST@137..137
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@137..174
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@137..174
         0: TW_BASE@137..146 "grid-cols" [] []
         1: DASH@146..147 "-" [] []
         2: TW_ARBITRARY_VALUE@147..174
@@ -492,7 +502,7 @@ TwRoot {
               3: R_PAREN@172..173 ")" [] []
           2: R_BRACKET@173..174 "]" [] []
         3: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@174..175 "" [Newline("\n")] []
 
 ```

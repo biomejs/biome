@@ -140,6 +140,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // content from being incorrectly lexed as a FENCE token.
     p.set_after_frontmatter(true);
 
+    parse_processing_instruction(p).ok();
     parse_doc_type(p).ok();
     // Only a real `.vue` document has single-file-component blocks. Plain HTML
     // parsed with the Vue extensions turned on keeps ordinary element nesting,
@@ -167,6 +168,8 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 
     if p.at(T![html]) {
         p.eat_with_context(T![html], HtmlLexContext::Doctype);
+    } else if p.at(HTML_LITERAL) {
+        p.eat_with_context(HTML_LITERAL, HtmlLexContext::Doctype);
     }
 
     if p.at(HTML_LITERAL) {

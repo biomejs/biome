@@ -11,6 +11,86 @@ use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
 
+declare_lint_rule! {
+    /// Disallow shorthand properties that override related longhand properties.
+    ///
+    /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```css,expect_diagnostic
+    /// a { padding-left: 10px; padding: 20px; }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```css
+    /// a { padding: 10px; padding-left: 20px; }
+    /// ```
+    ///
+    /// ```css
+    /// a { transition-property: opacity; } a { transition: opacity 1s linear; }
+    /// ```
+    ///
+    pub NoShorthandPropertyOverrides {
+        version: "1.8.2",
+        name: "noShorthandPropertyOverrides",
+        language: "css",
+        recommended: true,
+        severity: Severity::Error,
+        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
+    }
+}
+
+#[derive(Clone)]
+pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
+    property_node: AnyCssDeclarationName,
+    override_property: Box<str>,
+}
+
+pub struct NoDeclarationBlockShorthandPropertyOverridesState {
+    target_property: Box<str>,
+    override_property: Box<str>,
+    span: TextRange,
+}
+
+impl Rule for NoShorthandPropertyOverrides {
+    type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
+    type State = NoDeclarationBlockShorthandPropertyOverridesState;
+    type Signals = Option<Self::State>;
+    type Options = NoShorthandPropertyOverridesOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let query = ctx.query();
+
+        Some(NoDeclarationBlockShorthandPropertyOverridesState {
+            target_property: query.property_node.to_trimmed_text().into(),
+            override_property: query.override_property.clone(),
+            span: query.text_range(),
+        })
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.span,
+                markup! {
+                    "This shorthand property "<Emphasis>{state.target_property}</Emphasis>" overrides the earlier "<Emphasis>{state.override_property}</Emphasis>" declaration."
+                },
+            )
+            .note(markup! {
+                "Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly."
+            })
+            .note(markup! {
+                "Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit."
+            }),
+        )
+    }
+}
+
 fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
     if let Some(prop) = prop.strip_prefix(prefix) {
         return prop;
@@ -46,39 +126,6 @@ fn get_override_props(property: &str) -> Vec<&str> {
     }
 
     merged
-}
-
-declare_lint_rule! {
-    /// Disallow shorthand properties that override related longhand properties.
-    ///
-    /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```css,expect_diagnostic
-    /// a { padding-left: 10px; padding: 20px; }
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```css
-    /// a { padding: 10px; padding-left: 20px; }
-    /// ```
-    ///
-    /// ```css
-    /// a { transition-property: opacity; } a { transition: opacity 1s linear; }
-    /// ```
-    ///
-    pub NoShorthandPropertyOverrides {
-        version: "1.8.2",
-        name: "noShorthandPropertyOverrides",
-        language: "css",
-        recommended: true,
-        severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
-    }
 }
 
 #[derive(Default)]
@@ -146,11 +193,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
     }
 }
 
-#[derive(Clone)]
-pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
-    property_node: AnyCssDeclarationName,
-    override_property: Box<str>,
-}
+
 
 impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
     fn text_range(&self) -> TextRange {
@@ -176,46 +219,5 @@ impl Queryable for NoDeclarationBlockShorthandPropertyOverridesQuery {
 
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.clone()
-    }
-}
-
-pub struct NoDeclarationBlockShorthandPropertyOverridesState {
-    target_property: Box<str>,
-    override_property: Box<str>,
-    span: TextRange,
-}
-
-impl Rule for NoShorthandPropertyOverrides {
-    type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
-    type State = NoDeclarationBlockShorthandPropertyOverridesState;
-    type Signals = Option<Self::State>;
-    type Options = NoShorthandPropertyOverridesOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let query = ctx.query();
-
-        Some(NoDeclarationBlockShorthandPropertyOverridesState {
-            target_property: query.property_node.to_trimmed_text().into(),
-            override_property: query.override_property.clone(),
-            span: query.text_range(),
-        })
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.span,
-                markup! {
-                    "This shorthand property "<Emphasis>{state.target_property}</Emphasis>" overrides the earlier "<Emphasis>{state.override_property}</Emphasis>" declaration."
-                },
-            )
-            .note(markup! {
-                "Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly."
-            })
-            .note(markup! {
-                "Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit."
-            }),
-        )
     }
 }

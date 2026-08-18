@@ -1,0 +1,227 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+has-[>svg]:flex has-[+p]:flex has-[~span]:flex group-has-[>svg]:flex
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@0..3 "has" [] [],
+                        },
+                        DASH@3..4 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@4..5 "[" [] [],
+                            value_token: TW_SELECTOR@5..9 ">svg" [] [],
+                            r_brack_token: R_BRACKET@9..10 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@10..11 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@11..16 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@16..19 "has" [] [],
+                        },
+                        DASH@19..20 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@20..21 "[" [] [],
+                            value_token: TW_SELECTOR@21..23 "+p" [] [],
+                            r_brack_token: R_BRACKET@23..24 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@24..25 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@25..30 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@30..33 "has" [] [],
+                        },
+                        DASH@33..34 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@34..35 "[" [] [],
+                            value_token: TW_SELECTOR@35..40 "~span" [] [],
+                            r_brack_token: R_BRACKET@40..41 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@41..42 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@42..47 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@47..52 "group" [] [],
+                        },
+                        DASH@52..53 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@53..56 "has" [] [],
+                        },
+                        DASH@56..57 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@57..58 "[" [] [],
+                            value_token: TW_SELECTOR@58..62 ">svg" [] [],
+                            r_brack_token: R_BRACKET@62..63 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@63..64 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@64..68 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@68..68 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..68
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..68
+    0: TW_FULL_CANDIDATE@0..16
+      0: TW_VARIANT_LIST@0..11
+        0: TW_VARIANT_EXPRESSION@0..10
+          0: TW_VARIANT_SEGMENT_LIST@0..10
+            0: TW_NAMED_VARIANT_SEGMENT@0..3
+              0: TW_VARIANT_SEGMENT@0..3 "has" [] []
+            1: DASH@3..4 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@4..10
+              0: L_BRACKET@4..5 "[" [] []
+              1: TW_SELECTOR@5..9 ">svg" [] []
+              2: R_BRACKET@9..10 "]" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@10..11 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@11..16
+        0: TW_BASE@11..16 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@16..30
+      0: TW_VARIANT_LIST@16..25
+        0: TW_VARIANT_EXPRESSION@16..24
+          0: TW_VARIANT_SEGMENT_LIST@16..24
+            0: TW_NAMED_VARIANT_SEGMENT@16..19
+              0: TW_VARIANT_SEGMENT@16..19 "has" [] []
+            1: DASH@19..20 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@20..24
+              0: L_BRACKET@20..21 "[" [] []
+              1: TW_SELECTOR@21..23 "+p" [] []
+              2: R_BRACKET@23..24 "]" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@24..25 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@25..30
+        0: TW_BASE@25..30 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@30..47
+      0: TW_VARIANT_LIST@30..42
+        0: TW_VARIANT_EXPRESSION@30..41
+          0: TW_VARIANT_SEGMENT_LIST@30..41
+            0: TW_NAMED_VARIANT_SEGMENT@30..33
+              0: TW_VARIANT_SEGMENT@30..33 "has" [] []
+            1: DASH@33..34 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@34..41
+              0: L_BRACKET@34..35 "[" [] []
+              1: TW_SELECTOR@35..40 "~span" [] []
+              2: R_BRACKET@40..41 "]" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@41..42 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@42..47
+        0: TW_BASE@42..47 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@47..68
+      0: TW_VARIANT_LIST@47..64
+        0: TW_VARIANT_EXPRESSION@47..63
+          0: TW_VARIANT_SEGMENT_LIST@47..63
+            0: TW_NAMED_VARIANT_SEGMENT@47..52
+              0: TW_VARIANT_SEGMENT@47..52 "group" [] []
+            1: DASH@52..53 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@53..56
+              0: TW_VARIANT_SEGMENT@53..56 "has" [] []
+            3: DASH@56..57 "-" [] []
+            4: TW_ARBITRARY_VARIANT_SEGMENT@57..63
+              0: L_BRACKET@57..58 "[" [] []
+              1: TW_SELECTOR@58..62 ">svg" [] []
+              2: R_BRACKET@62..63 "]" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@63..64 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@64..68
+        0: TW_BASE@64..68 "flex" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@68..68 "" [] []
+
+```
