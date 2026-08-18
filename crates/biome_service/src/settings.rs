@@ -1652,17 +1652,6 @@ impl OverrideSettings {
             .collect()
     }
 
-    /// It scans the current override rules and return the formatting options that of the first override is matched
-    #[cfg(feature = "lang_js")]
-    pub fn override_js_format_options(
-        &self,
-        path: &Utf8Path,
-        options: JsFormatOptions,
-    ) -> JsFormatOptions {
-        let indices = self.matching_indices(path);
-        self.override_js_format_options_by_indices(&indices, options)
-    }
-
     #[cfg(feature = "lang_js")]
     pub(crate) fn override_js_format_options_by_indices(
         &self,
@@ -1675,16 +1664,6 @@ impl OverrideSettings {
             }
         }
         options
-    }
-
-    #[cfg(feature = "lang_js")]
-    pub fn override_js_globals(
-        &self,
-        path: &BiomePath,
-        base_set: &Option<rustc_hash::FxHashSet<Box<str>>>,
-    ) -> rustc_hash::FxHashSet<Box<str>> {
-        let indices = self.matching_indices(path);
-        self.override_js_globals_by_indices(&indices, base_set)
     }
 
     #[cfg(feature = "lang_js")]
@@ -1703,12 +1682,6 @@ impl OverrideSettings {
     }
 
     #[cfg(feature = "lang_js")]
-    pub fn override_jsx_runtime(&self, path: &BiomePath, base_setting: JsxRuntime) -> JsxRuntime {
-        let indices = self.matching_indices(path);
-        self.override_jsx_runtime_by_indices(&indices, base_setting)
-    }
-
-    #[cfg(feature = "lang_js")]
     pub(crate) fn override_jsx_runtime_by_indices(
         &self,
         indices: &[usize],
@@ -1723,16 +1696,6 @@ impl OverrideSettings {
     }
 
     #[cfg(feature = "lang_grit")]
-    pub fn apply_override_grit_format_options(
-        &self,
-        path: &Utf8Path,
-        options: &mut GritFormatOptions,
-    ) {
-        let indices = self.matching_indices(path);
-        self.apply_override_grit_format_options_by_indices(&indices, options);
-    }
-
-    #[cfg(feature = "lang_grit")]
     pub(crate) fn apply_override_grit_format_options_by_indices(
         &self,
         indices: &[usize],
@@ -1743,16 +1706,6 @@ impl OverrideSettings {
                 pattern.apply_overrides_to_grit_format_options(options);
             }
         }
-    }
-
-    #[cfg(feature = "lang_html")]
-    pub fn apply_override_html_format_options(
-        &self,
-        path: &Utf8Path,
-        options: &mut HtmlFormatOptions,
-    ) {
-        let indices = self.matching_indices(path);
-        self.apply_override_html_format_options_by_indices(&indices, options);
     }
 
     #[cfg(feature = "lang_html")]
@@ -1816,17 +1769,6 @@ impl OverrideSettings {
         }
     }
 
-    /// Scans and aggregates all the overrides into a single [CssFormatOptions]
-    #[cfg(feature = "lang_css")]
-    pub fn apply_override_css_format_options(
-        &self,
-        path: &Utf8Path,
-        options: &mut CssFormatOptions,
-    ) {
-        let indices = self.matching_indices(path);
-        self.apply_override_css_format_options_by_indices(&indices, options);
-    }
-
     #[cfg(feature = "lang_css")]
     pub(crate) fn apply_override_css_format_options_by_indices(
         &self,
@@ -1853,16 +1795,6 @@ impl OverrideSettings {
         }
     }
 
-    /// Scans and aggregates all the overrides into a single `JsonFormatOptions`
-    pub fn apply_override_json_format_options(
-        &self,
-        path: &Utf8Path,
-        options: &mut JsonFormatOptions,
-    ) {
-        let indices = self.matching_indices(path);
-        self.apply_override_json_format_options_by_indices(&indices, options);
-    }
-
     pub(crate) fn apply_override_json_format_options_by_indices(
         &self,
         indices: &[usize],
@@ -1873,17 +1805,6 @@ impl OverrideSettings {
                 pattern.apply_overrides_to_json_format_options(options);
             }
         }
-    }
-
-    /// Scans and aggregates all the overrides into a single [biome_graphql_formatter::GraphqlFormatOptions]
-    #[cfg(feature = "lang_graphql")]
-    pub fn apply_override_graphql_format_options(
-        &self,
-        path: &Utf8Path,
-        options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
-    ) {
-        let indices = self.matching_indices(path);
-        self.apply_override_graphql_format_options_by_indices(&indices, options);
     }
 
     #[cfg(feature = "lang_graphql")]

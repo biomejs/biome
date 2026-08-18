@@ -618,12 +618,8 @@ fn format_embedded(
                 }
             }
             DocumentFileSource::Json(_) => {
-                let json_options = json::resolve_format_options(
-                    biome_path,
-                    &snippet_file_source,
-                    settings,
-                    &workspace_db,
-                );
+                let json_options =
+                    json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
                 let node = snippet
                     .parsed_origin()
                     .parse(&workspace_db)
