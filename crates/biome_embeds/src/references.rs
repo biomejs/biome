@@ -99,7 +99,7 @@ pub fn is_svelte_store_reference_used(
         })
 }
 
-fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
+pub(crate) fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
     // These are special Svelte runes that are not valid store names, so we should ignore them.
     const SVELTE_RUNES: [&str; 7] = [
         "$bindable",
