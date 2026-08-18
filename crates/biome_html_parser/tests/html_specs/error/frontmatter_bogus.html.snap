@@ -31,6 +31,7 @@ HtmlRoot {
             FENCE@20..23 "---" [] [],
         ],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -107,7 +108,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] []
     2: FENCE@20..23 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@23..68
+  3: (empty)
+  4: HTML_ELEMENT_LIST@23..68
     0: HTML_ELEMENT@23..68
       0: HTML_OPENING_ELEMENT@23..30
         0: L_ANGLE@23..25 "<" [Newline("\n")] []
@@ -150,7 +152,7 @@ HtmlRoot {
         2: HTML_TAG_NAME@63..67
           0: HTML_KW@63..67 "html" [] []
         3: R_ANGLE@67..68 ">" [] []
-  4: EOF@68..69 "" [Newline("\n")] []
+  5: EOF@68..69 "" [Newline("\n")] []
 
 ```
 

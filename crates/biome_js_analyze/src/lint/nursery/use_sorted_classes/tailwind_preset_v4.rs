@@ -1603,6 +1603,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 5, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "inset-x" => FunctionalEntry {
@@ -1615,6 +1617,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 6, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "inset-y" => FunctionalEntry {
@@ -1627,6 +1631,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 7, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "inset-s" => FunctionalEntry {
@@ -1639,6 +1645,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 8, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "inset-e" => FunctionalEntry {
@@ -1651,6 +1659,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 9, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "inset-bs" => FunctionalEntry {
@@ -1663,6 +1673,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 10, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "inset-be" => FunctionalEntry {
@@ -1675,6 +1687,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 11, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "top" => FunctionalEntry {
@@ -1687,6 +1701,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 12, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "right" => FunctionalEntry {
@@ -1699,6 +1715,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 13, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "bottom" => FunctionalEntry {
@@ -1711,6 +1729,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 14, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "left" => FunctionalEntry {
@@ -1723,6 +1743,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 15, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "z" => FunctionalEntry {
@@ -1734,6 +1756,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 189, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 189, 1),
@@ -1752,6 +1776,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 188, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 188, 1),
@@ -1770,6 +1796,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 190, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 190, 1),
@@ -1788,6 +1816,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 190, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "col-start" => FunctionalEntry {
@@ -1799,6 +1829,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 191, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 191, 1),
@@ -1817,6 +1849,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 192, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 192, 1),
@@ -1835,6 +1869,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 193, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 193, 1),
@@ -1853,6 +1889,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 193, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "row-start" => FunctionalEntry {
@@ -1864,6 +1902,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 194, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 194, 1),
@@ -1882,6 +1922,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 195, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 195, 1),
@@ -1900,6 +1942,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 19, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mx" => FunctionalEntry {
@@ -1911,6 +1955,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 20, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "my" => FunctionalEntry {
@@ -1922,6 +1968,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 21, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "ms" => FunctionalEntry {
@@ -1933,6 +1981,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 22, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "me" => FunctionalEntry {
@@ -1944,6 +1994,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 23, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mbs" => FunctionalEntry {
@@ -1955,6 +2007,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 24, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mbe" => FunctionalEntry {
@@ -1966,6 +2020,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 25, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mt" => FunctionalEntry {
@@ -1977,6 +2033,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 26, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mr" => FunctionalEntry {
@@ -1988,6 +2046,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 27, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mb" => FunctionalEntry {
@@ -1999,6 +2059,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 28, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "ml" => FunctionalEntry {
@@ -2010,6 +2072,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 29, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "line-clamp" => FunctionalEntry {
@@ -2021,6 +2085,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 196, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "block" => FunctionalEntry {
@@ -2033,6 +2099,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: Some((31, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "inline" => FunctionalEntry {
@@ -2046,6 +2114,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: Some((31, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "flex" => FunctionalEntry {
@@ -2057,6 +2127,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 42, 1),
         ],
         bare: Some((31, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "aspect" => FunctionalEntry {
@@ -2069,6 +2141,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 197, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "max-w-screen" => FunctionalEntry {
@@ -2077,6 +2151,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         ],
         arbitrary_branches: &[],
         bare: Some((38, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "size" => FunctionalEntry {
@@ -2089,6 +2165,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 33, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "w" => FunctionalEntry {
@@ -2102,6 +2180,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 34, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "min-w" => FunctionalEntry {
@@ -2115,6 +2195,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 36, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "max-w" => FunctionalEntry {
@@ -2129,6 +2211,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 38, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "h" => FunctionalEntry {
@@ -2141,6 +2225,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 35, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "min-h" => FunctionalEntry {
@@ -2153,6 +2239,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 37, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "max-h" => FunctionalEntry {
@@ -2165,6 +2253,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 39, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "min-inline" => FunctionalEntry {
@@ -2178,6 +2268,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "max-inline" => FunctionalEntry {
@@ -2191,6 +2283,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "min-block" => FunctionalEntry {
@@ -2203,6 +2297,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "max-block" => FunctionalEntry {
@@ -2215,6 +2311,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "shrink" => FunctionalEntry {
@@ -2225,6 +2323,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 198, 1),
         ],
         bare: Some((198, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "grow" => FunctionalEntry {
@@ -2235,6 +2335,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 199, 1),
         ],
         bare: Some((199, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "basis" => FunctionalEntry {
@@ -2248,6 +2350,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 43, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-spacing" => FunctionalEntry {
@@ -2259,6 +2363,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 47, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-spacing-x" => FunctionalEntry {
@@ -2270,6 +2376,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 47, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-spacing-y" => FunctionalEntry {
@@ -2281,6 +2389,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 47, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "origin" => FunctionalEntry {
@@ -2291,6 +2401,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 200, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "perspective-origin" => FunctionalEntry {
@@ -2301,6 +2413,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "perspective" => FunctionalEntry {
@@ -2312,6 +2426,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "translate" => FunctionalEntry {
@@ -2324,6 +2440,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 49, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "translate-x" => FunctionalEntry {
@@ -2336,6 +2454,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 50, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "translate-y" => FunctionalEntry {
@@ -2348,6 +2468,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 51, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "translate-z" => FunctionalEntry {
@@ -2359,6 +2481,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 52, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scale" => FunctionalEntry {
@@ -2369,6 +2493,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 53, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scale-x" => FunctionalEntry {
@@ -2379,6 +2505,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 202, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scale-y" => FunctionalEntry {
@@ -2389,6 +2517,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 203, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scale-z" => FunctionalEntry {
@@ -2399,6 +2529,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 204, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "rotate" => FunctionalEntry {
@@ -2409,6 +2541,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 54, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "rotate-x" => FunctionalEntry {
@@ -2419,6 +2553,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 205, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "rotate-y" => FunctionalEntry {
@@ -2429,6 +2565,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 206, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "rotate-z" => FunctionalEntry {
@@ -2439,6 +2577,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 207, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "skew" => FunctionalEntry {
@@ -2449,6 +2589,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 208, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "skew-x" => FunctionalEntry {
@@ -2459,6 +2601,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 209, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "skew-y" => FunctionalEntry {
@@ -2469,6 +2613,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 210, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "transform" => FunctionalEntry {
@@ -2477,6 +2623,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 55, 1),
         ],
         bare: Some((55, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "cursor" => FunctionalEntry {
@@ -2485,6 +2633,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 56, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-m" => FunctionalEntry {
@@ -2496,6 +2646,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 66, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-mx" => FunctionalEntry {
@@ -2507,6 +2659,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 67, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-my" => FunctionalEntry {
@@ -2518,6 +2672,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 68, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-ms" => FunctionalEntry {
@@ -2529,6 +2685,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 69, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-me" => FunctionalEntry {
@@ -2540,6 +2698,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 70, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-mbs" => FunctionalEntry {
@@ -2551,6 +2711,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 71, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-mbe" => FunctionalEntry {
@@ -2562,6 +2724,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 72, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-mt" => FunctionalEntry {
@@ -2573,6 +2737,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 73, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-mr" => FunctionalEntry {
@@ -2584,6 +2750,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 74, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-mb" => FunctionalEntry {
@@ -2595,6 +2763,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 75, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-ml" => FunctionalEntry {
@@ -2606,6 +2776,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 76, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "scroll-p" => FunctionalEntry {
@@ -2617,6 +2789,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 77, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-px" => FunctionalEntry {
@@ -2628,6 +2802,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 78, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-py" => FunctionalEntry {
@@ -2639,6 +2815,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 79, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-ps" => FunctionalEntry {
@@ -2650,6 +2828,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 80, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pe" => FunctionalEntry {
@@ -2661,6 +2841,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 81, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pbs" => FunctionalEntry {
@@ -2672,6 +2854,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 82, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pbe" => FunctionalEntry {
@@ -2683,6 +2867,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 83, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pt" => FunctionalEntry {
@@ -2694,6 +2880,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 84, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pr" => FunctionalEntry {
@@ -2705,6 +2893,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 85, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pb" => FunctionalEntry {
@@ -2716,6 +2906,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 86, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "scroll-pl" => FunctionalEntry {
@@ -2727,6 +2919,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 87, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "list" => FunctionalEntry {
@@ -2737,6 +2931,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 211, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "list-image" => FunctionalEntry {
@@ -2747,6 +2943,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 212, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "columns" => FunctionalEntry {
@@ -2759,6 +2957,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 213, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "auto-cols" => FunctionalEntry {
@@ -2769,6 +2969,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 214, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "auto-rows" => FunctionalEntry {
@@ -2779,6 +2981,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 215, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "grid-cols" => FunctionalEntry {
@@ -2790,6 +2994,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 216, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "grid-rows" => FunctionalEntry {
@@ -2801,6 +3007,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 217, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "gap" => FunctionalEntry {
@@ -2812,6 +3020,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 103, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "gap-x" => FunctionalEntry {
@@ -2823,6 +3033,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 104, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "gap-y" => FunctionalEntry {
@@ -2834,6 +3046,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 105, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "space-x" => FunctionalEntry {
@@ -2845,6 +3059,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 105, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "space-y" => FunctionalEntry {
@@ -2856,6 +3072,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 104, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "accent" => FunctionalEntry {
@@ -2867,6 +3085,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 106, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "caret" => FunctionalEntry {
@@ -2878,6 +3098,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 218, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "divide" => FunctionalEntry {
@@ -2889,6 +3111,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 219, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded" => FunctionalEntry {
@@ -2900,6 +3124,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 220, 1),
         ],
         bare: Some((220, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-s" => FunctionalEntry {
@@ -2911,6 +3137,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 221, 2),
         ],
         bare: Some((221, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-e" => FunctionalEntry {
@@ -2922,6 +3150,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 222, 2),
         ],
         bare: Some((222, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-t" => FunctionalEntry {
@@ -2933,6 +3163,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 223, 2),
         ],
         bare: Some((223, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-r" => FunctionalEntry {
@@ -2944,6 +3176,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 224, 2),
         ],
         bare: Some((224, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-b" => FunctionalEntry {
@@ -2955,6 +3189,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 225, 2),
         ],
         bare: Some((225, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-l" => FunctionalEntry {
@@ -2966,6 +3202,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 226, 2),
         ],
         bare: Some((226, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-ss" => FunctionalEntry {
@@ -2977,6 +3215,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 227, 1),
         ],
         bare: Some((227, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-se" => FunctionalEntry {
@@ -2988,6 +3228,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 228, 1),
         ],
         bare: Some((228, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-ee" => FunctionalEntry {
@@ -2999,6 +3241,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 229, 1),
         ],
         bare: Some((229, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-es" => FunctionalEntry {
@@ -3010,6 +3254,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 230, 1),
         ],
         bare: Some((230, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-tl" => FunctionalEntry {
@@ -3021,6 +3267,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 231, 1),
         ],
         bare: Some((231, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-tr" => FunctionalEntry {
@@ -3032,6 +3280,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 232, 1),
         ],
         bare: Some((232, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-br" => FunctionalEntry {
@@ -3043,6 +3293,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 233, 1),
         ],
         bare: Some((233, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "rounded-bl" => FunctionalEntry {
@@ -3054,6 +3306,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 234, 1),
         ],
         bare: Some((234, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border" => FunctionalEntry {
@@ -3068,6 +3322,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 235, 1),
         ],
         bare: Some((236, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-x" => FunctionalEntry {
@@ -3082,6 +3338,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 237, 1),
         ],
         bare: Some((238, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-y" => FunctionalEntry {
@@ -3096,6 +3354,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 239, 1),
         ],
         bare: Some((240, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-s" => FunctionalEntry {
@@ -3110,6 +3370,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 241, 1),
         ],
         bare: Some((242, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-e" => FunctionalEntry {
@@ -3124,6 +3386,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 243, 1),
         ],
         bare: Some((244, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-bs" => FunctionalEntry {
@@ -3138,6 +3402,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 245, 1),
         ],
         bare: Some((246, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-be" => FunctionalEntry {
@@ -3152,6 +3418,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 247, 1),
         ],
         bare: Some((248, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-t" => FunctionalEntry {
@@ -3166,6 +3434,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 249, 1),
         ],
         bare: Some((250, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-r" => FunctionalEntry {
@@ -3180,6 +3450,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 251, 1),
         ],
         bare: Some((252, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-b" => FunctionalEntry {
@@ -3194,6 +3466,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 253, 1),
         ],
         bare: Some((254, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "border-l" => FunctionalEntry {
@@ -3208,6 +3482,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 255, 1),
         ],
         bare: Some((256, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "divide-x" => FunctionalEntry {
@@ -3218,6 +3494,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 257, 5),
         ],
         bare: Some((257, 5)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "divide-y" => FunctionalEntry {
@@ -3228,6 +3506,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 258, 6),
         ],
         bare: Some((258, 6)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "bg-size" => FunctionalEntry {
@@ -3236,6 +3516,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 128, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "bg-position" => FunctionalEntry {
@@ -3244,6 +3526,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 130, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "bg-linear" => FunctionalEntry {
@@ -3256,6 +3540,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 186, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 186, 3),
@@ -3275,6 +3561,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 186, 2),
         ],
         bare: Some((186, 2)),
+        bare_opacity: Some((186, 2)),
+        bare_name: Some((186, 2)),
         negative: Some(SameBranches),
     },
     "bg-radial" => FunctionalEntry {
@@ -3283,6 +3571,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 186, 2),
         ],
         bare: Some((186, 2)),
+        bare_opacity: Some((186, 2)),
+        bare_name: Some((186, 2)),
         negative: None,
     },
     "bg" => FunctionalEntry {
@@ -3301,6 +3591,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 259, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "from" => FunctionalEntry {
@@ -3315,6 +3607,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 260, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "via" => FunctionalEntry {
@@ -3329,6 +3623,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 262, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "to" => FunctionalEntry {
@@ -3343,6 +3639,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 264, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask" => FunctionalEntry {
@@ -3355,6 +3653,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 134, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-size" => FunctionalEntry {
@@ -3363,6 +3663,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 138, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-position" => FunctionalEntry {
@@ -3371,6 +3673,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 139, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-x-from" => FunctionalEntry {
@@ -3385,6 +3689,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 267, 7),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-x-to" => FunctionalEntry {
@@ -3399,6 +3705,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 269, 7),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-y-from" => FunctionalEntry {
@@ -3413,6 +3721,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 271, 7),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-y-to" => FunctionalEntry {
@@ -3427,6 +3737,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 273, 7),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-t-from" => FunctionalEntry {
@@ -3441,6 +3753,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 275, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-t-to" => FunctionalEntry {
@@ -3455,6 +3769,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 277, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-r-from" => FunctionalEntry {
@@ -3469,6 +3785,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 279, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-r-to" => FunctionalEntry {
@@ -3483,6 +3801,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 281, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-b-from" => FunctionalEntry {
@@ -3497,6 +3817,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 283, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-b-to" => FunctionalEntry {
@@ -3511,6 +3833,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 285, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-l-from" => FunctionalEntry {
@@ -3525,6 +3849,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 287, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-l-to" => FunctionalEntry {
@@ -3539,6 +3865,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 289, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-linear" => FunctionalEntry {
@@ -3549,6 +3877,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 290, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mask-linear-from" => FunctionalEntry {
@@ -3563,6 +3893,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 292, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-linear-to" => FunctionalEntry {
@@ -3577,6 +3909,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 294, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-radial-at" => FunctionalEntry {
@@ -3585,6 +3919,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 145, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-radial" => FunctionalEntry {
@@ -3593,6 +3929,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 295, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-radial-from" => FunctionalEntry {
@@ -3607,6 +3945,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 297, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-radial-to" => FunctionalEntry {
@@ -3621,6 +3961,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 299, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-conic" => FunctionalEntry {
@@ -3631,6 +3973,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 300, 4),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "mask-conic-from" => FunctionalEntry {
@@ -3645,6 +3989,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 302, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "mask-conic-to" => FunctionalEntry {
@@ -3659,6 +4005,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 304, 5),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "fill" => FunctionalEntry {
@@ -3670,6 +4018,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 151, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "stroke" => FunctionalEntry {
@@ -3686,6 +4036,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 152, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "object" => FunctionalEntry {
@@ -3696,6 +4048,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 187, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "p" => FunctionalEntry {
@@ -3707,6 +4061,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 154, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "px" => FunctionalEntry {
@@ -3718,6 +4074,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 155, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "py" => FunctionalEntry {
@@ -3729,6 +4087,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 156, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "ps" => FunctionalEntry {
@@ -3740,6 +4100,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 157, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pe" => FunctionalEntry {
@@ -3751,6 +4113,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 158, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pbs" => FunctionalEntry {
@@ -3762,6 +4126,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 159, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pbe" => FunctionalEntry {
@@ -3773,6 +4139,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 160, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pt" => FunctionalEntry {
@@ -3784,6 +4152,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 161, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pr" => FunctionalEntry {
@@ -3795,6 +4165,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 162, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pb" => FunctionalEntry {
@@ -3806,6 +4178,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 163, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "pl" => FunctionalEntry {
@@ -3817,6 +4191,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 164, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "indent" => FunctionalEntry {
@@ -3828,6 +4204,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 166, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "align" => FunctionalEntry {
@@ -3836,6 +4214,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 167, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "font" => FunctionalEntry {
@@ -3862,6 +4242,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 306, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "font-features" => FunctionalEntry {
@@ -3870,6 +4252,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 308, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "font-stretch" => FunctionalEntry {
@@ -3878,6 +4262,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 171, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "placeholder" => FunctionalEntry {
@@ -3889,6 +4275,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 309, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "decoration" => FunctionalEntry {
@@ -3903,6 +4291,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 310, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "animate" => FunctionalEntry {
@@ -3914,6 +4304,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 311, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "filter" => FunctionalEntry {
@@ -3922,6 +4314,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 312, 1),
         ],
         bare: Some((312, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-filter" => FunctionalEntry {
@@ -3930,6 +4324,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 313, 2),
         ],
         bare: Some((313, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "blur" => FunctionalEntry {
@@ -3941,6 +4337,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 314, 2),
         ],
         bare: Some((314, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-blur" => FunctionalEntry {
@@ -3952,6 +4350,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 315, 3),
         ],
         bare: Some((315, 3)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "brightness" => FunctionalEntry {
@@ -3962,6 +4362,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 316, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-brightness" => FunctionalEntry {
@@ -3972,6 +4374,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 317, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "contrast" => FunctionalEntry {
@@ -3982,6 +4386,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 318, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-contrast" => FunctionalEntry {
@@ -3992,6 +4398,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 319, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "grayscale" => FunctionalEntry {
@@ -4002,6 +4410,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 320, 2),
         ],
         bare: Some((320, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-grayscale" => FunctionalEntry {
@@ -4012,6 +4422,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 321, 3),
         ],
         bare: Some((321, 3)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "hue-rotate" => FunctionalEntry {
@@ -4022,6 +4434,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 322, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "backdrop-hue-rotate" => FunctionalEntry {
@@ -4032,6 +4446,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 323, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "invert" => FunctionalEntry {
@@ -4042,6 +4458,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 324, 2),
         ],
         bare: Some((324, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-invert" => FunctionalEntry {
@@ -4052,6 +4470,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 325, 3),
         ],
         bare: Some((325, 3)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "saturate" => FunctionalEntry {
@@ -4062,6 +4482,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 326, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-saturate" => FunctionalEntry {
@@ -4072,6 +4494,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 327, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "sepia" => FunctionalEntry {
@@ -4082,6 +4506,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 328, 2),
         ],
         bare: Some((328, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "backdrop-sepia" => FunctionalEntry {
@@ -4092,6 +4518,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 329, 3),
         ],
         bare: Some((329, 3)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "drop-shadow" => FunctionalEntry {
@@ -4105,6 +4533,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 174, 3),
         ],
         bare: Some((174, 3)),
+        bare_opacity: Some((174, 4)),
+        bare_name: Some((174, 3)),
         negative: None,
     },
     "backdrop-opacity" => FunctionalEntry {
@@ -4115,6 +4545,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 331, 3),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "transition" => FunctionalEntry {
@@ -4126,6 +4558,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 332, 3),
         ],
         bare: Some((332, 3)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "delay" => FunctionalEntry {
@@ -4136,6 +4570,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 334, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "duration" => FunctionalEntry {
@@ -4146,6 +4582,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 335, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "ease" => FunctionalEntry {
@@ -4158,6 +4596,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 336, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "will-change" => FunctionalEntry {
@@ -4166,6 +4606,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 176, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "content" => FunctionalEntry {
@@ -4174,6 +4616,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 177, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "contain" => FunctionalEntry {
@@ -4182,6 +4626,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 178, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "leading" => FunctionalEntry {
@@ -4195,6 +4641,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 180, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "tracking" => FunctionalEntry {
@@ -4205,6 +4653,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 337, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "outline" => FunctionalEntry {
@@ -4220,6 +4670,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 338, 1),
         ],
         bare: Some((339, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "outline-offset" => FunctionalEntry {
@@ -4230,6 +4682,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 340, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "opacity" => FunctionalEntry {
@@ -4240,6 +4694,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 341, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "underline-offset" => FunctionalEntry {
@@ -4251,6 +4707,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 342, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 342, 1),
@@ -4274,6 +4732,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 343, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "text-shadow" => FunctionalEntry {
@@ -4286,6 +4746,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::LineHeight, 40, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "shadow" => FunctionalEntry {
@@ -4300,6 +4762,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::LineHeight, 345, 2),
         ],
         bare: Some((345, 2)),
+        bare_opacity: Some((345, 3)),
+        bare_name: Some((345, 2)),
         negative: None,
     },
     "inset-shadow" => FunctionalEntry {
@@ -4314,6 +4778,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::LineHeight, 346, 2),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "ring" => FunctionalEntry {
@@ -4327,6 +4793,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 347, 1),
         ],
         bare: Some((348, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "inset-ring" => FunctionalEntry {
@@ -4340,6 +4808,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 349, 1),
         ],
         bare: Some((350, 2)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "ring-offset" => FunctionalEntry {
@@ -4353,6 +4823,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::Opacity, 351, 1),
         ],
         bare: None,
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "@container" => FunctionalEntry {
@@ -4361,6 +4833,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::LineHeight, 353, 1),
         ],
         bare: Some((353, 1)),
+        bare_opacity: Some((353, 2)),
+        bare_name: Some((353, 2)),
         negative: None,
     },
     "flex-shrink" => FunctionalEntry {
@@ -4371,6 +4845,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 198, 1),
         ],
         bare: Some((198, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "flex-grow" => FunctionalEntry {
@@ -4381,6 +4857,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 199, 1),
         ],
         bare: Some((199, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: None,
     },
     "start" => FunctionalEntry {
@@ -4393,6 +4871,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 8, 1),
         ],
         bare: Some((8, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
     "end" => FunctionalEntry {
@@ -4405,6 +4885,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(ModifierKind::None, 9, 1),
         ],
         bare: Some((9, 1)),
+        bare_opacity: None,
+        bare_name: None,
         negative: Some(SameBranches),
     },
 };

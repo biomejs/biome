@@ -532,6 +532,14 @@ pub fn create_config(
 
 /// Returns the rules applied to a specific [Path], given the [Settings]
 pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules {
+    let override_indices = settings.matching_override_indices(path);
+    to_analyzer_rules_by_indices(settings, &override_indices)
+}
+
+pub(crate) fn to_analyzer_rules_by_indices(
+    settings: &Settings,
+    override_indices: &[usize],
+) -> AnalyzerRules {
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = settings.linter.rules.as_ref() {
         #[cfg(feature = "lang_js")]
@@ -559,8 +567,9 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         #[cfg(feature = "lang_md")]
         push_to_analyzer_assist(rules, md_lint_metadata.deref(), &mut analyzer_rules);
     }
-    let overrides = &settings.override_settings;
-    overrides.override_analyzer_rules(path, analyzer_rules)
+    settings
+        .override_settings
+        .override_analyzer_rules_by_indices(override_indices, analyzer_rules)
 }
 
 pub trait ConfigurationExt {

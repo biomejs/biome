@@ -195,6 +195,14 @@ pub struct FunctionalEntry {
     /// a value (`border`, `ring`, `shadow` have defaults; `w` does
     /// not), as a (`SIGNATURE_POOL` index, declaration count) pair.
     pub bare: Option<(u16, u8)>,
+    /// Placements of the bare basename with a modifier, split by
+    /// modifier shape because the compiled declarations differ:
+    /// a numeric or bracketed modifier (`shadow/50` adds an opacity
+    /// declaration) versus a bare-word modifier (`@container/sidebar`
+    /// names the container). `None` when the modifier invalidates the
+    /// candidate, which is the case for almost every utility.
+    pub bare_opacity: Option<(u16, u8)>,
+    pub bare_name: Option<(u16, u8)>,
     pub negative: Option<Negative>,
 }
 

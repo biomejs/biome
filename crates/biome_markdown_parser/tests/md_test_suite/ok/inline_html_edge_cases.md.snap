@@ -78,6 +78,7 @@ Self close: <br/> break.
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -1029,7 +1030,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..1720
   0: (empty)
-  1: MD_BLOCK_LIST@0..1720
+  1: (empty)
+  2: MD_BLOCK_LIST@0..1720
     0: MD_HEADER@0..24
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -1638,6 +1640,6 @@ MdRoot {
           0: MD_TEXTUAL_LITERAL@1712..1719 " break." [] []
         8: MD_TEXTUAL@1719..1720
           0: MD_TEXTUAL_LITERAL@1719..1720 "\n" [] []
-  2: EOF@1720..1720 "" [] []
+  3: EOF@1720..1720 "" [] []
 
 ```

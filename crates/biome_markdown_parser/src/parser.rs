@@ -25,13 +25,22 @@ pub struct MarkdownParserOptions {
     ///
     /// This limits recursion on pathological input to avoid stack overflow.
     pub max_nesting_depth: usize,
-    // Reserved for future GFM options
+    pub(crate) frontmatter: bool,
+}
+
+impl MarkdownParserOptions {
+    /// Controls whether a complete `---` pair at the start of the document is parsed as frontmatter.
+    pub fn with_frontmatter(mut self, frontmatter: bool) -> Self {
+        self.frontmatter = frontmatter;
+        self
+    }
 }
 
 impl Default for MarkdownParserOptions {
     fn default() -> Self {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
+            frontmatter: false,
         }
     }
 }
@@ -965,6 +974,10 @@ impl<'source> MarkdownParser<'source> {
     /// This is useful for lookahead when detecting HTML blocks.
     pub fn source_after_current(&self) -> &str {
         self.source.source_after_current()
+    }
+
+    pub(crate) fn has_frontmatter_closing_fence(&self) -> bool {
+        self.source.has_frontmatter_closing_fence()
     }
 
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {

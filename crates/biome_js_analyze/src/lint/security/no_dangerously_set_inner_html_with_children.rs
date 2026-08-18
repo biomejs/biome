@@ -48,8 +48,9 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub DangerousProp = JsxAttribute | JsPropertyObjectMember
+    pub AnyJsCreateElement = JsxElement | JsxSelfClosingElement | JsCallExpression
 }
+
 /// The kind of children
 enum ChildrenKind {
     /// As prop, e.g.
@@ -64,14 +65,6 @@ enum ChildrenKind {
     Direct(TextRange),
 }
 
-impl ChildrenKind {
-    fn range(&self) -> &TextRange {
-        match self {
-            Self::Prop(range) | Self::Direct(range) => range,
-        }
-    }
-}
-
 pub struct RuleState {
     /// The `dangerouslySetInnerHTML` prop range
     dangerous_prop: TextRange,
@@ -80,8 +73,59 @@ pub struct RuleState {
     children_kind: ChildrenKind,
 }
 
+impl Rule for NoDangerouslySetInnerHtmlWithChildren {
+    type Query = Semantic<AnyJsCreateElement>;
+    type State = RuleState;
+    type Signals = Option<Self::State>;
+    type Options = NoDangerouslySetInnerHtmlWithChildrenOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        let model = ctx.model();
+        if let Some(dangerous_prop) = node.find_dangerous_prop(model) {
+            let dangerous_prop = dangerous_prop.range();
+            if let Some(children_node) = node.has_children(model) {
+                return Some(RuleState {
+                    children_kind: ChildrenKind::Direct(children_node.text_trimmed_range()),
+                    dangerous_prop,
+                });
+            } else if let Some(children_prop) = node.find_children_prop(model) {
+                return Some(RuleState {
+                    children_kind: ChildrenKind::Prop(children_prop.range()),
+                    dangerous_prop,
+                });
+            }
+        }
+        None
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            state.dangerous_prop,
+            markup! {
+                "Avoid passing both "<Emphasis>"children"</Emphasis>" and the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+            },
+        ).detail(state.children_kind.range(), markup! {
+            "This is the source of the children prop"
+        }).note(
+            markup! {
+                "Setting HTML content will inadvertently override any passed children in React"
+            }
+        ))
+    }
+}
+
 declare_node_union! {
-    pub AnyJsCreateElement = JsxElement | JsxSelfClosingElement | JsCallExpression
+    pub DangerousProp = JsxAttribute | JsPropertyObjectMember
+}
+
+impl ChildrenKind {
+    fn range(&self) -> &TextRange {
+        match self {
+            Self::Prop(range) | Self::Direct(range) => range,
+        }
+    }
 }
 
 impl AnyJsCreateElement {
@@ -151,48 +195,5 @@ impl AnyJsCreateElement {
                     .map(DangerousProp::from)
             }
         }
-    }
-}
-
-impl Rule for NoDangerouslySetInnerHtmlWithChildren {
-    type Query = Semantic<AnyJsCreateElement>;
-    type State = RuleState;
-    type Signals = Option<Self::State>;
-    type Options = NoDangerouslySetInnerHtmlWithChildrenOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let model = ctx.model();
-        if let Some(dangerous_prop) = node.find_dangerous_prop(model) {
-            let dangerous_prop = dangerous_prop.range();
-            if let Some(children_node) = node.has_children(model) {
-                return Some(RuleState {
-                    children_kind: ChildrenKind::Direct(children_node.text_trimmed_range()),
-                    dangerous_prop,
-                });
-            } else if let Some(children_prop) = node.find_children_prop(model) {
-                return Some(RuleState {
-                    children_kind: ChildrenKind::Prop(children_prop.range()),
-                    dangerous_prop,
-                });
-            }
-        }
-        None
-    }
-
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.dangerous_prop,
-            markup! {
-                "Avoid passing both "<Emphasis>"children"</Emphasis>" and the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-            },
-        ).detail(state.children_kind.range(), markup! {
-            "This is the source of the children prop"
-        }).note(
-            markup! {
-                "Setting HTML content will inadvertently override any passed children in React"
-            }
-        ))
     }
 }

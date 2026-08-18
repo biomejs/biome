@@ -7,6 +7,8 @@ pub(crate) mod code_content;
 pub(crate) mod continuation_indent;
 pub(crate) mod entity_reference;
 pub(crate) mod fenced_code_block;
+pub(crate) mod frontmatter;
+pub(crate) mod frontmatter_content;
 pub(crate) mod hard_line;
 pub(crate) mod hash;
 pub(crate) mod header;

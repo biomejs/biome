@@ -52,7 +52,7 @@ use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use biome_service::settings::ModuleGraphResolutionKind;
-use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 #[cfg(feature = "html_embeds")]
 use biome_service::test_utils::setup_workspace_and_open_project;
 #[cfg(feature = "html_embeds")]
@@ -121,17 +121,15 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             )
             .unwrap();
 
-        L::resolve_analyzer_options(
-            &settings,
-            &L::lookup_settings(&settings.languages).linter,
-            L::resolve_environment(&settings),
-            &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(
-                input_file,
-                settings.experimental_full_html_support_enabled(),
-            ),
-            None,
-        )
+        settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(input_file),
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            )
+            .with_file_path(input_file)
     }
 }
 
@@ -211,8 +209,13 @@ pub fn create_parser_options<L: ServiceLanguage>(
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+        let language_settings = &L::lookup_settings(&settings.languages).parser;
+        Some(L::resolve_parse_options(
+            &settings.override_settings,
+            language_settings,
+            &input_file.into(),
+            &document_file_source,
+        ))
     }
 }
 
@@ -258,8 +261,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        let override_indices = settings.matching_override_indices(input_file);
+        settings.format_options::<L>(&override_indices, &document_file_source)
     }
 }
 

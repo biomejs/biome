@@ -27,6 +27,7 @@ CDATA: <![CDATA[text]]> here.
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -173,7 +174,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..259
   0: (empty)
-  1: MD_BLOCK_LIST@0..259
+  1: (empty)
+  2: MD_BLOCK_LIST@0..259
     0: MD_PARAGRAPH@0..41
       0: MD_INLINE_ITEM_LIST@0..41
         0: MD_TEXTUAL@0..9
@@ -260,6 +262,6 @@ MdRoot {
           0: MD_TEXTUAL_LITERAL@252..258 " here." [] []
         3: MD_TEXTUAL@258..259
           0: MD_TEXTUAL_LITERAL@258..259 "\n" [] []
-  2: EOF@259..259 "" [] []
+  3: EOF@259..259 "" [] []
 
 ```

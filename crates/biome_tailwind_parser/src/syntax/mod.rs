@@ -72,6 +72,11 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         variants.complete(p, TW_VARIANT_LIST);
     }
 
+    // Tailwind's legacy important spelling puts the `!` right before the
+    // utility, after the variants and before the sign (`hover:!flex`,
+    // `!-m-4`).
+    let legacy_important = p.eat(T![!]);
+
     if p.at(T![-]) {
         p.bump_with_context(T![-], TailwindLexContext::SawNegative);
     }
@@ -94,7 +99,12 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         }
     }
 
-    if p.at(T![!]) {
+    // The trailing `!` must be glued to the utility; whitespace before it
+    // means the next class starts with the legacy `!` instead.
+    if p.at(T![!]) && !p.source().had_trivia_before() {
+        if legacy_important {
+            p.error(duplicate_important(p, p.cur_range()));
+        }
         p.bump(T![!]);
     }
 
@@ -119,6 +129,20 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
     }
 
     if !p.at(T![-]) {
+        // A modifier can glue straight onto a bare name
+        // (`@container/sidebar` names the container); whitespace before
+        // the `/` means the next class starts instead.
+        if p.at(T![/]) && !p.source().had_trivia_before() {
+            parse_modifier(p).or_add_diagnostic(p, expected_modifier);
+            if p.at(T![:]) {
+                // A `:` after the modifier means this was a (malformed)
+                // variant, not a candidate; rewinding lets the whole
+                // token recover as one bogus candidate.
+                m.abandon(p);
+                p.rewind(checkpoint);
+                return Absent;
+            }
+        }
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
     if p.source().had_trivia_before() {

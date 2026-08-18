@@ -314,6 +314,7 @@ pub fn tw_full_candidate(
     TwFullCandidateBuilder {
         variants,
         candidate,
+        legacy_important_token: None,
         negative_token: None,
         excl_token: None,
     }
@@ -321,10 +322,15 @@ pub fn tw_full_candidate(
 pub struct TwFullCandidateBuilder {
     variants: TwVariantList,
     candidate: AnyTwCandidate,
+    legacy_important_token: Option<SyntaxToken>,
     negative_token: Option<SyntaxToken>,
     excl_token: Option<SyntaxToken>,
 }
 impl TwFullCandidateBuilder {
+    pub fn with_legacy_important_token(mut self, legacy_important_token: SyntaxToken) -> Self {
+        self.legacy_important_token = Some(legacy_important_token);
+        self
+    }
     pub fn with_negative_token(mut self, negative_token: SyntaxToken) -> Self {
         self.negative_token = Some(negative_token);
         self
@@ -338,6 +344,8 @@ impl TwFullCandidateBuilder {
             TailwindSyntaxKind::TW_FULL_CANDIDATE,
             [
                 Some(SyntaxElement::Node(self.variants.into_syntax())),
+                self.legacy_important_token
+                    .map(|token| SyntaxElement::Token(token)),
                 self.negative_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.candidate.into_syntax())),
                 self.excl_token.map(|token| SyntaxElement::Token(token)),
@@ -448,11 +456,31 @@ impl TwRootBuilder {
         ))
     }
 }
-pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
-    TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_STATIC_CANDIDATE,
-        [Some(SyntaxElement::Token(base_token))],
-    ))
+pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidateBuilder {
+    TwStaticCandidateBuilder {
+        base_token,
+        modifier: None,
+    }
+}
+pub struct TwStaticCandidateBuilder {
+    base_token: SyntaxToken,
+    modifier: Option<AnyTwModifier>,
+}
+impl TwStaticCandidateBuilder {
+    pub fn with_modifier(mut self, modifier: AnyTwModifier) -> Self {
+        self.modifier = Some(modifier);
+        self
+    }
+    pub fn build(self) -> TwStaticCandidate {
+        TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_STATIC_CANDIDATE,
+            [
+                Some(SyntaxElement::Token(self.base_token)),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpressionBuilder {
     TwVariantExpressionBuilder {

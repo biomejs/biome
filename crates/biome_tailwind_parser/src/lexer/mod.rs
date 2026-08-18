@@ -57,13 +57,17 @@ impl<'src> TailwindLexer<'src> {
             PRC => self.consume_byte(T![%]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
-            IDT | ZER | DIG => self.consume_base(),
-            // A candidate never starts with `@` or `*`, but a variant does
-            // (`@sm:flex`, `*:flex`). The first token of a class is lexed
-            // here before `parse_variant_expression` re-lexes it as a
-            // segment, so emit a segment name rather than an error token —
-            // otherwise the error token's diagnostic survives the re-lex.
-            AT_ | MUL => self.consume_variant_segment_name(),
+            // `@` can begin a candidate (`@container` sets container-type)
+            // as well as a variant (`@sm:`), so it lexes as a base; when it
+            // turns out to be a variant, `parse_variant_expression` re-lexes
+            // it as a segment.
+            IDT | ZER | DIG | AT_ => self.consume_base(),
+            // `*` only ever begins a variant (`*:flex`, `**:flex`). The
+            // first token of a class is lexed here before
+            // `parse_variant_expression` re-lexes it as a segment, so emit
+            // a segment name rather than an error token — otherwise the
+            // error token's diagnostic survives the re-lex.
+            MUL => self.consume_variant_segment_name(),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)

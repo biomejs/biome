@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..2 "bg" [] [],
@@ -53,7 +54,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..14
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..13
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..13
         0: TW_BASE@0..2 "bg" [] []
         1: DASH@2..3 "-" [] []
         2: TW_NAMED_VALUE@3..12
@@ -62,7 +64,7 @@ TwRoot {
           0: SLASH@12..13 "/" [] []
           1: TW_BOGUS_MODIFIER@13..13
             0: ERROR_TOKEN@13..13 "" [] []
-      3: BANG@13..14 "!" [] []
+      4: BANG@13..14 "!" [] []
   2: EOF@14..15 "" [Newline("\n")] []
 
 ```

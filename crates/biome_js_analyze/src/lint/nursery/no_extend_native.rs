@@ -59,49 +59,6 @@ declare_lint_rule! {
     }
 }
 
-// IMPORTANT: Keep this array sorted for binary search
-const NATIVE_BUILTINS: &[&str] = &[
-    "AggregateError",
-    "Array",
-    "ArrayBuffer",
-    "BigInt",
-    "BigInt64Array",
-    "BigUint64Array",
-    "Boolean",
-    "DataView",
-    "Date",
-    "Error",
-    "EvalError",
-    "FinalizationRegistry",
-    "Float32Array",
-    "Float64Array",
-    "Function",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Map",
-    "Number",
-    "Object",
-    "Promise",
-    "RangeError",
-    "ReferenceError",
-    "RegExp",
-    "Set",
-    "SharedArrayBuffer",
-    "String",
-    "Symbol",
-    "SyntaxError",
-    "TypeError",
-    "URIError",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-    "WeakMap",
-    "WeakRef",
-    "WeakSet",
-];
-
 declare_node_union! {
     pub AnyExtendNativeCandidate = JsAssignmentExpression | JsCallExpression
 }
@@ -120,7 +77,8 @@ impl Rule for NoExtendNative {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {
             AnyExtendNativeCandidate::JsAssignmentExpression(assignment) => {
-                let AnyJsAssignmentPattern::AnyJsAssignment(target) = assignment.left().ok()? else {
+                let AnyJsAssignmentPattern::AnyJsAssignment(target) = assignment.left().ok()?
+                else {
                     return None;
                 };
                 let object = match target {
@@ -129,7 +87,10 @@ impl Rule for NoExtendNative {
                     _ => return None,
                 };
                 let builtin_name = native_builtin_name(ctx, &object)?;
-                Some(NoExtendNativeState { range: assignment.range(), builtin_name })
+                Some(NoExtendNativeState {
+                    range: assignment.range(),
+                    builtin_name,
+                })
             }
             AnyExtendNativeCandidate::JsCallExpression(call) => {
                 let callee = call.callee().ok()?.omit_parentheses();
@@ -152,7 +113,10 @@ impl Rule for NoExtendNative {
                 let first_arg = call.arguments().ok()?.args().iter().next()?.ok()?;
                 let target = first_arg.as_any_js_expression()?;
                 let builtin_name = native_builtin_name(ctx, target)?;
-                Some(NoExtendNativeState { range: call.range(), builtin_name })
+                Some(NoExtendNativeState {
+                    range: call.range(),
+                    builtin_name,
+                })
             }
         }
     }
@@ -195,7 +159,10 @@ fn is_native_prototype(expr: &AnyJsExpression) -> Option<JsReferenceIdentifier> 
 /// 1. The expression accesses `<Builtin>.prototype` for a known builtin.
 /// 2. The builtin identifier is not shadowed by a local binding.
 /// 3. The builtin name is not in the `ignore` options list.
-fn native_builtin_name(ctx: &RuleContext<NoExtendNative>, expr: &AnyJsExpression) -> Option<TokenText> {
+fn native_builtin_name(
+    ctx: &RuleContext<NoExtendNative>,
+    expr: &AnyJsExpression,
+) -> Option<TokenText> {
     let builtin_ref = is_native_prototype(expr)?;
     let name_token = builtin_ref.value_token().ok()?;
     let name = name_token.text_trimmed();
@@ -205,11 +172,60 @@ fn native_builtin_name(ctx: &RuleContext<NoExtendNative>, expr: &AnyJsExpression
     if ctx.model().binding(&builtin_ref).is_some() {
         return None;
     }
-    if ctx.options().ignore.iter().flatten().any(|n| n.as_ref() == name) {
+    if ctx
+        .options()
+        .ignore
+        .iter()
+        .flatten()
+        .any(|n| n.as_ref() == name)
+    {
         return None;
     }
     Some(name_token.token_text_trimmed())
 }
+
+// IMPORTANT: Keep this array sorted for binary search
+const NATIVE_BUILTINS: &[&str] = &[
+    "AggregateError",
+    "Array",
+    "ArrayBuffer",
+    "BigInt",
+    "BigInt64Array",
+    "BigUint64Array",
+    "Boolean",
+    "DataView",
+    "Date",
+    "Error",
+    "EvalError",
+    "FinalizationRegistry",
+    "Float32Array",
+    "Float64Array",
+    "Function",
+    "Int16Array",
+    "Int32Array",
+    "Int8Array",
+    "Map",
+    "Number",
+    "Object",
+    "Promise",
+    "RangeError",
+    "ReferenceError",
+    "RegExp",
+    "Set",
+    "SharedArrayBuffer",
+    "String",
+    "Symbol",
+    "SyntaxError",
+    "TypeError",
+    "URIError",
+    "Uint16Array",
+    "Uint32Array",
+    "Uint8Array",
+    "Uint8ClampedArray",
+    "WeakMap",
+    "WeakRef",
+    "WeakSet",
+];
 
 #[cfg(test)]
 mod tests {

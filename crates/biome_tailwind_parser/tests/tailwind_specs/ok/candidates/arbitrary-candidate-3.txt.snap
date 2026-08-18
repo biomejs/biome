@@ -19,6 +19,7 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@0..1 "[" [] [],
@@ -48,7 +49,8 @@ TwRoot {
     0: TW_FULL_CANDIDATE@0..17
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@0..17
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@0..17
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..11 "background" [] []
         2: COLON@11..12 ":" [] []
@@ -57,7 +59,7 @@ TwRoot {
             0: IDENT@12..16 "blue" [] []
         4: R_BRACKET@16..17 "]" [] []
         5: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@17..18 "" [Newline("\n")] []
 
 ```

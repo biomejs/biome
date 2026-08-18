@@ -72,6 +72,40 @@ declare_lint_rule! {
     }
 }
 
+pub struct MissingAwait(AnyFunctionLike);
+
+impl Rule for UseAwait {
+    type Query = MissingAwait;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = UseAwaitOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let query = ctx.query();
+        if query.statements()?.is_empty() {
+            return None;
+        }
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "This "<Emphasis>"async"</Emphasis>" function lacks an "<Emphasis>"await"</Emphasis>" expression."
+                },
+            )
+            .note(markup! {
+                <Emphasis>"Async"</Emphasis>" functions without "<Emphasis>"await"</Emphasis>" expressions may not need to be declared "<Emphasis>"async"</Emphasis>"."
+            }).detail(ctx.query().range(), markup! {
+                "Remove this "<Emphasis>"async"</Emphasis>" modifier, or add an "<Emphasis>"await"</Emphasis>" expression in the function."
+            }),
+        )
+    }
+}
+
 #[derive(Default)]
 struct MissingAwaitVisitor {
     /// Vector to hold a function node and a boolean indicating whether the function
@@ -126,7 +160,7 @@ impl Visitor for MissingAwaitVisitor {
     }
 }
 
-pub struct MissingAwait(AnyFunctionLike);
+
 
 impl QueryMatch for MissingAwait {
     fn text_range(&self) -> TextRange {
@@ -149,37 +183,5 @@ impl Queryable for MissingAwait {
 
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.0.clone()
-    }
-}
-
-impl Rule for UseAwait {
-    type Query = MissingAwait;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = UseAwaitOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let query = ctx.query();
-        if query.statements()?.is_empty() {
-            return None;
-        }
-        Some(())
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                ctx.query().range(),
-                markup! {
-                    "This "<Emphasis>"async"</Emphasis>" function lacks an "<Emphasis>"await"</Emphasis>" expression."
-                },
-            )
-            .note(markup! {
-                <Emphasis>"Async"</Emphasis>" functions without "<Emphasis>"await"</Emphasis>" expressions may not need to be declared "<Emphasis>"async"</Emphasis>"."
-            }).detail(ctx.query().range(), markup! {
-                "Remove this "<Emphasis>"async"</Emphasis>" modifier, or add an "<Emphasis>"await"</Emphasis>" expression in the function."
-            }),
-        )
     }
 }

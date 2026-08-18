@@ -40,9 +40,11 @@ TwRoot {
                 },
                 COLON@29..30 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@30..36 "hidden" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -75,9 +77,11 @@ TwRoot {
           2: (empty)
         1: COLON@29..30 ":" [] []
       1: (empty)
-      2: TW_STATIC_CANDIDATE@30..36
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@30..36
         0: TW_BASE@30..36 "hidden" [] []
-      3: (empty)
+        1: (empty)
+      4: (empty)
   2: EOF@36..37 "" [Newline("\n")] []
 
 ```

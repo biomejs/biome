@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-event-handler.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="count++">Increment</button>
+  <button v-on:click="count++">Increment</button>
+</template>
+
+```

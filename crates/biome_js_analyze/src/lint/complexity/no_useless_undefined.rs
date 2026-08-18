@@ -97,57 +97,6 @@ declare_node_union! {
         | JsFormalParameter
 }
 
-fn find_undefined_range(expr: Option<&AnyJsExpression>) -> Option<TextRange> {
-    let ident = expr?.as_js_reference_identifier()?;
-    if ident.is_undefined() {
-        Some(ident.range())
-    } else {
-        None
-    }
-}
-
-fn enclosing_function_return_type(statement: &JsReturnStatement) -> Option<AnyTsReturnType> {
-    let control_flow_root = statement
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .find_map(AnyJsControlFlowRoot::cast)?;
-
-    match control_flow_root {
-        AnyJsControlFlowRoot::AnyJsFunction(function) => {
-            function.return_type_annotation()?.ty().ok()
-        }
-        AnyJsControlFlowRoot::JsGetterClassMember(function) => Some(AnyTsReturnType::AnyTsType(
-            function.return_type()?.ty().ok()?,
-        )),
-        AnyJsControlFlowRoot::JsGetterObjectMember(function) => Some(AnyTsReturnType::AnyTsType(
-            function.return_type()?.ty().ok()?,
-        )),
-        AnyJsControlFlowRoot::JsMethodClassMember(function) => {
-            function.return_type_annotation()?.ty().ok()
-        }
-        AnyJsControlFlowRoot::JsMethodObjectMember(function) => {
-            function.return_type_annotation()?.ty().ok()
-        }
-        _ => None,
-    }
-}
-
-fn is_useless_return_undefined(statement: &JsReturnStatement) -> bool {
-    enclosing_function_return_type(statement).is_none_or(|return_type| {
-        return_type
-            .as_any_ts_type()
-            .cloned()
-            .map(AnyTsType::omit_parentheses)
-            .is_some_and(|return_type| {
-                matches!(
-                    return_type,
-                    AnyTsType::TsUndefinedType(_) | AnyTsType::TsVoidType(_)
-                )
-            })
-    })
-}
-
 pub struct RuleState {
     binding_text: Option<TokenText>,
     diagnostic_range: TextRange,
@@ -331,4 +280,55 @@ impl Rule for NoUselessUndefined {
             mutation,
         ))
     }
+}
+
+fn find_undefined_range(expr: Option<&AnyJsExpression>) -> Option<TextRange> {
+    let ident = expr?.as_js_reference_identifier()?;
+    if ident.is_undefined() {
+        Some(ident.range())
+    } else {
+        None
+    }
+}
+
+fn enclosing_function_return_type(statement: &JsReturnStatement) -> Option<AnyTsReturnType> {
+    let control_flow_root = statement
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyJsControlFlowRoot::cast)?;
+
+    match control_flow_root {
+        AnyJsControlFlowRoot::AnyJsFunction(function) => {
+            function.return_type_annotation()?.ty().ok()
+        }
+        AnyJsControlFlowRoot::JsGetterClassMember(function) => Some(AnyTsReturnType::AnyTsType(
+            function.return_type()?.ty().ok()?,
+        )),
+        AnyJsControlFlowRoot::JsGetterObjectMember(function) => Some(AnyTsReturnType::AnyTsType(
+            function.return_type()?.ty().ok()?,
+        )),
+        AnyJsControlFlowRoot::JsMethodClassMember(function) => {
+            function.return_type_annotation()?.ty().ok()
+        }
+        AnyJsControlFlowRoot::JsMethodObjectMember(function) => {
+            function.return_type_annotation()?.ty().ok()
+        }
+        _ => None,
+    }
+}
+
+fn is_useless_return_undefined(statement: &JsReturnStatement) -> bool {
+    enclosing_function_return_type(statement).is_none_or(|return_type| {
+        return_type
+            .as_any_ts_type()
+            .cloned()
+            .map(AnyTsType::omit_parentheses)
+            .is_some_and(|return_type| {
+                matches!(
+                    return_type,
+                    AnyTsType::TsUndefinedType(_) | AnyTsType::TsVoidType(_)
+                )
+            })
+    })
 }

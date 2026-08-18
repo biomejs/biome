@@ -1350,6 +1350,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUnsafeTypeAssertion",
+        TypeId::of::<biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUntrustedLicenses",
         TypeId::of::<biome_rule_options::no_untrusted_licenses::NoUntrustedLicensesOptions>(),
     ));
@@ -1641,6 +1646,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useAsConstAssertion",
         TypeId::of::<biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions>(),
     ));
+    result.push(("nursery", "useAstroClientOnlyDirectiveValue", TypeId::of::<biome_rule_options::use_astro_client_only_directive_value::UseAstroClientOnlyDirectiveValueOptions>()));
     result.push((
         "style",
         "useAtIndex",
@@ -1736,6 +1742,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "useConst",
         TypeId::of::<biome_rule_options::use_const::UseConstOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useControlLabel",
+        TypeId::of::<biome_rule_options::use_control_label::UseControlLabelOptions>(),
     ));
     result.push((
         "complexity",
@@ -2064,6 +2075,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_named_capture_group::UseNamedCaptureGroupOptions>(),
     ));
     result.push((
+        "nursery",
+        "useNamedLayer",
+        TypeId::of::<biome_rule_options::use_named_layer::UseNamedLayerOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useNamespaceKeyword",
         TypeId::of::<biome_rule_options::use_namespace_keyword::UseNamespaceKeywordOptions>(),
@@ -2271,6 +2287,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "useSymbolDescription",
         TypeId::of::<biome_rule_options::use_symbol_description::UseSymbolDescriptionOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useTailwindShorthandClasses",
+        TypeId::of::<
+            biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions,
+        >(),
     ));
     result.push((
         "style",

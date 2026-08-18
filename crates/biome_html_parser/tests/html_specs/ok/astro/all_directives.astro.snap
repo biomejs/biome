@@ -24,6 +24,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlSelfClosingElement {
@@ -135,7 +136,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..113
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..113
     0: HTML_SELF_CLOSING_ELEMENT@0..113
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_COMPONENT_NAME@1..10
@@ -203,6 +205,6 @@ HtmlRoot {
             2: (empty)
       3: SLASH@110..112 "/" [Newline("\n")] []
       4: R_ANGLE@112..113 ">" [] []
-  4: EOF@113..114 "" [Newline("\n")] []
+  5: EOF@113..114 "" [Newline("\n")] []
 
 ```
