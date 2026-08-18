@@ -1414,6 +1414,7 @@ impl WorkspaceServerWithDb<'_> {
                     };
                     new_snippets.push(UpdateSnippetsNodes {
                         range: embedded_snippet.element_range(&state.db),
+                        content_range: embedded_snippet.content_range(&state.db),
                         new_code,
                         needs_reindent: should_format,
                         verbatim_ranges,

@@ -1193,7 +1193,7 @@ fn lint_and_fix_vue_template_expressions() {
 
     fs.insert(
         "biome.json".into(),
-        r#"{ "html": { "experimentalFullSupportEnabled": true }, "linter": { "rules": { "style": { "useTemplate": "error" } } } }"#.as_bytes(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true }, "linter": { "rules": { "style": { "useTemplate": "on" } } } }"#.as_bytes(),
     );
 
     let vue_file_path = Utf8Path::new("file.vue");

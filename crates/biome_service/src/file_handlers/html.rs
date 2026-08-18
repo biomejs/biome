@@ -977,28 +977,21 @@ pub(crate) fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree(&workspace_db);
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    // Snippets are keyed by the range of the node whose single content
-    // token holds the embedded source: `<script>`/`<style>` bodies and
-    // Astro frontmatter (`AnyEmbeddedContent`), whose whitespace is part
-    // of the token text, and `{…}` / `{{…}}` text expressions in element
-    // bodies and attribute values (`HtmlTextExpression`), whose
-    // surrounding whitespace is trivia that the snippet's source already
-    // covers.
-    let iterator = tree.syntax().descendants().filter_map(|node| {
+    // Yields, for every node that can hold an embedded snippet, the range
+    // the snippet is keyed by and the token holding its source:
+    // `<script>`/`<style>` bodies and Astro frontmatter
+    // (`AnyEmbeddedContent`), and `{…}` / `{{…}}` text expressions
+    // (`HtmlTextExpression`).
+    let iterator = tree.syntax().descendants().skip(1).filter_map(|node| {
         if let Some(element) = AnyEmbeddedContent::cast_ref(&node) {
-            Some((element.range(), element.value_token(), false))
+            Some((element.range(), element.value_token()))
         } else {
-            HtmlTextExpression::cast(node).map(|expression| {
-                (
-                    expression.range(),
-                    expression.html_literal_token().ok(),
-                    true,
-                )
-            })
+            HtmlTextExpression::cast(node)
+                .map(|expression| (expression.range(), expression.html_literal_token().ok()))
         }
     });
 
-    for (range, value_token, is_text_expression) in iterator {
+    for (range, value_token) in iterator {
         let Some(snippet_index) = new_snippets
             .iter()
             .position(|snippet| snippet.range == range)
@@ -1008,15 +1001,12 @@ pub(crate) fn update_snippets(
         let snippet = new_snippets.swap_remove(snippet_index);
 
         if let Some(value_token) = value_token {
+            let token_range = value_token.text_range();
             let new_token_text = if snippet.needs_reindent {
                 // The formatted code doesn't carry the host's nesting
                 // indentation. Re-apply it to every line so the embed
                 // lines up with its surroundings.
-                let old_text = if is_text_expression {
-                    value_token.text()
-                } else {
-                    value_token.text_trimmed()
-                };
+                let old_text = &value_token.text()[snippet.content_range - token_range.start()];
                 let leading_trivia = read_leading_trivia(old_text);
                 let trailing_trivia = read_trailing_trivia(old_text);
                 let indent_prefix = content_indent_prefix(&leading_trivia);
@@ -1034,10 +1024,13 @@ pub(crate) fn update_snippets(
                 snippet.new_code
             };
 
-            if is_text_expression {
-                mutation.replace_token_discard_trivia(value_token, ident(&new_token_text));
+            let new_token = ident(&new_token_text);
+            if snippet.content_range == token_range {
+                // The source spanned the whole token, whitespace included:
+                // carrying the old trivia over would duplicate it.
+                mutation.replace_token_discard_trivia(value_token, new_token);
             } else {
-                mutation.replace_token(value_token, ident(&new_token_text));
+                mutation.replace_token(value_token, new_token);
             }
         }
     }
