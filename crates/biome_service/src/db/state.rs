@@ -517,6 +517,18 @@ impl DbState {
         }
     }
 
+    /// Removes the cached parsed source for `path`.
+    ///
+    /// This is an untracked removal: the `files` map is not read by any
+    /// Salsa-tracked query, so no generation signal needs to be bumped. See
+    /// the "Remove" section of the module documentation above.
+    pub(crate) fn remove_file(&self, path: &Utf8Path) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => shared_db.data().remove_file(path),
+            DbStorage::Owned(db) => db.data.remove_file(path),
+        }
+    }
+
     #[cfg(feature = "module_graph")]
     pub(crate) fn upsert_module_kind(
         &self,

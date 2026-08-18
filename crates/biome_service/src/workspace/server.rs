@@ -2275,6 +2275,11 @@ impl WorkspaceServerWithDb<'_> {
         self.db_state.unload_path(path);
     }
 
+    /// Removes the cached parsed source for `path` from the database.
+    fn db_remove_file(&self, path: &Utf8Path) {
+        self.db_state.remove_file(path);
+    }
+
     /// Adds a [AnyParsedSource] to the database
     fn db_update_parsed_file(
         &self,
@@ -3946,6 +3951,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         self.documents.pin().remove(path);
         self.node_cache.lock().unwrap().remove(path);
+        self.db_remove_file(path);
 
         if self.is_indexed(path) {
             // This may look counter-intuitive, but we need to consider that the

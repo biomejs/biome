@@ -81,6 +81,99 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     );
 }
 
+/// Regression test: `WorkspaceDb::files` used to be missing from every
+/// eviction path, so a closed file's parsed source stayed cached in the
+/// database for the lifetime of a long-running LSP daemon.
+#[test]
+fn close_file_evicts_cached_parsed_source() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "let a = 1;";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some(),
+        "opening the file must cache its parsed source"
+    );
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_none(),
+        "closing the file must evict its cached parsed source"
+    );
+}
+
+/// Regression test: closing a project already evicted open documents and
+/// module graph entries under its root, but left cached parsed sources
+/// behind indefinitely.
+#[test]
+fn close_project_evicts_cached_parsed_sources_under_root() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "let a = 1;";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some(),
+        "opening the file must cache its parsed source"
+    );
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_none(),
+        "closing the project must evict cached parsed sources under its root"
+    );
+}
+
 #[test]
 fn process_file_preserves_embedded_content_after_formatting() {
     const PATH: &str = "/project/file.html";

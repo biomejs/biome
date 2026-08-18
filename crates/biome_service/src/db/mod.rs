@@ -111,6 +111,7 @@ impl Default for WorkspaceDb {
 /// runs. This type is what makes that possible.
 #[derive(Clone)]
 pub struct WorkspaceDbData {
+    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -136,6 +137,11 @@ impl WorkspaceDbData {
         self.projects.pin().remove(&project_key);
     }
 
+    /// Removes the parsed source cached for `path`.
+    pub fn remove_file(&self, path: &Utf8Path) {
+        self.files.pin().remove(path);
+    }
+
     /// Checks whether the module data contains `path` without making Salsa
     /// track the read operation.
     ///
@@ -157,9 +163,19 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
-    /// Removes all modules that start with the given path. That's usually used
-    /// when removing a library or a folder from the project.
+    /// Removes all files and modules that start with the given path. That's
+    /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
+        let files = self.files.pin();
+        let to_remove: Vec<Utf8PathBuf> = files
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            files.remove(&p);
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let modules = self.modules.pin();
@@ -172,8 +188,6 @@ impl WorkspaceDbData {
                 modules.remove(&p);
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 }
 
@@ -200,6 +214,7 @@ impl WorkspaceDb {
     /// its clones.
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -385,6 +400,16 @@ impl WorkspaceDb {
     }
 
     pub fn unload_path(&mut self, path: &Utf8Path) {
+        let files = self.files.pin();
+        let to_remove: Vec<Utf8PathBuf> = files
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            files.remove(&p);
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let to_remove = self
@@ -403,8 +428,6 @@ impl WorkspaceDb {
                 });
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 
     // #region Project operations
@@ -645,6 +668,7 @@ impl Default for SharedWorkspaceDb {
 impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -877,6 +901,24 @@ mod tests {
             db.get_parsed_source(path).unwrap().as_id(),
             updated_file.as_id()
         );
+    }
+
+    #[test]
+    fn unload_path_removes_matching_files() {
+        let mut db = WorkspaceDb::default();
+        let root = Utf8Path::new("root/a.js");
+        let nested = Utf8Path::new("root/nested/b.js");
+        let outside = Utf8Path::new("other/c.js");
+
+        db.upsert_file(root, parse_js("let a = 1;"), 0, vec![]);
+        db.upsert_file(nested, parse_js("let b = 2;"), 0, vec![]);
+        db.upsert_file(outside, parse_js("let c = 3;"), 0, vec![]);
+
+        db.unload_path(Utf8Path::new("root"));
+
+        assert!(db.get_parsed_source(root).is_none());
+        assert!(db.get_parsed_source(nested).is_none());
+        assert!(db.get_parsed_source(outside).is_some());
     }
 
     #[test]
