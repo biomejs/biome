@@ -36,13 +36,14 @@ pub use crate::html::HtmlFileSource;
 pub use crate::javascript::JsFileSource;
 #[cfg(feature = "lang_json")]
 pub use crate::json::JsonFileSource;
+#[cfg(feature = "lang_json")]
+use crate::json::JsonSourceKind;
 #[cfg(feature = "lang_md")]
 pub use crate::md::MdFileSource;
 #[cfg(feature = "lang_yaml")]
 pub use crate::yaml::YamlFileSource;
 
 pub use crate::db::LanguageDb;
-use crate::json::JsonSourceKind;
 
 // NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]
 pub const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
