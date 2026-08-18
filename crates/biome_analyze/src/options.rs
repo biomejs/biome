@@ -245,20 +245,33 @@ impl AnalyzerOptions {
     }
 }
 
-/// User-provided names that Tailwind-aware analyzer queries use to identify class strings.
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// User-provided names that Tailwind-aware analyzer queries use to identify class strings,
+/// and the project stylesheet Tailwind-aware rules read.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct TailwindOptions {
     attributes: Option<Arc<[Box<str>]>>,
     functions: Option<Arc<[Box<str>]>>,
+    stylesheet: Option<Arc<str>>,
 }
 
 impl TailwindOptions {
-    /// Creates analyzer options from optional replacement lists.
-    pub fn new(attributes: Option<Box<[Box<str>]>>, functions: Option<Box<[Box<str>]>>) -> Self {
+    /// Creates analyzer options from optional replacement lists and stylesheet path.
+    pub fn new(
+        attributes: Option<Box<[Box<str>]>>,
+        functions: Option<Box<[Box<str>]>>,
+        stylesheet: Option<Box<str>>,
+    ) -> Self {
         Self {
             attributes: attributes.map(Arc::from),
             functions: functions.map(Arc::from),
+            stylesheet: stylesheet.map(Arc::from),
         }
+    }
+
+    /// Returns the configured path of the project's Tailwind CSS entry stylesheet,
+    /// relative to the package root of the linted file.
+    pub fn stylesheet(&self) -> Option<&str> {
+        self.stylesheet.as_deref()
     }
 
     /// Returns the configured attribute replacement list, or `None` when language defaults apply.
@@ -269,12 +282,6 @@ impl TailwindOptions {
     /// Returns the configured function replacement list, or `None` when defaults apply.
     pub fn functions(&self) -> Option<&[Box<str>]> {
         self.functions.as_deref()
-    }
-}
-
-impl Default for TailwindOptions {
-    fn default() -> Self {
-        Self::new(None, None)
     }
 }
 

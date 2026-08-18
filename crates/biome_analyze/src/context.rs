@@ -1,4 +1,4 @@
-use crate::options::{JsxRuntime, PreferredIndentation, PreferredQuote};
+use crate::options::{JsxRuntime, PreferredIndentation, PreferredQuote, TailwindOptions};
 use crate::{FromServices, Queryable, Rule, RuleKey, ServiceBag, registry::RuleRoot};
 use crate::{GroupCategory, RuleCategory, RuleGroup, RuleMetadata};
 use biome_diagnostics::{Error, Result};
@@ -23,6 +23,7 @@ pub struct RuleContext<'a, R: Rule> {
     jsx_factory: Option<&'a str>,
     jsx_fragment_factory: Option<&'a str>,
     working_directory: Option<&'a Utf8Path>,
+    tailwind: &'a TailwindOptions,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -44,6 +45,7 @@ where
         jsx_factory: Option<&'a str>,
         jsx_fragment_factory: Option<&'a str>,
         working_directory: Option<&'a Utf8Path>,
+        tailwind: &'a TailwindOptions,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -61,6 +63,7 @@ where
             jsx_factory,
             jsx_fragment_factory,
             working_directory,
+            tailwind,
         })
     }
 
@@ -186,6 +189,11 @@ where
     /// The file path of the current file
     pub fn file_path(&self) -> &Utf8Path {
         self.file_path
+    }
+
+    /// The top-level `tailwind` configuration.
+    pub fn tailwind(&self) -> &TailwindOptions {
+        self.tailwind
     }
 
     pub fn working_directory(&self) -> Option<&Utf8Path> {

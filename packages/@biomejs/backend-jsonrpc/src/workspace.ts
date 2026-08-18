@@ -397,6 +397,14 @@ Defaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`,
 `cnb`, and `ctl`. 
 	 */
 	functions?: string[];
+	/**
+	* Path to the project's Tailwind CSS entry stylesheet, relative to the root of
+the package that contains the linted file.
+
+When set, Tailwind-aware rules read the `@theme`, `@utility`, and
+`@custom-variant` directives of that file and of the stylesheets it imports. 
+	 */
+	stylesheet?: string;
 }
 /**
  * Settings for integrating Biome with version control.

@@ -424,6 +424,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 jsx_factory,
                 jsx_fragment_factory,
                 working_directory,
+                params.options.tailwind(),
             )?;
 
             let rule_timer = crate::profiling::start_rule::<R>();

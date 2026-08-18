@@ -14881,6 +14881,10 @@
 					"description": "Function and tagged-template names whose arguments contain Tailwind classes.\n\nDefaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`,\n`cnb`, and `ctl`.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				},
+				"stylesheet": {
+					"description": "Path to the project's Tailwind CSS entry stylesheet, relative to the root of\nthe package that contains the linted file.\n\nWhen set, Tailwind-aware rules read the `@theme`, `@utility`, and\n`@custom-variant` directives of that file and of the stylesheets it imports.",
+					"type": ["string", "null"]
 				}
 			},
 			"additionalProperties": false

@@ -529,6 +529,7 @@ where
             self.options.jsx_factory(),
             self.options.jsx_fragment_factory(),
             self.options.working_directory.as_deref(),
+            self.options.tailwind(),
         )
         .ok()?;
 
@@ -584,6 +585,7 @@ where
             self.options.jsx_factory(),
             self.options.jsx_fragment_factory(),
             self.options.working_directory.as_deref(),
+            self.options.tailwind(),
         )
         .ok();
         let mut actions = Vec::new();
@@ -708,6 +710,7 @@ where
             self.options.jsx_factory(),
             self.options.jsx_fragment_factory(),
             self.options.working_directory.as_deref(),
+            self.options.tailwind(),
         )
         .ok();
         if let Some(ctx) = ctx {

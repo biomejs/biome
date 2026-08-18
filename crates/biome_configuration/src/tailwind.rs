@@ -19,10 +19,22 @@ pub struct TailwindConfiguration {
     /// `cnb`, and `ctl`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub functions: Option<Box<[Box<str>]>>,
+
+    /// Path to the project's Tailwind CSS entry stylesheet, relative to the root of
+    /// the package that contains the linted file.
+    ///
+    /// When set, Tailwind-aware rules read the `@theme`, `@utility`, and
+    /// `@custom-variant` directives of that file and of the stylesheets it imports.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stylesheet: Option<Box<str>>,
 }
 
 impl From<TailwindConfiguration> for TailwindOptions {
     fn from(configuration: TailwindConfiguration) -> Self {
-        Self::new(configuration.attributes, configuration.functions)
+        Self::new(
+            configuration.attributes,
+            configuration.functions,
+            configuration.stylesheet,
+        )
     }
 }
