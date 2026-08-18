@@ -27,12 +27,12 @@ impl TestFormatLanguage for GraphqlTestFormatLanguage {
     fn to_format_language(
         &self,
         settings: &Settings,
-        _file_source: &DocumentFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
         let path = BiomePath::new("");
         let options = settings.format_options::<Self::ServiceLanguage>(
             &settings.matching_override_indices(path.as_path()),
-            (),
+            file_source,
         );
         GraphqlFormatLanguage::new(options)
     }

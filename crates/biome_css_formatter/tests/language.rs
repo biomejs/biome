@@ -6,7 +6,7 @@ use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_languages::{CssFileSource, DocumentFileSource};
 use biome_parser::AnyParse;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 
 pub struct CssTestFormatLanguage {
     source_type: CssFileSource,
@@ -39,10 +39,9 @@ impl TestFormatLanguage for CssTestFormatLanguage {
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
         let path = BiomePath::new("");
-        let input = Self::ServiceLanguage::format_options_input(&path, file_source);
         let options = settings.format_options::<Self::ServiceLanguage>(
             &settings.matching_override_indices(path.as_path()),
-            input,
+            file_source,
         );
         CssFormatLanguage::new(options)
     }

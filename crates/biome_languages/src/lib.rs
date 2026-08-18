@@ -1,3 +1,4 @@
+use biome_fs::ConfigName;
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
@@ -41,6 +42,7 @@ pub use crate::md::MdFileSource;
 pub use crate::yaml::YamlFileSource;
 
 pub use crate::db::LanguageDb;
+use crate::json::JsonSourceKind;
 
 // NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]
 pub const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
@@ -327,6 +329,16 @@ impl DocumentFileSource {
             Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
             Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
             Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
+            Some(filename) if ConfigName::matches_file_name(&filename) => {
+                return Ok(JsonFileSource::json()
+                    .with_kind(JsonSourceKind::BiomeJson)
+                    .into());
+            }
+            Some(filename) if filename == "package.json" => {
+                return Ok(JsonFileSource::json()
+                    .with_kind(JsonSourceKind::PackageJson)
+                    .into());
+            }
             _ => path
                 .extension()
                 // We assume the file extensions are case-insensitive.

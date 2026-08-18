@@ -264,10 +264,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let path = BiomePath::new(input_file);
         let override_indices = settings.matching_override_indices(input_file);
-        let input = L::format_options_input(&path, &document_file_source);
-        settings.format_options::<L>(&override_indices, input)
+        settings.format_options::<L>(&override_indices, &document_file_source)
     }
 }
 

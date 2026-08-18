@@ -164,7 +164,6 @@ impl ServiceLanguage for HtmlLanguage {
     type FormatterSettings = HtmlFormatterSettings;
     type LinterSettings = HtmlLinterSettings;
     type FormatOptions = HtmlFormatOptions;
-    type FormatOptionsInput = HtmlFileSource;
     type ParserSettings = HtmlParserSettings;
     type EnvironmentSettings = ();
     type AssistSettings = HtmlAssistSettings;
@@ -175,20 +174,14 @@ impl ServiceLanguage for HtmlLanguage {
         &languages.html
     }
 
-    fn format_options_input(
-        _path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
-        file_source.to_html_file_source().unwrap_or_default()
-    }
-
     fn resolve_format_options(
         global: &crate::settings::FormatSettings,
         overrides: &crate::settings::OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        file_source: HtmlFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
+        let file_source = file_source.to_html_file_source().unwrap_or_default();
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -366,7 +359,8 @@ struct HtmlFormatOptionsInput {
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
-    source: HtmlFileSource,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -377,19 +371,18 @@ fn resolved_html_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<HtmlLanguage>(input.override_indices(db), input.source(db))
+        .format_options::<HtmlLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
-    path: &BiomePath,
+    _path: &BiomePath,
     source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> HtmlFormatOptions {
     let query = settings.query();
-    let format_options_input = HtmlLanguage::format_options_input(path, source);
     if query.inline_settings().is_some() {
-        return settings.format_options::<HtmlLanguage>(format_options_input);
+        return settings.format_options::<HtmlLanguage>(source);
     }
     let selected_settings = query
         .selection()
@@ -399,7 +392,7 @@ pub(in crate::file_handlers) fn resolve_format_options(
         &query_db,
         selected_settings,
         query.override_indices(),
-        format_options_input,
+        *source,
     );
     resolved_html_format_options(&query_db, input)
 }

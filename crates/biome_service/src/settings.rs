@@ -123,7 +123,7 @@ impl Settings {
     pub fn format_options<L>(
         &self,
         override_indices: &[usize],
-        input: L::FormatOptionsInput,
+        file_source: &DocumentFileSource,
     ) -> L::FormatOptions
     where
         L: ServiceLanguage,
@@ -134,7 +134,7 @@ impl Settings {
             &self.override_settings,
             language_settings,
             override_indices,
-            input,
+            file_source,
         )
     }
 
@@ -703,12 +703,12 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
     }
 
     /// Resolve the formatting options for the given language
-    pub fn format_options<L>(&self, input: L::FormatOptionsInput) -> L::FormatOptions
+    pub fn format_options<L>(&self, file_source: &DocumentFileSource) -> L::FormatOptions
     where
         L: ServiceLanguage,
     {
         let settings = self.effective_settings();
-        settings.format_options::<L>(self.query().override_indices(), input)
+        settings.format_options::<L>(self.query().override_indices(), file_source)
     }
 
     pub fn parse_options<L>(
@@ -1156,9 +1156,6 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Fully resolved formatter options type for this language
     type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display + Default;
 
-    /// Path-independent input needed to resolve formatter options for this language.
-    type FormatOptionsInput;
-
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
@@ -1188,13 +1185,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        input: Self::FormatOptionsInput,
-    ) -> Self::FormatOptions;
-
-    fn format_options_input(
-        path: &BiomePath,
         file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput;
+    ) -> Self::FormatOptions;
 
     /// Resolve the linter options from the global (workspace level),
     /// per-language and editor provided formatter settings

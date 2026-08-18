@@ -53,19 +53,12 @@ impl ServiceLanguage for YamlLanguage {
     type LinterSettings = ();
     type AssistSettings = ();
     type FormatOptions = YamlFormatOptions;
-    type FormatOptionsInput = ();
     type ParserSettings = ();
     type ParserOptions = ();
     type EnvironmentSettings = ();
 
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.yaml
-    }
-
-    fn format_options_input(
-        _path: &BiomePath,
-        _file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
     }
 
     fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
@@ -85,7 +78,7 @@ impl ServiceLanguage for YamlLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        _input: (),
+        _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         // TODO: apply markdown overrides once markdown override settings are introduced.
         let _ = (overrides, override_indices);
@@ -169,6 +162,8 @@ struct YamlFormatOptionsInput {
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -179,24 +174,29 @@ fn resolved_yaml_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<YamlLanguage>(input.override_indices(db), ())
+        .format_options::<YamlLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
     _path: &BiomePath,
-    _source: &DocumentFileSource,
+    source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> YamlFormatOptions {
     let query = settings.query();
     if query.inline_settings().is_some() {
-        return settings.format_options::<YamlLanguage>(());
+        return settings.format_options::<YamlLanguage>(source);
     }
     let selected_settings = query
         .selection()
         .selected_settings(workspace_db, query.project());
     let query_db = workspace_db.settings_query_db();
-    let input = YamlFormatOptionsInput::new(&query_db, selected_settings, query.override_indices());
+    let input = YamlFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
     resolved_yaml_format_options(&query_db, input)
 }
 

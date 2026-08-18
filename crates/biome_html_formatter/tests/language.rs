@@ -8,7 +8,7 @@ use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::HtmlLanguage;
 use biome_languages::{DocumentFileSource, HtmlFileSource};
 use biome_parser::AnyParse;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 
 pub struct HtmlTestFormatLanguage {
     source_type: HtmlFileSource,
@@ -35,10 +35,9 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
         let path = BiomePath::new("");
-        let input = Self::ServiceLanguage::format_options_input(&path, file_source);
         let options = settings.format_options::<Self::ServiceLanguage>(
             &settings.matching_override_indices(path.as_path()),
-            input,
+            file_source,
         );
         HtmlFormatLanguage::new(options)
     }

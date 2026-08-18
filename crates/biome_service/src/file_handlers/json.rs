@@ -123,28 +123,14 @@ impl From<JsonAssistConfiguration> for JsonAssistSettings {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum JsonFormatFileKind {
-    Normal,
-    BiomeJson,
-    PackageJson,
-}
-
-fn json_format_file_kind(path: &BiomePath) -> JsonFormatFileKind {
-    match path.file_name() {
-        Some("biome.json") => JsonFormatFileKind::BiomeJson,
-        Some("package.json") => JsonFormatFileKind::PackageJson,
-        _ => JsonFormatFileKind::Normal,
-    }
-}
-
 #[salsa::interned]
 struct JsonFormatOptionsInput {
     #[returns(ref)]
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
-    file_kind: JsonFormatFileKind,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -155,7 +141,7 @@ fn resolved_json_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<JsonLanguage>(input.override_indices(db), input.file_kind(db))
+        .format_options::<JsonLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 impl ServiceLanguage for JsonLanguage {
@@ -163,7 +149,6 @@ impl ServiceLanguage for JsonLanguage {
     type LinterSettings = JsonLinterSettings;
     type AssistSettings = JsonAssistSettings;
     type FormatOptions = JsonFormatOptions;
-    type FormatOptionsInput = JsonFormatFileKind;
     type ParserSettings = JsonParserSettings;
     type ParserOptions = JsonParserOptions;
     type EnvironmentSettings = ();
@@ -206,20 +191,16 @@ impl ServiceLanguage for JsonLanguage {
         }
     }
 
-    fn format_options_input(
-        path: &BiomePath,
-        _file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
-        json_format_file_kind(path)
-    }
-
     fn resolve_format_options(
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &JsonFormatterSettings,
         override_indices: &[usize],
-        file_kind: JsonFormatFileKind,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
+        let json = file_source
+            .to_json_file_source()
+            .expect("Expected a JSON file source");
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -242,13 +223,13 @@ impl ServiceLanguage for JsonLanguage {
             .unwrap_or_default();
 
         // ensure it never formats biome.json into a form it can't parse
-        let trailing_commas = if matches!(file_kind, JsonFormatFileKind::BiomeJson) {
+        let trailing_commas = if json.kind().is_biome_json() {
             TrailingCommas::None
         } else {
             language.trailing_commas.unwrap_or_default()
         };
         let expand_lists = language.expand.or(global.expand).unwrap_or_else(|| {
-            if matches!(file_kind, JsonFormatFileKind::PackageJson) {
+            if json.kind().is_package_json() {
                 Expand::Always
             } else {
                 Expand::default()
@@ -380,15 +361,13 @@ impl ServiceLanguage for JsonLanguage {
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
-    path: &BiomePath,
     source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> JsonFormatOptions {
     let query = settings.query();
-    let format_options_input = JsonLanguage::format_options_input(path, source);
     if query.inline_settings().is_some() {
-        return settings.format_options::<JsonLanguage>(format_options_input);
+        return settings.format_options::<JsonLanguage>(source);
     }
     let selected_settings = query
         .selection()
@@ -398,7 +377,7 @@ pub(in crate::file_handlers) fn resolve_format_options(
         &query_db,
         selected_settings,
         query.override_indices(),
-        format_options_input,
+        *source,
     );
     resolved_json_format_options(&query_db, input)
 }
@@ -499,13 +478,13 @@ fn debug_syntax_tree(
 }
 
 fn debug_formatter_ir(
-    path: &BiomePath,
+    _path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
+    let options = resolve_format_options(document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -516,13 +495,13 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
-    path: &BiomePath,
+    _path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
+    let options = resolve_format_options(document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -534,14 +513,14 @@ fn format(
 }
 
 fn format_range(
-    path: &BiomePath,
+    _path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
+    let options = resolve_format_options(document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let printed = biome_json_formatter::format_range(options, &tree, range)?;
@@ -549,14 +528,14 @@ fn format_range(
 }
 
 fn format_on_type(
-    path: &BiomePath,
+    _path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
+    let options = resolve_format_options(document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
 

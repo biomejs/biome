@@ -258,7 +258,6 @@ impl ServiceLanguage for JsLanguage {
     type LinterSettings = JsLinterSettings;
     type AssistSettings = JsAssistSettings;
     type FormatOptions = JsFormatOptions;
-    type FormatOptionsInput = JsFileSource;
     type ParserSettings = JsParserSettings;
     type ParserOptions = JsParserOptions;
 
@@ -296,8 +295,9 @@ impl ServiceLanguage for JsLanguage {
         overrides: &OverrideSettings,
         language: &JsFormatterSettings,
         override_indices: &[usize],
-        source: JsFileSource,
+        file_source: &DocumentFileSource,
     ) -> JsFormatOptions {
+        let source = file_source.to_js_file_source().unwrap_or_default();
         let options = JsFormatOptions::new(source)
             .with_indent_style(
                 language
@@ -363,16 +363,6 @@ impl ServiceLanguage for JsLanguage {
             .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
         overrides.override_js_format_options_by_indices(override_indices, options)
-    }
-
-    fn format_options_input(
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
-        file_source
-            .to_js_file_source()
-            .or(JsFileSource::try_from(path.as_path()).ok())
-            .unwrap_or_default()
     }
 
     fn resolve_analyzer_options(
@@ -589,7 +579,8 @@ struct JsFormatOptionsInput {
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
-    source: JsFileSource,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -600,7 +591,7 @@ fn resolved_js_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<JsLanguage>(input.override_indices(db), input.source(db))
+        .format_options::<JsLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 #[cfg(test)]
@@ -611,7 +602,12 @@ pub(crate) fn resolved_js_format_options_for_test(
     source: JsFileSource,
 ) -> JsFormatOptions {
     let query_db = db.settings_query_db();
-    let input = JsFormatOptionsInput::new(&query_db, settings, override_indices, source);
+    let input = JsFormatOptionsInput::new(
+        &query_db,
+        settings,
+        override_indices,
+        DocumentFileSource::Js(source),
+    );
     resolved_js_format_options(&query_db, input)
 }
 
@@ -634,13 +630,12 @@ pub(crate) fn resolve_js_format_options_for_test(
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
-    path: &BiomePath,
+    _path: &BiomePath,
     source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> JsFormatOptions {
     let query = settings.query();
-    let source = JsLanguage::format_options_input(path, source);
     if query.inline_settings().is_some() {
         return settings.format_options::<JsLanguage>(source);
     }
@@ -652,7 +647,7 @@ pub(in crate::file_handlers) fn resolve_format_options(
         &query_db,
         selected_settings,
         query.override_indices(),
-        source,
+        *source,
     );
     resolved_js_format_options(&query_db, input)
 }

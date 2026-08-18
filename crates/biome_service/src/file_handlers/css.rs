@@ -43,8 +43,8 @@ use biome_formatter::{
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
+use biome_languages::DocumentFileSource;
 use biome_languages::css::CssEmbeddingKind;
-use biome_languages::{CssFileSource, DocumentFileSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -152,7 +152,6 @@ impl ServiceLanguage for CssLanguage {
     type LinterSettings = CssLinterSettings;
     type AssistSettings = CssAssistSettings;
     type FormatOptions = CssFormatOptions;
-    type FormatOptionsInput = CssFileSource;
     type ParserSettings = CssParserSettings;
     type ParserOptions = CssParserOptions;
 
@@ -164,13 +163,6 @@ impl ServiceLanguage for CssLanguage {
 
     fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
         None
-    }
-
-    fn format_options_input(
-        _path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
-        file_source.to_css_file_source().unwrap_or_default()
     }
 
     fn resolve_parse_options(
@@ -223,8 +215,9 @@ impl ServiceLanguage for CssLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        source: CssFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
+        let source = file_source.to_css_file_source().unwrap_or_default();
         let mut options = CssFormatOptions::new(source)
             .with_indent_style(
                 language
@@ -390,7 +383,8 @@ struct CssFormatOptionsInput {
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
-    source: CssFileSource,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -401,17 +395,16 @@ fn resolved_css_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<CssLanguage>(input.override_indices(db), input.source(db))
+        .format_options::<CssLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
-    path: &BiomePath,
+    _path: &BiomePath,
     source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> CssFormatOptions {
     let query = settings.query();
-    let source = CssLanguage::format_options_input(path, source);
     if query.inline_settings().is_some() {
         return settings.format_options::<CssLanguage>(source);
     }
@@ -423,7 +416,7 @@ pub(in crate::file_handlers) fn resolve_format_options(
         &query_db,
         selected_settings,
         query.override_indices(),
-        source,
+        *source,
     );
     resolved_css_format_options(&query_db, input)
 }
@@ -1054,7 +1047,7 @@ mod test {
             &OverrideSettings::default(),
             &CssFormatterSettings::default(),
             &[],
-            CssFileSource::css(),
+            &DocumentFileSource::Css(CssFileSource::css()),
         );
         assert_eq!(
             format_options,

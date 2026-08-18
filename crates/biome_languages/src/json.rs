@@ -16,6 +16,31 @@ pub struct JsonFileSource {
     allow_trailing_commas: bool,
     allow_comments: bool,
     variant: JsonFileVariant,
+    kind: JsonSourceKind,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Copy, Default, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
+pub enum JsonSourceKind {
+    #[default]
+    Regular,
+    BiomeJson,
+    PackageJson,
+}
+
+impl JsonSourceKind {
+    pub const fn is_regular(&self) -> bool {
+        matches!(self, Self::Regular)
+    }
+    pub const fn is_biome_json(&self) -> bool {
+        matches!(self, Self::BiomeJson)
+    }
+    pub const fn is_package_json(&self) -> bool {
+        matches!(self, Self::PackageJson)
+    }
 }
 
 /// It represents the extension of the file
@@ -189,6 +214,7 @@ impl JsonFileSource {
             allow_comments: false,
             allow_trailing_commas: false,
             variant: JsonFileVariant::Standard,
+            kind: JsonSourceKind::Regular,
         }
     }
 
@@ -197,6 +223,7 @@ impl JsonFileSource {
             allow_comments: true,
             allow_trailing_commas: false,
             variant: JsonFileVariant::from_str(extension).unwrap_or_default(),
+            kind: JsonSourceKind::Regular,
         }
     }
 
@@ -205,6 +232,7 @@ impl JsonFileSource {
             allow_comments: true,
             allow_trailing_commas: true,
             variant: JsonFileVariant::from_str(extension).unwrap_or_default(),
+            kind: JsonSourceKind::Regular,
         }
     }
 
@@ -225,12 +253,22 @@ impl JsonFileSource {
         self
     }
 
+    #[must_use]
+    pub fn with_kind(mut self, kind: JsonSourceKind) -> Self {
+        self.kind = kind;
+        self
+    }
+
     pub fn allow_comments(&self) -> bool {
         self.allow_comments
     }
 
     pub fn variant(&self) -> JsonFileVariant {
         self.variant
+    }
+
+    pub fn kind(&self) -> JsonSourceKind {
+        self.kind
     }
 
     /// Returns a possible file extension for this source without a leading dot.

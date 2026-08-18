@@ -77,19 +77,12 @@ impl ServiceLanguage for MarkdownLanguage {
     type LinterSettings = MarkdownLinterSettings;
     type AssistSettings = MarkdownAssistSettings;
     type FormatOptions = MdFormatOptions;
-    type FormatOptionsInput = ();
     type ParserSettings = ();
     type ParserOptions = MarkdownParserOptions;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.markdown
-    }
-
-    fn format_options_input(
-        _path: &BiomePath,
-        _file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
     }
 
     fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
@@ -110,7 +103,7 @@ impl ServiceLanguage for MarkdownLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        _input: (),
+        _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         // TODO: apply markdown overrides once markdown override settings are introduced.
         let _ = (overrides, override_indices);
@@ -251,6 +244,8 @@ struct MarkdownFormatOptionsInput {
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -261,25 +256,29 @@ fn resolved_markdown_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<MarkdownLanguage>(input.override_indices(db), ())
+        .format_options::<MarkdownLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
     _path: &BiomePath,
-    _source: &DocumentFileSource,
+    source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> MdFormatOptions {
     let query = settings.query();
     if query.inline_settings().is_some() {
-        return settings.format_options::<MarkdownLanguage>(());
+        return settings.format_options::<MarkdownLanguage>(source);
     }
     let selected_settings = query
         .selection()
         .selected_settings(workspace_db, query.project());
     let query_db = workspace_db.settings_query_db();
-    let input =
-        MarkdownFormatOptionsInput::new(&query_db, selected_settings, query.override_indices());
+    let input = MarkdownFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
     resolved_markdown_format_options(&query_db, input)
 }
 

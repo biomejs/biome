@@ -105,6 +105,8 @@ struct GraphqlFormatOptionsInput {
     settings: SettingsIdentity,
     #[returns(ref)]
     override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
 #[salsa::tracked(returns(clone))]
@@ -115,25 +117,29 @@ fn resolved_graphql_format_options<'db>(
     input
         .settings(db)
         .as_ref()
-        .format_options::<GraphqlLanguage>(input.override_indices(db), ())
+        .format_options::<GraphqlLanguage>(input.override_indices(db), input.file_source(db))
 }
 
 pub(in crate::file_handlers) fn resolve_format_options(
     _path: &BiomePath,
-    _source: &DocumentFileSource,
+    source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
 ) -> GraphqlFormatOptions {
     let query = settings.query();
     if query.inline_settings().is_some() {
-        return settings.format_options::<GraphqlLanguage>(());
+        return settings.format_options::<GraphqlLanguage>(source);
     }
     let selected_settings = query
         .selection()
         .selected_settings(workspace_db, query.project());
     let query_db = workspace_db.settings_query_db();
-    let input =
-        GraphqlFormatOptionsInput::new(&query_db, selected_settings, query.override_indices());
+    let input = GraphqlFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
     resolved_graphql_format_options(&query_db, input)
 }
 
@@ -142,7 +148,6 @@ impl ServiceLanguage for GraphqlLanguage {
     type LinterSettings = GraphqlLinterSettings;
     type AssistSettings = GraphqlAssistSettings;
     type FormatOptions = GraphqlFormatOptions;
-    type FormatOptionsInput = ();
     type ParserSettings = ();
     type ParserOptions = ();
 
@@ -164,18 +169,12 @@ impl ServiceLanguage for GraphqlLanguage {
     ) -> Self::ParserOptions {
     }
 
-    fn format_options_input(
-        _path: &BiomePath,
-        _file_source: &DocumentFileSource,
-    ) -> Self::FormatOptionsInput {
-    }
-
     fn resolve_format_options(
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        _input: (),
+        _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
