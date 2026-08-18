@@ -7,7 +7,7 @@ expression: redactor(content)
 ```json
 {
   "html": { "experimentalFullSupportEnabled": true },
-  "linter": { "rules": { "style": { "useTemplate": "error" } } }
+  "linter": { "rules": { "style": { "useTemplate": "on" } } }
 }
 ```
 
