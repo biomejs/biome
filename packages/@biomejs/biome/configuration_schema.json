@@ -2951,12 +2951,14 @@
 			"type": "object",
 			"properties": {
 				"formatter": {
+					"description": "Formatter options",
 					"anyOf": [
 						{ "$ref": "#/$defs/MarkdownFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"linter": {
+					"description": "Linter options",
 					"anyOf": [
 						{ "$ref": "#/$defs/MarkdownLinterConfiguration" },
 						{ "type": "null" }

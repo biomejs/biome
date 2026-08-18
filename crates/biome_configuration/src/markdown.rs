@@ -105,10 +105,7 @@ pub struct MarkdownFormatterConfiguration {
     /// Defaults to true.
     #[cfg_attr(
         feature = "cli",
-        bpaf(
-            long("markdown-formatter-trailing-newline"),
-            argument("true|false")
-        )
+        bpaf(long("markdown-formatter-trailing-newline"), argument("true|false"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
@@ -116,10 +113,7 @@ pub struct MarkdownFormatterConfiguration {
     /// The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
     #[cfg_attr(
         feature = "cli",
-        bpaf(
-            long("markdown-formatter-line-ending"),
-            argument("lf|crlf|cr|auto")
-        )
+        bpaf(long("markdown-formatter-line-ending"), argument("lf|crlf|cr|auto"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,

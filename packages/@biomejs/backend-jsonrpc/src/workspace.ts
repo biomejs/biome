@@ -381,7 +381,13 @@ match these patterns.
  * Options applied to Markdown files
  */
 export interface MarkdownConfiguration {
+	/**
+	 * Formatter options
+	 */
 	formatter?: MarkdownFormatterConfiguration;
+	/**
+	 * Linter options
+	 */
 	linter?: MarkdownLinterConfiguration;
 }
 export type Overrides = OverridePattern[];
