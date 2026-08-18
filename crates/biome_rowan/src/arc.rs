@@ -264,10 +264,6 @@ impl<H, T> HeaderSlice<H, [T]> {
         &self.slice
     }
 
-    pub(crate) fn slice_mut(&mut self) -> &mut [T] {
-        &mut self.slice
-    }
-
     /// Returns the number of items
     pub(crate) fn len(&self) -> usize {
         self.length

@@ -440,10 +440,19 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsParserOptions, parse_js_with_cache, parse_js_with_offset};
+    use crate::{JsParserOptions, parse_js_with_cache, parse_js_with_offset, parse_script};
     use biome_languages::JsFileSource;
 
     use biome_rowan::TextSize;
+
+    #[test]
+    fn deeply_nested_expression_reports_error() {
+        let source = format!("{}a;", "a+".repeat(2_500));
+        let parse = parse_script(&source, JsParserOptions::default());
+
+        assert_eq!(parse.syntax().text_with_trivia().to_string(), source);
+        assert_eq!(parse.diagnostics().len(), 1);
+    }
 
     #[test]
     fn test_offset_parsing_basic() {
