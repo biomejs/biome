@@ -11,8 +11,9 @@ use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
     JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration,
+    TsInferType, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeParameterList,
+    TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -320,7 +321,7 @@ impl Rule for NoUnusedVariables {
             {
                 return None;
             }
-            suggested_fix_if_unused(binding, ctx.options())
+            suggested_fix_if_unused(model, binding, ctx.options())
         } else {
             None
         }
@@ -433,6 +434,52 @@ fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
     }
 }
 
+fn is_implemented_overload_type_parameter(
+    model: &SemanticModel,
+    type_parameter: &JsSyntaxNode,
+) -> bool {
+    let Some(signature) = type_parameter
+        .parent()
+        .and_then(TsTypeParameterList::cast)
+        .and_then(|list| list.parent::<TsTypeParameters>())
+        .and_then(|parameters| parameters.parent::<TsDeclareFunctionDeclaration>())
+    else {
+        return false;
+    };
+    let Some(id) = signature
+        .id()
+        .ok()
+        .and_then(|id| id.as_js_identifier_binding().cloned())
+    else {
+        return false;
+    };
+    let Some(scope) = model.scope_hoisted_to(id.syntax()) else {
+        return false;
+    };
+    let signature_range = id.syntax().text_trimmed_range();
+
+    scope.overload_sets().into_iter().any(|set| {
+        let Some((implementation, signatures)) = set.split_last() else {
+            return false;
+        };
+        let Some(implementation) = model.binding_by_id(*implementation) else {
+            return false;
+        };
+        if !matches!(
+            implementation.tree().declaration(),
+            Some(AnyJsBindingDeclaration::JsFunctionDeclaration(_))
+        ) {
+            return false;
+        }
+
+        signatures.iter().any(|id| {
+            model.binding_by_id(*id).is_some_and(|binding| {
+                binding.syntax().text_trimmed_range() == signature_range
+            })
+        })
+    })
+}
+
 fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     if binding.is_under_object_pattern_binding()? {
         Some(SuggestedFix::NoSuggestion)
@@ -444,6 +491,7 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // It is ok in some Typescripts constructs for a parameter to be unused.
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(
+    model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
     options: &NoUnusedVariablesOptions,
 ) -> Option<SuggestedFix> {
@@ -502,7 +550,9 @@ fn suggested_fix_if_unused(
 
         // Type parameters are never ok to be unused unless they are declared in an ambient context
         node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
-            if is_in_ambient_context(node.syntax()) {
+            if is_in_ambient_context(node.syntax())
+                || is_implemented_overload_type_parameter(model, node.syntax())
+            {
                 None
             } else {
                 Some(SuggestedFix::PrefixUnderscore)
