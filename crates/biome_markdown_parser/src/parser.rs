@@ -967,6 +967,10 @@ impl<'source> MarkdownParser<'source> {
         self.source.source_after_current()
     }
 
+    pub(crate) fn has_frontmatter_closing_fence(&self) -> bool {
+        self.source.has_frontmatter_closing_fence()
+    }
+
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint {
             context,

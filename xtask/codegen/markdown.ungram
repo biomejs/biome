@@ -47,8 +47,20 @@ MdBogusBullet = SyntaxElement*
 
 MdRoot =
   bom: 'UNICODE_BOM'?
+  frontmatter: MdFrontmatter?
   value: MdBlockList
   eof: 'EOF'
+
+// ---
+// content
+// ---
+// ^^^^^^^
+MdFrontmatter =
+	l_fence: '---'
+	content: MdFrontmatterContent
+	r_fence: '---'
+
+MdFrontmatterContent = value: 'md_frontmatter_literal'
 
 MdBlockList = AnyMdBlock*
 

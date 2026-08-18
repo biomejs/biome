@@ -9,12 +9,24 @@ impl FormatNodeRule<MdRoot> for FormatMdRoot {
     fn fmt_fields(&self, node: &MdRoot, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdRootFields {
             bom_token,
+            frontmatter,
             value,
             eof_token,
         } = node.as_fields();
 
         if let Some(bom) = bom_token {
             write!(f, [bom.format()])?;
+        }
+        if let Some(frontmatter) = frontmatter {
+            write!(f, [frontmatter.format()])?;
+            if value.iter().any(|block| {
+                !matches!(
+                    block,
+                    AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))
+                )
+            }) {
+                write!(f, [empty_line()])?;
+            }
         }
         let already_ends_with_newline = content_ends_with_newline(&value);
 

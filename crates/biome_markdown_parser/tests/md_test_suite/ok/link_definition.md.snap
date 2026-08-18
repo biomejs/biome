@@ -24,6 +24,7 @@ expression: snapshot
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [],
@@ -194,7 +195,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..111
   0: (empty)
-  1: MD_BLOCK_LIST@0..111
+  1: (empty)
+  2: MD_BLOCK_LIST@0..111
     0: MD_LINK_REFERENCE_DEFINITION@0..30
       0: MD_INDENT_TOKEN_LIST@0..0
       1: L_BRACK@0..1 "[" [] []
@@ -299,6 +301,6 @@ MdRoot {
       6: (empty)
     13: MD_NEWLINE@110..111
       0: NEWLINE@110..111 "\n" [] []
-  2: EOF@111..111 "" [] []
+  3: EOF@111..111 "" [] []
 
 ```

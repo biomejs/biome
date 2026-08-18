@@ -51,3 +51,21 @@ fn quick_test() {
         "left is the re-formatted"
     );
 }
+
+#[test]
+fn formats_crlf_frontmatter() {
+    let source = "---\r\n# ---\r\n---\r\n\r\n#   Heading\r\n";
+    let parse = parse_markdown(source);
+    let options = MdFormatOptions::default();
+    let formatted =
+        biome_formatter::format_node(&parse.syntax(), MdFormatLanguage::new(options), false)
+            .expect("frontmatter should format");
+
+    assert_eq!(
+        formatted
+            .print()
+            .expect("frontmatter should print")
+            .as_code(),
+        "---\n# ---\n---\n\n# Heading\n"
+    );
+}

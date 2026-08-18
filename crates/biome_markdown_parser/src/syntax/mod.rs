@@ -23,6 +23,7 @@
 //! See [`inline`] module for inline element parsing.
 
 pub mod fenced_code_block;
+mod frontmatter;
 pub mod header;
 pub mod html_block;
 pub mod inline;
@@ -47,6 +48,7 @@ use fenced_code_block::{
     at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
     parse_fenced_code_block_force,
 };
+use frontmatter::parse_frontmatter;
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
 use inline::EmphasisContext;
@@ -126,6 +128,7 @@ pub(crate) const MIN_FENCE_RUN_LENGTH: usize = 3;
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);
+    parse_frontmatter(p).ok();
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);

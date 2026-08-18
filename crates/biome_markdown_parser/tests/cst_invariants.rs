@@ -212,6 +212,47 @@ fn document_fence_content_is_one_verbatim_literal() {
 }
 
 #[test]
+fn frontmatter_content_is_one_verbatim_literal() {
+    let input = "\u{feff}---\r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n---\r\n# Heading\r\n";
+    let parsed = parse_markdown(input);
+    let frontmatter = parsed
+        .tree()
+        .frontmatter()
+        .expect("expected frontmatter after the BOM");
+    let content = frontmatter
+        .content()
+        .expect("frontmatter content should be present")
+        .value_token()
+        .expect("frontmatter literal should be present");
+
+    assert_eq!(
+        content.text(),
+        "\r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n"
+    );
+    assert_eq!(parsed.syntax().to_string(), input);
+    assert!(parsed.diagnostics().is_empty());
+}
+
+#[test]
+fn frontmatter_is_only_recognized_at_the_document_start() {
+    for input in [
+        "\n---\ntitle: value\n---\n",
+        " ---\ntitle: value\n---\n",
+        "\t---\ntitle: value\n---\n",
+        "# Heading\n\n---\ntitle: value\n---\n",
+        "----\ntitle: value\n---\n",
+        "---\nunterminated",
+    ] {
+        let parsed = parse_markdown(input);
+        assert!(
+            parsed.tree().frontmatter().is_none(),
+            "unexpected frontmatter in {input:?}\n\n{:#?}",
+            parsed.tree()
+        );
+    }
+}
+
+#[test]
 fn unterminated_document_fence_literal_runs_to_eof() {
     let input = "```\nfoo";
     assert_eq!(code_literal_texts(input), ["\nfoo"]);
