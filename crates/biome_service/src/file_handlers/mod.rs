@@ -1551,11 +1551,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
     }
 
-    /// It inspects the [`biome_analyze::RuleDomain`] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
+    /// Applies configured domains to the rule.
     ///
-    /// As per business logic, rules that have domains can be recommended, however they shouldn't be enabled when `linter.rules.recommended` is `true`.
-    ///
-    /// This means that
+    /// Global recommended presets exclude rules with domains. A matching domain
+    /// set to `all` enables the rule, `recommended` enables it only when the rule
+    /// is recommended, and `none` disables it.
     fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1568,15 +1568,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
         // no domains, no need to record the rule
         if self.domains.is_none_or(|domains| domains.is_empty()) {
-            return;
-        }
-
-        // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
-        if R::METADATA.recommended
-            && !R::METADATA.domains.is_empty()
-            && self.domains.is_none_or(|domains| domains.is_empty())
-        {
-            self.disabled_rules.insert(rule_filter);
             return;
         }
 
