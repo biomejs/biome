@@ -13,7 +13,7 @@ use crate::file_handlers::{
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
-    check_override_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::{CodeAction, GetSyntaxTreeResult, PatternId, PullActionsResult};
 use crate::workspace::{FixFileMode, SearchQuery};
@@ -144,6 +144,27 @@ fn resolved_json_format_options<'db>(
         .format_options::<JsonLanguage>(input.override_indices(db), input.file_source(db))
 }
 
+#[salsa::interned]
+struct JsonAnalyzerOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_json_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: JsonAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<JsonLanguage>(input.override_indices(db), input.file_source(db))
+}
+
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = JsonLinterSettings;
@@ -200,7 +221,7 @@ impl ServiceLanguage for JsonLanguage {
     ) -> Self::FormatOptions {
         let json = file_source
             .to_json_file_source()
-            .expect("Expected a JSON file source");
+            .unwrap_or_else(JsonFileSource::json);
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -222,8 +243,8 @@ impl ServiceLanguage for JsonLanguage {
             .or(global.line_ending)
             .unwrap_or_default();
 
-        // ensure it never formats biome.json into a form it can't parse
-        let trailing_commas = if json.kind().is_biome_json() {
+        // Biome's strict JSON configuration loader rejects trailing commas.
+        let trailing_commas = if json.kind().is_biome_json() && !json.allow_trailing_commas() {
             TrailingCommas::None
         } else {
             language.trailing_commas.unwrap_or_default()
@@ -265,17 +286,12 @@ impl ServiceLanguage for JsonLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         override_indices: &[usize],
-        path: &BiomePath,
         _file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules_by_indices(settings, override_indices))
             .with_preferred_quote(PreferredQuote::Double);
-        AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -380,6 +396,33 @@ pub(in crate::file_handlers) fn resolve_format_options(
         *source,
     );
     resolved_json_format_options(&query_db, input)
+}
+
+fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<JsonLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = JsonAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_json_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -593,12 +636,13 @@ fn lint(params: LintParams) -> LintResults {
     };
     let root: JsonRoot = params.parsed_source.tree(&params.workspace_db);
 
-    let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
-        &params.workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
 
     let AnalyzerVisitorResult {
@@ -679,12 +723,13 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
     let tree: JsonRoot = parsed_source.tree(&workspace_db);
-    let analyzer_options = settings.analyzer_options::<JsonLanguage>(
-        &workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let project_layout_for_services = project_layout.clone();
@@ -767,12 +812,13 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: JsonRoot = params.parsed_source.tree(&params.workspace_db);
 
-    let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
-        &params.workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -951,4 +997,33 @@ fn search(
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let any_parse = parsed.any_parse(&workspace_db);
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn non_json_source_uses_default_json_format_options() {
+        let global = FormatSettings::default();
+        let overrides = OverrideSettings::default();
+        let language = JsonFormatterSettings::default();
+        let expected = JsonLanguage::resolve_format_options(
+            &global,
+            &overrides,
+            &language,
+            &[],
+            &JsonFileSource::json().into(),
+        );
+
+        let actual = JsonLanguage::resolve_format_options(
+            &global,
+            &overrides,
+            &language,
+            &[],
+            &DocumentFileSource::Unknown,
+        );
+
+        assert_eq!(actual, expected);
+    }
 }

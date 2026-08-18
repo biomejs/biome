@@ -121,18 +121,15 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             )
             .unwrap();
 
-        L::resolve_analyzer_options(
-            &settings,
-            &L::lookup_settings(&settings.languages).linter,
-            L::resolve_environment(&settings),
-            &settings.matching_override_indices(input_file),
-            &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(
-                input_file,
-                settings.experimental_full_html_support_enabled(),
-            ),
-            None,
-        )
+        settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(input_file),
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            )
+            .with_file_path(input_file)
     }
 }
 

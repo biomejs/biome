@@ -111,9 +111,7 @@ impl ServiceLanguage for YamlLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         _override_indices: &[usize],
-        _path: &BiomePath,
         _file_source: &DocumentFileSource,
-        _suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
     }

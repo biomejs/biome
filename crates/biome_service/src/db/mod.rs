@@ -862,8 +862,8 @@ mod tests {
     use super::*;
     #[cfg(feature = "lang_js")]
     use crate::file_handlers::javascript::{
-        js_format_options_input_count_for_test, resolve_js_format_options_for_test,
-        resolved_js_format_options_for_test,
+        resolve_analyzer_options as resolve_js_analyzer_options,
+        resolve_format_options as resolve_js_format_options,
     };
     #[cfg(feature = "lang_js")]
     use crate::file_handlers::{
@@ -890,6 +890,7 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse};
     #[cfg(feature = "lang_js")]
     use biome_js_syntax::JsLanguage;
+    #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
     #[cfg(feature = "module_graph")]
     use biome_module_graph::{ModuleDb, PathInfoCache, resolve_html_module};
@@ -1191,14 +1192,15 @@ mod tests {
             None,
             Utf8Path::new("project/file.js"),
         );
+        let handle = SettingsHandle::new(settings.as_ref(), SettingsEditorState::new(query));
         let source = JsFileSource::js_module();
         take_events(&events);
 
-        resolved_js_format_options_for_test(
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
             &db,
-            query.selection().selected_settings(&db, query.project()),
-            query.override_indices().into(),
-            source,
         );
         assert_eq!(
             function_query_will_execute_count_by_name(
@@ -1208,11 +1210,11 @@ mod tests {
             ),
             1
         );
-        resolved_js_format_options_for_test(
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
             &db,
-            query.selection().selected_settings(&db, query.project()),
-            query.override_indices().into(),
-            source,
         );
         assert_eq!(
             function_query_will_execute_count_by_name(
@@ -1230,11 +1232,11 @@ mod tests {
             vec![],
         );
         take_events(&events);
-        resolved_js_format_options_for_test(
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
             &db,
-            query.selection().selected_settings(&db, query.project()),
-            query.override_indices().into(),
-            source,
         );
         assert_eq!(
             function_query_will_execute_count_by_name(
@@ -1251,16 +1253,139 @@ mod tests {
             ProjectUpdateMode::Setters,
         );
         take_events(&events);
-        resolved_js_format_options_for_test(
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
             &db,
-            query.selection().selected_settings(&db, query.project()),
-            query.override_indices().into(),
-            source,
         );
         assert_eq!(
             function_query_will_execute_count_by_name(
                 &db,
                 "resolved_js_format_options",
+                &take_events(&events),
+            ),
+            1
+        );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn resolved_analyzer_options_query_tracks_only_selected_settings_and_source() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        let handle = SettingsHandle::new(settings.as_ref(), SettingsEditorState::new(query));
+        let source = DocumentFileSource::Js(JsFileSource::js_module());
+        take_events(&events);
+
+        let options = resolve_js_analyzer_options(
+            &BiomePath::new("project/file.js"),
+            None,
+            &source,
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(options.file_path, Utf8Path::new("project/file.js"));
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            1
+        );
+
+        let options = resolve_js_analyzer_options(
+            &BiomePath::new("project/other.js"),
+            Some(Utf8Path::new("project")),
+            &source,
+            Some("explanation"),
+            &handle,
+            &db,
+        );
+        assert_eq!(options.file_path, Utf8Path::new("project/other.js"));
+        assert_eq!(
+            options.working_directory.as_ref().as_deref(),
+            Some(Utf8Path::new("project"))
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        db.upsert_file(
+            Utf8Path::new("project/file.js"),
+            parse_js("let a = 1;"),
+            0,
+            vec![],
+        );
+        take_events(&events);
+        resolve_js_analyzer_options(
+            &BiomePath::new("project/file.js"),
+            None,
+            &source,
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        resolve_js_analyzer_options(
+            &BiomePath::new("project/file.tsx"),
+            None,
+            &DocumentFileSource::Js(JsFileSource::tsx()),
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            1
+        );
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+        take_events(&events);
+        resolve_js_analyzer_options(
+            &BiomePath::new("project/file.js"),
+            None,
+            &source,
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
                 &take_events(&events),
             ),
             1
@@ -1569,14 +1694,14 @@ mod tests {
 
     #[cfg(feature = "lang_js")]
     #[test]
-    fn inline_settings_reach_fallback_resolution_without_new_project_inputs() {
-        let mut db = WorkspaceDb::default();
+    fn inline_settings_resolve_without_tracked_formatter_queries() {
+        let (mut db, events) = settings_query_test_db();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         let project = db.get_project(&project_key).unwrap();
         let settings = project.root_settings(&db);
         let project_count = ProjectInput::ingredient(&db).entries(db.zalsa()).count();
-        let format_input_count = js_format_options_input_count_for_test(&db);
         let settings = settings.clone_arc();
+        take_events(&events);
 
         for _ in 0..16 {
             let mut inline_settings = Settings::default();
@@ -1597,9 +1722,17 @@ mod tests {
                 &BiomePath::new("project/file.js"),
                 &DocumentFileSource::Js(JsFileSource::js_module()),
             );
-            resolve_js_format_options_for_test(
+            resolve_js_format_options(
                 &BiomePath::new("project/file.js"),
                 &DocumentFileSource::Js(JsFileSource::js_module()),
+                &handle,
+                &db,
+            );
+            resolve_js_analyzer_options(
+                &BiomePath::new("project/file.js"),
+                None,
+                &DocumentFileSource::Js(JsFileSource::js_module()),
+                None,
                 &handle,
                 &db,
             );
@@ -1611,9 +1744,14 @@ mod tests {
             ProjectInput::ingredient(&db).entries(db.zalsa()).count(),
             project_count
         );
+        let events = take_events(&events);
         assert_eq!(
-            js_format_options_input_count_for_test(&db),
-            format_input_count
+            function_query_will_execute_count_by_name(&db, "resolved_js_format_options", &events,),
+            0
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "resolved_js_analyzer_options", &events,),
+            0
         );
     }
 

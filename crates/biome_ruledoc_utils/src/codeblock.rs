@@ -77,20 +77,14 @@ impl CodeBlock {
             settings.merge_with_configuration(config, None, vec![])?;
         }
 
-        let language_settings = &L::lookup_settings(&settings.languages).linter;
-        let environment = L::resolve_environment(&settings);
-        let suppression_reason = None;
         let path = BiomePath::new(self.file_path());
 
-        Ok(L::resolve_analyzer_options(
-            &settings,
-            language_settings,
-            environment,
-            &settings.matching_override_indices(path.as_path()),
-            &path,
-            &self.document_file_source(),
-            suppression_reason,
-        ))
+        Ok(settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(path.as_path()),
+                &self.document_file_source(),
+            )
+            .with_file_path(path.as_path()))
     }
 
     pub fn document_file_source(&self) -> DocumentFileSource {

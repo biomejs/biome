@@ -1,4 +1,3 @@
-use biome_fs::ConfigName;
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
@@ -36,8 +35,6 @@ pub use crate::html::HtmlFileSource;
 pub use crate::javascript::JsFileSource;
 #[cfg(feature = "lang_json")]
 pub use crate::json::JsonFileSource;
-#[cfg(feature = "lang_json")]
-use crate::json::JsonSourceKind;
 #[cfg(feature = "lang_md")]
 pub use crate::md::MdFileSource;
 #[cfg(feature = "lang_yaml")]
@@ -330,16 +327,6 @@ impl DocumentFileSource {
             Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
             Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
             Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
-            Some(filename) if ConfigName::matches_file_name(&filename) => {
-                return Ok(JsonFileSource::json()
-                    .with_kind(JsonSourceKind::BiomeJson)
-                    .into());
-            }
-            Some(filename) if filename == "package.json" => {
-                return Ok(JsonFileSource::json()
-                    .with_kind(JsonSourceKind::PackageJson)
-                    .into());
-            }
             _ => path
                 .extension()
                 // We assume the file extensions are case-insensitive.

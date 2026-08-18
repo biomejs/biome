@@ -10,7 +10,7 @@ use crate::db::WorkspaceDb;
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
-    check_override_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::{CodeAction, FixFileMode, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::{
@@ -143,17 +143,12 @@ impl ServiceLanguage for MarkdownLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         override_indices: &[usize],
-        path: &BiomePath,
         _file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules_by_indices(global, override_indices));
 
-        AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -259,6 +254,27 @@ fn resolved_markdown_format_options<'db>(
         .format_options::<MarkdownLanguage>(input.override_indices(db), input.file_source(db))
 }
 
+#[salsa::interned]
+struct MarkdownAnalyzerOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_markdown_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: MarkdownAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<MarkdownLanguage>(input.override_indices(db), input.file_source(db))
+}
+
 pub(in crate::file_handlers) fn resolve_format_options(
     _path: &BiomePath,
     source: &DocumentFileSource,
@@ -280,6 +296,33 @@ pub(in crate::file_handlers) fn resolve_format_options(
         *source,
     );
     resolved_markdown_format_options(&query_db, input)
+}
+
+fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<MarkdownLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = MarkdownAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_markdown_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -413,12 +456,13 @@ fn lint(params: LintParams) -> LintResults {
         .entered();
     let root: MdRoot = params.parsed_source.tree(&params.workspace_db);
 
-    let analyzer_options = params.settings.analyzer_options::<MarkdownLanguage>(
-        &params.workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
 
     let AnalyzerVisitorResult {
@@ -473,12 +517,13 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
     let tree: MdRoot = parsed_source.tree(&workspace_db);
-    let analyzer_options = settings.analyzer_options::<MarkdownLanguage>(
-        &workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
@@ -542,12 +587,13 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: MdRoot = params.parsed_source.tree(&params.workspace_db);
 
-    let analyzer_options = params.settings.analyzer_options::<MarkdownLanguage>(
-        &params.workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,

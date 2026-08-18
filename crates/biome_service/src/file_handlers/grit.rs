@@ -161,13 +161,9 @@ impl ServiceLanguage for GritLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         _override_indices: &[usize],
-        path: &BiomePath,
         _file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_suppression_reason(suppression_reason)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {

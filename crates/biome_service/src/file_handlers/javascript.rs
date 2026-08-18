@@ -20,7 +20,7 @@ use crate::file_handlers::FixAllParams;
 use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
 use crate::settings::{
     OverrideSettings, Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
-    check_override_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::{FixFileMode, SearchQuery};
 use crate::workspace::{PatternId, PullDiagnosticsAndActionsResult};
@@ -108,8 +108,6 @@ use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
-#[cfg(test)]
-use salsa::plumbing::ZalsaDatabase;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -370,9 +368,7 @@ impl ServiceLanguage for JsLanguage {
         _language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
         override_indices: &[usize],
-        path: &BiomePath,
         file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let preferred_quote = global
             .languages
@@ -436,7 +432,7 @@ impl ServiceLanguage for JsLanguage {
             &global.languages.javascript.globals,
         ));
 
-        if let Ok(source_type) = JsFileSource::try_from(path.as_path()) {
+        if let Some(source_type) = file_source.to_js_file_source() {
             if source_type.as_embedding_kind().is_vue() {
                 globals.extend(
                     [
@@ -455,10 +451,7 @@ impl ServiceLanguage for JsLanguage {
                 // expression by the compiler, but are never declared in user code.
                 // Inside `<script setup>` they are genuinely undeclared: Vue requires
                 // `useSlots()`, `defineProps()`, etc. instead.
-                if let Some(snippet_source) = file_source.to_js_file_source()
-                    && snippet_source.as_embedding_kind().is_vue()
-                    && !snippet_source.is_embedded_source()
-                {
+                if !source_type.is_embedded_source() {
                     globals.extend(
                         VUE_TEMPLATE_INSTANCE_PROPERTIES
                             .iter()
@@ -466,7 +459,7 @@ impl ServiceLanguage for JsLanguage {
                             .map(Into::into),
                     );
 
-                    if snippet_source.as_embedding_kind().is_vue_event_handler() {
+                    if source_type.as_embedding_kind().is_vue_event_handler() {
                         globals.push("$event".into());
                     }
                 }
@@ -485,10 +478,7 @@ impl ServiceLanguage for JsLanguage {
             .with_preferred_jsx_quote(preferred_jsx_quote)
             .with_preferred_indentation(preferred_indentation);
 
-        AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -594,42 +584,28 @@ fn resolved_js_format_options<'db>(
         .format_options::<JsLanguage>(input.override_indices(db), input.file_source(db))
 }
 
-#[cfg(test)]
-pub(crate) fn resolved_js_format_options_for_test(
-    db: &WorkspaceDb,
+#[salsa::interned]
+struct JsAnalyzerOptionsInput {
+    #[returns(ref)]
     settings: SettingsIdentity,
+    #[returns(ref)]
     override_indices: Box<[usize]>,
-    source: JsFileSource,
-) -> JsFormatOptions {
-    let query_db = db.settings_query_db();
-    let input = JsFormatOptionsInput::new(
-        &query_db,
-        settings,
-        override_indices,
-        DocumentFileSource::Js(source),
-    );
-    resolved_js_format_options(&query_db, input)
+    #[returns(ref)]
+    file_source: DocumentFileSource,
 }
 
-#[cfg(test)]
-pub(crate) fn js_format_options_input_count_for_test(db: &WorkspaceDb) -> usize {
-    let query_db = db.settings_query_db();
-    JsFormatOptionsInput::ingredient(query_db.zalsa())
-        .entries(query_db.zalsa())
-        .count()
+#[salsa::tracked(returns(clone))]
+fn resolved_js_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: JsAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<JsLanguage>(input.override_indices(db), input.file_source(db))
 }
 
-#[cfg(test)]
-pub(crate) fn resolve_js_format_options_for_test(
-    path: &BiomePath,
-    source: &DocumentFileSource,
-    settings: &SettingsWithEditor,
-    workspace_db: &WorkspaceDb,
-) -> JsFormatOptions {
-    resolve_format_options(path, source, settings, workspace_db)
-}
-
-pub(in crate::file_handlers) fn resolve_format_options(
+pub(crate) fn resolve_format_options(
     _path: &BiomePath,
     source: &DocumentFileSource,
     settings: &SettingsWithEditor,
@@ -650,6 +626,33 @@ pub(in crate::file_handlers) fn resolve_format_options(
         *source,
     );
     resolved_js_format_options(&query_db, input)
+}
+
+pub(crate) fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<JsLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = JsAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_js_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -1218,12 +1221,13 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     };
 
     let tree = params.parsed_source.tree(&params.workspace_db);
-    let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
-        &params.workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -1302,12 +1306,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parsed_source.tree(&workspace_db);
     let _ = trace_span!("Parsed file").entered();
-    let analyzer_options = settings.analyzer_options::<JsLanguage>(
-        &workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
@@ -1403,12 +1408,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
 
-    let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
-        &params.workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -1779,12 +1785,13 @@ pub(crate) fn pull_diagnostics_and_actions(
         working_directory,
     } = params;
     let tree = parsed_source.tree(&workspace_db);
-    let analyzer_options = settings.analyzer_options::<JsLanguage>(
-        &workspace_db,
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,

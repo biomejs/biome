@@ -5,7 +5,6 @@ pub use query::SettingsIdentity;
 pub(crate) use query::SettingsQuerySelection;
 pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
 
-use crate::projects::ProjectDb;
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
@@ -133,6 +132,24 @@ impl Settings {
             &self.formatter,
             &self.override_settings,
             language_settings,
+            override_indices,
+            file_source,
+        )
+    }
+
+    pub fn analyzer_options<L>(
+        &self,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions
+    where
+        L: ServiceLanguage,
+    {
+        let language_settings = &L::lookup_settings(&self.languages).linter;
+        L::resolve_analyzer_options(
+            self,
+            language_settings,
+            L::resolve_environment(self),
             override_indices,
             file_source,
         )
@@ -672,20 +689,6 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
         &self.editor.query
     }
 
-    pub(crate) fn with_selected_settings<R>(
-        &self,
-        db: &dyn ProjectDb,
-        resolve: impl FnOnce(&Settings, &[usize]) -> R,
-    ) -> R {
-        let query = self.query();
-        if let Some(settings) = query.inline_settings() {
-            return resolve(settings.as_ref(), query.override_indices());
-        }
-        let selection = query.selection();
-        let settings = selection.selected_settings(db, query.project());
-        resolve(settings.as_ref(), selection.override_indices())
-    }
-
     /// Whether the editor needs document services. Current features that need it:
     /// - [EditorFeatures::GotoDefinition]
     pub(crate) fn needs_document_services(&self) -> bool {
@@ -726,34 +729,12 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
         L::resolve_parse_options(overrides, language_settings, path, file_source)
     }
 
-    pub fn analyzer_options<L>(
-        &self,
-        db: &dyn ProjectDb,
-        path: &BiomePath,
-        working_directory: Option<&Utf8Path>,
-        file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
-    ) -> AnalyzerOptions
+    pub fn analyzer_options<L>(&self, file_source: &DocumentFileSource) -> AnalyzerOptions
     where
         L: ServiceLanguage,
     {
-        self.with_selected_settings(db, |settings, override_indices| {
-            let linter_settings = &L::lookup_settings(&settings.languages).linter;
-            let environment = L::resolve_environment(settings);
-            let mut options = L::resolve_analyzer_options(
-                settings,
-                linter_settings,
-                environment,
-                override_indices,
-                path,
-                file_source,
-                suppression_reason,
-            );
-            if let Some(wd) = working_directory {
-                options = options.with_working_directory(wd);
-            }
-            options
-        })
+        self.effective_settings()
+            .analyzer_options::<L>(self.query().override_indices(), file_source)
     }
 
     pub(crate) fn linter_rules(&self) -> Option<Cow<'_, Rules>> {
@@ -784,6 +765,21 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
     {
         L::assist_enabled_for_file_path(self.effective_settings(), path)
     }
+}
+
+pub(crate) fn finalize_analyzer_options(
+    mut options: AnalyzerOptions,
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    suppression_reason: Option<&str>,
+) -> AnalyzerOptions {
+    options = options
+        .with_file_path(path.as_path())
+        .with_suppression_reason(suppression_reason);
+    if let Some(working_directory) = working_directory {
+        options = options.with_working_directory(working_directory);
+    }
+    options
 }
 
 /// Formatter settings for the entire workspace
@@ -1195,9 +1191,7 @@ pub trait ServiceLanguage: biome_rowan::Language {
         language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
         override_indices: &[usize],
-        path: &BiomePath,
         file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions;
 
     /// Checks whether this file has the linter enabled.
