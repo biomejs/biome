@@ -1,4 +1,7 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares CSS values that can span multiple tokens."
+)]
 
 use crate::fonts::{
     CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
@@ -70,7 +73,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same(), RuleSource::EslintCss("font-family-fallbacks").inspired()],
     }
 }
 
