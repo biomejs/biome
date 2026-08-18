@@ -4162,7 +4162,7 @@ fn harness_markdown() {
 
     assert!(
         result.is_err(),
-        "This test will fail once markdown support is officially added"
+        "This test will fail once markdown support is officially added {result:?}"
     );
 }
 

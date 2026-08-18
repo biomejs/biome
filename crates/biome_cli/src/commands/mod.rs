@@ -15,6 +15,7 @@ use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfigur
 use biome_configuration::json::{
     JsonFormatterConfiguration, JsonLinterConfiguration, JsonParserConfiguration,
 };
+use biome_configuration::markdown::MarkdownFormatterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
@@ -29,6 +30,7 @@ use biome_configuration::{
     json::json_linter_configuration,
     json::json_parser_configuration,
     linter_configuration,
+    markdown::markdown_formatter_configuration,
     vcs::vcs_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
@@ -379,6 +381,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external(html_formatter_configuration), optional, hide_usage)]
         html_formatter: Option<HtmlFormatterConfiguration>,
+
+        #[bpaf(external(markdown_formatter_configuration), optional, hide_usage)]
+        markdown_formatter: Option<MarkdownFormatterConfiguration>,
 
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,

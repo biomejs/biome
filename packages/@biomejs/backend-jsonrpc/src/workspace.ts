@@ -65,6 +65,10 @@ export interface Configuration {
 	 */
 	linter?: LinterConfiguration;
 	/**
+	 * Configuration specific to Markdown.
+	 */
+	markdown?: MarkdownConfiguration;
+	/**
 	 * A list of granular patterns applied only to a subset of files.
 	 */
 	overrides?: Overrides;
@@ -372,6 +376,13 @@ match these patterns.
 	 * List of rules
 	 */
 	rules?: Rules;
+}
+/**
+ * Options applied to Markdown files
+ */
+export interface MarkdownConfiguration {
+	formatter?: MarkdownFormatterConfiguration;
+	linter?: MarkdownLinterConfiguration;
 }
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
@@ -1013,6 +1024,60 @@ export interface Rules {
 	style?: SeverityOrStyle;
 	suspicious?: SeverityOrSuspicious;
 }
+/**
+ * Options that change how the Markdown formatter behaves
+ */
+export interface MarkdownFormatterConfiguration {
+	/**
+	 * Control the formatter for Markdown (and its super languages) files.
+	 */
+	enabled?: Bool;
+	/**
+	 * The indent style applied to Markdown files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to Markdown files. Defaults to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to Markdown files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	* Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+
+Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+line with two spaces or a backslash. 
+	 */
+	proseWrap?: ProseWrap;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
+}
+/**
+ * Options that change how the Markdown linter behaves
+ */
+export interface MarkdownLinterConfiguration {
+	/**
+	 * Control the linter for Markdown files.
+	 */
+	enabled?: Bool;
+}
 export interface OverridePattern {
 	/**
 	 * Specific configuration for the Json language
@@ -1059,6 +1124,10 @@ match these patterns.
 	 * Specific configuration for the Json language
 	 */
 	linter?: OverrideLinterConfiguration;
+	/**
+	 * Specific configuration for the Markdown language
+	 */
+	markdown?: MarkdownConfiguration;
 	/**
 	 * Specific configuration for additional plugins
 	 */
@@ -1225,6 +1294,13 @@ export type SeverityOrPerformance = GroupPlainConfiguration | Performance;
 export type SeverityOrSecurity = GroupPlainConfiguration | Security;
 export type SeverityOrStyle = GroupPlainConfiguration | Style;
 export type SeverityOrSuspicious = GroupPlainConfiguration | Suspicious;
+/**
+	* Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+
+Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+line with two spaces or a backslash. 
+	 */
+export type ProseWrap = "preserve" | "always" | "never";
 export interface OverrideAssistConfiguration {
 	/**
 	 * List of actions
@@ -2662,6 +2738,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
+	* Enforce that all heading levels are consistent and ordered.
+See https://biomejs.dev/linter/rules/use-consistent-heading-level 
+	 */
+	useConsistentHeadingLevel?: UseConsistentHeadingLevelConfiguration;
+	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
@@ -2826,6 +2907,11 @@ See https://biomejs.dev/linter/rules/use-test-hooks-on-top
 See https://biomejs.dev/linter/rules/use-this-in-class-methods 
 	 */
 	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
+	/**
+	* Require Markdown documents to start with a top-level heading.
+See https://biomejs.dev/linter/rules/use-top-level-heading 
+	 */
+	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
 	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
@@ -4879,6 +4965,9 @@ export type UseAwaitThenableConfiguration =
 export type UseBaselineConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBaselineOptions;
+export type UseConsistentHeadingLevelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentHeadingLevelOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -4978,6 +5067,9 @@ export type UseTestHooksOnTopConfiguration =
 export type UseThisInClassMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseThisInClassMethodsOptions;
+export type UseTopLevelHeadingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTopLevelHeadingOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -6837,6 +6929,10 @@ export interface RuleWithUseBaselineOptions {
 	level: RulePlainConfiguration;
 	options?: UseBaselineOptions;
 }
+export interface RuleWithUseConsistentHeadingLevelOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentHeadingLevelOptions;
+}
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6984,6 +7080,10 @@ export interface RuleWithUseTestHooksOnTopOptions {
 export interface RuleWithUseThisInClassMethodsOptions {
 	level: RulePlainConfiguration;
 	options?: UseThisInClassMethodsOptions;
+}
+export interface RuleWithUseTopLevelHeadingOptions {
+	level: RulePlainConfiguration;
+	options?: UseTopLevelHeadingOptions;
 }
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
@@ -8636,6 +8736,7 @@ export interface UseBaselineOptions {
 	 */
 	available?: AvailabilityTarget;
 }
+export type UseConsistentHeadingLevelOptions = {};
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -8795,6 +8896,7 @@ Defaults to `false`.
 	 */
 	ignoreOverrideMethods?: boolean;
 }
+export type UseTopLevelHeadingOptions = {};
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -10570,7 +10672,8 @@ export type DocumentFileSource =
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource };
+	| { Grit: GritFileSource }
+	| { Markdown: MdFileSource };
 export type EditorFeatures = EditorFeature[];
 export interface JsFileSource {
 	/**
@@ -10612,6 +10715,9 @@ export interface HtmlFileSource {
 }
 export interface GritFileSource {
 	variant: GritVariant;
+}
+export interface MdFileSource {
+	variant: MarkdownVariant;
 }
 export type EditorFeature = "gotoDefinition";
 export type JsEmbeddingKind =
@@ -10713,6 +10819,7 @@ export type HtmlVariant =
 	| "Svelte"
 	| "Angular";
 export type GritVariant = "Standard";
+export type MarkdownVariant = "Standard";
 /**
 	* Identifies the parser contract for JavaScript embedded in a Svelte file.
 

@@ -20,6 +20,7 @@ pub struct MarkdownConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parser: Option<MarkdownParserConfiguration>,
 
+    /// Formatter options
     #[cfg_attr(
         feature = "cli",
         bpaf(external(markdown_formatter_configuration), optional, hide)
@@ -27,6 +28,7 @@ pub struct MarkdownConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<MarkdownFormatterConfiguration>,
 
+    /// Linter options
     #[cfg_attr(
         feature = "cli",
         bpaf(external(markdown_linter_configuration), optional, hide)
@@ -35,7 +37,7 @@ pub struct MarkdownConfiguration {
     pub linter: Option<MarkdownLinterConfiguration>,
 }
 
-pub type MarkdownFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
+pub type MarkdownFormatterEnabled = Bool<true>;
 pub type MarkdownLinterEnabled = Bool<true>;
 pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseInterpolation = Bool<false>;
@@ -60,22 +62,34 @@ pub struct MarkdownParserConfiguration {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct MarkdownFormatterConfiguration {
     /// Control the formatter for Markdown (and its super languages) files.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("markdown-formatter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<MarkdownFormatterEnabled>,
 
     /// The indent style applied to Markdown files.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("markdown-formatter-indent-style"), argument("tab|space"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to Markdown files. Defaults to 2.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("markdown-formatter-indent-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// What's the max width of a line applied to Markdown files. Defaults to 80.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("markdown-formatter-line-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
@@ -89,12 +103,24 @@ pub struct MarkdownFormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(
+            long("markdown-formatter-trailing-newline"),
+            argument("true|false")
+        )
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
     /// The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(
+            long("markdown-formatter-line-ending"),
+            argument("lf|crlf|cr|auto")
+        )
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
@@ -102,7 +128,13 @@ pub struct MarkdownFormatterConfiguration {
     ///
     /// Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
     /// line with two spaces or a backslash.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(
+            long("markdown-formatter-prose-wrap"),
+            argument("preserve|always|never")
+        )
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prose_wrap: Option<ProseWrap>,
 }
@@ -114,7 +146,10 @@ pub struct MarkdownFormatterConfiguration {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct MarkdownLinterConfiguration {
     /// Control the linter for Markdown files.
-    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("markdown-linter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<MarkdownLinterEnabled>,
 }
