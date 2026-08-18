@@ -81,9 +81,9 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     );
 }
 
-/// Regression test: `WorkspaceDb::files` used to be missing from every
-/// eviction path, so a closed file's parsed source stayed cached in the
-/// database for the lifetime of a long-running LSP daemon.
+/// Closing a file must evict its cached parsed source from the database, so
+/// the database does not retain parsed sources for files the client no
+/// longer has open.
 #[test]
 fn close_file_evicts_cached_parsed_source() {
     const PATH: &str = "/project/file.js";
@@ -129,9 +129,9 @@ fn close_file_evicts_cached_parsed_source() {
     );
 }
 
-/// Regression test: closing a project already evicted open documents and
-/// module graph entries under its root, but left cached parsed sources
-/// behind indefinitely.
+/// Closing a project must evict the cached parsed sources of every file
+/// under its root, alongside the open documents and module graph entries it
+/// already evicts.
 #[test]
 fn close_project_evicts_cached_parsed_sources_under_root() {
     const PATH: &str = "/project/file.js";
