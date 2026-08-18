@@ -65,6 +65,8 @@ use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::CssLanguage;
 use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
+#[cfg(feature = "html_embeds")]
+use biome_embeds::EmbeddedData;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
@@ -128,6 +130,8 @@ pub struct FixAllParams<'a> {
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
     #[cfg(feature = "module_graph")]
     pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -461,6 +465,8 @@ pub(crate) struct LintParams<'a> {
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
     #[cfg(feature = "module_graph")]
     pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
