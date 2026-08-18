@@ -19,6 +19,7 @@ use biome_analyze::{
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::markdown::{
     MarkdownFormatterConfiguration, MarkdownFormatterEnabled, MarkdownLinterEnabled,
+    MarkdownParseFrontmatter, MarkdownParserConfiguration,
 };
 use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
@@ -62,6 +63,20 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct MarkdownParserSettings {
+    pub frontmatter: Option<MarkdownParseFrontmatter>,
+}
+
+impl From<MarkdownParserConfiguration> for MarkdownParserSettings {
+    fn from(configuration: MarkdownParserConfiguration) -> Self {
+        Self {
+            frontmatter: configuration.frontmatter,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct MarkdownLinterSettings {
     pub enabled: Option<MarkdownLinterEnabled>,
 }
@@ -77,7 +92,7 @@ impl ServiceLanguage for MarkdownLanguage {
     type LinterSettings = MarkdownLinterSettings;
     type AssistSettings = MarkdownAssistSettings;
     type FormatOptions = MdFormatOptions;
-    type ParserSettings = ();
+    type ParserSettings = MarkdownParserSettings;
     type ParserOptions = MarkdownParserOptions;
     type EnvironmentSettings = ();
 
@@ -91,11 +106,12 @@ impl ServiceLanguage for MarkdownLanguage {
 
     fn resolve_parse_options(
         _overrides: &OverrideSettings,
-        _language: &Self::ParserSettings,
+        language: &Self::ParserSettings,
         _path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         MarkdownParserOptions::default()
+            .with_frontmatter(language.frontmatter.unwrap_or_default().into())
     }
 
     fn resolve_format_options(

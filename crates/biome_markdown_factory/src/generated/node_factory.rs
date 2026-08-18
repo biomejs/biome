@@ -96,6 +96,26 @@ impl MdFencedCodeBlockBuilder {
         ))
     }
 }
+pub fn md_frontmatter(
+    l_fence_token: SyntaxToken,
+    content: MdFrontmatterContent,
+    r_fence_token: SyntaxToken,
+) -> MdFrontmatter {
+    MdFrontmatter::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_FRONTMATTER,
+        [
+            Some(SyntaxElement::Token(l_fence_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_fence_token)),
+        ],
+    ))
+}
+pub fn md_frontmatter_content(value_token: SyntaxToken) -> MdFrontmatterContent {
+    MdFrontmatterContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_FRONTMATTER_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn md_hard_line(value_token: SyntaxToken) -> MdHardLine {
     MdHardLine::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HARD_LINE,
@@ -581,16 +601,22 @@ pub fn md_root(value: MdBlockList, eof_token: SyntaxToken) -> MdRootBuilder {
         value,
         eof_token,
         bom_token: None,
+        frontmatter: None,
     }
 }
 pub struct MdRootBuilder {
     value: MdBlockList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
+    frontmatter: Option<MdFrontmatter>,
 }
 impl MdRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_frontmatter(mut self, frontmatter: MdFrontmatter) -> Self {
+        self.frontmatter = Some(frontmatter);
         self
     }
     pub fn build(self) -> MdRoot {
@@ -598,6 +624,8 @@ impl MdRootBuilder {
             MarkdownSyntaxKind::MD_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
+                self.frontmatter
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],

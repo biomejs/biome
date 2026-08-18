@@ -26,6 +26,8 @@ pub enum MarkdownLexContext {
     Regular,
     /// Inside code info strings. Newlines end them.
     CodeInfoString,
+    /// Inside the YAML frontmatter delimited by `---` lines.
+    Frontmatter,
     /// Inside link definition (after `]:`). Whitespace separates destination from title.
     LinkDefinition,
     /// Inside inline code span. Backslashes are literal per CommonMark §6.1.
@@ -281,6 +283,10 @@ impl<'src> MarkdownLexer<'src> {
         self.end
     }
 
+    pub fn has_frontmatter_closing_fence(&self) -> bool {
+        self.find_frontmatter_fence(self.position).is_some()
+    }
+
     /// Sets the target for the next [MarkdownReLexContext::Span] re-lex.
     pub fn set_relex_span(&mut self, end: usize, kind: MarkdownSyntaxKind) {
         self.relex_span = Some((end, kind));
@@ -299,6 +305,9 @@ impl<'src> MarkdownLexer<'src> {
             } else {
                 self.consume_code_info_string()
             };
+        }
+        if matches!(context, MarkdownLexContext::Frontmatter) {
+            return self.consume_frontmatter();
         }
         match dispatched {
             // Whitespace handling is context-sensitive and order-dependent:
@@ -722,6 +731,65 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         MD_TEXTUAL_LITERAL
+    }
+
+    fn consume_frontmatter(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        if let Some(length) = self.frontmatter_fence_len(self.position) {
+            self.advance(length);
+            return T![---];
+        }
+
+        self.position = self
+            .find_frontmatter_fence(self.position)
+            .unwrap_or(self.end);
+        MD_FRONTMATTER_LITERAL
+    }
+
+    fn frontmatter_fence_len(&self, start: usize) -> Option<usize> {
+        let source = self.source.as_bytes();
+        let fence_end = start.checked_add(3)?;
+        if fence_end > self.end || source.get(start..fence_end)? != b"---" {
+            return None;
+        }
+
+        let mut position = fence_end;
+        while position < self.end && matches!(source[position], b' ' | b'\t') {
+            position += 1;
+        }
+
+        (position == self.end || matches!(source[position], b'\n' | b'\r'))
+            .then_some(position - start)
+    }
+
+    fn find_frontmatter_fence(&self, start: usize) -> Option<usize> {
+        let source = self.source.as_bytes();
+        let mut position = start;
+
+        while position < self.end {
+            while position < self.end && !matches!(source[position], b'\n' | b'\r') {
+                position += 1;
+            }
+            if position == self.end {
+                return None;
+            }
+
+            if source[position] == b'\r' {
+                position += 1;
+                if position < self.end && source[position] == b'\n' {
+                    position += 1;
+                }
+            } else {
+                position += 1;
+            }
+
+            if self.frontmatter_fence_len(position).is_some() {
+                return Some(position);
+            }
+        }
+
+        None
     }
 
     /// Consume a single whitespace character at line start as text.

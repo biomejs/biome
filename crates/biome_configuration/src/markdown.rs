@@ -12,6 +12,14 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct MarkdownConfiguration {
+    /// Parsing options
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_parser_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parser: Option<MarkdownParserConfiguration>,
+
     #[cfg_attr(
         feature = "cli",
         bpaf(external(markdown_formatter_configuration), optional, hide)
@@ -31,6 +39,19 @@ pub type MarkdownFormatterEnabled = Bool<false>; // Keep it disabled by default 
 pub type MarkdownLinterEnabled = Bool<true>;
 pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseInterpolation = Bool<false>;
+pub type MarkdownParseFrontmatter = Bool<false>;
+
+/// Options that change how the Markdown parser behaves
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct MarkdownParserConfiguration {
+    /// Enables parsing frontmatter at the start of the file. Defaults to `false`.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub frontmatter: Option<MarkdownParseFrontmatter>,
+}
 
 /// Options that change how the Markdown formatter behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]

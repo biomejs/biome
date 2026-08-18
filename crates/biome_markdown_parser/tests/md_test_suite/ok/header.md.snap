@@ -32,6 +32,7 @@ expression: snapshot
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -316,7 +317,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..183
   0: (empty)
-  1: MD_BLOCK_LIST@0..183
+  1: (empty)
+  2: MD_BLOCK_LIST@0..183
     0: MD_HEADER@0..11
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -491,6 +493,6 @@ MdRoot {
           0: HASH@181..182 "#" [] []
     25: MD_NEWLINE@182..183
       0: NEWLINE@182..183 "\n" [] []
-  2: EOF@183..183 "" [] []
+  3: EOF@183..183 "" [] []
 
 ```
