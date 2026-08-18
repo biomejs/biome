@@ -5,6 +5,7 @@ expression: invalid.js
 # Input
 ```js
 const r = true && boolExp;
+const r0 = false || boolExp;
 const boolExp2 = true;
 const r2 = boolExp || true;
 const nonNullExp = 123;
@@ -23,8 +24,8 @@ invalid.js:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
   
   > 1 │ const r = true && boolExp;
       │           ^^^^^^^^^^^^^^^
-    2 │ const boolExp2 = true;
-    3 │ const r2 = boolExp || true;
+    2 │ const r0 = false || boolExp;
+    3 │ const boolExp2 = true;
   
   i Safe fix: Discard redundant terms from the logical expression.
   
@@ -34,61 +35,79 @@ invalid.js:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
 ```
 
 ```
-invalid.js:3:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Logical expression contains unnecessary complexity.
   
     1 │ const r = true && boolExp;
-    2 │ const boolExp2 = true;
-  > 3 │ const r2 = boolExp || true;
-      │            ^^^^^^^^^^^^^^^
-    4 │ const nonNullExp = 123;
-    5 │ const r3 = null ?? nonNullExp;
+  > 2 │ const r0 = false || boolExp;
+      │            ^^^^^^^^^^^^^^^^
+    3 │ const boolExp2 = true;
+    4 │ const r2 = boolExp || true;
   
   i Safe fix: Discard redundant terms from the logical expression.
   
-    3 │ const·r2·=·boolExp·||·true;
+    2 │ const·r0·=·false·||·boolExp;
+      │            ---------        
+
+```
+
+```
+invalid.js:4:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    2 │ const r0 = false || boolExp;
+    3 │ const boolExp2 = true;
+  > 4 │ const r2 = boolExp || true;
+      │            ^^^^^^^^^^^^^^^
+    5 │ const nonNullExp = 123;
+    6 │ const r3 = null ?? nonNullExp;
+  
+  i Safe fix: Discard redundant terms from the logical expression.
+  
+    4 │ const·r2·=·boolExp·||·true;
       │            -----------     
 
 ```
 
 ```
-invalid.js:5:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Logical expression contains unnecessary complexity.
   
-    3 │ const r2 = boolExp || true;
-    4 │ const nonNullExp = 123;
-  > 5 │ const r3 = null ?? nonNullExp;
+    4 │ const r2 = boolExp || true;
+    5 │ const nonNullExp = 123;
+  > 6 │ const r3 = null ?? nonNullExp;
       │            ^^^^^^^^^^^^^^^^^^
-    6 │ const boolExpr1 = true;
-    7 │ const boolExpr2 = false;
+    7 │ const boolExpr1 = true;
+    8 │ const boolExpr2 = false;
   
   i Safe fix: Discard redundant terms from the logical expression.
   
-    5 │ const·r3·=·null·??·nonNullExp;
+    6 │ const·r3·=·null·??·nonNullExp;
       │            --------           
 
 ```
 
 ```
-invalid.js:8:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Logical expression contains unnecessary complexity.
   
-    6 │ const boolExpr1 = true;
-    7 │ const boolExpr2 = false;
-  > 8 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/·
-      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     7 │ const boolExpr1 = true;
+     8 │ const boolExpr2 = false;
+   > 9 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/·
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
   
   i Safe fix: Reduce the complexity of the logical expression.
   
-    6 6 │   const boolExpr1 = true;
-    7 7 │   const boolExpr2 = false;
-    8   │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/·
-      8 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/·)·/*4*/·
-    9 9 │   
+     7  7 │   const boolExpr1 = true;
+     8  8 │   const boolExpr2 = false;
+     9    │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/·
+        9 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/·)·/*4*/·
+    10 10 │   
   
 
 ```

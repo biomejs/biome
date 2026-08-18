@@ -6,3 +6,7 @@ const boolExpr5 = true;
 const boolExpr6 = false;
 const r6 = !!boolExpr1 || !!boolExpr2;
 !!x;
+x || false;
+x && true;
+foo() || false;
+bar() && true;
