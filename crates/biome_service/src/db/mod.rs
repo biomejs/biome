@@ -212,6 +212,7 @@ impl Default for WorkspaceDb {
 /// runs. This type is what makes that possible.
 #[derive(Clone)]
 pub struct WorkspaceDbData {
+    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -237,6 +238,11 @@ impl WorkspaceDbData {
         self.projects.pin().remove(&project_key);
     }
 
+    /// Removes the parsed source cached for `path`.
+    pub fn remove_file(&self, path: &Utf8Path) {
+        self.files.pin().remove(path);
+    }
+
     /// Checks whether the module data contains `path` without making Salsa
     /// track the read operation.
     ///
@@ -258,9 +264,19 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
-    /// Removes all modules that start with the given path. That's usually used
-    /// when removing a library or a folder from the project.
+    /// Removes all files and modules that start with the given path. That's
+    /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
+        let files = self.files.pin();
+        let to_remove: Vec<Utf8PathBuf> = files
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            files.remove(&p);
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let modules = self.modules.pin();
@@ -273,8 +289,6 @@ impl WorkspaceDbData {
                 modules.remove(&p);
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 }
 
@@ -305,6 +319,7 @@ impl WorkspaceDb {
     /// its clones.
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -409,6 +424,15 @@ impl WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 
+    /// Returns the number of cached parsed sources.
+    ///
+    /// Only used by tests to check that eviction empties the collection,
+    /// rather than only the specific paths a test looks up.
+    #[cfg(test)]
+    pub(crate) fn parsed_sources_len(&self) -> usize {
+        self.files.pin().len()
+    }
+
     /// Returns a [Rc] to itself, cast to [ModuleDb]. This is used to send the service
     /// to the analyzer.
     #[cfg(feature = "module_graph")]
@@ -490,6 +514,18 @@ impl WorkspaceDb {
     }
 
     pub fn unload_path(&mut self, path: &Utf8Path) {
+        {
+            let files = self.files.pin();
+            let to_remove: Vec<Utf8PathBuf> = files
+                .keys()
+                .filter(|p| p.starts_with(path))
+                .cloned()
+                .collect();
+            for p in to_remove {
+                files.remove(&p);
+            }
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let to_remove = self
@@ -508,8 +544,6 @@ impl WorkspaceDb {
                 });
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 
     // #region Project operations
@@ -753,6 +787,7 @@ impl Default for SharedWorkspaceDb {
 impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
