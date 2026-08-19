@@ -248,6 +248,8 @@ pub(super) fn convert_jsx_attribute_value(
                 convert_jsx_fragment(ctx, &fragment)?,
             )),
         },
+        // Astro-only syntax that React never produces
+        AnyJsxAttributeValue::JsTemplateExpression(template) => Err(unsupported(template.syntax())),
     }
 }
 
