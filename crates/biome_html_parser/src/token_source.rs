@@ -78,10 +78,6 @@ pub(crate) enum HtmlLexContext {
     Doctype,
     /// Treat everything as text until the closing tag is encountered.
     EmbeddedLanguage(HtmlEmbeddedLanguage),
-    /// Like [EmbeddedLanguage], except that a `{` still opens a text
-    /// expression. This is the rule Astro applies to `<textarea>`: markup
-    /// inside it is text, but interpolations are still interpolations.
-    RawTextWithExpressions(HtmlEmbeddedLanguage),
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
     CdataSection,
     /// Lexing the Astro frontmatter. When in this context, the lexer will treat `---`

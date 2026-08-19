@@ -684,33 +684,6 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume raw text that a `{` still interrupts, so that the parser can read
-    /// the interpolation and come back for the rest of the text.
-    fn consume_token_raw_text_with_expressions(
-        &mut self,
-        current: u8,
-        lang: HtmlEmbeddedLanguage,
-    ) -> HtmlSyntaxKind {
-        let closing_tag_name = lang.closing_tag_name(self.source);
-
-        if current == b'{' {
-            return self.consume_byte(T!['{']);
-        }
-        if self.is_at_closing_tag(closing_tag_name) {
-            return self.consume_byte(T![<]);
-        }
-
-        self.assert_current_char_boundary();
-        while let Some(byte) = self.current_byte() {
-            if byte == b'{' || self.is_at_closing_tag(closing_tag_name) {
-                break;
-            }
-            self.advance_byte_or_char(byte);
-        }
-
-        HTML_LITERAL
-    }
-
     /// Consumes tokens within a double text expression ('{{...}}') until the closing
     /// delimiter is reached. Returns HTML_LITERAL for the expression content.
     fn consume_double_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
@@ -1818,9 +1791,6 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
-                    }
-                    HtmlLexContext::RawTextWithExpressions(lang) => {
-                        self.consume_token_raw_text_with_expressions(current, lang)
                     }
                     HtmlLexContext::TextExpression(kind) => match kind {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
