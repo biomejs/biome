@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/line_comments/selector-boundary-comments.css
+---
+
+# Input
+
+```css
+.a
+// before +
++
+// after +
+.b
+// before block
+{color:red}
+
+.a// before +
++.b{color:orange}
+
+.a+// after +
+.b{color:purple}
+
+.before// keep with >
+>.middle+.after{color:navy}
+
+.before>// keep after >
+.middle+.after{color:teal}
+
+.before>.middle// keep with +
++.after{color:maroon}
+
+.before
+// descendant
+.middle+.after{color:olive}
+
+```
+
+
+# Options
+
+```json
+{
+  "css": {
+    "parser": {
+      "allowWrongLineComments": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```css
+.a
+// before +
++
+// after +
+.b
+// before block
+{
+	color: red;
+}
+
+.a // before +
++ .b {
+	color: orange;
+}
+
+.a + // after +
+.b {
+	color: purple;
+}
+
+.before // keep with >
+> .middle + .after {
+	color: navy;
+}
+
+.before > // keep after >
+.middle + .after {
+	color: teal;
+}
+
+.before > .middle // keep with +
++ .after {
+	color: maroon;
+}
+
+.before
+// descendant
+.middle + .after {
+	color: olive;
+}
+
+```

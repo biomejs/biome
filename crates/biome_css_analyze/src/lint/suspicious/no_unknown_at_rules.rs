@@ -71,7 +71,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("at-rule-no-unknown").same()],
+        sources: &[RuleSource::Stylelint("at-rule-no-unknown").same(), RuleSource::EslintCss("no-invalid-at-rules").inspired()],
     }
 }
 
@@ -123,10 +123,7 @@ impl Rule for NoUnknownAtRules {
             return None;
         }
 
-        Some(NoUnknownAtRuleState {
-            range,
-            name,
-        })
+        Some(NoUnknownAtRuleState { range, name })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

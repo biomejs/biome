@@ -2596,6 +2596,23 @@ impl JsAstNode {
                     )),
                 );
             }
+            JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => {
+                register_js_ast_fields!(
+                    prototype,
+                    JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
+                    JsSvelteDeclarationRoot,
+                    ("declaration", |node, context| Self::wrap_optional_node(
+                        node.declaration().ok(),
+                        context
+                    )),
+                    ("semicolonToken", |node, context| Self::wrap_token(
+                        node.semicolon_token()
+                    )),
+                    ("eofToken", |node, context| Self::wrap_token(
+                        node.eof_token().ok()
+                    )),
+                );
+            }
             JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
                 register_js_ast_fields!(
                     prototype,

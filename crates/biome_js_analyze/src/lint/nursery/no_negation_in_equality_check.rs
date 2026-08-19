@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNegationInEqualityCheck {
-        version: "next",
+        version: "2.5.5",
         name: "noNegationInEqualityCheck",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-negation-in-equality-check").same()],

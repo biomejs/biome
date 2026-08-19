@@ -8,7 +8,8 @@ use super::{
     ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint, SearchCapabilities,
     UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
 };
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::to_analyzer_rules_by_indices;
+use crate::db::WorkspaceDb;
 #[cfg(feature = "js_embeds")]
 use crate::embed::EmbedContent;
 #[cfg(feature = "js_embeds")]
@@ -18,8 +19,8 @@ use crate::embed::js::{
 use crate::file_handlers::FixAllParams;
 use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
 use crate::settings::{
-    OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
-    check_override_feature_activity,
+    OverrideSettings, Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::{FixFileMode, SearchQuery};
 use crate::workspace::{PatternId, PullDiagnosticsAndActionsResult};
@@ -76,15 +77,16 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsTemplateExpression,
 };
+#[cfg(feature = "type_inference")]
+use biome_js_syntax::{
+    AnyJsExpression as TypeInfoExpression, JsClassDeclaration, JsClassExpression,
+    JsFunctionDeclaration, JsVariableDeclarator,
+};
 use biome_js_syntax::{
     AnyJsRoot, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, TextRange, TextSize, TokenAtOffset,
 };
 #[cfg(feature = "type_inference")]
-use biome_js_syntax::{
-    JsClassDeclaration, JsClassExpression, JsFunctionDeclaration, JsVariableDeclarator,
-};
-#[cfg(feature = "type_inference")]
-use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
+use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
 #[cfg(feature = "js_embeds")]
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -103,7 +105,6 @@ use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
@@ -227,6 +228,29 @@ impl From<JsxRuntime> for JsEnvironmentSettings {
     }
 }
 
+/// Public properties of the Vue component instance. Vue's compiler exposes them to every
+/// template expression, so they are never declared in user code.
+///
+/// Vue 2-only members (`$children`, `$listeners`, `$scopedSlots`, `$set`, `$delete`, `$on`,
+/// `$off`, `$once`, `$destroy`) are intentionally excluded, because Vue 2 is end of life.
+///
+/// See <https://vuejs.org/api/component-instance.html>
+const VUE_TEMPLATE_INSTANCE_PROPERTIES: [&str; 13] = [
+    "$attrs",
+    "$data",
+    "$el",
+    "$emit",
+    "$forceUpdate",
+    "$nextTick",
+    "$options",
+    "$parent",
+    "$props",
+    "$refs",
+    "$root",
+    "$slots",
+    "$watch",
+];
+
 impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
@@ -268,88 +292,83 @@ impl ServiceLanguage for JsLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &JsFormatterSettings,
-        path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
     ) -> JsFormatOptions {
-        let options = JsFormatOptions::new(
-            document_file_source
-                .to_js_file_source()
-                .or(JsFileSource::try_from(path.as_path()).ok())
-                .unwrap_or_default(),
-        )
-        .with_indent_style(
-            language
-                .indent_style
-                .or(global.indent_style)
-                .unwrap_or_default(),
-        )
-        .with_indent_width(
-            language
-                .indent_width
-                .or(global.indent_width)
-                .unwrap_or_default(),
-        )
-        .with_line_width(
-            language
-                .line_width
-                .or(global.line_width)
-                .unwrap_or_default(),
-        )
-        .with_line_ending(
-            language
-                .line_ending
-                .or(global.line_ending)
-                .unwrap_or_default(),
-        )
-        .with_quote_style(language.quote_style.unwrap_or_default())
-        .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
-        .with_quote_properties(language.quote_properties.unwrap_or_default())
-        .with_trailing_commas(language.trailing_commas.unwrap_or_default())
-        .with_semicolons(language.semicolons.unwrap_or_default())
-        .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
-        .with_bracket_spacing(
-            language
-                .bracket_spacing
-                .or(global.bracket_spacing)
-                .unwrap_or_default(),
-        )
-        .with_delimiter_spacing(
-            language
-                .delimiter_spacing
-                .or(global.delimiter_spacing)
-                .unwrap_or_default(),
-        )
-        .with_bracket_same_line(
-            language
-                .bracket_same_line
-                .or(global.bracket_same_line)
-                .unwrap_or_default(),
-        )
-        .with_attribute_position(
-            language
-                .attribute_position
-                .or(global.attribute_position)
-                .unwrap_or_default(),
-        )
-        .with_expand(language.expand.or(global.expand).unwrap_or_default())
-        .with_trailing_newline(
-            language
-                .trailing_newline
-                .or(global.trailing_newline)
-                .unwrap_or_default(),
-        )
-        .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
+        let source = file_source.to_js_file_source().unwrap_or_default();
+        let options = JsFormatOptions::new(source)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
+            .with_quote_style(language.quote_style.unwrap_or_default())
+            .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
+            .with_quote_properties(language.quote_properties.unwrap_or_default())
+            .with_trailing_commas(language.trailing_commas.unwrap_or_default())
+            .with_semicolons(language.semicolons.unwrap_or_default())
+            .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+            .with_bracket_spacing(
+                language
+                    .bracket_spacing
+                    .or(global.bracket_spacing)
+                    .unwrap_or_default(),
+            )
+            .with_delimiter_spacing(
+                language
+                    .delimiter_spacing
+                    .or(global.delimiter_spacing)
+                    .unwrap_or_default(),
+            )
+            .with_bracket_same_line(
+                language
+                    .bracket_same_line
+                    .or(global.bracket_same_line)
+                    .unwrap_or_default(),
+            )
+            .with_attribute_position(
+                language
+                    .attribute_position
+                    .or(global.attribute_position)
+                    .unwrap_or_default(),
+            )
+            .with_expand(language.expand.or(global.expand).unwrap_or_default())
+            .with_trailing_newline(
+                language
+                    .trailing_newline
+                    .or(global.trailing_newline)
+                    .unwrap_or_default(),
+            )
+            .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
-        overrides.override_js_format_options(path, options)
+        overrides.override_js_format_options_by_indices(override_indices, options)
     }
 
     fn resolve_analyzer_options(
         global: &Settings,
         _language: &Self::LinterSettings,
         environment: Option<&Self::EnvironmentSettings>,
-        path: &BiomePath,
-        _file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
         let preferred_quote = global
             .languages
@@ -395,8 +414,8 @@ impl ServiceLanguage for JsLanguage {
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
         let overrides = &global.override_settings;
-        let jsx_runtime = match overrides.override_jsx_runtime(
-            path,
+        let jsx_runtime = match overrides.override_jsx_runtime_by_indices(
+            override_indices,
             environment
                 .and_then(|env| env.jsx_runtime)
                 .unwrap_or_default(),
@@ -408,9 +427,12 @@ impl ServiceLanguage for JsLanguage {
         };
         configuration = configuration.with_jsx_runtime(jsx_runtime);
 
-        globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
+        globals.extend(overrides.override_js_globals_by_indices(
+            override_indices,
+            &global.languages.javascript.globals,
+        ));
 
-        if let Ok(source_type) = JsFileSource::try_from(path.as_path()) {
+        if let Some(source_type) = file_source.to_js_file_source() {
             if source_type.as_embedding_kind().is_vue() {
                 globals.extend(
                     [
@@ -424,6 +446,23 @@ impl ServiceLanguage for JsLanguage {
                     ]
                     .map(Into::into),
                 );
+
+                // Vue's public instance properties are exposed to every template
+                // expression by the compiler, but are never declared in user code.
+                // Inside `<script setup>` they are genuinely undeclared: Vue requires
+                // `useSlots()`, `defineProps()`, etc. instead.
+                if !source_type.is_embedded_source() {
+                    globals.extend(
+                        VUE_TEMPLATE_INSTANCE_PROPERTIES
+                            .iter()
+                            .copied()
+                            .map(Into::into),
+                    );
+
+                    if source_type.as_embedding_kind().is_vue_event_handler() {
+                        globals.push("$event".into());
+                    }
+                }
             } else if source_type.as_embedding_kind().is_astro() {
                 globals.extend(["Astro"].map(Into::into));
             } else if source_type.as_embedding_kind().is_svelte() {
@@ -433,16 +472,13 @@ impl ServiceLanguage for JsLanguage {
         }
 
         let configuration = configuration
-            .with_rules(to_analyzer_rules(global, path.as_path()))
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices))
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
             .with_preferred_jsx_quote(preferred_jsx_quote)
             .with_preferred_indentation(preferred_indentation);
 
-        AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -525,6 +561,98 @@ impl ServiceLanguage for JsLanguage {
             .unwrap_or_default()
             .into()
     }
+}
+
+#[salsa::interned]
+struct JsFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_js_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: JsFormatOptionsInput<'db>,
+) -> JsFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<JsLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+#[salsa::interned]
+struct JsAnalyzerOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_js_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: JsAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<JsLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+pub(crate) fn resolve_format_options(
+    _path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> JsFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<JsLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = JsFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
+    resolved_js_format_options(&query_db, input)
+}
+
+pub(crate) fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<JsLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = JsAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_js_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -788,6 +916,26 @@ fn parse_js_matched_embed(
     }
 }
 
+// #[salsa::tracked]
+// fn debug_syntax_tree_impl<'db>(
+//     db: &'db dyn ProjectDb,
+//     project_key: ProjectKey,
+//     path: &'db Utf8Path,
+// ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+//     let settings = db
+//         .get_settings_based_on_path(project_key, path)
+//         .ok_or_else(WorkspaceError::no_project)?;
+//
+//     let parse = db.parsed_source_for_path(path);
+//
+//     let syntax: JsSyntaxNode = parse.syntax(&db);
+//     let tree: AnyJsRoot = parse.tree(&db);
+//     GetSyntaxTreeResult {
+//         cst: format!("{syntax:#?}"),
+//         ast: format!("{tree:#?}"),
+//     }
+// }
+
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
     parse: AnyParsedSource,
@@ -856,7 +1004,7 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(path, document_file_source);
+    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, Vec::new())?;
@@ -875,7 +1023,7 @@ fn debug_type_info(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -941,7 +1089,7 @@ fn debug_registered_types(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -961,7 +1109,7 @@ fn debug_registered_types(
             }
         }
 
-        for (i, ty) in resolver.registered_types().iter().enumerate() {
+        for (i, ty) in resolver.types.as_slice().iter().enumerate() {
             result.push_str(&format!("\nTypeId({i}) => {ty}\n"));
         }
 
@@ -972,6 +1120,35 @@ fn debug_registered_types(
     {
         let _ = (_path, parse, workspace_db);
         Err(WorkspaceError::feature_not_enabled())
+    }
+}
+
+#[cfg(feature = "type_inference")]
+#[derive(Default)]
+struct DebugTypeCollector {
+    types: TypeStore,
+}
+
+#[cfg(feature = "type_inference")]
+impl RawTypeCollector for DebugTypeCollector {
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types.find(type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.types.get_by_id(id)
+    }
+
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        self.types.insert_cow(type_data)
+    }
+
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &TypeInfoExpression,
+    ) -> Cow<'_, TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expression))
     }
 }
 
@@ -1044,24 +1221,25 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     };
 
     let tree = params.parsed_source.tree(&params.workspace_db);
-    let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
-        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -1073,7 +1251,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&files_source));
+    let semantic_model = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => {
+            js_semantic_model(&params.workspace_db, source).clone()
+        }
+        super::ParsedOrigin::Interned { .. } => {
+            semantic_model(&tree, SemanticModelOptions::from(&files_source))
+        }
+    };
     let services = js_analyzer_services(
         &tree,
         &params.workspace_db,
@@ -1117,16 +1302,17 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
-        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parsed_source.tree(&workspace_db);
     let _ = trace_span!("Parsed file").entered();
-    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
@@ -1134,13 +1320,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
-        .with_cache(analyzer_cache)
         .finish();
     let filter = AnalysisFilter {
         categories,
@@ -1223,23 +1408,20 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
 
-    // Compute final rules (taking `overrides` into account)
-    let rules = params
-        .settings
-        .as_ref()
-        .as_linter_rules(params.biome_path.as_path());
-    let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
         analyzer_options,
         fixable_rules,
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.biome_path.as_path())
@@ -1263,11 +1445,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         return Ok(None);
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
-        &params,
-        rules,
-        tree.syntax().text_range_with_trivia().len().into(),
-    );
+    let mut process_fix_all =
+        ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
@@ -1398,7 +1577,7 @@ pub(crate) fn format(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, Vec::new())?;
@@ -1423,7 +1602,7 @@ pub(crate) fn format_range(
     range: TextRange,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
     let tree = parse.syntax(&workspace_db);
     let printed = biome_js_formatter::format_range(options, &tree, range)?;
@@ -1442,7 +1621,7 @@ pub(crate) fn format_on_type(
     offset: TextSize,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(path, document_file_source);
+    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
     let tree = parse.syntax(&workspace_db);
 
@@ -1498,7 +1677,8 @@ fn format_embedded(
     #[cfg(feature = "js_embeds")]
     {
         let tree = parse.syntax(&workspace_db);
-        let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+        let options =
+            resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
         // Hand the snippet ranges to the formatter, so it only emits embedded
         // tags for chunks that were actually parsed as embedded languages.
@@ -1520,14 +1700,19 @@ fn format_embedded(
                     FormatElement::Line(LineMode::Hard),
                     FormatElement::Interned(Interned::new(document.into_elements())),
                     FormatElement::Tag(Tag::EndIndent),
+                    FormatElement::Line(LineMode::Hard),
                 ];
                 Document::new(elements)
             };
 
             match snippet_file_source {
                 DocumentFileSource::Css(_) => {
-                    let css_options =
-                        settings.format_options::<CssLanguage>(biome_path, &snippet_file_source);
+                    let css_options = super::css::resolve_format_options(
+                        biome_path,
+                        &snippet_file_source,
+                        settings,
+                        &workspace_db,
+                    );
                     let node = snippet
                         .parsed_origin()
                         .parse(&workspace_db)
@@ -1538,8 +1723,12 @@ fn format_embedded(
                 }
                 #[cfg(feature = "lang_graphql")]
                 DocumentFileSource::Graphql(_) => {
-                    let graphql_options = settings
-                        .format_options::<GraphqlLanguage>(biome_path, &snippet_file_source);
+                    let graphql_options = super::graphql::resolve_format_options(
+                        biome_path,
+                        &snippet_file_source,
+                        settings,
+                        &workspace_db,
+                    );
                     let node = snippet
                         .parsed_origin()
                         .parse(&workspace_db)
@@ -1596,18 +1785,20 @@ pub(crate) fn pull_diagnostics_and_actions(
         working_directory,
     } = params;
     let tree = parsed_source.tree(&workspace_db);
-    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())

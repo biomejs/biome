@@ -1,8 +1,14 @@
+#[cfg(feature = "module_graph")]
+use crate::db::WorkspaceDb;
 use crate::file_handlers::html::is_component_element;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 #[cfg(feature = "html_embeds")]
 use crate::workspace::LocalEmbeddedLanguage;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
+#[cfg(feature = "html_embeds")]
+use biome_embeds::bindings::{
+    InternedBindingTokenText, get_binding_by_token_text, get_binding_with_source,
+};
 #[cfg(feature = "module_graph")]
 use biome_fs::BiomePath;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlRoot};
@@ -13,12 +19,6 @@ use biome_module_graph::ModuleDb;
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, TokenAtOffset};
-#[cfg(feature = "module_graph")]
-use biome_workspace_db::WorkspaceDb;
-#[cfg(feature = "html_embeds")]
-use biome_workspace_db::embedded::bindings::{
-    InternedBindingTokenText, get_binding_by_token_text, get_binding_with_source,
-};
 #[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 
@@ -160,10 +160,7 @@ fn resolve_import_definition(
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
     let module_info = module_db.html_module_info_for_path(current_path)?;
-    let html_import = module_info
-        .static_import_paths
-        .get(source)
-        .or_else(|| module_info.dynamic_import_paths.get(source))?;
+    let html_import = module_info.import_paths.get(source)?;
 
     let target_path = html_import.as_path()?;
 

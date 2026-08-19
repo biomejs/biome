@@ -15,8 +15,9 @@ Paragraph that should NOT be interrupted.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -45,9 +46,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..97
+0: MD_ROOT@0..97
   0: (empty)
-  1: MD_BLOCK_LIST@0..97
+  1: (empty)
+  2: MD_BLOCK_LIST@0..97
     0: MD_PARAGRAPH@0..97
       0: MD_INLINE_ITEM_LIST@0..97
         0: MD_TEXTUAL@0..41
@@ -60,6 +62,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@44..96 " This stays in paragraph because 2 cannot interrupt." [] []
         4: MD_TEXTUAL@96..97
           0: MD_TEXTUAL_LITERAL@96..97 "\n" [] []
-  2: EOF@97..97 "" [] []
+  3: EOF@97..97 "" [] []
 
 ```

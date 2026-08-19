@@ -1,11 +1,14 @@
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
-use biome_markdown_parser::{document_to_html, parse_markdown};
-use biome_markdown_syntax::{MarkdownSyntaxKind, MdDocument};
-use biome_rowan::{AstNode, SyntaxKind, SyntaxSlot};
+use biome_markdown_parser::{
+    MarkdownParserOptions, document_to_html, parse_markdown, parse_markdown_with_cache,
+};
+use biome_markdown_syntax::{MarkdownSyntaxKind, MdRoot};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, SyntaxSlot};
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use std::fmt::Write;
 use std::fs;
@@ -37,7 +40,24 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parsed = parse_markdown(&content);
+    let options_path = Path::new(test_directory).join("options.json");
+    let options = if options_path.exists() {
+        let configuration: Configuration = serde_json::from_str(
+            &fs::read_to_string(&options_path).expect("Expected options.json to be readable"),
+        )
+        .expect("Expected options.json to contain a valid configuration");
+        let frontmatter = configuration
+            .markdown
+            .and_then(|markdown| markdown.parser)
+            .and_then(|parser| parser.frontmatter)
+            .unwrap_or_default()
+            .into();
+
+        MarkdownParserOptions::default().with_frontmatter(frontmatter)
+    } else {
+        MarkdownParserOptions::default()
+    };
+    let parsed = parse_markdown_with_cache(&content, &mut NodeCache::default(), options);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
@@ -121,7 +141,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             // render via document_to_html and compare against the reference.
             let html_path = test_case_path.with_extension("html");
             if html_path.exists() {
-                let doc = MdDocument::cast(parsed.syntax()).unwrap_or_else(|| {
+                let doc = MdRoot::cast(parsed.syntax()).unwrap_or_else(|| {
                     panic!("Failed to cast parsed output to MdDocument for {file_name}. Check that the .md test input is syntactically valid and re-run with `cargo t -p biome_markdown_parser` to see parser diagnostics.")
                 });
                 let actual = document_to_html(
@@ -198,12 +218,12 @@ use test_utils::normalize_html;
 #[test]
 pub fn quick_test() {
     use biome_markdown_parser::document_to_html;
-    use biome_markdown_syntax::MdDocument;
+    use biome_markdown_syntax::MdRoot;
     use biome_rowan::AstNode;
 
     fn test_example(num: u32, input: &str, expected: &str) {
         let root = parse_markdown(input);
-        let doc = MdDocument::cast(root.syntax())
+        let doc = MdRoot::cast(root.syntax())
             .unwrap_or_else(|| panic!("Example {:03}: parse failed", num));
         let html = document_to_html(
             &doc,
@@ -212,7 +232,11 @@ pub fn quick_test() {
             root.quote_indents(),
         );
 
-        assert_eq!(expected, html, "Example {:03} failed", num);
+        assert_eq!(
+            expected, html,
+            "Example {:03} failed. Expected\n\t{expected}",
+            num
+        );
     }
 
     test_example(
@@ -235,6 +259,7 @@ pub fn quick_test() {
         "# foo *bar* \\*baz\\*\n",
         "<h1>foo <em>bar</em> *baz*</h1>\n",
     );
+    test_example(63, "####### foo\n", "<p>####### foo</p>\n");
     test_example(73, "### foo ###     \n", "<h3>foo</h3>\n");
     // Heading content with 3+ trailing spaces (would be hard break in paragraph).
     // In headings, trailing spaces are stripped per §4.2 — no hard break produced.
@@ -480,7 +505,7 @@ pub fn quick_test() {
 fn fuzz_test_example(num: u32, input: &str, expected: &str) {
     let root = parse_markdown(input);
     let doc =
-        MdDocument::cast(root.syntax()).unwrap_or_else(|| panic!("Fuzz {:03}: parse failed", num));
+        MdRoot::cast(root.syntax()).unwrap_or_else(|| panic!("Fuzz {:03}: parse failed", num));
     let html = document_to_html(
         &doc,
         root.list_tightness(),

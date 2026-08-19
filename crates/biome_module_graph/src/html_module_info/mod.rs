@@ -1,11 +1,14 @@
 mod visitor;
 
+use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use biome_css_syntax::{AnyCssRoot, TextRange};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::CssFileSource;
+use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextSize, TokenText};
+use biome_rowan::{TextSize, TokenText};
+use camino::Utf8Path;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -33,8 +36,8 @@ pub enum HtmlEmbeddedContent {
     ///
     /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
     Css(AnyCssRoot, CssFileSource, TextSize),
-    /// A `<script>` block parsed as JS/TS.
-    Js(AnyJsRoot),
+    /// A `<script>` block parsed as JS/TS with its content offset within the parent document.
+    Js(AnyJsRoot, TextSize),
 }
 
 /// Information restricted to a single HTML module in the [ModuleGraph].
@@ -58,16 +61,14 @@ impl HtmlModuleInfo {
     pub(crate) fn new(
         style_classes: IndexSet<CssClassDefinition>,
         referenced_classes: Vec<CssClassReference>,
-        imported_stylesheets: Vec<ResolvedPath>,
-        static_import_paths: IndexMap<Text, ResolvedPath>,
-        dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+        imported_stylesheets: Vec<HtmlImport>,
+        import_paths: ImportPathMap<HtmlImport>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
             style_classes,
             referenced_classes,
             imported_stylesheets,
-            static_import_paths,
-            dynamic_import_paths,
+            import_paths,
         };
         Self(Arc::new(info))
     }
@@ -95,6 +96,32 @@ impl HtmlModuleInfo {
     }
 }
 
+/// A stylesheet or script import at its position in an HTML-like document.
+#[derive(Clone, Debug)]
+pub struct HtmlImport {
+    /// Absolute range of the element or JavaScript import expression.
+    pub range: TextRange,
+    /// Resolved import path.
+    pub resolved_path: ResolvedPath,
+    /// Whether the import is visible outside the containing HTML-like component.
+    pub applicability: EmbeddingStyleApplicability,
+}
+
+impl HtmlImport {
+    /// Returns the resolved filesystem path, when resolution succeeded.
+    pub fn as_path(&self) -> Option<&Utf8Path> {
+        self.resolved_path.as_path()
+    }
+}
+
+impl Deref for HtmlImport {
+    type Target = ResolvedPath;
+
+    fn deref(&self) -> &Self::Target {
+        &self.resolved_path
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct HtmlModuleInfoInner {
     /// CSS class names defined in `<style>` blocks within this HTML file.
@@ -111,19 +138,11 @@ pub struct HtmlModuleInfoInner {
     /// which may contain multiple space-separated class names.
     pub referenced_classes: Vec<CssClassReference>,
 
-    /// Resolved paths of external stylesheets linked via
-    /// `<link rel="stylesheet" href="...">`.
-    pub imported_stylesheets: Vec<ResolvedPath>,
+    /// Stylesheet imports from `<link>` elements and embedded `<style>` blocks.
+    pub imported_stylesheets: Vec<HtmlImport>,
 
-    /// Resolved paths of JS/TS modules imported from embedded `<script>` blocks.
-    ///
-    /// Keys are the raw import specifiers (e.g. `"./Button.vue"`); values are
-    /// their resolved absolute paths. Only static imports (`import … from "…"`)
-    /// are tracked here — dynamic imports are ignored for upward-traversal.
-    pub static_import_paths: IndexMap<Text, ResolvedPath>,
-
-    /// Resolved paths of JS/TS modules imported from dynamic imports.
-    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+    /// Resolved paths imported from embedded `<script>` blocks in source order.
+    pub import_paths: ImportPathMap<HtmlImport>,
 }
 
 impl HtmlModuleInfoInner {

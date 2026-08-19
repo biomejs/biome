@@ -37,6 +37,7 @@
 SyntaxElement = SyntaxElement
 
 CssBogus = SyntaxElement*
+CssBogusDeclaration = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
@@ -71,6 +72,7 @@ CssBogusIfTestBooleanExpr = SyntaxElement*
 AnyCssRoot =
 	CssRoot
 	| CssSnippetRoot
+	| CssDeclarationSnippetRoot
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -81,6 +83,10 @@ CssSnippetRoot =
 	items: CssDeclarationOrRuleList
 	eof: 'EOF'
 
+CssDeclarationSnippetRoot =
+	declarations: CssDeclarationList
+	eof: 'EOF'
+
 CssRootItemList = AnyCssRootItem*
 
 AnyCssRootItem =
@@ -88,7 +94,11 @@ AnyCssRootItem =
 	| ScssVariableDeclaration
 	| CssBogus
 
-CssRuleList = AnyCssRule*
+CssRuleList = AnyCssRuleListItem*
+
+AnyCssRuleListItem =
+	AnyCssRule
+	| ScssVariableDeclaration
 
 AnyCssRule =
 	CssQualifiedRule
@@ -117,6 +127,7 @@ CssSelectorList = (AnyCssSelector (',' AnyCssSelector)*)
 AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
+	| ScssPartialCombinatorSelector
 	| CssBogusSelector
 	| CssMetavariable
 
@@ -128,6 +139,14 @@ CssComplexSelector =
 	left: AnyCssSelector
 	combinator: ('>' | '+' | '~' | '||' | 'css_space_literal')
 	right: AnyCssSelector
+
+// .sidebar > {}
+// ^^^^^^^^^^
+// .card { + {} }
+//         ^
+ScssPartialCombinatorSelector =
+	left: AnyCssSelector?
+	combinator: ('>' | '+' | '~')
 
 // .class {}
 // ^^^^^^^
@@ -372,6 +391,7 @@ CssRelativeSelectorList = (AnyCssRelativeSelector (',' AnyCssRelativeSelector)*)
 
 AnyCssRelativeSelector =
 	CssRelativeSelector
+	| ScssPartialCombinatorSelector
 	| CssBogusSelector
 
 // :has(> img, +dt) {}
@@ -690,6 +710,7 @@ AnyCssDeclaration =
 	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
+	| CssBogusDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -720,7 +741,63 @@ CssGenericProperty =
 
 AnyCssGenericPropertyValueOrExpression =
 	CssGenericComponentValueList
+	| CssCustomPropertyValue
 	| ScssExpression
+
+// https://www.w3.org/TR/css-variables-1/#syntax
+CssCustomPropertyValue =
+	components: CssCustomPropertyComponentList
+
+CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*
+
+AnyCssCustomPropertyComponent =
+	CssCustomIdentifier
+	| CssNumber
+	| AnyCssDimension
+	| CssString
+	| ScssInterpolatedString
+	| ScssInterpolation
+	| CssCustomPropertyFunction
+	| CssCustomPropertyParenthesizedBlock
+	| CssCustomPropertyBracketedBlock
+	| CssCustomPropertyBracedBlock
+	| CssCustomPropertyDelimiter
+
+CssCustomPropertyFunction =
+	name: CssCustomIdentifier
+	'('
+	components: CssCustomPropertyComponentList
+	')'
+
+CssCustomPropertyParenthesizedBlock =
+	'('
+	components: CssCustomPropertyComponentList
+	')'
+
+CssCustomPropertyBracketedBlock =
+	'['
+	components: CssCustomPropertyComponentList
+	']'
+
+CssCustomPropertyBracedBlock =
+	'{'
+	components: CssCustomPropertyComponentList
+	'}'
+
+// Punctuation components of <declaration-value>, including <delim-token>.
+// A top-level `;` terminates the value, while a final `!important` is parsed
+// by the enclosing declaration; both remain components inside nested blocks.
+// https://www.w3.org/TR/css-syntax-3/#typedef-declaration-value
+CssCustomPropertyDelimiter =
+	value: (
+		'css_delim_literal'
+		| '$' | '#' | '&' | '@'
+		| ',' | ':' | ';' | '/' | '.' | '...' | '::'
+		| '+' | '-' | '*' | '%' | '^' | '~' | '|' | '||'
+		| '=' | '==' | '!=' | '<' | '<=' | '>' | '>='
+		| '|=' | '^=' | '*=' | '$=' | '~='
+		| '!' | '<!--' | '-->'
+	)
 
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
@@ -1427,10 +1504,16 @@ AnyCssMediaQuery =
 	| CssBogusMediaQuery
 	| CssMetavariable
 
-// @media #{$query} {}
-//        ^^^^^^^^^
+// @media all #{$query} {}
+//        ^^^^^^^^^^^^^
+// Parser-owned invariant: at least one media-type name contains interpolation.
 ScssMediaQuery =
-	query: ScssInterpolation
+	head: CssMediaTypeQuery
+	tail: CssMediaType?
+
+AnyCssMediaTypeName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
@@ -1460,7 +1543,7 @@ CssMediaTypeQuery =
 // @media not all and not (color)  { }
 //            ^^^
 CssMediaType =
-	value: CssIdentifier
+	value: AnyCssMediaTypeName
 
 AnyCssMediaTypeCondition =
 	CssMediaNotCondition

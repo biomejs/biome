@@ -1,0 +1,126 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Mapper<T> = () => T;
+
+declare function mapAliased<T>(mapper: Mapper<T>): T;
+declare function mapInline<T>(mapper: () => T): T;
+
+export const aliased = mapAliased(() => 42);
+export const inline = mapInline(() => 42);
+```
+
+## Inferred types
+
+```
+Binding Mapper "Mapper" => instanceof sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}<T>
+
+Binding T "T" => T
+
+Binding mapAliased "mapAliased" => sync Function "mapAliased" {
+  accepts: {
+    params: [
+      required mapper: instanceof Mapper<instanceof T>
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Binding T "T" => T
+
+Binding mapper "mapper" => instanceof Mapper<instanceof T>
+
+Binding mapInline "mapInline" => sync Function "mapInline" {
+  accepts: {
+    params: [
+      required mapper: sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof T
+      }
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Binding T "T" => T
+
+Binding mapper "mapper" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Binding aliased "aliased" => number: 42
+
+Expression "mapAliased" => sync Function "mapAliased" {
+  accepts: {
+    params: [
+      required mapper: instanceof Mapper<instanceof T>
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Expression "mapAliased(() => 42)" => number: 42
+
+Expression "() => 42" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number: 42
+}
+
+Expression "42" => number: 42
+
+Binding inline "inline" => number: 42
+
+Expression "mapInline" => sync Function "mapInline" {
+  accepts: {
+    params: [
+      required mapper: sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof T
+      }
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Expression "mapInline(() => 42)" => number: 42
+
+Expression "() => 42" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number: 42
+}
+
+Expression "42" => number: 42
+```

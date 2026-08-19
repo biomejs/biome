@@ -7,7 +7,7 @@ use super::{
     source_cursor::SourceCursor,
 };
 use crate::CssParserOptions;
-use crate::lexer::CssLexContext;
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use biome_css_syntax::{
     CssSyntaxKind::{self, EOF},
     T, TextRange,
@@ -141,6 +141,23 @@ fn rewind_restores_lexer_source_cursor_position() {
     assert_eq!(
         lexer.current_range(),
         TextRange::new(TextSize::from(3), TextSize::from(4))
+    );
+}
+
+#[test]
+fn custom_property_context_preserves_unknown_delimiters() {
+    let mut regular = CssLexer::from_str("`");
+    assert_eq!(
+        regular.next_token(CssLexContext::Regular),
+        CssSyntaxKind::ERROR_TOKEN
+    );
+
+    let mut custom_property = CssLexer::from_str("`");
+    assert_eq!(
+        custom_property.next_token(CssLexContext::CustomPropertyValue(
+            CssCustomPropertyCommentMode::PreserveDoubleSlash,
+        )),
+        CssSyntaxKind::CSS_DELIM_LITERAL
     );
 }
 
@@ -528,6 +545,22 @@ fn css_scan_cursor_respects_line_comment_config_in_url_body_scanning() {
 }
 
 #[test]
+fn css_scan_cursor_classifies_scss_raw_url_bodies() {
+    let protocol_relative = CssScanCursor::new(
+        SourceCursor::new("//cdn.example.com/app.css)", 0),
+        true,
+        true,
+    );
+    let escaped_whitespace =
+        CssScanCursor::new(SourceCursor::new("image\\20 fallback.svg)", 0), true, true);
+    let line_comment = CssScanCursor::new(SourceCursor::new("// silent\napp.css)", 0), true, true);
+
+    assert!(protocol_relative.is_scss_raw_url_body());
+    assert!(escaped_whitespace.is_scss_raw_url_body());
+    assert!(!line_comment.is_scss_raw_url_body());
+}
+
+#[test]
 fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
     let cursor = CssScanCursor::new(SourceCursor::new("\"a#{b}\"", 1), true, true);
     let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
@@ -859,6 +892,20 @@ fn css_scan_cursor_scans_raw_url_value_until_closing_paren() {
     assert_eq!(scan.start, 0);
     assert_eq!(scan.end, 8);
     assert!(scan.terminated);
+}
+
+#[test]
+fn css_scan_cursor_classifies_final_custom_property_important() {
+    let is_final = |source, skip_line_comments| {
+        CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+            .scan_final_custom_property_important(skip_line_comments)
+    };
+
+    assert!(is_final("!important;", false));
+    assert!(is_final("! /**/ IMPORTANT }", false));
+    assert!(!is_final("!important fallback;", false));
+    assert!(!is_final("!important// raw\n;", false));
+    assert!(is_final("!important// silent\n)", true));
 }
 
 #[test]

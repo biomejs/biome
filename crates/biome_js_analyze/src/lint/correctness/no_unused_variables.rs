@@ -226,143 +226,6 @@ pub enum SuggestedFix {
     PrefixUnderscore,
 }
 
-/// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
-fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
-    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = decl
-    {
-        node.syntax()
-            .siblings(Direction::Next)
-            .last()
-            .is_some_and(|last_sibling| {
-                matches!(
-                    last_sibling.kind(),
-                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                )
-            })
-    } else {
-        false
-    }
-}
-
-fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
-    if binding.is_under_object_pattern_binding()? {
-        Some(SuggestedFix::NoSuggestion)
-    } else {
-        Some(SuggestedFix::PrefixUnderscore)
-    }
-}
-
-// It is ok in some Typescripts constructs for a parameter to be unused.
-// Returning None means is ok to be unused
-fn suggested_fix_if_unused(
-    binding: &AnyJsIdentifierBinding,
-    options: &NoUnusedVariablesOptions,
-) -> Option<SuggestedFix> {
-    let decl = binding.declaration()?;
-    // It is fine to ignore unused rest spread siblings if the option is enabled
-    if options.ignore_rest_siblings() && is_rest_spread_sibling(&decl) {
-        return None;
-    }
-
-    match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
-        // ok to not be used
-        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-        | AnyJsBindingDeclaration::JsClassExpression(_)
-        | AnyJsBindingDeclaration::JsFunctionExpression(_)
-        | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsMappedType(_)
-        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
-
-        // Some parameters are ok to not be used
-        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
-        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
-            suggestion_for_binding(binding)
-        }
-        AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
-
-        // declarations need to be check if they are under `declare`
-        AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
-        | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
-            None
-        }
-        node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
-            if is_in_ambient_context(node.syntax()) {
-                None
-            } else {
-                suggestion_for_binding(binding)
-            }
-        }
-        node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
-        | AnyJsBindingDeclaration::JsClassDeclaration(_)
-        | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-        | AnyJsBindingDeclaration::TsEnumDeclaration(_)
-        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
-        | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
-            if is_in_ambient_context(node.syntax()) {
-                None
-            } else {
-                Some(SuggestedFix::NoSuggestion)
-            }
-        }
-
-        // Bindings under catch are never ok to be unused
-        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
-
-        // Type parameters are never ok to be unused unless they are declared in an ambient context
-        node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
-            if is_in_ambient_context(node.syntax()) {
-                None
-            } else {
-                Some(SuggestedFix::PrefixUnderscore)
-            }
-        }
-
-        AnyJsBindingDeclaration::TsInferType(_) => {
-            let binding_name_token = binding.name_token().ok()?;
-            let binding_name = binding_name_token.text_trimmed();
-            let conditional_type = binding.syntax().ancestors().find_map(TsConditionalType::cast)?;
-            let last_binding_name_token = conditional_type.extends_type().ok()?.syntax()
-                .descendants()
-                .filter_map(TsInferType::cast)
-                .filter_map(|infer_type| infer_type.name().ok()?.ident_token().ok())
-                .filter(|infer_type_name| infer_type_name.text_trimmed() == binding_name)
-                .last()?;
-            // We ignore `infer T` that precedes another `infer T`.
-            // Thus, only the last `infer T` is considered.
-            // See https://github.com/biomejs/biome/issues/565
-            if binding_name_token.text_range() == last_binding_name_token.text_range() {
-                Some(SuggestedFix::NoSuggestion)
-            } else {
-                None
-            }
-        }
-
-        // Bindings under unknown parameter are never ok to be unused
-        AnyJsBindingDeclaration::JsBogusParameter(_)
-        // exports with binding are ok to be unused
-        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
-            Some(SuggestedFix::NoSuggestion)
-        }
-        // Imports are handled by `noUnusedImports`
-        | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsFormalParameter(_)
-        | AnyJsBindingDeclaration::JsRestParameter(_)
-        | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
-            None
-        }
-    }
-}
-
 impl Rule for NoUnusedVariables {
     type Query = Semantic<AnyJsIdentifierBinding>;
     type State = SuggestedFix;
@@ -405,11 +268,11 @@ impl Rule for NoUnusedVariables {
 
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding_name.starts_with('_');
-        // Skip this for the `<script>` block itself: its own declarations are
-        // in the embedded-binding set, so the name check would always match and
-        // suppress every diagnostic. Template usage is handled by the
-        // reference check below.
+        // Source and declaration snippets contribute their own declarations to
+        // the embedded-binding set. Checking that set would make every local
+        // binding appear used. Template usage is handled by the reference check.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && !file_source.is_svelte_declaration()
             && embedded.contains_binding(binding_token_text.clone())
             && binding
                 .declaration()
@@ -547,6 +410,143 @@ impl Rule for NoUnusedVariables {
                     mutation,
                 ))
             }
+        }
+    }
+}
+
+/// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
+fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
+    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = decl
+    {
+        node.syntax()
+            .siblings(Direction::Next)
+            .last()
+            .is_some_and(|last_sibling| {
+                matches!(
+                    last_sibling.kind(),
+                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                )
+            })
+    } else {
+        false
+    }
+}
+
+fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
+    if binding.is_under_object_pattern_binding()? {
+        Some(SuggestedFix::NoSuggestion)
+    } else {
+        Some(SuggestedFix::PrefixUnderscore)
+    }
+}
+
+// It is ok in some Typescripts constructs for a parameter to be unused.
+// Returning None means is ok to be unused
+fn suggested_fix_if_unused(
+    binding: &AnyJsIdentifierBinding,
+    options: &NoUnusedVariablesOptions,
+) -> Option<SuggestedFix> {
+    let decl = binding.declaration()?;
+    // It is fine to ignore unused rest spread siblings if the option is enabled
+    if options.ignore_rest_siblings() && is_rest_spread_sibling(&decl) {
+        return None;
+    }
+
+    match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
+        // ok to not be used
+        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionExpression(_)
+        | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
+
+        // Some parameters are ok to not be used
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
+            suggestion_for_binding(binding)
+        }
+        AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
+
+        // declarations need to be check if they are under `declare`
+        AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+        | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            None
+        }
+        node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                suggestion_for_binding(binding)
+            }
+        }
+        node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassDeclaration(_)
+        | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
+        | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                Some(SuggestedFix::NoSuggestion)
+            }
+        }
+
+        // Bindings under catch are never ok to be unused
+        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
+
+        // Type parameters are never ok to be unused unless they are declared in an ambient context
+        node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                Some(SuggestedFix::PrefixUnderscore)
+            }
+        }
+
+        AnyJsBindingDeclaration::TsInferType(_) => {
+            let binding_name_token = binding.name_token().ok()?;
+            let binding_name = binding_name_token.text_trimmed();
+            let conditional_type = binding.syntax().ancestors().find_map(TsConditionalType::cast)?;
+            let last_binding_name_token = conditional_type.extends_type().ok()?.syntax()
+                .descendants()
+                .filter_map(TsInferType::cast)
+                .filter_map(|infer_type| infer_type.name().ok()?.ident_token().ok())
+                .filter(|infer_type_name| infer_type_name.text_trimmed() == binding_name)
+                .last()?;
+            // We ignore `infer T` that precedes another `infer T`.
+            // Thus, only the last `infer T` is considered.
+            // See https://github.com/biomejs/biome/issues/565
+            if binding_name_token.text_range() == last_binding_name_token.text_range() {
+                Some(SuggestedFix::NoSuggestion)
+            } else {
+                None
+            }
+        }
+
+        // Bindings under unknown parameter are never ok to be unused
+        AnyJsBindingDeclaration::JsBogusParameter(_)
+        // exports with binding are ok to be unused
+        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
+            Some(SuggestedFix::NoSuggestion)
+        }
+        // Imports are handled by `noUnusedImports`
+        | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsFormalParameter(_)
+        | AnyJsBindingDeclaration::JsRestParameter(_)
+        | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
+            None
         }
     }
 }

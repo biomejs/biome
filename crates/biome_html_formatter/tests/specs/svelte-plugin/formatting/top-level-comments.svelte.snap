@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/top-level-comments.svelte
+---
+
+# Input
+
+```svelte
+<!-- add your styles here -->
+<style>
+</style>
+
+<!-- here's the actual HTML -->
+<h1>Title</h1>
+
+<!-- code goes here -->
+<script>
+</script>
+
+<!-- svelte options -->
+<svelte:options />
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,13 @@
+-<!-- svelte options -->
+-<svelte:options />
++<!-- add your styles here -->
++<style>
++</style>
++
++<!-- here's the actual HTML -->
++<h1>Title</h1>
+ 
+ <!-- code goes here -->
+ <script>
+ </script>
+ 
+-<!-- here's the actual HTML -->
+-<h1>Title</h1>
+-
+-<!-- add your styles here -->
+-<style>
+-</style>
++<!-- svelte options -->
++<svelte:options />
+```
+
+# Output
+
+```svelte
+<!-- add your styles here -->
+<style>
+</style>
+
+<!-- here's the actual HTML -->
+<h1>Title</h1>
+
+<!-- code goes here -->
+<script>
+</script>
+
+<!-- svelte options -->
+<svelte:options />
+```

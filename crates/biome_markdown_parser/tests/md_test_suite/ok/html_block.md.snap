@@ -19,8 +19,9 @@ Next paragraph after blank line.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHtmlBlock {
             indent: MdIndentTokenList [],
@@ -52,9 +53,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..101
+0: MD_ROOT@0..101
   0: (empty)
-  1: MD_BLOCK_LIST@0..101
+  1: (empty)
+  2: MD_BLOCK_LIST@0..101
     0: MD_HTML_BLOCK@0..66
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HTML_CONTENT@0..66
@@ -69,6 +71,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@68..100 "Next paragraph after blank line." [] []
         1: MD_TEXTUAL@100..101
           0: MD_TEXTUAL_LITERAL@100..101 "\n" [] []
-  2: EOF@101..101 "" [] []
+  3: EOF@101..101 "" [] []
 
 ```

@@ -61,9 +61,9 @@ CssRoot {
                                                                     value_token: IDENT@26..34 "--scheme" [] [],
                                                                 },
                                                                 colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
-                                                                value: ScssExpression {
-                                                                    items: ScssExpressionItemList [
-                                                                        CssIdentifier {
+                                                                value: CssCustomPropertyValue {
+                                                                    components: CssCustomPropertyComponentList [
+                                                                        CssCustomIdentifier {
                                                                             value_token: IDENT@36..40 "dark" [] [],
                                                                         },
                                                                     ],
@@ -195,9 +195,9 @@ CssRoot {
                                 0: CSS_DASHED_IDENTIFIER@26..34
                                   0: IDENT@26..34 "--scheme" [] []
                                 1: COLON@34..36 ":" [] [Whitespace(" ")]
-                                2: SCSS_EXPRESSION@36..40
-                                  0: SCSS_EXPRESSION_ITEM_LIST@36..40
-                                    0: CSS_IDENTIFIER@36..40
+                                2: CSS_CUSTOM_PROPERTY_VALUE@36..40
+                                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@36..40
+                                    0: CSS_CUSTOM_IDENTIFIER@36..40
                                       0: IDENT@36..40 "dark" [] []
                               1: (empty)
                             3: R_PAREN@40..41 ")" [] []

@@ -83,12 +83,27 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssCustomMediaAtRuleDeclarator" => {
             lang::CssCustomMediaAtRuleDeclarator::KIND_SET.iter().next()
         }
+        "CssCustomPropertyBracedBlock" => {
+            lang::CssCustomPropertyBracedBlock::KIND_SET.iter().next()
+        }
+        "CssCustomPropertyBracketedBlock" => lang::CssCustomPropertyBracketedBlock::KIND_SET
+            .iter()
+            .next(),
+        "CssCustomPropertyDelimiter" => lang::CssCustomPropertyDelimiter::KIND_SET.iter().next(),
+        "CssCustomPropertyFunction" => lang::CssCustomPropertyFunction::KIND_SET.iter().next(),
+        "CssCustomPropertyParenthesizedBlock" => {
+            lang::CssCustomPropertyParenthesizedBlock::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssCustomPropertyValue" => lang::CssCustomPropertyValue::KIND_SET.iter().next(),
         "CssDashedIdentifier" => lang::CssDashedIdentifier::KIND_SET.iter().next(),
         "CssDeclaration" => lang::CssDeclaration::KIND_SET.iter().next(),
         "CssDeclarationBlock" => lang::CssDeclarationBlock::KIND_SET.iter().next(),
         "CssDeclarationImportant" => lang::CssDeclarationImportant::KIND_SET.iter().next(),
         "CssDeclarationOrAtRuleBlock" => lang::CssDeclarationOrAtRuleBlock::KIND_SET.iter().next(),
         "CssDeclarationOrRuleBlock" => lang::CssDeclarationOrRuleBlock::KIND_SET.iter().next(),
+        "CssDeclarationSnippetRoot" => lang::CssDeclarationSnippetRoot::KIND_SET.iter().next(),
         "CssDeclarationWithSemicolon" => lang::CssDeclarationWithSemicolon::KIND_SET.iter().next(),
         "CssDocumentAtRule" => lang::CssDocumentAtRule::KIND_SET.iter().next(),
         "CssDocumentCustomMatcher" => lang::CssDocumentCustomMatcher::KIND_SET.iter().next(),
@@ -400,6 +415,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         }
         "ScssParentSelectorValue" => lang::ScssParentSelectorValue::KIND_SET.iter().next(),
         "ScssParenthesizedExpression" => lang::ScssParenthesizedExpression::KIND_SET.iter().next(),
+        "ScssPartialCombinatorSelector" => {
+            lang::ScssPartialCombinatorSelector::KIND_SET.iter().next()
+        }
         "ScssPlaceholderSelector" => lang::ScssPlaceholderSelector::KIND_SET.iter().next(),
         "ScssPlainImport" => lang::ScssPlainImport::KIND_SET.iter().next(),
         "ScssReturnAtRule" => lang::ScssReturnAtRule::KIND_SET.iter().next(),
@@ -489,10 +507,16 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssCounterStyleAtRuleDeclarator" => &[("name", 1)],
         "CssCustomMediaAtRule" => &[("declarator", 0)],
         "CssCustomMediaAtRuleDeclarator" => &[("name", 1), ("queries", 2)],
+        "CssCustomPropertyBracedBlock" => &[("components", 1)],
+        "CssCustomPropertyBracketedBlock" => &[("components", 1)],
+        "CssCustomPropertyFunction" => &[("name", 0), ("components", 2)],
+        "CssCustomPropertyParenthesizedBlock" => &[("components", 1)],
+        "CssCustomPropertyValue" => &[("components", 0)],
         "CssDeclaration" => &[("property", 0), ("important", 1)],
         "CssDeclarationBlock" => &[("declarations", 1)],
         "CssDeclarationOrAtRuleBlock" => &[("items", 1)],
         "CssDeclarationOrRuleBlock" => &[("items", 1)],
+        "CssDeclarationSnippetRoot" => &[("declarations", 0)],
         "CssDeclarationWithSemicolon" => &[("declaration", 0)],
         "CssDocumentAtRule" => &[("matchers", 1), ("block", 2)],
         "CssDocumentCustomMatcher" => &[("value", 2)],
@@ -685,7 +709,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],
-        "ScssMediaQuery" => &[("query", 0)],
+        "ScssMediaQuery" => &[("head", 0), ("tail", 1)],
         "ScssMixinAtRule" => &[("name", 1), ("parameters", 2), ("block", 3)],
         "ScssModuleConfiguration" => &[("name", 0), ("value", 2), ("modifier", 3)],
         "ScssModuleMemberAccess" => &[("module", 0), ("member", 2)],
@@ -696,6 +720,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssParentSelector" => &[("suffix", 1)],
         "ScssParentSelectorSuffix" => &[("items", 0)],
         "ScssParenthesizedExpression" => &[("expression", 1)],
+        "ScssPartialCombinatorSelector" => &[("left", 0)],
         "ScssPlaceholderSelector" => &[("name", 1)],
         "ScssPlainImport" => &[("url", 0), ("layer", 1), ("supports", 2), ("media", 3)],
         "ScssReturnAtRule" => &[("value", 1)],

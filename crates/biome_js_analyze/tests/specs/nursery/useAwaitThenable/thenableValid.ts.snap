@@ -7,17 +7,33 @@ expression: thenableValid.ts
 /* should not generate diagnostics */
 
 interface Thenable<T> { then(onfulfilled: (value: T) => void): void; }
+interface UnknownThen { then: unknown; }
+interface CallableThen { (value: number): void; }
+interface InterfaceThen { then: CallableThen; }
+type Recursive = Recursive;
+interface RecursiveThen { then: Recursive; }
 declare const thenable: Thenable<number>;
 declare const value: unknown;
+declare const unknownThen: UnknownThen;
+declare const interfaceThen: InterfaceThen;
+declare const recursiveThen: RecursiveThen;
 
 // Awaiting a value typed as a custom thenable (a callable `then`) is valid.
 async function awaitDeclaredThenable(): Promise<void> {
     await thenable;
+    await interfaceThen;
 }
 
 // Awaiting a value cast to a custom thenable is valid.
 async function awaitCastThenable(): Promise<void> {
     await (value as Thenable<number>);
+}
+
+// Unknown containers and explicitly unknown members are indeterminate.
+async function awaitUnknownValues(): Promise<void> {
+    await value;
+    await unknownThen;
+    await recursiveThen;
 }
 
 ```

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::prelude::*;
 use crate::utils::case::{is_css_modules_import_export_declaration, is_supports_test_declaration};
 use crate::utils::comment_trivia::has_source_gap_before_token;
@@ -6,12 +8,13 @@ use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, CssContainerStyleInParens,
     CssContainerStyleQueryInParens, CssDeclaration, CssFontFeatureValuesItem, CssGenericProperty,
     CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssLanguage,
-    CssSupportsFeatureDeclaration, TwPluginAtRule,
+    CssSupportsFeatureDeclaration, TwPluginAtRule, is_css_horizontal_whitespace_byte,
+    is_css_newline_byte,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::{format_args, write};
-use biome_rowan::SyntaxResult;
+use biome_rowan::{AstNodeList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssGenericProperty;
@@ -200,7 +203,17 @@ impl<'a> CssPropertyColonComments<'a> {
         let value_boundary_comments = comments.trailing_comments(self.node.syntax());
 
         if value_boundary_comments.is_empty() {
-            return write!(f, [space(), value.format()]);
+            return if is_empty_custom_property_value(&value) {
+                write!(
+                    f,
+                    [
+                        maybe_space(self.has_source_gap_after_colon_token()),
+                        value.format()
+                    ]
+                )
+            } else {
+                write!(f, [space(), value.format()])
+            };
         }
 
         for (index, comment) in value_boundary_comments.iter().enumerate() {
@@ -235,13 +248,20 @@ impl<'a> CssPropertyColonComments<'a> {
         let formatted = format_dangling_comment(comment);
 
         if comment.lines_before() > 0 {
+            if let Some(source_indent) = source_indent_before_comment(comment) {
+                return write!(
+                    f,
+                    [dedent_to_root(&align(
+                        source_indent,
+                        &format_args![hard_line_break(), formatted]
+                    ))]
+                );
+            }
+
             if comment.kind().is_line() {
                 return write!(f, [hard_line_break(), formatted]);
             }
 
-            // Keep the block comment at its raw column:
-            // a { color:
-            // /* note */ red; }
             return write!(
                 f,
                 [dedent_to_root(&format_args![hard_line_break(), formatted])]
@@ -271,6 +291,50 @@ impl<'a> CssPropertyColonComments<'a> {
             .take_while(|piece| piece.text_range().end() <= comment_start)
             .any(|piece| piece.is_whitespace() || piece.is_newline())
     }
+
+    /// Returns whether an empty custom-property value contains whitespace.
+    fn has_source_gap_after_colon_token(&self) -> bool {
+        self.node.colon_token().is_ok_and(|colon| {
+            colon
+                .trailing_trivia()
+                .pieces()
+                .any(|piece| piece.is_whitespace() || piece.is_newline())
+        })
+    }
+}
+
+/// Recovers the horizontal source indentation of an own-line comment.
+///
+/// [`SourceComment`] records vertical spacing but not the exact spaces or tabs
+/// before a comment. For `color:\n        // comment`, this returns eight
+/// spaces. The caller resets structural indentation and aligns the comment
+/// with this prefix.
+fn source_indent_before_comment(comment: &SourceComment<CssLanguage>) -> Option<AlignedStr> {
+    let comment_piece = comment.piece().as_piece();
+    let token = comment_piece.token();
+    let comment_start =
+        usize::from(comment_piece.text_range().start() - token.text_range().start());
+    let source_before_comment = token.text().get(..comment_start)?;
+    let newline = source_before_comment
+        .bytes()
+        .rposition(is_css_newline_byte)?;
+    let source_indent = &source_before_comment[newline + 1..];
+
+    if !source_indent.bytes().all(is_css_horizontal_whitespace_byte) {
+        return None;
+    }
+
+    Some(AlignedStr::Owned(Rc::<str>::from(source_indent)))
+}
+
+fn is_empty_custom_property_value(
+    value: &SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+) -> bool {
+    value
+        .as_ref()
+        .ok()
+        .and_then(|value| value.as_css_custom_property_value())
+        .is_some_and(|value| value.components().is_empty())
 }
 
 /// Returns `true` when `a { font-family: /* note */ Hiragino Sans, sans-serif; }` breaks.

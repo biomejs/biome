@@ -17,8 +17,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -106,9 +107,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..32
+0: MD_ROOT@0..32
   0: (empty)
-  1: MD_BLOCK_LIST@0..32
+  1: (empty)
+  2: MD_BLOCK_LIST@0..32
     0: MD_HEADER@0..6
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -157,6 +159,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@27..31 "#foo" [] []
         1: MD_TEXTUAL@31..32
           0: MD_TEXTUAL_LITERAL@31..32 "\n" [] []
-  2: EOF@32..32 "" [] []
+  3: EOF@32..32 "" [] []
 
 ```

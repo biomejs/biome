@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/range/escaped_attribute_newline/escaped_attribute_newline.css
+---
+
+# Input
+
+```css
+.root {
+    div   span[foo='bar short\
+short']{color:red}
+}
+
+```
+
+
+# Options
+
+```json
+{
+    "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 4
+    }
+}
+```
+
+# Formatted
+
+```css
+.root {
+    div span[foo="bar short\
+short"] {
+        color: red;
+    }
+}
+
+```

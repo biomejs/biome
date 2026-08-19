@@ -23,6 +23,7 @@
 //! See [`inline`] module for inline element parsing.
 
 pub mod fenced_code_block;
+mod frontmatter;
 pub mod header;
 pub mod html_block;
 pub mod inline;
@@ -44,9 +45,10 @@ use biome_parser::{
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
-    at_fenced_code_block, backtick_info_violation, info_string_has_backtick,
-    parse_fenced_code_block, parse_fenced_code_block_force,
+    at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
+    parse_fenced_code_block_force,
 };
+use frontmatter::parse_frontmatter;
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
 use inline::EmphasisContext;
@@ -60,10 +62,12 @@ use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
     line_has_quote_prefix_at_current, parse_quote,
 };
+use std::rc::Rc;
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
+use crate::parser::DeferredInlineFlavor;
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -124,10 +128,13 @@ pub(crate) const MIN_FENCE_RUN_LENGTH: usize = 3;
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);
+    if p.options().frontmatter {
+        parse_frontmatter(p).ok();
+    }
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);
-    m.complete(p, MD_DOCUMENT);
+    m.complete(p, MD_ROOT);
 }
 
 /// Result of updating parenthesis depth when scanning link destinations.
@@ -313,11 +320,6 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         parse_fenced_code_block(p)
     } else if line_starts_with_fence(p) {
         parse_fenced_code_block_force(p)
-    } else if let Some(range) = backtick_info_violation(p) {
-        // Backtick-fence info strings cannot contain backticks (CommonMark §4.5);
-        // emit a diagnostic before delegating to paragraph parsing.
-        p.error(parse_error::info_string_contains_backtick(p, range));
-        parse_paragraph(p)
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);
@@ -332,24 +334,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             parse_paragraph(p)
         }
     } else if at_header(p) {
-        // Check for too many hashes BEFORE try_parse (which would lose diagnostics on rewind)
-        let too_many = check_too_many_hashes(p);
-        let header_result = try_parse(p, |p| {
-            let header = parse_header(p);
-            if header.is_absent() {
-                return Err(());
-            }
-            Ok(header)
-        });
-        if let Ok(parsed) = header_result {
-            parsed
-        } else {
-            // Emit diagnostic for too many hashes (outside try_parse to persist)
-            if let Some((range, count)) = too_many {
-                p.error(parse_error::too_many_hashes(p, range, count));
-            }
-            // Not a valid header, parse as paragraph
-            parse_paragraph(p)
+        match parse_header(p) {
+            Present(header) => Present(header),
+            Absent => parse_paragraph(p),
         }
     } else if at_quote(p) {
         parse_quote(p)
@@ -444,12 +431,7 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     };
 
     if start == p.cur_range().start() {
-        let range = p.cur_range();
-        p.error(parse_error::parse_any_block_no_progress(p, range));
-        if !p.at(T![EOF]) {
-            p.bump_any();
-        }
-        return Absent;
+        return recover_no_progress(p);
     }
 
     if let Present(marker) = &parsed
@@ -459,6 +441,19 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     }
 
     parsed
+}
+
+fn recover_no_progress(p: &mut MarkdownParser) -> ParsedSyntax {
+    let range = p.cur_range();
+    p.error(parse_error::parse_any_block_no_progress(p, range));
+    if p.at(T![EOF]) {
+        return Absent;
+    }
+
+    p.state_mut().link_reference_definition_continuation = false;
+    let bogus = p.start();
+    p.bump_any();
+    Present(bogus.complete(p, MD_BOGUS_BLOCK))
 }
 
 pub(crate) fn with_virtual_line_start<F, R>(p: &mut MarkdownParser, start: TextSize, op: F) -> R
@@ -687,8 +682,10 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
     let inline_start: usize = p.cur_range().start().into();
+    let deferred = p.start_deferred_inline(DeferredInlineFlavor::Paragraph);
     parse_inline_item_list(p);
     let inline_end: usize = p.cur_range().start().into();
+    p.finish_deferred_inline(deferred);
 
     let has_inline_content = inline_has_non_whitespace(p, inline_start, inline_end);
     let allow_setext = has_inline_content && allow_setext_heading(p);
@@ -1356,10 +1353,6 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
-    // The invalid fence still belongs to this paragraph; only add the diagnostic.
-    if let Some(range) = backtick_info_violation(p) {
-        p.error(parse_error::info_string_contains_backtick(p, range));
-    }
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
@@ -1555,7 +1548,7 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
 
 /// Build an emphasis context for the current inline list and install it on the parser.
 /// Returns the previous context so it can be restored.
-fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext> {
+fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisContext>> {
     let source_len = inline_list_source_len(p);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {
@@ -1568,7 +1561,7 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
     let context = EmphasisContext::new(inline_source, base_offset, |label| {
         p.has_link_reference_definition(label)
     });
-    p.set_emphasis_context(Some(context))
+    p.set_new_emphasis_context(context)
 }
 
 // #region inline list length scanning
@@ -2263,51 +2256,20 @@ pub(crate) fn is_whitespace_only(text: &str) -> bool {
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
-/// Check if the current position has too many hashes for an ATX heading (>6).
-///
-/// Returns `Some((range, count))` if there are >6 hashes, `None` otherwise.
-/// This is used to emit a diagnostic BEFORE `try_parse` which would lose it on rewind.
-fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRange, usize)> {
-    p.lookahead(|p| {
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-        if !p.at(T![#]) {
-            return None;
-        }
-
-        // The lexer emits all consecutive `#` as a single HASH token.
-        // Get the count from token text length.
-        let range = p.cur_range();
-        let count = p.cur_text().len();
-
-        if count > MAX_ATX_HEADING_LEVEL {
-            Some((range, count))
-        } else {
-            None
-        }
-    })
-}
-
 /// Check if we're at a valid ATX heading start (1-6 `#` followed by space or EOL).
 /// Uses lookahead to verify without consuming tokens.
 fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
-        // The lexer emits all consecutive `#` as a single HASH token.
-        // Count hash characters from the token's text length.
-        if !p.at(T![#]) {
-            return false;
+        let mut hash_count = 0;
+        while hash_count < MAX_ATX_HEADING_LEVEL && p.eat(T![#]) {
+            hash_count += 1;
         }
 
-        let hash_count = p.cur_text().len();
-
-        // Too many hashes - not a valid heading (must be 1-6)
-        if hash_count > MAX_ATX_HEADING_LEVEL {
+        if hash_count == 0 || p.at(T![#]) {
             return false;
         }
-
-        p.bump(T![#]);
 
         // Check if followed by space, tab, or EOL/EOF per CommonMark §4.2
         // In Markdown, whitespace is significant and included in token text.
@@ -2337,6 +2299,9 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     if p.at(T![EOF]) {
         return Absent;
     }
+    if p.at(TILDE) {
+        p.re_lex_span(tilde_textual_end(p), MD_TEXTUAL_LITERAL);
+    }
     // A construct token that turned out to be plain text (failed emphasis
     // marker, unmatched bracket, ...) would become a one-character node and
     // split the surrounding prose. Re-lex it as plain text so it merges with
@@ -2350,6 +2315,24 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     // as their specific token kinds, but MdTextual expects MD_TEXTUAL_LITERAL.
     p.bump_remap(MD_TEXTUAL_LITERAL);
     Present(m.complete(p, MD_TEXTUAL))
+}
+
+fn tilde_textual_end(p: &MarkdownParser) -> TextSize {
+    let start = p.cur_range().start();
+    let source = p.source_after_current();
+    let mut offset = source.bytes().take_while(|byte| *byte == b'~').count();
+
+    for (_, character) in source[offset..].char_indices() {
+        if matches!(
+            character,
+            '\n' | '\r' | '*' | '_' | '`' | '~' | '<' | '>' | '[' | ']' | '\\' | '!' | '&'
+        ) {
+            break;
+        }
+        offset += character.len_utf8();
+    }
+
+    start + TextSize::from(offset as u32)
 }
 
 /// Construct tokens that, once they fail to open a construct, read as plain
@@ -2393,4 +2376,24 @@ pub(crate) fn try_parse<T, E>(
     }
 
     res
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::MarkdownParserOptions;
+
+    #[test]
+    fn no_progress_recovery_returns_a_bogus_block_after_consuming() {
+        let mut parser = MarkdownParser::new("text", MarkdownParserOptions::default());
+        parser.state_mut().link_reference_definition_continuation = true;
+        let parsed = recover_no_progress(&mut parser);
+
+        assert!(matches!(
+            parsed,
+            Present(marker) if marker.kind(&parser) == MD_BOGUS_BLOCK
+        ));
+        assert!(parser.at(T![EOF]));
+        assert!(!parser.state().link_reference_definition_continuation);
+    }
 }

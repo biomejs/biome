@@ -19,6 +19,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_ATTR_NAME
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_CUSTOM_IDENTIFIER
+            | CSS_BOGUS_DECLARATION
             | CSS_BOGUS_DOCUMENT_MATCHER
             | CSS_BOGUS_FONT_FAMILY_NAME
             | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
@@ -1407,6 +1408,220 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR, children)
             }
+            CSS_CUSTOM_PROPERTY_BRACED_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssCustomPropertyComponentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_CUSTOM_PROPERTY_BRACED_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_CUSTOM_PROPERTY_BRACED_BLOCK, children)
+            }
+            CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['[']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssCustomPropertyComponentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![']']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK, children)
+            }
+            CSS_CUSTOM_PROPERTY_DELIMITER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(
+                        element.kind(),
+                        CSS_DELIM_LITERAL
+                            | T ! [$]
+                            | T ! [#]
+                            | T ! [&]
+                            | T ! [@]
+                            | T ! [,]
+                            | T ! [:]
+                            | T ! [;]
+                            | T ! [/]
+                            | T ! [.]
+                            | T ! [...]
+                            | T ! [::]
+                            | T ! [+]
+                            | T ! [-]
+                            | T ! [*]
+                            | T ! [%]
+                            | T ! [^]
+                            | T ! [~]
+                            | T ! [|]
+                            | T ! [||]
+                            | T ! [=]
+                            | T ! [==]
+                            | T ! [!=]
+                            | T ! [<]
+                            | T ! [<=]
+                            | T ! [>]
+                            | T ! [>=]
+                            | T ! [|=]
+                            | T ! [^=]
+                            | T ! [*=]
+                            | T!["$="]
+                            | T ! [~=]
+                            | T![!]
+                            | T ! [<!--]
+                            | T ! [-->]
+                    )
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_CUSTOM_PROPERTY_DELIMITER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_CUSTOM_PROPERTY_DELIMITER, children)
+            }
+            CSS_CUSTOM_PROPERTY_FUNCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssCustomIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssCustomPropertyComponentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_CUSTOM_PROPERTY_FUNCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_CUSTOM_PROPERTY_FUNCTION, children)
+            }
+            CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssCustomPropertyComponentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK, children)
+            }
+            CSS_CUSTOM_PROPERTY_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssCustomPropertyComponentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_CUSTOM_PROPERTY_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_CUSTOM_PROPERTY_VALUE, children)
+            }
             CSS_DASHED_IDENTIFIER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -1576,6 +1791,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_DECLARATION_OR_RULE_BLOCK, children)
+            }
+            CSS_DECLARATION_SNIPPET_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssDeclarationList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_DECLARATION_SNIPPET_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_DECLARATION_SNIPPET_ROOT, children)
             }
             CSS_DECLARATION_WITH_SEMICOLON => {
                 let mut elements = (&children).into_iter();
@@ -3432,7 +3673,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssMediaTypeName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7869,10 +8110,17 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             SCSS_MEDIA_QUERY => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && ScssInterpolation::can_cast(element.kind())
+                    && CssMediaTypeQuery::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssMediaType::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -8312,6 +8560,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_PARENTHESIZED_EXPRESSION, children)
+            }
+            SCSS_PARTIAL_COMBINATOR_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyCssSelector::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T ! [>] | T ! [+] | T ! [~])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_PARTIAL_COMBINATOR_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_PARTIAL_COMBINATOR_SELECTOR, children)
             }
             SCSS_PLACEHOLDER_SELECTOR => {
                 let mut elements = (&children).into_iter();
@@ -9308,6 +9582,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
             }
+            CSS_CUSTOM_PROPERTY_COMPONENT_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssCustomPropertyComponent::can_cast)
+            }
             CSS_DECLARATION_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssDeclaration::can_cast)
             }
@@ -9425,7 +9702,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_ROOT_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssRootItem::can_cast)
             }
-            CSS_RULE_LIST => Self::make_node_list_syntax(kind, children, AnyCssRule::can_cast),
+            CSS_RULE_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssRuleListItem::can_cast)
+            }
             CSS_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

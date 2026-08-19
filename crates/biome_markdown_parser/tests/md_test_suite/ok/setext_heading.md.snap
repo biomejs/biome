@@ -28,8 +28,9 @@ that spans lines
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdSetextHeader {
             content: MdInlineItemList [
@@ -127,9 +128,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..127
+0: MD_ROOT@0..127
   0: (empty)
-  1: MD_BLOCK_LIST@0..127
+  1: (empty)
+  2: MD_BLOCK_LIST@0..127
     0: MD_SETEXT_HEADER@0..19
       0: MD_INLINE_ITEM_LIST@0..10
         0: MD_TEXTUAL@0..9
@@ -187,6 +189,6 @@ MdDocument {
       1: MD_SETEXT_UNDERLINE_LITERAL@110..126 "================" [] []
     13: MD_NEWLINE@126..127
       0: NEWLINE@126..127 "\n" [] []
-  2: EOF@127..127 "" [] []
+  3: EOF@127..127 "" [] []
 
 ```

@@ -447,7 +447,7 @@ fn parse_keyframes_range_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_ts(TIMELINE_RANGE_NAME_SET);
-    parse_percentage_dimension(p)
+    parse_percentage_dimension(p, CssLexContext::Regular)
         .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
 
     Present(m.complete(p, CSS_KEYFRAMES_RANGE_SELECTOR))
@@ -461,7 +461,7 @@ fn parse_keyframes_percentage_selector(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_percentage_dimension(p).ok();
+    parse_percentage_dimension(p, CssLexContext::Regular).ok();
 
     Present(m.complete(p, CSS_KEYFRAMES_PERCENTAGE_SELECTOR))
 }

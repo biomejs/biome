@@ -1,31 +1,70 @@
 use crate::model::SemanticModel;
 use crate::semantic_model;
 use biome_css_syntax::AnyCssRoot;
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
-use biome_languages::LanguageDb;
+use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
+use biome_rowan::{TextRange, TokenText};
+
+/// The name and source range of an `@property` registration candidate.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CssPropertyDefinition {
+    name: TokenText,
+    range: TextRange,
+}
+
+impl CssPropertyDefinition {
+    pub fn name(&self) -> &str {
+        self.name.text()
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.range
+    }
+}
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn css_model_from_parsed_source(
-    db: &dyn LanguageDb,
+pub(crate) fn css_model_from_parsed_source(db: &dyn Db, file: ParsedSource) -> SemanticModel {
+    let parsed: AnyCssRoot = file.parsed(db).tree();
+    semantic_model(&parsed)
+}
+
+#[salsa::tracked(returns(ref))]
+pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) -> SemanticModel {
+    let parsed: AnyCssRoot = file.parsed(db).tree();
+    semantic_model(&parsed)
+}
+
+/// Returns `@property` registration candidates from a parsed CSS document.
+#[salsa::tracked(returns(ref))]
+pub fn css_property_definitions_from_source(
+    db: &dyn Db,
     file: ParsedSource,
-) -> SemanticModel {
-    let parsed: AnyCssRoot = file.parsed(db).tree();
-    semantic_model(&parsed)
+) -> Vec<CssPropertyDefinition> {
+    let _ = file.parsed(db);
+    collect_property_definitions(css_model_from_parsed_source(db, file))
 }
 
+/// Returns `@property` registration candidates from an embedded CSS document.
 #[salsa::tracked(returns(ref))]
-pub(crate) fn css_model_from_parsed_snippet(
-    db: &dyn LanguageDb,
+pub fn css_property_definitions_from_snippet(
+    db: &dyn Db,
     file: ParsedSnippet,
-) -> SemanticModel {
-    let parsed: AnyCssRoot = file.parsed(db).tree();
-    semantic_model(&parsed)
+) -> Vec<CssPropertyDefinition> {
+    let _ = file.parsed(db);
+    collect_property_definitions(css_model_from_parsed_snippet(db, file))
 }
 
-pub fn css_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
-where
-    Db: LanguageDb,
-{
+fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
+    model
+        .global_custom_variables()
+        .at_property_registration_candidates()
+        .map(|property| CssPropertyDefinition {
+            name: property.name().clone(),
+            range: property.range(),
+        })
+        .collect()
+}
+
+pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db SemanticModel {
     match file {
         AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, *s),
         AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, *s),
@@ -36,6 +75,9 @@ where
 mod tests {
     use super::css_model_from_parsed_source;
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::property_syntax::{
+        PropertySyntax, PropertySyntaxComponentName, PropertySyntaxResult, PropertySyntaxType,
+    };
     use biome_db::ParsedSource;
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
@@ -117,6 +159,24 @@ mod tests {
         model.rules().len()
     }
 
+    #[salsa::tracked]
+    fn property_syntax_type(db: &dyn LanguageDb, file: ParsedSource) -> Option<PropertySyntaxType> {
+        let model = css_model_from_parsed_source(db, file);
+        let at_property = model
+            .global_custom_variables()
+            .get("--value")?
+            .at_property()?;
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
+            at_property.syntax()
+        else {
+            return None;
+        };
+        let PropertySyntaxComponentName::Type(syntax_type) = components.first()?.name else {
+            return None;
+        };
+        Some(syntax_type)
+    }
+
     #[test]
     fn selector_change_does_recompute() {
         let mut db = TestDb::new();
@@ -163,6 +223,24 @@ mod tests {
     }
 
     #[test]
+    fn incomplete_property_value_does_not_panic() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, ".incomplete {\n  height: 1px\n}\n");
+
+        assert_eq!(rule_count(&db, file), 1);
+
+        let new_parsed = parse_css(
+            ".incomplete {\n  height:\n}\n",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        assert_eq!(rule_count(&db, file), 1);
+    }
+
+    #[test]
     fn declaration_count_change_does_recompute_downstream() {
         let mut db = TestDb::new();
         let file = make_file(&db, "p { color: red; }");
@@ -205,6 +283,101 @@ mod tests {
 
         assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
         assert_function_query_was_not_run(&db, rule_count, file, &events);
+    }
+
+    #[test]
+    fn at_property_whitespace_change_does_not_recompute_downstream() {
+        let mut db = TestDb::new();
+        let file = make_file(
+            &db,
+            r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#,
+        );
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Color)
+        );
+
+        let new_parsed = parse_css(
+            r#"@property  --value  { syntax:  "<color>"; inherits:  true; initial-value:  red; }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        db.clear_salsa_events();
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Color)
+        );
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
+        assert_function_query_was_not_run(&db, property_syntax_type, file, &events);
+    }
+
+    #[test]
+    fn at_property_syntax_change_recomputes_downstream() {
+        let mut db = TestDb::new();
+        let file = make_file(
+            &db,
+            r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#,
+        );
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Color)
+        );
+
+        let new_parsed = parse_css(
+            r#"@property --value { syntax: "<length>"; inherits: true; initial-value: 10px; }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        db.clear_salsa_events();
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Length)
+        );
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
+        assert_function_query_was_run(&db, property_syntax_type, file, &events);
+    }
+
+    #[test]
+    fn shadowed_at_property_change_recomputes_downstream() {
+        let mut db = TestDb::new();
+        let file = make_file(
+            &db,
+            r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --value { syntax: "<length>"; inherits: true; initial-value: 1px; }"#,
+        );
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Length)
+        );
+
+        let new_parsed = parse_css(
+            r#"@property --value { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --value { syntax: "<length>"; inherits: true; initial-value: 1px; }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        db.clear_salsa_events();
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Length)
+        );
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
+        assert_function_query_was_run(&db, property_syntax_type, file, &events);
     }
 
     #[test]

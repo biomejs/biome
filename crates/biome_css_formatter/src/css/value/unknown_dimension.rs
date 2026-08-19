@@ -1,4 +1,7 @@
-use crate::{prelude::*, utils::string_utils::FormatDimensionUnit};
+use crate::{
+    prelude::*,
+    utils::{custom_property::is_raw_custom_property_component, string_utils::FormatDimensionUnit},
+};
 use biome_css_syntax::{CssUnknownDimension, CssUnknownDimensionFields};
 use biome_formatter::write;
 
@@ -10,6 +13,10 @@ impl FormatNodeRule<CssUnknownDimension> for FormatCssUnknownDimension {
             value_token,
             unit_token,
         } = node.as_fields();
+
+        if is_raw_custom_property_component(node) {
+            return write!(f, [value_token.format(), unit_token.format()]);
+        }
 
         let var_name = write!(
             f,

@@ -40,8 +40,11 @@ jobs:
           - os: depot-windows-2022
           - os: depot-ubuntu-24.04-arm-16
     steps:
+      - name: Enable Git long paths
+        if: matrix.os == 'depot-windows-2022'
+        run: git config --system core.longpaths true
       - name: Checkout PR Branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -75,9 +78,9 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install cargo-deny
-        uses: taiki-e/install-action@c7eb1735f09259a5035e8e5d44b1406b1cddc0fb # v2.83.0
+        uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
         with:
           tool: cargo-deny
       - run: cargo deny check bans
@@ -92,8 +95,11 @@ jobs:
           - os: depot-windows-2022-16
           - os: depot-ubuntu-24.04-arm-16
     steps:
+      - name: Enable Git long paths
+        if: matrix.os == 'depot-windows-2022-16'
+        run: git config --system core.longpaths true
       - name: Checkout PR branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -115,7 +121,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -125,16 +131,14 @@ jobs:
       - name: Build Biome debug binary
         run: cargo build --bin biome
       - name: Run tests
-        run: |
-          cd e2e-tests
-          sh test-all.sh
+        run: ./e2e-tests/test-all.sh
 
   documentation:
     name: Documentation
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:

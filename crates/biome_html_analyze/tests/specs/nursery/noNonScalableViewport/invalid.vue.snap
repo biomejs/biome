@@ -1,0 +1,56 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+	<meta :name="'viewport'" :content="'width=device-width, user-scalable=no'" />
+	<meta v-bind:name="'viewport'" v-bind:content="'user-scalable = no'" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:27 lint/nursery/noNonScalableViewport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The viewport disables user scaling.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<meta :name="'viewport'" :content="'width=device-width, user-scalable=no'" />
+      │ 	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<meta v-bind:name="'viewport'" v-bind:content="'user-scalable = no'" />
+    5 │ </template>
+  
+  i Disabling zoom can make page content difficult to read for people with low vision.
+  
+  i Remove the user-scalable=no directive from the content attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:33 lint/nursery/noNonScalableViewport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The viewport disables user scaling.
+  
+    2 │ <template>
+    3 │ 	<meta :name="'viewport'" :content="'width=device-width, user-scalable=no'" />
+  > 4 │ 	<meta v-bind:name="'viewport'" v-bind:content="'user-scalable = no'" />
+      │ 	                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Disabling zoom can make page content difficult to read for people with low vision.
+  
+  i Remove the user-scalable=no directive from the content attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1508,8 +1508,8 @@ CssRoot {
                                         ],
                                     },
                                     colon_token: COLON@1171..1173 ":" [] [Whitespace(" ")],
-                                    value: ScssExpression {
-                                        items: ScssExpressionItemList [
+                                    value: CssCustomPropertyValue {
+                                        components: CssCustomPropertyComponentList [
                                             CssRegularDimension {
                                                 value_token: CSS_NUMBER_LITERAL@1173..1175 "10" [] [],
                                                 unit_token: IDENT@1175..1177 "px" [] [],
@@ -1549,9 +1549,9 @@ CssRoot {
                                         ],
                                     },
                                     colon_token: COLON@1197..1199 ":" [] [Whitespace(" ")],
-                                    value: ScssExpression {
-                                        items: ScssExpressionItemList [
-                                            CssIdentifier {
+                                    value: CssCustomPropertyValue {
+                                        components: CssCustomPropertyComponentList [
+                                            CssCustomIdentifier {
                                                 value_token: IDENT@1199..1202 "red" [] [],
                                             },
                                         ],
@@ -2463,8 +2463,8 @@ CssRoot {
                               0: IDENT@1166..1170 "prop" [] []
                       3: R_CURLY@1170..1171 "}" [] []
                 1: COLON@1171..1173 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@1173..1177
-                  0: SCSS_EXPRESSION_ITEM_LIST@1173..1177
+                2: CSS_CUSTOM_PROPERTY_VALUE@1173..1177
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1173..1177
                     0: CSS_REGULAR_DIMENSION@1173..1177
                       0: CSS_NUMBER_LITERAL@1173..1175 "10" [] []
                       1: IDENT@1175..1177 "px" [] []
@@ -2488,9 +2488,9 @@ CssRoot {
                               0: IDENT@1192..1196 "slot" [] []
                       3: R_CURLY@1196..1197 "}" [] []
                 1: COLON@1197..1199 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@1199..1202
-                  0: SCSS_EXPRESSION_ITEM_LIST@1199..1202
-                    0: CSS_IDENTIFIER@1199..1202
+                2: CSS_CUSTOM_PROPERTY_VALUE@1199..1202
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1199..1202
+                    0: CSS_CUSTOM_IDENTIFIER@1199..1202
                       0: IDENT@1199..1202 "red" [] []
               1: (empty)
             1: SEMICOLON@1202..1203 ";" [] []

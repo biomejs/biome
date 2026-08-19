@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
     JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
+use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};

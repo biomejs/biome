@@ -1,5 +1,8 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
+use crate::utils::component_value_list::{
+    ValueListLayout, get_value_list_layout, has_value_boundary_comments,
+};
 use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
@@ -10,8 +13,9 @@ use biome_css_syntax::{
     is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
     scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
+use biome_formatter::separated::TrailingSeparator;
 use biome_formatter::{format_args, write};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 
 /// Layout for SCSS list expressions.
 pub(crate) struct ScssListLayout<'a> {
@@ -83,6 +87,11 @@ impl<'a> ScssListLayout<'a> {
                         .should_expand(true)
                 ]
             );
+        }
+
+        if should_preserve_source_group_breaks(self.node, f) {
+            let elements = format_elements_with_source_breaks(&elements);
+            return write!(f, [group(&format_args![soft_line_break(), elements])]);
         }
 
         write!(
@@ -203,6 +212,69 @@ impl<'a> ScssListLayout<'a> {
     pub(crate) fn owns_dangling_comments(&self, f: &CssFormatter) -> bool {
         owns_include_closing_comments(self.node.syntax(), f)
     }
+}
+
+fn format_elements_with_source_breaks(
+    elements: &ScssListExpressionElementList,
+) -> impl Format<CssFormatContext> + '_ {
+    format_with(|f| {
+        let separated = elements
+            .format_separated(",")
+            .with_trailing_separator(TrailingSeparator::Omit);
+
+        for (index, (element, formatted)) in elements.elements().zip(separated).enumerate() {
+            if index > 0 {
+                if element
+                    .node()
+                    .is_ok_and(|element| element.syntax().has_leading_newline())
+                {
+                    write!(f, [hard_line_break()])?;
+                } else {
+                    write!(f, [soft_line_break_or_space()])?;
+                }
+            }
+            write!(f, [formatted])?;
+        }
+
+        Ok(())
+    })
+}
+
+/// Returns whether an SCSS declaration value preserves source breaks between
+/// comma groups.
+///
+/// ```scss
+/// a {
+///   grid-template-columns: $a/* boundary */$b,
+///   $c $d;
+/// }
+/// ```
+///
+/// The boundary comment can expand the first group. Preserving the source
+/// break keeps `$c $d` aligned with that group instead of nesting it under the
+/// expanded content.
+fn should_preserve_source_group_breaks(node: &ScssListExpression, f: &CssFormatter) -> bool {
+    let elements = node.elements();
+    let Some(items) = node.parent::<ScssExpressionItemList>() else {
+        return false;
+    };
+
+    elements.len() > 1
+        && matches!(
+            get_value_list_layout(&items, f.comments(), f),
+            ValueListLayout::PreserveInline
+        )
+        && elements.iter().filter_map(Result::ok).any(|element| {
+            let Ok(value) = element.value() else {
+                return false;
+            };
+            let Some(expression) = value.as_scss_expression() else {
+                return false;
+            };
+
+            let items = expression.items();
+            has_value_boundary_comments(f.comments().dangling_comments(items.syntax()))
+        })
 }
 
 /// Detects `@include mix($arg: (a, b) /* end */)`, where comments force expansion.

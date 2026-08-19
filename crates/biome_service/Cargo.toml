@@ -11,10 +11,15 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = false
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [package.metadata.cargo-udeps.ignore]
 development = ["biome_service"]
+
+[[bench]]
+harness           = false
+name              = "pull_diagnostics"
+required-features = ["type_inference"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
@@ -28,6 +33,7 @@ biome_css_syntax         = { workspace = true, optional = true }
 biome_db                 = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_diagnostics        = { workspace = true, features = ["camino"] }
+biome_embeds             = { workspace = true, optional = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_fs                 = { workspace = true, features = ["serde"] }
 biome_glob               = { workspace = true }
@@ -56,6 +62,7 @@ biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_json"] }
+biome_markdown_analyze   = { workspace = true, optional = true }
 biome_markdown_formatter = { workspace = true, optional = true }
 biome_markdown_parser    = { workspace = true, optional = true }
 biome_markdown_syntax    = { workspace = true, optional = true }
@@ -69,10 +76,10 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 biome_unicode_table      = { workspace = true }
-biome_workspace_db       = { workspace = true }
 biome_yaml_formatter     = { workspace = true, features = ["serde"], optional = true }
 biome_yaml_parser        = { workspace = true, optional = true }
 biome_yaml_syntax        = { workspace = true, optional = true }
+boxcar                   = { workspace = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
@@ -98,12 +105,19 @@ web-time                 = { workspace = true }
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
 biome_service       = { path = ".", features = ["testing"] }
+divan               = { package = "codspeed-divan-compat", version = "=5.0.1" }
 insta               = { workspace = true }
 static_assertions   = { workspace = true }
 
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
 [features]
 # To parse snippets and embeds inside HTML files
-html_embeds                  = ["biome_workspace_db/html_embeds", "lang_css", "lang_html", "lang_js", "lang_json"]
+html_embeds                  = ["dep:biome_embeds", "lang_css", "lang_html", "lang_js", "lang_json"]
 # JavaScript embeds
 js_embeds                    = ["lang_css", "lang_graphql", "lang_js"]
 js_plugin                    = ["biome_plugin_loader/js_plugin", "plugins"]
@@ -157,6 +171,7 @@ lang_json                    = [
 lang_md                      = [
   "biome_configuration/lang_md",
   "biome_languages/lang_md",
+  "dep:biome_markdown_analyze",
   "dep:biome_markdown_formatter",
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
@@ -170,7 +185,7 @@ lang_yaml                    = [
   "dep:biome_yaml_syntax"
 ]
 # TODO does it need lang_js, lang_html and lang_css? To verify
-module_graph                 = ["biome_workspace_db/module_graph", "dep:biome_module_graph"]
+module_graph                 = ["dep:biome_module_graph"]
 plugins                      = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
 report_scss_exclusive_syntax = []
 schema                       = [

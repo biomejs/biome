@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/*_test.*", "!**/*_tests.*", "build.rs", "src/**/*"]
 publish              = true
 
 [[bench]]
@@ -18,6 +19,10 @@ name    = "js_analyzer"
 [[bench]]
 harness = false
 name    = "use_sorted_classes_parser"
+
+[[bench]]
+harness = false
+name    = "use_sorted_classes_v4"
 
 [dependencies]
 biome_analyze             = { workspace = true }
@@ -30,6 +35,7 @@ biome_db                  = { workspace = true }
 biome_deserialize         = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros  = { workspace = true }
 biome_diagnostics         = { workspace = true }
+biome_embeds              = { workspace = true }
 biome_fs                  = { workspace = true }
 biome_glob                = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_js_factory          = { workspace = true }
@@ -43,15 +49,16 @@ biome_module_replacements = { workspace = true }
 biome_package             = { workspace = true }
 biome_parser              = { workspace = true }
 biome_project_layout      = { workspace = true }
+biome_react_compiler      = { workspace = true }
 biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
 biome_rule_options        = { workspace = true }
 biome_string_case         = { workspace = true, features = ["biome_rowan"] }
 biome_suppression         = { workspace = true }
+biome_tailwind_logic      = { workspace = true }
 biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }
-biome_workspace_db        = { workspace = true, features = ["html_embeds"] }
 bitvec                    = "1.0.1"
 camino                    = { workspace = true }
 either                    = { workspace = true }
@@ -72,7 +79,7 @@ biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion           = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta               = { workspace = true, features = ["glob"] }
 salsa               = { workspace = true }
 tests_macros        = { path = "../tests_macros" }

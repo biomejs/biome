@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_dashed_identifier,
@@ -87,7 +88,7 @@ pub(crate) fn parse_any_scss_value_with_context(
     } else if is_at_scss_parent_selector_value(p) {
         parse_scss_parent_selector_value(p)
     } else {
-        parse_scss_interpolated_string(p)
+        parse_scss_interpolated_string(p, CssLexContext::Regular)
     }
 }
 

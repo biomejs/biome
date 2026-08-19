@@ -48,7 +48,7 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     /// Used by [crate::runner::ProcessFile::execute] to determine which kind of support kind the file has
     fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind>;
 
-    /// It should returns the value of `--stdin-file-path`
+    /// Returns the value of `--stdin-file-path` for commands that support standard input.
     fn get_stdin_file_path(&self) -> Option<&str>;
 
     /// Derives the [ScanKind] for this execution
@@ -93,6 +93,21 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     /// `biome lint` command
     fn is_lint(&self) -> bool {
         false
+    }
+
+    fn is_rule_profiling_enabled(&self) -> bool {
+        false
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        false
+    }
+
+    /// Drains the type-inference profile owned by this execution.
+    fn take_type_inference_profile(
+        &self,
+    ) -> Option<biome_module_graph::type_inference::profiling::TypeInferenceProfileSnapshot> {
+        None
     }
 
     /// The [Category] that should be used when running the command.

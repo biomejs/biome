@@ -1,18 +1,15 @@
-//! This module represents the database queries used by the module graph.
+//! Salsa-backed queries over module graph data.
 //!
-//! The queries are defined in terms of `ModuleInfo` inputs.
+//! Tracked queries cache their results and record the inputs they inspect so
+//! Salsa can rerun affected queries after a change. Queries with compound input
+//! values may use interned input structs, which provide stable identities for
+//! equal values but do not cache results by themselves.
 //!
-//! The queries are tracked so that Salsa can invalidate them when the inputs
-//! change.
-//!
-//! The queries are also interned, so that Salsa can reuse the same computation
-//! when the inputs are the same.
-//!
-//! This module should contain only tracked functions, exposed to the consumers. Middle
-//! functions that aren't queries should be moved somewhere else, unless they are used
-//! directly by the tracked functions e.g. cycle detection
+//! Public query entry points live in this module. Helpers stay near the query
+//! whose behavior they implement.
 
 mod css;
+mod js_scc;
 mod type_inference;
 
 use crate::{JsExport, JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind};
@@ -21,6 +18,7 @@ use biome_jsdoc_comment::JsdocComment;
 
 pub use crate::db::type_inference::InferredModuleTypes;
 pub use css::*;
+pub use js_scc::*;
 pub use type_inference::*;
 
 // #region EXPORTED TRACKED QUERIES
@@ -180,10 +178,10 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
 /// Generic symbol used by queries to track a generic "symbol", which can represent everything (variable name, class name, etc.)
 pub struct SymbolFromModuleInfo {
     #[returns(clone)]
-    name: String,
+    pub(crate) name: String,
 
     #[returns(ref)]
-    module: ModuleInfo,
+    pub(crate) module: ModuleInfo,
 }
 
 // #endregion

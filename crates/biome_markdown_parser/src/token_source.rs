@@ -49,6 +49,16 @@ impl<'source> MarkdownTokenSource<'source> {
     pub fn from_str(source: &'source str) -> Self {
         let lexer = MarkdownLexer::from_str(source);
 
+        Self::from_lexer(lexer)
+    }
+
+    pub fn from_range(source: &'source str, range: TextRange) -> Option<Self> {
+        let lexer = MarkdownLexer::from_range(source, range)?;
+
+        Some(Self::from_lexer(lexer))
+    }
+
+    fn from_lexer(lexer: MarkdownLexer<'source>) -> Self {
         let buffered = BufferedLexer::new(lexer);
         let mut source = MarkdownTokenSource::new(buffered);
 
@@ -97,13 +107,18 @@ impl<'source> MarkdownTokenSource<'source> {
     pub fn source_after_current(&self) -> &str {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
+        let end = self.lexer.lexer().range_end();
         let source = self.lexer.source();
-        &source[start..]
+        &source[start..end]
     }
 
     /// Returns the full source text.
     pub fn source_text(&self) -> &str {
         self.lexer.source()
+    }
+
+    pub fn has_frontmatter_closing_fence(&self) -> bool {
+        self.lexer.lexer().has_frontmatter_closing_fence()
     }
 
     /// Count leading indentation on the current line, including whitespace

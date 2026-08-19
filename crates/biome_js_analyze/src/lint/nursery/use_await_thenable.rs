@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::JsAwaitExpression;
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::AstNode;
 use biome_rule_options::use_await_thenable::UseAwaitThenableOptions;
 
@@ -11,12 +12,7 @@ use crate::services::typed::Typed;
 declare_lint_rule! {
     /// Enforce that `await` is _only_ used on `Promise` values.
     ///
-    /// :::caution
-    /// At the moment, this rule only checks for instances of the global
-    /// `Promise` class. This is a major shortcoming compared to the ESLint
-    /// rule if you are using custom `Promise`-like implementations such as
-    /// [Bluebird](http://bluebirdjs.com/) or in-house solutions.
-    /// :::
+    /// Values with a callable `then` member are treated as thenable.
     ///
     /// ## Examples
     ///
@@ -59,15 +55,21 @@ impl Rule for UseAwaitThenable {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.argument().ok()?;
-        let ty = ctx.inferred_type_of_expression(&expression)?;
+        let ty = ctx.type_of_expression(&expression)?;
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
 
-        let is_maybe_promise = ty.is_promise_instance()
-            || ty.has_promise_variant()
-            || ctx.inferred_expression_has_callable_member(&expression, "then");
-        (ty.is_inferred() && !is_maybe_promise).then_some(())
+        match ty.is_promise_instance() {
+            Some(true) | None => return None,
+            Some(false) => {}
+        }
+
+        match ctx.classify_callable_member(&expression, "then") {
+            TypeInferenceClassification::NoMatch => Some(()),
+            TypeInferenceClassification::Match
+            | TypeInferenceClassification::Indeterminate => None,
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

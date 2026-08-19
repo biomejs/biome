@@ -1,0 +1,266 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+@sm:flex @md:flex @lg:flex @max-lg:flex @min-[400px]:flex @container:flex
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@0..3 "@sm" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@3..4 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@4..9 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@9..12 "@md" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@12..13 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@13..18 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@18..21 "@lg" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@21..22 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@22..27 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@27..31 "@max" [] [],
+                        },
+                        DASH@31..32 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@32..34 "lg" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@34..35 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@35..40 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@40..44 "@min" [] [],
+                        },
+                        DASH@44..45 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@45..46 "[" [] [],
+                            value_token: TW_SELECTOR@46..51 "400px" [] [],
+                            r_brack_token: R_BRACKET@51..52 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@52..53 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@53..58 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@58..68 "@container" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@68..69 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@69..73 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@73..73 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..73
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..73
+    0: TW_FULL_CANDIDATE@0..9
+      0: TW_VARIANT_LIST@0..4
+        0: TW_VARIANT_EXPRESSION@0..3
+          0: TW_VARIANT_SEGMENT_LIST@0..3
+            0: TW_NAMED_VARIANT_SEGMENT@0..3
+              0: TW_VARIANT_SEGMENT@0..3 "@sm" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@3..4 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@4..9
+        0: TW_BASE@4..9 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@9..18
+      0: TW_VARIANT_LIST@9..13
+        0: TW_VARIANT_EXPRESSION@9..12
+          0: TW_VARIANT_SEGMENT_LIST@9..12
+            0: TW_NAMED_VARIANT_SEGMENT@9..12
+              0: TW_VARIANT_SEGMENT@9..12 "@md" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@12..13 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@13..18
+        0: TW_BASE@13..18 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@18..27
+      0: TW_VARIANT_LIST@18..22
+        0: TW_VARIANT_EXPRESSION@18..21
+          0: TW_VARIANT_SEGMENT_LIST@18..21
+            0: TW_NAMED_VARIANT_SEGMENT@18..21
+              0: TW_VARIANT_SEGMENT@18..21 "@lg" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@21..22 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@22..27
+        0: TW_BASE@22..27 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@27..40
+      0: TW_VARIANT_LIST@27..35
+        0: TW_VARIANT_EXPRESSION@27..34
+          0: TW_VARIANT_SEGMENT_LIST@27..34
+            0: TW_NAMED_VARIANT_SEGMENT@27..31
+              0: TW_VARIANT_SEGMENT@27..31 "@max" [] []
+            1: DASH@31..32 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@32..34
+              0: TW_VARIANT_SEGMENT@32..34 "lg" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@34..35 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@35..40
+        0: TW_BASE@35..40 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@40..58
+      0: TW_VARIANT_LIST@40..53
+        0: TW_VARIANT_EXPRESSION@40..52
+          0: TW_VARIANT_SEGMENT_LIST@40..52
+            0: TW_NAMED_VARIANT_SEGMENT@40..44
+              0: TW_VARIANT_SEGMENT@40..44 "@min" [] []
+            1: DASH@44..45 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@45..52
+              0: L_BRACKET@45..46 "[" [] []
+              1: TW_SELECTOR@46..51 "400px" [] []
+              2: R_BRACKET@51..52 "]" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@52..53 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@53..58
+        0: TW_BASE@53..58 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    5: TW_FULL_CANDIDATE@58..73
+      0: TW_VARIANT_LIST@58..69
+        0: TW_VARIANT_EXPRESSION@58..68
+          0: TW_VARIANT_SEGMENT_LIST@58..68
+            0: TW_NAMED_VARIANT_SEGMENT@58..68
+              0: TW_VARIANT_SEGMENT@58..68 "@container" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@68..69 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@69..73
+        0: TW_BASE@69..73 "flex" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@73..73 "" [] []
+
+```

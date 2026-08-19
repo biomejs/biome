@@ -314,6 +314,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_SPACE_LITERAL",
         "CSS_URL_VALUE_RAW_LITERAL",
         "CSS_COLOR_LITERAL",
+        "CSS_DELIM_LITERAL",
         // Special literal token to represent a number that is _immediately_
         // followed by an identifier, which means it is a `<dimension>` token
         // according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
@@ -339,6 +340,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ROOT",
         "CSS_ROOT_ITEM_LIST",
         "CSS_SNIPPET_ROOT",
+        "CSS_DECLARATION_SNIPPET_ROOT",
         "CSS_RULE_LIST",
         "CSS_QUALIFIED_RULE",
         "CSS_NESTED_QUALIFIED_RULE",
@@ -369,6 +371,13 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_DELIMITER",
+        "CSS_CUSTOM_PROPERTY_VALUE",
+        "CSS_CUSTOM_PROPERTY_COMPONENT_LIST",
+        "CSS_CUSTOM_PROPERTY_DELIMITER",
+        "CSS_CUSTOM_PROPERTY_FUNCTION",
+        "CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK",
+        "CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK",
+        "CSS_CUSTOM_PROPERTY_BRACED_BLOCK",
         "CSS_GENERIC_PROPERTY",
         "CSS_COMPOSES_PROPERTY",
         "CSS_COMPOSES_PROPERTY_VALUE",
@@ -697,6 +706,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "SCSS_MAP_EXPRESSION",
         "SCSS_MAP_EXPRESSION_PAIR",
         "SCSS_MAP_EXPRESSION_PAIR_LIST",
+        "SCSS_PARTIAL_COMBINATOR_SELECTOR",
         "SCSS_PARENT_SELECTOR",
         "SCSS_PARENT_SELECTOR_SUFFIX",
         "SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST",
@@ -732,6 +742,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",
         // Bogus nodes
         "CSS_BOGUS",
+        "CSS_BOGUS_DECLARATION",
         "CSS_BOGUS_BLOCK",
         "CSS_BOGUS_KEYFRAMES_ITEM",
         "CSS_BOGUS_RULE",

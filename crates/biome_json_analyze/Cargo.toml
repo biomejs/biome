@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["build.rs", "src/**/*"]
 publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -41,7 +42,7 @@ rustc-hash                = { workspace = true }
 biome_configuration = { path = "../biome_configuration" }
 biome_json_parser   = { path = "../biome_json_parser" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["lang_json"] }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion           = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 

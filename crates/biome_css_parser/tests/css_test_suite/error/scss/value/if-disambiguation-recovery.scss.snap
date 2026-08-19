@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -65,9 +64,9 @@ CssRoot {
                                                                             value_token: IDENT@30..35 "--foo" [] [],
                                                                         },
                                                                         colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
-                                                                        value: ScssExpression {
-                                                                            items: ScssExpressionItemList [
-                                                                                CssIdentifier {
+                                                                        value: CssCustomPropertyValue {
+                                                                            components: CssCustomPropertyComponentList [
+                                                                                CssCustomIdentifier {
                                                                                     value_token: IDENT@37..40 "bar" [] [],
                                                                                 },
                                                                             ],
@@ -143,9 +142,9 @@ CssRoot {
                                                                             value_token: IDENT@91..96 "--bar" [] [],
                                                                         },
                                                                         colon_token: COLON@96..98 ":" [] [Whitespace(" ")],
-                                                                        value: ScssExpression {
-                                                                            items: ScssExpressionItemList [
-                                                                                CssIdentifier {
+                                                                        value: CssCustomPropertyValue {
+                                                                            components: CssCustomPropertyComponentList [
+                                                                                CssCustomIdentifier {
                                                                                     value_token: IDENT@98..101 "baz" [] [],
                                                                                 },
                                                                             ],
@@ -247,9 +246,9 @@ CssRoot {
                                   0: CSS_DASHED_IDENTIFIER@30..35
                                     0: IDENT@30..35 "--foo" [] []
                                   1: COLON@35..37 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@37..40
-                                    0: SCSS_EXPRESSION_ITEM_LIST@37..40
-                                      0: CSS_IDENTIFIER@37..40
+                                  2: CSS_CUSTOM_PROPERTY_VALUE@37..40
+                                    0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@37..40
+                                      0: CSS_CUSTOM_IDENTIFIER@37..40
                                         0: IDENT@37..40 "bar" [] []
                                 1: (empty)
                               3: R_PAREN@40..41 ")" [] []
@@ -295,9 +294,9 @@ CssRoot {
                                   0: CSS_DASHED_IDENTIFIER@91..96
                                     0: IDENT@91..96 "--bar" [] []
                                   1: COLON@96..98 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@98..101
-                                    0: SCSS_EXPRESSION_ITEM_LIST@98..101
-                                      0: CSS_IDENTIFIER@98..101
+                                  2: CSS_CUSTOM_PROPERTY_VALUE@98..101
+                                    0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@98..101
+                                      0: CSS_CUSTOM_IDENTIFIER@98..101
                                         0: IDENT@98..101 "baz" [] []
                                 1: (empty)
                               3: R_PAREN@101..102 ")" [] []

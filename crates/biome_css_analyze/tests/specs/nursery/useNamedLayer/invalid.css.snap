@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@import url(foo.css) layer;
+
+@layer {
+	.test {
+		color: red;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:22 lint/nursery/useNamedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing cascade layer name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @import url(foo.css) layer;
+      │                      ^^^^^
+    3 │ 
+    4 │ @layer {
+  
+  i An anonymous layer cannot be referenced, so later rules cannot append to it or reorder it.
+  
+  i Give the layer a name, for example @layer base { ... }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:4:2 lint/nursery/useNamedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing cascade layer name.
+  
+    2 │ @import url(foo.css) layer;
+    3 │ 
+  > 4 │ @layer {
+      │  ^^^^^^^
+  > 5 │ 	.test {
+  > 6 │ 		color: red;
+  > 7 │ 	}
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+  i An anonymous layer cannot be referenced, so later rules cannot append to it or reorder it.
+  
+  i Give the layer a name, for example @layer base { ... }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

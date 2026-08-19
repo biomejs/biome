@@ -1,6 +1,9 @@
 use super::SymbolFromModuleInfo;
-use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
-use crate::{ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
+use crate::css_module_info::traverse::{
+    CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
+};
+use crate::traverse::UpwardTraversalVisitor;
+use crate::{CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
@@ -13,7 +16,7 @@ use std::collections::VecDeque;
 ///
 /// Tracked: depends on `js_module_info(db, module)` and on the CSS modules it
 /// imports. If any of those change, this recomputes.
-#[salsa::tracked(no_eq, returns(deref))]
+#[salsa::tracked(returns(deref))]
 pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssClassStep> {
     let module_kind = module.kind(db);
     let Some(js_info) = module_kind.as_js_module_info() else {
@@ -21,7 +24,11 @@ pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssC
     };
 
     let mut results = Vec::new();
-    for import_path in js_info.static_import_paths.values() {
+    for import_path in js_info
+        .import_paths
+        .iter()
+        .filter(|import| import.kind.is_static())
+    {
         if let Some(path) = import_path.as_path()
             && let Some(target) = db.module_for_path(path)
             && let ModuleInfoKind::Css(css_info) = target.kind(db)
@@ -46,6 +53,8 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
     let mut result = Vec::new();
     let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
     let mut queue = VecDeque::new();
+    let mut modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     queue.push_back(module.path(db).to_path_buf());
 
     while let Some(current) = queue.pop_front() {
@@ -53,19 +62,18 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        db.for_each_module(&mut |file_path, module_info| {
+        for (file_path, module_info) in &modules {
             if file_path == current.as_path() {
-                return;
+                continue;
             }
             let imports_current = match module_info {
                 ModuleInfoKind::Js(js_info) => js_info
-                    .static_import_paths
-                    .values()
-                    .chain(js_info.dynamic_import_paths.values())
+                    .import_paths
+                    .iter()
                     .any(|p| p.as_path() == Some(current.as_path())),
                 ModuleInfoKind::Css(css_info) => css_info
                     .imports
-                    .values()
+                    .iter()
                     .any(|p| p.resolved_path.as_path() == Some(current.as_path())),
                 ModuleInfoKind::Html(html_info) => {
                     html_info
@@ -73,17 +81,13 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                         .iter()
                         .any(|p| p.as_path() == Some(current.as_path()))
                         || html_info
-                            .static_import_paths
-                            .values()
-                            .any(|p| p.as_path() == Some(current.as_path()))
-                        || html_info
-                            .dynamic_import_paths
-                            .values()
+                            .import_paths
+                            .iter()
                             .any(|p| p.as_path() == Some(current.as_path()))
                 }
             };
 
-            if imports_current && !visited.contains(file_path) {
+            if imports_current && !visited.contains(file_path.as_path()) {
                 match module_info {
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
@@ -93,13 +97,20 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                     }
                 }
             }
-        });
+        }
     }
 
+    result.sort_unstable();
+    result.dedup();
     result
 }
 
-/// Returns CSS class steps for the given JS file by traversing its imports.
+/// Returns CSS classes reachable from a JavaScript module and its importers.
+///
+/// Direct CSS imports of `module` are returned first. The query then traverses
+/// JavaScript and HTML modules that transitively import it, collecting their
+/// direct CSS imports and global HTML style classes. Each importer is visited at
+/// most once, including when the module graph contains cycles.
 #[salsa::tracked(returns(deref))]
 pub fn traverse_import_tree_for_classes(
     db: &dyn ModuleDb,
@@ -108,7 +119,11 @@ pub fn traverse_import_tree_for_classes(
     let mut results = Vec::new();
 
     if let Some(js_info) = db.js_module_info_for_path(module.path(db)) {
-        for import_path in js_info.static_import_paths.values() {
+        for import_path in js_info
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
+        {
             if let Some(path) = import_path.as_path()
                 && let Some(css_info) = db.css_module_info_for_path(path)
             {
@@ -120,21 +135,18 @@ pub fn traverse_import_tree_for_classes(
         }
     }
 
-    let stack = vec![module.path(db).to_path_buf()];
-    let mut visited = FxHashSet::default();
-    visited.insert(module.path(db).to_path_buf());
-
-    let traversal = ImportTreeTraversal {
-        module_database: db,
-        stack,
-        visited,
-        current_css_iter: None,
-    };
+    let start = module.path(db);
+    let traversal = CssClassTraversal::new(db, start).into_upward_iter(start.to_path_buf(), ());
     results.extend(traversal);
     results
 }
 
-/// Returns CSS class steps for the given HTML file.
+/// Returns CSS classes reachable from an HTML module and its importers.
+///
+/// The result includes the module's inline classes and linked stylesheets,
+/// followed by CSS classes discovered through JavaScript and HTML importers.
+/// Each importer is visited at most once, including when the module graph
+/// contains cycles.
 #[salsa::tracked(returns(deref))]
 pub fn traverse_import_tree_for_html_classes(
     db: &dyn ModuleDb,
@@ -167,11 +179,7 @@ pub fn traverse_import_tree_for_html_classes(
             }
         }
 
-        for import_path in html_info
-            .static_import_paths
-            .values()
-            .chain(html_info.dynamic_import_paths.values())
-        {
+        for import_path in html_info.import_paths.iter() {
             if let Some(path) = import_path.as_path()
                 && let Some(css_info) = db.css_module_info_for_path(path)
             {
@@ -183,19 +191,51 @@ pub fn traverse_import_tree_for_html_classes(
         }
     }
 
-    let stack = vec![module.path(db).to_path_buf()];
-    let mut visited = FxHashSet::default();
-    visited.insert(module.path(db).to_path_buf());
-
     inline_steps
         .into_iter()
         .chain(linked_steps)
-        .chain(ImportTreeTraversal {
-            module_database: db,
-            stack,
-            visited,
-            current_css_iter: None,
-        })
+        .chain(
+            CssClassTraversal::new(db, module.path(db))
+                .into_upward_iter(module.path(db).to_path_buf(), ()),
+        )
+        .collect()
+}
+
+/// Returns the nearest visible `@property` definitions for a CSS, JavaScript, or HTML-like module.
+///
+/// A CSS module's local definition takes precedence over definitions reached
+/// through its imports. A JavaScript module searches the CSS files it imports.
+/// An HTML-like module searches embedded styles, linked stylesheets, and script
+/// imports in document order. Every importer is then traversed as an independent
+/// branch. A branch stops at its first visible definition, and only CSS contexts
+/// authored before the child edge are visible. Component-scoped styles do not
+/// escape an HTML-like importer.
+/// Definitions reached through the same authored rule are deduplicated, while
+/// definitions from separate branches remain separate. Result order is
+/// unspecified.
+#[salsa::tracked(returns(deref))]
+pub fn css_property_definitions<'db>(
+    db: &'db dyn ModuleDb,
+    property: SymbolFromModuleInfo<'db>,
+) -> Vec<CssPropertyDefinition> {
+    let module = *property.module(db);
+    let path = module.path(db);
+    let name = property.name(db);
+    let traversal = CssPropertyTraversal::new(db, &name);
+    let definition = match module.kind(db) {
+        ModuleInfoKind::Css(_) => traversal.last_property_in_css_context(path),
+        ModuleInfoKind::Html(_) => traversal.last_property_in_html_context(path),
+        ModuleInfoKind::Js(_) => traversal.last_property_in_js_context(path),
+    };
+    if let Some(definition) = definition {
+        return vec![definition];
+    }
+
+    traversal
+        .into_upward_iter(
+            path.to_path_buf(),
+            CssPropertyBranch::new(path.to_path_buf()),
+        )
         .collect()
 }
 
@@ -286,8 +326,9 @@ pub fn build_import_tree_for_js(db: &dyn ModuleDb, module: ModuleInfo) -> Option
 
     if let Some(js_info) = module.kind(db).as_js_module_info() {
         root.css_imports = js_info
-            .static_import_paths
-            .values()
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
             .filter_map(|import_path| {
                 let path = import_path.as_path()?;
                 db.css_module_info_for_path(path)?;
@@ -314,7 +355,7 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
     let css_imports: Vec<_> = html_info
         .imported_stylesheets
         .iter()
-        .chain(html_info.static_import_paths.values())
+        .chain(html_info.import_paths.iter())
         .filter_map(|stylesheet_path| {
             let path = stylesheet_path.as_path()?;
             db.css_module_info_for_path(path)?;
@@ -364,11 +405,7 @@ fn is_class_used_in_component_tree<'db>(
                 {
                     return true;
                 }
-                for import_path in js_info
-                    .static_import_paths
-                    .values()
-                    .chain(js_info.dynamic_import_paths.values())
-                {
+                for import_path in js_info.import_paths.iter() {
                     if let Some(path) = import_path.as_path()
                         && let Some(module) = db.module_for_path(path)
                     {
@@ -417,7 +454,7 @@ fn search_css_class_transitive<'db>(
         }
 
         // Follow @import edges
-        for import in css_info.imports.values() {
+        for import in css_info.imports.iter() {
             if let Some(imported_path) = import.resolved_path.as_path()
                 && let Some(module) = db.module_for_path(imported_path)
             {
@@ -429,12 +466,13 @@ fn search_css_class_transitive<'db>(
     result
 }
 
-pub(crate) fn build_parent_nodes(
+fn build_parent_nodes(
     db: &dyn ModuleDb,
     current_path: &Utf8Path,
     visited: &mut FxHashSet<Utf8PathBuf>,
 ) -> Vec<ImportTreeNode> {
-    let all_modules = db.all_modules();
+    let mut all_modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    all_modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     let mut parents = Vec::new();
 
     for (file_path, module_info) in &all_modules {
@@ -444,15 +482,13 @@ pub(crate) fn build_parent_nodes(
 
         let imports_current = match module_info {
             ModuleInfoKind::Js(js_info) => js_info
-                .static_import_paths
-                .values()
-                .chain(js_info.dynamic_import_paths.values())
+                .import_paths
+                .iter()
                 .any(|p| p.as_path() == Some(current_path)),
             ModuleInfoKind::Html(html_info) => html_info
                 .imported_stylesheets
                 .iter()
-                .chain(html_info.static_import_paths.values())
-                .chain(html_info.dynamic_import_paths.values())
+                .chain(html_info.import_paths.iter())
                 .any(|p| p.as_path() == Some(current_path)),
             ModuleInfoKind::Css(_) => false,
         };
@@ -460,8 +496,9 @@ pub(crate) fn build_parent_nodes(
         if imports_current {
             let css_imports: Vec<Utf8PathBuf> = match module_info {
                 ModuleInfoKind::Js(js_info) => js_info
-                    .static_import_paths
-                    .values()
+                    .import_paths
+                    .iter()
+                    .filter(|import| import.kind.is_static())
                     .filter_map(|import_path| {
                         let path = import_path.as_path()?;
                         db.css_module_info_for_path(path)?;
@@ -471,8 +508,7 @@ pub(crate) fn build_parent_nodes(
                 ModuleInfoKind::Html(html_info) => html_info
                     .imported_stylesheets
                     .iter()
-                    .chain(html_info.static_import_paths.values())
-                    .chain(html_info.dynamic_import_paths.values())
+                    .chain(html_info.import_paths.iter())
                     .filter_map(|stylesheet_path| {
                         let path = stylesheet_path.as_path()?;
                         db.css_module_info_for_path(path)?;

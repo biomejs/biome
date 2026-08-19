@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/each-inline-else.svelte
+---
+
+# Input
+
+```svelte
+{#each animals as animal}{animal}{:else}no animals{/each}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,5 @@
+-{#each animals as animal}{animal}{:else}no animals{/each}
++{#each animals as animal}
++    {animal}
++{:else}
++    no animals
++{/each}
+```
+
+# Output
+
+```svelte
+{#each animals as animal}
+    {animal}
+{:else}
+    no animals
+{/each}
+```

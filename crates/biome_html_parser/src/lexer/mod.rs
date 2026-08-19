@@ -98,7 +98,12 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::InsideTag] context.
-    fn consume_token_inside_tag(&mut self, current: u8, mode: TagNameMode) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag(
+        &mut self,
+        current: u8,
+        mode: TagNameMode,
+        double_text_expressions: bool,
+    ) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -111,7 +116,7 @@ impl<'src> HtmlLexer<'src> {
             EXL => self.consume_byte(T![!]),
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if double_text_expressions && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -301,7 +306,7 @@ impl<'src> HtmlLexer<'src> {
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if !svelte && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -396,7 +401,7 @@ impl<'src> HtmlLexer<'src> {
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
-        self.consume_token_inside_tag(current, mode)
+        self.consume_token_inside_tag(current, mode, false)
     }
 
     fn consume_token_vue_v_for_value(&mut self, current: u8) -> HtmlSyntaxKind {
@@ -445,7 +450,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
-    fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_token(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -458,7 +463,7 @@ impl<'src> HtmlLexer<'src> {
             }
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if double_text_expressions && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -491,7 +496,7 @@ impl<'src> HtmlLexer<'src> {
             }
             IDT => self
                 .consume_language_identifier(current)
-                .unwrap_or_else(|| self.consume_html_text(current)),
+                .unwrap_or_else(|| self.consume_html_text(current, double_text_expressions)),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -499,7 +504,7 @@ impl<'src> HtmlLexer<'src> {
                     self.unicode_bom_length = bom_size;
                     return bom;
                 }
-                self.consume_html_text(current)
+                self.consume_html_text(current, double_text_expressions)
             }
         }
     }
@@ -570,6 +575,32 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Whether the lexer sits at the closing tag `</name>`, ignoring case the
+    /// way tag names are matched everywhere else.
+    ///
+    /// Whitespace is allowed before the `>`, as browsers accept it. The name
+    /// has to end where the tag does, so that `</pre>` does not stop a
+    /// `</prefetch>` from being ordinary text.
+    fn is_at_closing_tag(&self, name: &str) -> bool {
+        let Some(after_name) = self
+            .source
+            .get(self.position..)
+            .and_then(|rest| rest.strip_prefix("</"))
+            .and_then(|rest| {
+                let candidate = rest.get(..name.len())?;
+                candidate
+                    .eq_ignore_ascii_case(name)
+                    .then(|| &rest[name.len()..])
+            })
+        else {
+            return false;
+        };
+
+        after_name
+            .trim_start_matches([' ', '\t', '\n', '\r', '\x0C'])
+            .starts_with('>')
+    }
+
     /// Consume an embedded language in its entirety. Stops immediately:
     /// - before the closing tag
     /// - before the Astro fence, if applicable
@@ -580,7 +611,7 @@ impl<'src> HtmlLexer<'src> {
         context: HtmlLexContext,
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
-        let end_tag = lang.end_tag();
+        let closing_tag_name = lang.closing_tag_name(self.source);
         // double, single, template
         let mut quotes_seen = QuotesSeen::new();
         self.assert_current_char_boundary();
@@ -589,12 +620,7 @@ impl<'src> HtmlLexer<'src> {
                 quotes_seen.check_byte(byte);
             }
 
-            let end = self.position + end_tag.len();
-            let both_ends_at_char_boundaries =
-                self.source.is_char_boundary(self.position) && self.source.is_char_boundary(end);
-            if both_ends_at_char_boundaries
-                && self.source[self.position..end].eq_ignore_ascii_case(end_tag)
-            {
+            if self.is_at_closing_tag(closing_tag_name) {
                 break;
             }
             self.advance_byte_or_char(byte);
@@ -648,27 +674,10 @@ impl<'src> HtmlLexer<'src> {
             return self.consume_newline_or_whitespaces();
         }
 
-        let mut brackets_stack = 0;
-        while let Some(current) = self.current_byte() {
-            match current {
-                b'}' => {
-                    if brackets_stack == 0 {
-                        break;
-                    } else {
-                        brackets_stack -= 1;
-                        self.advance(1);
-                    }
-                }
-                b'{' => {
-                    brackets_stack += 1;
-                    self.advance(1);
-                }
-
-                _ => {
-                    self.advance(1);
-                }
-            }
-        }
+        let mut quotes_seen = QuotesSeen::new();
+        let expression_length =
+            quotes_seen.expression_length(&self.source.as_bytes()[self.position..]);
+        self.advance(expression_length);
 
         HTML_LITERAL
     }
@@ -1002,8 +1011,16 @@ impl<'src> HtmlLexer<'src> {
         self.assert_current_char_boundary();
 
         const BUFFER_SIZE: usize = 14;
+        let lowercase_buffer = matches!(
+            &context,
+            IdentifierContext::Doctype | IdentifierContext::None
+        );
         let mut buffer = [0u8; BUFFER_SIZE];
-        buffer[0] = first;
+        buffer[0] = if lowercase_buffer {
+            first.to_ascii_lowercase()
+        } else {
+            first
+        };
         let mut len = 1;
 
         self.advance_byte_or_char(first);
@@ -1013,7 +1030,7 @@ impl<'src> HtmlLexer<'src> {
                 IdentifierContext::Doctype | IdentifierContext::None => {
                     if is_attribute_name_byte(byte) {
                         if len < BUFFER_SIZE {
-                            buffer[len] = byte;
+                            buffer[len] = byte.to_ascii_lowercase();
                             len += 1;
                         }
 
@@ -1099,8 +1116,8 @@ impl<'src> HtmlLexer<'src> {
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
-            b"html" | b"HTML" if context.is_doctype() => HTML_KW,
+            b"doctype" => DOCTYPE_KW,
+            b"html" if context.is_doctype() => HTML_KW,
             b"client" if context.is_astro() && self.current_byte() == Some(b':') => CLIENT_KW,
             b"set" if context.is_astro() && self.current_byte() == Some(b':') => SET_KW,
             b"class" if context.is_astro() && self.current_byte() == Some(b':') => CLASS_KW,
@@ -1531,7 +1548,7 @@ impl<'src> HtmlLexer<'src> {
     ///
     /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
-    fn consume_html_text(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_html_text(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
         let mut seen_newlines = 0;
 
@@ -1542,7 +1559,7 @@ impl<'src> HtmlLexer<'src> {
 
         match dispatched {
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if double_text_expressions && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -1658,11 +1675,15 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         } else {
             match self.current_byte() {
                 Some(current) => match context {
-                    HtmlLexContext::Regular => self.consume_token(current),
+                    HtmlLexContext::Regular { framework } => {
+                        self.consume_token(current, framework != HtmlFramework::Svelte)
+                    }
                     HtmlLexContext::InsideTag { framework } => {
                         let mode = TagNameMode::for_inside_tag(framework);
                         match framework {
-                            HtmlFramework::Plain => self.consume_token_inside_tag(current, mode),
+                            HtmlFramework::Plain => {
+                                self.consume_token_inside_tag(current, mode, true)
+                            }
                             HtmlFramework::Vue => {
                                 self.consume_token_inside_tag_directives(current, false, mode)
                             }
@@ -1792,11 +1813,13 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
-                HtmlReLexContext::HtmlText => self.consume_html_text(current),
+                HtmlReLexContext::HtmlText { framework } => {
+                    self.consume_html_text(current, framework != HtmlFramework::Svelte)
+                }
                 // Re-lexing is only used mid-tag (e.g. to split `:`/`.`), never at the
                 // tag-name position, so the classification mode is irrelevant here.
                 HtmlReLexContext::InsideTag => {
-                    self.consume_token_inside_tag(current, TagNameMode::Html)
+                    self.consume_token_inside_tag(current, TagNameMode::Html, true)
                 }
                 HtmlReLexContext::InsideTagAstro => {
                     self.consume_token_inside_tag_astro(current, TagNameMode::Html)
@@ -1868,6 +1891,16 @@ fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
 }
 
+fn slash_starts_regex(previous_non_whitespace: Option<u8>) -> bool {
+    match previous_non_whitespace {
+        None => true,
+        Some(byte) => !matches!(
+            lookup_byte(byte),
+            IDT | DOL | DIG | ZER | PNC | BTC | PLS | MIN
+        ),
+    }
+}
+
 /// Check if a char is a linebreak (for JS-style comments in Svelte)
 fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
@@ -1914,9 +1947,9 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 }
 
 /// Tracks whether the lexer is currently inside an open string literal, regex
-/// literal, or comment while scanning Astro frontmatter. Used to determine
-/// whether a `---` sequence is a genuine closing fence or merely three dashes
-/// that appear inside a string or regex.
+/// literal, or comment while scanning embedded JavaScript. This distinguishes
+/// Astro closing fences and Svelte expression braces from the same characters
+/// inside JavaScript literals or comments.
 ///
 /// ## Design
 ///
@@ -1976,6 +2009,110 @@ impl QuotesSeen {
             prev_byte: None,
             prev_non_ws_byte: None,
         }
+    }
+
+    fn expression_length(&mut self, source: &[u8]) -> usize {
+        let mut position = 0;
+        let mut brackets_stack = 0;
+
+        'expression: loop {
+            if self.is_empty() {
+                while let Some(&current) = source.get(position) {
+                    match current {
+                        b'}' => {
+                            if brackets_stack == 0 {
+                                break 'expression;
+                            }
+                            brackets_stack -= 1;
+                        }
+                        b'{' => brackets_stack += 1,
+                        b'"' | b'\'' | b'`' => {
+                            self.current_quote = Some(current);
+                            position += 1;
+                            break;
+                        }
+                        b'/' => {
+                            match source.get(position + 1) {
+                                Some(b'/') => self.comment = QuotesSeenComment::SingleLine,
+                                Some(b'*') => self.comment = QuotesSeenComment::MultiLine,
+                                Some(b'>') => {}
+                                _ => {
+                                    let expression = &source[..position];
+                                    let previous_non_whitespace = expression
+                                        .iter()
+                                        .rev()
+                                        .copied()
+                                        .find(|byte| !byte.is_ascii_whitespace());
+                                    self.in_regex = expression.last() != Some(&b'<')
+                                        && slash_starts_regex(previous_non_whitespace);
+                                }
+                            }
+                            position += 1;
+                            if !self.is_empty() {
+                                break;
+                            }
+                            continue;
+                        }
+                        _ => {}
+                    }
+                    position += 1;
+                }
+            } else if let Some(quote) = self.current_quote {
+                while let Some(&current) = source.get(position) {
+                    position += 1;
+                    if self.escaped {
+                        self.escaped = false;
+                    } else if current == b'\\' {
+                        self.escaped = true;
+                    } else if current == quote {
+                        self.current_quote = None;
+                        break;
+                    }
+                }
+            } else if self.in_regex {
+                while let Some(&current) = source.get(position) {
+                    position += 1;
+                    if self.escaped {
+                        self.escaped = false;
+                    } else if current == b'\\' {
+                        self.escaped = true;
+                    } else if current == b'/' {
+                        self.in_regex = false;
+                        break;
+                    }
+                }
+            } else {
+                match self.comment {
+                    QuotesSeenComment::SingleLine => {
+                        while let Some(&current) = source.get(position) {
+                            position += 1;
+                            if current == b'\n' {
+                                self.comment = QuotesSeenComment::None;
+                                break;
+                            }
+                        }
+                    }
+                    QuotesSeenComment::MultiLine => {
+                        let mut previous = b'/';
+                        while let Some(&current) = source.get(position) {
+                            position += 1;
+                            if previous == b'*' && current == b'/' {
+                                self.comment = QuotesSeenComment::None;
+                                break;
+                            }
+                            previous = current;
+                        }
+                    }
+                    QuotesSeenComment::None => unreachable!(),
+                }
+            }
+
+            if position == source.len() {
+                break;
+            }
+        }
+
+        position
     }
 
     /// Processes one byte of frontmatter source and updates the tracking state.
@@ -2133,21 +2270,7 @@ impl QuotesSeen {
     /// paren/bracket, number, or `++`/`--` suffix, `/` is division. In all
     /// other positions `/` starts a regex.
     fn slash_starts_regex(&self) -> bool {
-        match self.prev_non_ws_byte {
-            None => true,
-            Some(b) => !matches!(
-                b,
-                b'a'..=b'z'
-                    | b'A'..=b'Z'
-                    | b'0'..=b'9'
-                    | b'_'
-                    | b'$'
-                    | b')'
-                    | b']'
-                    | b'+'
-                    | b'-'
-            ),
-        }
+        slash_starts_regex(self.prev_non_ws_byte)
     }
 
     /// Returns `true` when the tracker is not currently inside an open string

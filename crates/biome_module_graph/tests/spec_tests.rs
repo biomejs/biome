@@ -1,4172 +1,780 @@
-#![allow(clippy::arc_with_non_send_sync)]
-
-mod snap;
-
 use std::collections::BTreeMap;
-use std::fs::read_link;
-use std::ops::Deref;
-use std::sync::Arc;
 
-use biome_resolver::ResolveError;
-
-use crate::snap::ModuleGraphSnapshot;
-use biome_configuration::{Configuration, HtmlConfiguration};
-use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
-use biome_html_parser::HtmlParserOptions;
-use biome_js_semantic::ScopeId;
-use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_db::ParsedSource;
+use biome_db::testing::{
+    Events, assert_function_query_was_not_run, assert_function_query_was_run,
+    function_query_will_execute_count_by_name, function_query_will_execute_position,
+};
+use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::format_node;
+use biome_js_parser::{JsParserOptions, parse};
+use biome_js_type_info::{
+    InferredType, format_inferred_type,
+    resolved::{
+        InferredCallArgumentType, InferredFunctionParameter, InferredInterface,
+        InferredLiteralValue as InferredLiteral, InferredLocalTypeId, InferredMergedReference,
+        InferredModuleKey, InferredObject, InferredReturnType, InferredTypeData,
+        InferredTypeMemberKind, InferredTypeofType, InferredUnion,
+    },
+};
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_value::{JsonObject, JsonString};
-use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
-use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath,
-    JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
-    ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
+    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
+    find_value_member_type, infer_call_argument_type,
+    infer_call_expression_type as infer_call_expression_type_query,
+    infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
+    module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{Text, TextRange, TextSize};
-use biome_service::Workspace;
-use biome_service::settings::ModuleGraphResolutionKind;
-use biome_service::test_utils::setup_workspace_and_open_project;
-use biome_service::workspace::UpdateSettingsParams;
-use biome_test_utils::{get_added_js_paths, get_css_added_paths};
-use biome_workspace_db::WorkspaceDb;
+use biome_rowan::{AstNode, Text, TextRange};
+use biome_test_utils::get_added_js_paths;
 use camino::{Utf8Path, Utf8PathBuf};
-use rustc_hash::FxHashSet;
-use walkdir::WalkDir;
+use salsa::Storage;
+use salsa::plumbing::{AsId, FromId};
 
-fn build_js_db(
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
-    infer_types: bool,
-) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
-    let path_info_cache = PathInfoCache::default();
-    for (path, root, semantic_model) in added_paths {
-        let (module_info, _, _) = resolve_js_module(
-            root.clone(),
-            path,
-            fs,
-            layout,
-            semantic_model.clone(),
-            &path_info_cache,
-            infer_types,
-        );
-        let md = ModuleInfo::new(
-            &db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Js(module_info),
-        );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
-    }
-    db
+#[path = "spec_tests/calls.test.rs"]
+mod calls;
+#[path = "spec_tests/css_classes.test.rs"]
+mod css_classes;
+#[path = "spec_tests/css_properties.test.rs"]
+mod css_properties;
+#[path = "spec_tests/cycles.test.rs"]
+mod cycles;
+#[path = "spec_tests/database.test.rs"]
+mod database;
+#[path = "spec_tests/expected_argument_inference.test.rs"]
+mod expected_argument_inference;
+#[path = "spec_tests/expressions.test.rs"]
+mod expressions;
+#[path = "spec_tests/globals.test.rs"]
+mod globals;
+#[path = "spec_tests/html_classes.test.rs"]
+mod html_classes;
+#[path = "spec_tests/html_components.test.rs"]
+mod html_components;
+#[path = "spec_tests/imports.test.rs"]
+mod imports;
+#[path = "spec_tests/intersections.test.rs"]
+mod intersections;
+#[path = "spec_tests/js_doc.test.rs"]
+mod js_doc;
+#[path = "spec_tests/module_resolution.test.rs"]
+mod module_resolution;
+#[path = "spec_tests/normalization.test.rs"]
+mod normalization;
+#[path = "spec_tests/overloads.test.rs"]
+mod overloads;
+#[path = "spec_tests/promises.test.rs"]
+mod promises;
+#[path = "spec_tests/queries.test.rs"]
+mod queries;
+#[path = "spec_tests/requests.test.rs"]
+mod requests;
+#[path = "spec_tests/substitutions.test.rs"]
+mod substitutions;
+#[path = "spec_tests/types.test.rs"]
+mod types;
+
+#[path = "spec_tests/support.rs"]
+mod support;
+
+#[path = "snap/mod.rs"]
+mod snap;
+
+#[salsa::db]
+struct TestModuleDb {
+    modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
+    events: Events,
+    storage: Storage<Self>,
 }
 
-fn build_html_db(
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    html_data: &[(
-        &BiomePath,
-        biome_html_syntax::HtmlRoot,
-        Vec<HtmlEmbeddedContent>,
-    )],
-) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
-    let path_info_cache = PathInfoCache::default();
-    for (path, root, embedded_content) in html_data {
-        let (module_info, _, _) = resolve_html_module(
-            root.clone(),
-            embedded_content,
-            path,
-            fs,
-            layout,
-            &path_info_cache,
-        );
-        let md = ModuleInfo::new(
-            &db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Html(module_info),
-        );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
-    }
-    db
-}
-
-fn add_js_modules(
-    db: &WorkspaceDb,
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
-    infer_types: bool,
-) {
-    let path_info_cache = PathInfoCache::default();
-    for (path, root, semantic_model) in added_paths {
-        let (module_info, _, _) = resolve_js_module(
-            root.clone(),
-            path,
-            fs,
-            layout,
-            semantic_model.clone(),
-            &path_info_cache,
-            infer_types,
-        );
-        let md = ModuleInfo::new(
-            db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Js(module_info),
-        );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
-    }
-}
-
-fn add_css_modules(
-    db: &WorkspaceDb,
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    css_roots: &[(&BiomePath, biome_css_syntax::AnyCssRoot)],
-) {
-    let path_info_cache = PathInfoCache::default();
-    for (path, root) in css_roots {
-        let (module_info, _, _) =
-            resolve_css_module(root.clone(), path, fs, layout, &path_info_cache);
-        let md = ModuleInfo::new(
-            db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Css(module_info),
-        );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
-    }
-}
-
-fn add_html_modules(
-    db: &WorkspaceDb,
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    html_data: &[(
-        &BiomePath,
-        biome_html_syntax::HtmlRoot,
-        Vec<HtmlEmbeddedContent>,
-    )],
-) {
-    let path_info_cache = PathInfoCache::default();
-    for (path, root, embedded_content) in html_data {
-        let (module_info, _, _) = resolve_html_module(
-            root.clone(),
-            embedded_content,
-            path,
-            fs,
-            layout,
-            &path_info_cache,
-        );
-        let md = ModuleInfo::new(
-            db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Html(module_info),
-        );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
-    }
-}
-
-fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            import { foo } from "shared";
-            import { bar } from "./bar.ts";
-            import { Hello } from "@components/Hello";
-
-            foo();
-        "#,
-    );
-    fs.insert(
-        "/src/bar.ts".into(),
-        r#"
-            export function bar() {}
-        "#,
-    );
-    fs.insert(
-        "/src/components/Hello.tsx".into(),
-        r#"
-            export function Hello() {}
-        "#,
-    );
-
-    fs.insert(
-        "/node_modules/shared/dist/index.js".into(),
-        r#"
-            export function foo() {}
-        "#,
-    );
-
-    fs.insert(
-        "/node_modules/shared/dist/index.d.ts".into(),
-        r#"
-            declare namespace shared {
-                type Result = string;
-            }
-
-            declare const shared: {
-                foo(): shared.Result;
-            }
-
-            export = shared;
-        "#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([(
-                "shared".into(),
-                "link:./node_modules/shared".into(),
-            )]))),
-    );
-
-    let tsconfig_json = parse_json(
-        r#"{
-        "compilerOptions": {
-            "paths": {
-                "@components/*": ["./src/components/*"]
-            }
-        }
-    }"#,
-        JsonParserOptions::default(),
-    );
-    project_layout
-        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
-
-    project_layout.insert_node_manifest(
-        "/node_modules/shared".into(),
-        PackageJson::new("shared")
-            .with_exports(JsonObject::from([
-                ("types".into(), JsonString::from("./dist/index.d.ts").into()),
-                ("default".into(), JsonString::from("./dist/index.js").into()),
-            ]))
-            .with_version("0.0.1"),
-    );
-
-    (fs, project_layout)
-}
-
-/// Returns the path to the `fixtures/` directory, regardless of working dir.
-fn get_fixtures_path() -> Utf8PathBuf {
-    let mut path: Utf8PathBuf = std::env::current_dir().unwrap().try_into().unwrap();
-    while !path.join("Cargo.lock").exists() {
-        path = path
-            .parent()
-            .expect("couldn't find Cargo.lock")
-            .to_path_buf();
-    }
-    path.join("crates/biome_module_graph/tests/fixtures")
-}
-
-#[test]
-fn test_type_flattening_does_not_explode_on_recursive_parent_element_pattern() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/repro.ts".into(),
-        r#"
-            const root = {} as Element;
-
-            for (let el: Element | null = root; el && el !== root; el = el.parentElement) {
-                // noop
-            }
-        "#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    let added_paths = [BiomePath::new("/src/repro.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let module = db
-        .js_module_info_for_path(Utf8Path::new("/src/repro.ts"))
-        .unwrap();
-
-    assert!(
-        !module.diagnostics().iter().any(|diagnostic| matches!(
-            diagnostic,
-            ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::ExceededTypesLimit(_))
-        )),
-        "expected module graph not to hit the types-limit diagnostic",
-    );
-}
-
-#[test]
-fn test_resolve_relative_import() {
-    let (fs, project_layout) = create_test_project_layout();
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/bar.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let file_imports = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
-
-    assert_eq!(file_imports.static_imports.len(), 3);
-    assert_eq!(
-        file_imports.static_imports.get("bar"),
-        Some(&JsImport {
-            specifier: "./bar.ts".into(),
-            resolved_path: ResolvedPath::from_path("/src/bar.ts"),
-            symbol: "bar".into()
-        })
-    );
-}
-
-#[test]
-fn test_resolve_package_import() {
-    let (fs, project_layout) = create_test_project_layout();
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/node_modules/shared/dist/index.js"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let file_imports = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
-
-    assert_eq!(file_imports.static_imports.len(), 3);
-    assert_eq!(
-        file_imports.static_imports.get("foo"),
-        Some(&JsImport {
-            specifier: "shared".into(),
-            resolved_path: ResolvedPath::from_path("/node_modules/shared/dist/index.d.ts"),
-            symbol: "foo".into()
-        })
-    );
-}
-
-#[test]
-fn test_import_through_path_alias() {
-    let (fs, project_layout) = create_test_project_layout();
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/components/Hello.tsx"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let file_imports = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
-
-    assert_eq!(file_imports.static_imports.len(), 3);
-    assert_eq!(
-        file_imports.static_imports.get("Hello"),
-        Some(&JsImport {
-            specifier: "@components/Hello".into(),
-            resolved_path: ResolvedPath::from_path("/src/components/Hello.tsx"),
-            symbol: "Hello".into()
-        })
-    );
-}
-
-#[test]
-fn test_resolve_package_import_in_monorepo_fixtures() {
-    let fixtures_path = get_fixtures_path();
-
-    let fs = OsFileSystem::new(fixtures_path.clone());
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(format!("{fixtures_path}/frontend").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/frontend/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-
-    project_layout.insert_node_manifest(format!("{fixtures_path}/shared").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/shared/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-
-    project_layout.insert_node_manifest(
-        format!("{fixtures_path}/frontend/node_modules/shared").into(),
-        {
-            let path = Utf8PathBuf::from(format!(
-                "{fixtures_path}/frontend/node_modules/shared/package.json"
-            ));
-            deserialize_from_json_str::<PackageJson>(
-                &fs.read_file_from_path(&path)
-                    .expect("package.json must be readable"),
-                JsonParserOptions::default(),
-                "package.json",
-            )
-            .into_deserialized()
-            .expect("package.json must parse")
-        },
-    );
-
-    let added_paths = [
-        BiomePath::new(format!("{fixtures_path}/frontend/src/bar.ts")),
-        BiomePath::new(format!("{fixtures_path}/frontend/src/index.ts")),
-        BiomePath::new(format!(
-            "{fixtures_path}/frontend/node_modules/shared/dist/index.js"
-        )),
-        BiomePath::new(format!("{fixtures_path}/shared/dist/index.js")),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let file_imports = db
-        .js_module_info_for_path(Utf8Path::new(&format!(
-            "{fixtures_path}/frontend/src/index.ts"
-        )))
-        .unwrap();
-
-    assert_eq!(file_imports.static_imports.len(), 3);
-    assert_eq!(
-        file_imports.static_imports.get("sharedFoo"),
-        Some(&JsImport {
-            specifier: "shared".into(),
-            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/shared/dist/index.js")),
-            symbol: "sharedFoo".into()
-        })
-    );
-    assert_eq!(
-        file_imports.static_imports.get("bar"),
-        Some(&JsImport {
-            specifier: "./bar".into(),
-            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/frontend/src/bar.ts")),
-            symbol: "bar".into()
-        })
-    );
-}
-
-#[test]
-fn test_export_referenced_function() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            /**
-             * @returns {string}
-             */
-            function foo() {}
-
-            export { foo };
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-
-    snapshot.assert_snapshot("test_export_referenced_function");
-}
-
-#[test]
-fn test_export_default_function_declaration() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            /**
-             * @public
-             * @returns {JSX.Element}
-             */
-            export default function Component(): JSX.Element {}
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_export_default_function_declaration");
-}
-
-#[test]
-fn test_export_default_imported_binding() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-            /**
-             * @returns {number}
-             */
-            export function foo(): number {
-                return 42;
-            }
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            import { foo } from "./foo.ts";
-
-            export default foo;
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    // Test that the default export's type is correctly resolved as a function returning number
-    let default_export_ty = resolver
-        .resolved_type_of_default_export()
-        .expect("default export must exist");
-    assert!(
-        default_export_ty.is_function(),
-        "Default export should be a function, got: {default_export_ty:?}"
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_export_default_imported_binding");
-}
-
-#[test]
-fn test_export_const_type_declaration_with_namespace() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.d.ts".into(),
-        r#"
-            declare namespace shared {
-                type Result = string;
-            }
-
-            declare const shared: {
-                foo(): shared.Result;
-            }
-
-            export = shared;
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.d.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_export_const_type_declaration_with_namespace");
-}
-
-#[test]
-fn test_resolve_exports() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            /**
-             * @returns {string}
-             */
-            function foo() {}
-
-            export { foo, qux };
-
-            /** @package */
-            export function bar() {}
-
-            /** @private */
-            export const quz = {};
-
-            /* @ignored because of incorrect amount of asterisks */
-            export async function baz() {}
-
-            var qux = 1;
-
-            export const { a, b, c: [d, e] } = getObject();
-
-            type GetObjectResult = {
-                a: string,
-                b: Array<number>,
-                c: [first: boolean, last: boolean | undefined],
-            };
-
-            function getObject(): GetObjectResult {
-                return {}; // We're not a type checker, so this is a-okay.
-            }
-
-            /**
-             * @public
-             * @returns {JSX.Element}
-             */
-            export default function Component(): JSX.Element {}
-
-            export * from "./reexports";
-            export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
-
-            /**
-             * Hello, namespace 2.
-             */
-            export * as renamed2 from "./renamed-reexports";
-        "#,
-    );
-    fs.insert(
-        "/src/reexports.ts".into(),
-        r#"
-            /**
-             * Hello, namespace 1.
-             */
-            export * as renamed from "./renamed-reexports";
-        "#,
-    );
-    fs.insert(
-        "/src/renamed-reexports.ts".into(),
-        r#"
-            export function ohNo() {}
-        "#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend").with_version("0.0.0"),
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexports.ts"),
-        BiomePath::new("/src/renamed-reexports.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let data = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
-    let mut exports = data.exports.clone();
-
-    // Remove this entry, or the Windows tests fail on the path in the snapshot below:
-    assert_eq!(
-        exports.swap_remove(&Text::new_static("oh\nno")),
-        Some(JsExport::Reexport(JsReexport {
-            export_range: None,
-            import: JsImport {
-                specifier: "./renamed-reexports".into(),
-                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: "ohNo".into()
-            },
-        }))
-    );
-    assert_eq!(
-        exports.swap_remove(&Text::new_static("renamed2")),
-        Some(JsExport::Own(JsOwnExport::Namespace(JsReexport {
-            export_range: Some(TextRange::new(TextSize::from(1129), TextSize::from(1177))),
-            import: JsImport {
-                specifier: "./renamed-reexports".into(),
-                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: ImportSymbol::All,
-            },
-        })))
-    );
-
-    assert_eq!(
-        data.blanket_reexports,
-        &[JsReexport {
-            export_range: Some(TextRange::new(TextSize::from(950), TextSize::from(978))),
-            import: JsImport {
-                specifier: "./reexports".into(),
-                resolved_path: ResolvedPath::from_path("/src/reexports.ts"),
-                symbol: ImportSymbol::All,
-            },
-        }]
-    );
-
-    let data = db
-        .js_module_info_for_path(Utf8Path::new("/src/reexports.ts"))
-        .unwrap();
-    assert_eq!(data.exports.len(), 1);
-    assert_eq!(
-        data.exports.get(&Text::new_static("renamed")),
-        Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
-            export_range: Some(TextRange::new(TextSize::from(80), TextSize::from(127))),
-            import: JsImport {
-                specifier: "./renamed-reexports".into(),
-                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: ImportSymbol::All,
-            },
-        })))
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_exports");
-}
-
-#[test]
-fn test_resolve_export_types() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            export const theAnswer = 42;
-
-            /**
-             * Built by a race of hyper-intelligent pan-dimensional beings to
-             * calculate the Ultimate Answer to the Ultimate Question of Life,
-             * The Universe, and Everything.
-             *
-             * This JSDoc comment should not be transferred to the exported
-             * instance variable below.
-             */
-            class DeepThought {
-                answerMe(): number {
-                    return theAnswer;
+impl TestModuleDb {
+    fn new() -> Self {
+        let events = Events::default();
+        let db = Self {
+            modules: BTreeMap::new(),
+            storage: salsa::Storage::new(Some(Box::new({
+                let events = events.clone();
+                move |event| {
+                    events.0.lock().unwrap().push(event);
                 }
-
-                giveMeABiggerAnswer(delta: number) {
-                    // Return type should be inferred to `number`.
-                    // TODO: At some point.
-                    return theAnswer + delta;
-                }
-
-                whatWasTheUltimateQuestion(): unknown {
-                    // This should not be inferred to `string` due to the
-                    // explicit annotation in the signature.
-                    return "Life, The Universe, and Everything";
-                }
-            }
-
-            export const superComputer = new DeepThought();
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_export_types");
-}
-
-#[test]
-fn test_resolve_generic_return_value() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"function useCallback<T extends Function>(
-    callback: T,
-    deps: DependencyList,
-): T;
-
-export const makePromise = (): Promise => Promise.resolve(1);
-
-export const makePromiseCb = useCallback(makePromise);
-
-export const promise = makePromiseCb();
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let promise_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-    let promise_ty = resolver.resolved_type_for_id(promise_id);
-    assert!(promise_ty.is_promise_instance());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_generic_return_value");
-}
-
-#[test]
-fn test_resolve_generic_mapped_value() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"const mapped = [1, 2, 3].map(async (x) => x + 1);
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let mapped_id = resolver
-        .resolve_type_of(&Text::new_static("mapped"), ScopeId::GLOBAL)
-        .expect("mapped variable not found");
-    let mapped_ty = resolver.resolved_type_for_id(mapped_id);
-    let _mapped_ty_string = format!("{:?}", mapped_ty.deref()); // for debugging
-    assert!(mapped_ty.is_array_of(|elem_ty| {
-        let _elem_ty_string = format!("{:?}", elem_ty.deref()); // for debugging
-        elem_ty.is_promise_instance()
-    }));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_generic_mapped_value");
-}
-
-#[test]
-fn test_resolve_generic_return_value_with_multiple_modules() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/bar.ts".into(),
-        r#"
-        export type Bar = { bar: "bar" };
-        "#,
-    );
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        import type { Bar } from "./bar.ts";
-
-        export function foo<T>(foo: T, bar: Bar): T;
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import type { Bar } from "./bar.ts";
-        import { foo } from "./foo.ts";
-
-        const bar: Bar = { bar: "bar" };
-
-        const stringyBar = bar.bar;
-
-        const result = foo(bar.bar, 1);
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/bar.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_string_or_string_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot("test_resolve_generic_return_value_with_multiple_modules");
-}
-
-#[test]
-fn test_resolve_import_as_namespace() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): number {
-            return 1;
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import * as fooNs from "./foo.ts";
-
-        const result = fooNs.foo();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_number_or_number_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_import_as_namespace");
-}
-
-#[test]
-fn test_resolve_nested_function_call_with_namespace_in_return_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): Type {}
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { foo } from "./foo.ts";
-
-        const result = bar(foo());
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
-}
-
-#[test]
-fn test_resolve_return_value_of_function() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        export function foo(input: number) {
-            switch (input) {
-                case 0: return null;
-                case 1: return "one";
-                case 2: return "two";
-                default: return "many";
-            }
-            return "many"; // Check if this one gets deduplicated.
-        }
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let foo_id = resolver
-        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
-        .expect("foo variable not found");
-    let foo_ty = resolver.resolved_type_for_id(foo_id);
-    let _foo_string_ty = format!("{foo_ty:?}");
-    let return_ty = foo_ty
-        .as_function()
-        .expect("foo must be a function")
-        .return_type
-        .as_type()
-        .and_then(|return_ty| foo_ty.resolve(return_ty))
-        .expect("expected a resolvable return type");
-    assert!(return_ty.has_variant(|ty| ty.is_string_literal("one")));
-    assert!(return_ty.has_variant(|ty| ty.is_string_literal("two")));
-    assert!(return_ty.has_variant(|ty| ty.is_string_literal("many")));
-    assert!(return_ty.has_variant(|ty| ty.is_null()));
-    match return_ty.resolved_data().unwrap().as_raw_data() {
-        TypeData::Union(union) => assert_eq!(union.types().len(), 4),
-        _ => panic!("expected a union type"),
-    }
-}
-
-#[test]
-fn test_resolve_type_of_property_with_getter() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        class Foo {
-            get foo() {
-                if (!this.initialised) {
-                    this.initialise();
-                    return "foo";
-                }
-
-                return "foo";
-            }
-        }
-
-        const fooness = new Foo();
-        const foo = fooness.foo;
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let foo_id = resolver
-        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
-        .expect("foo variable not found");
-    let foo_ty = resolver.resolved_type_for_id(foo_id);
-    let _foo_string_ty = format!("{foo_ty:?}");
-    assert!(foo_ty.is_string_literal("foo"));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_type_of_property_with_getter");
-}
-
-#[test]
-fn test_writable_annotated_binding_does_not_become_singleton_union() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        declare let sink: string;
-        sink += "";
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let sink_id = resolver
-        .resolve_type_of(&Text::new_static("sink"), ScopeId::GLOBAL)
-        .expect("sink variable not found");
-    let sink_ty = resolver.resolved_type_for_id(sink_id);
-
-    assert!(sink_ty.is_string_or_string_literal());
-    assert!(!matches!(
-        sink_ty.resolved_data().unwrap().as_raw_data(),
-        TypeData::Union(_)
-    ));
-}
-
-macro_rules! class_tests {
-    ($($name:ident: $prefix:expr,)*) => {
-    $(
-        #[test]
-        fn $name() {
-            class_this_test_helper(stringify!($name), $prefix);
-        }
-    )*
-    }
-}
-
-class_tests! {
-    test_resolve_type_of_this_in_class_plain: "class Foo",
-    test_resolve_type_of_this_in_class_assign: "const Foo = class",
-    test_resolve_type_of_this_in_class_export: "export default class Foo",
-}
-
-fn class_this_test_helper(case_name: &str, prefix: &str) {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        format!(
-            "{prefix} {}",
-            r#"
-        {
-            x = 'foo';
-            y = this.x;
-
-            get fooGetter() {
-                return this.x
-            }
-
-            arrow = () => this.x
-
-            func = function() {
-                return this.x
-            }
-
-            meth() {
-                return this.x
-            }
-
-            nestedArrow() {
-                const fn = () => this.x;
-                return fn();
-            }
-
-            inObject() {
-                const inner = {
-                    x: this.x
-                };
-                return inner.x;
-            }
-        }
-
-        const obj = new Foo();
-
-        const foo1 = obj.y;
-        const foo2 = obj.fooGetter;
-        const foo3 = obj.arrow();
-        const foo4 = obj.func();
-        const foo5 = obj.meth();
-        const foo6 = obj.nestedArrow();
-        const foo7 = obj.inObject();
-        "#
-        ),
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    for i in 1..=7 {
-        let name = format!("foo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot(case_name);
-}
-
-#[test]
-fn test_resolve_type_of_this_in_object() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        const obj = {
-            x: 'foo',
-            y: this.x,
-
-            get fooGetter() {
-                return this.x
-            },
-
-            arrow: () => this.x,
-
-            func: function() {
-                return this.x
-            },
-
-            meth() {
-                return this.x
-            },
-
-            nestedArrow() {
-                const fn = () => this.x;
-                return fn();
-            },
-
-            inObject() {
-                const inner = {
-                    x: this.x
-                };
-                return inner.x;
-            },
+            }))),
+            events,
         };
-
-        const foo1 = obj.fooGetter;
-        const foo2 = obj.func();
-        const foo3 = obj.meth();
-        const foo4 = obj.nestedArrow();
-        const foo5 = obj.inObject();
-
-        const notFoo1 = obj.y;
-        const notFoo2 = obj.arrow();
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    for i in 1..=5 {
-        let name = format!("foo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-    for i in 1..=2 {
-        let name = format!("notFoo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+        ModuleGraphGeneration::new(&db, 0);
+        db
     }
 
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_type_of_this_in_object");
+    fn take_salsa_events(&self) -> Vec<salsa::Event> {
+        std::mem::take(&mut *self.events.0.lock().unwrap())
+    }
+
+    fn clear_salsa_events(&self) {
+        self.take_salsa_events();
+    }
 }
 
-#[test]
-fn test_resolve_type_of_this_in_class_wrong_scope() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        class Foo {
-            x = 'foo';
+#[salsa::db]
+impl salsa::Database for TestModuleDb {}
 
-            nested() {
-                const fn = function() {
-                    return this.x;
-                }
-                return fn();
-            }
-            nested2() {
-                function fn() {
-                    return this.x;
-                }
-                return fn();
-            }
+#[salsa::db]
+impl biome_db::Db for TestModuleDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        None
+    }
+}
 
-            nestedObject() {
-                const inner = {
-                    fn: function() {
-                        return this.x;
-                    }
-                };
-                return inner.fn();
-            }
-            nestedObject2() {
-                const inner = {
-                    fn() {
-                        return this.x;
-                    }
-                };
-                return inner.fn();
-            }
+#[salsa::db]
+impl LanguageDb for TestModuleDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        None
+    }
+}
 
-            nestedInArrow = () => {
-                const fn = function() {
-                    return this.x;
-                }
-                return fn();
-            }
+#[salsa::db]
+impl biome_module_graph::TypeDb for TestModuleDb {
+    fn local_type_name(
+        &self,
+        module_key: InferredModuleKey,
+        type_id: InferredLocalTypeId,
+    ) -> Option<Text> {
+        let module = ModuleInfo::from_id(module_key.as_id());
+        let current = self.module_for_path(module.path(self))?;
+        if InferredModuleKey::new(current.as_id()) != module_key {
+            return None;
         }
 
-        const obj = new Foo();
-
-        const notFoo1 = obj.nested();
-        const notFoo2 = obj.nested2();
-        const notFoo3 = obj.nestedInArrow();
-        const notFoo4 = obj.nestedObject();
-        const notFoo5 = obj.nestedObject2();
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    for i in 1..=5 {
-        let name = format!("notFoo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_type_of_this_in_class_wrong_scope");
-}
-
-#[test]
-fn test_resolve_promise_export() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            async function returnsPromise() {
-                return 'value';
-            }
-
-            export const promise = returnsPromise();
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_promise_export");
-}
-
-#[test]
-fn test_resolve_merged_types() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"type A = 'a';
-type B = 'b';
-type C = 'c';
-export type Union = A | B | C;
-
-const A = 'a';
-const B = 1;
-const C = true;
-
-export type Union2 = typeof A | typeof B | typeof C;
-
-export { A, B };
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_merged_types");
-}
-
-#[test]
-fn test_resolve_merged_namespace_with_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"export namespace Foo {
-    interface Bar {};
-}
-
-export type Foo = Foo.Bar;
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-
-    snapshot.assert_snapshot("test_resolve_merged_namespace_with_type");
-}
-
-#[test]
-fn test_resolve_recursive_looking_country_info() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/@types/iso-3166-2/index.d.ts".into(),
-        r#"// Type definitions for iso-3166-2 1.0
-// Project: https://github.com/olahol/iso-3166-2.js
-// Definitions by: Matt Rollins <https://github.com/sicilica>, Emily Klassen <https://github.com/forivall>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-
-export namespace CountryInfo {
-    interface Partial {
-        name: string;
-        sub: SubdivisionInfo.Map;
-    }
-    interface Full extends Partial {
-        code: string;
-    }
-
-    interface Map {
-        // full data if this country has been retrieved with country() at least once
-        [code: string]: Full | Partial;
+        let ModuleInfoKind::Js(info) = current.kind(self) else {
+            return None;
+        };
+        info.local_type_name(type_id)
     }
 }
-export type CountryInfo = CountryInfo.Full;
 
-export namespace SubdivisionInfo {
-    interface Partial {
-        type: string;
-        name: string;
-    }
-    interface Full extends Partial {
-        countryName: string;
-        countryCode: string;
-        code: string;
-        regionCode: string;
+#[salsa::db]
+impl ModuleDb for TestModuleDb {
+    fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.modules.get(path).copied()
     }
 
-    interface Map {
-        // full data if this subdivision has been retrieved with subdivision() at least once
-        [code: string]: Full | Partial;
+    fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
+        for module in self.modules.values() {
+            f(*module);
+        }
     }
 }
-export type SubdivisionInfo = SubdivisionInfo.Full;
 
-export function subdivision(countryCodeOrFullSubdivisionCode: string, subdivisionCodeOrName?: string): SubdivisionInfo | null;
-
-export function country(countryCodeOrName: string): CountryInfo | null;
-
-export const data: CountryInfo.Map;
-
-// map of alpha 3 codes to alpha 3 codes
-export const codes: {
-    [alpha3: string]: string
-};
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/node_modules/@types/iso-3166-2/index.d.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_recursive_looking_country_info");
+fn is_inferred_instance_of<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    inner: InferredTypeData<'db>,
+) -> bool {
+    matches!(ty, InferredTypeData::InstanceOf(instance) if instance.ty(db) == inner)
 }
 
-#[test]
-fn test_resolve_recursive_looking_vfile() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/vfile/types/index.d.ts".into(),
-        r#"// TypeScript Version: 3.0
-
-import * as Unist from 'unist'
-import * as vfileMessage from 'vfile-message'
-
-declare namespace vfile {
-  /**
-   * Encodings supported by the buffer class
-   *
-   * @remarks
-   * This is a copy of the typing from Node, copied to prevent Node globals from being needed.
-   * Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/a2bc1d868d81733a8969236655fa600bd3651a7b/types/node/globals.d.ts#L174
-   */
-  type BufferEncoding =
-    | 'ascii'
-    | 'utf8'
-    | 'utf-8'
-    | 'utf16le'
-    | 'ucs2'
-    | 'ucs-2'
-    | 'base64'
-    | 'latin1'
-    | 'binary'
-    | 'hex'
-
-  /**
-   * VFileContents can either be text, or a Buffer like structure
-   * @remarks
-   * This does not directly use type `Buffer, because it can also be used in a browser context.
-   * Instead this leverages `Uint8Array` which is the base type for `Buffer`, and a native JavaScript construct.
-   */
-  type VFileContents = string | Uint8Array
-  type VFileCompatible = VFile | VFileOptions | VFileContents
-  interface Settings {
-    [key: string]: unknown
-  }
-  type VFileReporter<T = Settings> = (files: VFile[], options: T) => string
-
-  interface VFileOptions {
-    contents?: VFileContents
-    path?: string
-    basename?: string
-    stem?: string
-    extname?: string
-    dirname?: string
-    cwd?: string
-    data?: any
-    [key: string]: any
-  }
-
-  interface VFile {
-    /**
-     * Create a new virtual file. If `options` is `string` or `Buffer`, treats it as `{contents: options}`.
-     * If `options` is a `VFile`, returns it. All other options are set on the newly created `vfile`.
-     *
-     * Path related properties are set in the following order (least specific to most specific): `history`, `path`, `basename`, `stem`, `extname`, `dirname`.
-     *
-     * It’s not possible to set either `dirname` or `extname` without setting either `history`, `path`, `basename`, or `stem` as well.
-     *
-     * @param options If `options` is `string` or `Buffer`, treats it as `{contents: options}`. If `options` is a `VFile`, returns it. All other options are set on the newly created `vfile`.
-     */
-    <F extends VFile>(input?: VFileContents | F | VFileOptions): F
-    /**
-     * List of file-paths the file moved between.
-     */
-    history: string[]
-    /**
-     * Place to store custom information.
-     * It's OK to store custom data directly on the `vfile`, moving it to `data` gives a little more privacy.
-     */
-    data: unknown
-    /**
-     * List of messages associated with the file.
-     */
-    messages: vfileMessage.VFileMessage[]
-    /**
-     * Raw value.
-     */
-    contents: VFileContents
-    /**
-     * Path of `vfile`.
-     * Cannot be nullified.
-     */
-    path?: string
-    /**
-     * Path to parent directory of `vfile`.
-     * Cannot be set if there's no `path` yet.
-     */
-    dirname?: string
-    /**
-     * Current name (including extension) of `vfile`.
-     * Cannot contain path separators.
-     * Cannot be nullified either (use `file.path = file.dirname` instead).
-     */
-    basename?: string
-    /**
-     * Name (without extension) of `vfile`.
-     * Cannot be nullified, and cannot contain path separators.
-     */
-    stem?: string
-    /**
-     * Extension (with dot) of `vfile`.
-     * Cannot be set if there's no `path` yet and cannot contain path separators.
-     */
-    extname?: string
-    /**
-     * Base of `path`.
-     * Defaults to `process.cwd()`.
-     */
-    cwd: string
-    /**
-     * Convert contents of `vfile` to string.
-     * @param encoding If `contents` is a buffer, `encoding` is used to stringify buffers (default: `'utf8'`).
-     */
-    toString: (encoding?: BufferEncoding) => string
-    /**
-     * Associates a message with the file for `reason` at `position`.
-     * When an error is passed in as `reason`, copies the stack.
-     * Each message has a `fatal` property which by default is set to `false` (ie. `warning`).
-     * @param reason Reason for message. Uses the stack and message of the error if given.
-     * @param position Place at which the message occurred in `vfile`.
-     * @param ruleId Category of message.
-     */
-    message: (
-      reason: string,
-      position?: Unist.Point | Unist.Position | Unist.Node,
-      ruleId?: string
-    ) => vfileMessage.VFileMessage
-    /**
-     * Associates a fatal message with the file, then immediately throws it.
-     * Note: fatal errors mean a file is no longer processable.
-     * Calls `message()` internally.
-     * @param reason Reason for message. Uses the stack and message of the error if given.
-     * @param position Place at which the message occurred in `vfile`.
-     * @param ruleId Category of message.
-     */
-    fail: (
-      reason: string,
-      position?: Unist.Point | Unist.Position | Unist.Node,
-      ruleId?: string
-    ) => never
-    /**
-     * Associates an informational message with the file, where `fatal` is set to `null`.
-     * Calls `message()` internally.
-     * @param reason Reason for message. Uses the stack and message of the error if given.
-     * @param position Place at which the message occurred in `vfile`.
-     * @param ruleId Category of message.
-     */
-    info: (
-      reason: string,
-      position?: Unist.Point | Unist.Position | Unist.Node,
-      ruleId?: string
-    ) => vfileMessage.VFileMessage
-
-    [key: string]: unknown
-  }
+fn is_inferred_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    ty == InferredTypeData::String
+        || is_inferred_instance_of(db, ty, InferredTypeData::String)
+        || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::String(_)))
 }
 
-declare const vfile: vfile.VFile
-
-export = vfile
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/node_modules/vfile/types/index.d.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_recursive_looking_vfile");
+fn is_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    ty == InferredTypeData::Number
+        || is_inferred_instance_of(db, ty, InferredTypeData::Number)
+        || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Number(_)))
 }
 
-#[test]
-fn test_resolve_react_types() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/@types/react/index.d.ts".into(),
-        include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts")
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { useCallback } from "react";
-
-        const fn = useCallback(async () => {});
-        const promise = fn();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/node_modules/@types/react/index.d.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
-    );
-
-    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout
-        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let use_callback_id = resolver
-        .resolve_type_of(&Text::new_static("useCallback"), ScopeId::GLOBAL)
-        .expect("useCallback variable not found");
-    let use_callback_ty = resolver.resolved_type_for_id(use_callback_id);
-    assert!(use_callback_ty.is_function());
-
-    let promise_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-    let promise_ty = resolver.resolved_type_for_id(promise_id);
-    assert!(promise_ty.is_promise_instance());
+fn is_inferred_boolean<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    ty == InferredTypeData::Boolean
+        || is_inferred_instance_of(db, ty, InferredTypeData::Boolean)
+        || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Boolean(_)))
 }
 
-#[test]
-fn test_resolve_redis_commander_types() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/RedisCommander.d.ts".into(),
-        include_bytes!("../benches/RedisCommander.d.ts"),
-    );
-    fs.insert(
-        "/index.ts".into(),
-        r#"import RedisCommander from "./RedisCommander.d.ts";
-        "#,
-    );
+fn is_inferred_array_of_promises<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return false;
+    };
 
-    let added_paths = [
-        BiomePath::new("/RedisCommander.d.ts"),
-        BiomePath::new("/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
+    instance.ty(db).is_array_class(db)
+        && instance
+            .type_parameters(db)
+            .first()
+            .is_some_and(|ty| is_inferred_promise_instance(db, *ty))
+}
 
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+fn is_inferred_promise_instance<'db>(db: &'db dyn ModuleDb, mut ty: InferredTypeData<'db>) -> bool {
+    while let InferredTypeData::InstanceOf(instance) = ty {
+        ty = instance.ty(db);
+        if ty.is_promise_class(db) {
+            return true;
+        }
+    }
 
-    // We previously had an issue with `RedisCommander.d.ts` that caused types
-    // to be duplicated. We should look out in this snapshot that method
-    // signatures are registered only once per signature.
-    let redis_commander_module = db
-        .js_module_info_for_path(Utf8Path::new("/RedisCommander.d.ts"))
-        .expect("module must exist");
-    let num_registered_signatures = redis_commander_module
-        .types()
-        .iter()
-        .filter(|ty| {
+    false
+}
+
+fn is_inferred_string_literal<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    value: &str,
+) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::Literal(literal)
+            if matches!(literal.literal(db), InferredLiteral::String(string) if string.as_str() == value)
+    )
+}
+
+fn is_inferred_number_literal<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    value: &str,
+) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::Literal(literal)
+            if matches!(literal.literal(db), InferredLiteral::Number(number) if number.as_str() == value)
+    )
+}
+
+fn contains_inferred_string_literal<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    value: &str,
+) -> bool {
+    if is_inferred_string_literal(db, ty, value) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_string_literal(db, *ty, value)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_number_literal<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    value: &str,
+) -> bool {
+    if is_inferred_number_literal(db, ty, value) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_number_literal(db, *ty, value)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if is_inferred_string(db, ty) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_string(db, *ty)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if is_inferred_number(db, ty) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_number(db, *ty)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_boolean<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if is_inferred_boolean(db, ty) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_boolean(db, *ty)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_undefined<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if ty == InferredTypeData::Undefined {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_undefined(db, *ty)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_null<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if ty == InferredTypeData::Null {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_null(db, *ty)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_instance<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    match ty {
+        InferredTypeData::InstanceOf(_) => true,
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_instance(db, *ty)),
+        _ => false,
+    }
+}
+
+fn assert_inferred_function_returns_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
+    let InferredTypeData::Function(function) = ty else {
+        panic!("type must be inferred as a function");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(db) else {
+        panic!("function return type must be inferred as a type");
+    };
+
+    assert!(is_inferred_number(db, *return_ty));
+}
+
+fn object_member_ty_by_name<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    member_name: &str,
+) -> Option<(InferredTypeMemberKind<'db>, InferredTypeData<'db>)> {
+    let object = match ty {
+        InferredTypeData::Object(object) => object,
+        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+            InferredTypeData::Object(object) => object,
+            _ => return None,
+        },
+        _ => return None,
+    };
+
+    object.members(db).iter().find_map(|member| {
+        member
+            .kind
+            .name()
+            .is_some_and(|name| name.text() == member_name)
+            .then(|| (member.kind.clone(), member.ty))
+    })
+}
+
+fn inferred_binding_ty_by_name<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+    let binding = info.semantic_model.all_bindings().find(|binding| {
+        binding
+            .tree()
+            .name_token()
+            .is_ok_and(|token| token.text_trimmed() == name)
+    })?;
+
+    inferred
+        .binding_type_data
+        .get(&binding.syntax().text_trimmed_range())
+        .map(|data| data.ty)
+}
+
+fn inferred_function_return_ty_by_name<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    let binding_ty = inferred_binding_ty_by_name(db, module, inferred, name)?;
+    let function = inferred
+        .resolve_type(db, binding_ty)
+        .callable_function(db)?;
+    let InferredReturnType::Type(return_ty) = function.return_type(db) else {
+        return None;
+    };
+
+    Some(inferred.resolve_type(db, *return_ty))
+}
+
+#[salsa::tracked]
+fn inferred_expression_count(db: &dyn ModuleDb, module: ModuleInfo) -> usize {
+    infer_module_types(db, module).map_or(0, |inferred| inferred.expressions.len())
+}
+
+fn is_inferred_promise_with_type_parameter<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    predicate: impl Fn(InferredTypeData<'db>) -> bool,
+) -> bool {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return false;
+    };
+
+    ty.is_promise_instance(db) && instance.type_parameters(db).iter().any(|ty| predicate(*ty))
+}
+
+fn assert_inferred_function_returns_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
+    let InferredTypeData::Function(function) = ty else {
+        panic!("type must be inferred as a function");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(db) else {
+        panic!("function return type must be inferred as a type");
+    };
+
+    assert!(is_inferred_string(db, *return_ty));
+}
+
+fn local_type_id_of_instance<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<usize> {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return None;
+    };
+    let InferredTypeData::Local(local) = instance.ty(db) else {
+        return None;
+    };
+
+    Some(local.type_id(db).index())
+}
+
+fn infer_call_expression_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    callee: InferredTypeData<'db>,
+    args: Vec<InferredTypeData<'db>>,
+) -> InferredTypeData<'db> {
+    infer_call_expression_type_query(
+        db,
+        CallExpressionTypeInput::new(db, module, callee, args.into_boxed_slice()),
+    )
+}
+
+fn normalize_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    normalize_type_query(db, NormalizeTypeInput::new(db, module, ty))
+}
+
+fn interface_member_ty<'db>(
+    db: &'db dyn ModuleDb,
+    interface: InferredInterface<'db>,
+    member_name: &str,
+) -> Option<InferredTypeData<'db>> {
+    interface.members(db).iter().find_map(|member| {
+        matches!(
+            &member.kind,
+            InferredTypeMemberKind::Named(name) if name.text() == member_name,
+        )
+        .then_some(member.ty)
+    })
+}
+
+fn inferred_overload_ty_by_name<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+
+    info.semantic_model
+        .all_bindings()
+        .filter(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
+        })
+        .filter_map(|binding| {
+            inferred
+                .binding_type_data
+                .get(&binding.syntax().text_trimmed_range())
+                .map(|data| inferred.resolve_type(db, data.ty))
+        })
+        .find(|ty| {
             matches!(
                 ty,
-                TypeData::Function(function)
-                    if function
-                        .name
-                        .as_ref()
-                        .is_some_and(|name| *name == "zunionstore")
+                InferredTypeData::Object(object)
+                    if object
+                        .members(db)
+                        .iter()
+                        .filter(|member| member.kind.is_call_signature())
+                        .count()
+                        >= 2
             )
         })
-        .count();
-    assert_eq!(num_registered_signatures, 24);
 }
 
-#[test]
-fn test_resolve_single_reexport() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): number {
-            return 1;
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/reexport.ts".into(),
-        r#"
-        export * from "./foo.ts";
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { foo } from "./reexport.ts";
-
-        const result = foo();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexport.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let ty = resolver.resolved_type_for_id(result_id);
-    assert!(ty.is_number_or_number_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_single_reexport");
-}
-
-#[test]
-fn test_resolve_type_of_union_from_imported_module() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/react.d.ts".into(),
-        r#"
-        type BogusType = false;
-
-        export type ReactPortal = BogusType;
-
-        export type ReactElement = BogusType;
-
-        export type ReactNode =
-            | ReactElement
-            | string
-            | number
-            | Iterable<ReactNode>
-            | ReactPortal
-            | boolean
-            | null
-            | undefined;
-        "#,
-    );
-    fs.insert(
-        "/src/reexport.ts".into(),
-        r#"export { type ReactElement, type ReactNode } from "../node_modules/react.d.ts";"#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { type ReactNode } from "./reexport.ts";
-
-        const foo: ReactNode = undefined;
-        const bar = foo && 1;
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexport.ts"),
-        BiomePath::new("/node_modules/react.d.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("bar"), ScopeId::GLOBAL)
-        .expect("bar variable not found");
-    let ty = resolver.resolved_type_for_id(result_id);
-    assert!(ty.has_variant(|ty| ty.is_null()));
-    assert!(ty.has_variant(|ty| ty.is_undefined()));
-    assert!(ty.has_variant(|ty| ty.is_boolean_literal(false)));
-    assert!(ty.has_variant(|ty| ty.is_number_literal(0.)));
-    assert!(ty.has_variant(|ty| ty.is_number_literal(1.)));
-}
-
-#[test]
-fn test_resolve_multiple_reexports() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): number {
-            return 1;
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/bar.ts".into(),
-        r#"
-        export function bar(): string {
-            return "bar";
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/reexports.ts".into(),
-        r#"
-        export * from "./foo.ts";
-        export * from "./bar.ts";
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { foo } from "./reexports.ts";
-        import * as reexports from "./reexports.ts";
-
-        const result1 = foo();
-        const result2 = reexports.bar();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/bar.ts"),
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexports.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result1_id = resolver
-        .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
-        .expect("result1 variable not found");
-    let ty = resolver.resolved_type_for_id(result1_id);
-    assert!(ty.is_number_or_number_literal());
-
-    let result2_id = resolver
-        .resolve_type_of(&Text::new_static("result2"), ScopeId::GLOBAL)
-        .expect("result2 variable not found");
-    let ty = resolver.resolved_type_for_id(result2_id);
-    assert!(ty.is_string_or_string_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_multiple_reexports");
-}
-
-#[test]
-fn test_resolve_export_type_referencing_imported_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/promisedResult.ts".into(),
-        "export type PromisedResult = Promise<{ result: true | false }>;\n",
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import type { PromisedResult } from "./promisedResult.ts";
-
-        function returnPromiseResult(): PromisedResult {
-            return new Promise(resolve => resolve({ result: true }));
-        }
-
-        export { returnPromiseResult };
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/promisedResult.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_export_type_referencing_imported_type");
-}
-
-#[test]
-fn test_resolve_promise_from_imported_function_returning_imported_promise_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/promisedResult.ts".into(),
-        "export type PromisedResult = Promise<{ result: true | false }>;\n",
-    );
-    fs.insert(
-        "/src/returnPromiseResult.ts".into(),
-        r#"import type { PromisedResult } from "./promisedResult.ts";
-
-        function returnPromiseResult(): PromisedResult {
-            return new Promise(resolve => resolve({ result: true }));
-        }
-
-        export { returnPromiseResult };
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-        const promise = returnPromiseResult();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/promisedResult.ts"),
-        BiomePath::new("/src/returnPromiseResult.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let resolved_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-
-    let ty = resolver.resolved_type_for_id(resolved_id);
-    let _ty_string = format!("{:?}", ty.deref()); // for debugging
-    assert!(ty.is_promise_instance());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot(
-        "test_resolve_promise_from_imported_function_returning_imported_promise_type",
-    );
-}
-
-#[test]
-fn test_resolve_promise_from_imported_function_returning_reexported_promise_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/promisedResult.ts".into(),
-        "export type PromisedResult = Promise<{ result: true | false }>;\n",
-    );
-    fs.insert(
-        "/src/reexport.ts".into(),
-        "export { PromisedResult } from \"./promisedResult.ts\";\n",
-    );
-    fs.insert(
-        "/src/returnPromiseResult.ts".into(),
-        r#"import type { PromisedResult } from "./reexport.ts";
-
-        function returnPromiseResult(): PromisedResult {
-            return new Promise(resolve => resolve({ result: true }));
-        }
-
-        export { returnPromiseResult };
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-        const promise = returnPromiseResult();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/promisedResult.ts"),
-        BiomePath::new("/src/reexport.ts"),
-        BiomePath::new("/src/returnPromiseResult.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let resolved_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-
-    let ty = resolver.resolved_type_for_id(resolved_id);
-    let _ty_string = format!("{:?}", ty.deref()); // for debugging
-    assert!(ty.is_promise_instance());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot(
-        "test_resolve_promise_from_imported_function_returning_reexported_promise_type",
-    );
-}
-
-#[test]
-fn test_resolve_type_of_destructured_field_of_intersection_of_interfaces() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-
-type FullConfiguration = InternalConfiguration & PublicConfiguration;
-
-type ScopedMutator<Data = any, T = Data> = (key: Arguments, data?: T | Promise<T> | MutatorCallback<T>, opts?: boolean | MutatorOptions<Data, T>) => Promise<T | undefined>;
-
-interface InternalConfiguration {
-    cache: Cache;
-    mutate: ScopedMutator;
-}
-
-interface PublicConfiguration {
-    errorRetryInterval: number;
-}
-
-declare const useSWRConfig: () => FullConfiguration;
-
-const { mutate } = useSWRConfig();
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let use_swr_config_id = resolver
-        .resolve_type_of(&Text::new_static("useSWRConfig"), ScopeId::GLOBAL)
-        .expect("mutate variable not found");
-    let use_swr_config_ty = resolver.resolved_type_for_id(use_swr_config_id);
-    let _use_swr_config_ty_string = format!("{:?}", use_swr_config_ty.deref()); // for debugging
-    assert!(use_swr_config_ty.is_function_with_return_type(|return_ty| {
-        let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
-        return_ty.is_interface()
-    }));
-
-    let mutate_id = resolver
-        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
-        .expect("mutate variable not found");
-    let mutate_ty = resolver.resolved_type_for_id(mutate_id);
-    let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    assert!(
-        mutate_ty.is_instance_of(|instance_ty| instance_ty.is_function_with_return_type(
-            |return_ty| {
-                let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
-                return_ty.is_promise_instance()
-            }
-        ))
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot
-        .assert_snapshot("test_resolve_type_of_destructured_field_of_intersection_of_interfaces");
-}
-
-#[test]
-fn test_resolve_type_of_intersection_of_interfaces() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"interface Foo {
-    foo(): string;
-}
-
-interface Bar {
-    foo(): number;
-    bar(): boolean;
-}
-
-type Intersection = Foo & Bar;"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let intersection_id = resolver
-        .resolve_type_of(&Text::new_static("Intersection"), ScopeId::GLOBAL)
-        .expect("Intersection type not found");
-    let intersection_ty = resolver.resolved_type_for_id(intersection_id);
-    let _intersection_ty = format!("{:?}", intersection_ty.deref()); // for debugging
-    assert!(intersection_ty.is_interface());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot("test_resolve_type_of_intersection_of_interfaces");
-}
-
-#[test]
-fn test_resolve_swr_types() {
-    let fixtures_path = get_fixtures_path();
-
-    let fs = OsFileSystem::new(fixtures_path.clone());
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(format!("{fixtures_path}/frontend").into(), {
-        let path = Utf8PathBuf::from(format!("{fixtures_path}/frontend/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-    // Bloody symlinks...
-    let swr_path = {
-        let swr_path = format!("{fixtures_path}/node_modules/swr");
-        let symlink = read_link(swr_path).expect("cannot read symlink");
-        let symlink = Utf8PathBuf::from_path_buf(symlink).expect("non-UTF8 path");
-        normalize_path(Utf8Path::new(&format!(
-            "{fixtures_path}/node_modules/{symlink}"
-        )))
-    };
-    project_layout.insert_node_manifest(swr_path.clone(), {
-        let path = Utf8PathBuf::from(format!("{swr_path}/package.json"));
-        deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&path)
-                .expect("package.json must be readable"),
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .expect("package.json must parse")
-    });
-
-    let mut added_paths = vec![BiomePath::new(format!(
-        "{fixtures_path}/frontend/src/index.ts"
-    ))];
-    for path in find_files_recursively_in_directory(&swr_path, |path| {
-        path.extension().is_some_and(|ext| ext != "json")
-    }) {
-        added_paths.push(BiomePath::new(path));
+fn assert_inferred_type_snapshot(test_name: &str, db: &dyn ModuleDb, fs: &MemoryFileSystem) {
+    let mut content = String::new();
+    let files = source_files_from_memory_fs(fs);
+    for (file_name, source_code) in &files {
+        let file_name = Utf8PathBuf::from(file_name.as_str());
+        write_source_file(&mut content, &file_name, source_code);
+
+        let Some(module) = db.module_for_path(file_name.as_path()) else {
+            continue;
+        };
+        let Some(inferred) = infer_module_types(db, module) else {
+            continue;
+        };
+        write_inferred_type_rows(&mut content, db, module, inferred, source_code);
     }
-    let added_paths = get_added_js_paths(&fs, &added_paths);
 
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
+    insta::with_settings!({
+        snapshot_path => "snapshots",
+        prepend_module_to_snapshot => false,
+    }, {
+        insta::assert_snapshot!(test_name, content);
+    });
+}
 
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new(&format!(
-            "{fixtures_path}/frontend/src/index.ts"
-        )))
-        .expect("module must exist");
-    assert_eq!(
-        index_module.static_import_paths.get("swr"),
-        Some(&JsImportPath {
-            resolved_path: ResolvedPath::from_path(format!("{swr_path}/dist/index/index.d.mts")),
-            phase: JsImportPhase::Default,
+struct InferredTypeSnapshotRow {
+    range: TextRange,
+    text: String,
+}
+
+fn write_inferred_type_rows<'db>(
+    content: &mut String,
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    source_code: &str,
+) {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return;
+    };
+
+    let mut rows = Vec::new();
+    for range in info.raw_binding_types.keys() {
+        let Some(data) = inferred.binding_type_data.get(range) else {
+            continue;
+        };
+        let binding_name = info
+            .semantic_model
+            .as_binding_by_range(*range)
+            .and_then(|binding| binding.tree().name_token().ok())
+            .map_or_else(
+                || "<unknown>".to_string(),
+                |token| token.text_trimmed().to_string(),
+            );
+        rows.push(InferredTypeSnapshotRow {
+            range: *range,
+            text: inferred_type_snapshot_row(
+                format!(
+                    "Binding {binding_name} {:?}",
+                    source_snippet(source_code, *range)
+                ),
+                format_inferred_type(db, inferred.resolve_type(db, data.ty)),
+            ),
+        });
+    }
+
+    for (range, ty) in &inferred.expressions {
+        rows.push(InferredTypeSnapshotRow {
+            range: *range,
+            text: inferred_type_snapshot_row(
+                format!("Expression {:?}", source_snippet(source_code, *range)),
+                format_inferred_type(db, inferred.resolve_type(db, *ty)),
+            ),
+        });
+    }
+
+    if rows.is_empty() {
+        return;
+    }
+
+    rows.sort_by(|left, right| {
+        left.range
+            .start()
+            .cmp(&right.range.start())
+            .then_with(|| left.range.end().cmp(&right.range.end()))
+            .then_with(|| left.text.cmp(&right.text))
+    });
+
+    content.push_str("\n\n## Inferred types\n\n```");
+    for row in rows {
+        content.push('\n');
+        content.push_str(&row.text);
+        content.push('\n');
+    }
+    content.push_str("```\n");
+}
+
+fn inferred_type_snapshot_row(label: String, formatted_ty: String) -> String {
+    if !formatted_ty
+        .lines()
+        .skip(1)
+        .any(|line| line.starts_with("| ") || line.starts_with("& "))
+    {
+        return format!("{label} => {formatted_ty}");
+    }
+
+    let indented_ty = formatted_ty
+        .lines()
+        .map(|line| format!("  {line}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    format!("{label} =>\n{indented_ty}")
+}
+
+fn source_snippet(source_code: &str, range: TextRange) -> String {
+    let start = usize::from(range.start());
+    let end = usize::from(range.end());
+    source_code
+        .get(start..end)
+        .unwrap_or("<invalid range>")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn source_files_from_memory_fs(fs: &MemoryFileSystem) -> BTreeMap<String, String> {
+    fs.files
+        .read()
+        .iter()
+        .map(|(file, entry)| {
+            let content = entry.lock();
+            let content = String::from_utf8_lossy(content.as_slice()).into_owned();
+            (file.as_str().to_string(), content)
         })
-    );
-
-    let swr_index_module = db
-        .js_module_info_for_path(Utf8Path::new(&format!("{swr_path}/dist/index/index.d.mts")))
-        .expect("module must exist");
-    assert_eq!(
-        swr_index_module
-            .static_import_paths
-            .get("../_internal/index.mjs"),
-        Some(&JsImportPath {
-            resolved_path: ResolvedPath::from_path(format!(
-                "{swr_path}/dist/_internal/index.d.mts"
-            )),
-            phase: JsImportPhase::Default,
-        })
-    );
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let mutate_id = resolver
-        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
-        .expect("mutate variable not found");
-
-    let mutate_ty = resolver.resolved_type_for_id(mutate_id);
-    let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    assert!(mutate_ty.is_interface_with_member(|member| member.kind().is_call_signature()));
-
-    let mutate_result_id = resolver
-        .resolve_type_of(&Text::new_static("mutateResult"), ScopeId::GLOBAL)
-        .expect("mutateResult variable not found");
-
-    let mutate_result_ty = resolver.resolved_type_for_id(mutate_result_id);
-    let _mutate_result_ty_string = format!("{:?}", mutate_result_ty.deref()); // for debugging
-    assert!(mutate_result_ty.is_promise_instance());
+        .collect()
 }
 
-#[test]
-fn test_widening_via_assignment() {
-    let fs = MemoryFileSystem::default();
+fn write_source_file(content: &mut String, file_name: &Utf8PathBuf, source_code: &str) {
+    let extension = file_name.extension().unwrap_or_default();
 
-    fs.insert(
-        "index.ts".into(),
-        r#"
-let hey = false;
-function f() {
-    hey = true;
-}"#,
-    );
+    content.push_str("\n# `");
+    content.push_str(file_name.as_str());
+    content.push_str("`\n\n## Source\n\n");
+    content.push_str("```");
+    content.push_str(extension);
+    content.push('\n');
 
-    let added_paths = [BiomePath::new("index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
+    if let Ok(file_source) = JsFileSource::try_from(file_name.as_path()) {
+        let tree = parse(source_code, file_source, JsParserOptions::default());
+        let formatted = format_node(JsFormatOptions::default(), tree.tree().syntax(), Vec::new())
+            .unwrap()
+            .print()
+            .unwrap();
+        content.push_str(formatted.as_code().trim());
+    } else {
+        content.push_str(source_code.trim());
+    }
 
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-
-    snapshot.assert_snapshot("test_widening_via_assignment");
+    content.push_str("\n```");
 }
 
-#[test]
-fn test_widening_via_assignment_multiple_values() {
-    let fs = MemoryFileSystem::default();
-
-    fs.insert(
-        "index.ts".into(),
-        r#"
-let hey = undefined;
-function f() {
-    hey = "some string";
-}
-function g() {
-    hey = 123;
-}
-"#,
-    );
-
-    let added_paths = [BiomePath::new("index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-
-    snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
+fn resolve_js_module_kind_for_test(
+    fs: &MemoryFileSystem,
+    path: &str,
+    infer_types: bool,
+) -> ModuleInfoKind {
+    resolve_js_module_kind_with_layout(fs, &ProjectLayout::default(), path, infer_types)
 }
 
-// ============================================================================
-// Regression tests for false positives fixed in biome#9143
-// ============================================================================
-
-/// `node:fs`, `node:path`, etc. must resolve to `ResolveError::NodeBuiltIn`,
-/// not to any file path error. The lint rule silently accepts this error kind.
-#[test]
-fn test_node_builtin_imports_resolve_to_builtin_error() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            import fs from "node:fs";
-            import path from "node:path";
-            import { fileURLToPath } from "node:url";
-        "#,
+fn resolve_js_module_kind_with_layout(
+    fs: &MemoryFileSystem,
+    project_layout: &ProjectLayout,
+    path: &str,
+    infer_types: bool,
+) -> ModuleInfoKind {
+    let paths = [BiomePath::new(path)];
+    let mut added_paths = get_added_js_paths(fs, &paths);
+    let (path, root, semantic_model) = added_paths.pop().expect("module must parse");
+    let (module_info, _, _) = resolve_js_module(
+        root,
+        path,
+        fs,
+        project_layout,
+        semantic_model,
+        &PathInfoCache::default(),
+        infer_types,
     );
 
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("test-pkg").with_version("0.0.0"),
-    );
+    ModuleInfoKind::Js(module_info)
+}
 
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
+fn build_js_test_module_db(
+    fs: &MemoryFileSystem,
+    paths: &[&str],
+    infer_types: bool,
+) -> TestModuleDb {
+    build_js_test_module_db_with_layout(fs, &ProjectLayout::default(), paths, infer_types)
+}
 
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
-
-    // All three `node:*` specifiers must be present in static_import_paths.
-    for specifier in ["node:fs", "node:path", "node:url"] {
-        let import_path = module
-            .static_import_paths
-            .get(specifier)
-            .unwrap_or_else(|| panic!("specifier `{specifier}` not found in static_import_paths"));
-
-        assert_eq!(
-            import_path.resolved_path.error(),
-            Some(&ResolveError::NodeBuiltIn),
-            "`{specifier}` should resolve to ResolveError::NodeBuiltIn, got: {:?}",
-            import_path.resolved_path.as_deref()
+fn build_js_test_module_db_with_layout(
+    fs: &MemoryFileSystem,
+    project_layout: &ProjectLayout,
+    paths: &[&str],
+    infer_types: bool,
+) -> TestModuleDb {
+    let mut db = TestModuleDb::new();
+    for path in paths {
+        let module_info = ModuleInfo::new(
+            &db,
+            Utf8PathBuf::from(*path),
+            resolve_js_module_kind_with_layout(fs, project_layout, path, infer_types),
         );
+        db.modules.insert(Utf8PathBuf::from(*path), module_info);
     }
+    db
 }
 
-/// A package that uses `"typings"` (instead of `"types"`) to declare its type
-/// entry point must still be resolved correctly. This regression covers the
-/// `lucide-react` false-positive reported in biome#9143.
-#[test]
-fn test_package_typings_field_resolution() {
-    let fs = MemoryFileSystem::default();
-
-    // Package entry point — a .d.ts reached via "typings".
-    fs.insert(
-        "/node_modules/my-icons/dist/index.d.ts".into(),
-        r#"export declare function Icon(): void;"#,
-    );
-
-    // The package's package.json uses "typings", not "types".
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { Icon } from "my-icons";"#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("test-pkg")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([(
-                "my-icons".into(),
-                "1.0.0".into(),
-            )]))),
-    );
-
-    // Insert the package manifest using `with_typings` once that API exists,
-    // or manually build a PackageJson that has `typings` set.
-    // For now we build it from raw JSON — this also exercises the
-    // `"typings"` → `"types"` alias in PackageJson deserialization.
-    let pkg_json_str = r#"{"name":"my-icons","version":"1.0.0","typings":"./dist/index.d.ts"}"#;
-    let pkg_json = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
-        pkg_json_str,
-        biome_json_parser::JsonParserOptions::default(),
-        "package.json",
-    )
-    .into_deserialized()
-    .expect("package.json must parse");
-
-    project_layout.insert_node_manifest("/node_modules/my-icons".into(), pkg_json);
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/node_modules/my-icons/dist/index.d.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
-
-    // The import must resolve to the .d.ts file, not an error.
-    let import_path = module
-        .static_imports
-        .get("Icon")
-        .expect("`Icon` must be in static_imports");
-    assert_eq!(
-        import_path.resolved_path.as_path(),
-        Some(Utf8Path::new("/node_modules/my-icons/dist/index.d.ts")),
-        "Package with `typings` field must resolve to its declared entry point"
-    );
-}
-
-/// `export {{ x as y }} from "./mod"` re-exports `x` under the name `y`.
-/// When a consumer imports `y`, the resolver must look up `x` (the source-side
-/// name) in the target module — not `y` (the alias). This regression covers
-/// the `vitest` / `@tanstack/react-query` false-positives in biome#9143.
-#[test]
-fn test_aliased_named_reexport_is_found_by_alias() {
-    let fs = MemoryFileSystem::default();
-
-    // Source module: exports the function under its original name.
-    fs.insert(
-        "/src/source.ts".into(),
-        r#"export function originalName() {}"#,
-    );
-
-    // Barrel: re-exports `originalName` under a different name `renamedSymbol`.
-    fs.insert(
-        "/src/barrel.ts".into(),
-        r#"export { originalName as renamedSymbol } from "./source.ts";"#,
-    );
-
-    // Consumer: imports using the public alias name.
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { renamedSymbol } from "./barrel.ts";"#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("test-pkg").with_version("0.0.0"),
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/source.ts"),
-        BiomePath::new("/src/barrel.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    // `barrel.ts` must expose `renamedSymbol` as an own export (resolved from
-    // the re-export chain to a binding in `source.ts`).
-    let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
-
-    let found =
-        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "renamedSymbol", barrel));
-    assert!(
-        matches!(found, JsExportedSymbolLookup::Found(_)),
-        "`renamedSymbol` must be found via the aliased re-export chain; got {found:?}"
-    );
-
-    // `originalName` must NOT be visible under the barrel's public API.
-    let not_found =
-        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel));
-    assert_eq!(
-        not_found,
-        JsExportedSymbolLookup::Missing,
-        "`originalName` must not be directly exported from the barrel"
-    );
-}
-
-/// `export * as Ns from "./mod"` creates a namespace object and exports it
-/// under the name `Ns`. `Ns` must be resolved as `JsOwnExport::Namespace`
-/// (an own export of the barrel module, not a forwarding re-export).
-/// This regression covers the `@base-ui/react` false-positive in biome#9143.
-#[test]
-fn test_namespace_reexport_is_own_export() {
-    let fs = MemoryFileSystem::default();
-
-    // Source module with some exports.
-    fs.insert(
-        "/src/source.ts".into(),
-        r#"
-            export function alpha() {}
-            export function beta() {}
-        "#,
-    );
-
-    // Barrel: re-exports entire namespace of `source.ts` under `MyNs`.
-    fs.insert(
-        "/src/barrel.ts".into(),
-        r#"export * as MyNs from "./source.ts";"#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("test-pkg").with_version("0.0.0"),
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/source.ts"),
-        BiomePath::new("/src/barrel.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
-
-    let js_barrel = barrel.kind(&db);
-    let js_barrel = js_barrel.as_js_module_info().unwrap();
-
-    // `MyNs` must be stored as an own export (namespace), not as a forwarding
-    // re-export. Only then will `find_js_exported_symbol` find it.
-    assert_eq!(
-        js_barrel.exports.get(&Text::new_static("MyNs")),
-        Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
-            export_range: Some(TextRange::new(TextSize::from(0), TextSize::from(36))),
-            import: JsImport {
-                specifier: "./source.ts".into(),
-                resolved_path: ResolvedPath::from_path("/src/source.ts"),
-                symbol: ImportSymbol::All,
-            },
-        }))),
-        "`export * as MyNs` must produce JsExport::Own(JsOwnExport::Namespace(JsReexport {{ .. }}))"
-    );
-
-    // Confirm `find_js_exported_symbol` finds it as the lint rule sees it.
-    let found = find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "MyNs", barrel));
-    assert!(
-        matches!(found, JsExportedSymbolLookup::Found(_)),
-        "`MyNs` must be found by find_js_exported_symbol"
-    );
-}
-
-/// A package without an `exports` field (like `next`) can re-export symbols
-/// through its own package name: `next/server.d.ts` contains
-/// `export { NextRequest } from 'next/dist/...'`. The re-export must be
-/// followed through the regular `node_modules` lookup.
-/// This regression covers the `next/server` false positive in biome#10870.
-#[test]
-fn test_find_symbol_reexported_through_package_self_reference() {
-    let fs = MemoryFileSystem::default();
-
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { NextRequest } from "next/server";"#,
-    );
-    fs.insert(
-        "/node_modules/next/server.d.ts".into(),
-        r#"export { NextRequest } from "next/dist/request";"#,
-    );
-    fs.insert(
-        "/node_modules/next/dist/request.d.ts".into(),
-        r#"export declare class NextRequest {}"#,
-    );
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([("next".into(), "16.0.0".into())]))),
-    );
-    project_layout.insert_node_manifest(
-        "/node_modules/next".into(),
-        PackageJson::new("next").with_version("16.0.0"),
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/node_modules/next/server.d.ts"),
-        BiomePath::new("/node_modules/next/dist/request.d.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, false);
-
-    let server = db
-        .module_for_path(Utf8Path::new("/node_modules/next/server.d.ts"))
-        .unwrap();
-
-    let found = find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "NextRequest", server));
-    assert!(
-        matches!(found, JsExportedSymbolLookup::Found(_)),
-        "`NextRequest` must be found through the self-referencing re-export; got {found:?}"
-    );
-}
-
-/// A re-export whose target cannot be resolved must make the lookup report
-/// `Unknown` instead of `Missing`: the symbol may exist in the module we
-/// failed to resolve, so callers must not claim it is absent.
-#[test]
-fn test_find_symbol_behind_unresolvable_reexport_is_unknown() {
-    let fs = MemoryFileSystem::default();
-
-    fs.insert(
-        "/src/barrel.ts".into(),
-        r#"
-            export { fromMissingPackage } from "not-installed";
-            export const own = 1;
-        "#,
-    );
-    fs.insert("/src/star.ts".into(), r#"export * from "not-installed";"#);
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("test-pkg").with_version("0.0.0"),
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/barrel.ts"),
-        BiomePath::new("/src/star.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, false);
-
-    let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
-
-    let named = find_js_exported_symbol(
-        &db,
-        SymbolFromModuleInfo::new(&db, "fromMissingPackage", barrel),
-    );
-    assert_eq!(named, JsExportedSymbolLookup::Unknown);
-
-    // A symbol that no export statement mentions is still `Missing`.
-    let absent =
-        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "neverExported", barrel));
-    assert_eq!(absent, JsExportedSymbolLookup::Missing);
-
-    // `export * from` with an unresolvable target may provide any name.
-    let star = db.module_for_path(Utf8Path::new("/src/star.ts")).unwrap();
-    let behind_star =
-        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "anything", star));
-    assert_eq!(behind_star, JsExportedSymbolLookup::Unknown);
-}
-
-/// `export * as Ns from "./mod"` should also support type inference: when
-/// `index.ts` imports `{ MyNs }` from a barrel that uses `export * as MyNs`,
-/// calling `MyNs.alpha()` must resolve to the return type of `alpha` in
-/// the source module. This verifies the `JsOwnExport::Namespace(JsReexport)`
-/// variant drives the correct `TypeData::ImportNamespace` path.
-#[test]
-fn test_namespace_reexport_type_inference() {
-    let fs = MemoryFileSystem::default();
-
-    // Source module with a typed export.
-    fs.insert(
-        "/src/source.ts".into(),
-        r#"
-            /**
-            * @description
-            * I am a jsdoc
-            */
-            export function alpha(): number {
-                return 1;
-            }
-        "#,
-    );
-
-    // Barrel: re-exports entire source namespace under `MyNs`.
-    fs.insert(
-        "/src/barrel.ts".into(),
-        r#"export * as MyNs from "./source.ts";"#,
-    );
-
-    // Consumer: imports the namespace and calls a member.
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { MyNs } from "./barrel.ts";
-
-        const result = MyNs.alpha();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/source.ts"),
-        BiomePath::new("/src/barrel.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(
-        result_ty.is_number_or_number_literal(),
-        "expected `MyNs.alpha()` to resolve to number, got: {result_ty:?}"
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_namespace_reexport_type_inference");
-}
-
-/// Verifies that a JSX file that imports a CSS file shows:
-/// - the CSS import edge in `static_import_paths`
-/// - `referenced_classes` populated from `className="..."` attributes
-/// - the CSS module info showing the defined classes
-#[test]
-fn test_jsx_imports_css_file() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/styles.css".into(),
-        r#"
-.button {
-    color: red;
-}
-.header {
-    font-size: 24px;
-}
-"#,
-    );
-    fs.insert(
-        "/src/App.jsx".into(),
-        r#"
-import "./styles.css";
-
-export function App() {
-    return <div className="button header">Hello</div>;
-}
-"#,
-    );
-
-    let css_paths = [BiomePath::new("/src/styles.css")];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-
-    let js_paths = [BiomePath::new("/src/App.jsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    // Verify the JS module info has the CSS import edge resolved
-    let app_info = db
-        .js_module_info_for_path(Utf8Path::new("/src/App.jsx"))
-        .expect("App.jsx must be in module graph");
-    assert!(
-        app_info
-            .static_import_paths
-            .values()
-            .any(|p| p.as_path() == Some(Utf8Path::new("/src/styles.css"))),
-        "App.jsx must have a resolved import edge to styles.css"
-    );
-
-    // Verify referenced_classes contains the JSX className values
-    assert!(
-        app_info
-            .referenced_classes
-            .iter()
-            .any(|r| r.matches("button")),
-        "App.jsx must reference class 'button'"
-    );
-    assert!(
-        app_info
-            .referenced_classes
-            .iter()
-            .any(|r| r.matches("header")),
-        "App.jsx must reference class 'header'"
-    );
-
-    // Verify the CSS module info has the defined classes
-    let css_info = db
-        .css_module_info_for_path(Utf8Path::new("/src/styles.css"))
-        .expect("styles.css must be in module graph");
-    assert!(
-        css_info.classes.values().any(|t| t.text() == "button"),
-        "styles.css must define class 'button'"
-    );
-    assert!(
-        css_info.classes.values().any(|t| t.text() == "header"),
-        "styles.css must define class 'header'"
-    );
-
-    // Snapshot both files to capture the full module info.
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_jsx_imports_css_file");
-}
-
-/// Verifies that `is_class_referenced_by_importers` returns `true` for a class
-/// that is referenced in the importing JSX file, and `false` for a class that
-/// is defined in the CSS but never used.
-#[test]
-fn test_css_classes_referenced_by_jsx() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/styles.css".into(),
-        r#"
-.used { color: blue; }
-.unused { color: green; }
-"#,
-    );
-    fs.insert(
-        "/src/Component.jsx".into(),
-        r#"
-import "./styles.css";
-
-export function Component() {
-    return <div className="used" />;
-}
-"#,
-    );
-
-    let css_paths = [BiomePath::new("/src/styles.css")];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/Component.jsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-    let styles_css = db
-        .module_for_path(Utf8Path::new("/src/styles.css"))
-        .unwrap();
-
-    assert!(
-        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "used", styles_css)),
-        "'used' class should be referenced by Component.jsx"
-    );
-    assert!(
-        !is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "unused", styles_css)
-        ),
-        "'unused' class should not be referenced by any importer"
-    );
-}
-
-/// Verifies transitive CSS import chain:
-/// `App.jsx` → `theme.css` → `base.css`
-///
-/// `transitive_importers_of(base.css)` must include `App.jsx`, and
-/// `is_class_referenced_by_importers(base.css, "base")` must return `true`.
-#[test]
-fn test_transitive_css_import_chain() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/base.css".into(),
-        r#"
-.base { margin: 0; }
-.orphan { padding: 0; }
-"#,
-    );
-    fs.insert(
-        "/src/theme.css".into(),
-        r#"
-@import "./base.css";
-.theme { color: purple; }
-"#,
-    );
-    fs.insert(
-        "/src/App.jsx".into(),
-        r#"
-import "./theme.css";
-
-export function App() {
-    return <div className="base theme" />;
-}
-"#,
-    );
-
-    let css_paths = [
-        BiomePath::new("/src/base.css"),
-        BiomePath::new("/src/theme.css"),
-    ];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/App.jsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    // CSS class consumers of base.css must include App.jsx (via theme.css).
-    let module = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
-    let importers = transitive_importers_of(&db, module);
-    assert!(
-        importers
-            .iter()
-            .any(|p| p.as_path() == Utf8Path::new("/src/App.jsx")),
-        "App.jsx must be a transitive importer of base.css; got: {importers:?}"
-    );
-
-    // The 'base' class is used by App.jsx, so it should be considered referenced.
-    assert!(
-        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "base", module)),
-        "'base' class must be referenced transitively"
-    );
-
-    // The 'orphan' class is never used anywhere.
-    assert!(
-        !is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "orphan", module)),
-        "'orphan' class must not be referenced"
-    );
-}
-
-/// Verifies the real-world use case: single entry point importing main CSS,
-/// which imports multiple component CSS files.
-///
-/// App.tsx → app.css → components.css (defines .button)
-/// App.tsx uses className="button"
-///
-/// This test ensures that classes defined in deeply nested CSS files are
-/// correctly detected as used when referenced by the entry point.
-#[test]
-fn test_single_entry_point_with_nested_css_imports() {
-    let fs = MemoryFileSystem::default();
-
-    // Deeply nested CSS file defining component classes
-    fs.insert(
-        "/src/styles/components.css".into(),
-        r#"
-.button { background: blue; }
-.card { border: 1px solid; }
-.unused-component-class { color: red; }
-"#,
-    );
-
-    // Utility CSS file
-    fs.insert(
-        "/src/styles/utils.css".into(),
-        r#"
-.flex { display: flex; }
-.grid { display: grid; }
-"#,
-    );
-
-    // Main app CSS that imports other CSS files
-    fs.insert(
-        "/src/app.css".into(),
-        r#"
-@import "./styles/components.css";
-@import "./styles/utils.css";
-
-.app-container { width: 100%; }
-"#,
-    );
-
-    // Entry point that only imports app.css
-    fs.insert(
-        "/src/App.tsx".into(),
-        r#"
-import "./app.css";
-
-export function App() {
-    return (
-        <div className="app-container flex">
-            <button className="button">Click</button>
-            <div className="card">Content</div>
-        </div>
-    );
-}
-"#,
-    );
-
-    let css_paths = [
-        BiomePath::new("/src/styles/components.css"),
-        BiomePath::new("/src/styles/utils.css"),
-        BiomePath::new("/src/app.css"),
-    ];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/App.tsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    // App.tsx should be found as consumer of components.css (via app.css)
-    let components_css = db
-        .module_for_path(Utf8Path::new("/src/styles/components.css"))
-        .unwrap();
-    let utils_css = db
-        .module_for_path(Utf8Path::new("/src/styles/utils.css"))
-        .unwrap();
-    let consumers = transitive_importers_of(&db, components_css);
-    assert!(
-        consumers
-            .iter()
-            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
-        "App.tsx must be a consumer of components.css; got: {consumers:?}"
-    );
-
-    // Classes used in App.tsx should be detected even from nested CSS
-    assert!(
-        is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "button", components_css)
-        ),
-        "'button' class from components.css should be detected as used"
-    );
-
-    assert!(
-        is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "card", components_css)
-        ),
-        "'card' class from components.css should be detected as used"
-    );
-
-    // Unused class should not be detected
-    assert!(
-        !is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "unused-component-class", components_css)
-        ),
-        "'unused-component-class' should be detected as unused"
-    );
-
-    // Utils classes should also work
-    assert!(
-        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "flex", utils_css)),
-        "'flex' class from utils.css should be detected as used"
-    );
-
-    assert!(
-        !is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "grid", utils_css)),
-        "'grid' class from utils.css should be detected as unused"
-    );
-}
-
-/// Verifies that multiple entry points can all access nested CSS classes.
-///
-/// components.css → app.css → App.tsx (uses .button)
-/// components.css → app.css → Dashboard.tsx (uses .card)
-///
-/// Both entry points import the same main CSS file.
-#[test]
-fn test_multiple_entry_points_sharing_css() {
-    let fs = MemoryFileSystem::default();
-
-    fs.insert(
-        "/src/components.css".into(),
-        r#"
-.button { background: blue; }
-.card { border: 1px solid; }
-.modal { position: fixed; }
-"#,
-    );
-
-    fs.insert(
-        "/src/app.css".into(),
-        r#"
-@import "./components.css";
-"#,
-    );
-
-    fs.insert(
-        "/src/App.tsx".into(),
-        r#"
-import "./app.css";
-
-export function App() {
-    return <button className="button">Click</button>;
-}
-"#,
-    );
-
-    fs.insert(
-        "/src/Dashboard.tsx".into(),
-        r#"
-import "./app.css";
-
-export function Dashboard() {
-    return <div className="card">Dashboard</div>;
-}
-"#,
-    );
-
-    let css_paths = [
-        BiomePath::new("/src/components.css"),
-        BiomePath::new("/src/app.css"),
-    ];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [
-        BiomePath::new("/src/App.tsx"),
-        BiomePath::new("/src/Dashboard.tsx"),
-    ];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    // Both entry points should be found as consumers
-    let components_css = db
-        .module_for_path(Utf8Path::new("/src/components.css"))
-        .unwrap();
-    let consumers = transitive_importers_of(&db, components_css);
-    assert_eq!(
-        consumers.len(),
-        2,
-        "Expected 2 consumers of components.css; got: {consumers:?}"
-    );
-    assert!(
-        consumers
-            .iter()
-            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
-        "App.tsx should be a consumer"
-    );
-    assert!(
-        consumers
-            .iter()
-            .any(|p| p.as_path() == Utf8Path::new("/src/Dashboard.tsx")),
-        "Dashboard.tsx should be a consumer"
-    );
-
-    // button used in App.tsx
-    assert!(
-        is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "button", components_css)
-        ),
-        "'button' should be detected as used"
-    );
-
-    // card used in Dashboard.tsx
-    assert!(
-        is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "card", components_css)
-        ),
-        "'card' should be detected as used"
-    );
-
-    // modal not used anywhere
-    assert!(
-        !is_class_referenced_by_importers(
-            &db,
-            SymbolFromModuleInfo::new(&db, "modal", components_css)
-        ),
-        "'modal' should be detected as unused"
-    );
-}
-
-/// Tests `traverse_import_tree_for_classes` for a JSX file that directly
-/// imports CSS.
-#[test]
-fn test_collect_available_classes_for_js_file() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/styles.css".into(),
-        r#"
-.button { color: blue; }
-.card { border: 1px solid; }
-"#,
-    );
-    fs.insert(
-        "/src/App.jsx".into(),
-        r#"
-import "./styles.css";
-
-export function App() {
-    return <div className="button">Hello</div>;
-}
-"#,
-    );
-
-    let css_paths = [BiomePath::new("/src/styles.css")];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/App.jsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    let traversal = traverse_import_tree_for_classes(
-        &db,
-        db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
-    );
-    let classes: FxHashSet<String> = traversal
-        .iter()
-        .flat_map(|step| step.css_classes.values())
-        .map(|class| class.text().to_string())
-        .collect();
-
-    // Should find both CSS classes
-    assert!(classes.contains("button"), "Should find .button class");
-    assert!(classes.contains("card"), "Should find .card class");
-
-    // Should have one traversal step (direct import)
-    assert_eq!(traversal.len(), 1, "Should have 1 CSS file in traversal");
-    assert_eq!(
-        traversal[0].css_path.as_str().replace('\\', "/"),
-        "/src/styles.css",
-        "Should show styles.css in traversal"
-    );
-}
-
-/// Tests `traverse_import_tree_for_classes` with multiple CSS imports.
-#[test]
-fn test_collect_available_classes_for_js_file_multiple_css() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/buttons.css".into(),
-        r#"
-.btn { padding: 0.5rem; }
-.btn-primary { background: blue; }
-"#,
-    );
-    fs.insert(
-        "/src/layout.css".into(),
-        r#"
-.container { width: 100%; }
-.flex { display: flex; }
-"#,
-    );
-    fs.insert(
-        "/src/App.jsx".into(),
-        r#"
-import "./buttons.css";
-import "./layout.css";
-
-export function App() {
-    return <div className="container"><button className="btn">Click</button></div>;
-}
-"#,
-    );
-
-    let css_paths = [
-        BiomePath::new("/src/buttons.css"),
-        BiomePath::new("/src/layout.css"),
-    ];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/App.jsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    let traversal = traverse_import_tree_for_classes(
-        &db,
-        db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
-    );
-    let classes: FxHashSet<String> = traversal
-        .iter()
-        .flat_map(|step| step.css_classes.values())
-        .map(|class| class.text().to_string())
-        .collect();
-
-    // Should find all CSS classes from both imports
-    assert!(classes.contains("btn"), "Should find .btn class");
-    assert!(
-        classes.contains("btn-primary"),
-        "Should find .btn-primary class"
-    );
-    assert!(
-        classes.contains("container"),
-        "Should find .container class"
-    );
-    assert!(classes.contains("flex"), "Should find .flex class");
-
-    // Should have two CSS files in traversal
-    assert_eq!(
-        traversal.len(),
-        2,
-        "Should have 2 CSS files in traversal path"
-    );
-}
-
-#[test]
-fn test_export_equals_namespace_without_type_inference() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/@types/react/index.d.ts".into(),
-        include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"),
-    );
-
-    let added_paths = [BiomePath::new("/node_modules/@types/react/index.d.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
-    );
-
-    // infer_types = false, matching the `project` domain behavior
-    let db = build_js_db(&fs, &project_layout, &added_paths, false);
-
-    let react_module = db
-        .module_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
-        .expect("react module must exist");
-
-    let use_state = find_js_exported_symbol(
-        &db,
-        SymbolFromModuleInfo::new(&db, "useState", react_module),
-    );
-    assert!(
-        matches!(use_state, JsExportedSymbolLookup::Found(_)),
-        "`useState` must be visible as a named export from `@types/react` even without type inference"
-    );
-
-    let use_callback = find_js_exported_symbol(
-        &db,
-        SymbolFromModuleInfo::new(&db, "useCallback", react_module),
-    );
-    assert!(
-        matches!(use_callback, JsExportedSymbolLookup::Found(_)),
-        "`useCallback` must be visible as a named export from `@types/react` even without type inference"
-    );
-}
-
-fn find_files_recursively_in_directory(
-    directory: &Utf8Path,
-    predicate: impl Fn(&Utf8Path) -> bool,
-) -> Vec<Utf8PathBuf> {
-    WalkDir::new(directory.as_std_path())
-        .into_iter()
-        .filter_map(Result::ok)
-        .filter_map(|entry| Utf8Path::from_path(entry.path()).map(Utf8Path::to_path_buf))
-        .filter(|path| predicate(path))
-        .collect()
-}
-
-// #region HTML module graph + style applicability tests
-
-/// Parses a CSS snippet with the given `CssFileSource` and wraps it as an
-/// [`HtmlEmbeddedContent::Css`] ready for [`resolve_html_module`].
-fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbeddedContent {
-    // Mirror the workspace server: enable CSS modules parsing for embedded CSS
-    // in framework files (Vue → Vue dialect; Svelte/Astro → Classic).
-    let css_modules_kind = match file_source.as_embedding_kind() {
-        CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
-        CssEmbeddingKind::Html(
-            EmbeddingHtmlKind::Astro { .. } | EmbeddingHtmlKind::Svelte { .. },
-        ) => CssModulesKind::Classic,
-        _ => CssModulesKind::None,
+fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> TextRange {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
     };
-    let options = CssParserOptions {
-        css_modules: css_modules_kind,
-        ..Default::default()
-    };
-    let parsed = biome_css_parser::parse_css(src, file_source, options);
-    HtmlEmbeddedContent::Css(parsed.tree(), file_source, biome_rowan::TextSize::from(0))
-}
-
-/// Parses an HTML snippet and returns a `HtmlRoot`.
-fn parse_html_src(src: &str, file_source: HtmlFileSource) -> biome_html_syntax::HtmlRoot {
-    let parsed = biome_html_parser::parse_html(src, HtmlParserOptions::from(&file_source));
-    parsed.tree()
-}
-
-/// Returns a `CssFileSource` for a plain HTML `<style>` block (always Global).
-fn html_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
-}
-
-/// Returns a `CssFileSource` for a Vue `<style>` (unscoped → Global).
-fn vue_global_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-        applicability: EmbeddingStyleApplicability::Global,
-    }))
-}
-
-/// Returns a `CssFileSource` for a Vue `<style scoped>` (Local).
-fn vue_scoped_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-        applicability: EmbeddingStyleApplicability::Local,
-    }))
-}
-
-/// Returns a `CssFileSource` for an Astro `<style>` (default → Local).
-fn astro_local_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
-        applicability: EmbeddingStyleApplicability::Local,
-    }))
-}
-
-/// Returns a `CssFileSource` for an Astro `<style is:global>` (Global).
-fn astro_global_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
-        applicability: EmbeddingStyleApplicability::Global,
-    }))
-}
-
-/// Returns a `CssFileSource` for a Svelte `<style>` (default → Local).
-fn svelte_local_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
-        applicability: EmbeddingStyleApplicability::Local,
-    }))
-}
-
-/// Plain HTML `<style>` → all classes are Global and visible in the traversal.
-#[test]
-fn test_html_inline_style_classes_are_global() {
-    let fs = MemoryFileSystem::default();
-    fs.insert("/src/index.html".into(), r#"<div class="card">Hello</div>"#);
-
-    let html_path = BiomePath::new("/src/index.html");
-    let html_root = parse_html_src(r#"<div class="card">Hello</div>"#, HtmlFileSource::html());
-    let css = parse_embedded_css(".card { color: red; }", html_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/index.html"))
-        .expect("HTML module must exist");
-
-    assert_eq!(html_info.style_classes.len(), 1, "should have one class");
-    let def = html_info.style_classes.iter().next().unwrap();
-    assert_eq!(def.name.text(), "card");
-    assert_eq!(
-        def.applicability,
-        EmbeddingStyleApplicability::Global,
-        "HTML inline styles are always Global"
-    );
-
-    // The traversal must yield the class.
-    let module = db
-        .module_for_path(Utf8Path::new("/src/index.html"))
-        .unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "card"));
-    assert!(found, "Global class must appear in traversal");
-}
-
-/// `class="..."` on void/self-closing HTML elements must be collected as
-/// referenced classes, not silently dropped.
-///
-/// Before the fix, `visit_self_closing_element` returned early for non-`<link>`
-/// tags, so `<img class="hero" />` and `<input class="field" />` never reached
-/// `referenced_classes`, which produced false `noUndeclaredClasses` diagnostics.
-#[test]
-fn test_html_self_closing_element_class_references_are_collected() {
-    let src = r#"<img class="hero" /><input class="field" /><br class="spacer" />"#;
-    let fs = MemoryFileSystem::default();
-    fs.insert("/src/index.html".into(), src);
-
-    let html_path = BiomePath::new("/src/index.html");
-    let html_root = parse_html_src(src, HtmlFileSource::html());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/index.html"))
-        .expect("HTML module must exist");
-
-    let has = |name: &str| html_info.referenced_classes.iter().any(|r| r.matches(name));
-
-    assert!(has("hero"), "expected 'hero' in referenced_classes");
-    assert!(has("field"), "expected 'field' in referenced_classes");
-    assert!(has("spacer"), "expected 'spacer' in referenced_classes");
-}
-
-/// Vue `<style>` (unscoped) → classes are Global.
-#[test]
-fn test_vue_unscoped_style_classes_are_global() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/Comp.vue".into(),
-        r#"<template><div class="card"></div></template>"#,
-    );
-
-    let html_path = BiomePath::new("/src/Comp.vue");
-    let html_root = parse_html_src(
-        r#"<template><div class="card"></div></template>"#,
-        HtmlFileSource::vue(),
-    );
-    let css = parse_embedded_css(".card { color: red; }", vue_global_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Comp.vue"))
-        .expect("Vue module must exist");
-
-    let def = html_info.style_classes.iter().next().unwrap();
-    assert_eq!(def.name.text(), "card");
-    assert_eq!(
-        def.applicability,
-        EmbeddingStyleApplicability::Global,
-        "Vue unscoped <style> is Global"
-    );
-
-    let module = db.module_for_path(Utf8Path::new("/src/Comp.vue")).unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "card"));
-    assert!(found, "Global class must appear in traversal");
-}
-
-/// Vue `<style scoped>` → classes are Local and hidden from the traversal iterator.
-#[test]
-fn test_vue_scoped_style_classes_are_local_and_hidden() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/Scoped.vue".into(),
-        r#"<template><div class="alpha"></div></template>"#,
-    );
-
-    let html_path = BiomePath::new("/src/Scoped.vue");
-    let html_root = parse_html_src(
-        r#"<template><div class="alpha"></div></template>"#,
-        HtmlFileSource::vue(),
-    );
-    let css = parse_embedded_css(".alpha { margin: 0; }", vue_scoped_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Scoped.vue"))
-        .expect("Vue module must exist");
-
-    // Class IS stored with Local applicability.
-    let def = html_info.style_classes.iter().next().unwrap();
-    assert_eq!(def.name.text(), "alpha");
-    assert_eq!(
-        def.applicability,
-        EmbeddingStyleApplicability::Local,
-        "Vue <style scoped> is Local"
-    );
-
-    // The traversal DOES yield local inline classes for same-file checks,
-    // because scoped styles still apply to the component's own elements.
-    let module = db
-        .module_for_path(Utf8Path::new("/src/Scoped.vue"))
-        .unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "alpha"));
-    assert!(
-        found,
-        "Local inline class MUST appear in same-file traversal"
-    );
-}
-
-/// Vue with both scoped and unscoped blocks → only Global class is visible.
-#[test]
-fn test_vue_mixed_scoped_and_unscoped() {
-    let fs = MemoryFileSystem::default();
-    fs.insert("/src/Mixed.vue".into(), r#"<template></template>"#);
-
-    let html_path = BiomePath::new("/src/Mixed.vue");
-    let html_root = parse_html_src(r#"<template></template>"#, HtmlFileSource::vue());
-
-    let global_css = parse_embedded_css(".global-btn { color: red; }", vue_global_css_source());
-    let scoped_css = parse_embedded_css(".scoped-card { border: 1px; }", vue_scoped_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(
-        &fs,
-        &layout,
-        &[(&html_path, html_root, vec![global_css, scoped_css])],
-    );
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Mixed.vue"))
-        .expect("Vue module must exist");
-
-    // Both classes are stored.
-    assert_eq!(html_info.style_classes.len(), 2);
-
-    // Only Global class appears in the traversal.
-    let module = db.module_for_path(Utf8Path::new("/src/Mixed.vue")).unwrap();
-    let traversal_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .flat_map(|step| {
-            step.css_classes
-                .values()
-                .map(|c| c.text().to_string())
-                .collect::<Vec<_>>()
+    js_info
+        .semantic_model
+        .all_bindings()
+        .find(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
         })
-        .collect();
-
-    assert!(
-        traversal_classes.contains(&"global-btn".to_string()),
-        "global-btn must appear in traversal"
-    );
-    // Local inline classes also appear in same-file traversal: scoped styles
-    // apply to the component's own elements (scoping only restricts leaking,
-    // not same-file applicability).
-    assert!(
-        traversal_classes.contains(&"scoped-card".to_string()),
-        "scoped-card must appear in same-file traversal"
-    );
-}
-
-/// Astro `<style>` (default → Local) → classes are Local and hidden.
-#[test]
-fn test_astro_local_style_classes_are_hidden() {
-    let fs = MemoryFileSystem::default();
-    fs.insert("/src/Page.astro".into(), r#"<div class="hero"></div>"#);
-
-    let html_path = BiomePath::new("/src/Page.astro");
-    let html_root = parse_html_src(r#"<div class="hero"></div>"#, HtmlFileSource::astro());
-    let css = parse_embedded_css(".hero { font-size: 2rem; }", astro_local_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
-        .expect("Astro module must exist");
-
-    let def = html_info.style_classes.iter().next().unwrap();
-    assert_eq!(def.applicability, EmbeddingStyleApplicability::Local);
-
-    // Local inline classes appear in same-file traversal: scoped styles still
-    // apply to the component's own elements. Scoping only restricts leaking to
-    // parent/consumer files.
-    let module = db
-        .module_for_path(Utf8Path::new("/src/Page.astro"))
-        .unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "hero"));
-    assert!(
-        found,
-        "Astro local class MUST appear in same-file traversal"
-    );
-}
-
-/// Astro `<style is:global>` → classes are Global and visible.
-#[test]
-fn test_astro_global_style_classes_are_visible() {
-    let fs = MemoryFileSystem::default();
-    fs.insert("/src/Layout.astro".into(), r#"<div class="wrapper"></div>"#);
-
-    let html_path = BiomePath::new("/src/Layout.astro");
-    let html_root = parse_html_src(r#"<div class="wrapper"></div>"#, HtmlFileSource::astro());
-    let css = parse_embedded_css(".wrapper { max-width: 80ch; }", astro_global_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let module = db
-        .module_for_path(Utf8Path::new("/src/Layout.astro"))
-        .unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "wrapper"));
-    assert!(found, "Astro is:global class must appear in traversal");
-}
-
-/// Svelte `<style>` (default → Local) → classes are Local and hidden.
-#[test]
-fn test_svelte_local_style_classes_are_hidden() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/Button.svelte".into(),
-        r#"<button class="btn">Click</button>"#,
-    );
-
-    let html_path = BiomePath::new("/src/Button.svelte");
-    let html_root = parse_html_src(
-        r#"<button class="btn">Click</button>"#,
-        HtmlFileSource::svelte(),
-    );
-    let css = parse_embedded_css(".btn { padding: 0.5rem; }", svelte_local_css_source());
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Button.svelte"))
-        .expect("Svelte module must exist");
-
-    let def = html_info.style_classes.iter().next().unwrap();
-    assert_eq!(
-        def.applicability,
-        EmbeddingStyleApplicability::Local,
-        "Svelte default <style> is Local"
-    );
-
-    // Local inline classes appear in same-file traversal: scoped styles still
-    // apply to the component's own elements. Scoping only restricts leaking to
-    // parent/consumer files.
-    let module = db
-        .module_for_path(Utf8Path::new("/src/Button.svelte"))
-        .unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "btn"));
-    assert!(
-        found,
-        "Svelte local class MUST appear in same-file traversal"
-    );
-}
-
-/// Svelte `<style>` with a `:global(.foo)` selector → `.foo` is Global even
-/// though the surrounding block is Local.
-#[test]
-fn test_svelte_global_pseudo_class_is_visible() {
-    let fs = MemoryFileSystem::default();
-    fs.insert("/src/Global.svelte".into(), r#"<div class="prose"></div>"#);
-
-    let html_path = BiomePath::new("/src/Global.svelte");
-    let html_root = parse_html_src(r#"<div class="prose"></div>"#, HtmlFileSource::svelte());
-    // The surrounding block is Local, but :global(.prose) makes `.prose` Global.
-    let css = parse_embedded_css(
-        ":global(.prose) { font-size: 1rem; }",
-        svelte_local_css_source(),
-    );
-
-    let layout = ProjectLayout::default();
-    let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
-
-    let html_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Global.svelte"))
-        .expect("Svelte module must exist");
-
-    // The class must be stored with Global applicability.
-    let def = html_info
-        .style_classes
-        .iter()
-        .find(|c| c.name.text() == "prose")
-        .expect(".prose class must exist");
-    assert_eq!(
-        def.applicability,
-        EmbeddingStyleApplicability::Global,
-        ":global(.prose) must be stored as Global even in a Local Svelte block"
-    );
-
-    // And it must appear in the traversal.
-    let module = db
-        .module_for_path(Utf8Path::new("/src/Global.svelte"))
-        .unwrap();
-    let found = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .any(|step| step.css_classes.values().any(|c| c.text() == "prose"));
-    assert!(found, ":global class must appear in traversal");
-}
-
-// #endregion
-
-/// Verifies that upward traversal through a Vue component chain finds CSS classes.
-///
-/// Component hierarchy:
-///   App.vue → imports app.css AND Page.vue
-///   Page.vue → imports Button.vue
-///   Button.vue → uses .btn-invalid (not in app.css)
-///
-/// When looking up available classes for Button.vue, we should find the classes
-/// from app.css by traversing up: Button → Page → App → app.css.
-#[test]
-fn test_vue_upward_traversal() {
-    use biome_html_parser::HtmlParserOptions;
-    use biome_js_parser::JsParserOptions;
-    use biome_languages::HtmlFileSource;
-
-    let fs = MemoryFileSystem::default();
-
-    // Insert all files into the filesystem for path resolution
-    fs.insert("/src/app.css".into(), ".app { } .page { } .btn { }");
-    fs.insert("/src/App.vue".into(), "");
-    fs.insert("/src/Page.vue".into(), "");
-    fs.insert("/src/Button.vue".into(), "");
-
-    let layout = ProjectLayout::default();
-    let db = WorkspaceDb::default();
-
-    // Add CSS
-    let css_paths = [BiomePath::new("/src/app.css")];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    add_css_modules(&db, &fs, &layout, &css_roots);
-
-    // Parse HTML files
-    let app_root = biome_html_parser::parse_html(
-        r#"<template><div class="app"></div></template>"#,
-        HtmlParserOptions::from(&HtmlFileSource::vue()),
-    )
-    .tree();
-    // App.vue's embedded <script> imports app.css and Page.vue
-    let app_script = biome_js_parser::parse(
-        r#"import "./app.css"; import Page from "./Page.vue";"#,
-        JsFileSource::ts(),
-        JsParserOptions::default(),
-    );
-    let app_embedded = vec![HtmlEmbeddedContent::Js(app_script.tree())];
-
-    let page_root = biome_html_parser::parse_html(
-        r#"<template><div class="page"></div></template>"#,
-        HtmlParserOptions::from(&HtmlFileSource::vue()),
-    )
-    .tree();
-    // Page.vue's embedded <script> imports Button.vue
-    let page_script = biome_js_parser::parse(
-        r#"import Button from "./Button.vue";"#,
-        JsFileSource::ts(),
-        JsParserOptions::default(),
-    );
-    let page_embedded = vec![HtmlEmbeddedContent::Js(page_script.tree())];
-
-    let button_root = biome_html_parser::parse_html(
-        r#"<template><button class="btn-invalid">Bad class</button></template>"#,
-        HtmlParserOptions::from(&HtmlFileSource::vue()),
-    )
-    .tree();
-    let button_embedded: Vec<HtmlEmbeddedContent> = vec![];
-
-    let app_path = BiomePath::new("/src/App.vue");
-    let page_path = BiomePath::new("/src/Page.vue");
-    let button_path = BiomePath::new("/src/Button.vue");
-
-    add_html_modules(
-        &db,
-        &fs,
-        &layout,
-        &[
-            (&app_path, app_root, app_embedded),
-            (&page_path, page_root, page_embedded),
-            (&button_path, button_root, button_embedded),
-        ],
-    );
-
-    // Verify App.vue has resolved import paths
-    let app_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/App.vue"))
-        .expect("App.vue must be in module graph");
-
-    assert!(
-        !app_info.static_import_paths.is_empty(),
-        "App.vue should have static import paths (app.css and Page.vue)"
-    );
-
-    let page_info = db
-        .html_module_info_for_path(Utf8Path::new("/src/Page.vue"))
-        .expect("Page.vue must be in module graph");
-
-    assert!(
-        !page_info.static_import_paths.is_empty(),
-        "Page.vue should have static import paths (Button.vue)"
-    );
-
-    // Verify upward traversal finds btn from app.css
-    let module = db
-        .module_for_path(Utf8Path::new("/src/Button.vue"))
-        .unwrap();
-    let available_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
-        .iter()
-        .flat_map(|step| step.css_classes.values())
-        .collect();
-
-    assert!(
-        available_classes.iter().any(|c| c.text() == "btn"),
-        "btn class from app.css should be visible to Button.vue via upward traversal. Available: {:?}",
-        available_classes
-            .iter()
-            .map(|c| c.text())
-            .collect::<Vec<_>>()
-    );
-}
-
-/// Snapshot test: a Vue parent component imports a CSS file and a child Vue
-/// component via its `<script>` block. Verifies that the module graph resolves
-/// both the stylesheet edge and the component import edge.
-///
-/// Uses a [`WorkspaceServer`] to parse embedded nodes exactly as production
-/// does, avoiding hand-crafted snippet mismatches.
-#[test]
-fn test_vue_component_imports_snapshot() {
-    let files: Vec<(&str, &str)> = vec![
-        (
-            "/src/app.css",
-            ".app { color: red; }\n.btn { padding: 8px; }\n",
-        ),
-        (
-            "/src/Button.vue",
-            r#"<template>
-  <button class="btn">Click me</button>
-</template>
-
-<style scoped>
-  .btn { font-weight: bold; }
-</style>
-"#,
-        ),
-        (
-            "/src/App.vue",
-            r#"<template>
-  <div class="app"><Button /></div>
-</template>
-
-<script>
-import "./app.css";
-import Button from "./Button.vue";
-</script>
-"#,
-        ),
-    ];
-
-    let db = build_module_db_via_workspace(&files);
-    let snapshot_files = files_to_snapshot_vec(&files);
-    let snapshot = ModuleGraphSnapshot::from_files(&db, snapshot_files);
-    snapshot.assert_snapshot("test_vue_component_imports_snapshot");
-}
-
-/// Snapshot test: an Astro parent component imports a CSS file and a child
-/// Astro component via its frontmatter. Verifies that the module graph resolves
-/// both edges correctly for the Astro embedding model.
-///
-/// Uses a [`WorkspaceServer`] to parse embedded nodes exactly as production
-/// does, avoiding hand-crafted snippet mismatches.
-#[test]
-fn test_astro_component_imports_snapshot() {
-    let files: Vec<(&str, &str)> = vec![
-        (
-            "/src/global.css",
-            ".layout { display: flex; }\n.hero { font-size: 2rem; }\n",
-        ),
-        (
-            "/src/Hero.astro",
-            r#"---
----
-<section class="hero">Welcome</section>
-
-<style>
-  .hero { color: navy; }
-</style>
-
-<style is:global>
-  .hero { color: navy; }
-</style>
-"#,
-        ),
-        (
-            "/src/Layout.astro",
-            r#"---
-import "./global.css";
-import Hero from "./Hero.astro";
----
-<div class="layout"><Hero /></div>
-"#,
-        ),
-    ];
-
-    let db = build_module_db_via_workspace(&files);
-    let snapshot_files = files_to_snapshot_vec(&files);
-    let snapshot = ModuleGraphSnapshot::from_files(&db, snapshot_files);
-    snapshot.assert_snapshot("test_astro_component_imports_snapshot");
-}
-
-/// Snapshot test: a Svelte parent component imports a CSS file and a child
-/// Svelte component. Verifies that the module graph resolves both edges
-/// correctly for the Svelte embedding model.
-///
-/// Uses a [`WorkspaceServer`] to parse embedded nodes exactly as production
-/// does, avoiding hand-crafted snippet mismatches.
-#[test]
-fn test_svelte_component_imports_snapshot() {
-    let files: Vec<(&str, &str)> = vec![
-        (
-            "/src/theme.css",
-            ".wrapper { max-width: 1200px; }\n.title { font-weight: bold; }\n",
-        ),
-        (
-            "/src/Card.svelte",
-            r#"<script>
-</script>
-
-<div class="card">Content</div>
-
-<style>
-  .card { border: 1px solid; }
-</style>
-"#,
-        ),
-        (
-            "/src/App.svelte",
-            r#"<script>
-import "./theme.css";
-import Card from "./Card.svelte";
-</script>
-
-<div class="wrapper title"><Card /></div>
-"#,
-        ),
-    ];
-
-    let db = build_module_db_via_workspace(&files);
-    let snapshot_files = files_to_snapshot_vec(&files);
-    let snapshot = ModuleGraphSnapshot::from_files(&db, snapshot_files);
-    snapshot.assert_snapshot("test_svelte_component_imports_snapshot");
-}
-
-// #endregion
-
-/// Builds a module db by indexing all given files through a real
-/// [`WorkspaceServer`] instance.
-///
-/// This mirrors production behavior: `open_file` triggers
-/// `parse_embedded_nodes`, which correctly extracts `<style>`, `<script>`, and
-/// Astro frontmatter (`---...---`) blocks with their scoping semantics.
-fn build_module_db_via_workspace(files: &[(&str, &str)]) -> WorkspaceDb {
-    let mem_fs = MemoryFileSystem::default();
-    for (path, content) in files {
-        mem_fs.insert(Utf8PathBuf::from(*path), *content);
-    }
-
-    let (workspace, project_key) = setup_workspace_and_open_project(mem_fs, "/src");
-
-    workspace
-        .update_settings(UpdateSettingsParams {
-            project_key,
-            configuration: Configuration {
-                html: Some(HtmlConfiguration {
-                    experimental_full_support_enabled: Some(true.into()),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-            workspace_directory: None,
-            extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
-        })
-        .expect("can update settings");
-
-    let files_with_sources = files.iter().map(|(path, _)| {
-        let biome_path = BiomePath::new(Utf8PathBuf::from(*path));
-        let document_file_source = DocumentFileSource::from_well_known(biome_path.as_path(), true);
-        (biome_path, document_file_source)
-    });
-    workspace.index_files_for_test(project_key, files_with_sources);
-
-    workspace.get_module_db_for_test()
-}
-
-/// Converts a `&[(&str, &str)]` file list into the owned form expected by
-/// [`ModuleGraphSnapshot::from_files`].
-fn files_to_snapshot_vec(files: &[(&str, &str)]) -> BTreeMap<String, String> {
-    files
-        .iter()
-        .map(|(path, content)| ((*path).to_string(), (*content).to_string()))
-        .collect()
-}
-
-#[test]
-fn test_property_const_assertion_flows_through_module_resolver() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"const object = { value: "x" as const };"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-    let object = resolver.resolved_type_of_named_value(TextRange::default(), "object");
-    let TypeData::Object(object) = object.deref() else {
-        panic!("expected object type");
-    };
-    let value = object
-        .members
-        .iter()
-        .find(|member| member.has_name("value"))
-        .expect("value member");
-    assert!(value.is_const_asserted());
-    let value_type = resolver
-        .resolve_and_get(&value.ty)
-        .expect("value type")
-        .to_data();
-    assert_eq!(value_type.to_string(), "string: x");
+        .unwrap_or_else(|| panic!("{name} binding must exist"))
+        .syntax()
+        .text_trimmed_range()
 }

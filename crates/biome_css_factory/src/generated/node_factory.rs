@@ -708,6 +708,78 @@ pub fn css_custom_media_at_rule_declarator(
         ],
     ))
 }
+pub fn css_custom_property_braced_block(
+    l_curly_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_curly_token: SyntaxToken,
+) -> CssCustomPropertyBracedBlock {
+    CssCustomPropertyBracedBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_BRACED_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_bracketed_block(
+    l_brack_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_brack_token: SyntaxToken,
+) -> CssCustomPropertyBracketedBlock {
+    CssCustomPropertyBracketedBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_delimiter(value_token: SyntaxToken) -> CssCustomPropertyDelimiter {
+    CssCustomPropertyDelimiter::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_DELIMITER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_custom_property_function(
+    name: CssCustomIdentifier,
+    l_paren_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_paren_token: SyntaxToken,
+) -> CssCustomPropertyFunction {
+    CssCustomPropertyFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_FUNCTION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_parenthesized_block(
+    l_paren_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_paren_token: SyntaxToken,
+) -> CssCustomPropertyParenthesizedBlock {
+    CssCustomPropertyParenthesizedBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_value(
+    components: CssCustomPropertyComponentList,
+) -> CssCustomPropertyValue {
+    CssCustomPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_VALUE,
+        [Some(SyntaxElement::Node(components.into_syntax()))],
+    ))
+}
 pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {
     CssDashedIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DASHED_IDENTIFIER,
@@ -791,6 +863,18 @@ pub fn css_declaration_or_rule_block(
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(items.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_declaration_snippet_root(
+    declarations: CssDeclarationList,
+    eof_token: SyntaxToken,
+) -> CssDeclarationSnippetRoot {
+    CssDeclarationSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_SNIPPET_ROOT,
+        [
+            Some(SyntaxElement::Node(declarations.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
         ],
     ))
 }
@@ -1655,7 +1739,7 @@ pub fn css_media_or_condition(
         ],
     ))
 }
-pub fn css_media_type(value: CssIdentifier) -> CssMediaType {
+pub fn css_media_type(value: AnyCssMediaTypeName) -> CssMediaType {
     CssMediaType::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_TYPE,
         [Some(SyntaxElement::Node(value.into_syntax()))],
@@ -3958,11 +4042,28 @@ pub fn scss_map_expression_pair(
         ],
     ))
 }
-pub fn scss_media_query(query: ScssInterpolation) -> ScssMediaQuery {
-    ScssMediaQuery::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_MEDIA_QUERY,
-        [Some(SyntaxElement::Node(query.into_syntax()))],
-    ))
+pub fn scss_media_query(head: CssMediaTypeQuery) -> ScssMediaQueryBuilder {
+    ScssMediaQueryBuilder { head, tail: None }
+}
+pub struct ScssMediaQueryBuilder {
+    head: CssMediaTypeQuery,
+    tail: Option<CssMediaType>,
+}
+impl ScssMediaQueryBuilder {
+    pub fn with_tail(mut self, tail: CssMediaType) -> Self {
+        self.tail = Some(tail);
+        self
+    }
+    pub fn build(self) -> ScssMediaQuery {
+        ScssMediaQuery::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_MEDIA_QUERY,
+            [
+                Some(SyntaxElement::Node(self.head.into_syntax())),
+                self.tail
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn scss_mixin_at_rule(
     mixin_token: SyntaxToken,
@@ -4200,6 +4301,34 @@ pub fn scss_parenthesized_expression(
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
+}
+pub fn scss_partial_combinator_selector(
+    combinator_token: SyntaxToken,
+) -> ScssPartialCombinatorSelectorBuilder {
+    ScssPartialCombinatorSelectorBuilder {
+        combinator_token,
+        left: None,
+    }
+}
+pub struct ScssPartialCombinatorSelectorBuilder {
+    combinator_token: SyntaxToken,
+    left: Option<AnyCssSelector>,
+}
+impl ScssPartialCombinatorSelectorBuilder {
+    pub fn with_left(mut self, left: AnyCssSelector) -> Self {
+        self.left = Some(left);
+        self
+    }
+    pub fn build(self) -> ScssPartialCombinatorSelector {
+        ScssPartialCombinatorSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_PARTIAL_COMBINATOR_SELECTOR,
+            [
+                self.left
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.combinator_token)),
+            ],
+        ))
+    }
 }
 pub fn scss_placeholder_selector(
     percent_token: SyntaxToken,
@@ -4910,6 +5039,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_custom_property_component_list<I>(items: I) -> CssCustomPropertyComponentList
+where
+    I: IntoIterator<Item = AnyCssCustomPropertyComponent>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssCustomPropertyComponentList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_COMPONENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
 where
     I: IntoIterator<Item = AnyCssDeclaration>,
@@ -5298,7 +5439,7 @@ where
 }
 pub fn css_rule_list<I>(items: I) -> CssRuleList
 where
-    I: IntoIterator<Item = AnyCssRule>,
+    I: IntoIterator<Item = AnyCssRuleListItem>,
     I::IntoIter: ExactSizeIterator,
 {
     CssRuleList::unwrap_cast(SyntaxNode::new_detached(
@@ -5745,6 +5886,16 @@ where
 {
     CssBogusCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER,
+        slots,
+    ))
+}
+pub fn css_bogus_declaration<I>(slots: I) -> CssBogusDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_DECLARATION,
         slots,
     ))
 }

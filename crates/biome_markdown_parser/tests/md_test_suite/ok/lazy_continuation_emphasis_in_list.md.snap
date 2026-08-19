@@ -28,8 +28,9 @@ baz **em**
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdOrderedListItem {
             md_bullet_list: MdBulletList [
@@ -370,9 +371,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..158
+0: MD_ROOT@0..158
   0: (empty)
-  1: MD_BLOCK_LIST@0..158
+  1: (empty)
+  2: MD_BLOCK_LIST@0..158
     0: MD_ORDERED_LIST_ITEM@0..22
       0: MD_BULLET_LIST@0..22
         0: MD_BULLET@0..22
@@ -592,6 +594,6 @@ MdDocument {
                   2: DOUBLE_STAR@155..157 "**" [] []
                 11: MD_TEXTUAL@157..158
                   0: MD_TEXTUAL_LITERAL@157..158 "\n" [] []
-  2: EOF@158..158 "" [] []
+  3: EOF@158..158 "" [] []
 
 ```

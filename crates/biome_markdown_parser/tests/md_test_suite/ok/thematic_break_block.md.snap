@@ -20,8 +20,9 @@ ___
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdThematicBreakBlock {
             parts: MdThematicBreakPartList [
@@ -160,9 +161,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..37
+0: MD_ROOT@0..37
   0: (empty)
-  1: MD_BLOCK_LIST@0..37
+  1: (empty)
+  2: MD_BLOCK_LIST@0..37
     0: MD_THEMATIC_BREAK_BLOCK@0..6
       0: MD_THEMATIC_BREAK_PART_LIST@0..6
         0: MD_INDENT_TOKEN@0..3
@@ -245,6 +247,6 @@ MdDocument {
           0: MD_INDENT_CHAR@35..36 " " [] []
         4: MD_THEMATIC_BREAK_CHAR@36..37
           0: STAR@36..37 "*" [] []
-  2: EOF@37..37 "" [] []
+  3: EOF@37..37 "" [] []
 
 ```

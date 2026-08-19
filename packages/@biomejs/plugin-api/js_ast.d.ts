@@ -885,6 +885,12 @@ export interface JsSuperExpression extends JsAstNode {
 	readonly kind: "JS_SUPER_EXPRESSION";
 	readonly superToken: string | undefined;
 }
+export interface JsSvelteDeclarationRoot extends JsAstNode {
+	readonly kind: "JS_SVELTE_DECLARATION_ROOT";
+	readonly declaration: JsVariableDeclaration | undefined;
+	readonly semicolonToken: string | undefined;
+	readonly eofToken: string | undefined;
+}
 export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
@@ -2097,6 +2103,7 @@ export type AnyJsRoot =
 	| JsExpressionTemplateRoot
 	| JsModule
 	| JsScript
+	| JsSvelteDeclarationRoot
 	| JsSvelteSnippetRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =

@@ -1,0 +1,27 @@
+/* should not generate diagnostics */
+
+type Prefix<T> = [T];
+
+declare function consumeTuple(
+  ...args: [...Prefix<number>, () => Promise<void>]
+): void;
+const tuplePrefix: Prefix<number> = [1];
+consumeTuple(...tuplePrefix, async () => {});
+
+type Recursive<T> = [...Recursive<T>];
+
+declare function consumeRecursive(
+  ...args: [...Recursive<number>, () => Promise<void>]
+): void;
+consumeRecursive(async () => {});
+
+interface InterfaceConstructor {
+  new (callback: () => Promise<void>): object;
+}
+declare const InterfaceConsumer: InterfaceConstructor;
+new InterfaceConsumer(async () => {});
+
+declare const ObjectConsumer: {
+  new (callback: () => Promise<void>): object;
+};
+new ObjectConsumer(async () => {});

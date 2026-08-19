@@ -13,7 +13,7 @@ For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## Conversational Style
 
 - Keep answers short and concise.
-- No emojis in commits, issues, PR comments, code, or any agent output.
+- No emojis anywhere: source code, comments, rustdoc, diagnostics, tests, snapshots, commit messages, issues, PR comments, or any agent output. This is the single canonical statement of the rule; individual skills do not repeat it. The one deliberate exception is the agent-PR opt-in marker described in the note at the top of this file.
 - No fluff or cheerful filler text.
 - Technical prose only. Be kind but direct (e.g., "Thanks @user" not "Thanks so much @user!").
 
@@ -214,9 +214,31 @@ touch src/lib.rs  # Triggers recompilation
 cargo test
 ```
 
-### 6. Read Before You Edit
+### 6. Final Code Review
+
+After implementation, code generation, formatting, linting, and tests are complete, review the finished change with the `biome-code-review` skill before committing or opening a pull request.
+
+- Prefer running the review in a fresh sub-agent when sub-agents are available.
+- Give the reviewer only the review scope and the intended business behavior of the fix or feature.
+- Do not include implementation details, suspected defects, areas to prioritize, previous review findings, or expected outcomes. Leave your bias out.
+- The review scope should be a pull request number, branch, commit range, or complete working-tree diff.
+- If a sub-agent is unavailable, load the skill in the current agent and perform the review directly.
+- Resolve actionable findings, rerun the affected verification, and repeat the review when the fixes materially change the implementation.
+
+### 7. Read Before You Edit
 
 Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes.
+
+### 8. Comments and Doc Comments
+
+These rules apply to **every** comment you write, including ones added incidentally while fixing a bug. Full guidance with examples: [`.claude/skills/doc-comments/SKILL.md`](./.claude/skills/doc-comments/SKILL.md).
+
+- Write for a contributor reading the code at HEAD, months later, with no access to this conversation, the PR, or the diff.
+- Never narrate change history ("now", "previously", "no longer") and never address the reviewer ("this correctly handles..."). State how the code works, not how it came to be or why the change is right.
+- Deletion test: a comment must state something the reader cannot recover from the code. If names or types already carry it, don't write it.
+- `///` docs state the contract (behavior, invariants, panics); `//!` docs explain why the module exists and its terminology; `//` comments carry rationale only.
+- When your change alters documented behavior, extend or correct the existing prose — never replace specific docs with generic text.
+- Exception: rustdoc inside `declare_lint_rule!` is end-user documentation for the website; these rules don't apply there.
 
 ## Available Resources
 
@@ -225,7 +247,9 @@ Read files in full before making wide-ranging changes, before editing files you 
 Located in `.claude/skills/`, these provide step-by-step workflows:
 
 - **biome-developer** - General development best practices and common gotchas
+- **biome-code-review** - Reviewing a completed change for correctness and compliance before committing or opening a pull request
 - **changeset** - Creating and writing proper changesets
+- **doc-comments** - Writing comments and rustdoc addressed to developers
 - **eslint-migrate-options** - Implementing ESLint-to-Biome rule option migrators
 - **lint-rule-development** - Creating and testing lint rules
 - **formatter-development** - Implementing formatters
@@ -234,17 +258,8 @@ Located in `.claude/skills/`, these provide step-by-step workflows:
 - **testing-codegen** - Testing and code generation commands
 - **type-inference** - Working with module graph and types
 - **diagnostics-development** - Creating user-facing diagnostics
-- **prettier-compare** - Comparing with Prettier
 
 See [`.claude/skills/README.md`](./.claude/skills/README.md) for the full catalog.
-
-### Specialized Agents
-
-Located in `.claude/agents/`, invoke these for complex tasks:
-
-- **biome-lint-engineer** - Lint/analyzer work
-- **ir-formatter-engineer** - Formatter work
-- **cst-parser-engineer** - Parser work
 
 ## Workflow Examples
 
@@ -369,6 +384,8 @@ Before opening a PR, verify:
   - [ ] Analyzer/Bindings: Optional (CI Autofix handles this)
 - [ ] Code formatted (`just f`)
 - [ ] Code linted (`just l`)
+- [ ] Completed change reviewed with `biome-code-review`, preferably in a fresh sub-agent with only the scope and intended business behavior
+- [ ] Actionable review findings resolved and affected verification rerun
 - [ ] Changeset created if user-facing (file in `.changeset/` with correct type)
 - [ ] PR template filled out completely
 - [ ] AI assistance disclosed if applicable

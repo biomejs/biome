@@ -555,6 +555,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::NoConsole(conf));
                             }
                         }
+                        "no-restricted-properties" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::NoRestrictedProperties(conf));
+                            }
+                        }
                         "no-restricted-globals" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
@@ -807,6 +812,29 @@ pub(crate) struct GlobalWithMessage {
     message: String,
 }
 
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct NoRestrictedPropertyOption {
+    object: Option<Box<str>>,
+    property: Option<Box<str>>,
+    message: Option<Box<str>>,
+    allow_objects: Box<[Box<str>]>,
+    allow_properties: Box<[Box<str>]>,
+}
+
+impl From<NoRestrictedPropertyOption>
+    for biome_rule_options::no_js_restricted_properties::RestrictedPropertyEntry
+{
+    fn from(value: NoRestrictedPropertyOption) -> Self {
+        Self {
+            object: value.object,
+            property: value.property,
+            message: value.message,
+            allow_objects: value.allow_objects,
+            allow_properties: value.allow_properties,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum Rule {
     /// Any rule without its options.
@@ -817,6 +845,7 @@ pub(crate) enum Rule {
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
+    NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
@@ -842,6 +871,7 @@ impl Rule {
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
+            Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),

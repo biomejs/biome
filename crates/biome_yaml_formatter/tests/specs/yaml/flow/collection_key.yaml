@@ -1,0 +1,8 @@
+short: { [a, b]: v }
+long:
+  { [a, key, that, is, way, too, long, to, fit, on, a, single, eighty, column, line]: v }
+comment: { [a, # forces the explicit form
+    b]: v }
+value:
+  { [a, b]: [a, value, that, is, way, too, long, to, fit, on, a, single, eighty, column] }
+pair: [{ a: b }: adjacent]

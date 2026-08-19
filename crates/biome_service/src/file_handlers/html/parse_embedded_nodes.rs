@@ -3,7 +3,7 @@ use crate::embed::html::{
     EmbedBlockKind, EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch, GuestLanguage,
     SvelteBlockKind,
 };
-use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
+use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssLanguage, TextSize};
@@ -12,8 +12,8 @@ use biome_html_syntax::{
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
     HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression,
     HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression,
-    SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue,
+    VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
@@ -21,7 +21,7 @@ use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
-use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
@@ -256,7 +256,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 {
                     let is_v_on = directive
                         .name_token()
-                        .is_ok_and(|t| t.text_trimmed() == "v-on");
+                        .is_ok_and(|t| t.text_trimmed() == "v-on" && directive.arg().is_some());
                     if let Some(candidate) = build_vue_directive_candidate(&initializer, is_v_on) {
                         ctx.parse_and_push(
                             &candidate,
@@ -366,6 +366,18 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     );
                 }
 
+                if let Some(attach) = SvelteAttachAttribute::cast_ref(&element)
+                    && let Ok(expression) = attach.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        &mut nodes,
+                    );
+                }
+
                 // Spread attributes: <input {...props} />
                 if let Some(spread) = HtmlSpreadAttribute::cast_ref(&element)
                     && let Ok(expression) = spread.argument()
@@ -383,6 +395,15 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         // TODO: Angular support
         HtmlVariant::Angular => {}
     }
+
+    for element in html_root.syntax().descendants() {
+        if let Some(attribute) = HtmlAttribute::cast_ref(&element)
+            && let Some(candidate) = build_attribute_candidate(&attribute, file_source.variant())
+        {
+            ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
+        }
+    }
+
     ParseEmbedResult { nodes }
 }
 
@@ -419,6 +440,19 @@ fn parse_svelte_blocks(
                 if let Ok(expression) = const_block.expression()
                     && let Some(candidate) =
                         build_svelte_text_expression_candidate(&expression, &svelte_block)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        nodes,
+                    );
+                }
+            }
+            AnySvelteBlock::SvelteDeclarationBlock(declaration_block) => {
+                if let Ok(declaration) = declaration_block.declaration()
+                    && let Some(candidate) =
+                        build_svelte_text_expression_candidate(&declaration, &svelte_block)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -737,6 +771,40 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
     })
 }
 
+fn build_attribute_candidate(
+    attribute: &HtmlAttribute,
+    host_variant: &HtmlVariant,
+) -> Option<EmbedCandidate> {
+    let name = attribute
+        .name()
+        .ok()?
+        .value_token()
+        .ok()?
+        .token_text_trimmed();
+
+    if matches!(host_variant, HtmlVariant::Astro | HtmlVariant::Svelte)
+        && is_component_element(attribute)
+    {
+        return None;
+    }
+
+    let value = attribute.initializer()?.value().ok()?;
+    let html_string = value.as_html_string()?;
+    let value_token = html_string.value_token().ok()?;
+    let text = html_string.inner_string_text().ok()?;
+    let content_range = text.source_range(value_token.text_range());
+
+    Some(EmbedCandidate::Attribute {
+        name,
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text,
+        },
+    })
+}
+
 /// Build an `EmbedCandidate::Element` from an `HtmlElement`.
 /// Returns `None` if the element has no embedded content or has multiple children (error).
 fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
@@ -829,6 +897,10 @@ fn embedded_css_file_source(
     host_file_source: &HtmlFileSource,
     candidate: &EmbedCandidate,
 ) -> CssFileSource {
+    if matches!(candidate, EmbedCandidate::Attribute { .. }) {
+        return CssFileSource::css().with_embedding_kind(CssEmbeddingKind::HtmlStyleAttribute);
+    }
+
     let base = if host_file_source.is_html() {
         CssFileSource::css()
     } else {
@@ -939,10 +1011,8 @@ fn parse_matched_embed(
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: true,
-                            is_function_signature: false,
-                            kind: SvelteFileKind::Component,
-                            is_const_block: false,
+                            file_kind: SvelteFileKind::Component,
+                            embedding_kind: SvelteEmbeddingKind::Source,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
@@ -962,16 +1032,21 @@ fn parse_matched_embed(
                             is_class_attribute: false,
                         });
                     } else if ctx.host_file_source.is_svelte() {
-                        let is_function_signature =
-                            matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
+                        let embedding_kind = match block_kind {
+                            EmbedBlockKind::Svelte(SvelteBlockKind::Snippet) => {
+                                SvelteEmbeddingKind::SnippetSignature
+                            }
+                            EmbedBlockKind::Svelte(SvelteBlockKind::Const) => {
+                                SvelteEmbeddingKind::LegacyConst
+                            }
+                            EmbedBlockKind::Svelte(SvelteBlockKind::Declaration) => {
+                                SvelteEmbeddingKind::Declaration
+                            }
+                            _ => SvelteEmbeddingKind::Expression,
+                        };
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: false,
-                            is_function_signature,
-                            kind: SvelteFileKind::Component,
-                            is_const_block: matches!(
-                                block_kind,
-                                EmbedBlockKind::Svelte(SvelteBlockKind::Const)
-                            ),
+                            file_kind: SvelteFileKind::Component,
+                            embedding_kind,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
@@ -1006,10 +1081,8 @@ fn parse_matched_embed(
                         }
                         HtmlVariant::Svelte => {
                             js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                                is_source: false,
-                                is_function_signature: false,
-                                kind: SvelteFileKind::Component,
-                                is_const_block: false,
+                                file_kind: SvelteFileKind::Component,
+                                embedding_kind: SvelteEmbeddingKind::Expression,
                             });
                         }
                         // TODO: Angular support
@@ -1018,6 +1091,7 @@ fn parse_matched_embed(
 
                     false
                 }
+                EmbedCandidate::Attribute { .. } => false,
             };
 
             let doc_source = DocumentFileSource::Js(js_source);
@@ -1049,10 +1123,12 @@ fn parse_matched_embed(
             let mut options = ctx
                 .settings
                 .parse_options::<CssLanguage>(ctx.biome_path, &doc_source);
-            if ctx.host_file_source.is_vue() {
-                options.css_modules = CssModulesKind::Vue;
-            } else if !ctx.host_file_source.is_html() {
-                options.css_modules = CssModulesKind::Classic;
+            if !css_source.as_embedding_kind().is_html_style_attribute() {
+                if ctx.host_file_source.is_vue() {
+                    options.css_modules = CssModulesKind::Vue;
+                } else if !ctx.host_file_source.is_html() {
+                    options.css_modules = CssModulesKind::Classic;
+                }
             }
             let parse = parse_css_with_offset_and_cache(
                 content.text.text(),

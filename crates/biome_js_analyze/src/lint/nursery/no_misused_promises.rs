@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
     JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
-use biome_js_type_info::InferredType;
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
@@ -108,12 +108,32 @@ impl Rule for NoMisusedPromises {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
-        let ty = ctx.inferred_type_of_expression(expression)?;
-        if ty.is_function() {
-            find_misused_promise_returning_callback(ctx, expression, ty)
-        } else {
-            find_misused_promise_expression(expression, ty)
+        if let Some(state) = misused_promise_expression_state(expression) {
+            return match ctx.classify_expression_as_promise(expression) {
+                TypeInferenceClassification::Match => Some(state),
+                TypeInferenceClassification::NoMatch => None,
+                TypeInferenceClassification::Indeterminate => (ctx
+                    .type_of_expression(expression)?
+                    .is_promise_instance()
+                    == Some(true))
+                .then_some(state),
+            };
         }
+        if expression.as_any_js_literal_expression().is_some()
+            || !expression
+                .syntax()
+                .parent()
+                .is_some_and(|parent| JsCallArgumentList::can_cast(parent.kind()))
+        {
+            return None;
+        }
+
+        if ctx.classify_expression_as_promise_returning_function(expression)
+            != TypeInferenceClassification::Match
+        {
+            return None;
+        }
+        find_misused_promise_returning_callback(ctx, expression)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -210,9 +230,8 @@ impl Rule for NoMisusedPromises {
     }
 }
 
-fn find_misused_promise_expression(
+fn misused_promise_expression_state(
     expression: &AnyJsExpression,
-    ty: InferredType,
 ) -> Option<NoMisusedPromisesState> {
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
@@ -229,21 +248,13 @@ fn find_misused_promise_expression(
         _ => return None,
     };
 
-    // Uncomment the following line for debugging convenience:
-    //let printed = format!("type of {expression:?} = {ty:?}");
-    let should_signal = ty.is_promise_instance() || ty.has_promise_variant();
-    should_signal.then_some(state)
+    Some(state)
 }
 
 fn find_misused_promise_returning_callback(
     ctx: &RuleContext<NoMisusedPromises>,
     expression: &AnyJsExpression,
-    ty: InferredType,
 ) -> Option<NoMisusedPromisesState> {
-    if !ty.function_returns_promise() {
-        return None;
-    }
-
     let argument = expression
         .syntax()
         .ancestors()
@@ -259,7 +270,7 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsCallExpression::cast)
     {
-        ctx.inferred_expected_argument_type_for_arguments(
+        ctx.expected_argument_type(
             &call_expression.callee().ok()?,
             &argument_list,
             argument_index,
@@ -271,7 +282,7 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsNewExpression::cast)
     {
-        ctx.inferred_expected_argument_type_for_arguments(
+        ctx.expected_argument_type(
             &new_expression.callee().ok()?,
             &argument_list,
             argument_index,

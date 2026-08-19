@@ -2,8 +2,32 @@ use crate::comments::CssCommentStyle;
 use crate::prelude::*;
 use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::comments::{CommentKind, CommentStyle, DecoratedComment, SourceComment};
+use biome_formatter::write;
 use biome_rowan::syntax::SyntaxTrivia;
 use biome_rowan::{SyntaxResult, SyntaxTriviaPiece, SyntaxTriviaPieceComments};
+
+/// Formats a source gap as a space, line break, or empty line.
+#[derive(Debug, Copy, Clone)]
+pub(crate) struct FormatCommentGap {
+    lines: u32,
+}
+
+impl FormatCommentGap {
+    /// Creates a gap from the number of source line breaks.
+    pub(crate) fn new(lines: u32) -> Self {
+        Self { lines }
+    }
+}
+
+impl Format<CssFormatContext> for FormatCommentGap {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        match self.lines {
+            0 => write!(f, [space()]),
+            1 => write!(f, [hard_line_break()]),
+            _ => write!(f, [empty_line()]),
+        }
+    }
+}
 
 /// Returns `true` for CSS `/* ... */` comments.
 pub(crate) fn is_block_style_comment(piece: &SyntaxTriviaPiece<CssLanguage>) -> bool {
@@ -22,6 +46,22 @@ pub(crate) fn has_line_comment(trivia: SyntaxTrivia<CssLanguage>) -> bool {
         .pieces()
         .filter_map(|piece| piece.as_comments())
         .any(|comment| CssCommentStyle::get_comment_kind(&comment).is_line())
+}
+
+/// Returns whether a token boundary contains a format suppression.
+///
+/// All comments in a suppressed boundary must keep the same owner so mixed
+/// normal and suppression comments preserve their source order.
+pub(crate) fn is_token_boundary_suppressed(
+    preceding: &CssSyntaxToken,
+    following: &CssSyntaxToken,
+) -> bool {
+    preceding
+        .trailing_trivia()
+        .pieces()
+        .chain(following.leading_trivia().pieces())
+        .filter_map(|piece| piece.as_comments())
+        .any(|comment| CssCommentStyle::is_suppression(comment.text()))
 }
 
 /// Returns `true` when the last leading block comment stays with this node.

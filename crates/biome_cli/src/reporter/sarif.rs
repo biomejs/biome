@@ -9,6 +9,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
@@ -53,6 +54,7 @@ impl<'a> SarifReporterVisitor<'a> {
         biome_css_analyze::visit_registry(&mut visitor);
         biome_json_analyze::visit_registry(&mut visitor);
         biome_js_analyze::visit_registry(&mut visitor);
+        biome_markdown_analyze::visit_registry(&mut visitor);
 
         visitor
     }
@@ -120,6 +122,16 @@ impl RegistryVisitor<HtmlLanguage> for SarifReporterVisitor<'_> {
             + 'static,
     {
         self.store_rule::<R, HtmlLanguage>();
+    }
+}
+
+impl RegistryVisitor<MarkdownLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, MarkdownLanguage>();
     }
 }
 

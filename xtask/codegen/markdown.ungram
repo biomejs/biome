@@ -45,10 +45,22 @@ MdBogusBlock = SyntaxElement*
 // to parse mid-list.
 MdBogusBullet = SyntaxElement*
 
-MdDocument =
+MdRoot =
   bom: 'UNICODE_BOM'?
+  frontmatter: MdFrontmatter?
   value: MdBlockList
   eof: 'EOF'
+
+// ---
+// content
+// ---
+// ^^^^^^^
+MdFrontmatter =
+	l_fence: '---'
+	content: MdFrontmatterContent
+	r_fence: '---'
+
+MdFrontmatterContent = value: 'md_frontmatter_literal'
 
 MdBlockList = AnyMdBlock*
 
@@ -356,7 +368,7 @@ MdAutolink =
 // Raw inline HTML per CommonMark §6.8
 // Includes: open tags, closing tags, comments, processing instructions,
 // declarations, and CDATA sections
-MdInlineHtml = value: MdInlineItemList
+MdInlineHtml = value: 'md_html_literal'
 
 // &amp;
 // ^^^^^

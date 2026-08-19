@@ -30,7 +30,7 @@ use biome_html_syntax::HtmlRoot;
 #[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_module_graph::HtmlEmbeddedContent;
@@ -48,10 +48,11 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
-use biome_service::projects::Projects;
+#[cfg(feature = "module_graph")]
+use biome_service::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use biome_service::settings::ModuleGraphResolutionKind;
-use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 #[cfg(feature = "html_embeds")]
 use biome_service::test_utils::setup_workspace_and_open_project;
 #[cfg(feature = "html_embeds")]
@@ -59,8 +60,6 @@ use biome_service::workspace::{
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_string_case::StrLikeExtension;
-#[cfg(feature = "module_graph")]
-use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
@@ -122,17 +121,15 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             )
             .unwrap();
 
-        L::resolve_analyzer_options(
-            &settings,
-            &L::lookup_settings(&settings.languages).linter,
-            L::resolve_environment(&settings),
-            &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(
-                input_file,
-                settings.experimental_full_html_support_enabled(),
-            ),
-            None,
-        )
+        settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(input_file),
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            )
+            .with_file_path(input_file)
     }
 }
 
@@ -180,9 +177,6 @@ pub fn create_parser_options<L: ServiceLanguage>(
         return None;
     };
 
-    let projects = Projects::default();
-    let key = projects.insert_project(Utf8PathBuf::from(""));
-
     if loaded_configuration.has_errors() {
         let configuration_path = loaded_configuration.file_path.unwrap().clone();
         diagnostics.extend(
@@ -202,7 +196,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
-        let mut settings = projects.get_mut_root_settings(key).unwrap_or_default();
+        let mut settings = Settings::default();
         settings
             .merge_with_configuration(
                 configuration,
@@ -215,8 +209,13 @@ pub fn create_parser_options<L: ServiceLanguage>(
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+        let language_settings = &L::lookup_settings(&settings.languages).parser;
+        Some(L::resolve_parse_options(
+            &settings.override_settings,
+            language_settings,
+            &input_file.into(),
+            &document_file_source,
+        ))
     }
 }
 
@@ -227,9 +226,6 @@ pub fn create_formatting_options<L>(
 where
     L: ServiceLanguage,
 {
-    let projects = Projects::default();
-    let key = projects.insert_project(Utf8PathBuf::from(""));
-
     let Ok((source, loaded_configuration)) = load_configuration_for_test_file(input_file) else {
         return Default::default();
     };
@@ -252,7 +248,7 @@ where
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
-        let mut settings = projects.get_mut_root_settings(key).unwrap_or_default();
+        let mut settings = Settings::default();
         settings
             .merge_with_configuration(
                 configuration,
@@ -265,8 +261,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        let override_indices = settings.matching_override_indices(input_file);
+        settings.format_options::<L>(&override_indices, &document_file_source)
     }
 }
 
@@ -750,29 +746,7 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
 }
 
 #[cfg(feature = "type_inference")]
-pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
-    let mut registered_types = String::new();
-    let mut resolver = Some(resolver);
-    while let Some(current_resolver) = resolver {
-        for (i, ty) in current_resolver.registered_types().iter().enumerate() {
-            let level = current_resolver.level();
-            registered_types.push_str(&format!("\n{level:?} TypeId({i}) => {ty}\n"));
-        }
-
-        resolver = current_resolver.fallback_resolver();
-    }
-
-    if !registered_types.is_empty() {
-        content.push_str("## Registered types\n\n");
-
-        content.push_str("```");
-        content.push_str(&registered_types);
-        content.push_str("```\n");
-    }
-}
-
-#[cfg(feature = "type_inference")]
-pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
+pub fn dump_registered_module_types(content: &mut String, types: &[TypeData]) {
     if types.is_empty() {
         return;
     }
@@ -1026,7 +1000,7 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
 
     let is_valid_test_file = match file_path.extension().unwrap_or_default() {
         // Excluded files types which cannot contain comment in the source code
-        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" => false,
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" | "md" => false,
         _ => {
             let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
             // We can't know all the valid file names, but this should catch most common cases.

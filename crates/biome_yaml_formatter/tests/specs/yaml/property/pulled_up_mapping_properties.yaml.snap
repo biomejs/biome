@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/property/pulled_up_mapping_properties.yaml
+---
+
+# Input
+
+```yaml
+top1: &node1
+  &k1 key1: one
+top2:
+  &node2
+  &k2 key2: two
+top3: &val3 scalar
+top4:
+  &val4 scalar
+top5: &node5
+  key5: five
+
+```
+
+
+# Formatted
+
+```yaml
+top1: &node1
+  &k1 key1: one
+top2: &node2
+  &k2 key2: two
+top3: &val3 scalar
+top4: &val4 scalar
+top5: &node5
+  key5: five
+
+```

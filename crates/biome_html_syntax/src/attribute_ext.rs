@@ -1,6 +1,7 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, AnyVueDirective,
-    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, static_value::StaticValue,
+    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, HtmlString, is_quoted,
+    static_value::StaticValue,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, TokenText};
@@ -23,10 +24,7 @@ fn vue_binding_static_value(value: AnyHtmlAttributeInitializer) -> Option<Static
             // Only return a static value if the inner content is a JS string literal
             // (starts and ends with the same quote character). Plain identifiers like
             // `roleValue` are dynamic references and should not be treated as static.
-            if inner.len() >= 2
-                && ((inner.starts_with('"') && inner.ends_with('"'))
-                    || (inner.starts_with('\'') && inner.ends_with('\'')))
-            {
+            if is_quoted(inner) {
                 Some(StaticValue::String(token))
             } else {
                 None
@@ -76,6 +74,11 @@ impl AnyHtmlAttributeInitializer {
 }
 
 impl HtmlAttribute {
+    /// Returns the attribute value when its initializer is an HTML string.
+    pub fn html_string(&self) -> Option<HtmlString> {
+        self.initializer()?.value().ok()?.as_html_string().cloned()
+    }
+
     /// Extracts the value from an attribute's initializer.
     ///
     /// Returns `None` if the attribute has no initializer or the value cannot be extracted.
@@ -112,6 +115,11 @@ impl AnyHtmlAttribute {
     pub fn name(&self) -> Option<TokenText> {
         match self {
             Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::HtmlAttributeSingleTextExpression(attr) => attr
+                .expression()
+                .ok()
+                .and_then(|expr| expr.html_literal_token().ok())
+                .map(|html_literal| html_literal.token_text_trimmed()),
             Self::AnyVueDirective(vue) => match vue {
                 // :attr="..." — shorthand Vue binding
                 AnyVueDirective::VueVBindShorthandDirective(d) => d

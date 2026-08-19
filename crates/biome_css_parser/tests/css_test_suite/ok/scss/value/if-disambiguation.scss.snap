@@ -66,9 +66,9 @@ CssRoot {
                                                                     value_token: IDENT@26..34 "--scheme" [] [],
                                                                 },
                                                                 colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
-                                                                value: ScssExpression {
-                                                                    items: ScssExpressionItemList [
-                                                                        CssIdentifier {
+                                                                value: CssCustomPropertyValue {
+                                                                    components: CssCustomPropertyComponentList [
+                                                                        CssCustomIdentifier {
                                                                             value_token: IDENT@36..40 "dark" [] [],
                                                                         },
                                                                     ],
@@ -253,9 +253,9 @@ CssRoot {
                                                                         value_token: IDENT@210..218 "--scheme" [] [],
                                                                     },
                                                                     colon_token: COLON@218..220 ":" [] [Whitespace(" ")],
-                                                                    value: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssIdentifier {
+                                                                    value: CssCustomPropertyValue {
+                                                                        components: CssCustomPropertyComponentList [
+                                                                            CssCustomIdentifier {
                                                                                 value_token: IDENT@220..225 "light" [] [],
                                                                             },
                                                                         ],
@@ -321,9 +321,9 @@ CssRoot {
                                                                         value_token: IDENT@276..284 "--scheme" [] [],
                                                                     },
                                                                     colon_token: COLON@284..286 ":" [] [Whitespace(" ")],
-                                                                    value: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssIdentifier {
+                                                                    value: CssCustomPropertyValue {
+                                                                        components: CssCustomPropertyComponentList [
+                                                                            CssCustomIdentifier {
                                                                                 value_token: IDENT@286..290 "dark" [] [],
                                                                             },
                                                                         ],
@@ -550,9 +550,9 @@ CssRoot {
                                 0: CSS_DASHED_IDENTIFIER@26..34
                                   0: IDENT@26..34 "--scheme" [] []
                                 1: COLON@34..36 ":" [] [Whitespace(" ")]
-                                2: SCSS_EXPRESSION@36..40
-                                  0: SCSS_EXPRESSION_ITEM_LIST@36..40
-                                    0: CSS_IDENTIFIER@36..40
+                                2: CSS_CUSTOM_PROPERTY_VALUE@36..40
+                                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@36..40
+                                    0: CSS_CUSTOM_IDENTIFIER@36..40
                                       0: IDENT@36..40 "dark" [] []
                               1: (empty)
                             3: R_PAREN@40..41 ")" [] []
@@ -675,9 +675,9 @@ CssRoot {
                                   0: CSS_DASHED_IDENTIFIER@210..218
                                     0: IDENT@210..218 "--scheme" [] []
                                   1: COLON@218..220 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@220..225
-                                    0: SCSS_EXPRESSION_ITEM_LIST@220..225
-                                      0: CSS_IDENTIFIER@220..225
+                                  2: CSS_CUSTOM_PROPERTY_VALUE@220..225
+                                    0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@220..225
+                                      0: CSS_CUSTOM_IDENTIFIER@220..225
                                         0: IDENT@220..225 "light" [] []
                                 1: (empty)
                               3: R_PAREN@225..226 ")" [] []
@@ -720,9 +720,9 @@ CssRoot {
                                   0: CSS_DASHED_IDENTIFIER@276..284
                                     0: IDENT@276..284 "--scheme" [] []
                                   1: COLON@284..286 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@286..290
-                                    0: SCSS_EXPRESSION_ITEM_LIST@286..290
-                                      0: CSS_IDENTIFIER@286..290
+                                  2: CSS_CUSTOM_PROPERTY_VALUE@286..290
+                                    0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@286..290
+                                      0: CSS_CUSTOM_IDENTIFIER@286..290
                                         0: IDENT@286..290 "dark" [] []
                                 1: (empty)
                               3: R_PAREN@290..291 ")" [] []

@@ -31,7 +31,10 @@ pub(crate) fn is_at_scss_interpolated_string(p: &mut CssParser) -> bool {
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
 #[inline]
-pub(crate) fn parse_scss_interpolated_string(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_scss_interpolated_string(
+    p: &mut CssParser,
+    closing_context: CssLexContext,
+) -> ParsedSyntax {
     if !is_at_scss_interpolated_string(p) {
         return Absent;
     }
@@ -47,7 +50,7 @@ pub(crate) fn parse_scss_interpolated_string(p: &mut CssParser) -> ParsedSyntax 
     ScssInterpolatedStringPartList::new(quote).parse_list(p);
 
     if p.at(SCSS_STRING_QUOTE) {
-        p.bump_with_context(SCSS_STRING_QUOTE, CssLexContext::Regular);
+        p.bump_with_context(SCSS_STRING_QUOTE, closing_context);
     }
 
     Present(m.complete(p, SCSS_INTERPOLATED_STRING))

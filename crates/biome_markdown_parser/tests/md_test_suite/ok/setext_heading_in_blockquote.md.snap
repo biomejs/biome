@@ -40,8 +40,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -438,9 +439,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..305
+0: MD_ROOT@0..305
   0: (empty)
-  1: MD_BLOCK_LIST@0..305
+  1: (empty)
+  2: MD_BLOCK_LIST@0..305
     0: MD_QUOTE@0..12
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -698,6 +700,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@303..304 "_" [] []
             9: MD_TEXTUAL@304..305
               0: MD_TEXTUAL_LITERAL@304..305 "\n" [] []
-  2: EOF@305..305 "" [] []
+  3: EOF@305..305 "" [] []
 
 ```

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Configuration",
-	"description": "The configuration that is contained inside the file `biome.json`",
+	"description": "The configuration contained in `biome.json`.",
 	"type": "object",
 	"properties": {
 		"$schema": {
@@ -9,11 +9,11 @@
 			"anyOf": [{ "$ref": "#/$defs/Schema" }, { "type": "null" }]
 		},
 		"assist": {
-			"description": "Specific configuration for assists",
+			"description": "The assist configuration.",
 			"anyOf": [{ "$ref": "#/$defs/AssistConfiguration" }, { "type": "null" }]
 		},
 		"css": {
-			"description": "Specific configuration for the Css language",
+			"description": "Configuration specific to CSS.",
 			"anyOf": [{ "$ref": "#/$defs/CssConfiguration" }, { "type": "null" }]
 		},
 		"extends": {
@@ -21,42 +21,42 @@
 			"anyOf": [{ "$ref": "#/$defs/Extends" }, { "type": "null" }]
 		},
 		"files": {
-			"description": "The configuration of the filesystem",
+			"description": "The file handling configuration.",
 			"anyOf": [{ "$ref": "#/$defs/FilesConfiguration" }, { "type": "null" }]
 		},
 		"formatter": {
-			"description": "The configuration of the formatter",
+			"description": "The formatter configuration.",
 			"anyOf": [
 				{ "$ref": "#/$defs/FormatterConfiguration" },
 				{ "type": "null" }
 			]
 		},
 		"graphql": {
-			"description": "Specific configuration for the GraphQL language",
+			"description": "Configuration specific to GraphQL.",
 			"anyOf": [{ "$ref": "#/$defs/GraphqlConfiguration" }, { "type": "null" }]
 		},
 		"grit": {
-			"description": "Specific configuration for the GraphQL language",
+			"description": "Configuration specific to GritQL.",
 			"anyOf": [{ "$ref": "#/$defs/GritConfiguration" }, { "type": "null" }]
 		},
 		"html": {
-			"description": "Specific configuration for the HTML language",
+			"description": "Configuration specific to HTML.",
 			"anyOf": [{ "$ref": "#/$defs/HtmlConfiguration" }, { "type": "null" }]
 		},
 		"javascript": {
-			"description": "Specific configuration for the JavaScript language",
+			"description": "Configuration specific to JavaScript.",
 			"anyOf": [{ "$ref": "#/$defs/JsConfiguration" }, { "type": "null" }]
 		},
 		"json": {
-			"description": "Specific configuration for the Json language",
+			"description": "Configuration specific to JSON.",
 			"anyOf": [{ "$ref": "#/$defs/JsonConfiguration" }, { "type": "null" }]
 		},
 		"linter": {
-			"description": "The configuration for the linter",
+			"description": "The linter configuration.",
 			"anyOf": [{ "$ref": "#/$defs/LinterConfiguration" }, { "type": "null" }]
 		},
 		"overrides": {
-			"description": "A list of granular patterns that should be applied only to a sub set of files",
+			"description": "A list of granular patterns applied only to a subset of files.",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
 		},
 		"plugins": {
@@ -68,7 +68,7 @@
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 		},
 		"vcs": {
-			"description": "The configuration of the VCS integration",
+			"description": "The version control integration configuration.",
 			"anyOf": [{ "$ref": "#/$defs/VcsConfiguration" }, { "type": "null" }]
 		}
 	},
@@ -459,6 +459,26 @@
 					"description": "Check the input type (case-sensitive)",
 					"type": "string",
 					"const": "strict"
+				}
+			]
+		},
+		"CompilationMode": {
+			"description": "Controls which functions React Compiler analyzes.",
+			"oneOf": [
+				{
+					"description": "Analyze functions that follow React conventions: components\n(capitalized functions that create JSX or call hooks) and hooks\n(`use`-prefixed functions).",
+					"type": "string",
+					"const": "infer"
+				},
+				{
+					"description": "Analyze only functions annotated with a `\"use memo\"` directive.",
+					"type": "string",
+					"const": "annotation"
+				},
+				{
+					"description": "Analyze every function. This can report React-specific diagnostics in\nnon-React code, such as utility functions that update module-level\nstate.",
+					"type": "string",
+					"const": "all"
 				}
 			]
 		},
@@ -1605,22 +1625,22 @@
 			"additionalProperties": false
 		},
 		"CssAssistConfiguration": {
-			"description": "Options that changes how the CSS assist behaves",
+			"description": "Options that change how CSS assist behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assist for CSS files.",
+					"description": "Controls assist actions for CSS files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"CssConfiguration": {
-			"description": "Options applied to CSS files",
+			"description": "Options applied to CSS files.",
 			"type": "object",
 			"properties": {
 				"assist": {
-					"description": "CSS assist options",
+					"description": "CSS assist options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/CssAssistConfiguration" },
 						{ "type": "null" }
@@ -1628,7 +1648,7 @@
 					"default": null
 				},
 				"formatter": {
-					"description": "CSS formatter options",
+					"description": "CSS formatter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/CssFormatterConfiguration" },
 						{ "type": "null" }
@@ -1636,13 +1656,13 @@
 					"default": null
 				},
 				"globals": {
-					"description": "CSS globals",
+					"description": "CSS globals.",
 					"type": ["array", "null"],
 					"items": { "type": "string" },
 					"uniqueItems": true
 				},
 				"linter": {
-					"description": "CSS linter options",
+					"description": "CSS linter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/CssLinterConfiguration" },
 						{ "type": "null" }
@@ -1650,7 +1670,7 @@
 					"default": null
 				},
 				"parser": {
-					"description": "CSS parsing options",
+					"description": "CSS parsing options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/CssParserConfiguration" },
 						{ "type": "null" }
@@ -1661,65 +1681,65 @@
 			"additionalProperties": false
 		},
 		"CssFormatterConfiguration": {
-			"description": "Options that changes how the CSS formatter behaves",
+			"description": "Options that change how the CSS formatter behaves.",
 			"type": "object",
 			"properties": {
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\ndelimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and\nsquare brackets (e.g., `[ data-attr ]`). Defaults to false.",
+					"description": "Controls spaces inside CSS parentheses and square brackets when their content fits on one\nline. When enabled, `rgb(0, 0, 0)` becomes `rgb( 0, 0, 0 )` and `[data-attr]` becomes\n`[ data-attr ]`. Empty delimiters are unchanged.\n\nIf unset, inherits the global delimiter spacing setting.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Control the formatter for CSS (and its super languages) files.",
+					"description": "Controls the formatter for CSS and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
-					"description": "The indent style applied to CSS (and its super languages) files.",
+					"description": "The indent style applied to CSS and languages that extend it. If unset, inherits the global\nindentation style.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
-					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"description": "The indentation width applied to CSS and languages that extend it. If unset, inherits the\nglobal indentation width.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"description": "The line ending applied to CSS and languages that extend it. If unset, inherits the global\nline ending.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
+					"description": "The maximum line width for CSS and languages that extend it. If unset, inherits the global\nline width.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"quoteStyle": {
-					"description": "The type of quotes used in CSS code. Defaults to double.",
+					"description": "The type of quotes used in CSS code. Defaults to `double`.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. If unset, inherits the global\ntrailing newline setting.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"CssLinterConfiguration": {
-			"description": "Options that changes how the CSS linter behaves",
+			"description": "Options that change how the CSS linter behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for CSS files.",
+					"description": "Controls the linter for CSS files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"CssParserConfiguration": {
-			"description": "Options that changes how the CSS parser behaves",
+			"description": "Options that change how the CSS parser behaves.",
 			"type": "object",
 			"properties": {
 				"allowWrongLineComments": {
-					"description": "Allow comments to appear on incorrect lines in `.css` files",
+					"description": "Allows comments to appear on incorrect lines in `.css` files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables parsing of CSS Modules specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
+					"description": "Enables parsing of CSS Modules-specific features. Enable this feature only\nwhen your files don't end in `.module.css`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1793,7 +1813,7 @@
 		"Expand": {
 			"oneOf": [
 				{
-					"description": "Objects are expanded when the first property has a leading newline. Arrays are always\nexpanded if they are shorter than the line width.",
+					"description": "Objects are expanded when the first property has a leading newline. Arrays remain on one\nline if they fit.",
 					"type": "string",
 					"const": "auto"
 				},
@@ -1803,7 +1823,7 @@
 					"const": "always"
 				},
 				{
-					"description": "Objects and arrays are never expanded, if they are shorter than the line width.",
+					"description": "Objects and arrays remain on one line if they fit.",
 					"type": "string",
 					"const": "never"
 				}
@@ -1843,7 +1863,7 @@
 			"uniqueItems": true
 		},
 		"FilesConfiguration": {
-			"description": "The configuration of the filesystem",
+			"description": "The file handling configuration.",
 			"type": "object",
 			"properties": {
 				"experimentalScannerIgnores": {
@@ -1852,16 +1872,16 @@
 					"items": { "type": "string" }
 				},
 				"ignoreUnknown": {
-					"description": "Tells Biome to not emit diagnostics when handling files that it doesn't know",
+					"description": "Prevents Biome from emitting diagnostics for unrecognized file types.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"includes": {
-					"description": "A list of glob patterns. Biome will handle only those files/folders that will\nmatch these patterns.",
+					"description": "A list of glob patterns. Biome handles only files and directories that match these\npatterns.",
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
 				"maxSize": {
-					"description": "The maximum allowed size for source code files in bytes. Files above\nthis limit will be ignored for performance reasons. Defaults to 1 MiB",
+					"description": "The maximum source file size in bytes. Biome ignores larger files. Defaults to `1 MiB`.",
 					"anyOf": [{ "$ref": "#/$defs/MaxSize" }, { "type": "null" }]
 				}
 			},
@@ -1902,30 +1922,30 @@
 			"type": "object",
 			"properties": {
 				"attributePosition": {
-					"description": "The attribute position style in HTML-ish languages. Defaults to auto.",
+					"description": "The attribute position style in HTML-like languages. Defaults to `auto`.",
 					"anyOf": [{ "$ref": "#/$defs/AttributePosition" }, { "type": "null" }]
 				},
 				"bracketSameLine": {
-					"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+					"description": "Places the `>` of a multiline HTML or JSX element at the end of the last line instead of on\nthe next line. Self-closing elements are unaffected. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSameLine" }, { "type": "null" }]
 				},
 				"bracketSpacing": {
-					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"description": "Whether to insert spaces inside braces in object literals. Defaults to `true`.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"description": "Controls spaces immediately inside supported delimiters when their content fits on one line.\nIt doesn't add spaces before opening delimiters or inside empty delimiters.\n\nThe affected delimiters vary by language. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Whether to expand arrays and objects on multiple lines.\nWhen set to `auto`, object literals are formatted on multiple lines if the first property has a newline,\nand array literals are formatted on a single line if it fits in the line.\nWhen set to `always`, these literals are formatted on multiple lines, regardless of length of the list.\nWhen set to `never`, these literals are formatted on a single line if it fits in the line.\nWhen formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"description": "Controls whether arrays and objects are formatted on one line or multiple lines.\n\n`auto` formats objects on multiple lines if the first property has a newline, and arrays on\none line if they fit.\n\n`always` formats arrays and objects on multiple lines.\n\n`never` formats arrays and objects on one line if they fit.\n\nDefaults to `auto`.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
-					"description": "Whether formatting should be allowed to proceed if a given file\nhas syntax errors",
+					"description": "Allows formatting files that contain syntax errors when set to `true`. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1934,27 +1954,27 @@
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
 				"indentStyle": {
-					"description": "The indent style.",
+					"description": "Uses tabs or spaces for indentation. Defaults to `tab`.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
-					"description": "The size of the indentation, 2 by default",
+					"description": "The indentation width. Defaults to `2`.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending.",
+					"description": "Selects the line ending. `auto` uses the platform convention. Defaults to `lf`.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line. Defaults to 80.",
+					"description": "The maximum line width. Defaults to `80`.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. Defaults to `true`; disabling\nthis option can cause compatibility problems with other tools.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration\nin `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
+					"description": "Uses `.editorconfig` files to configure the formatter. Settings in `biome.json` or\n`biome.jsonc` override `.editorconfig` settings. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -1962,11 +1982,11 @@
 		},
 		"Glob": { "type": "string" },
 		"GraphqlAssistConfiguration": {
-			"description": "Options that changes how the GraphQL linter behaves",
+			"description": "Options that change how GraphQL assist behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the formatter for GraphQL files.",
+					"description": "Controls assist actions for GraphQL files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }],
 					"default": null
 				}
@@ -1974,24 +1994,25 @@
 			"additionalProperties": false
 		},
 		"GraphqlConfiguration": {
-			"description": "Options applied to GraphQL files",
+			"description": "Options applied to GraphQL files.",
 			"type": "object",
 			"properties": {
 				"assist": {
-					"description": "Assist options",
+					"description": "GraphQL assist options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/GraphqlAssistConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"formatter": {
-					"description": "GraphQL formatter options",
+					"description": "GraphQL formatter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/GraphqlFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"linter": {
+					"description": "GraphQL linter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/GraphqlLinterConfiguration" },
 						{ "type": "null" }
@@ -2001,46 +2022,46 @@
 			"additionalProperties": false
 		},
 		"GraphqlFormatterConfiguration": {
-			"description": "Options that changes how the GraphQL formatter behaves",
+			"description": "Options that change how the GraphQL formatter behaves.",
 			"type": "object",
 			"properties": {
 				"bracketSpacing": {
-					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"description": "Whether to insert spaces inside braces in object literals. If unset, inherits the global\nbracket spacing setting.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }],
 					"default": null
 				},
 				"enabled": {
-					"description": "Control the formatter for GraphQL files.",
+					"description": "Controls the formatter for GraphQL files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }],
 					"default": null
 				},
 				"indentStyle": {
-					"description": "The indent style applied to GraphQL files.",
+					"description": "The indent style applied to GraphQL files. If unset, inherits the global indentation style.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }],
 					"default": null
 				},
 				"indentWidth": {
-					"description": "The size of the indentation applied to GraphQL files. Default to 2.",
+					"description": "The indentation width applied to GraphQL files. If unset, inherits the global indentation\nwidth.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }],
 					"default": null
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"description": "The line ending applied to GraphQL files. If unset, inherits the global line ending.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }],
 					"default": null
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to GraphQL files. Defaults to 80.",
+					"description": "The maximum line width for GraphQL files. If unset, inherits the global line width.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }],
 					"default": null
 				},
 				"quoteStyle": {
-					"description": "The type of quotes used in GraphQL code. Defaults to double.",
+					"description": "The type of quotes used in GraphQL code. Defaults to `double`.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
 					"default": null
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. If unset, inherits the global\ntrailing newline setting.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
@@ -2051,7 +2072,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the formatter for GraphQL files.",
+					"description": "Controls the linter for GraphQL files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }],
 					"default": null
 				}
@@ -2059,35 +2080,36 @@
 			"additionalProperties": false
 		},
 		"GritAssistConfiguration": {
+			"description": "Options that change how GritQL assist behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assist functionality for Grit files.",
+					"description": "Controls assist actions for GritQL files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"GritConfiguration": {
-			"description": "Options applied to GritQL files",
+			"description": "Options applied to GritQL files.",
 			"type": "object",
 			"properties": {
 				"assist": {
-					"description": "Assist options",
+					"description": "GritQL assist options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/GritAssistConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"formatter": {
-					"description": "Formatting options",
+					"description": "GritQL formatter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/GritFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"linter": {
-					"description": "Formatting options",
+					"description": "GritQL linter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/GritLinterConfiguration" },
 						{ "type": "null" }
@@ -2097,40 +2119,42 @@
 			"additionalProperties": false
 		},
 		"GritFormatterConfiguration": {
+			"description": "Options that change how the GritQL formatter behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the formatter for Grit files.",
+					"description": "Controls the formatter for GritQL files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
-					"description": "The indent style applied to Grit files.",
+					"description": "The indent style applied to GritQL files. If unset, inherits the global indentation style.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
-					"description": "The size of the indentation applied to Grit files. Default to 2.",
+					"description": "The indentation width applied to GritQL files. If unset, inherits the global indentation\nwidth.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to Grit files.",
+					"description": "The line ending applied to GritQL files. If unset, inherits the global line ending.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to Grit files. Defaults to 80.",
+					"description": "The maximum line width for GritQL files. If unset, inherits the global line width.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. If unset, inherits the global\ntrailing newline setting.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"GritLinterConfiguration": {
+			"description": "Options that change how the GritQL linter behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for Grit files.",
+					"description": "Controls the linter for GritQL files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2204,46 +2228,47 @@
 			"additionalProperties": false
 		},
 		"HtmlAssistConfiguration": {
-			"description": "Options that changes how the HTML assist behaves",
+			"description": "Options that change how HTML assist behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assist for HTML (and its super languages) files.",
+					"description": "Controls assist actions for HTML and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"HtmlConfiguration": {
-			"description": "Options applied to HTML files",
+			"description": "Options applied to HTML files.",
 			"type": "object",
 			"properties": {
 				"assist": {
+					"description": "HTML assist options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/HtmlAssistConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"experimentalFullSupportEnabled": {
-					"description": "Enables full support for HTML, Vue, Svelte and Astro files.",
+					"description": "Enables full support for HTML, Vue, Svelte, and Astro files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"formatter": {
-					"description": "HTML formatter options",
+					"description": "HTML formatter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/HtmlFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"linter": {
-					"description": "HTML linter options",
+					"description": "HTML linter options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/HtmlLinterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"parser": {
-					"description": "HTML parsing options",
+					"description": "HTML parsing options.",
 					"anyOf": [
 						{ "$ref": "#/$defs/HtmlParserConfiguration" },
 						{ "type": "null" }
@@ -2253,57 +2278,57 @@
 			"additionalProperties": false
 		},
 		"HtmlFormatterConfiguration": {
-			"description": "Options that changes how the HTML formatter behaves",
+			"description": "Options that change how the HTML formatter behaves.",
 			"type": "object",
 			"properties": {
 				"attributePosition": {
-					"description": "The attribute position style in HTML elements. Defaults to auto.",
+					"description": "The attribute position style in HTML elements. If unset, inherits the global attribute\nposition setting.",
 					"anyOf": [{ "$ref": "#/$defs/AttributePosition" }, { "type": "null" }]
 				},
 				"bracketSameLine": {
-					"description": "Whether to hug the closing bracket of multiline HTML tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
+					"description": "Whether to place the closing bracket of a multiline HTML tag at the end of the last line\ninstead of on its own line. If unset, inherits the global `bracketSameLine` setting.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSameLine" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Control the formatter for HTML (and its super languages) files.",
+					"description": "Controls the formatter for HTML and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"indentScriptAndStyle": {
-					"description": "Whether to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.",
+					"description": "Whether to indent `<script>` and `<style>` tags in HTML and languages that extend it.\nDefaults to `false`.",
 					"anyOf": [
 						{ "$ref": "#/$defs/IndentScriptAndStyle" },
 						{ "type": "null" }
 					]
 				},
 				"indentStyle": {
-					"description": "The indent style applied to HTML (and its super languages) files.",
+					"description": "The indent style applied to HTML and languages that extend it. If unset, inherits the global\nindentation style.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
-					"description": "The size of the indentation applied to HTML (and its super languages) files. Default to 2.",
+					"description": "The indentation width applied to HTML and languages that extend it. If unset, inherits the\nglobal indentation width.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"description": "The line ending applied to HTML and languages that extend it. If unset, inherits the global\nline ending.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.",
+					"description": "The maximum line width for HTML and languages that extend it. If unset, inherits the global\nline width.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"selfCloseVoidElements": {
-					"description": "Whether void elements should be self-closed. Defaults to never.",
+					"description": "Controls whether void elements are self-closed. Defaults to `never`.",
 					"anyOf": [
 						{ "$ref": "#/$defs/SelfCloseVoidElements" },
 						{ "type": "null" }
 					]
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. Unlike other language-specific\ntrailing newline settings, this option defaults to `true` instead of inheriting the global\nsetting.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				},
 				"whitespaceSensitivity": {
-					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
+					"description": "Whether to account for whitespace sensitivity when formatting HTML and languages that\nextend it. Defaults to `css`.",
 					"anyOf": [
 						{ "$ref": "#/$defs/WhitespaceSensitivity" },
 						{ "type": "null" }
@@ -2313,26 +2338,26 @@
 			"additionalProperties": false
 		},
 		"HtmlLinterConfiguration": {
-			"description": "Options that changes how the HTML linter behaves",
+			"description": "Options that change how the HTML linter behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for HTML (and its super languages) files.",
+					"description": "Controls the linter for HTML and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"HtmlParserConfiguration": {
-			"description": "Options that changes how the HTML parser behaves",
+			"description": "Options that change how the HTML parser behaves.",
 			"type": "object",
 			"properties": {
 				"interpolation": {
-					"description": "Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files",
+					"description": "Enables parsing double text expressions such as `{{ expression }}` inside `.html` files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"vue": {
-					"description": "Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files. If this option is enabled, it also enables `interpolation` implicitly.\n\nBiome will already automatically enable Vue parsing in `.vue` files, so you probably don't need\nto enable this option. This only affects `.html` files, and does not change how `.vue`, `.svelte`,\nor `.astro` files are parsed.",
+					"description": "Enables parsing Vue syntax (`v-if`, `v-bind`, etc.) in `.html` files. Enabling this option\nalso enables `interpolation` implicitly.\n\nBiome will already automatically enable Vue parsing in `.vue` files, so you probably don't need\nto enable this option. This only affects `.html` files, and does not change how `.vue`, `.svelte`,\nor `.astro` files are parsed.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2432,7 +2457,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assist for JavaScript (and its super languages) files.",
+					"description": "Controls assist actions for JavaScript and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2499,75 +2524,75 @@
 			"type": "object",
 			"properties": {
 				"arrowParentheses": {
-					"description": "Whether to add non-necessary parentheses to arrow functions. Defaults to \"always\".",
+					"description": "Whether to add parentheses around arrow function parameters. Defaults to `always`.",
 					"anyOf": [{ "$ref": "#/$defs/ArrowParentheses" }, { "type": "null" }]
 				},
 				"attributePosition": {
-					"description": "The attribute position style in JSX elements. Defaults to auto.",
+					"description": "The attribute position style in JSX elements. If unset, inherits the global attribute\nposition setting.",
 					"anyOf": [{ "$ref": "#/$defs/AttributePosition" }, { "type": "null" }]
 				},
 				"bracketSameLine": {
-					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
+					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line,\nrather than being alone on the following line. If unset, inherits the global bracket\nplacement setting.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSameLine" }, { "type": "null" }]
 				},
 				"bracketSpacing": {
-					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"description": "Whether to insert spaces inside braces in object literals. If unset, inherits the global\nbracket spacing setting.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line. Spaces are not\nadded before the opening delimiter (e.g., `function f()` stays `function f()`, not\n`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).\nFor JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets\n(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle\nbrackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical\nNOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to\nfalse.",
+					"description": "Controls spaces immediately inside supported JavaScript and TypeScript delimiters when their\ncontent fits on one line. It doesn't add spaces before opening delimiters or inside empty\ndelimiters.\n\nIt affects parentheses, square brackets, template interpolations, TypeScript angle brackets,\nJSX expression braces, and logical NOT. In operator chains, only the final operator receives\na following space.\n\nIf unset, inherits the global delimiter spacing setting.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Control the formatter for JavaScript (and its super languages) files.",
+					"description": "Controls the formatter for JavaScript and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Whether to expand arrays and objects on multiple lines.\nWhen set to `auto`, object literals are formatted on multiple lines if the first property has a newline,\nand array literals are formatted on a single line if it fits in the line.\nWhen set to `always`, these literals are formatted on multiple lines, regardless of length of the list.\nWhen set to `never`, these literals are formatted on a single line if it fits in the line.\nWhen formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"description": "Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.\n\nIf unset, inherits the global expansion setting.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
-					"description": "The indent style applied to JavaScript (and its super languages) files.",
+					"description": "The indent style applied to JavaScript and languages that extend it. If unset, inherits the\nglobal indentation style.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
-					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
+					"description": "The indentation width applied to JavaScript and languages that extend it. If unset,\ninherits the global indentation width.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
 				},
 				"jsxQuoteStyle": {
-					"description": "The type of quotes used in JSX. Defaults to double.",
+					"description": "The type of quotes used in JSX. Defaults to `double`.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"description": "The line ending applied to JavaScript and languages that extend it. If unset, inherits the\nglobal line ending.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
+					"description": "The maximum line width applied to JavaScript and languages that extend it. If unset,\ninherits the global line width.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"operatorLinebreak": {
-					"description": "When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to \"after\".",
+					"description": "When breaking binary expressions into multiple lines, whether to break them before or after\nthe binary operator. Defaults to `after`.",
 					"anyOf": [{ "$ref": "#/$defs/OperatorLinebreak" }, { "type": "null" }]
 				},
 				"quoteProperties": {
-					"description": "When properties in objects are quoted. Defaults to asNeeded.",
+					"description": "Controls when object properties are quoted. Defaults to `asNeeded` in configuration\n(`as-needed` on the CLI).",
 					"anyOf": [{ "$ref": "#/$defs/QuoteProperties" }, { "type": "null" }]
 				},
 				"quoteStyle": {
-					"description": "The type of quotes used in JavaScript code. Defaults to double.",
+					"description": "The type of quotes used in JavaScript code. Defaults to `double`.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
 				},
 				"semicolons": {
-					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
+					"description": "Prints semicolons after every statement or only where needed to avoid automatic semicolon\ninsertion hazards. Defaults to `always`.",
 					"anyOf": [{ "$ref": "#/$defs/Semicolons" }, { "type": "null" }]
 				},
 				"trailingCommas": {
-					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
+					"description": "Prints trailing commas wherever possible in multiline comma-separated structures. Defaults\nto `all`.",
 					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. If unset, inherits the global\ntrailing newline setting.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
@@ -2578,14 +2603,14 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for JavaScript (and its super languages) files.",
+					"description": "Controls the linter for JavaScript and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"JsParserConfiguration": {
-			"description": "Options that changes how the JavaScript parser behaves",
+			"description": "Options that change how the JavaScript parser behaves.",
 			"type": "object",
 			"properties": {
 				"gritMetavariables": {
@@ -2593,7 +2618,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"jsxEverywhere": {
-					"description": "When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.\n\nDefaults to `true`.",
+					"description": "When enabled, files such as `.js`, `.mjs`, and `.cjs` may contain JSX syntax. Defaults to\n`true`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"unsafeParameterDecoratorsEnabled": {
@@ -2608,7 +2633,7 @@
 			"type": "object",
 			"properties": {
 				"experimentalPnpmCatalogs": {
-					"description": "Enables pnpm workspace catalog resolution for JavaScript package manifests.\n\nOpt-in:\n- Set `javascript.resolver.experimentalPnpmCatalogs` to `true`.\n\nScope:\n- Resolves `catalog:` and `catalog:<name>` dependency versions from\n  `package.json`.\n- Applies to `dependencies`, `devDependencies`, and `peerDependencies`.\n\nFail-safe behavior:\n- If `pnpm-workspace.yaml` is missing, unreadable, or cannot be parsed,\n  Biome silently falls back to the default behavior (as if this option\n  were disabled).\n- Unknown keys and unsupported value shapes in `pnpm-workspace.yaml` are\n  ignored.\n\nLimitations:\n- Only `pnpm-workspace.yaml` is read.\n- Biome only reads top-level `catalog` / `catalogs` mappings and scalar\n  string entries.\n\nDefault: `false`.",
+					"description": "Enables pnpm workspace catalog resolution for JavaScript package manifests.\n\nOpt-in:\n- Set `javascript.resolver.experimentalPnpmCatalogs` to `true`.\n\nScope:\n- Resolves `catalog:` and `catalog:<name>` dependency versions from\n  `package.json`.\n- Applies to `dependencies`, `devDependencies`, and `peerDependencies`.\n\nFail-safe behavior:\n- If `pnpm-workspace.yaml` is missing, unreadable, or cannot be parsed,\n  Biome silently falls back to the default behavior (as if this option\n  were disabled).\n- Unknown keys and unsupported value shapes in `pnpm-workspace.yaml` are\n  ignored.\n\nLimitations:\n- Only `pnpm-workspace.yaml` is read.\n- Biome only reads top-level `catalog` / `catalogs` mappings and scalar\n  string entries.\n\nDefaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2624,7 +2649,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assist for JSON (and its super languages) files.",
+					"description": "Controls assist actions for JSON and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2669,46 +2694,46 @@
 			"type": "object",
 			"properties": {
 				"bracketSpacing": {
-					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"description": "Whether to insert spaces inside braces in object literals. If unset, inherits the global\nbracket spacing setting.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\nbrackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).\nDefaults to false.",
+					"description": "Controls spaces inside JSON square brackets when their content fits on one line. When\nenabled, `[1, 2, 3]` becomes `[ 1, 2, 3 ]`. Empty brackets are unchanged.\n\nIf unset, inherits the global delimiter spacing setting.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Control the formatter for JSON (and its super languages) files.",
+					"description": "Controls the formatter for JSON and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Whether to expand arrays and objects on multiple lines.\nWhen set to `auto`, object literals are formatted on multiple lines if the first property has a newline,\nand array literals are formatted on a single line if it fits in the line.\nWhen set to `always`, these literals are formatted on multiple lines, regardless of length of the list.\nWhen set to `never`, these literals are formatted on a single line if it fits in the line.\nWhen formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"description": "Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.\n\nIf unset, inherits the global expansion setting.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
-					"description": "The indent style applied to JSON (and its super languages) files.",
+					"description": "The indent style applied to JSON and languages that extend it. If unset, inherits the global\nindentation style.",
 					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
-					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
+					"description": "The indentation width applied to JSON and languages that extend it. If unset, inherits the\nglobal indentation width.",
 					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"description": "The line ending applied to JSON and languages that extend it. If unset, inherits the global\nline ending.",
 					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
+					"description": "The maximum line width applied to JSON and languages that extend it. If unset, inherits the\nglobal line width.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"trailingCommas": {
-					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
+					"description": "Prints trailing commas wherever possible in multiline comma-separated structures. Defaults\nto `none`.",
 					"anyOf": [
 						{ "$ref": "#/$defs/JsonTrailingCommas" },
 						{ "type": "null" }
 					]
 				},
 				"trailingNewline": {
-					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"description": "Whether to add a trailing newline at the end of the file. If unset, inherits the global\ntrailing newline setting.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
 				}
 			},
@@ -2719,22 +2744,22 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for JSON (and its super languages) files.",
+					"description": "Controls the linter for JSON and languages that extend it.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"JsonParserConfiguration": {
-			"description": "Options that changes how the JSON parser behaves",
+			"description": "Options that change how the JSON parser behaves.",
 			"type": "object",
 			"properties": {
 				"allowComments": {
-					"description": "Allow parsing comments in `.json` files",
+					"description": "Allows parsing comments in `.json` files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"allowTrailingCommas": {
-					"description": "Allow parsing trailing commas in `.json` files",
+					"description": "Allows parsing trailing commas in `.json` files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
@@ -4106,6 +4131,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoExtendNativeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExtendNativeOptions" }
+			]
+		},
+		"NoExtendNativeOptions": {
+			"description": "Options for the `noExtendNative` rule.",
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "Built-in names to ignore. Extending the prototype of an ignored\nname will not trigger this rule.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExtraBooleanCastConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4499,6 +4542,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidPropertyInitValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidPropertyInitValueOptions" }
+			]
+		},
+		"NoInvalidPropertyInitValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidUseBeforeDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4517,6 +4570,23 @@
 		},
 		"NoIrregularWhitespaceOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"NoJsRestrictedPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsRestrictedPropertiesOptions" }
+			]
+		},
+		"NoJsRestrictedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"description": "Restriction entries for object/property access.\n\nEach entry can describe one of these cases:\n\n- exact object/property match:\n  `{ \"object\": \"require\", \"property\": \"ensure\" }`\n- property-wide restriction with allowed objects:\n  `{ \"property\": \"__defineGetter__\", \"allowObjects\": [\"Object\"] }`\n- object-wide restriction with allowed properties:\n  `{ \"object\": \"arguments\", \"allowProperties\": [\"length\"] }`",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/RestrictedPropertyEntry" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoJsxLeakedDollarConfiguration": {
@@ -4823,6 +4893,16 @@
 			]
 		},
 		"NoNonNullAssertionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoNonScalableViewportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNonScalableViewportOptions" }
+			]
+		},
+		"NoNonScalableViewportOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5538,6 +5618,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteLegacyConstConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteLegacyConstOptions" }
+			]
+		},
+		"NoSvelteLegacyConstOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteUnnecessaryStateWrapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5586,6 +5676,29 @@
 			]
 		},
 		"NoSyncScriptsOptions": { "type": "object", "additionalProperties": false },
+		"NoTailwindArbitraryValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindArbitraryValueOptions" }
+			]
+		},
+		"NoTailwindArbitraryValueOptions": {
+			"description": "Options for the `noTailwindArbitraryValue` rule.\n\nControls which attributes and utility functions are checked for arbitrary values.",
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5963,6 +6076,16 @@
 			]
 		},
 		"NoUnsafePlusOperandsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnsafeTypeAssertionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeTypeAssertionOptions" }
+			]
+		},
+		"NoUnsafeTypeAssertionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6654,6 +6777,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExtendNative": {
+					"description": "Disallow extending the prototype of built-in objects.\nSee https://biomejs.dev/linter/rules/no-extend-native",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExtendNativeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
@@ -6679,6 +6809,20 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidPropertyInitValue": {
+					"description": "Checks that the initial-value of an @property rule follows the value format declared by its syntax.\nSee https://biomejs.dev/linter/rules/no-invalid-property-init-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidPropertyInitValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsRestrictedProperties": {
+					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-js-restricted-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsRestrictedPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6721,6 +6865,13 @@
 					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNonScalableViewport": {
+					"description": "Disallow disabling zoom with user-scalable=no in the \\<meta name=\"viewport\"> element.\nSee https://biomejs.dev/linter/rules/no-non-scalable-viewport",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNonScalableViewportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6829,10 +6980,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteLegacyConst": {
+					"description": "Disallow legacy Svelte {@const} tags.\nSee https://biomejs.dev/linter/rules/no-svelte-legacy-const",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteLegacyConstConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvelteUnnecessaryStateWrap": {
 					"description": "Disallow unnecessary $state wrapping of reactive classes.\nSee https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteUnnecessaryStateWrapConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindArbitraryValue": {
+					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6861,6 +7026,13 @@
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeTypeAssertion": {
+					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6921,6 +7093,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAstroClientOnlyDirectiveValue": {
+					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAwaitThenable": {
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
@@ -6939,6 +7118,13 @@
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentTestItConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useControlLabel": {
+					"description": "Enforce that interactive control elements have an accessible label.\nSee https://biomejs.dev/linter/rules/use-control-label",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseControlLabelConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7026,6 +7212,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedLayer": {
+					"description": "Disallow anonymous cascade layers.\nSee https://biomejs.dev/linter/rules/use-named-layer",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedLayerConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNullishCoalescing": {
 					"description": "Enforce using the nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
 					"anyOf": [
@@ -7053,6 +7246,13 @@
 					"description": "Require functions with the \"use server\" directive to be async.\nSee https://biomejs.dev/linter/rules/use-react-async-server-function",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseReactAsyncServerFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactCompiler": {
+					"description": "Validate files with React Compiler.\nSee https://biomejs.dev/linter/rules/use-react-compiler",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactCompilerConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7118,6 +7318,13 @@
 					"description": "Require keyed {#each} blocks in Svelte templates.\nSee https://biomejs.dev/linter/rules/use-svelte-require-each-key",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSvelteRequireEachKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTailwindShorthandClasses": {
+					"description": "Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.\nSee https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindShorthandClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7270,14 +7477,14 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"description": "Controls spaces immediately inside supported delimiters when their content fits on one line.\nIt doesn't add spaces before opening delimiters or inside empty delimiters.\n\nThe affected delimiters vary by language. If unset, uses the configured formatter setting.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Whether to expand arrays and objects on multiple lines.\nWhen set to `auto`, object literals are formatted on multiple lines if the first property has a newline,\nand array literals are formatted on a single line if it fits in the line.\nWhen set to `always`, these literals are formatted on multiple lines, regardless of length of the list.\nWhen set to `never`, these literals are formatted on a single line if it fits in the line.\nWhen formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"description": "Controls whether arrays and objects are formatted on one line or multiple lines.\n\n`auto` formats objects on multiple lines if the first property has a newline, and arrays on\none line if they fit.\n\n`always` formats arrays and objects on multiple lines.\n\n`never` formats arrays and objects on one line if they fit.\n\nIf unset, uses the configured formatter setting.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
@@ -7638,6 +7845,34 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
+		"RestrictedPropertyEntry": {
+			"type": "object",
+			"properties": {
+				"allowObjects": {
+					"description": "Objects that are allowed when `property` is restricted globally.\n\nExample:\n`{ \"property\": \"__defineGetter__\", \"allowObjects\": [\"Object\"] }`",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowProperties": {
+					"description": "Properties that are allowed when `object` is restricted globally.\n\nExample:\n`{ \"object\": \"arguments\", \"allowProperties\": [\"length\"] }`",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "Optional custom note appended to the diagnostic.",
+					"type": ["string", "null"]
+				},
+				"object": {
+					"description": "Object name to restrict.\n\nExample: `\"require\"` or `\"Object\"`.",
+					"type": ["string", "null"]
+				},
+				"property": {
+					"description": "Property name to restrict.\n\nExample: `\"ensure\"` or `\"__defineGetter__\"`.",
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
 		"RuleAssistWithNoDuplicateClassesOptions": {
 			"type": "object",
@@ -7722,6 +7957,11 @@
 		"RuleDomain": {
 			"description": "Rule domains",
 			"oneOf": [
+				{
+					"description": "Astro framework rules",
+					"type": "string",
+					"const": "astro"
+				},
 				{
 					"description": "Drizzle ORM rules",
 					"type": "string",
@@ -8795,6 +9035,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoExtendNativeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExtendNativeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoExtraBooleanCastOptions": {
 			"type": "object",
 			"properties": {
@@ -9166,6 +9415,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoInvalidPropertyInitValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidPropertyInitValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoInvalidUseBeforeDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -9180,6 +9438,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoIrregularWhitespaceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoJsRestrictedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsRestrictedPropertiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9448,6 +9715,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNonNullAssertionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNonScalableViewportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNonScalableViewportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10064,6 +10340,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSvelteLegacyConstOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteLegacyConstOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSvelteUnnecessaryStateWrapOptions": {
 			"type": "object",
 			"properties": {
@@ -10098,6 +10383,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSyncScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindArbitraryValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10381,6 +10675,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeTypeAssertionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeTypeAssertionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10999,6 +11302,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseAtIndexOptions": {
 			"type": "object",
 			"properties": {
@@ -11209,6 +11521,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConstOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseControlLabelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseControlLabelOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11813,6 +12134,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedLayerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedLayerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamespaceKeywordOptions": {
 			"type": "object",
 			"properties": {
@@ -11986,6 +12316,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseReactAsyncServerFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseReactCompilerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactCompilerOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12240,6 +12579,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSymbolDescriptionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTailwindShorthandClassesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindShorthandClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14661,6 +15010,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAstroClientOnlyDirectiveValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroClientOnlyDirectiveValueOptions" }
+			]
+		},
+		"UseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseAtIndexConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15021,6 +15380,17 @@
 			]
 		},
 		"UseConstOptions": { "type": "object", "additionalProperties": false },
+		"UseControlLabelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseControlLabelOptions" }
+			]
+		},
+		"UseControlLabelOptions": {
+			"description": "Configuration for the `useControlLabel` lint rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseDateNowConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15783,6 +16153,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseNamedLayerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedLayerOptions" }
+			]
+		},
+		"UseNamedLayerOptions": { "type": "object", "additionalProperties": false },
 		"UseNamespaceKeywordConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15855,6 +16232,10 @@
 				},
 				"ignoreConditionalTests": {
 					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
+					"type": ["boolean", "null"]
+				},
+				"ignoreIfStatements": {
+					"description": "Whether to ignore `if` statements that only assign to a nullish variable and could be rewritten as `??=` (default: `false`).",
 					"type": ["boolean", "null"]
 				},
 				"ignoreMixedLogicalExpressions": {
@@ -16030,6 +16411,22 @@
 		},
 		"UseReactAsyncServerFunctionOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactCompilerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactCompilerOptions" }
+			]
+		},
+		"UseReactCompilerOptions": {
+			"type": "object",
+			"properties": {
+				"compilationMode": {
+					"description": "Which functions React Compiler analyzes. Defaults to `infer`.",
+					"anyOf": [{ "$ref": "#/$defs/CompilationMode" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseReactFunctionComponentDefinitionConfiguration": {
@@ -16422,6 +16819,16 @@
 			]
 		},
 		"UseSymbolDescriptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindShorthandClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindShorthandClassesOptions" }
+			]
+		},
+		"UseTailwindShorthandClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -16952,34 +17359,34 @@
 		"VcsClientKind": {
 			"oneOf": [
 				{
-					"description": "Integration with the git client as VCS",
+					"description": "Integration with Git as the version control client.",
 					"type": "string",
 					"const": "git"
 				}
 			]
 		},
 		"VcsConfiguration": {
-			"description": "Set of properties to integrate Biome with a VCS software.",
+			"description": "Settings for integrating Biome with version control.",
 			"type": "object",
 			"properties": {
 				"clientKind": {
-					"description": "The kind of client.",
+					"description": "The version control client.",
 					"anyOf": [{ "$ref": "#/$defs/VcsClientKind" }, { "type": "null" }]
 				},
 				"defaultBranch": {
-					"description": "The main branch of the project",
+					"description": "The project's default branch.",
 					"type": ["string", "null"]
 				},
 				"enabled": {
-					"description": "Whether Biome should integrate itself with the VCS client",
+					"description": "Whether Biome should integrate with the version control client.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"root": {
-					"description": "The folder where Biome should check for VCS files. By default, Biome will use the same\nfolder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory.\nIf no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic\nwill be emitted",
+					"description": "Sets the directory where Biome checks for version control files.\n\nDefaults to the directory containing `biome.json` or `biome.jsonc`. If no configuration is\nfound, Biome uses the current working directory.\n\nIf neither directory is available, Biome disables version control integration and emits a\ndiagnostic.",
 					"type": ["string", "null"]
 				},
 				"useIgnoreFile": {
-					"description": "Whether Biome should use VCS ignore files. When [true], Biome will ignore files\nspecified in `.gitignore`, `.ignore`, and Git's local exclude file.",
+					"description": "When `true`, Biome ignores files listed in `.gitignore`, `.ignore`, and Git's local\nexclude file.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},

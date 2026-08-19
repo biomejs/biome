@@ -142,7 +142,7 @@ e-wrap </html:textarea>
 ```diff
 --- Prettier
 +++ Biome
-@@ -9,14 +9,9 @@
+@@ -9,14 +9,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -156,11 +156,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -49,14 +44,9 @@
+@@ -49,14 +45,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -174,11 +175,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -89,14 +79,9 @@
+@@ -89,14 +81,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -192,11 +194,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -129,14 +114,9 @@
+@@ -129,14 +117,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -210,11 +213,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -169,14 +149,9 @@
+@@ -169,14 +153,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -228,65 +232,23 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -206,53 +181,25 @@
-     </h1>
-   </div>
-   <script>
--    const func = function () {
--      console.log("Hello, there");
--    };
-+  const func = function() { console.log('Hello, there');}
-   </script>
- </with:colon>
- 
- <!-- script like -->
- <with:colon>
--  <style>
--    .a {
--      color: #f00;
--    }
--  </style>
-+  <style>.a{color:#f00}</style>
-   <script>
--    const func = function () {
--      console.log("Hello, there");
--    };
-+  const func = function() { console.log('Hello, there');}
-   </script>
--  <style>
--    .A {
--      color: #f00;
--    }
--  </style>
-+  <style>.A{COLOR:#F00}</style>
+@@ -232,9 +212,7 @@
    <html:script
      >const func = function() { console.log('Hello, there');}</html:script
    >
 -  <html:style
 -    >.a{color:#f00}</html:style
 -  >
--  <svg>
--    <style>
--      .a {
--        color: #f00;
--      }
--    </style>
--  </svg>
--  <svg>
--    <style>
--      .a {
--        color: #f00;
--      }
--    </style>
--  </svg>
 +  <html:style>.a { color:#f00}</html:style>
-+  <svg><style>.a{color:#f00}</style></svg>
-+  <svg><style>.a{color:#f00}</style></svg>
- </with:colon>
+   <svg>
+     <style>
+       .a {
+@@ -253,6 +231,4 @@
  <html:script
    >const func = function() { console.log('Hello, there');}</html:script
  >
@@ -312,7 +274,8 @@ e-wrap </html:textarea>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -347,7 +310,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -382,7 +346,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -417,7 +382,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -452,7 +418,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -482,23 +449,47 @@ e</pre>
     </h1>
   </div>
   <script>
-  const func = function() { console.log('Hello, there');}
+    const func = function () {
+      console.log("Hello, there");
+    };
   </script>
 </with:colon>
 
 <!-- script like -->
 <with:colon>
-  <style>.a{color:#f00}</style>
+  <style>
+    .a {
+      color: #f00;
+    }
+  </style>
   <script>
-  const func = function() { console.log('Hello, there');}
+    const func = function () {
+      console.log("Hello, there");
+    };
   </script>
-  <style>.A{COLOR:#F00}</style>
+  <style>
+    .A {
+      color: #f00;
+    }
+  </style>
   <html:script
     >const func = function() { console.log('Hello, there');}</html:script
   >
   <html:style>.a { color:#f00}</html:style>
-  <svg><style>.a{color:#f00}</style></svg>
-  <svg><style>.a{color:#f00}</style></svg>
+  <svg>
+    <style>
+      .a {
+        color: #f00;
+      }
+    </style>
+  </svg>
+  <svg>
+    <style>
+      .a {
+        color: #f00;
+      }
+    </style>
+  </svg>
 </with:colon>
 <html:script
   >const func = function() { console.log('Hello, there');}</html:script

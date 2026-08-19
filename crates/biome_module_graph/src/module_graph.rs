@@ -48,7 +48,7 @@ pub fn resolve_js_module(
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
     let inference_mode = if enable_type_inference {
-        TypeInferenceMode::Complete
+        TypeInferenceMode::RawTypesOnly
     } else {
         TypeInferenceMode::Disabled
     };
@@ -111,7 +111,7 @@ pub fn resolve_css_module(
 
     let module = visitor.visit();
     let mut dependencies = ModuleDependencies::default();
-    for (_, import) in module.0.imports.deref() {
+    for import in module.0.imports.iter() {
         if let Some(p) = import.resolved_path.as_path() {
             dependencies.insert(p.to_path_buf());
         }
@@ -146,11 +146,7 @@ pub fn resolve_html_module(
             dependencies.insert(p.to_path_buf());
         }
     }
-    for resolved_path in module
-        .static_import_paths
-        .values()
-        .chain(module.dynamic_import_paths.values())
-    {
+    for resolved_path in module.import_paths.iter() {
         if let Some(p) = resolved_path.as_path() {
             dependencies.insert(p.to_path_buf());
         }

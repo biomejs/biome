@@ -21,6 +21,9 @@ pub(crate) enum StringLiteralParentKind {
     /// Variants to track tokens that are inside a CssCharsetRule
     /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
     CharsetAtRule,
+    /// Attribute values preserve escaped source newlines without expanding the
+    /// surrounding selector group.
+    AttributeMatcherValue,
     /// other types, will add more later
     Others,
 }
@@ -64,6 +67,10 @@ impl<'token> FormatLiteralStringToken<'token> {
         CleanedStringLiteralText {
             text: content,
             token,
+            literal_line_breaks: matches!(
+                self.parent_kind,
+                StringLiteralParentKind::AttributeMatcherValue
+            ),
         }
     }
 }
@@ -71,27 +78,33 @@ impl<'token> FormatLiteralStringToken<'token> {
 pub(crate) struct CleanedStringLiteralText<'a> {
     token: &'a CssSyntaxToken,
     text: Cow<'a, str>,
+    /// Whether embedded LF characters use non-propagating literal lines.
+    ///
+    /// Attribute matcher values enable this to preserve escaped newlines
+    /// without expanding the surrounding selector group.
+    literal_line_breaks: bool,
 }
 
-impl Format<CssFormatContext> for CleanedStringLiteralText<'_> {
-    fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
-        format_replaced(
-            self.token,
-            &syntax_token_cow_slice(
-                self.text.clone(),
-                self.token,
-                self.token.text_trimmed_range().start(),
-            ),
-        )
-        .fmt(f)
+impl CleanedStringLiteralText<'_> {
+    fn fmt(self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
+        let Self {
+            token,
+            text,
+            literal_line_breaks,
+        } = self;
+        let text = syntax_token_cow_slice(text, token, token.text_trimmed_range().start());
+
+        if literal_line_breaks {
+            format_replaced(token, &text.with_literal_line_breaks()).fmt(f)
+        } else {
+            format_replaced(token, &text).fmt(f)
+        }
     }
 }
 
 impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let cleaned = self.clean_text(f.options());
-
-        cleaned.fmt(f)
+        self.clean_text(f.options()).fmt(f)
     }
 }
 
@@ -213,7 +226,7 @@ impl<'token> LiteralStringNormaliser<'token> {
                 // However, Prettier preserve single quotes.
                 Cow::Borrowed(self.get_token().text_trimmed())
             }
-            StringLiteralParentKind::Others => {
+            StringLiteralParentKind::AttributeMatcherValue | StringLiteralParentKind::Others => {
                 let string_information = self
                     .token
                     .compute_string_information(self.chosen_quote_style);

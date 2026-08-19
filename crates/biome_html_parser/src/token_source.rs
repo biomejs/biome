@@ -16,15 +16,14 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for lexing outside of tags.
     ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
     /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceded with a `<`.
-    #[default]
-    Regular,
+    Regular { framework: HtmlFramework },
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     ///
     /// This single context covers plain HTML as well as the Vue/Svelte/Astro
@@ -174,22 +173,63 @@ impl RestrictedExpressionStopAt {
 pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,
-    Preformatted,
+    /// An element whose text the user-agent stylesheet renders with a
+    /// `white-space` value that keeps newlines and consecutive spaces.
+    /// Lexing the text as a single literal is what lets the formatter
+    /// reproduce it byte for byte; splitting it into markup would lose the
+    /// whitespace to trivia.
+    Preformatted(PreformattedElement),
+    /// A top-level block of a Vue single-file component whose content is not
+    /// HTML: a custom block such as `<i18n>` or `<docs>`, or a `<template>`
+    /// written in another language. The tag name is arbitrary, so it is
+    /// carried as a range into the source rather than as a `&'static str`.
+    RawTextBlock {
+        name: TextRange,
+    },
+}
+
+/// The preformatted elements, each identified by the closing tag that ends its
+/// text. `pre` renders as `white-space: pre` and `textarea` as `pre-wrap`;
+/// `xmp` and `plaintext` are obsolete but browsers still read them as raw text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum PreformattedElement {
+    Pre,
+    Textarea,
+    Xmp,
+    Plaintext,
 }
 
 impl HtmlEmbeddedLanguage {
-    pub fn end_tag(&self) -> &'static str {
+    /// The name of the tag that ends this content, e.g. `script` for a
+    /// `<script>` element. A raw-text block can be named anything, so its name
+    /// is read back out of `source`, which is the same text its range was taken
+    /// from.
+    pub fn closing_tag_name<'a>(&self, source: &'a str) -> &'a str {
         match self {
-            Self::Script => "</script>",
-            Self::Style => "</style>",
-            Self::Preformatted => "</pre>",
+            Self::Script => "script",
+            Self::Style => "style",
+            Self::Preformatted(element) => match element {
+                PreformattedElement::Pre => "pre",
+                PreformattedElement::Textarea => "textarea",
+                PreformattedElement::Xmp => "xmp",
+                PreformattedElement::Plaintext => "plaintext",
+            },
+            Self::RawTextBlock { name } => &source[*name],
         }
     }
 }
 
 impl LexContext for HtmlLexContext {
     fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
+        matches!(self, Self::Regular { .. })
+    }
+}
+
+impl Default for HtmlLexContext {
+    fn default() -> Self {
+        Self::Regular {
+            framework: HtmlFramework::Plain,
+        }
     }
 }
 
@@ -197,8 +237,8 @@ impl LexContext for HtmlLexContext {
 pub(crate) enum HtmlReLexContext {
     /// Specialised relex that manages certain characters such as commas, etc.
     Svelte,
-    /// Relex tokens using `HtmlLexer::consume_html_text`
-    HtmlText,
+    /// Relex tokens using `HtmlLexer::consume_html_text`.
+    HtmlText { framework: HtmlFramework },
     /// Relex tokens as if the parser was inside a tag.
     InsideTag,
     /// Relex tokens as if the parser was inside a tag in an Astro file.
@@ -216,13 +256,12 @@ pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind
 
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
+    pub fn from_str(source: &'source str, initial_context: HtmlLexContext) -> Self {
         let lexer = HtmlLexer::from_str(source);
-
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 
-        source.next_non_trivia_token(HtmlLexContext::Regular, true);
+        source.next_non_trivia_token(initial_context, true);
         source
     }
 
@@ -306,11 +345,11 @@ impl TokenSource for HtmlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(HtmlLexContext::Regular)
+        self.bump_with_context(HtmlLexContext::default())
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(HtmlLexContext::Regular)
+        self.skip_as_trivia_with_context(HtmlLexContext::default())
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {

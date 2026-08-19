@@ -86,8 +86,7 @@ info: html/comments/conditional.html
 --- Prettier
 +++ Biome
 @@ -1,29 +1,29 @@
--<!doctype html>
-+<!DOCTYPE html>
+ <!doctype html>
  <html>
    <body>
 -    <!--[if IE 5]>This is IE 5<br /><![endif]-->
@@ -180,7 +179,7 @@ info: html/comments/conditional.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <body>
     <!--[if IE 5]>This is IE 5<br><![endif]-->

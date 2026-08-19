@@ -1,0 +1,128 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/component-value-boundary-comments.css
+---
+
+# Input
+
+```css
+a{box-shadow:2px 2px 4px gray,1000px/* long long long long long long long long long long long long comment */1000px/* long long long long long long long long long comment */2px color(srgb 0.555555555 0.555555555 0.555555555),100px -1px 2px lightgray;}
+a{box-shadow:1px/* short */2px gray,3px 4px black;}
+a{box-shadow:1px/* first *//* second */2px gray,3px 4px black;}
+a{box-shadow:1px,/* after comma */2px 3px gray,4px 5px black;}
+a{box-shadow:1px/* biome-ignore format: preserve this boundary */2px gray,3px 4px black;}
+a{margin:1px/* boundary */2px;}
+a{--items:alpha/* one-per-line boundary */beta,gamma-value,delta-value,epsilon-value,zeta-value,eta-value,theta-value,iota-value,kappa-value,lambda-value,mu-value,nu-value;}
+a{grid-template-columns:a/* boundary */b,
+c d;}
+a{box-shadow:1px/* target */2px gray,
+/* own line */
+3px 4px black,5px 6px blue;}
+a{grid-template-columns:a/* boundary */b
+c,d e;}
+a{--newline-items:alpha/* boundary */beta
+gamma-value,
+delta-value,epsilon-value,zeta-value,eta-value,theta-value,iota-value,kappa-value,lambda-value,mu-value,nu-value,xi-value,omicron-value;}
+a{grid-template-columns:left-track-name-with-enough-characters-to-force-a-break/* targeted value boundary */right-track-name-with-enough-characters-to-force-a-break,next;}
+a{box-shadow:1px 2px gray,3px/* final boundary */4px black,;}
+a{box-shadow:1px 2px gray,/* long long long long long long long long long long long long after comma */3px 4px black,5px 6px blue;}
+a{box-shadow:1px 2px
+/* ordinary own-line block comment */
+3px gray,4px 5px black;}
+
+```
+
+
+# Formatted
+
+```css
+a {
+	box-shadow:
+		2px 2px 4px gray,
+		1000px
+			/* long long long long long long long long long long long long comment */
+			1000px /* long long long long long long long long long comment */ 2px
+			color(srgb 0.555555555 0.555555555 0.555555555),
+		100px -1px 2px lightgray;
+}
+a {
+	box-shadow:
+		1px /* short */ 2px gray,
+		3px 4px black;
+}
+a {
+	box-shadow:
+		1px /* first */ /* second */ 2px gray,
+		3px 4px black;
+}
+a {
+	box-shadow:
+		1px,
+		/* after comma */ 2px 3px gray,
+		4px 5px black;
+}
+a {
+	box-shadow:
+		1px /* biome-ignore format: preserve this boundary */ 2px gray,
+		3px 4px black;
+}
+a {
+	margin: 1px /* boundary */ 2px;
+}
+a {
+	--items:
+		alpha /* one-per-line boundary */ beta, gamma-value, delta-value, epsilon-value, zeta-value, eta-value, theta-value, iota-value, kappa-value, lambda-value, mu-value, nu-value;
+}
+a {
+	grid-template-columns:
+		a /* boundary */ b,
+		c d;
+}
+a {
+	box-shadow:
+		1px /* target */ 2px gray,
+		/* own line */ 3px 4px black,
+		5px 6px blue;
+}
+a {
+	grid-template-columns:
+		a /* boundary */ b
+		c, d e;
+}
+a {
+	--newline-items:
+		alpha /* boundary */ beta
+		gamma-value,
+		delta-value, epsilon-value, zeta-value, eta-value, theta-value, iota-value, kappa-value, lambda-value, mu-value, nu-value, xi-value, omicron-value;
+}
+a {
+	grid-template-columns:
+		left-track-name-with-enough-characters-to-force-a-break
+			/* targeted value boundary */
+			right-track-name-with-enough-characters-to-force-a-break, next;
+}
+a {
+	box-shadow:
+		1px 2px gray,
+		3px /* final boundary */ 4px black,;
+}
+a {
+	box-shadow:
+		1px 2px gray,
+		/* long long long long long long long long long long long long after comma */
+		3px 4px black,
+		5px 6px blue;
+}
+a {
+	box-shadow:
+		1px 2px /* ordinary own-line block comment */ 3px gray,
+		4px 5px black;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   36: 		alpha /* one-per-line boundary */ beta, gamma-value, delta-value, epsilon-value, zeta-value, eta-value, theta-value, iota-value, kappa-value, lambda-value, mu-value, nu-value;
+   58: 		delta-value, epsilon-value, zeta-value, eta-value, theta-value, iota-value, kappa-value, lambda-value, mu-value, nu-value, xi-value, omicron-value;
+```

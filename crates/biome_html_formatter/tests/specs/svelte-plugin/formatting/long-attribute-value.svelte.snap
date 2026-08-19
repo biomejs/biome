@@ -1,0 +1,119 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/long-attribute-value.svelte
+---
+
+# Input
+
+```svelte
+<input
+  type="password"
+  use:fits={{ store: passwordStore, clean: [ensureString] }}
+  use:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+  on:fits={() => ''}
+  on:breaks={() => { const a = ''; a.toLowerCase(); }}
+  in:fits={{ store: passwordStore, clean: [ensureString] }}
+  in:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+  out:fits={{ store: passwordStore, clean: [ensureString] }}
+  out:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+  transition:fits={{ store: passwordStore, clean: [ensureString] }}
+  transition:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+  animate:fits={{ store: passwordStore, clean: [ensureString] }}
+  animate:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+  class:fits={'short check that fits in one line' ? true : false}
+  class:breaks={'some really long condition check happening here' ? true : false}
+   />
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,42 +1,17 @@
+ <input
+     type="password"
+     use:fits={{ store: passwordStore, clean: [ensureString] }}
+-    use:breaks={{
+-        store: passwordStore,
+-        clean: [ensureString],
+-        validate: [minLength(6), maxLength(25)],
+-    }}
+-    on:fits={() => ""}
+-    on:breaks={() => {
+-        const a = "";
+-        a.toLowerCase();
+-    }}
++    use:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
++    on:fits={() => ''}
++    on:breaks={() => { const a = ''; a.toLowerCase(); }}
+     in:fits={{ store: passwordStore, clean: [ensureString] }}
+-    in:breaks={{
+-        store: passwordStore,
+-        clean: [ensureString],
+-        validate: [minLength(6), maxLength(25)],
+-    }}
++    in:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+     out:fits={{ store: passwordStore, clean: [ensureString] }}
+-    out:breaks={{
+-        store: passwordStore,
+-        clean: [ensureString],
+-        validate: [minLength(6), maxLength(25)],
+-    }}
++    out:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+     transition:fits={{ store: passwordStore, clean: [ensureString] }}
+-    transition:breaks={{
+-        store: passwordStore,
+-        clean: [ensureString],
+-        validate: [minLength(6), maxLength(25)],
+-    }}
++    transition:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+     animate:fits={{ store: passwordStore, clean: [ensureString] }}
+-    animate:breaks={{
+-        store: passwordStore,
+-        clean: [ensureString],
+-        validate: [minLength(6), maxLength(25)],
+-    }}
+-    class:fits={"short check that fits in one line" ? true : false}
+-    class:breaks={"some really long condition check happening here"
+-        ? true
+-        : false}
++    animate:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
++    class:fits={'short check that fits in one line' ? true : false}
++    class:breaks={'some really long condition check happening here' ? true : false}
+ />
+```
+
+# Output
+
+```svelte
+<input
+    type="password"
+    use:fits={{ store: passwordStore, clean: [ensureString] }}
+    use:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+    on:fits={() => ''}
+    on:breaks={() => { const a = ''; a.toLowerCase(); }}
+    in:fits={{ store: passwordStore, clean: [ensureString] }}
+    in:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+    out:fits={{ store: passwordStore, clean: [ensureString] }}
+    out:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+    transition:fits={{ store: passwordStore, clean: [ensureString] }}
+    transition:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+    animate:fits={{ store: passwordStore, clean: [ensureString] }}
+    animate:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+    class:fits={'short check that fits in one line' ? true : false}
+    class:breaks={'some really long condition check happening here' ? true : false}
+/>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:     use:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+    8:     in:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+   10:     out:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+   12:     transition:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+   14:     animate:breaks={{ store: passwordStore, clean: [ensureString], validate: [minLength(6), maxLength(25)] }}
+   16:     class:breaks={'some really long condition check happening here' ? true : false}
+```

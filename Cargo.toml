@@ -13,13 +13,13 @@ keywords   = ["formatter", "linter", "parser"]
 categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
-anyhow                       = "1.0.103"
+anyhow                       = "1.0.104"
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
-biome_workspace_db           = { path = "./crates/biome_workspace_db" }
+biome_embeds                 = { path = "./crates/biome_embeds" }
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
@@ -81,6 +81,7 @@ biome_markdown_factory       = { path = "./crates/biome_markdown_factory", versi
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.0.1" }
 biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", version = "0.0.1" }
+biome_markdown_analyze       = { path = "./crates/biome_markdown_analyze", version = "0.1.0" }
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
 biome_migrate                = { path = "./crates/biome_migrate" }
 biome_module_graph           = { path = "./crates/biome_module_graph", version = "0.0.1" }
@@ -89,6 +90,7 @@ biome_package                = { path = "./crates/biome_package", version = "0.5
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
 biome_project_layout         = { path = "./crates/biome_project_layout", version = "0.0.1" }
+biome_react_compiler         = { path = "./crates/biome_react_compiler", version = "0.0.0" }
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.1.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.5.7" }
 biome_rule_options           = { path = "./crates/biome_rule_options", version = "0.0.1" }
@@ -97,6 +99,7 @@ biome_service                = { path = "./crates/biome_service" }
 biome_string_case            = { path = "./crates/biome_string_case", version = "0.5.7", features = ["biome_rowan"] }
 biome_suppression            = { path = "./crates/biome_suppression", version = "0.5.7" }
 biome_tailwind_factory       = { path = "./crates/biome_tailwind_factory", version = "0.0.1" }
+biome_tailwind_logic         = { path = "./crates/biome_tailwind_logic", version = "0.1.0" }
 biome_tailwind_parser        = { path = "./crates/biome_tailwind_parser", version = "0.0.1" }
 biome_tailwind_syntax        = { path = "./crates/biome_tailwind_syntax", version = "0.0.1" }
 biome_test_utils             = { path = "./crates/biome_test_utils" }
@@ -111,8 +114,8 @@ biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = 
 biome_languages              = { path = "./crates/biome_languages", version = "0.1.0" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
-bpaf                         = { version = "0.9.26", features = ["derive"] }
-camino                       = "1.2.4"
+bpaf                         = { version = "0.9.27", features = ["derive"] }
+camino                       = "1.2.5"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
 crossbeam                    = "0.8.4"
@@ -121,35 +124,38 @@ either                       = "1.15.0"
 enumflags2                   = "0.7.12"
 filetime                     = "0.2.29"
 getrandom                    = "0.2.15"
-globset                      = "0.4.18"
+globset                      = "0.4.19"
 grit-pattern-matcher         = "0.5.1"
 grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.0" }
 insta                        = "1.48.0"
-jiff                         = "0.2.32"
-libc                         = "0.2.186"
-mimalloc                     = "0.1.48"
+jiff                         = "0.2.35"
+libc                         = "0.2.189"
+# mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
+# See: https://github.com/biomejs/biome/issues/10270
+# See: https://github.com/biomejs/biome/issues/11242
+mimalloc                     = "=0.1.48"
 notify                       = "8.2.0"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
 prettyplease                 = "0.2.37"
 proc-macro-error2            = { version = "2.0.1", default-features = false }
-proc-macro2                  = "1.0.106"
+proc-macro2                  = "1.0.107"
 quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
 quote                        = "1.0.47"
 rayon                        = "1.12.0"
-regex                        = "1.13.0"
+regex                        = "1.13.1"
 reqwest                      = { version = "0.12.19", default-features = false }
-rust-lapper                  = "1.2.0"
+rust-lapper                  = "1.3.0"
 rustc-hash                   = "2.1.3"
 salsa                        = "0.27.2"
-schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
-serde                        = { version = "1.0.228", features = ["derive"] }
-serde_json                   = "1.0.150"
+schemars                     = { version = "1.2.2", features = ["indexmap2", "smallvec1"] }
+serde                        = { version = "1.0.229", features = ["derive"] }
+serde_json                   = "1.0.151"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
 smallvec                     = { version = "1.15.2", features = ["const_new", "serde", "union"] }
@@ -260,7 +266,8 @@ unused_macro_rules             = "warn"
 
 # Dev optimisations
 [profile.dev]
-debug = "line-tables-only"
+debug           = "line-tables-only"
+split-debuginfo = "unpacked"
 
 [profile.dev.package."*"]
 debug = false

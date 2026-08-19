@@ -444,6 +444,7 @@ pub fn html_directive(
         excl_token,
         doctype_token,
         r_angle_token,
+        name_token: None,
         html_token: None,
         quirk_token: None,
         public_id_token: None,
@@ -455,12 +456,17 @@ pub struct HtmlDirectiveBuilder {
     excl_token: SyntaxToken,
     doctype_token: SyntaxToken,
     r_angle_token: SyntaxToken,
+    name_token: Option<SyntaxToken>,
     html_token: Option<SyntaxToken>,
     quirk_token: Option<SyntaxToken>,
     public_id_token: Option<SyntaxToken>,
     system_id_token: Option<SyntaxToken>,
 }
 impl HtmlDirectiveBuilder {
+    pub fn with_name_token(mut self, name_token: SyntaxToken) -> Self {
+        self.name_token = Some(name_token);
+        self
+    }
     pub fn with_html_token(mut self, html_token: SyntaxToken) -> Self {
         self.html_token = Some(html_token);
         self
@@ -484,6 +490,7 @@ impl HtmlDirectiveBuilder {
                 Some(SyntaxElement::Token(self.l_angle_token)),
                 Some(SyntaxElement::Token(self.excl_token)),
                 Some(SyntaxElement::Token(self.doctype_token)),
+                self.name_token.map(|token| SyntaxElement::Token(token)),
                 self.html_token.map(|token| SyntaxElement::Token(token)),
                 self.quirk_token.map(|token| SyntaxElement::Token(token)),
                 self.public_id_token
@@ -581,6 +588,7 @@ pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuild
         eof_token,
         bom_token: None,
         frontmatter: None,
+        processing_instruction: None,
         directive: None,
     }
 }
@@ -589,6 +597,7 @@ pub struct HtmlRootBuilder {
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     frontmatter: Option<AnyAstroFrontmatterElement>,
+    processing_instruction: Option<HtmlProcessingInstruction>,
     directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
@@ -598,6 +607,13 @@ impl HtmlRootBuilder {
     }
     pub fn with_frontmatter(mut self, frontmatter: AnyAstroFrontmatterElement) -> Self {
         self.frontmatter = Some(frontmatter);
+        self
+    }
+    pub fn with_processing_instruction(
+        mut self,
+        processing_instruction: HtmlProcessingInstruction,
+    ) -> Self {
+        self.processing_instruction = Some(processing_instruction);
         self
     }
     pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
@@ -610,6 +626,8 @@ impl HtmlRootBuilder {
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.frontmatter
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.processing_instruction
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.directive
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -1042,6 +1060,20 @@ pub fn svelte_debug_block(
             Some(SyntaxElement::Token(sv_curly_at_token)),
             Some(SyntaxElement::Token(debug_token)),
             Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_declaration_block(
+    l_curly_token: SyntaxToken,
+    declaration: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteDeclarationBlock {
+    SvelteDeclarationBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_DECLARATION_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(declaration.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))

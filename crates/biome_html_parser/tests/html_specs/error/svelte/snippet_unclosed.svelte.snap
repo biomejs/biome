@@ -21,6 +21,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteSnippetBlock {
@@ -83,7 +84,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..69
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..69
     0: SVELTE_SNIPPET_BLOCK@0..47
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..37
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -118,7 +120,7 @@ HtmlRoot {
       2: HTML_TEXT_EXPRESSION@58..68
         0: HTML_LITERAL@58..68 "greeting()" [] []
       3: R_CURLY@68..69 "}" [] []
-  4: EOF@69..70 "" [Newline("\n")] []
+  5: EOF@69..70 "" [Newline("\n")] []
 
 ```
 

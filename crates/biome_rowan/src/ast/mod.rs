@@ -840,17 +840,24 @@ impl<L: Language> SyntaxNodePtr<L> {
     /// Also returns `None` if `root` is not actually a root (i.e. it has a
     /// parent).
     ///
-    /// The complexity is linear in the depth of the tree and logarithmic in
-    /// tree width. As most trees are shallow, thinking about this as
-    /// `O(log(N))` in the size of the tree is not too wrong!
+    /// For non-empty ranges, the complexity is linear in the depth of the tree
+    /// and logarithmic in tree width. Empty ranges may require a linear scan
+    /// because multiple slots can occupy the same source boundary.
     pub fn try_to_node(&self, root: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
         if root.parent().is_some() {
             return None;
         }
-        successors(Some(root.clone()), |node| {
+        let node = successors(Some(root.clone()), |node| {
             node.child_or_token_at_range(self.range)?.into_node()
         })
-        .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind)
+        .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind);
+
+        if node.is_some() || !self.range.is_empty() {
+            node
+        } else {
+            root.pruned_descendents(|it| it.text_range_with_trivia().contains_range(self.range))
+                .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind)
+        }
     }
 
     /// Casts this to an [`AstPtr`] to the given node type if possible.
@@ -1382,6 +1389,21 @@ mod tests {
             *third.syntax(),
             third_ptr.to_node(list.syntax_list().node())
         );
+    }
+
+    #[test]
+    fn syntax_ptr_roundtrip_nested_empty_node() {
+        let tree = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+            builder.token(RawLanguageKind::LET_TOKEN, "let");
+            builder.start_node(RawLanguageKind::CONDITION);
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.finish_node();
+            builder.finish_node();
+        });
+        let empty = tree.first_child().unwrap().first_child().unwrap();
+        let empty_ptr = SyntaxNodePtr::new(&empty);
+
+        assert_eq!(empty, empty_ptr.to_node(&tree));
     }
 
     #[test]

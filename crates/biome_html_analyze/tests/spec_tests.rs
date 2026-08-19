@@ -78,14 +78,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if group == "specs" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_html_analyze::METADATA
-        .deref()
-        .find_rule(group, rule)
-        .is_none()
-    {
-        panic!("could not find rule {group}/{rule}");
-    }
-
     let rule_filter = RuleFilter::Rule(group, rule);
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),
@@ -99,6 +91,14 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
+        if biome_html_analyze::METADATA
+            .deref()
+            .find_rule(group, rule)
+            .is_none()
+        {
+            panic!("could not find rule {group}/{rule}");
+        }
+
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,

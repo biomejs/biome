@@ -130,6 +130,9 @@ pub enum TaskCommand {
     /// Generates Baseline data for CSS features from web-features
     #[bpaf(command, long("css-baseline"))]
     CssBaseline,
+    /// Generates CSS keywords from @webref/css
+    #[bpaf(command, long("css-keywords"))]
+    CssKeywords,
     /// Generates e18e module replacement data
     #[bpaf(command, long("module-replacements"))]
     ModuleReplacements,

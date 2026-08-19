@@ -1,5 +1,5 @@
 ---
-source: crates/biome_module_graph/tests/spec_tests_v2.rs
+source: crates/biome_module_graph/tests/spec_tests.rs
 expression: content
 ---
 
@@ -36,7 +36,7 @@ Binding T "T" => T
 
 Binding value "value" => instanceof T
 
-Expression "this" => instanceof Box
+Expression "this" => instanceof Box<T>
 
 Expression "this.value = value" => unknown
 

@@ -630,7 +630,9 @@ impl biome_aria::Element for AnyHtmlTagElement {
         Self::attributes(self).into_iter().filter(|attr| {
             matches!(
                 attr,
-                AnyHtmlAttribute::HtmlAttribute(_) | AnyHtmlAttribute::AnyVueDirective(_)
+                AnyHtmlAttribute::HtmlAttribute(_)
+                    | AnyHtmlAttribute::AnyVueDirective(_)
+                    | AnyHtmlAttribute::HtmlAttributeSingleTextExpression(_)
             )
         })
     }
@@ -647,6 +649,11 @@ impl AnyEmbeddedContent {
             Self::AstroEmbeddedContent(node) => node.content_token(),
         }
     }
+}
+
+/// Whether the value of a `style` attribute should be read as CSS.
+pub fn is_css_style_attribute_value(value: &str) -> bool {
+    !value.trim().is_empty() && value.contains(':') && !value.contains("{{")
 }
 
 #[cfg(test)]

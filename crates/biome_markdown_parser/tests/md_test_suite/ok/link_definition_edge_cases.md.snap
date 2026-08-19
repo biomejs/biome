@@ -46,8 +46,9 @@ Another paragraph
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -555,17 +556,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@513..516 "]: " [] [],
                 },
                 MdInlineHtml {
-                    value: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@516..517 "<" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@517..521 "/url" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@521..522 ">" [] [],
-                        },
-                    ],
+                    value_token: MD_HTML_LITERAL@516..522 "</url>" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@522..530 " invalid" [] [],
@@ -583,9 +574,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..531
+0: MD_ROOT@0..531
   0: (empty)
-  1: MD_BLOCK_LIST@0..531
+  1: (empty)
+  2: MD_BLOCK_LIST@0..531
     0: MD_PARAGRAPH@0..31
       0: MD_INLINE_ITEM_LIST@0..31
         0: MD_TEXTUAL@0..30
@@ -917,17 +909,11 @@ MdDocument {
         1: MD_TEXTUAL@513..516
           0: MD_TEXTUAL_LITERAL@513..516 "]: " [] []
         2: MD_INLINE_HTML@516..522
-          0: MD_INLINE_ITEM_LIST@516..522
-            0: MD_TEXTUAL@516..517
-              0: MD_TEXTUAL_LITERAL@516..517 "<" [] []
-            1: MD_TEXTUAL@517..521
-              0: MD_TEXTUAL_LITERAL@517..521 "/url" [] []
-            2: MD_TEXTUAL@521..522
-              0: MD_TEXTUAL_LITERAL@521..522 ">" [] []
+          0: MD_HTML_LITERAL@516..522 "</url>" [] []
         3: MD_TEXTUAL@522..530
           0: MD_TEXTUAL_LITERAL@522..530 " invalid" [] []
         4: MD_TEXTUAL@530..531
           0: MD_TEXTUAL_LITERAL@530..531 "\n" [] []
-  2: EOF@531..531 "" [] []
+  3: EOF@531..531 "" [] []
 
 ```

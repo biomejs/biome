@@ -14,18 +14,6 @@ Use this skill when working with Biome's type inference system and module graph.
 2. Understand Biome's focus on IDE support and instant updates
 3. Familiarity with TypeScript type system concepts
 
-## Code Standards
-
-**CRITICAL: No Emojis**
-
-Emojis are BANNED in all type inference code:
-- NO emojis in code comments
-- NO emojis in rustdoc documentation
-- NO emojis in test files
-- NO emojis in debug output or error messages
-
-Keep all code professional and emoji-free.
-
 ## Key Concepts
 
 ### Module Graph Constraint
@@ -104,7 +92,7 @@ TypeData::TypeofExpression(TypeofExpression::Addition {
 3. Converts to `TypeReference::Resolved` if found locally
 4. Converts to `TypeReference::Import` if from import statement
 5. Falls back to globals (like `Array`, `Promise`)
-6. Uses `TypeReference::Unknown` if nothing found
+6. Uses `TypeReference::unknown()` if nothing is found
 
 **Where**: Implemented in `js_module_info/collector.rs`
 
@@ -119,9 +107,13 @@ TypeData::TypeofExpression(TypeofExpression::Addition {
 2. Resolves `TypeReference::Import` by following imports
 3. Converts to `TypeReference::Resolved` after following imports
 
-**Where**: Implemented in `js_module_info/module_resolver.rs`
+**Where**: The Salsa-backed implementation starts at
+`db/queries/type_inference.rs::infer_module_types` and uses helpers under
+`db/type_inference/`. `js_module_info/module_resolver.rs` contains the legacy
+`TypeResolver`-based path.
 
-**Limitation**: Results cannot be cached (would become stale on file changes)
+**Caching**: `infer_module_types` is tracked by Salsa. Imported module results
+are dependencies, so Salsa invalidates affected importers after a change.
 
 ## Working with Type Resolvers
 
@@ -287,7 +279,7 @@ let raw_data: &TypeData = resolved_data.as_raw_data();
 - **Resolver context**: Keep `ResolvedTypeData` when possible, don't extract raw `TypeData` early
 - **Performance**: Type vectors are fast - iterate directly instead of recursive traversal
 - **IDE focus**: All design decisions prioritize instant IDE updates over CLI performance
-- **No caching**: Full inference results can't be cached (would become stale)
+- **Caching**: Salsa memoizes full-inference query results and invalidates them through tracked module dependencies
 - **Globals**: Currently hardcoded, eventually should use TypeScript's `.d.ts` files
 
 ## Common Patterns

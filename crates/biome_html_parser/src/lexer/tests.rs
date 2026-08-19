@@ -302,7 +302,7 @@ fn long_text() {
 #[test]
 fn text_trailing_whitespace() {
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "Lorem ipsum dolor <a",
         HTML_LITERAL: 17,
         WHITESPACE: 1,
@@ -314,7 +314,7 @@ fn text_trailing_whitespace() {
 #[test]
 fn text_trailing_whitespace_multiple() {
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "Lorem ipsum dolor  <a",
         HTML_LITERAL: 17,
         WHITESPACE: 2,
@@ -372,7 +372,7 @@ fn cdata_full() {
 #[test]
 fn svelte_openings() {
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "{@debug}",
         SV_CURLY_AT: 2,
         DEBUG_KW: 5,
@@ -380,7 +380,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "{/debug}",
         SV_CURLY_SLASH: 2,
         DEBUG_KW: 5,
@@ -388,7 +388,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "{:debug}",
         SV_CURLY_COLON: 2,
         DEBUG_KW: 5,
@@ -396,11 +396,27 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::Regular,
+        HtmlLexContext::default(),
         "{#debug}",
         SV_CURLY_HASH: 2,
         DEBUG_KW: 5,
         R_CURLY: 1
+    }
+}
+
+#[test]
+fn double_curly_depends_on_regular_context() {
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Plain },
+        "{{",
+        L_DOUBLE_CURLY: 2,
+    }
+
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
+        "{{",
+        L_CURLY: 1,
+        L_CURLY: 1,
     }
 }
 
@@ -585,4 +601,18 @@ fn pascal_case_tag_is_a_component_in_frameworks() {
         HTML_COMPONENT_LITERAL: 3,
         R_ANGLE: 1,
     }
+}
+
+#[test]
+fn is_at_closing_tag_matches_only_the_whole_name() {
+    let is_at = |source, name| HtmlLexer::from_str(source).is_at_closing_tag(name);
+
+    assert!(is_at("</docs>", "docs"));
+    assert!(is_at("</DOCS>", "docs"));
+    assert!(is_at("</docs   >", "docs"));
+    // A longer name that merely starts with `docs` is a different tag.
+    assert!(!is_at("</docsy>", "docs"));
+    assert!(!is_at("</doc>", "docs"));
+    assert!(!is_at("<docs>", "docs"));
+    assert!(!is_at("nothing here", "docs"));
 }

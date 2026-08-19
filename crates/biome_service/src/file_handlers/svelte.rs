@@ -3,24 +3,23 @@ use super::{
     parse_lang_and_setup_from_script_opening_tag,
 };
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
-    LintResults, ParseResult, ParserCapabilities, javascript,
+    LintResults, ParseResult, ParserCapabilities, html, javascript,
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
 use biome_db::AnyParsedSource;
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
-use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{JsLanguage, TextRange, TextSize};
-use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
-use biome_workspace_db::WorkspaceDb;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::{debug, error};
@@ -83,10 +82,8 @@ impl SvelteFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: true,
-                            is_function_signature: false,
-                            kind: SvelteFileKind::Component,
-                            is_const_block: false,
+                            file_kind: SvelteFileKind::Component,
+                            embedding_kind: SvelteEmbeddingKind::Source,
                         }),
                 )
             })
@@ -179,8 +176,14 @@ fn format(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-    let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let options = javascript::resolve_format_options(
+        biome_path,
+        document_file_source,
+        settings,
+        &workspace_db,
+    );
+    let html_options =
+        html::resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     let indent_amount = if *html_options.indent_script_and_style() {
         1
     } else {

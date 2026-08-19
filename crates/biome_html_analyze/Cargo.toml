@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/*_tests.*", "build.rs", "src/**/*"]
 
 [[bench]]
 harness = false
@@ -33,6 +34,9 @@ biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
+biome_tailwind_logic     = { workspace = true }
+biome_tailwind_parser    = { workspace = true }
+biome_tailwind_syntax    = { workspace = true }
 biome_unicode_table      = { workspace = true }
 camino                   = { workspace = true }
 phf                      = { workspace = true }
@@ -44,7 +48,7 @@ smallvec                 = { workspace = true }
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 

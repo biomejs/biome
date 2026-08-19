@@ -1,4 +1,7 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares CSS values that can span multiple tokens."
+)]
 
 use crate::fonts::{
     CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
@@ -70,7 +73,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same(), RuleSource::EslintCss("font-family-fallbacks").inspired()],
     }
 }
 
@@ -107,6 +110,7 @@ impl Rule for UseGenericFontNames {
         // e.g: { font: caption }, { font: inherit }
         let properties = match node.value() {
             Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
                 AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
                 AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
             },

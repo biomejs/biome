@@ -6,8 +6,10 @@ expression: snapshot
 ## Input
 
 ```vue
-<Base title="500">
-</Base>
+<template>
+	<Base title="500">
+	</Base>
+</template>
 
 ```
 
@@ -18,73 +20,109 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
-                name: HtmlComponentName {
-                    value_token: HTML_COMPONENT_LITERAL@1..6 "Base" [] [Whitespace(" ")],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@1..9 "template" [] [],
                 },
-                attributes: HtmlAttributeList [
-                    HtmlAttribute {
-                        name: HtmlAttributeName {
-                            value_token: HTML_LITERAL@6..11 "title" [] [],
-                        },
-                        initializer: HtmlAttributeInitializerClause {
-                            eq_token: EQ@11..12 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@12..17 "\"500\"" [] [],
-                            },
-                        },
-                    },
-                ],
-                r_angle_token: R_ANGLE@17..18 ">" [] [],
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
             },
-            children: HtmlElementList [],
-            closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@18..20 "<" [Newline("\n")] [],
-                slash_token: SLASH@20..21 "/" [] [],
-                name: HtmlComponentName {
-                    value_token: HTML_COMPONENT_LITERAL@21..25 "Base" [] [],
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@13..18 "Base" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@18..23 "title" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@23..24 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@24..29 "\"500\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@29..30 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@33..34 "/" [] [],
+                        name: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@34..38 "Base" [] [],
+                        },
+                        r_angle_token: R_ANGLE@38..39 ">" [] [],
+                    },
                 },
-                r_angle_token: R_ANGLE@25..26 ">" [] [],
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@39..41 "<" [Newline("\n")] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@42..50 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@50..51 ">" [] [],
             },
         },
     ],
-    eof_token: EOF@26..27 "" [Newline("\n")] [],
+    eof_token: EOF@51..52 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..27
+0: HTML_ROOT@0..52
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..26
-    0: HTML_ELEMENT@0..26
-      0: HTML_OPENING_ELEMENT@0..18
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..51
+    0: HTML_ELEMENT@0..51
+      0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
-        1: HTML_COMPONENT_NAME@1..6
-          0: HTML_COMPONENT_LITERAL@1..6 "Base" [] [Whitespace(" ")]
-        2: HTML_ATTRIBUTE_LIST@6..17
-          0: HTML_ATTRIBUTE@6..17
-            0: HTML_ATTRIBUTE_NAME@6..11
-              0: HTML_LITERAL@6..11 "title" [] []
-            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..17
-              0: EQ@11..12 "=" [] []
-              1: HTML_STRING@12..17
-                0: HTML_STRING_LITERAL@12..17 "\"500\"" [] []
-        3: R_ANGLE@17..18 ">" [] []
-      1: HTML_ELEMENT_LIST@18..18
-      2: HTML_CLOSING_ELEMENT@18..26
-        0: L_ANGLE@18..20 "<" [Newline("\n")] []
-        1: SLASH@20..21 "/" [] []
-        2: HTML_COMPONENT_NAME@21..25
-          0: HTML_COMPONENT_LITERAL@21..25 "Base" [] []
-        3: R_ANGLE@25..26 ">" [] []
-  4: EOF@26..27 "" [Newline("\n")] []
+        1: HTML_TAG_NAME@1..9
+          0: TEMPLATE_KW@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..39
+        0: HTML_ELEMENT@10..39
+          0: HTML_OPENING_ELEMENT@10..30
+            0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_COMPONENT_NAME@13..18
+              0: HTML_COMPONENT_LITERAL@13..18 "Base" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@18..29
+              0: HTML_ATTRIBUTE@18..29
+                0: HTML_ATTRIBUTE_NAME@18..23
+                  0: HTML_LITERAL@18..23 "title" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..29
+                  0: EQ@23..24 "=" [] []
+                  1: HTML_STRING@24..29
+                    0: HTML_STRING_LITERAL@24..29 "\"500\"" [] []
+            3: R_ANGLE@29..30 ">" [] []
+          1: HTML_ELEMENT_LIST@30..30
+          2: HTML_CLOSING_ELEMENT@30..39
+            0: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@33..34 "/" [] []
+            2: HTML_COMPONENT_NAME@34..38
+              0: HTML_COMPONENT_LITERAL@34..38 "Base" [] []
+            3: R_ANGLE@38..39 ">" [] []
+      2: HTML_CLOSING_ELEMENT@39..51
+        0: L_ANGLE@39..41 "<" [Newline("\n")] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_TAG_NAME@42..50
+          0: TEMPLATE_KW@42..50 "template" [] []
+        3: R_ANGLE@50..51 ">" [] []
+  5: EOF@51..52 "" [Newline("\n")] []
 
 ```

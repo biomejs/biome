@@ -10,45 +10,47 @@ path              = "tests/global_types_codegen.rs"
 required-features = ["global_types"]
 
 [dependencies]
-anyhow                = { workspace = true }
-biome_analyze         = { workspace = true, features = ["schema"], optional = true }
-biome_cli             = { workspace = true, optional = true }
-biome_configuration   = { workspace = true, features = ["schema"], optional = true }
-biome_css_analyze     = { workspace = true, optional = true }
-biome_css_syntax      = { workspace = true, optional = true }
-biome_diagnostics     = { workspace = true, optional = true }
-biome_graphql_analyze = { workspace = true, optional = true }
-biome_graphql_parser  = { workspace = true, optional = true }
-biome_graphql_syntax  = { workspace = true, optional = true }
-biome_html_analyze    = { workspace = true, optional = true }
-biome_html_parser     = { workspace = true, optional = true }
-biome_html_syntax     = { workspace = true, optional = true }
-biome_js_analyze      = { workspace = true, optional = true }
-biome_js_factory      = { workspace = true }
-biome_js_formatter    = { workspace = true }
-biome_js_parser       = { workspace = true, optional = true }
-biome_js_syntax       = { workspace = true }
+anyhow                 = { workspace = true }
+biome_analyze          = { workspace = true, features = ["schema"], optional = true }
+biome_cli              = { workspace = true, optional = true }
+biome_configuration    = { workspace = true, features = ["schema"], optional = true }
+biome_css_analyze      = { workspace = true, optional = true }
+biome_css_syntax       = { workspace = true, optional = true }
+biome_diagnostics      = { workspace = true, optional = true }
+biome_graphql_analyze  = { workspace = true, optional = true }
+biome_graphql_parser   = { workspace = true, optional = true }
+biome_graphql_syntax   = { workspace = true, optional = true }
+biome_html_analyze     = { workspace = true, optional = true }
+biome_html_parser      = { workspace = true, optional = true }
+biome_html_syntax      = { workspace = true, optional = true }
+biome_js_analyze       = { workspace = true, optional = true }
+biome_js_factory       = { workspace = true }
+biome_js_formatter     = { workspace = true }
+biome_js_parser        = { workspace = true, optional = true }
+biome_js_syntax        = { workspace = true }
 # HACK: This is a path dependency and not a workspace dependency because
 # `default-features` is not allowed to override the workspace default, for whatever reason.
-biome_json_analyze    = { path = "../../crates/biome_json_analyze", default-features = false, optional = true }
-biome_json_formatter  = { workspace = true, optional = true }
-biome_json_parser     = { workspace = true, optional = true }
-biome_json_syntax     = { workspace = true, optional = true }
-biome_languages       = { workspace = true, features = ["lang_js"] }
-biome_rowan           = { workspace = true }
-biome_service         = { workspace = true, features = ["schema"], optional = true }
-biome_string_case     = { workspace = true }
-biome_ungrammar       = { workspace = true }
-bpaf                  = { workspace = true, features = ["derive"] }
-git2                  = { version = "0.21.0", default-features = false }
-proc-macro2           = { workspace = true, features = ["span-locations"] }
-pulldown-cmark        = { version = "0.13.3", default-features = false, optional = true }
-quote                 = "1.0.36"
-schemars              = { workspace = true, optional = true }
-serde                 = { workspace = true, optional = true }
-serde_json            = { workspace = true, optional = true }
-ureq                  = "3.3.0"
-xtask_glue            = { workspace = true }
+biome_json_analyze     = { path = "../../crates/biome_json_analyze", default-features = false, optional = true }
+biome_json_formatter   = { workspace = true, optional = true }
+biome_json_parser      = { workspace = true, optional = true }
+biome_json_syntax      = { workspace = true, optional = true }
+biome_languages        = { workspace = true, features = ["lang_js"] }
+biome_markdown_analyze = { workspace = true, optional = true }
+biome_markdown_syntax  = { workspace = true, optional = true }
+biome_rowan            = { workspace = true }
+biome_service          = { workspace = true, features = ["schema"], optional = true }
+biome_string_case      = { workspace = true }
+biome_ungrammar        = { workspace = true }
+bpaf                   = { workspace = true, features = ["derive"] }
+git2                   = { version = "0.21.0", default-features = false }
+proc-macro2            = { workspace = true, features = ["span-locations"] }
+pulldown-cmark         = { version = "0.13.3", default-features = false, optional = true }
+quote                  = "1.0.36"
+schemars               = { workspace = true, optional = true }
+serde                  = { workspace = true, optional = true }
+serde_json             = { workspace = true, optional = true }
+ureq                   = "3.3.0"
+xtask_glue             = { workspace = true }
 
 [features]
 configuration = [
@@ -63,6 +65,8 @@ configuration = [
   "biome_js_analyze",
   "biome_json_analyze",
   "biome_json_syntax",
+  "biome_markdown_analyze",
+  "biome_markdown_syntax",
   "pulldown-cmark",
 ]
 external_data = ["serde", "serde_json", "ureq/default", "ureq/json"]

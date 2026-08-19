@@ -6,6 +6,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
 };
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
@@ -176,18 +177,39 @@ impl Rule for NoFloatingPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.expression().ok()?;
-        let ty = ctx.type_of_expression(&expression);
+
+        // `is_handled_promise` always treats a bare assignment
+        // statement as handled, regardless of its type, so there's no
+        // point paying for type inference just to be told that afterwards.
+        if matches!(
+            expression.clone().omit_parentheses(),
+            AnyJsExpression::JsAssignmentExpression(_)
+        ) {
+            return None;
+        }
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
-        if ty.is_array_of(|ty| ty.is_promise_instance()) {
+        let array_classification = ctx.classify_expression_as_array_of_promises(&expression);
+        if array_classification == TypeInferenceClassification::Match {
             return Some(NoFloatingPromisesState::ArrayOfPromises);
         }
 
-        let is_maybe_promise =
-            ty.is_promise_instance() || ty.has_variant(|ty| ty.is_promise_instance());
-        if !is_maybe_promise {
-            return None;
+        let promise_classification = ctx.classify_expression_as_promise(&expression);
+        if promise_classification != TypeInferenceClassification::Match {
+            if array_classification == TypeInferenceClassification::NoMatch
+                && promise_classification == TypeInferenceClassification::NoMatch
+            {
+                return None;
+            }
+
+            let ty = ctx.type_of_expression(&expression)?;
+            if ty.is_array_of_promise() == Some(true) {
+                return Some(NoFloatingPromisesState::ArrayOfPromises);
+            }
+            if ty.is_promise_instance() != Some(true) {
+                return None;
+            }
         }
 
         if is_handled_promise(expression).unwrap_or_default() {

@@ -19,8 +19,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [],
@@ -149,9 +150,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..59
+0: MD_ROOT@0..59
   0: (empty)
-  1: MD_BLOCK_LIST@0..59
+  1: (empty)
+  2: MD_BLOCK_LIST@0..59
     0: MD_LINK_REFERENCE_DEFINITION@0..13
       0: MD_INDENT_TOKEN_LIST@0..0
       1: L_BRACK@0..1 "[" [] []
@@ -228,6 +230,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@49..58 "lazy line" [] []
                         5: MD_TEXTUAL@58..59
                           0: MD_TEXTUAL_LITERAL@58..59 "\n" [] []
-  2: EOF@59..59 "" [] []
+  3: EOF@59..59 "" [] []
 
 ```

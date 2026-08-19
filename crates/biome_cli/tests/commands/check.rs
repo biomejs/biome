@@ -49,6 +49,24 @@ console.log(a);
 
 const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
+const JSX_FRAGMENT_ATTRIBUTE_BEFORE: &str = r#"const cases = (
+  <>
+    <Component selfClosing={<><div /></>} />
+    <Component nested={<><><span /></></>} />
+    <Component expression={<>{value}</>} />
+  </>
+);
+"#;
+
+const JSX_FRAGMENT_ATTRIBUTE_AFTER: &str = r#"const cases = (
+	<>
+		<Component selfClosing={<div />} />
+		<Component nested={<span />} />
+		<Component expression={value} />
+	</>
+);
+"#;
+
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
 
@@ -295,6 +313,48 @@ fn apply_suggested() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "apply_suggested",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_write_unsafe_preserves_jsx_attribute_value_shape() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("fragment-attribute.tsx");
+    fs.insert(file_path.into(), JSX_FRAGMENT_ATTRIBUTE_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--unsafe",
+                "--only=complexity/noUselessFragments",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(buffer, JSX_FRAGMENT_ATTRIBUTE_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_write_unsafe_preserves_jsx_attribute_value_shape",
         fs,
         console,
         result,
@@ -3200,7 +3260,7 @@ fn html_enabled_by_arg_check() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+    assert_file_contents(&fs, file_path, "<!doctype html>\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

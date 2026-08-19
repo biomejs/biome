@@ -122,6 +122,24 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
   </tbody>
 </table>
 
+### Sponsors Oro
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://codspeed.io/?utm_source=biome&utm_medium=readme" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: light)" srcset="https://biomejs.dev/_astro/codspeed-logo-light.NPF02X9E.svg" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://biomejs.dev/_astro/codspeed-logo-dark.DqfyMRf2.svg" />
+            <img src="https://biomejs.dev/_astro/codspeed-logo-light.NPF02X9E.svg" width="300" alt="CodSpeed logo" />
+          </picture>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ### Sponsors Plata
 
 <table>
@@ -132,6 +150,9 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
       </td>
       <td align="center" valign="middle">
         <a href="https://latitude.so/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/98949449?s=200&v=4" height="100" alt="Latitude logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
     </tr>
   </tbody>
