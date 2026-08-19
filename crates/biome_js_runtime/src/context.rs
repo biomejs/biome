@@ -107,6 +107,11 @@ impl JsExecContext {
         namespace.get(js_string!("default"), ctx)
     }
 
+    /// Wraps `node` in the AST bindings exposed to the plugins, so it can be passed to a plugin
+    /// function as an argument.
+    ///
+    /// The returned value is bound to this context: it must not outlive it, nor be passed to
+    /// another [`JsExecContext`].
     pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsValue {
         JsAstNode::from_node(node, &mut self.ctx)
     }

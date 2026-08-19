@@ -174,17 +174,28 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_diagnostics::{Error, print_diagnostic_to_string};
+    use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
     use biome_js_parser::JsParserOptions;
     use biome_languages::JsFileSource;
 
-    fn snap_diagnostics(test_name: &str, diagnostics: Vec<Error>) {
-        let content = diagnostics
-            .iter()
-            .map(print_diagnostic_to_string)
-            .collect::<String>();
+    /// Renders the diagnostics of a single evaluation the same way the CLI does, by attaching the
+    /// path and the content of the analyzed file so the code frame can be printed.
+    fn render_diagnostics(path: &str, source: &str, result: PluginEvalResult) -> String {
+        result
+            .entries
+            .into_iter()
+            .map(|entry| {
+                print_diagnostic_to_string(
+                    &Error::from(entry.diagnostic)
+                        .with_file_path(path)
+                        .with_file_source_code(source.to_string()),
+                )
+            })
+            .collect()
+    }
 
+    fn snap_diagnostics(test_name: &str, content: String) {
         // Normalize Windows paths...
         let content = content.replace('\\', "/");
 
@@ -244,6 +255,8 @@ mod tests {
         assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
     }
 
+    /// The AST is exposed through lazy getters installed on the prototype of each kind, so the
+    /// fields are only cast when the plugin accesses them.
     #[test]
     fn passes_ast_as_the_second_argument() {
         let plugin = load_test_plugin_from_source(
@@ -270,13 +283,15 @@ mod tests {
 
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
 
-        snap_diagnostics(
-            "passes_ast_as_the_second_argument",
-            result
-                .entries
-                .into_iter()
-                .map(|entry| entry.diagnostic.into())
-                .collect(),
+        let [entry] = result.entries.as_slice() else {
+            panic!("expected a single diagnostic, got {result:?}");
+        };
+
+        assert_eq!(
+            PrintDescription(&entry.diagnostic).to_string(),
+            // path | kind | the `items` field is a getter | it isn't an own property | unknown
+            // fields aren't exposed
+            "/file.js|JS_MODULE|function|false|false"
         );
     }
 
@@ -298,8 +313,9 @@ mod tests {
                     }
                 }
             }"#;
+        let content = "var legacy = 1; const modern = 2;";
         let parse = biome_js_parser::parse(
-            "var legacy = 1; const modern = 2;",
+            content,
             JsFileSource::js_module(),
             JsParserOptions::default(),
         );
@@ -309,11 +325,7 @@ mod tests {
 
         snap_diagnostics(
             "reports_top_level_var_declarations_using_ast_fields",
-            result
-                .entries
-                .into_iter()
-                .map(|entry| entry.diagnostic.into())
-                .collect(),
+            render_diagnostics("/file.js", content, result),
         );
     }
 
@@ -364,13 +376,13 @@ mod tests {
 
         let result1 = worker1.join().unwrap();
         let result2 = worker2.join().unwrap();
-        let mut diagnostics: Vec<_> = result1.entries.into_iter().map(|e| e.diagnostic).collect();
-        diagnostics.extend(result2.entries.into_iter().map(|e| e.diagnostic));
 
-        assert_eq!(diagnostics.len(), 2);
-        snap_diagnostics(
-            "evaluate_in_worker_threads",
-            diagnostics.into_iter().map(|diag| diag.into()).collect(),
-        );
+        assert_eq!(result1.entries.len(), 1);
+        assert_eq!(result2.entries.len(), 1);
+
+        let content = render_diagnostics("/foo.js", "let foo;", result1)
+            + &render_diagnostics("/bar.js", "let bar;", result2);
+
+        snap_diagnostics("evaluate_in_worker_threads", content);
     }
 }

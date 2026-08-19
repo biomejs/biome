@@ -2,6 +2,9 @@
 source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
 expression: content
 ---
-plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use let or const instead of a top-level var declaration.
+  
+  > 1 │ var legacy = 1; const modern = 2;
+      │ ^^^^^^^^^^^^^^^
