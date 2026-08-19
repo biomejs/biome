@@ -12,6 +12,10 @@ expression: snapshot
 <div is:raw></div>
 <div is:raw />
 <div is:global>{x}</div>
+<script is:raw>{{ mustache }}</script>
+<style is:raw>{{ mustache }}</style>
+<pre is:raw>{x}</pre>
+<textarea is:raw>{x}</textarea>
 
 ```
 
@@ -226,20 +230,156 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@182..183 ">" [] [],
             },
         },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@183..185 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@185..192 "script" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AstroIsDirective {
+                        is_token: IS_KW@192..194 "is" [] [],
+                        value: AstroDirectiveValue {
+                            colon_token_token: COLON@194..195 ":" [] [],
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@195..198 "raw" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@198..199 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@199..213 "{{ mustache }}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@213..214 "<" [] [],
+                slash_token: SLASH@214..215 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@215..221 "script" [] [],
+                },
+                r_angle_token: R_ANGLE@221..222 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@222..224 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: STYLE_KW@224..230 "style" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AstroIsDirective {
+                        is_token: IS_KW@230..232 "is" [] [],
+                        value: AstroDirectiveValue {
+                            colon_token_token: COLON@232..233 ":" [] [],
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@233..236 "raw" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@236..237 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@237..251 "{{ mustache }}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@251..252 "<" [] [],
+                slash_token: SLASH@252..253 "/" [] [],
+                name: HtmlTagName {
+                    value_token: STYLE_KW@253..258 "style" [] [],
+                },
+                r_angle_token: R_ANGLE@258..259 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@259..261 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: PRE_KW@261..265 "pre" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AstroIsDirective {
+                        is_token: IS_KW@265..267 "is" [] [],
+                        value: AstroDirectiveValue {
+                            colon_token_token: COLON@267..268 ":" [] [],
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@268..271 "raw" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@271..272 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@272..275 "{x}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@275..276 "<" [] [],
+                slash_token: SLASH@276..277 "/" [] [],
+                name: HtmlTagName {
+                    value_token: PRE_KW@277..280 "pre" [] [],
+                },
+                r_angle_token: R_ANGLE@280..281 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@281..283 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@283..292 "textarea" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AstroIsDirective {
+                        is_token: IS_KW@292..294 "is" [] [],
+                        value: AstroDirectiveValue {
+                            colon_token_token: COLON@294..295 ":" [] [],
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@295..298 "raw" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@298..299 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@299..302 "{x}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@302..303 "<" [] [],
+                slash_token: SLASH@303..304 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEXTAREA_KW@304..312 "textarea" [] [],
+                },
+                r_angle_token: R_ANGLE@312..313 ">" [] [],
+            },
+        },
     ],
-    eof_token: EOF@183..184 "" [Newline("\n")] [],
+    eof_token: EOF@313..314 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..184
+0: HTML_ROOT@0..314
   0: (empty)
   1: (empty)
   2: (empty)
   3: (empty)
-  4: HTML_ELEMENT_LIST@0..183
+  4: HTML_ELEMENT_LIST@0..313
     0: HTML_ELEMENT@0..39
       0: HTML_OPENING_ELEMENT@0..16
         0: L_ANGLE@0..1 "<" [] []
@@ -377,6 +517,98 @@ HtmlRoot {
         2: HTML_TAG_NAME@179..182
           0: DIV_KW@179..182 "div" [] []
         3: R_ANGLE@182..183 ">" [] []
-  5: EOF@183..184 "" [Newline("\n")] []
+    6: HTML_ELEMENT@183..222
+      0: HTML_OPENING_ELEMENT@183..199
+        0: L_ANGLE@183..185 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@185..192
+          0: SCRIPT_KW@185..192 "script" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@192..198
+          0: ASTRO_IS_DIRECTIVE@192..198
+            0: IS_KW@192..194 "is" [] []
+            1: ASTRO_DIRECTIVE_VALUE@194..198
+              0: COLON@194..195 ":" [] []
+              1: HTML_ATTRIBUTE_NAME@195..198
+                0: HTML_LITERAL@195..198 "raw" [] []
+              2: (empty)
+        3: R_ANGLE@198..199 ">" [] []
+      1: HTML_ELEMENT_LIST@199..213
+        0: HTML_EMBEDDED_CONTENT@199..213
+          0: HTML_LITERAL@199..213 "{{ mustache }}" [] []
+      2: HTML_CLOSING_ELEMENT@213..222
+        0: L_ANGLE@213..214 "<" [] []
+        1: SLASH@214..215 "/" [] []
+        2: HTML_TAG_NAME@215..221
+          0: SCRIPT_KW@215..221 "script" [] []
+        3: R_ANGLE@221..222 ">" [] []
+    7: HTML_ELEMENT@222..259
+      0: HTML_OPENING_ELEMENT@222..237
+        0: L_ANGLE@222..224 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@224..230
+          0: STYLE_KW@224..230 "style" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@230..236
+          0: ASTRO_IS_DIRECTIVE@230..236
+            0: IS_KW@230..232 "is" [] []
+            1: ASTRO_DIRECTIVE_VALUE@232..236
+              0: COLON@232..233 ":" [] []
+              1: HTML_ATTRIBUTE_NAME@233..236
+                0: HTML_LITERAL@233..236 "raw" [] []
+              2: (empty)
+        3: R_ANGLE@236..237 ">" [] []
+      1: HTML_ELEMENT_LIST@237..251
+        0: HTML_EMBEDDED_CONTENT@237..251
+          0: HTML_LITERAL@237..251 "{{ mustache }}" [] []
+      2: HTML_CLOSING_ELEMENT@251..259
+        0: L_ANGLE@251..252 "<" [] []
+        1: SLASH@252..253 "/" [] []
+        2: HTML_TAG_NAME@253..258
+          0: STYLE_KW@253..258 "style" [] []
+        3: R_ANGLE@258..259 ">" [] []
+    8: HTML_ELEMENT@259..281
+      0: HTML_OPENING_ELEMENT@259..272
+        0: L_ANGLE@259..261 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@261..265
+          0: PRE_KW@261..265 "pre" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@265..271
+          0: ASTRO_IS_DIRECTIVE@265..271
+            0: IS_KW@265..267 "is" [] []
+            1: ASTRO_DIRECTIVE_VALUE@267..271
+              0: COLON@267..268 ":" [] []
+              1: HTML_ATTRIBUTE_NAME@268..271
+                0: HTML_LITERAL@268..271 "raw" [] []
+              2: (empty)
+        3: R_ANGLE@271..272 ">" [] []
+      1: HTML_ELEMENT_LIST@272..275
+        0: HTML_EMBEDDED_CONTENT@272..275
+          0: HTML_LITERAL@272..275 "{x}" [] []
+      2: HTML_CLOSING_ELEMENT@275..281
+        0: L_ANGLE@275..276 "<" [] []
+        1: SLASH@276..277 "/" [] []
+        2: HTML_TAG_NAME@277..280
+          0: PRE_KW@277..280 "pre" [] []
+        3: R_ANGLE@280..281 ">" [] []
+    9: HTML_ELEMENT@281..313
+      0: HTML_OPENING_ELEMENT@281..299
+        0: L_ANGLE@281..283 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@283..292
+          0: TEXTAREA_KW@283..292 "textarea" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@292..298
+          0: ASTRO_IS_DIRECTIVE@292..298
+            0: IS_KW@292..294 "is" [] []
+            1: ASTRO_DIRECTIVE_VALUE@294..298
+              0: COLON@294..295 ":" [] []
+              1: HTML_ATTRIBUTE_NAME@295..298
+                0: HTML_LITERAL@295..298 "raw" [] []
+              2: (empty)
+        3: R_ANGLE@298..299 ">" [] []
+      1: HTML_ELEMENT_LIST@299..302
+        0: HTML_EMBEDDED_CONTENT@299..302
+          0: HTML_LITERAL@299..302 "{x}" [] []
+      2: HTML_CLOSING_ELEMENT@302..313
+        0: L_ANGLE@302..303 "<" [] []
+        1: SLASH@303..304 "/" [] []
+        2: HTML_TAG_NAME@304..312
+          0: TEXTAREA_KW@304..312 "textarea" [] []
+        3: R_ANGLE@312..313 ">" [] []
+  5: EOF@313..314 "" [Newline("\n")] []
 
 ```

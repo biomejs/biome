@@ -813,6 +813,11 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
         return None;
     }
 
+    // Astro emits the children of `is:raw` verbatim, so they are not a guest language.
+    if element.has_astro_is_raw() {
+        return None;
+    }
+
     let tag_name = element.tag_name()?;
 
     let attributes: Vec<_> = element
