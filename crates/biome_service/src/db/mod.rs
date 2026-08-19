@@ -514,14 +514,16 @@ impl WorkspaceDb {
     }
 
     pub fn unload_path(&mut self, path: &Utf8Path) {
-        let files = self.files.pin();
-        let to_remove: Vec<Utf8PathBuf> = files
-            .keys()
-            .filter(|p| p.starts_with(path))
-            .cloned()
-            .collect();
-        for p in to_remove {
-            files.remove(&p);
+        {
+            let files = self.files.pin();
+            let to_remove: Vec<Utf8PathBuf> = files
+                .keys()
+                .filter(|p| p.starts_with(path))
+                .cloned()
+                .collect();
+            for p in to_remove {
+                files.remove(&p);
+            }
         }
 
         #[cfg(feature = "module_graph")]
