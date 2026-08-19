@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: multibyte.ts
+---
+# Input
+```ts
+type 型 = string; // コメント
+const 値: 型 = 'あ';
+
+```
+
+# Transformations
+```ts
+                   // コメント
+const 値: 型 = 'あ';
+
+```
+
+```ts
+type 型 = string; // コメント
+const 値      = 'あ';
+
+```
+
+# Final output
+```ts
+                   // コメント
+const 値      = 'あ';
+
+```

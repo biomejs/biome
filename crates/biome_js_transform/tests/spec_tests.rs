@@ -1,6 +1,4 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
-use biome_js_formatter::context::JsFormatOptions;
-use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsLanguage;
 use biome_languages::JsFileSource;
@@ -105,6 +103,13 @@ pub(crate) fn analyze_and_snap(
     let mut transformations = vec![];
     let (_, errors) =
         biome_js_transform::transform(&root, filter, &options, source_type, |event| {
+            if let Some(diagnostic) = event.diagnostic() {
+                diagnostics.push(diagnostic_to_string(
+                    file_name,
+                    input_code,
+                    diagnostic.into(),
+                ));
+            }
             for transformation in event.transformations() {
                 check_transformation(
                     input_file,
@@ -113,12 +118,11 @@ pub(crate) fn analyze_and_snap(
                     &transformation,
                     parser_options,
                 );
-                let node = transformation.mutation.commit();
 
-                let formatted =
-                    format_node(JsFormatOptions::new(source_type), &node, Vec::new()).unwrap();
-
-                transformations.push(formatted.print().unwrap().as_code().to_string());
+                // Snapshot the raw output of the transformation without formatting it, so
+                // text-level properties (like the whitespace replacement of `stripTypes`
+                // preserving positions) stay visible.
+                transformations.push(transformation.mutation.commit().to_string());
             }
             ControlFlow::<Never>::Continue(())
         });
@@ -127,10 +131,35 @@ pub(crate) fn analyze_and_snap(
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
     }
 
+    // When every transformation preserves the text length (like the whitespace replacement of
+    // `stripTypes`), their outputs can be merged bytewise into the final result.
+    let final_output = (!transformations.is_empty()
+        && transformations
+            .iter()
+            .all(|transformation| transformation.len() == input_code.len()))
+    .then(|| {
+        let mut merged = input_code.as_bytes().to_vec();
+        for transformation in &transformations {
+            for (index, byte) in transformation.bytes().enumerate() {
+                if byte != input_code.as_bytes()[index] {
+                    merged[index] = byte;
+                }
+            }
+        }
+        String::from_utf8(merged).expect("merging transformations must keep the text valid UTF-8")
+    });
+
+    if let Some(final_output) = &final_output {
+        let re_parse = parse(final_output, source_type, parser_options);
+        assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), input_file);
+    }
+
     write_transformation_snapshot(
         snapshot,
         input_code,
         transformations.as_slice(),
+        final_output.as_deref(),
+        diagnostics.as_slice(),
         source_type.file_extension(),
     );
 

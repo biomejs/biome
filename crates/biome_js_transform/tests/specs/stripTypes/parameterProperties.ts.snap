@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: parameterProperties.ts
+---
+# Input
+```ts
+// should generate diagnostics
+class Foo {
+	constructor(private a: string) {}
+}
+
+```
+
+# Transformations
+```ts
+// should generate diagnostics
+class Foo {
+	constructor(        a: string) {}
+}
+
+```
+
+```ts
+// should generate diagnostics
+class Foo {
+	constructor(private a        ) {}
+}
+
+```
+
+# Final output
+```ts
+// should generate diagnostics
+class Foo {
+	constructor(        a        ) {}
+}
+
+```
+
+# Diagnostics
+```
+parameterProperties.ts:3:14 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i parameter properties are not supported because they generate runtime code.
+  
+    1 │ // should generate diagnostics
+    2 │ class Foo {
+  > 3 │ 	constructor(private a: string) {}
+      │ 	            ^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+
+```

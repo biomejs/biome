@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: typeOnlyStatements.ts
+---
+# Input
+```ts
+interface Foo {
+	bar: string; // comment inside
+}
+type Bar = Foo | null; // comment outside
+declare const baz: Bar;
+declare function qux(): void;
+function overloaded(a: string): void;
+function overloaded(a: unknown) {}
+
+```
+
+# Transformations
+```ts
+               
+                               
+ 
+type Bar = Foo | null; // comment outside
+declare const baz: Bar;
+declare function qux(): void;
+function overloaded(a: string): void;
+function overloaded(a: unknown) {}
+
+```
+
+```ts
+interface Foo {
+	bar: string; // comment inside
+}
+                       // comment outside
+declare const baz: Bar;
+declare function qux(): void;
+function overloaded(a: string): void;
+function overloaded(a: unknown) {}
+
+```
+
+```ts
+interface Foo {
+	bar: string; // comment inside
+}
+type Bar = Foo | null; // comment outside
+                       
+declare function qux(): void;
+function overloaded(a: string): void;
+function overloaded(a: unknown) {}
+
+```
+
+```ts
+interface Foo {
+	bar: string; // comment inside
+}
+type Bar = Foo | null; // comment outside
+declare const baz: Bar;
+                             
+function overloaded(a: string): void;
+function overloaded(a: unknown) {}
+
+```
+
+```ts
+interface Foo {
+	bar: string; // comment inside
+}
+type Bar = Foo | null; // comment outside
+declare const baz: Bar;
+declare function qux(): void;
+                                     
+function overloaded(a: unknown) {}
+
+```
+
+```ts
+interface Foo {
+	bar: string; // comment inside
+}
+type Bar = Foo | null; // comment outside
+declare const baz: Bar;
+declare function qux(): void;
+function overloaded(a: string): void;
+function overloaded(a         ) {}
+
+```
+
+# Final output
+```ts
+               
+                               
+ 
+                       // comment outside
+                       
+                             
+                                     
+function overloaded(a         ) {}
+
+```

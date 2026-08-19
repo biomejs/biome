@@ -580,6 +580,9 @@ define_categories! {
     "syntax/correctness/noDuplicatePrivateClassMembers",
     // end syntax rules
 
+    // transformation categories
+    "transformations/stripTypes",
+
     // General categories
     "files/missingHandler",
     "format",

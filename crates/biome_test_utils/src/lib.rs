@@ -921,6 +921,8 @@ pub fn write_transformation_snapshot(
     snapshot: &mut String,
     input_code: &str,
     transformations: &[String],
+    final_output: Option<&str>,
+    diagnostics: &[String],
     extension: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
@@ -934,6 +936,24 @@ pub fn write_transformation_snapshot(
         for transformation in transformations {
             writeln!(snapshot, "```{extension}").unwrap();
             writeln!(snapshot, "{transformation}").unwrap();
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot).unwrap();
+        }
+    }
+
+    if let Some(final_output) = final_output {
+        writeln!(snapshot, "# Final output").unwrap();
+        writeln!(snapshot, "```{extension}").unwrap();
+        writeln!(snapshot, "{final_output}").unwrap();
+        writeln!(snapshot, "```").unwrap();
+        writeln!(snapshot).unwrap();
+    }
+
+    if !diagnostics.is_empty() {
+        writeln!(snapshot, "# Diagnostics").unwrap();
+        for diagnostic in diagnostics {
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot, "{diagnostic}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }

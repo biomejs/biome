@@ -20,26 +20,18 @@ let a = () => {
 
 # Transformations
 ```ts
-var StatusA;
-(function (StatusA) {
-	StatusA[(StatusA["Enabled"] = 0)] = "Enabled";
-	StatusA[(StatusA["Disabled"] = 1)] = "Disabled";
-})(StatusA || (StatusA = {}));
+var StatusA;(function(StatusA){StatusA[StatusA["Enabled"]=0]="Enabled";StatusA[StatusA["Disabled"]=1]="Disabled";})(StatusA||(StatusA={}));
 
 ```
 
 ```ts
 enum StatusA {
 	Enabled,
-	Disabled,
+	Disabled
 }
 
 let a = () => {
-	var StatusB;
-	(function (StatusB) {
-		StatusB[(StatusB["Enabled"] = "Enabled")] = "Enabled";
-		StatusB[(StatusB["Disabled"] = "Disabled")] = "Disabled";
-	})(StatusB || (StatusB = {}));
+	var StatusB;(function(StatusB){StatusB[StatusB["Enabled"]="Enabled"]="Enabled";StatusB[StatusB["Disabled"]="Disabled"]="Disabled";})(StatusB||(StatusB={}));
 };
 
 ```

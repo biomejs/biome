@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: namespace.ts
+---
+# Input
+```ts
+// should generate diagnostics
+namespace Foo {
+	export const a = 1;
+}
+
+```
+
+# Diagnostics
+```
+namespace.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `namespace` and `module` declarations are not supported because they generate runtime code.
+  
+    1 │ // should generate diagnostics
+  > 2 │ namespace Foo {
+      │ ^^^^^^^^^^^^^^^
+  > 3 │ 	export const a = 1;
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+
+```

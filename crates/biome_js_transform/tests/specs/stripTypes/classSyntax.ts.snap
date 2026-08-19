@@ -1,0 +1,346 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: classSyntax.ts
+---
+# Input
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+# Transformations
+```ts
+         class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	                   
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo    extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base    implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T>                  {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	        readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private          a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a         = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b         ;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c         ;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	                  
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	                   
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	                       
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	         f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f (this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(              a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a : T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?   ): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T)       {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```
+
+# Final output
+```ts
+         class Foo    extends Base                     {
+	                 a         = 'a';
+	b         ;
+	c         ;
+	                  
+	                   
+	                       
+	         f (              a    )       {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+```

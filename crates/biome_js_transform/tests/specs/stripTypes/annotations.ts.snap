@@ -1,0 +1,210 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: annotations.ts
+---
+# Input
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+# Transformations
+```ts
+function foo   (a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a   , b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b : number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?        , ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest          ): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[])                {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x         ;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b          ;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo        ;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar =     (a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a   ): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T)    => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(              a?: boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a : boolean) {}
+
+```
+
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?         ) {}
+
+```
+
+# Final output
+```ts
+function foo   (a   , b         , ...rest          )                {
+	let x         ;
+	x = b          ;
+	const y = foo        ;
+	return a;
+}
+const bar =     (a   )    => a;
+function baz(              a          ) {}
+
+```

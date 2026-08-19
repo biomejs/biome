@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: enum.ts
+---
+# Input
+```ts
+// should generate diagnostics
+enum Foo {
+	A,
+}
+
+```
+
+# Diagnostics
+```
+enum.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `enum` declarations are not supported because they generate runtime code.
+  
+    1 │ // should generate diagnostics
+  > 2 │ enum Foo {
+      │ ^^^^^^^^^^
+  > 3 │ 	A,
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+
+```

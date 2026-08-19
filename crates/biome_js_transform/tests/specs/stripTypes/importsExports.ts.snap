@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: importsExports.ts
+---
+# Input
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+# Transformations
+```ts
+                           
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import {         C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D,        } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+                       
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+                            
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+                  
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export {         C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+                       
+export interface I {}
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+                     
+export declare const j: number;
+
+```
+
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+                               
+
+```
+
+# Final output
+```ts
+                           
+import {         C } from "b";
+import { D,        } from "d";
+                       
+                            
+                  
+export {         C };
+                       
+                     
+                               
+
+```
