@@ -170,6 +170,15 @@ fn is_string_ref_value(value: &AnyJsxAttributeValue) -> bool {
                 _ => false,
             }
         }
+        AnyJsxAttributeValue::JsTemplateExpression(template) => {
+            template.elements().into_iter().any(|element| {
+                matches!(
+                    element,
+                    AnyJsTemplateElement::JsTemplateChunkElement(_)
+                        | AnyJsTemplateElement::JsTemplateElement(_)
+                )
+            })
+        }
     }
 }
 

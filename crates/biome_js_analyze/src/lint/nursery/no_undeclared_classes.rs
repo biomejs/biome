@@ -230,6 +230,10 @@ fn extract_class_entries_from_jsx_impl(
             let expression = expr_attr.expression().ok()?.omit_parentheses();
             collect_class_names_from_expression(&expression, model, out);
         }
+        AnyJsxAttributeValue::JsTemplateExpression(template) => {
+            let expression = AnyJsExpression::JsTemplateExpression(template);
+            collect_class_names_from_expression(&expression, model, out);
+        }
         // JSX tags as attribute values cannot contain class names
         AnyJsxAttributeValue::AnyJsxTag(_) => return None,
     }
