@@ -846,6 +846,39 @@ mod tests {
     }
 
     #[test]
+    fn astro_template_literal_is_an_attribute_value() {
+        use biome_rowan::AstNode;
+
+        let parse = parse(
+            "x && <C data-x=`t${x}` />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let clause = parse
+            .syntax()
+            .descendants()
+            .find_map(biome_js_syntax::JsxAttributeInitializerClause::cast)
+            .expect("an attribute initializer");
+        assert!(matches!(
+            clause.value(),
+            Ok(biome_js_syntax::AnyJsxAttributeValue::JsTemplateExpression(_))
+        ));
+    }
+
+    #[test]
+    fn template_literal_attribute_value_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <C data-x=`t${x}` />",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX has no template attribute values");
+    }
+
+    #[test]
     fn astro_unterminated_html_comment_reports_one_diagnostic() {
         let parse = parse(
             "<a></a><!-- never closed",

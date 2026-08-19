@@ -2421,10 +2421,12 @@ JsxAttributeInitializerClause =
 	'='
 	value: AnyJsxAttributeValue
 
+// JsTemplateExpression is only valid in Astro, e.g. `attr=`t${x}``
 AnyJsxAttributeValue =
 	AnyJsxTag
 	| JsxString
 	| JsxExpressionAttributeValue
+	| JsTemplateExpression
 
 JsxExpressionAttributeValue =
 	'{'

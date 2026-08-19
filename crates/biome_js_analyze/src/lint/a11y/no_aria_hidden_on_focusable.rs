@@ -105,6 +105,7 @@ impl Rule for NoAriaHiddenOnFocusable {
                             return (num >= 0).then_some(());
                         }
                     }
+                    AnyJsxAttributeValue::JsTemplateExpression(_) => {}
                 }
             }
 
