@@ -37,6 +37,9 @@ impl<L> SyntaxKindSet<L>
 where
     L: Language,
 {
+    /// The empty set, containing no [SyntaxKind].
+    pub const EMPTY: Self = Self([0; 6], PhantomData);
+
     /// Create a new [SyntaxKindSet] containing only the provided [SyntaxKind]
     pub fn of(kind: L::Kind) -> Self {
         Self::from_raw(kind.to_raw())
