@@ -349,8 +349,9 @@ fn html_parser_vue_only_applies_to_html_files() {
         HtmlFileSource::svelte(),
     );
 
-    assert_no_parse_diagnostics("<div v-if=\"show\"></div>", html_options);
-    assert_has_parse_diagnostics("<div v-if=\"show\"></div>", astro_options);
+    assert_vue_directive("<div v-if=\"show\"></div>", html_options);
+    // Astro has no `v-` directives, so `v-if` is an ordinary attribute name there.
+    assert_no_vue_directive("<div v-if=\"show\"></div>", astro_options);
     assert_has_parse_diagnostics("<div v-if=\"show\"></div>", svelte_options);
 }
 
@@ -426,6 +427,29 @@ fn resolve_html_parse_options(
         &BiomePath::new(Utf8PathBuf::from(path)),
         &DocumentFileSource::from(file_source),
     )
+}
+
+fn assert_vue_directive(source: &str, options: HtmlParserOptions) {
+    let parse = parse_html(source, options);
+    assert!(
+        format!("{:#?}", parse.syntax()).contains("VUE_DIRECTIVE"),
+        "expected a Vue directive, got: {:#?}",
+        parse.syntax()
+    );
+}
+
+fn assert_no_vue_directive(source: &str, options: HtmlParserOptions) {
+    let parse = parse_html(source, options);
+    assert!(
+        parse.diagnostics().is_empty(),
+        "expected parsing to succeed, got diagnostics: {:?}",
+        parse.diagnostics()
+    );
+    assert!(
+        !format!("{:#?}", parse.syntax()).contains("VUE_DIRECTIVE"),
+        "expected no Vue directive, got: {:#?}",
+        parse.syntax()
+    );
 }
 
 fn assert_has_parse_diagnostics(source: &str, options: HtmlParserOptions) {
