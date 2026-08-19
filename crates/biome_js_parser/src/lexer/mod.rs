@@ -445,8 +445,10 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    /// Whether the lexer sits at the closing tag that ends `element`'s raw text,
-    /// matched case-insensitively the way JSX matches element names.
+    /// Whether the lexer sits at the closing tag that ends `element`'s raw text.
+    ///
+    /// `<script>` and `<style>` match case-insensitively as HTML does, while an
+    /// `is:raw` element matches exactly, because component names are case-sensitive.
     fn at_jsx_raw_text_end(&self, element: JsxRawTextElement) -> bool {
         let Some(rest) = self
             .source

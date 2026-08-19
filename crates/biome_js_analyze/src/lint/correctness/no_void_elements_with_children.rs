@@ -291,8 +291,13 @@ impl Rule for NoVoidElementsWithChildren {
         ))
     }
 }
+const VOID_ELEMENTS: [&str; 16] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
+    "meta", "param", "source", "track", "wbr",
+];
+
 fn void_dom_element_name(element_name: &str) -> Option<&'static str> {
-    biome_js_syntax::jsx_ext::VOID_ELEMENTS
+    VOID_ELEMENTS
         .iter()
         .copied()
         .find(|candidate| *candidate == element_name)
