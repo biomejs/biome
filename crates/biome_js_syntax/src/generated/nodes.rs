@@ -15737,6 +15737,7 @@ impl AnyJsxAttributeName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttributeValue {
     AnyJsxTag(AnyJsxTag),
+    JsTemplateExpression(JsTemplateExpression),
     JsxExpressionAttributeValue(JsxExpressionAttributeValue),
     JsxString(JsxString),
 }
@@ -15744,6 +15745,12 @@ impl AnyJsxAttributeValue {
     pub fn as_any_jsx_tag(&self) -> Option<&AnyJsxTag> {
         match &self {
             Self::AnyJsxTag(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_template_expression(&self) -> Option<&JsTemplateExpression> {
+        match &self {
+            Self::JsTemplateExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -38171,6 +38178,11 @@ impl From<AnyJsxAttributeName> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsTemplateExpression> for AnyJsxAttributeValue {
+    fn from(node: JsTemplateExpression) -> Self {
+        Self::JsTemplateExpression(node)
+    }
+}
 impl From<JsxExpressionAttributeValue> for AnyJsxAttributeValue {
     fn from(node: JsxExpressionAttributeValue) -> Self {
         Self::JsxExpressionAttributeValue(node)
@@ -38184,17 +38196,19 @@ impl From<JsxString> for AnyJsxAttributeValue {
 impl AstNode for AnyJsxAttributeValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyJsxTag::KIND_SET
+        .union(JsTemplateExpression::KIND_SET)
         .union(JsxExpressionAttributeValue::KIND_SET)
         .union(JsxString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            JSX_EXPRESSION_ATTRIBUTE_VALUE | JSX_STRING => true,
+            JS_TEMPLATE_EXPRESSION | JSX_EXPRESSION_ATTRIBUTE_VALUE | JSX_STRING => true,
             k if AnyJsxTag::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_TEMPLATE_EXPRESSION => Self::JsTemplateExpression(JsTemplateExpression { syntax }),
             JSX_EXPRESSION_ATTRIBUTE_VALUE => {
                 Self::JsxExpressionAttributeValue(JsxExpressionAttributeValue { syntax })
             }
@@ -38210,6 +38224,7 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::JsTemplateExpression(it) => it.syntax(),
             Self::JsxExpressionAttributeValue(it) => it.syntax(),
             Self::JsxString(it) => it.syntax(),
             Self::AnyJsxTag(it) => it.syntax(),
@@ -38217,6 +38232,7 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::JsTemplateExpression(it) => it.into_syntax(),
             Self::JsxExpressionAttributeValue(it) => it.into_syntax(),
             Self::JsxString(it) => it.into_syntax(),
             Self::AnyJsxTag(it) => it.into_syntax(),
@@ -38227,6 +38243,7 @@ impl std::fmt::Debug for AnyJsxAttributeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyJsxTag(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTemplateExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxExpressionAttributeValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxString(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -38236,6 +38253,7 @@ impl From<AnyJsxAttributeValue> for SyntaxNode {
     fn from(n: AnyJsxAttributeValue) -> Self {
         match n {
             AnyJsxAttributeValue::AnyJsxTag(it) => it.into_syntax(),
+            AnyJsxAttributeValue::JsTemplateExpression(it) => it.into_syntax(),
             AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => it.into_syntax(),
             AnyJsxAttributeValue::JsxString(it) => it.into_syntax(),
         }

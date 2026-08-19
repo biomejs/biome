@@ -11,7 +11,7 @@ use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, JsxRawTextElement, T};
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
-    parse_reference_identifier,
+    parse_reference_identifier, parse_template_literal,
 };
 use crate::syntax::js_parse_error::{expected_expression, expected_identifier};
 use crate::syntax::jsx::jsx_parse_errors::{
@@ -796,6 +796,10 @@ fn parse_jsx_attribute_value(p: &mut JsParser) -> ParsedSyntax {
             let m = p.start();
             p.bump(JSX_STRING_LITERAL);
             ParsedSyntax::Present(m.complete(p, JSX_STRING))
+        }
+        BACKTICK if is_astro(p) => {
+            let m = p.start();
+            ParsedSyntax::Present(parse_template_literal(p, m, false, false))
         }
         _ => ParsedSyntax::Absent,
     }
