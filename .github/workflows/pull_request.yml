@@ -83,8 +83,8 @@ jobs:
         uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
         with:
           tool: cargo-deny
-      - run: cargo deny check bans
-      - run: cargo deny check advisories
+      - name: Audit crates.io dependencies
+        run: cargo deny check bans advisories
 
   test:
     name: Test
