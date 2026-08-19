@@ -135,7 +135,7 @@ where
     fn report_depth_limit(&mut self) {
         self.depth_limit_exceeded = true;
         let diagnostic = ParseDiagnostic::new(
-            "The syntax is too deeply nested to parse safely.",
+            format!("Syntax nesting exceeds maximum depth of {MAX_TREE_DEPTH}."),
             TextRange::empty(self.text_pos),
         );
         let index = self.errors.partition_point(|error| match error.span() {
