@@ -27,8 +27,12 @@ pub(crate) struct HtmlLexer<'src> {
     /// consumed. Once set, the `Regular` context will no longer treat `---` as a
     /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
     after_frontmatter: bool,
-    /// Not read from the lex context: `bump()` uses [HtmlLexContext::default].
+    /// Fixed for the whole lex: the lexer cannot read it from the lex context,
+    /// because `bump()` passes [HtmlLexContext::default].
     framework: HtmlFramework,
+    /// Whether `{{` opens an interpolation, from `html.parser.interpolation`.
+    /// Not a framework property: plain HTML can enable it, and Astro never has it.
+    double_text_expressions: bool,
 }
 
 enum IdentifierContext {
@@ -91,11 +95,18 @@ impl<'src> HtmlLexer<'src> {
             unicode_bom_length: 0,
             after_frontmatter: false,
             framework: HtmlFramework::Plain,
+            double_text_expressions: false,
         }
     }
 
-    pub fn set_framework(&mut self, framework: HtmlFramework) {
+    pub(crate) fn with_capabilities(
+        mut self,
+        framework: HtmlFramework,
+        double_text_expressions: bool,
+    ) -> Self {
         self.framework = framework;
+        self.double_text_expressions = double_text_expressions;
+        self
     }
 
     /// Sets the `after_frontmatter` flag. When `true`, `---` in the `Regular`
@@ -1483,8 +1494,7 @@ impl<'src> HtmlLexer<'src> {
 
     #[inline(always)]
     fn at_opening_double_text_expression(&self) -> bool {
-        // Astro has no `{{ }}` interpolation: `{{ a: 1 }}` is an object literal.
-        self.framework != HtmlFramework::Astro
+        self.double_text_expressions
             && self.current_byte() == Some(b'{')
             && self.byte_at(1) == Some(b'{')
     }
@@ -1521,7 +1531,7 @@ impl<'src> HtmlLexer<'src> {
 
     #[inline(always)]
     fn at_closing_double_text_expression(&self) -> bool {
-        self.framework != HtmlFramework::Astro
+        self.double_text_expressions
             && self.current_byte() == Some(b'}')
             && self.byte_at(1) == Some(b'}')
     }

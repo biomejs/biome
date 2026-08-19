@@ -48,13 +48,15 @@ fn losslessness(string: String) -> bool {
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = HtmlLexer::from_str($src);
-        match $context {
+        let framework = match $context {
             HtmlLexContext::Regular { framework } | HtmlLexContext::InsideTag { framework } => {
-                lexer.set_framework(framework)
+                framework
             }
-            _ => {}
-        }
+            _ => HtmlFramework::Plain,
+        };
+        let double_text_expressions = framework != HtmlFramework::Astro;
+        let mut lexer =
+            HtmlLexer::from_str($src).with_capabilities(framework, double_text_expressions);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 

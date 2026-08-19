@@ -24,9 +24,18 @@ pub(crate) struct HtmlParser<'source> {
 impl<'source> HtmlParser<'source> {
     pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
         let framework = options.framework();
+        // Whether `{{` is lexically meaningful at all. Astro uses `{ }`, so there
+        // `{{` is two curlies. Whether interpolation is *enabled* is a separate
+        // question the parser answers via `DoubleTextExpressions`.
+        let double_text_expressions = framework != HtmlFramework::Astro;
         Self {
             context: ParserContext::default(),
-            source: HtmlTokenSource::from_str(source, HtmlLexContext::Regular { framework }),
+            source: HtmlTokenSource::from_str(
+                source,
+                HtmlLexContext::Regular { framework },
+                framework,
+                double_text_expressions,
+            ),
             options,
         }
     }
