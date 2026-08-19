@@ -424,6 +424,15 @@ impl WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 
+    /// Returns the number of cached parsed sources.
+    ///
+    /// Only used by tests to check that eviction empties the collection,
+    /// rather than only the specific paths a test looks up.
+    #[cfg(test)]
+    pub(crate) fn parsed_sources_len(&self) -> usize {
+        self.files.pin().len()
+    }
+
     /// Returns a [Rc] to itself, cast to [ModuleDb]. This is used to send the service
     /// to the analyzer.
     #[cfg(feature = "module_graph")]
