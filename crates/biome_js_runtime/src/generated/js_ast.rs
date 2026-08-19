@@ -5701,6 +5701,7 @@ impl JsAstNode {
             "JS_BOGUS_NAMED_IMPORT_SPECIFIER" => JsSyntaxKind::JS_BOGUS_NAMED_IMPORT_SPECIFIER,
             "JS_BOGUS_PARAMETER" => JsSyntaxKind::JS_BOGUS_PARAMETER,
             "JS_BOGUS_STATEMENT" => JsSyntaxKind::JS_BOGUS_STATEMENT,
+            "JS_BOGUS_VARIABLE_DECLARATION" => JsSyntaxKind::JS_BOGUS_VARIABLE_DECLARATION,
             "TS_BOGUS_TYPE" => JsSyntaxKind::TS_BOGUS_TYPE,
             _ => return None,
         })

@@ -548,7 +548,9 @@ impl EmbeddedBindingsBuilder {
             return None;
         };
 
-        for declarator in root.declaration().ok()?.declarators().iter().flatten() {
+        let declaration = root.declaration().ok()?;
+        let declaration = declaration.as_js_variable_declaration()?;
+        for declarator in declaration.declarators().iter().flatten() {
             self.visit_any_js_binding_pattern(&declarator.id().ok()?)?;
         }
 

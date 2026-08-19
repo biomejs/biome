@@ -533,6 +533,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_BOGUS_IMPORT_ASSERTION_ENTRY",
         "JS_BOGUS_NAMED_IMPORT_SPECIFIER",
         "JS_BOGUS_ASSIGNMENT",
+        "JS_BOGUS_VARIABLE_DECLARATION",
         "TS_BOGUS_TYPE",
     ],
 };
