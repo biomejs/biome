@@ -21,6 +21,7 @@ const a = 1;
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlContent {
@@ -61,7 +62,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..40
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..40
     0: HTML_CONTENT@0..31
       0: HTML_LITERAL@0..31 "---\nconst a = 1;\n---" [Comments("<!-- c -->"), Newline("\n")] []
     1: HTML_ELEMENT@31..40
@@ -80,6 +82,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@38..39
           0: P_KW@38..39 "p" [] []
         3: R_ANGLE@39..40 ">" [] []
-  4: EOF@40..41 "" [Newline("\n")] []
+  5: EOF@40..41 "" [Newline("\n")] []
 
 ```
