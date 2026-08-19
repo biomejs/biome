@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
+    JsTemplateExpression,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::is_redundant_alt;
@@ -135,7 +136,7 @@ impl Rule for NoRedundantAlt {
     }
 }
 
-fn template_contains_redundant_alt(expr: &biome_js_syntax::JsTemplateExpression) -> bool {
+fn template_contains_redundant_alt(expr: &JsTemplateExpression) -> bool {
     expr.elements()
         .into_iter()
         .any(|template_element| match template_element {

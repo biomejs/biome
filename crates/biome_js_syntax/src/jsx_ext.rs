@@ -779,10 +779,13 @@ impl AnyJsxChild {
 
 /// HTML elements that never have a closing tag.
 ///
+/// Deliberately excludes the legacy `keygen` and `menuitem`, which Astro requires
+/// a closing tag for, and which the HTML parser's own set also omits.
+///
 /// <https://html.spec.whatwg.org/multipage/syntax.html#void-elements>
-pub const VOID_ELEMENTS: [&str; 16] = [
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
-    "meta", "param", "source", "track", "wbr",
+const VOID_ELEMENTS: [&str; 14] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
 ];
 
 pub fn is_void_element(name: &str) -> bool {
