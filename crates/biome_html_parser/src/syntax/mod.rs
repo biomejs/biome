@@ -614,6 +614,12 @@ pub(crate) fn parse_html_element(
         T!["<![CDATA["] => parse_cdata_section(p),
         T![<?] => parse_processing_instruction(p),
         T![<] => parse_element(p, at_vue_sfc_top_level, in_math),
+        // Where a file has single text expressions, `{{` opens an object literal
+        // rather than an interpolation, so re-read it as one `{`.
+        T!["{{"] if SingleTextExpressions.is_supported(p) => {
+            p.re_lex(HtmlReLexContext::SingleCurly);
+            parse_single_text_expression(p, regular_context(p))
+        }
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_double_text_expression(p, regular_context(p)),
@@ -784,6 +790,12 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     }
 
     match p.cur() {
+        // As in element content, `{{` is an object literal where the file has
+        // single text expressions.
+        T!["{{"] if SingleTextExpressions.is_supported(p) => {
+            p.re_lex(HtmlReLexContext::SingleCurly);
+            parse_single_text_expression(p, inside_tag_context(p))
+        }
         T!["{{"] => {
             let m = p.start();
             DoubleTextExpressions

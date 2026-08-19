@@ -27,12 +27,16 @@ pub(crate) struct HtmlLexer<'src> {
     /// consumed. Once set, the `Regular` context will no longer treat `---` as a
     /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
     after_frontmatter: bool,
-    /// Fixed for the whole lex: the lexer cannot read it from the lex context,
-    /// because `bump()` passes [HtmlLexContext::default].
-    framework: HtmlFramework,
-    /// Whether `{{` opens an interpolation, from `html.parser.interpolation`.
-    /// Not a framework property: plain HTML can enable it, and Astro never has it.
-    double_text_expressions: bool,
+    /// Parse options, not state. The lexer cannot read them from the lex
+    /// context, because `bump()` passes [HtmlLexContext::default].
+    options: HtmlLexerOptions,
+}
+
+/// The parse options the lexer needs. Fixed for the whole file, unlike the
+/// lexer's position and flags.
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct HtmlLexerOptions {
+    pub(crate) framework: HtmlFramework,
 }
 
 enum IdentifierContext {
@@ -94,19 +98,12 @@ impl<'src> HtmlLexer<'src> {
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
             after_frontmatter: false,
-            framework: HtmlFramework::Plain,
-            double_text_expressions: false,
+            options: HtmlLexerOptions::default(),
         }
     }
 
-    pub(crate) fn with_capabilities(
-        mut self,
-        framework: HtmlFramework,
-        double_text_expressions: bool,
-    ) -> Self {
-        self.framework = framework;
-        self.double_text_expressions = double_text_expressions;
-        self
+    pub(crate) fn with_options(self, options: HtmlLexerOptions) -> Self {
+        Self { options, ..self }
     }
 
     /// Sets the `after_frontmatter` flag. When `true`, `---` in the `Regular`
@@ -497,7 +494,7 @@ impl<'src> HtmlLexer<'src> {
                 } else {
                     // Astro keeps the HTML5 reading, where a `<` that cannot open
                     // a tag is text and so needs no escaping.
-                    if self.framework != HtmlFramework::Astro {
+                    if self.options.framework != HtmlFramework::Astro {
                         self.push_diagnostic(
                             ParseDiagnostic::new(
                                 "Unescaped `<` bracket character. Expected a tag or escaped character.",
@@ -535,7 +532,7 @@ impl<'src> HtmlLexer<'src> {
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             QOT => self.consume_string_literal(current),
-            TPL if self.framework == HtmlFramework::Astro => {
+            TPL if self.options.framework == HtmlFramework::Astro => {
                 self.consume_template_literal_attribute_value()
             }
             _ => self.consume_unquoted_string_literal(),
@@ -841,7 +838,10 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes a comment between attributes, which only Svelte and Astro
     /// accept; elsewhere a `/` inside a tag can only open a self-closing tag.
     fn consume_js_comment_in_tag(&mut self) -> Option<HtmlSyntaxKind> {
-        if !matches!(self.framework, HtmlFramework::Svelte | HtmlFramework::Astro) {
+        if !matches!(
+            self.options.framework,
+            HtmlFramework::Svelte | HtmlFramework::Astro
+        ) {
             return None;
         }
 
@@ -1343,7 +1343,9 @@ impl<'src> HtmlLexer<'src> {
                 b'\n' | b'\r' | b'\t' | b' ' | b'>' => break,
                 // HTML5 makes these a parse error but not a terminator, which is
                 // the reading Astro takes.
-                b'?' | b'\'' | b'"' | b'=' | b'`' if self.framework == HtmlFramework::Astro => {
+                b'?' | b'\'' | b'"' | b'=' | b'`'
+                    if self.options.framework == HtmlFramework::Astro =>
+                {
                     self.advance(1);
                     content_started = true;
                 }
@@ -1494,9 +1496,7 @@ impl<'src> HtmlLexer<'src> {
 
     #[inline(always)]
     fn at_opening_double_text_expression(&self) -> bool {
-        self.double_text_expressions
-            && self.current_byte() == Some(b'{')
-            && self.byte_at(1) == Some(b'{')
+        self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
     }
 
     #[inline(always)]
@@ -1509,7 +1509,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn at_svelte_opening_block(&self) -> bool {
-        self.framework == HtmlFramework::Svelte && self.at_svelte_block_start()
+        self.options.framework == HtmlFramework::Svelte && self.at_svelte_block_start()
     }
 
     #[inline(always)]
@@ -1531,9 +1531,7 @@ impl<'src> HtmlLexer<'src> {
 
     #[inline(always)]
     fn at_closing_double_text_expression(&self) -> bool {
-        self.double_text_expressions
-            && self.current_byte() == Some(b'}')
-            && self.byte_at(1) == Some(b'}')
+        self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
     #[inline(always)]
@@ -1910,6 +1908,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTagSvelte => {
                     self.consume_token_inside_tag_svelte(current, TagNameMode::Html)
                 }
+                HtmlReLexContext::SingleCurly => self.consume_byte(T!['{']),
                 HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,

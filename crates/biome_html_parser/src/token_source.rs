@@ -1,4 +1,4 @@
-use crate::lexer::HtmlLexer;
+use crate::lexer::{HtmlLexer, HtmlLexerOptions};
 use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -246,6 +246,10 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current `{{` as a single `{`. Used where the file has
+    /// single text expressions, so `{{` opens an object literal rather than an
+    /// interpolation.
+    SingleCurly,
     /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
     /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
     /// speculatively parsed as a template but turned out to have no
@@ -260,11 +264,9 @@ impl<'source> HtmlTokenSource<'source> {
     pub fn from_str(
         source: &'source str,
         initial_context: HtmlLexContext,
-        framework: HtmlFramework,
-        double_text_expressions: bool,
+        options: HtmlLexerOptions,
     ) -> Self {
-        let lexer =
-            HtmlLexer::from_str(source).with_capabilities(framework, double_text_expressions);
+        let lexer = HtmlLexer::from_str(source).with_options(options);
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 

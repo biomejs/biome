@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use super::{HtmlLexer, TextSize};
+use super::{HtmlLexer, HtmlLexerOptions, TextSize};
 use crate::token_source::{HtmlFramework, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{self, *};
 use biome_parser::lexer::Lexer;
@@ -54,9 +54,7 @@ macro_rules! assert_lex {
             }
             _ => HtmlFramework::Plain,
         };
-        let double_text_expressions = framework != HtmlFramework::Astro;
-        let mut lexer =
-            HtmlLexer::from_str($src).with_capabilities(framework, double_text_expressions);
+        let mut lexer = HtmlLexer::from_str($src).with_options(HtmlLexerOptions { framework });
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
