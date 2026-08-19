@@ -582,6 +582,14 @@ impl<I: Iterator> Iterator for JsxChildrenIterator<I> {
     }
 }
 
+/// Children of a delimiter-less fragment carry real comments, unlike JSX children.
+pub(crate) fn is_implicit_fragment_child(node: &JsSyntaxNode) -> bool {
+    node.parent()
+        .and_then(|list| list.parent())
+        .and_then(JsxFragment::cast)
+        .is_some_and(|fragment| fragment.is_implicit())
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::jsx::{
@@ -852,12 +860,4 @@ mod tests {
             }
         }
     }
-}
-
-/// Children of a delimiter-less fragment carry real comments, unlike JSX children.
-pub(crate) fn is_implicit_fragment_child(node: &JsSyntaxNode) -> bool {
-    node.parent()
-        .and_then(|list| list.parent())
-        .and_then(JsxFragment::cast)
-        .is_some_and(|fragment| fragment.is_implicit())
 }

@@ -88,8 +88,6 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
 
                     if self.has_slash() {
                         write!(f, [soft_line_break_or_space(), format_close])
-                    } else if self.is_self_closing() {
-                        write!(f, [soft_line_break(), format_close])
                     } else if force_bracket_same_line && last_attribute_has_comments {
                         write!(f, [soft_line_break(), format_close])
                     } else if force_bracket_same_line || wants_bracket_same_line {
