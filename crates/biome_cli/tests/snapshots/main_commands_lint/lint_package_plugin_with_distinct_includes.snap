@@ -1,0 +1,89 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [{ "path": "plugin", "includes": ["**/src/**"] }],
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "plugins": [{ "path": "plugin", "includes": ["**/tests/**"] }]
+    }
+  ]
+}
+```
+
+## `node_modules/plugin/biome-manifest.json`
+
+```json
+{ "version": 1, "rules": ["rules/noAssign.grit"] }
+```
+
+## `node_modules/plugin/package.json`
+
+```json
+{ "name": "plugin" }
+```
+
+## `node_modules/plugin/rules/noAssign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.assign")
+}
+```
+
+## `src/a.ts`
+
+```ts
+Object.assign({});
+```
+
+## `tests/a.ts`
+
+```ts
+Object.assign({});
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/a.ts:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use Object.assign
+  
+  > 1 │ Object.assign({});
+      │               ^^
+  
+
+```
+
+```block
+tests/a.ts:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use Object.assign
+  
+  > 1 │ Object.assign({});
+      │               ^^
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

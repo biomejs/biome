@@ -39,6 +39,37 @@ impl ConfigName {
     pub fn matches_file_name(file_name: &str) -> bool {
         Self::BIOME_JSON.contains(&file_name)
     }
+
+    pub fn is_manifest_file(path: &Utf8Path) -> bool {
+        path.file_name().is_some_and(Self::matches_file_name)
+    }
+}
+
+/// File names recognized as Biome plugin manifests.
+pub struct ManifestName;
+
+impl ManifestName {
+    const BIOME_MANIFEST_JSON: [&'static str; 2] = ["biome-manifest.json", "biome-manifest.jsonc"];
+
+    /// Returns the strict JSON manifest name.
+    pub const fn biome_manifest_json() -> &'static str {
+        Self::BIOME_MANIFEST_JSON[0]
+    }
+
+    /// Returns the JSON-with-comments manifest name.
+    pub const fn biome_manifest_jsonc() -> &'static str {
+        Self::BIOME_MANIFEST_JSON[1]
+    }
+
+    /// Returns manifest names in lookup priority order.
+    pub const fn file_names() -> [&'static str; 2] {
+        Self::BIOME_MANIFEST_JSON
+    }
+
+    pub fn is_manifest_file(path: &Utf8Path) -> bool {
+        path.file_name()
+            .is_some_and(|file_name| Self::file_names().contains(&file_name))
+    }
 }
 
 /// Represents the kind of filesystem entry a path points at.

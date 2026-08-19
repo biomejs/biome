@@ -135,12 +135,18 @@ impl LoadedConfiguration {
                         .parent()
                         .unwrap_or(external_resolution_base_path.as_path());
                     if let Some(plugins) = partial_configuration.plugins.as_mut() {
-                        plugins.normalize_relative_paths(config_dir);
+                        plugins
+                            .normalize_relative_paths(fs, config_dir)
+                            .map_err(|diagnostic| {
+                                WorkspaceError::plugin_errors(vec![diagnostic])
+                            })?;
                     }
                     if let Some(overrides) = partial_configuration.overrides.as_mut() {
                         for pattern in overrides.0.iter_mut() {
                             if let Some(plugins) = pattern.plugins.as_mut() {
-                                plugins.normalize_relative_paths(config_dir);
+                                plugins.normalize_relative_paths(fs, config_dir).map_err(
+                                    |diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]),
+                                )?;
                             }
                         }
                     }
@@ -800,10 +806,11 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         let (mut configuration, diagnostics) = deserialized.consume();
         if let Some(configuration) = configuration.as_mut() {
             Self::normalize_plugins(
+                self.fs,
                 configuration,
                 &resolved.file_path,
                 resolved.file_path.parent().unwrap_or(Utf8Path::new("")),
-            );
+            )?;
         }
         let diagnostics = diagnostics
             .into_iter()
@@ -847,29 +854,37 @@ impl<'a> ConfigurationExtendsLoader<'a> {
 
     #[cfg(feature = "plugins")]
     fn normalize_plugins(
+        fs: &dyn FsWithResolverProxy,
         configuration: &mut Configuration,
         file_path: &Utf8Path,
         fallback_resolution_base_path: &Utf8Path,
-    ) {
+    ) -> Result<(), WorkspaceError> {
         let config_dir = file_path.parent().unwrap_or(fallback_resolution_base_path);
         if let Some(plugins) = configuration.plugins.as_mut() {
-            plugins.normalize_object_relative_paths(config_dir);
+            plugins
+                .normalize_object_relative_paths(fs, config_dir)
+                .map_err(|diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]))?;
         }
         if let Some(overrides) = configuration.overrides.as_mut() {
             for pattern in overrides.0.iter_mut() {
                 if let Some(plugins) = pattern.plugins.as_mut() {
-                    plugins.normalize_object_relative_paths(config_dir);
+                    plugins
+                        .normalize_object_relative_paths(fs, config_dir)
+                        .map_err(|diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]))?;
                 }
             }
         }
+        Ok(())
     }
 
     #[cfg(not(feature = "plugins"))]
     fn normalize_plugins(
+        _fs: &dyn FsWithResolverProxy,
         _configuration: &mut Configuration,
         _file_path: &Utf8Path,
         _fallback_resolution_base_path: &Utf8Path,
-    ) {
+    ) -> Result<(), WorkspaceError> {
+        Ok(())
     }
 }
 

@@ -277,6 +277,60 @@ fn extends_config_with_object_syntax_plugin_from_npm_package() {
 }
 
 #[test]
+fn extended_config_resolves_plugin_package_from_config() {
+    let mut fs = TemporaryFs::new("extended_config_resolves_plugin_package_from_config");
+
+    fs.create_file("biome.json", r#"{ "extends": ["@shared/config/biome"] }"#);
+    fs.create_file(
+        "node_modules/@shared/config/biome.jsonc",
+        r#"{
+    "root": false,
+    "plugins": [{ "path": "@shared/plugin", "resolutionKind": "config" }]
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/package.json",
+        r#"{
+    "name": "@shared/config",
+    "exports": { "./biome": "./biome.jsonc" }
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/node_modules/@shared/plugin/package.json",
+        r#"{ "name": "@shared/plugin" }"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/node_modules/@shared/plugin/biome-manifest.json",
+        r#"{ "version": 1, "rules": ["rules/noAssign.grit"] }"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/node_modules/@shared/plugin/rules/noAssign.grit",
+        r#"`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of Object.assign()"
+    )
+}"#,
+    );
+    fs.create_file("test.js", "Object.assign({}, value);\n");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", &format!("{}/test.js", fs.cli_path())].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extended_config_resolves_plugin_package_from_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn extends_config_ok_linter_not_formatter() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

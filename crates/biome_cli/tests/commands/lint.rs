@@ -4587,3 +4587,69 @@ fn only_per_plugin_selector_is_rejected() {
         result,
     ));
 }
+
+#[test]
+fn lint_invalid_plugin_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = "biome-manifest.json";
+    fs.insert(file_path.into(), b"{}");
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_invalid_plugin_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_package_plugin_with_distinct_includes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": [{ "path": "plugin", "includes": ["**/src/**"] }],
+    "overrides": [{
+        "includes": ["tests/**"],
+        "plugins": [{ "path": "plugin", "includes": ["**/tests/**"] }]
+    }]
+}"#,
+    );
+    fs.insert(
+        "node_modules/plugin/package.json".into(),
+        br#"{ "name": "plugin" }"#,
+    );
+    fs.insert(
+        "node_modules/plugin/biome-manifest.json".into(),
+        br#"{ "version": 1, "rules": ["rules/noAssign.grit"] }"#,
+    );
+    fs.insert(
+        "node_modules/plugin/rules/noAssign.grit".into(),
+        br#"`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.assign")
+}"#,
+    );
+    fs.insert("src/a.ts".into(), b"Object.assign({});");
+    fs.insert("tests/a.ts".into(), b"Object.assign({});");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "src/a.ts", "tests/a.ts"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_package_plugin_with_distinct_includes",
+        fs,
+        console,
+        result,
+    ));
+}
