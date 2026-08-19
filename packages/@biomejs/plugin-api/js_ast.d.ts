@@ -887,7 +887,7 @@ export interface JsSuperExpression extends JsAstNode {
 }
 export interface JsSvelteDeclarationRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_DECLARATION_ROOT";
-	readonly declaration: JsVariableDeclaration | undefined;
+	readonly declaration: AnyJsSvelteDeclaration | undefined;
 	readonly semicolonToken: string | undefined;
 	readonly eofToken: string | undefined;
 }
@@ -1863,6 +1863,9 @@ export interface JsBogusParameter extends JsAstNode {
 export interface JsBogusStatement extends JsAstNode {
 	readonly kind: "JS_BOGUS_STATEMENT";
 }
+export interface JsBogusVariableDeclaration extends JsAstNode {
+	readonly kind: "JS_BOGUS_VARIABLE_DECLARATION";
+}
 export interface TsBogusType extends JsAstNode {
 	readonly kind: "TS_BOGUS_TYPE";
 }
@@ -2140,6 +2143,9 @@ export type AnyJsStatement =
 	| TsInterfaceDeclaration
 	| TsModuleDeclaration
 	| TsTypeAliasDeclaration;
+export type AnyJsSvelteDeclaration =
+	| JsBogusVariableDeclaration
+	| JsVariableDeclaration;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
 export type AnyJsxAttribute =
@@ -2580,6 +2586,7 @@ export interface JsNodeByKind {
 	readonly JS_BOGUS_NAMED_IMPORT_SPECIFIER: JsBogusNamedImportSpecifier;
 	readonly JS_BOGUS_PARAMETER: JsBogusParameter;
 	readonly JS_BOGUS_STATEMENT: JsBogusStatement;
+	readonly JS_BOGUS_VARIABLE_DECLARATION: JsBogusVariableDeclaration;
 	readonly TS_BOGUS_TYPE: TsBogusType;
 }
 export type JsArrayAssignmentPatternElementList =

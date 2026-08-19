@@ -3097,7 +3097,7 @@ impl JsSuperExpression {
     }
 }
 impl JsSvelteDeclarationRoot {
-    pub fn with_declaration(self, element: JsVariableDeclaration) -> Self {
+    pub fn with_declaration(self, element: AnyJsSvelteDeclaration) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
