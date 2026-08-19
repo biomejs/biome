@@ -17,7 +17,7 @@ use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::TextSize;
 use biome_languages::DocumentFileSource;
 use biome_languages::JsFileSource;
-use biome_plugin_loader::{PluginConfiguration, Plugins};
+use biome_plugin_loader::{PluginConfiguration, PluginWithOptions, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
 use std::collections::BTreeMap;
@@ -766,9 +766,13 @@ fn package_plugins_are_loaded_from_manifests() {
         .update_settings(UpdateSettingsParams {
             project_key,
             configuration: Configuration {
-                plugins: Some(Plugins(vec![PluginConfiguration::Path(
-                    "@scope/plugin".to_string(),
-                )])),
+                plugins: Some(Plugins(vec![
+                    PluginConfiguration::Path("@scope/plugin".to_string()),
+                    PluginConfiguration::PathWithOptions(PluginWithOptions {
+                        path: "@scope/plugin".to_string(),
+                        ..Default::default()
+                    }),
+                ])),
                 ..Default::default()
             },
             workspace_directory: Some(BiomePath::new("/project")),

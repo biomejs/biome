@@ -1676,7 +1676,7 @@ impl WorkspaceServerWithDb<'_> {
         plugins: &Plugins,
     ) -> (PluginCache, Vec<PluginDiagnostic>) {
         let mut diagnostics = Vec::new();
-        let mut plugin_cache = PluginCache::default();
+        let plugin_cache = PluginCache::default();
 
         for plugin_config in plugins.iter() {
             let plugin_path = plugin_config.path();
@@ -2838,7 +2838,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         self.project_layout.unload_folder(&project_path);
         #[cfg(feature = "plugins")]
         {
-            self.plugin_caches.pin().remove(&project_path);
+            self.plugin_caches
+                .pin()
+                .retain(|path, _| !path.starts_with(&project_path));
         }
         self.analyzer_cache.pin().remove(&params.project_key);
 

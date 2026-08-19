@@ -254,7 +254,7 @@ mod test {
 
     #[test]
     fn deserialization_error() {
-        let content = r#"{ "rules": [] }"#;
+        let content = r#"{ "rules": ["rules/1.grit"] }"#;
         let result =
             deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "");
 

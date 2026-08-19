@@ -4608,6 +4608,25 @@ fn lint_invalid_plugin_manifest() {
 }
 
 #[test]
+fn lint_plugin_manifest_rejects_empty_rules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = "biome-manifest.json";
+    fs.insert(file_path.into(), br#"{ "version": 1, "rules": [] }"#);
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_plugin_manifest_rejects_empty_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_package_plugin_with_distinct_includes() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

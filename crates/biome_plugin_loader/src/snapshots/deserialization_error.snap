@@ -6,8 +6,8 @@ deserialize ━━━━━━━━━━━━━━━━━━━━━━�
 
   × The key `version` is missing.
   
-  > 1 │ { "rules": [] }
-      │ ^^^^^^^^^^^^^^^
+  > 1 │ { "rules": ["rules/1.grit"] }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Required keys
   
