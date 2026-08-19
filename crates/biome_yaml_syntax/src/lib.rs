@@ -3,11 +3,13 @@
 #[macro_use]
 mod generated;
 mod block_ext;
+mod flow_ext;
 mod syntax_node;
 
 pub use self::generated::*;
 use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
+pub use block_ext::{AnyYamlBlockScalar, AnyYamlEntryValue};
 pub use syntax_node::*;
 
 impl From<u16> for YamlSyntaxKind {

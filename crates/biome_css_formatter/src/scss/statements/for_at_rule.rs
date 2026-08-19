@@ -20,17 +20,17 @@ impl FormatNodeRule<ScssForAtRule> for FormatScssForAtRule {
         write!(
             f,
             [
-                for_token.format(),
+                for_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 group(&format_args![
                     variable.format(),
                     indent(&format_args![
                         soft_line_break_or_space(),
-                        from_token.format(),
+                        from_token.format()?.with_text_case(CssCase::Preserve),
                         space(),
                         lower_bound.format(),
                         soft_line_break_or_space(),
-                        operator.format(),
+                        operator.format()?.with_text_case(CssCase::Preserve),
                         space(),
                         upper_bound.format()
                     ]),

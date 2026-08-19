@@ -2,6 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true
+  }
+}
+```
+
 ## `packages/mobile/biome.json`
 
 ```json
@@ -13,16 +23,6 @@ expression: redactor(content)
     "rules": {
       "recommended": true
     }
-  }
-}
-```
-
-## `biome.json`
-
-```json
-{
-  "linter": {
-    "enabled": true
   }
 }
 ```

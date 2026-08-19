@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::separated::FormatAstSeparatedListWithScopedOptionsExtension;
 use biome_css_syntax::ScssModuleMemberList;
 
 #[derive(Debug, Clone, Default)]
@@ -11,7 +12,7 @@ impl FormatRule<ScssModuleMemberList> for FormatScssModuleMemberList {
         let separator = soft_line_break_or_space();
         let mut joiner = f.join_with(&separator);
 
-        for formatted in node.format_separated(",") {
+        for formatted in node.format_separated_with_scoped_options(",", CssCase::Preserve) {
             joiner.entry(&formatted);
         }
 

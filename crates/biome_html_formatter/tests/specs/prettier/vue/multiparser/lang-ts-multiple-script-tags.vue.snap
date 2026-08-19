@@ -1,0 +1,80 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/multiparser/lang-ts-multiple-script-tags.vue
+---
+
+# Input
+
+```vue
+<script></script>
+<script></script>
+<script></script>
+<script></script>
+<script></script>
+<script></script>
+<script setup lang="ts">
+let x:      string |         number = 1
+</script>
+<script></script>
+<script></script>
+<script></script>
+<template>
+  <span
+  v-if=" (x    as string).length  >     0"
+  v-for="a in [1,2,  3,4,5].map(   (x  :    number) => x *   x)"
+  :foo="  (x    as number).toFixed(   2) "
+  >
+  {{ (x      as      number).toFixed(2) }}
+  </span>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,10 +12,10 @@
+ <script></script>
+ <template>
+   <span
+-    v-if="(x as string).length > 0"
+-    v-for="a in [1, 2, 3, 4, 5].map((x: number) => x * x)"
+-    :foo="(x as number).toFixed(2)"
++    v-if=" (x    as string).length  >     0"
++    v-for="a in [1,2,  3,4,5].map(   (x  :    number) => x *   x)"
++    :foo="  (x    as number).toFixed(   2) "
+   >
+-    {{ (x as number).toFixed(2) }}
++    {{ (x      as      number).toFixed(2) }}
+   </span>
+ </template>
+```
+
+# Output
+
+```vue
+<script></script>
+<script></script>
+<script></script>
+<script></script>
+<script></script>
+<script></script>
+<script setup lang="ts">
+let x: string | number = 1;
+</script>
+<script></script>
+<script></script>
+<script></script>
+<template>
+  <span
+    v-if=" (x    as string).length  >     0"
+    v-for="a in [1,2,  3,4,5].map(   (x  :    number) => x *   x)"
+    :foo="  (x    as number).toFixed(   2) "
+  >
+    {{ (x      as      number).toFixed(2) }}
+  </span>
+</template>
+```

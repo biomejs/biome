@@ -1,18 +1,22 @@
 use crate::WorkspaceError;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{
-    Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
-    ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    Capabilities, DebugCapabilities, EditorCapabilities, EnabledForPath, ExtensionHandler,
+    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
+use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_parser::{AnyParse, NodeParse};
+use biome_languages::DocumentFileSource;
+use biome_parser::NodeParse;
 use biome_rowan::NodeCache;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
@@ -73,11 +77,11 @@ impl ServiceLanguage for YamlLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &BiomePath,
+        override_indices: &[usize],
         _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         // TODO: apply markdown overrides once markdown override settings are introduced.
-        let _ = (overrides, path);
+        let _ = (overrides, override_indices);
 
         let line_width = language
             .line_width
@@ -106,9 +110,8 @@ impl ServiceLanguage for YamlLanguage {
         _global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
-        _path: &BiomePath,
+        _override_indices: &[usize],
         _file_source: &DocumentFileSource,
-        _suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
     }
@@ -149,6 +152,50 @@ impl ServiceLanguage for YamlLanguage {
         // TODO: Assist support for YAML files
         false
     }
+}
+
+#[salsa::interned]
+struct YamlFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_yaml_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: YamlFormatOptionsInput<'db>,
+) -> YamlFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<YamlLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    _path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> YamlFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<YamlLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = YamlFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
+    resolved_yaml_format_options(&query_db, input)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -220,9 +267,13 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: YamlSyntaxNode = parse.syntax();
-    let tree: YamlRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: YamlSyntaxNode = parse.syntax(&workspace_db);
+    let tree: YamlRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -232,12 +283,13 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<YamlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -247,12 +299,13 @@ fn debug_formatter_ir(
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<YamlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),

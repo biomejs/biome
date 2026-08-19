@@ -84,7 +84,7 @@ impl TypeData {
                 },
                 None => None,
             },
-            Self::TypeofExpression(expr) => flattened_expression(expr, resolver, 0),
+            Self::TypeofExpression(expr) => flattened_expression(expr, resolver),
             Self::TypeofType(reference) => resolver
                 .resolve_reference(reference.as_ref())
                 .map(Self::reference),

@@ -1,6 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_markdown_formatter::context::ProseWrap;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -11,18 +12,46 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct MarkdownConfiguration {
+    /// Parsing options
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_parser_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parser: Option<MarkdownParserConfiguration>,
+
     #[cfg_attr(
         feature = "cli",
         bpaf(external(markdown_formatter_configuration), optional, hide)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<MarkdownFormatterConfiguration>,
+
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_linter_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linter: Option<MarkdownLinterConfiguration>,
 }
 
 pub type MarkdownFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
 pub type MarkdownLinterEnabled = Bool<true>;
 pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseInterpolation = Bool<false>;
+pub type MarkdownParseFrontmatter = Bool<false>;
+
+/// Options that change how the Markdown parser behaves
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct MarkdownParserConfiguration {
+    /// Enables parsing frontmatter at the start of the file. Defaults to `false`.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub frontmatter: Option<MarkdownParseFrontmatter>,
+}
 
 /// Options that change how the Markdown formatter behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
@@ -68,4 +97,24 @@ pub struct MarkdownFormatterConfiguration {
     #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
+
+    /// Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+    ///
+    /// Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+    /// line with two spaces or a backslash.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prose_wrap: Option<ProseWrap>,
+}
+
+/// Options that change how the Markdown linter behaves
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct MarkdownLinterConfiguration {
+    /// Control the linter for Markdown files.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<MarkdownLinterEnabled>,
 }

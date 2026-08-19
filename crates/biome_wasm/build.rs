@@ -69,7 +69,7 @@ fn main() -> io::Result<()> {
     let formatted = format_node(
         JsFormatOptions::new(JsFileSource::ts()),
         module.syntax(),
-        false,
+        Vec::new(),
     )
     .unwrap();
     let printed = formatted.print().unwrap();

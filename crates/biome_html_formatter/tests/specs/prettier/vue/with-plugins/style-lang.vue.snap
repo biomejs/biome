@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/with-plugins/style-lang.vue
+---
+
+# Input
+
+```vue
+<style lang="uppercase-rocks">
+/* Should be uppercased */
+hello,
+world!
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,6 @@
+ <style lang="uppercase-rocks">
+-/* SHOULD BE UPPERCASED */
+-HELLO,
+-WORLD!
++/* Should be uppercased */
++hello,
++world 
++!
+ </style>
+```
+
+# Output
+
+```vue
+<style lang="uppercase-rocks">
+/* Should be uppercased */
+hello,
+world 
+!
+</style>
+```

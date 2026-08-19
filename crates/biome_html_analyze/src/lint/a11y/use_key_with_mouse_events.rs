@@ -86,14 +86,20 @@ impl Rule for UseKeyWithMouseEvents {
             }
         }
 
-        if node.find_attribute_by_name("onmouseover").is_some()
-            && node.find_attribute_by_name("onfocus").is_none()
+        if node
+            .find_attribute_or_vue_event_binding("onmouseover")
+            .is_some()
+            && node
+                .find_attribute_or_vue_event_binding("onfocus")
+                .is_none()
         {
             return Some(UseKeyWithMouseEventsState::MissingOnFocus);
         }
 
-        if node.find_attribute_by_name("onmouseout").is_some()
-            && node.find_attribute_by_name("onblur").is_none()
+        if node
+            .find_attribute_or_vue_event_binding("onmouseout")
+            .is_some()
+            && node.find_attribute_or_vue_event_binding("onblur").is_none()
         {
             return Some(UseKeyWithMouseEventsState::MissingOnBlur);
         }

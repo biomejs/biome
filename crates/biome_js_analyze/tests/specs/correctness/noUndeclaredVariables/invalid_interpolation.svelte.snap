@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_interpolation.svelte
+---
+# Input
+```svelte
+<script>
+let used = 0;
+</script>
+
+<div style="top: {foo}px; left: {used}px"></div>
+
+```
+
+# Diagnostics
+```
+invalid_interpolation.svelte:5:19 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The foo variable is undeclared.
+  
+    3 │ </script>
+    4 │ 
+  > 5 │ <div style="top: {foo}px; left: {used}px"></div>
+      │                   ^^^
+    6 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

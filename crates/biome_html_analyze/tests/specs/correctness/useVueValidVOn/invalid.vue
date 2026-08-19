@@ -1,11 +1,8 @@
 <!-- should generate diagnostics -->
 
 <template>
-  <!-- Missing event name: long-form without an argument -->
+  <!-- Missing event name: long-form without an argument or value -->
   <div v-on></div>
-
-  <!-- Missing event name with value -->
-  <div v-on="foo"></div>
 
   <!-- Missing handler on long-form -->
   <div v-on:click></div>

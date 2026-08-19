@@ -1,0 +1,74 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+[123, # comment
+]
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: YamlPropertyList [],
+                    content: YamlFlowSequence {
+                        l_brack_token: L_BRACK@0..1 "[" [] [],
+                        entries: YamlFlowSequenceEntryList [
+                            YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@1..4 "123" [] [],
+                                },
+                            },
+                            COMMA@4..15 "," [] [Whitespace(" "), Comments("# comment")],
+                        ],
+                        r_brack_token: R_BRACK@15..17 "]" [Newline("\n")] [],
+                    },
+                },
+                flow_end_token: FLOW_END@17..17 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..18
+  0: YAML_DOCUMENT_LIST@0..17
+    0: YAML_DOCUMENT@0..17
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..17
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..17
+          0: YAML_PROPERTY_LIST@0..0
+          1: YAML_FLOW_SEQUENCE@0..17
+            0: L_BRACK@0..1 "[" [] []
+            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@1..15
+              0: YAML_FLOW_YAML_NODE@1..4
+                0: YAML_PROPERTY_LIST@1..1
+                1: YAML_PLAIN_SCALAR@1..4
+                  0: PLAIN_LITERAL@1..4 "123" [] []
+              1: COMMA@4..15 "," [] [Whitespace(" "), Comments("# comment")]
+            2: R_BRACK@15..17 "]" [Newline("\n")] []
+        2: FLOW_END@17..17 "" [] []
+      4: (empty)
+  1: EOF@17..18 "" [Newline("\n")] []
+
+```

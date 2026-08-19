@@ -555,6 +555,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::NoConsole(conf));
                             }
                         }
+                        "no-restricted-properties" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::NoRestrictedProperties(conf));
+                            }
+                        }
                         "no-restricted-globals" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
@@ -599,6 +604,11 @@ impl Deserializable for Rules {
                         "@typescript-eslint/no-base-to-string" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptNoBaseToString(conf));
+                            }
+                        }
+                        "svelte/no-unnecessary-state-wrap" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
                             }
                         }
                         "unicorn/filename-case" => {
@@ -802,6 +812,29 @@ pub(crate) struct GlobalWithMessage {
     message: String,
 }
 
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct NoRestrictedPropertyOption {
+    object: Option<Box<str>>,
+    property: Option<Box<str>>,
+    message: Option<Box<str>>,
+    allow_objects: Box<[Box<str>]>,
+    allow_properties: Box<[Box<str>]>,
+}
+
+impl From<NoRestrictedPropertyOption>
+    for biome_rule_options::no_js_restricted_properties::RestrictedPropertyEntry
+{
+    fn from(value: NoRestrictedPropertyOption) -> Self {
+        Self {
+            object: value.object,
+            property: value.property,
+            message: value.message,
+            allow_objects: value.allow_objects,
+            allow_properties: value.allow_properties,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum Rule {
     /// Any rule without its options.
@@ -812,6 +845,7 @@ pub(crate) enum Rule {
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
+    NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
@@ -824,6 +858,7 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
@@ -836,6 +871,7 @@ impl Rule {
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
+            Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
@@ -853,6 +889,9 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::SvelteNoUnnecessaryStateWrap(_) => {
+                Cow::Borrowed("svelte/no-unnecessary-state-wrap")
+            }
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
@@ -869,5 +908,25 @@ impl PartialEq for Rule {
 impl Hash for Rule {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.name().hash(state);
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct SvelteNoUnnecessaryStateWrapOptions {
+    #[deserializable(rename = "additionalReactiveClasses")]
+    pub(crate) additional_reactive_classes: Box<[Box<str>]>,
+    #[deserializable(rename = "allowReassign")]
+    pub(crate) allow_reassign: Option<bool>,
+}
+
+impl From<SvelteNoUnnecessaryStateWrapOptions>
+    for biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions
+{
+    fn from(value: SvelteNoUnnecessaryStateWrapOptions) -> Self {
+        Self {
+            additional_reactive_classes: (!value.additional_reactive_classes.is_empty())
+                .then_some(value.additional_reactive_classes),
+            allow_reassign: value.allow_reassign,
+        }
     }
 }

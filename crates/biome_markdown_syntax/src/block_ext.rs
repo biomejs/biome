@@ -1,5 +1,7 @@
 use crate::list_ext::AnyListItem;
-use crate::{AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock, MdParagraph};
+use crate::{
+    AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock, MdHtmlBlock, MdParagraph,
+};
 use biome_rowan::AstNodeList;
 
 impl AnyMdBlock {
@@ -8,6 +10,15 @@ impl AnyMdBlock {
             self,
             Self::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
                 AnyMdCodeBlock::MdFencedCodeBlock(_)
+            ))
+        )
+    }
+
+    pub const fn is_indent_block(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+                AnyMdCodeBlock::MdIndentCodeBlock(_)
             ))
         )
     }
@@ -41,8 +52,26 @@ impl AnyMdBlock {
         )
     }
 
+    pub const fn is_link_reference_definition(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdLinkReferenceDefinition(_))
+        )
+    }
+
+    pub const fn is_thematic_break(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdThematicBreakBlock(_))
+        )
+    }
+
     pub const fn is_newline(&self) -> bool {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)))
+    }
+
+    pub const fn is_html_block(&self) -> bool {
+        matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_)))
     }
 
     pub fn as_any_list_item(&self) -> Option<AnyListItem> {
@@ -81,5 +110,18 @@ impl MdParagraph {
             }
             _ => false,
         }
+    }
+}
+
+impl MdHtmlBlock {
+    pub fn is_html_comment(&self) -> bool {
+        let Ok(content) = self.content() else {
+            return false;
+        };
+        let Ok(token) = content.value_token() else {
+            return false;
+        };
+
+        token.text_trimmed().starts_with("<!--")
     }
 }

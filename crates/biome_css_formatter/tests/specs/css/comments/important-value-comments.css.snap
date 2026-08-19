@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/important-value-comments.css
+---
+
+# Input
+
+```css
+a{color:/* before */red/* after */!important;}
+a{color:red/* first *//* second */!important;}
+a{color:red
+/* own */
+!important;}
+
+```
+
+
+# Formatted
+
+```css
+a {
+	color:/* before */ red /* after */ !important;
+}
+a {
+	color: red /* first */ /* second */ !important;
+}
+a {
+	color: red /* own */ !important;
+}
+
+```

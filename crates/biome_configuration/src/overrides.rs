@@ -1,14 +1,16 @@
 use crate::analyzer::assist::AssistEnabled;
 use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+#[cfg(feature = "lang_html")]
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
-use crate::{CssConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration, Rules};
+use crate::{GritConfiguration, Rules};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
     IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
+#[cfg(feature = "lang_js")]
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
@@ -31,16 +33,19 @@ pub struct OverridePattern {
     pub includes: Option<OverrideGlobs>,
 
     /// Specific configuration for the JavaScript language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub javascript: Option<JsConfiguration>,
+    #[cfg_attr(feature = "lang_js", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg(feature = "lang_js")]
+    pub javascript: Option<crate::JsConfiguration>,
 
     /// Specific configuration for the Json language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub json: Option<JsonConfiguration>,
+    #[cfg(feature = "lang_json")]
+    #[cfg_attr(feature = "lang_json", serde(skip_serializing_if = "Option::is_none"))]
+    pub json: Option<crate::JsonConfiguration>,
 
     /// Specific configuration for the CSS language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub css: Option<CssConfiguration>,
+    #[cfg_attr(feature = "lang_css", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg(feature = "lang_css")]
+    pub css: Option<crate::CssConfiguration>,
 
     /// Specific configuration for the Graphql language
     #[cfg(feature = "lang_graphql")]
@@ -55,7 +60,8 @@ pub struct OverridePattern {
     pub grit: Option<GritConfiguration>,
 
     /// Specific configuration for the GritQL language
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "lang_html")]
+    #[cfg_attr(feature = "lang_html", serde(skip_serializing_if = "Option::is_none"))]
     pub html: Option<HtmlConfiguration>,
 
     /// Specific configuration for the Json language
@@ -180,11 +186,10 @@ pub struct OverrideFormatterConfiguration {
     #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
-    /// closing delimiter), such as parentheses, brackets, angle brackets, and template literal
-    /// interpolations. Spaces are not added before the opening delimiter, and empty delimiters
-    /// are not affected. Only applies when the content fits on a single line. The specific
-    /// delimiters affected depend on the language. Defaults to false.
+    /// Controls spaces immediately inside supported delimiters when their content fits on one line.
+    /// It doesn't add spaces before opening delimiters or inside empty delimiters.
+    ///
+    /// The affected delimiters vary by language. If unset, uses the configured formatter setting.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -192,12 +197,18 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
-    /// Whether to expand arrays and objects on multiple lines.
-    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-    /// and array literals are formatted on a single line if it fits in the line.
-    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
-    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    /// Controls whether arrays and objects are formatted on one line or multiple lines.
+    ///
+    /// `auto` formats objects on multiple lines if the first property has a newline, and arrays on
+    /// one line if they fit.
+    ///
+    /// `always` formats arrays and objects on multiple lines.
+    ///
+    /// `never` formats arrays and objects on one line if they fit.
+    ///
+    /// If unset, uses the configured formatter setting.
+    ///
+    /// When formatting `package.json`, Biome uses `always` unless configured otherwise.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -206,6 +217,7 @@ pub struct OverrideFormatterConfiguration {
     pub expand: Option<Expand>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+    #[cfg(feature = "lang_js")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",

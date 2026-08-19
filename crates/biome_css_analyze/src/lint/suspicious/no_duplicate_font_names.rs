@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+
 use crate::fonts::{CssFontValue, find_font_family, is_font_family_keyword};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -73,6 +75,7 @@ impl Rule for NoDuplicateFontNames {
         let mut family_names: HashSet<CssFontValue> = HashSet::new();
         let value_list = match node.value() {
             Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
                 AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
                 AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
             },

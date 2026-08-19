@@ -30,6 +30,7 @@ expression: redactor(content)
         }
       },
       "message": "This import is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -65,6 +66,7 @@ expression: redactor(content)
         }
       },
       "message": "Several of these imports are unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -100,6 +102,7 @@ expression: redactor(content)
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -135,6 +138,7 @@ expression: redactor(content)
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -170,6 +174,7 @@ expression: redactor(content)
         }
       },
       "message": "This import is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -205,6 +210,7 @@ expression: redactor(content)
         }
       },
       "message": "Several of these imports are unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -240,6 +246,7 @@ expression: redactor(content)
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -275,6 +282,7 @@ expression: redactor(content)
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -310,6 +318,7 @@ expression: redactor(content)
         }
       },
       "message": "Sort these imports.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -345,6 +354,7 @@ expression: redactor(content)
         }
       },
       "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -380,6 +390,7 @@ expression: redactor(content)
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -414,7 +425,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -434,7 +446,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -454,7 +467,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "'z' is redeclared in the same scope."
+      "message": "'z' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -474,13 +488,15 @@ expression: redactor(content)
           }
         }
       },
-      "message": "'f' is redeclared in the same scope."
+      "message": "'f' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "Formatter would have printed the following content:"
+      "message": "Formatter would have printed the following content:",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -501,6 +517,7 @@ expression: redactor(content)
         }
       },
       "message": "Sort these imports.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -536,6 +553,7 @@ expression: redactor(content)
         }
       },
       "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -571,6 +589,7 @@ expression: redactor(content)
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -605,7 +624,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -625,7 +645,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -645,7 +666,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "'z' is redeclared in the same scope."
+      "message": "'z' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -665,13 +687,15 @@ expression: redactor(content)
           }
         }
       },
-      "message": "'f' is redeclared in the same scope."
+      "message": "'f' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "Formatter would have printed the following content:"
+      "message": "Formatter would have printed the following content:",
+      "severity": "ERROR"
     }
   ]
 }

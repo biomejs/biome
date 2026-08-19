@@ -3,15 +3,15 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::{MarkdownSyntaxKind, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
-use biome_rowan::{SyntaxKind, TextSize};
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
-use biome_unicode_table::lookup_byte;
+use biome_unicode_table::{is_unicode_punctuation, lookup_byte};
 
 use crate::syntax::{
     MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
@@ -26,6 +26,8 @@ pub enum MarkdownLexContext {
     Regular,
     /// Inside code info strings. Newlines end them.
     CodeInfoString,
+    /// Inside the YAML frontmatter delimited by `---` lines.
+    Frontmatter,
     /// Inside link definition (after `]:`). Whitespace separates destination from title.
     LinkDefinition,
     /// Inside inline code span. Backslashes are literal per CommonMark §6.1.
@@ -68,6 +70,20 @@ pub enum MarkdownReLexContext {
     /// After an ordered list marker. Splits leading whitespace from content
     /// so the parser can capture it as `MD_LIST_POST_MARKER_SPACE`.
     ListPostMarker,
+    /// Re-lex a construct token that turned out to be plain text (failed
+    /// emphasis marker, unmatched bracket, ...). The token is consumed as
+    /// text together with the plain characters that follow it, producing
+    /// one wider text token instead of a one-character token.
+    TextualFallback,
+    /// Re-lex a parser-measured span as one token of a parser-chosen kind.
+    /// Used for regions whose extent only the parser can decide. For example,
+    /// the whole content of an HTML block becomes a single literal token,
+    /// whitespace and newlines included: the parser measures where the block
+    /// ends (terminator line, blank line, or container boundary) and passes
+    /// the end position via [MarkdownLexer::set_relex_span] before re-lexing.
+    /// Document-level fenced code content and runs of indentation characters
+    /// use the same mechanism.
+    Span,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -75,6 +91,9 @@ pub enum MarkdownReLexContext {
 pub(crate) struct MarkdownLexer<'src> {
     /// Source text
     source: &'src str,
+
+    /// Exclusive end of the source range visible to this lexer.
+    end: usize,
 
     /// The start byte position in the source text of the next token.
     position: usize,
@@ -96,6 +115,11 @@ pub(crate) struct MarkdownLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
     force_ordered_list_marker: bool,
+
+    /// Target of the next [MarkdownReLexContext::Span] re-lex: the end
+    /// position and the token kind, set by the parser after measuring the
+    /// span.
+    relex_span: Option<(usize, MarkdownSyntaxKind)>,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -191,6 +215,15 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         self.position
     }
 
+    fn is_eof(&self) -> bool {
+        self.position >= self.end
+    }
+
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        let position = self.position.checked_add(offset)?;
+        (position < self.end).then(|| self.source.as_bytes()[position])
+    }
+
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
         self.diagnostics.push(diagnostic);
     }
@@ -211,22 +244,52 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
 impl<'src> MarkdownLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(source: &'src str) -> Self {
+        Self::from_valid_range(source, TextSize::from(0), source.len())
+    }
+
+    pub fn from_range(source: &'src str, range: TextRange) -> Option<Self> {
+        let start: usize = range.start().into();
+        let end: usize = range.end().into();
+        source.get(start..end)?;
+
+        Some(Self::from_valid_range(source, range.start(), end))
+    }
+
+    fn from_valid_range(source: &'src str, start: TextSize, end: usize) -> Self {
         Self {
             source,
-            // Start of document is treated as start of line for indentation purposes
-            after_newline: true,
+            end,
+            after_newline: start == TextSize::from(0)
+                || matches!(
+                    source.as_bytes().get(usize::from(start) - 1),
+                    Some(b'\n' | b'\r')
+                ),
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
-            current_start: TextSize::from(0),
+            current_start: start,
             current_flags: TokenFlags::empty(),
-            position: 0,
+            position: start.into(),
             diagnostics: vec![],
             force_ordered_list_marker: false,
+            relex_span: None,
         }
     }
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.force_ordered_list_marker = value;
+    }
+
+    pub fn range_end(&self) -> usize {
+        self.end
+    }
+
+    pub fn has_frontmatter_closing_fence(&self) -> bool {
+        self.find_frontmatter_fence(self.position).is_some()
+    }
+
+    /// Sets the target for the next [MarkdownReLexContext::Span] re-lex.
+    pub fn set_relex_span(&mut self, end: usize, kind: MarkdownSyntaxKind) {
+        self.relex_span = Some((end, kind));
     }
 
     pub(crate) fn consume_token(
@@ -242,6 +305,9 @@ impl<'src> MarkdownLexer<'src> {
             } else {
                 self.consume_code_info_string()
             };
+        }
+        if matches!(context, MarkdownLexContext::Frontmatter) {
+            return self.consume_frontmatter();
         }
         match dispatched {
             // Whitespace handling is context-sensitive and order-dependent:
@@ -298,16 +364,43 @@ impl<'src> MarkdownLexer<'src> {
             }
             MUL | MIN | IDT => self.consume_thematic_break_or_emphasis(dispatched, context),
             PLS => self.consume_byte(PLUS),
-            HAS => self.consume_hash(),
+            HAS => {
+                if self.is_at_heading_hash() {
+                    self.consume_byte(T![#])
+                } else {
+                    self.consume_textual(context)
+                }
+            }
             TPL => self.consume_backtick(),
             TLD => self.consume_tilde(),
             MOR => self.consume_byte(R_ANGLE),
             LSS => self.consume_byte(L_ANGLE),
-            EXL => self.consume_byte(BANG),
+            EXL => {
+                if self.is_at_image_start() {
+                    self.consume_byte(BANG)
+                } else {
+                    self.consume_textual(context)
+                }
+            }
             BTO => self.consume_byte(L_BRACK),
             BTC => self.consume_byte(R_BRACK),
-            PNO => self.consume_byte(L_PAREN),
-            PNC => self.consume_byte(R_PAREN),
+            // `(` and `)` are only syntax inside link destinations and titles,
+            // which the parser lexes with the LinkDefinition context.
+            // Anywhere else they are plain text.
+            PNO => {
+                if matches!(context, MarkdownLexContext::LinkDefinition) {
+                    self.consume_byte(L_PAREN)
+                } else {
+                    self.consume_textual(context)
+                }
+            }
+            PNC => {
+                if matches!(context, MarkdownLexContext::LinkDefinition) {
+                    self.consume_byte(R_PAREN)
+                } else {
+                    self.consume_textual(context)
+                }
+            }
             COL => self.consume_byte(COLON),
             AMP => self.consume_entity_or_textual(context),
             BSL => {
@@ -537,10 +630,8 @@ impl<'src> MarkdownLexer<'src> {
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source()
-            .as_bytes()
-            .get(self.position() + offset)
-            .copied()
+        let position = self.position.checked_add(offset)?;
+        (position < self.end).then(|| self.source.as_bytes()[position])
     }
 
     /// Peeks at the next byte
@@ -640,6 +731,65 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         MD_TEXTUAL_LITERAL
+    }
+
+    fn consume_frontmatter(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        if let Some(length) = self.frontmatter_fence_len(self.position) {
+            self.advance(length);
+            return T![---];
+        }
+
+        self.position = self
+            .find_frontmatter_fence(self.position)
+            .unwrap_or(self.end);
+        MD_FRONTMATTER_LITERAL
+    }
+
+    fn frontmatter_fence_len(&self, start: usize) -> Option<usize> {
+        let source = self.source.as_bytes();
+        let fence_end = start.checked_add(3)?;
+        if fence_end > self.end || source.get(start..fence_end)? != b"---" {
+            return None;
+        }
+
+        let mut position = fence_end;
+        while position < self.end && matches!(source[position], b' ' | b'\t') {
+            position += 1;
+        }
+
+        (position == self.end || matches!(source[position], b'\n' | b'\r'))
+            .then_some(position - start)
+    }
+
+    fn find_frontmatter_fence(&self, start: usize) -> Option<usize> {
+        let source = self.source.as_bytes();
+        let mut position = start;
+
+        while position < self.end {
+            while position < self.end && !matches!(source[position], b'\n' | b'\r') {
+                position += 1;
+            }
+            if position == self.end {
+                return None;
+            }
+
+            if source[position] == b'\r' {
+                position += 1;
+                if position < self.end && source[position] == b'\n' {
+                    position += 1;
+                }
+            } else {
+                position += 1;
+            }
+
+            if self.frontmatter_fence_len(position).is_some() {
+                return Some(position);
+            }
+        }
+
+        None
     }
 
     /// Consume a single whitespace character at line start as text.
@@ -805,6 +955,16 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         let trailing = &prefix[idx..];
+
+        // Padding in marker-only (`-   \n`, `1.   \n`) belongs to the list prefix,
+        // not an inline hard break. Keep it split so the parser can classify the
+        // first space as the list separator and the rest as content indent.
+        if trailing.iter().all(|byte| is_space_or_tab_byte(*byte))
+            && self.current_whitespace_run_ends_line()
+        {
+            return true;
+        }
+
         if trailing.is_empty() {
             let mut saw_tab = current == b'\t';
             let mut next = self.position + 1;
@@ -898,15 +1058,12 @@ impl<'src> MarkdownLexer<'src> {
                 self.advance(1);
                 dash_count += 1;
             }
-            // Allow trailing spaces/tabs
-            while matches!(self.current_byte(), Some(b' ' | b'\t')) {
-                self.advance(1);
-            }
             // 1-2 dashes followed by newline/EOF is a setext underline
             // 3+ dashes goes to thematic break logic below
-            if (1..=2).contains(&dash_count)
-                && matches!(self.current_byte(), Some(b'\n' | b'\r') | None)
-            {
+            if (1..=2).contains(&dash_count) && self.current_whitespace_run_ends_line() {
+                // The trailing whitespace is only peeked to validate the setext
+                // underline. Leave it for the parser instead of including it in
+                // MD_SETEXT_UNDERLINE_LITERAL's span.
                 return MD_SETEXT_UNDERLINE_LITERAL;
             }
             // Not a setext underline - restore and try thematic break
@@ -1062,27 +1219,6 @@ impl<'src> MarkdownLexer<'src> {
         self.consume_textual(MarkdownLexContext::Regular)
     }
 
-    /// Consume hash character(s).
-    ///
-    /// Emits a single HASH token containing all consecutive `#` characters.
-    /// The parser can determine the heading level by checking the token's length.
-    ///
-    /// Per CommonMark §4.2: ATX headings use 1-6 `#` characters.
-    fn consume_hash(&mut self) -> MarkdownSyntaxKind {
-        self.assert_at_char_boundary();
-
-        // Count consecutive hash characters
-        let mut count = 0;
-        while let Some(b'#') = self.byte_at(count) {
-            count += 1;
-        }
-
-        // Emit all consecutive hashes as a single HASH token
-        // The parser determines heading level from token length
-        self.advance(count);
-        HASH
-    }
-
     /// Consume backtick(s).
     ///
     /// At line start with 3+ backticks: emits TRIPLE_BACKTICK for fenced code blocks.
@@ -1183,7 +1319,7 @@ impl<'src> MarkdownLexer<'src> {
     /// Returns `true` if the parser is at or passed the end of the file.
     #[inline]
     fn is_eof(&self) -> bool {
-        self.position >= self.source.len()
+        self.position >= self.end
     }
 
     /// Consume textual characters until hitting special markdown syntax.
@@ -1213,10 +1349,17 @@ impl<'src> MarkdownLexer<'src> {
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
 
-        // Continue consuming characters until we hit a special markdown character
-        // or end of file. Special characters are those that could start inline elements
-        // or block structures: * - _ + # ` ~ > ! [ ] ( ) \ and newlines.
-        // Spaces and tabs are now included as regular text content (except in LinkDefinition context).
+        // True while the token contains nothing but spaces and tabs.
+        // Such a token may be the indentation before a list marker or heading
+        // (for example after a `> ` quote marker), so a following `-`, `+`,
+        // or `#` must end the token instead of being absorbed as text.
+        let mut only_whitespace = matches!(char, ' ' | '\t');
+
+        // Keep consuming characters until we hit Markdown syntax or the end of the file.
+        // `* _ ` ~ < > [ ] ( ) \` and newlines always end the token.
+        // `# ! - + &` only count as syntax in certain positions; when they
+        // cannot be syntax here, they stay part of the text.
+        // Spaces and tabs are regular text content (except in the LinkDefinition context).
         while let Some(byte) = self.current_byte() {
             if matches!(context, MarkdownLexContext::LinkDefinition)
                 && (byte == b' ' || byte == b'\t')
@@ -1257,30 +1400,80 @@ impl<'src> MarkdownLexer<'src> {
                 }
                 // Stop at characters that could be markdown syntax
                 MUL  // *
-                | MIN  // -
-                | PLS  // +
-                | HAS  // #
                 | TPL  // `
                 | TLD  // ~
                 | LSS  // <
                 | MOR  // >
-                | EXL  // !
                 | BTO  // [
                 | BTC  // ]
-                | PNO  // (
-                | PNC  // )
                 | BSL  // \
-                | AMP  // & (entity references)
                 => break,
-                // IDT includes A-Z, a-z, and _ - only _ is special for markdown
-                IDT => {
-                    if byte == b'_' {
+                // Parens are only syntax in link destinations and titles
+                // (LinkDefinition context); elsewhere they are plain text.
+                PNO | PNC => {
+                    if matches!(context, MarkdownLexContext::LinkDefinition) {
                         break;
                     }
-                    self.advance_char_unchecked();
+                    only_whitespace = false;
+                    self.advance(1);
+                }
+                // `-` and `+` only mean something at the start of a line
+                // (lists, thematic breaks, setext underlines). In the middle
+                // of text they are plain characters; after leading whitespace
+                // they may still be a list marker, so stop there.
+                MIN | PLS => {
+                    if only_whitespace {
+                        break;
+                    }
+                    self.advance(1);
+                }
+                // A `#` in the middle of text is plain, unless it closes a
+                // heading (like the ` ##` in `## title ##`) or follows only
+                // whitespace, where it may open a heading.
+                HAS => {
+                    if only_whitespace || self.is_at_atx_closing_sequence() {
+                        break;
+                    }
+                    // Every `#` in this stretch has the same characters after
+                    // it, so none of them can close a heading either: consume
+                    // them all at once instead of re-checking each one.
+                    while let Some(b'#') = self.current_byte() {
+                        self.advance(1);
+                    }
+                }
+                // `!` only starts an image when directly followed by `[`.
+                EXL => {
+                    if self.is_at_image_start() {
+                        break;
+                    }
+                    only_whitespace = false;
+                    self.advance(1);
+                }
+                // `&` only matters when it starts a valid entity such as
+                // `&amp;`; a bare ampersand is plain text.
+                AMP => {
+                    if self.match_entity_reference().is_some() {
+                        break;
+                    }
+                    only_whitespace = false;
+                    self.advance(1);
+                }
+                // IDT includes A-Z, a-z, and _ - only _ is special for markdown.
+                // A `_` between two word characters (like the middle of
+                // `snake_case`) can never open or close emphasis (§6.2), so
+                // it stays inside the text token.
+                IDT if byte == b'_' => {
+                    if !self.is_intraword_underscore_sequence() {
+                        break;
+                    }
+                    while let Some(b'_') = self.current_byte() {
+                        self.advance(1);
+                    }
+                    only_whitespace = false;
                 }
                 // All other characters are regular text
                 _ => {
+                    only_whitespace = false;
                     self.advance_char_unchecked();
                 }
             }
@@ -1290,7 +1483,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     fn is_ordered_list_marker_at(&self, idx: usize) -> bool {
-        if idx >= self.source.len() {
+        if idx >= self.end {
             return false;
         }
 
@@ -1298,7 +1491,7 @@ impl<'src> MarkdownLexer<'src> {
         let mut pos = idx;
         let mut digit_count = 0;
 
-        while pos < bytes.len() && bytes[pos].is_ascii_digit() {
+        while pos < self.end && bytes[pos].is_ascii_digit() {
             digit_count += 1;
             if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                 return false;
@@ -1310,12 +1503,12 @@ impl<'src> MarkdownLexer<'src> {
             return false;
         }
 
-        if pos >= bytes.len() || !(bytes[pos] == b'.' || bytes[pos] == b')') {
+        if pos >= self.end || !(bytes[pos] == b'.' || bytes[pos] == b')') {
             return false;
         }
         pos += 1;
 
-        if pos >= bytes.len() {
+        if pos >= self.end {
             return true;
         }
 
@@ -1328,7 +1521,7 @@ impl<'src> MarkdownLexer<'src> {
     fn is_at_trailing_hash_closing_whitespace(&self) -> bool {
         let mut i = self.position;
         let bytes = self.source.as_bytes();
-        let len = bytes.len();
+        let len = self.end;
 
         let mut saw_ws = false;
         while i < len {
@@ -1369,6 +1562,93 @@ impl<'src> MarkdownLexer<'src> {
         matches!(bytes[i], b'\n' | b'\r')
     }
 
+    /// Returns true if a `#` at the current position can be heading syntax:
+    /// it opens a heading at the start of a line (§4.2) or closes one at the
+    /// end. Anywhere else `#` is plain text.
+    fn is_at_heading_hash(&self) -> bool {
+        self.after_newline
+            || self.is_at_container_line_start()
+            || self.is_in_atx_opening_sequence()
+            || self.is_at_atx_closing_sequence()
+    }
+
+    /// Returns true when earlier hashes on the line form an ATX opening sequence.
+    fn is_in_atx_opening_sequence(&self) -> bool {
+        let before = &self.source[..self.position];
+        let line_start = before.rfind(['\n', '\r']).map_or(0, |pos| pos + 1);
+        let line_prefix = &before[line_start..];
+        let Some(hash_start) = line_prefix.find('#') else {
+            return false;
+        };
+
+        line_prefix[..hash_start]
+            .bytes()
+            .all(|b| is_space_or_tab_byte(b) || b == b'>')
+            && line_prefix[hash_start..].bytes().all(|b| b == b'#')
+    }
+
+    /// Returns true if the current line holds nothing before this position
+    /// except spaces, tabs, and block quote markers (`>`). Block syntax like
+    /// a heading can still start here, even though it is not a raw line start.
+    fn is_at_container_line_start(&self) -> bool {
+        let before = &self.source[..self.position];
+        let line_start = before.rfind(['\n', '\r']).map_or(0, |pos| pos + 1);
+        before[line_start..]
+            .bytes()
+            .all(|b| is_space_or_tab_byte(b) || b == b'>')
+    }
+
+    /// Returns true if the current position starts an image opener (`![`, §6.4).
+    /// A `!` not followed by `[` is plain text.
+    fn is_at_image_start(&self) -> bool {
+        self.current_byte() == Some(b'!') && self.byte_at(1) == Some(b'[')
+    }
+
+    /// Returns true if the `_` sequence at the current position sits between
+    /// two characters that are neither whitespace nor punctuation, like the
+    /// middle of `snake_case`. Per §6.2 such a sequence can never open or
+    /// close emphasis, so it can stay inside a plain-text token.
+    ///
+    /// Uses the same character classes as the emphasis flanking rules in
+    /// `syntax/inline/emphasis.rs`, so a folded `_` is exactly one the
+    /// emphasis parser would reject anyway.
+    fn is_intraword_underscore_sequence(&self) -> bool {
+        let is_word_char = |c: Option<char>| matches!(c, Some(c) if !c.is_whitespace() && !is_unicode_punctuation(c));
+
+        let before = self.source[..self.position].chars().next_back();
+        if !is_word_char(before) {
+            return false;
+        }
+
+        let mut offset = 0;
+        while let Some(b'_') = self.byte_at(offset) {
+            offset += 1;
+        }
+        let after = self.source[self.position + offset..self.end].chars().next();
+        is_word_char(after)
+    }
+
+    /// Returns true when the rest of the line is only `#` characters and
+    /// optional spaces/tabs — the closing hashes of a heading like
+    /// `## title ##` (§4.2). Only space and tab count as padding here;
+    /// any other character makes the hashes plain text.
+    fn is_at_atx_closing_sequence(&self) -> bool {
+        if self.current_byte() != Some(b'#') {
+            return false;
+        }
+
+        let mut offset = 0;
+        while let Some(b'#') = self.byte_at(offset) {
+            offset += 1;
+        }
+
+        while matches!(self.byte_at(offset), Some(byte) if is_space_or_tab_byte(byte)) {
+            offset += 1;
+        }
+
+        matches!(self.byte_at(offset), None | Some(b'\n' | b'\r'))
+    }
+
     /// Check if current position starts a potential hard line break pattern.
     /// Returns true if enough trailing spaces are followed by a newline.
     fn is_potential_hard_line_break(&self) -> bool {
@@ -1398,6 +1678,15 @@ impl<'src> MarkdownLexer<'src> {
         false
     }
 
+    fn current_whitespace_run_ends_line(&self) -> bool {
+        let mut offset = 0;
+        while matches!(self.byte_at(offset), Some(b' ' | b'\t')) {
+            offset += 1;
+        }
+
+        matches!(self.byte_at(offset), Some(b'\n' | b'\r') | None)
+    }
+
     /// Bumps the current byte and creates a lexed token of the passed in kind
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
@@ -1420,15 +1709,40 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
         let old_position = self.position;
         self.position = u32::from(self.current_start) as usize;
 
-        let lex_context = match context {
-            MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
-            MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
-            MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
-            MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
-        };
-
         let re_lexed_kind = match self.current_byte() {
-            Some(current) => self.consume_token(current, lex_context),
+            // Consume the current character and everything after it as plain
+            // text, regardless of which token kind it lexed as before.
+            // `consume_textual` always consumes the first character, then
+            // stops at the next character that could be syntax.
+            Some(_) if context == MarkdownReLexContext::TextualFallback => {
+                self.consume_textual(MarkdownLexContext::Regular)
+            }
+            // Consume everything up to the end position the parser measured
+            // as one token of the kind the parser chose.
+            Some(_) if context == MarkdownReLexContext::Span => {
+                let (end, kind) = self
+                    .relex_span
+                    .take()
+                    .expect("set_relex_span must be called before a Span re-lex");
+                debug_assert!(end > self.position && end <= self.end);
+                self.position = end;
+                kind
+            }
+            Some(current) => {
+                let lex_context = match context {
+                    MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
+                    MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
+                    MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
+                    MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
+                    // Handled by the arms above; these contexts have no
+                    // corresponding lex context.
+                    MarkdownReLexContext::TextualFallback | MarkdownReLexContext::Span => {
+                        MarkdownLexContext::Regular
+                    }
+                };
+
+                self.consume_token(current, lex_context)
+            }
             None => EOF,
         };
 

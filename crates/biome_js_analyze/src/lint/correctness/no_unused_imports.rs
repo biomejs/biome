@@ -5,7 +5,7 @@ use crate::{
 };
 use biome_rule_options::no_unused_imports::NoUnusedImportsOptions;
 
-use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded::EmbeddedService;
 use biome_analyze::{
     AddVisitor, FixKind, FromServices, Phase, Phases, QueryKey, Queryable, Rule, RuleDiagnostic,
     RuleKey, RuleMetadata, RuleSource, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor,
@@ -113,158 +113,30 @@ declare_lint_rule! {
     }
 }
 
-/// Model for tracking any types referenced in JsDoc or TSDoc comments (like {@link TypeName} or @param {TypeName})
-#[derive(Clone, Default)]
-struct JsDocTypeModel(FxHashSet<String>);
-
-impl Deref for JsDocTypeModel {
-    type Target = FxHashSet<String>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for JsDocTypeModel {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-#[derive(Default)]
-struct JsDocTypeCollectorVisitor {
-    jsdoc_types: JsDocTypeModel,
-}
-
-declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyJsObjectMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
-}
-
-impl Visitor for JsDocTypeCollectorVisitor {
-    type Language = JsLanguage;
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        _ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
-                    load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
-                }
-            }
-            WalkEvent::Leave(_) => {}
-        }
-    }
-
-    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(self.jsdoc_types);
-    }
-}
-
-fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
-    JsdocComment::get_jsdocs(node)
-        .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
-}
-
-static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
-});
-
-static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
-
-static JSDOC_TYPE_PART_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\w+)").unwrap());
-
-fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str) {
-    // regex matching for typical JSDoc patterns containing types `{@link ClassName}` and `@sometag {TypeSyntax}`
-    // This should likely become a proper parser.
-    // This will definitely fail in object types like { a: { b: number } }
-
-    for (_, [_tag_name, type_name]) in JSDOC_INLINE_TAG_REGEX
-        .captures_iter(comment)
-        .map(|c| c.extract())
-    {
-        model.insert(type_name.to_string());
-    }
-
-    for (_, [_tag_name, type_name]) in JSDOC_TYPE_TAG_REGEX
-        .captures_iter(comment)
-        .map(|c| c.extract())
-    {
-        // can the TS type parser be used here? for now we simply match with words
-        for (_, [type_part]) in JSDOC_TYPE_PART_REGEX
-            .captures_iter(type_name)
-            .map(|c| c.extract())
-        {
-            model.insert(type_part.to_string());
-        }
-    }
-}
-
-pub struct JsDocTypeServices {
-    jsdoc_types: JsDocTypeModel,
-    semantic_services: SemanticServices,
-}
-impl JsDocTypeServices {
-    fn jsdoc_types(&self) -> &JsDocTypeModel {
-        &self.jsdoc_types
-    }
-
-    fn semantic_model(&self) -> &SemanticModel {
-        self.semantic_services.model()
-    }
-}
-
-impl FromServices for JsDocTypeServices {
-    fn from_services(
-        rule_key: &RuleKey,
-        rule_metadata: &RuleMetadata,
-        services: &ServiceBag,
-    ) -> Result<Self, ServicesDiagnostic> {
-        let jsdoc_types: &JsDocTypeModel = services
-            .get_service()
-            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
-
-        Ok(Self {
-            jsdoc_types: jsdoc_types.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
-        })
-    }
-}
-
-impl Phase for JsDocTypeServices {
-    fn phase() -> Phases {
-        Phases::Semantic
-    }
-}
-
 #[derive(Clone)]
 pub struct NoUnusedImportsQuery(pub AnyJsImportClause);
 
-impl Queryable for NoUnusedImportsQuery {
-    type Input = JsSyntaxNode;
-    type Output = AnyJsImportClause;
-
-    type Language = JsLanguage;
-    type Services = JsDocTypeServices;
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        root: &<Self::Language as Language>::Root,
-    ) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
-        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
-    }
-
-    fn key() -> QueryKey<Self::Language> {
-        QueryKey::Syntax(AnyJsImportClause::KIND_SET)
-    }
-
-    fn unwrap_match(_services: &ServiceBag, node: &Self::Input) -> Self::Output {
-        AnyJsImportClause::unwrap_cast(node.clone())
-    }
+#[derive(Debug)]
+pub enum Unused {
+    /// Empty import such as `import {} from "mod"`
+    EmptyStatement(TextRange),
+    //// All imports of the statements are unused
+    AllImports(TextRange),
+    /// The default import of the combined clause is unused. e.g.:
+    /// - `import UnusedDefault, * as Ns from "mod"`
+    /// - `import UnusedDefault, { A } from "mod"`
+    DefaultImport(TextRange),
+    /// The imports of the second specifier of the combined clause are unused. e.g.:
+    /// - `import Default, * as UnusedNs from "mod"`
+    /// - `import Default, { UnusedA }from "mod"`
+    CombinedImport(TextRange),
+    /// The default and some named imports in a combined clause are unused. e.g.:
+    /// - `import UnusedDefault, { UnusedA, B, UnusedC } from "mod"`
+    DefaultNamedImport(TextRange, Box<[AnyJsNamedImportSpecifier]>),
+    /// Some named specifoers are unused. e.g.:
+    /// - import { UnusedA, B, UnusedC } from "mod"`
+    /// - `import Default, { UnusedA, B, UnusedC }from "mod"`
+    NamedImports(Box<[AnyJsNamedImportSpecifier]>),
 }
 
 impl Rule for NoUnusedImports {
@@ -274,9 +146,9 @@ impl Rule for NoUnusedImports {
     type Options = NoUnusedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
 
         match ctx.query() {
             AnyJsImportClause::JsImportBareClause(_) => {
@@ -286,11 +158,18 @@ impl Rule for NoUnusedImports {
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let default_local_name = clause.default_specifier().ok()?.local_name().ok()?;
 
-                let is_default_import_unused =
-                    is_unused(ctx, embedded_bindings, &default_local_name);
+                let is_default_import_unused = is_unused(
+                    ctx,
+                    embedded,
+                    &default_local_name,
+                );
                 let (is_combined_unused, named_import_range) = match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers) => {
-                        match unused_named_specifiers(ctx, embedded_bindings, &specifiers) {
+                        match unused_named_specifiers(
+                            ctx,
+                            embedded,
+                            &specifiers,
+                        ) {
                             Some(Unused::AllImports(range) | Unused::EmptyStatement(range)) => {
                                 (true, range)
                             }
@@ -309,10 +188,7 @@ impl Rule for NoUnusedImports {
                     }
                     AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(specifier) => {
                         let local_name = specifier.local_name().ok()?;
-                        (
-                            is_unused(ctx, embedded_bindings, &local_name),
-                            local_name.range(),
-                        )
+                        (is_unused(ctx, embedded, &local_name), local_name.range())
                     }
                 };
                 match (is_default_import_unused, is_combined_unused) {
@@ -327,8 +203,7 @@ impl Rule for NoUnusedImports {
             }
             AnyJsImportClause::JsImportDefaultClause(clause) => {
                 let local_name = clause.default_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, embedded_bindings, &local_name)
-                    .then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded, &local_name).then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
                 // exception: allow type augmentation imports
@@ -340,12 +215,15 @@ impl Rule for NoUnusedImports {
                     return None;
                 }
 
-                unused_named_specifiers(ctx, embedded_bindings, &clause.named_specifiers().ok()?)
+                unused_named_specifiers(
+                    ctx,
+                    embedded,
+                    &clause.named_specifiers().ok()?,
+                )
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
                 let local_name = clause.namespace_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, embedded_bindings, &local_name)
-                    .then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded, &local_name).then_some(Unused::AllImports(local_name.range()))
             }
         }
     }
@@ -625,32 +503,162 @@ impl Rule for NoUnusedImports {
     }
 }
 
-#[derive(Debug)]
-pub enum Unused {
-    /// Empty import such as `import {} from "mod"`
-    EmptyStatement(TextRange),
-    //// All imports of the statements are unused
-    AllImports(TextRange),
-    /// The default import of the combined clause is unused. e.g.:
-    /// - `import UnusedDefault, * as Ns from "mod"`
-    /// - `import UnusedDefault, { A } from "mod"`
-    DefaultImport(TextRange),
-    /// The imports of the second specifier of the combined clause are unused. e.g.:
-    /// - `import Default, * as UnusedNs from "mod"`
-    /// - `import Default, { UnusedA }from "mod"`
-    CombinedImport(TextRange),
-    /// The default and some named imports in a combined clause are unused. e.g.:
-    /// - `import UnusedDefault, { UnusedA, B, UnusedC } from "mod"`
-    DefaultNamedImport(TextRange, Box<[AnyJsNamedImportSpecifier]>),
-    /// Some named specifoers are unused. e.g.:
-    /// - import { UnusedA, B, UnusedC } from "mod"`
-    /// - `import Default, { UnusedA, B, UnusedC }from "mod"`
-    NamedImports(Box<[AnyJsNamedImportSpecifier]>),
+/// Model for tracking any types referenced in JsDoc or TSDoc comments (like {@link TypeName} or @param {TypeName})
+#[derive(Clone, Default)]
+struct JsDocTypeModel(FxHashSet<String>);
+
+impl Deref for JsDocTypeModel {
+    type Target = FxHashSet<String>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for JsDocTypeModel {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Default)]
+struct JsDocTypeCollectorVisitor {
+    jsdoc_types: JsDocTypeModel,
+}
+
+declare_node_union! {
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyJsObjectMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
+}
+
+impl Visitor for JsDocTypeCollectorVisitor {
+    type Language = JsLanguage;
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        _ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(node) => {
+                if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
+                    load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
+                }
+            }
+            WalkEvent::Leave(_) => {}
+        }
+    }
+
+    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        ctx.services.insert_service(self.jsdoc_types);
+    }
+}
+
+fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
+    JsdocComment::get_jsdocs(node)
+        .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
+}
+
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
+});
+
+static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
+
+static JSDOC_TYPE_PART_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\w+)").unwrap());
+
+fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str) {
+    // regex matching for typical JSDoc patterns containing types `{@link ClassName}` and `@sometag {TypeSyntax}`
+    // This should likely become a proper parser.
+    // This will definitely fail in object types like { a: { b: number } }
+
+    for (_, [_tag_name, type_name]) in JSDOC_INLINE_TAG_REGEX
+        .captures_iter(comment)
+        .map(|c| c.extract())
+    {
+        model.insert(type_name.to_string());
+    }
+
+    for (_, [_tag_name, type_name]) in JSDOC_TYPE_TAG_REGEX
+        .captures_iter(comment)
+        .map(|c| c.extract())
+    {
+        // can the TS type parser be used here? for now we simply match with words
+        for (_, [type_part]) in JSDOC_TYPE_PART_REGEX
+            .captures_iter(type_name)
+            .map(|c| c.extract())
+        {
+            model.insert(type_part.to_string());
+        }
+    }
+}
+
+pub struct JsDocTypeServices {
+    jsdoc_types: JsDocTypeModel,
+    semantic_services: SemanticServices,
+}
+impl JsDocTypeServices {
+    fn jsdoc_types(&self) -> &JsDocTypeModel {
+        &self.jsdoc_types
+    }
+
+    fn semantic_model(&self) -> &SemanticModel {
+        self.semantic_services.model()
+    }
+}
+
+impl FromServices for JsDocTypeServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        let jsdoc_types: &JsDocTypeModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
+
+        Ok(Self {
+            jsdoc_types: jsdoc_types.clone(),
+            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
+        })
+    }
+}
+
+impl Phase for JsDocTypeServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
+
+
+impl Queryable for NoUnusedImportsQuery {
+    type Input = JsSyntaxNode;
+    type Output = AnyJsImportClause;
+
+    type Language = JsLanguage;
+    type Services = JsDocTypeServices;
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        root: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(AnyJsImportClause::KIND_SET)
+    }
+
+    fn unwrap_match(_services: &ServiceBag, node: &Self::Input) -> Self::Output {
+        AnyJsImportClause::unwrap_cast(node.clone())
+    }
 }
 
 fn unused_named_specifiers(
     ctx: &RuleContext<NoUnusedImports>,
-    embedded_bindings: &EmbeddedBindings,
+    embedded: &EmbeddedService,
     named_specifiers: &JsNamedImportSpecifiers,
 ) -> Option<Unused> {
     let specifiers = named_specifiers.specifiers();
@@ -664,7 +672,7 @@ fn unused_named_specifiers(
             let Some(local_name) = specifier.local_name() else {
                 continue;
             };
-            if is_unused(ctx, embedded_bindings, &local_name) {
+            if is_unused(ctx, embedded, &local_name) {
                 unused_imports.push(specifier);
             }
         }
@@ -682,17 +690,34 @@ fn unused_named_specifiers(
 
 fn is_unused(
     ctx: &RuleContext<NoUnusedImports>,
-    embedded_bindings: &EmbeddedBindings,
+    embedded: &EmbeddedService,
     local_name: &AnyJsBinding,
 ) -> bool {
     let AnyJsBinding::JsIdentifierBinding(binding) = &local_name else {
         return false;
     };
 
-    let is_defined_in_embed = binding
-        .name_token()
-        .ok()
-        .is_some_and(|token| embedded_bindings.contains_binding(token.text_trimmed()));
+    let binding_name = binding.name_token().ok();
+
+    // Used in the template, as a value or a type, which the script's semantic
+    // model can't see.
+    if let Some(token) = binding_name.as_ref()
+        && embedded.is_used(token.token_text_trimmed())
+    {
+        return false;
+    }
+
+    // Only treat "name matches an embedded binding" as proof-of-use when the
+    // snippet we are linting is itself a non-source embed (Svelte `{@const}`,
+    // snippet parameters, Vue v-for, …). Source `<script>` blocks have their
+    // own top-level imports registered into the embedded bindings set, which
+    // would otherwise self-suppress every import in the script; for those,
+    // the reference check above and the semantic model below are the precise
+    // gates.
+    let is_defined_in_embed = !ctx.source_type::<JsFileSource>().is_embedded_source()
+        && binding_name
+            .as_ref()
+            .is_some_and(|token| embedded.contains_binding(token.token_text_trimmed()));
     if is_defined_in_embed {
         return false;
     }

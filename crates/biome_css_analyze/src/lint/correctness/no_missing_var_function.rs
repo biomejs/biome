@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule stores CSS values that can span multiple tokens.")]
+
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
@@ -16,6 +18,7 @@ declare_lint_rule! {
     /// - It ignores the following properties:
     ///   - `animation`
     ///   - `animation-name`
+    ///   - `container-name`
     ///   - `counter-increment`
     ///   - `counter-reset`
     ///   - `counter-set`
@@ -179,7 +182,7 @@ impl Rule for NoMissingVarFunction {
 
         let mut parent_id = rule.parent_id();
         while let Some(id) = parent_id {
-            let parent_rule = model.get_rule_by_id(id)?;
+            let parent_rule = model.get_rule_by_id(&id)?;
             if parent_rule
                 .declarations()
                 .iter()

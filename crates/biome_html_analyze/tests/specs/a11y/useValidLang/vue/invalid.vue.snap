@@ -11,6 +11,9 @@ expression: invalid.vue
 <html lang="zh-Xxxx"></html>
 <html lang="zh-Hans-ZZ"></html>
 <html lang="en-US-GB-Extra"></html>
+<!-- static Vue bindings with invalid language codes should also be flagged -->
+<html :lang="'lorem'"></html>
+<html v-bind:lang="'en-babab'"></html>
 
 ```
 
@@ -138,7 +141,7 @@ invalid.vue:6:12 lint/a11y/useValidLang ━━━━━━━━━━━━━�
   > 6 │ <html lang="zh-Hans-ZZ"></html>
       │            ^^^^^^^^^^^^
     7 │ <html lang="en-US-GB-Extra"></html>
-    8 │ 
+    8 │ <!-- static Vue bindings with invalid language codes should also be flagged -->
   
   i Some of valid countries:
   
@@ -170,7 +173,55 @@ invalid.vue:7:12 lint/a11y/useValidLang ━━━━━━━━━━━━━�
     6 │ <html lang="zh-Hans-ZZ"></html>
   > 7 │ <html lang="en-US-GB-Extra"></html>
       │            ^^^^^^^^^^^^^^^^
-    8 │ 
+    8 │ <!-- static Vue bindings with invalid language codes should also be flagged -->
+    9 │ <html :lang="'lorem'"></html>
+  
+
+```
+
+```
+invalid.vue:9:13 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+     7 │ <html lang="en-US-GB-Extra"></html>
+     8 │ <!-- static Vue bindings with invalid language codes should also be flagged -->
+   > 9 │ <html :lang="'lorem'"></html>
+       │             ^^^^^^^^^
+    10 │ <html v-bind:lang="'en-babab'"></html>
+    11 │ 
+  
+  i Some of valid languages:
+  
+  - ab
+  - aa
+  - af
+  - sq
+  - am
+  - ar
+  - an
+  - hy
+  - as
+  - ay
+  - az
+  - ba
+  - eu
+  - bn
+  - dz
+  
+
+```
+
+```
+invalid.vue:10:19 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+     8 │ <!-- static Vue bindings with invalid language codes should also be flagged -->
+     9 │ <html :lang="'lorem'"></html>
+  > 10 │ <html v-bind:lang="'en-babab'"></html>
+       │                   ^^^^^^^^^^^^
+    11 │ 
   
 
 ```

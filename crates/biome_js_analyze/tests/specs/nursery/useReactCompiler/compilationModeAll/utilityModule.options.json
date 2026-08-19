@@ -1,0 +1,14 @@
+{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "useReactCompiler": {
+                    "level": "error",
+                    "options": {
+                        "compilationMode": "all"
+                    }
+                }
+            }
+        }
+    }
+}

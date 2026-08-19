@@ -1,7 +1,6 @@
 use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
-use biome_parser::Parser;
 use biome_parser::TokenSet;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -10,6 +9,7 @@ use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::{CompletedMarker, ParsedSyntax};
 use biome_parser::token_set;
+use biome_parser::{Parser, SyntaxFeature};
 
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
@@ -33,7 +33,6 @@ use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until}
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 use crate::syntax::value::parse_error::expected_if_test_boolean_not_expr;
-use biome_parser::SyntaxFeature;
 
 const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T![')'], T!['}'], EOF];

@@ -205,7 +205,10 @@ fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
                     continue;
                 }
                 p.bump(R_BRACK);
-                return p.at(L_PAREN) || p.at(L_BRACK);
+                // Check text as well as token kind: in Regular context `(`
+                // lexes as plain text, and this runs inside a lookahead
+                // where re-lexing is not possible.
+                return p.at(L_PAREN) || p.at(L_BRACK) || p.cur_text().starts_with('(');
             }
 
             p.bump(p.cur());

@@ -61,71 +61,6 @@ declare_lint_rule! {
     }
 }
 
-fn identifier_is_global_document(
-    reference: &JsReferenceIdentifier,
-    name: &StaticValue,
-    model: &SemanticModel,
-) -> bool {
-    //  Check identifier is `document` and global
-    name.text() == "document" && model.binding(reference).is_none()
-}
-
-/// Check `expr` is `document`
-fn is_global_document(expr: &AnyJsExpression, model: &SemanticModel) -> Option<()> {
-    let (reference, name) = global_identifier(&expr.as_any_global_identifier_expression()?)?;
-
-    // `expr` is global document
-    if identifier_is_global_document(&reference, &name, model) {
-        Some(())
-    } else {
-        // Check binding declaration recursively
-        let bind = model.binding(&reference)?;
-        let decl = bind.tree().declaration()?;
-        let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
-        match decl {
-            // const foo = document;
-            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                let initializer = declarator.initializer()?;
-                let right_expr = initializer.expression().ok()?;
-                is_global_document(&right_expr, model)
-            }
-            _ => None,
-        }
-    }
-}
-
-/// Check member is `cookie`
-fn is_cookie(assignment: &AnyJsAssignment) -> Option<()> {
-    const COOKIE: &str = "cookie";
-    match assignment {
-        // `document.cookie`
-        AnyJsAssignment::JsStaticMemberAssignment(static_assignment) => {
-            let property = static_assignment.member().ok()?;
-
-            if property.to_trimmed_text().text() != COOKIE {
-                return None;
-            };
-        }
-        // `document["cookie"]`
-        AnyJsAssignment::JsComputedMemberAssignment(computed_assignment) => {
-            let any_expr = computed_assignment.member().ok()?;
-            let string_literal = any_expr
-                .as_any_js_literal_expression()?
-                .as_js_string_literal_expression()?;
-            let inner_string = string_literal.inner_string_text().ok()?;
-
-            if inner_string.text() != COOKIE {
-                return None;
-            }
-        }
-        _ => {
-            return None;
-        }
-    }
-
-    Some(())
-}
-
 impl Rule for NoDocumentCookie {
     type Query = Semantic<JsAssignmentExpression>;
     type State = ();
@@ -169,4 +104,68 @@ impl Rule for NoDocumentCookie {
             }),
         )
     }
+}
+fn identifier_is_global_document(
+    reference: &JsReferenceIdentifier,
+    name: &StaticValue,
+    model: &SemanticModel,
+) -> bool {
+    //  Check identifier is `document` and global
+    name.text() == "document" && model.binding(reference).is_none()
+}
+
+/// Check `expr` is `document`
+fn is_global_document(expr: &AnyJsExpression, model: &SemanticModel) -> Option<()> {
+    let (reference, name) = global_identifier(&expr.as_any_global_identifier_expression()?)?;
+
+    // `expr` is global document
+    if identifier_is_global_document(&reference, &name, model) {
+        Some(())
+    } else {
+        // Check binding declaration recursively
+        let bind = model.binding(&reference)?;
+        let decl = bind.tree().declaration()?;
+        let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
+        match decl {
+            // const foo = document;
+            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                let initializer = declarator.initializer()?;
+                let right_expr = initializer.expression().ok()?;
+                is_global_document(&right_expr, model)
+            }
+            _ => None,
+        }
+    }
+}
+
+/// Check member is `cookie`
+fn is_cookie(assignment: &AnyJsAssignment) -> Option<()> {
+    const COOKIE: &str = "cookie";
+    match assignment {
+        // `document.cookie`
+        AnyJsAssignment::JsStaticMemberAssignment(static_assignment) => {
+            let property = static_assignment.member().ok()?;
+
+            if property.as_js_name()?.value_token().ok()?.text_trimmed() != COOKIE {
+                return None;
+            };
+        }
+        // `document["cookie"]`
+        AnyJsAssignment::JsComputedMemberAssignment(computed_assignment) => {
+            let any_expr = computed_assignment.member().ok()?;
+            let string_literal = any_expr
+                .as_any_js_literal_expression()?
+                .as_js_string_literal_expression()?;
+            let inner_string = string_literal.inner_string_text().ok()?;
+
+            if inner_string.text() != COOKIE {
+                return None;
+            }
+        }
+        _ => {
+            return None;
+        }
+    }
+
+    Some(())
 }

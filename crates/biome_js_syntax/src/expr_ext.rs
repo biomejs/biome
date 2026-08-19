@@ -1092,23 +1092,29 @@ impl AnyJsExpression {
         false
     }
 
-    /// Checks whether the current function call is:
-    /// - `it`: many libraries such as Node.js, Mocha, Jest, etc.
-    /// - `test`: many libraries such as Node.js, bun, etc.
+    /// Checks whether the current function call is a test body context:
+    /// - `it` and `test` calls accepted by [`contains_a_test_pattern`], such as
+    ///   `it.only` or `test.concurrent`
+    /// - `it.each` and `test.each` table test calls accepted by
+    ///   [`contains_a_test_each_pattern`], such as `test.concurrent.each`
     /// - [`Deno.test`](https://docs.deno.com/runtime/manual/basics/testing/)
     /// - [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async/#waitfor)
+    ///
+    /// [`contains_a_test_pattern`]: crate::AnyJsExpression::contains_a_test_pattern
+    /// [`contains_a_test_each_pattern`]: crate::AnyJsExpression::contains_a_test_each_pattern
     pub fn contains_it_call(&self) -> bool {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let members = CalleeNamesIterator::new(self.clone()).collect::<Vec<_>>();
 
-        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
-
-        let mut rev = texts.iter().rev().flatten();
+        let mut rev = members.iter().rev();
 
         let first = rev.next().map(|t| t.text());
         let second = rev.next().map(|t| t.text());
 
         match first {
-            Some("test" | "it" | "waitFor") => true,
+            Some("test" | "it") => {
+                self.contains_a_test_pattern() || self.contains_a_test_each_pattern()
+            }
+            Some("waitFor") => true,
             Some("Deno") => matches!(second, Some("test")),
             _ => false,
         }

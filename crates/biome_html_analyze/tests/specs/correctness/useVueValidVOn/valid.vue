@@ -52,9 +52,30 @@
   <!-- Multiple v-on directives on same element -->
   <div v-on:click="foo" @mouseenter="bar"></div>
 
+  <!-- Object syntax: arg-less v-on with a value spreads the object's
+       listeners onto the element. -->
+  <div v-on="$listeners"></div>
+  <div v-on="listeners"></div>
+
   <!-- Component event handlers -->
   <MyComponent @click="handler" @custom-event="customHandler"></MyComponent>
 
   <!-- Native modifier (Vue 2 compatibility) -->
   <div @click.native="handler"></div>
+
+  <!-- Verb modifiers (`stop`, `prevent`) carry an intrinsic side
+       effect and are valid without a handler. -->
+  <div @click.stop></div>
+  <form @submit.prevent></form>
+  <div v-on:click.stop></div>
+  <div v-on:submit.prevent></div>
+  <div @click.stop.prevent></div>
+  <div @click.prevent.exact></div>
+
+  <!-- Verb-modifier-only on a self-closing component (modifier is
+       followed by whitespace + `/>`, so the modifier-name lookup must
+       trim trivia). -->
+  <Foo @click.stop />
+  <Foo @submit.prevent />
+  <Foo v-on:click.stop />
 </template>

@@ -3,12 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlOpeningElement, element_ext::AnyHtmlTagElement};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{HtmlOpeningElement, T, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::no_sync_scripts::NoSyncScriptsOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Prevent the usage of synchronous scripts.
@@ -49,31 +46,26 @@ impl Rule for NoSyncScripts {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(
-            &AnyHtmlTagElement::from(binding.clone()),
-            source_type,
-            "script",
-        ) {
+        if AnyHtmlTagElement::from(binding.clone()).tag_name_kind() != Some(T![script]) {
             return None;
         }
 
         let attributes = binding.attributes();
-        if attributes.find_by_name("src").is_none()
-            || attributes.find_by_name("type").is_some_and(|attribute| {
-                attribute.initializer().is_some_and(|initializer| {
-                    initializer.value().ok().is_some_and(|value| {
-                        value.as_html_string().is_some_and(|html_string| {
-                            html_string
-                                .inner_string_text()
-                                .is_ok_and(|inner_string| inner_string.text() == "module")
-                        })
-                    })
+        if attributes.find_attribute_by_name("src").is_none()
+            || attributes.find_attribute_by_name("async").is_some()
+            || attributes.find_attribute_by_name("defer").is_some()
+            || attributes
+                .find_attribute_by_name("type")
+                .is_some_and(|attribute| {
+                    let Some(attribute) = attribute.as_html_attribute() else {
+                        return false;
+                    };
+
+                    attribute
+                        .as_static_value()
+                        .is_some_and(|value| value.text() == "module")
                 })
-            })
-            || attributes.find_by_name("async").is_some()
-            || attributes.find_by_name("defer").is_some()
         {
             return None;
         }

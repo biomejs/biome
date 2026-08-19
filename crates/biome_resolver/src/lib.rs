@@ -1,6 +1,5 @@
 #![deny(clippy::use_self)]
 
-pub mod db;
 mod errors;
 mod node_builtins;
 mod resolver_fs_proxy;
@@ -227,9 +226,11 @@ fn resolve_module_with_package_json(
         DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
         DiscoverableManifest::Off => Err(ResolveError::NotFound),
     };
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
-        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
-    }) {
+    if let Some(path) = tsconfig
+        .as_ref()
+        .ok()
+        .and_then(|tsconfig| resolve_paths_mapping(specifier, tsconfig, fs, options).ok())
+    {
         return Ok(path);
     }
 
@@ -249,7 +250,12 @@ fn resolve_module_with_package_json(
         return resolve_import_alias(specifier, package_path, package_json, fs, options);
     }
 
+    // A package may only reference itself by name when its `package.json` has
+    // an `exports` field (`PACKAGE_SELF_RESOLVE` step 4 in the Node.js
+    // resolution algorithm). Without one, the specifier falls through to the
+    // regular `node_modules` lookup below, which finds the package on disk.
     if let Some(package_name) = &package_json.name
+        && package_json.exports.is_some()
         && specifier.starts_with(package_name.as_ref())
         && specifier
             .as_bytes()
@@ -429,7 +435,6 @@ fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
 fn resolve_paths_mapping(
     specifier: &str,
     tsconfig_json: &TsConfigJson,
-    package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
@@ -440,16 +445,12 @@ fn resolve_paths_mapping(
         .ok_or(ResolveError::NotFound)?;
 
     let resolve_specifier = |specifier: &str| {
-        if is_relative_specifier(specifier) {
-            resolve_relative_path(
-                specifier,
-                &tsconfig_json.compiler_options.paths_base,
-                fs,
-                options,
-            )
-        } else {
-            resolve_dependency(specifier, package_path, fs, options)
-        }
+        resolve_relative_path(
+            specifier,
+            &tsconfig_json.compiler_options.paths_base,
+            fs,
+            options,
+        )
     };
 
     let resolve_target = |target: &str, glob_replacement: Option<&str>| match glob_replacement {

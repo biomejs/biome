@@ -240,8 +240,11 @@ fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
                 .ok()?
                 .as_js_static_member_expression()
                 .is_some_and(|y| {
-                    y.member()
-                        .is_ok_and(|z| z.to_trimmed_text().text() == "Number")
+                    y.member().is_ok_and(|z| {
+                        z.as_js_name()
+                            .and_then(|name| name.value_token().ok())
+                            .is_some_and(|token| token.text_trimmed() == "Number")
+                    })
                 });
 
             if !reference.is_global_this() && !reference.has_name("window")

@@ -29,14 +29,17 @@ pub enum MarkdownSyntaxKind {
     TRIPLE_BACKTICK,
     TILDE,
     TRIPLE_TILDE,
-    WHITESPACE3,
+    FENCE,
     UNDERSCORE,
     DOUBLE_UNDERSCORE,
     HASH,
     COMMA,
     COLON,
     NULL_KW,
+    MD_CODE_LITERAL,
+    MD_FRONTMATTER_LITERAL,
     MD_HARD_LINE_LITERAL,
+    MD_HTML_LITERAL,
     MD_TEXTUAL_LITERAL,
     MD_THEMATIC_BREAK_LITERAL,
     MD_SETEXT_UNDERLINE_LITERAL,
@@ -54,15 +57,19 @@ pub enum MarkdownSyntaxKind {
     MD_BOGUS,
     MD_BOGUS_BLOCK,
     MD_BOGUS_BULLET,
-    MD_DOCUMENT,
+    MD_ROOT,
     MD_BLOCK_LIST,
     MD_HASH_LIST,
     MD_HASH,
     MD_HEADER,
     MD_INDENT_CODE_BLOCK,
     MD_FENCED_CODE_BLOCK,
+    MD_FRONTMATTER,
+    MD_FRONTMATTER_CONTENT,
     MD_CODE_NAME_LIST,
+    MD_CODE_CONTENT,
     MD_HTML_BLOCK,
+    MD_HTML_CONTENT,
     MD_LINK_REFERENCE_DEFINITION,
     MD_LINK_LABEL,
     MD_LINK_DESTINATION,
@@ -124,7 +131,7 @@ impl MarkdownSyntaxKind {
                 | TRIPLE_BACKTICK
                 | TILDE
                 | TRIPLE_TILDE
-                | WHITESPACE3
+                | FENCE
                 | UNDERSCORE
                 | DOUBLE_UNDERSCORE
                 | HASH
@@ -135,7 +142,10 @@ impl MarkdownSyntaxKind {
     pub const fn is_literal(self) -> bool {
         matches!(
             self,
-            MD_HARD_LINE_LITERAL
+            MD_CODE_LITERAL
+                | MD_FRONTMATTER_LITERAL
+                | MD_HARD_LINE_LITERAL
+                | MD_HTML_LITERAL
                 | MD_TEXTUAL_LITERAL
                 | MD_THEMATIC_BREAK_LITERAL
                 | MD_SETEXT_UNDERLINE_LITERAL
@@ -186,7 +196,7 @@ impl MarkdownSyntaxKind {
             TRIPLE_BACKTICK => "```",
             TILDE => "~",
             TRIPLE_TILDE => "~~~",
-            WHITESPACE3 => "   ",
+            FENCE => "---",
             UNDERSCORE => "_",
             DOUBLE_UNDERSCORE => "__",
             HASH => "#",
@@ -201,4 +211,4 @@ impl MarkdownSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: MarkdownSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: MarkdownSyntaxKind :: R_ANGLE } ; ['('] => { $ crate :: MarkdownSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: MarkdownSyntaxKind :: R_PAREN } ; ['['] => { $ crate :: MarkdownSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: MarkdownSyntaxKind :: R_BRACK } ; [/] => { $ crate :: MarkdownSyntaxKind :: SLASH } ; [=] => { $ crate :: MarkdownSyntaxKind :: EQ } ; [!] => { $ crate :: MarkdownSyntaxKind :: BANG } ; [-] => { $ crate :: MarkdownSyntaxKind :: MINUS } ; [*] => { $ crate :: MarkdownSyntaxKind :: STAR } ; [+] => { $ crate :: MarkdownSyntaxKind :: PLUS } ; [**] => { $ crate :: MarkdownSyntaxKind :: DOUBLE_STAR } ; ['`'] => { $ crate :: MarkdownSyntaxKind :: BACKTICK } ; ["```"] => { $ crate :: MarkdownSyntaxKind :: TRIPLE_BACKTICK } ; [~] => { $ crate :: MarkdownSyntaxKind :: TILDE } ; [~~~] => { $ crate :: MarkdownSyntaxKind :: TRIPLE_TILDE } ; ["   "] => { $ crate :: MarkdownSyntaxKind :: WHITESPACE3 } ; ["_"] => { $ crate :: MarkdownSyntaxKind :: UNDERSCORE } ; ["__"] => { $ crate :: MarkdownSyntaxKind :: DOUBLE_UNDERSCORE } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; [,] => { $ crate :: MarkdownSyntaxKind :: COMMA } ; [:] => { $ crate :: MarkdownSyntaxKind :: COLON } ; [null] => { $ crate :: MarkdownSyntaxKind :: NULL_KW } ; [ident] => { $ crate :: MarkdownSyntaxKind :: IDENT } ; [EOF] => { $ crate :: MarkdownSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: MarkdownSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: MarkdownSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: MarkdownSyntaxKind :: R_ANGLE } ; ['('] => { $ crate :: MarkdownSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: MarkdownSyntaxKind :: R_PAREN } ; ['['] => { $ crate :: MarkdownSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: MarkdownSyntaxKind :: R_BRACK } ; [/] => { $ crate :: MarkdownSyntaxKind :: SLASH } ; [=] => { $ crate :: MarkdownSyntaxKind :: EQ } ; [!] => { $ crate :: MarkdownSyntaxKind :: BANG } ; [-] => { $ crate :: MarkdownSyntaxKind :: MINUS } ; [*] => { $ crate :: MarkdownSyntaxKind :: STAR } ; [+] => { $ crate :: MarkdownSyntaxKind :: PLUS } ; [**] => { $ crate :: MarkdownSyntaxKind :: DOUBLE_STAR } ; ['`'] => { $ crate :: MarkdownSyntaxKind :: BACKTICK } ; ["```"] => { $ crate :: MarkdownSyntaxKind :: TRIPLE_BACKTICK } ; [~] => { $ crate :: MarkdownSyntaxKind :: TILDE } ; [~~~] => { $ crate :: MarkdownSyntaxKind :: TRIPLE_TILDE } ; [---] => { $ crate :: MarkdownSyntaxKind :: FENCE } ; ["_"] => { $ crate :: MarkdownSyntaxKind :: UNDERSCORE } ; ["__"] => { $ crate :: MarkdownSyntaxKind :: DOUBLE_UNDERSCORE } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; [,] => { $ crate :: MarkdownSyntaxKind :: COMMA } ; [:] => { $ crate :: MarkdownSyntaxKind :: COLON } ; [null] => { $ crate :: MarkdownSyntaxKind :: NULL_KW } ; [ident] => { $ crate :: MarkdownSyntaxKind :: IDENT } ; [EOF] => { $ crate :: MarkdownSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: MarkdownSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; }

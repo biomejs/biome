@@ -12,6 +12,12 @@ impl FormatNodeRule<CssSyntaxComponent> for FormatCssSyntaxComponent {
             multiplier,
         } = node.as_fields();
 
-        write!(f, [component.format(), multiplier.format()])
+        write!(
+            f,
+            [
+                component.format()?.with_text_case(CssCase::Preserve),
+                multiplier.format()
+            ]
+        )
     }
 }

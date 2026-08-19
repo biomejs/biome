@@ -346,13 +346,23 @@ where
                                 continue;
                             }
 
-                            builder.entry(HtmlChild::Newline)
+                            // Text that follows a blank line keeps it, the same
+                            // way an element that follows one does.
+                            if whitespace.bytes().filter(|byte| *byte == b'\n').count() > 1 {
+                                builder.entry(HtmlChild::EmptyLine)
+                            } else {
+                                builder.entry(HtmlChild::Newline)
+                            }
                         } else {
                             // if there's newlines before a comment, we need to preserve them
                             if whitespace.contains('\n')
                                 && matches!(chunks.peek(), Some(&(_, HtmlTextChunk::Comment(_))))
                             {
-                                builder.entry(HtmlChild::Newline)
+                                if whitespace.bytes().filter(|byte| *byte == b'\n').count() > 1 {
+                                    builder.entry(HtmlChild::EmptyLine)
+                                } else {
+                                    builder.entry(HtmlChild::Newline)
+                                }
                             } else {
                                 builder.entry(HtmlChild::Whitespace)
                             }
@@ -564,11 +574,11 @@ impl PendingWhitespace {
     }
 }
 
-/// The builder is used to:
-/// 1. Remove [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace] if a next element is [HtmlChild::Whitespace]
-/// 2. Don't push a new element [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace] if previous one is [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace]
+/// Collects split children while coalescing adjacent whitespace markers.
 ///
-/// [Prettier applies]: https://github.com/prettier/prettier/blob/b0d9387b95cdd4e9d50f5999d3be53b0b5d03a97/src/language-js/print/jsx.js#L144-L180
+/// [HtmlChild::EmptyLine] remains dominant because it represents a user-authored blank line.
+/// A single newline following ordinary whitespace is retained only when the container's children
+/// started on a new line, preserving multiline source layout without expanding compact elements.
 #[derive(Debug)]
 struct HtmlSplitChildrenBuilder {
     buffer: Vec<HtmlChild>,
@@ -580,18 +590,28 @@ impl HtmlSplitChildrenBuilder {
     }
 
     fn entry(&mut self, child: HtmlChild) {
+        let children_started_on_new_line = matches!(
+            self.buffer.first(),
+            Some(HtmlChild::Newline | HtmlChild::EmptyLine)
+        );
         match self.buffer.last_mut() {
             Some(last @ (HtmlChild::EmptyLine | HtmlChild::Newline | HtmlChild::Whitespace)) => {
-                if matches!(child, HtmlChild::Whitespace) {
-                    *last = child;
-                } else if matches!(
-                    child,
+                match child {
+                    HtmlChild::EmptyLine => *last = HtmlChild::EmptyLine,
+                    HtmlChild::Newline
+                        if children_started_on_new_line
+                            && matches!(last, HtmlChild::Whitespace) =>
+                    {
+                        *last = HtmlChild::Newline;
+                    }
+                    HtmlChild::Whitespace if !matches!(last, HtmlChild::EmptyLine) => {
+                        *last = HtmlChild::Whitespace;
+                    }
+                    HtmlChild::Whitespace | HtmlChild::Newline => {}
                     HtmlChild::NonText(_)
-                        | HtmlChild::Word(_)
-                        | HtmlChild::Comment(_)
-                        | HtmlChild::Verbatim(_)
-                ) {
-                    self.buffer.push(child);
+                    | HtmlChild::Word(_)
+                    | HtmlChild::Comment(_)
+                    | HtmlChild::Verbatim(_) => self.buffer.push(child),
                 }
             }
             _ => self.buffer.push(child),

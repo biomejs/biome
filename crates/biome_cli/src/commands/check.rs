@@ -16,6 +16,7 @@ use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_module_graph::type_inference::profiling::TypeInferenceProfilerGuard;
 use biome_service::workspace::{
     FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
     SupportKind,
@@ -46,13 +47,14 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) watch: bool,
     pub(crate) profile_rules: bool,
+    pub(crate) profile_type_inference: bool,
 }
 
 struct CheckExecution {
     /// The type of fixes that should be applied when analyzing a file.
     ///
-    /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
-    /// arguments.
+    /// It's [None] if the `check` command is called without `--write` or `--fix`.
+    /// `--unsafe` upgrades the mode when combined with `--write` or `--fix`.
     fix_file_mode: Option<FixFileMode>,
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -71,6 +73,11 @@ struct CheckExecution {
     only: Vec<AnalyzerSelector>,
     /// Skip the given lint rule, assist action, group of rules and actions, or domain
     skip: Vec<AnalyzerSelector>,
+
+    profile_rules: bool,
+
+    /// Profiler for type inference
+    type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
 
 impl Execution for CheckExecution {
@@ -105,6 +112,22 @@ impl Execution for CheckExecution {
         true
     }
 
+    fn is_rule_profiling_enabled(&self) -> bool {
+        self.profile_rules
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        self.type_inference_profile.is_some()
+    }
+
+    fn take_type_inference_profile(
+        &self,
+    ) -> Option<biome_module_graph::type_inference::profiling::TypeInferenceProfileSnapshot> {
+        self.type_inference_profile
+            .as_ref()
+            .map(TypeInferenceProfilerGuard::drain)
+    }
+
     fn as_diagnostic_category(&self) -> &'static Category {
         category!("check")
     }
@@ -112,11 +135,6 @@ impl Execution for CheckExecution {
     fn is_safe_fixes_enabled(&self) -> bool {
         self.fix_file_mode
             .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeFixes)
-    }
-
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
-        self.fix_file_mode
-            .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeAndUnsafeFixes)
     }
 
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {
@@ -185,6 +203,25 @@ impl TraversalCommand for CheckCommandPayload {
             unsafe_: self.unsafe_,
         })?;
 
+        let type_inference_profile = if self.profile_type_inference {
+            if cli_options.use_server {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--use-server",
+                    "Type-inference profiling is available only for in-process CLI analysis.",
+                ));
+            }
+            if self.stdin_file_path.is_some() {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--stdin-file-path",
+                    "Type-inference profiles require files processed by the CLI traversal.",
+                ));
+            }
+            Some(TypeInferenceProfilerGuard::start())
+        } else {
+            None
+        };
         if self.profile_rules {
             biome_analyze::profiling::enable();
         }
@@ -197,6 +234,8 @@ impl TraversalCommand for CheckCommandPayload {
             skip_parse_errors: cli_options.skip_parse_errors,
             only: self.only.clone(),
             skip: self.skip.clone(),
+            profile_rules: self.profile_rules,
+            type_inference_profile,
         }))
     }
 

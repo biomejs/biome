@@ -92,10 +92,9 @@ impl Rule for UseValidAriaRole {
 
         let allowed_invalid_roles = &options.allow_invalid_roles;
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value =
-            role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role_attribute_value = role_attribute_static_value.trim();
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
+        let role_attribute_value = role_attribute_static_value.text().trim();
         if role_attribute_value.is_empty() {
             return Some(());
         }
@@ -135,7 +134,7 @@ impl Rule for UseValidAriaRole {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
         mutation.remove_node(role_attribute);
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

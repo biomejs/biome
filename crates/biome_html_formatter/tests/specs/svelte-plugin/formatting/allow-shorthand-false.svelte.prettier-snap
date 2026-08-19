@@ -1,0 +1,5 @@
+<input value />
+<input value="string" />
+<input value={value} />
+<input value={value} />
+<input value={value} />

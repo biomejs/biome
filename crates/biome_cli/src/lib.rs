@@ -71,8 +71,8 @@ impl<'app> CliSession<'app> {
         match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
             BiomeCommand::Upgrade => commands::upgrade::upgrade(self),
-            BiomeCommand::Rage(_, _, daemon_logs, formatter, linter) => {
-                commands::rage::rage(self, daemon_logs, formatter, linter)
+            BiomeCommand::Rage(cli_options, _, daemon_logs, formatter, linter) => {
+                commands::rage::rage(self, &cli_options, daemon_logs, formatter, linter)
             }
             BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start {
@@ -103,6 +103,7 @@ impl<'app> CliSession<'app> {
                 skip,
                 watch,
                 profile_rules,
+                profile_type_inference,
             } => run_command(
                 self,
                 &log_options,
@@ -127,6 +128,7 @@ impl<'app> CliSession<'app> {
                     only,
                     skip,
                     profile_rules,
+                    profile_type_inference,
                     watch,
                 }),
             ),
@@ -155,6 +157,7 @@ impl<'app> CliSession<'app> {
                 json_parser,
                 log_options,
                 profile_rules,
+                profile_type_inference,
                 watch,
             } => run_command(
                 self,
@@ -183,6 +186,7 @@ impl<'app> CliSession<'app> {
                     css_parser,
                     json_parser,
                     profile_rules,
+                    profile_type_inference,
                     watch,
                 }),
             ),

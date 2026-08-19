@@ -44,12 +44,12 @@
 
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
-    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdDocument, MdEntityReference,
+    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdEntityReference,
     MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode,
     MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
     MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
     MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdTextual, MdThematicBreakBlock,
+    MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -365,7 +365,7 @@ pub struct HtmlRenderContext {
 impl HtmlRenderContext {
     /// Create a new rendering context from parsed document data.
     pub fn new(
-        document: &MdDocument,
+        document: &MdRoot,
         list_tightness: &[ListTightness],
         list_item_indents: &[ListItemIndent],
         quote_indents: &[QuoteIndent],
@@ -414,7 +414,7 @@ impl HtmlRenderContext {
 
 /// Render a markdown document to HTML.
 pub fn document_to_html(
-    document: &MdDocument,
+    document: &MdRoot,
     list_tightness: &[ListTightness],
     list_item_indents: &[ListItemIndent],
     quote_indents: &[QuoteIndent],
@@ -428,7 +428,7 @@ pub fn document_to_html(
 // ============================================================================
 
 /// Collect link reference definitions from the document.
-fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, Option<String>)> {
+fn collect_link_definitions(document: &MdRoot) -> HashMap<String, (String, Option<String>)> {
     let mut definitions = HashMap::new();
     let link_definitions: Vec<_> = document
         .syntax()
@@ -883,7 +883,7 @@ impl<'a> HtmlRenderer<'a> {
                 .and_then(biome_markdown_syntax::MdInlineItemList::cast)
                 .is_some();
             if is_inline {
-                let content = collect_raw_inline_text(&html.content());
+                let content = collect_html_content_text(&html.content());
                 self.push_str(&content);
             } else {
                 let block_indent = self.block_indent(html.syntax().text_trimmed_range());
@@ -1325,17 +1325,7 @@ fn strip_paragraph_indent(
 
 /// Render an ATX header (# style).
 fn header_level(header: &MdHeader) -> usize {
-    // Count total hash characters in the before list.
-    // The lexer emits all consecutive `#` chars as a single HASH token,
-    // so we sum the text lengths of all hash tokens.
-    // Use text_trimmed() to exclude any leading trivia (indentation whitespace).
-    header
-        .before()
-        .iter()
-        .filter_map(|h| h.hash_token().ok())
-        .map(|tok| tok.text_trimmed().len())
-        .sum::<usize>()
-        .clamp(1, 6)
+    header.level().clamp(1, 6)
 }
 
 /// Render a setext header (underline style).
@@ -1490,7 +1480,7 @@ fn render_html_block(
 ) {
     // Prepend the block prefix indent (now in explicit slot, not trivia)
     let mut content = indent_list_text(&html.indent());
-    content.push_str(&collect_raw_inline_text(&html.content()));
+    content.push_str(&collect_html_content_text(&html.content()));
     if list_indent > 0 {
         content = strip_indent_preserve_tabs(&content, list_indent);
     }
@@ -1581,8 +1571,9 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
 
 /// Render inline HTML.
 fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
-    let content = collect_raw_inline_text(&html.value());
-    out.push_str(&content);
+    if let Ok(token) = html.value_token() {
+        out.push_str(token.text());
+    }
 }
 
 /// Render an entity reference into the current buffer.
@@ -1670,6 +1661,18 @@ fn collect_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String
 }
 
 /// Collect raw inline text without processing escapes.
+/// The raw text of HTML block content: a single literal token holding the
+/// whole content verbatim, container prefixes included.
+fn collect_html_content_text(
+    content: &biome_rowan::SyntaxResult<biome_markdown_syntax::MdHtmlContent>,
+) -> String {
+    content
+        .as_ref()
+        .ok()
+        .and_then(|content| content.value_token().ok())
+        .map_or_else(String::new, |token| token.text().to_string())
+}
+
 fn collect_raw_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String {
     let mut text = String::new();
     for item in list.iter() {
@@ -1688,6 +1691,11 @@ fn collect_raw_inline_item(item: &AnyMdInline, out: &mut String) {
         }
         AnyMdInline::MdHardLine(_) => {
             out.push('\n');
+        }
+        AnyMdInline::MdCodeContent(code) => {
+            if let Ok(token) = code.value_token() {
+                out.push_str(token.text());
+            }
         }
         _ => {
             // For other inline elements, collect their tokens
@@ -1957,6 +1965,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         AnyMdInline::MdIndentToken(_) => {
             // Indent tokens don't contribute text to alt attributes
         }
+        AnyMdInline::MdCodeContent(_) => {
+            // Fenced code content never appears inside link or image text
+        }
     }
 }
 
@@ -2101,12 +2112,28 @@ mod tests {
     }
 
     #[test]
+    fn test_forward_reference_scopes_emphasis() {
+        assert_eq!(
+            render("*[foo*][ref]\n\n[ref]: /uri\n"),
+            "<p>*<a href=\"/uri\">foo*</a></p>\n"
+        );
+        assert_eq!(
+            render("[foo *bar][ref]*\n\n[ref]: /uri\n"),
+            "<p><a href=\"/uri\">foo *bar</a>*</p>\n"
+        );
+        assert_eq!(
+            render("# [foo][ref]  \n\n[ref]: /uri\n"),
+            "<h1><a href=\"/uri\">foo</a></h1>\n"
+        );
+    }
+
+    #[test]
     fn test_emphasis_complex_cases() {
         // Test: Nested
         let parsed = parse_markdown("**bold *and italic* text**\n");
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Nested failed: {}",
             parsed.syntax()
         );
@@ -2115,7 +2142,7 @@ mod tests {
         let parsed = parse_markdown("***bold italic***\n");
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Rule of 3 failed: {}",
             parsed.syntax()
         );
@@ -2124,7 +2151,7 @@ mod tests {
         let parsed = parse_markdown("*a **b** c*\n");
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Multiple runs failed: {}",
             parsed.syntax()
         );
@@ -2133,7 +2160,7 @@ mod tests {
         let parsed = parse_markdown("*foo**bar**baz*\n");
         assert_eq!(
             parsed.syntax().kind(),
-            biome_markdown_syntax::MarkdownSyntaxKind::MD_DOCUMENT,
+            biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
             "Overlapping failed: {}",
             parsed.syntax()
         );

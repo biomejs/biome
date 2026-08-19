@@ -7,13 +7,14 @@ use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     JsClassExpression, JsFormalParameter, JsFunctionExpression, JsIdentifierBinding,
     JsParameterList, JsRestParameter, TsIdentifierBinding, TsPropertySignatureTypeMember,
-    TsTypeParameter, TsTypeParameterName, binding_ext::AnyJsBindingDeclaration,
+    TsTypeParameter, TsTypeParameterName,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
     binding_ext::AnyJsParameterParentFunction,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
 use biome_rule_options::no_shadow::NoShadowOptions;
 
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow variable declarations from shadowing variables declared in the outer scope.
@@ -127,23 +128,14 @@ pub struct ShadowedBinding {
 }
 
 impl Rule for NoShadow {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierBinding>;
     type State = ShadowedBinding;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = NoShadowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut shadowed_bindings = Vec::new();
-        let model = ctx.query();
-        let options = ctx.options();
-
-        for binding in ctx.query().all_bindings() {
-            if let Some(shadowed_binding) = check_shadowing(model, binding, options) {
-                shadowed_bindings.push(shadowed_binding);
-            }
-        }
-
-        shadowed_bindings.into_boxed_slice()
+        let model = ctx.model();
+        check_shadowing(model, model.as_binding(ctx.query()), ctx.options())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

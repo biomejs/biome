@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/each-block-else-with-nested-if-inline.svelte
+---
+
+# Input
+
+```svelte
+{#each animals as animal}
+    <p>{animal}</p>
+{:else}
+    {#if type === "dog"}no dogs{/if}
+{/each}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,7 @@
+ {#each animals as animal}
+     <p>{animal}</p>
+ {:else}
+-    {#if type === "dog"}no dogs{/if}
++    {#if type === "dog"}
++        no dogs
++    {/if}
+ {/each}
+```
+
+# Output
+
+```svelte
+{#each animals as animal}
+    <p>{animal}</p>
+{:else}
+    {#if type === "dog"}
+        no dogs
+    {/if}
+{/each}
+```

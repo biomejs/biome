@@ -83,6 +83,15 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                     AnyHtmlAttribute::AnyAstroDirective(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::AnyAngularBinding(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::AngularStructuralDirective(attr) => {
+                                        attr.format().fmt(f)
+                                    }
+                                    AnyHtmlAttribute::AngularTemplateRefVariable(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                 })
                             }))
                             .finish()?;

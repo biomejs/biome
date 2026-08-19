@@ -9,6 +9,10 @@
 
 <!-- autofocus inside element with popover is valid -->
 <div popover><input autofocus /></div>
+<div v-bind:popover="popoverValue"><input autofocus /></div>
+<div :popover="popoverValue"><input autofocus /></div>
+<div popover><input v-bind:autofocus="autofocusValue" /></div>
+<div popover><input :autofocus="autofocusValue" /></div>
 <div popover="auto"><button autofocus>Submit</button></div>
 
 <!-- nested cases -->

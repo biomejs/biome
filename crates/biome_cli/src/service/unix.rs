@@ -1,11 +1,13 @@
 use crate::logging::LogOptions;
 use biome_lsp::{ServerConnection, ServerFactory};
+use biome_package::node_semver::Version;
 use biome_service::WatcherOptions;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::{
     convert::Infallible,
     env, fs,
     io::{self, ErrorKind},
+    os::unix::fs::FileTypeExt,
     time::Duration,
 };
 use tokio::{
@@ -17,7 +19,7 @@ use tokio::{
     process::{Child, Command},
     time,
 };
-use tracing::{Instrument, debug, info};
+use tracing::{Instrument, debug, info, warn};
 
 /// Returns the filesystem path of the global socket used to communicate with
 /// the server daemon
@@ -26,7 +28,13 @@ fn get_socket_name() -> Utf8PathBuf {
 }
 
 pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
-    fs::read_dir(biome_fs::ensure_cache_dir()).map(|iter| {
+    enumerate_pipes_in(biome_fs::ensure_cache_dir())
+}
+
+fn enumerate_pipes_in(
+    path: Utf8PathBuf,
+) -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
+    fs::read_dir(&path).map(|iter| {
         iter.filter_map(|entry| {
             let entry = Utf8PathBuf::from_path_buf(entry.ok()?.path()).ok()?;
             let file_name = entry.file_name()?;
@@ -39,6 +47,64 @@ pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8
             }
         })
     })
+}
+
+async fn purge_old_sockets_in(cache_dir: &Utf8Path, current_version: &str) {
+    let Ok(current_version) = current_version.parse::<Version>() else {
+        warn!("Skipping stale socket cleanup because the current version is invalid");
+        return;
+    };
+
+    let sockets = match enumerate_pipes_in(cache_dir.to_path_buf()) {
+        Ok(sockets) => sockets.collect::<Vec<_>>(),
+        Err(err) => {
+            warn!("Could not enumerate stale daemon sockets: {err}");
+            return;
+        }
+    };
+
+    for (version, path) in sockets {
+        let Ok(version) = version.parse::<Version>() else {
+            continue;
+        };
+
+        if version >= current_version {
+            continue;
+        }
+
+        let file_type = match fs::symlink_metadata(&path) {
+            Ok(metadata) => metadata.file_type(),
+            Err(err) if err.kind() == ErrorKind::NotFound => continue,
+            Err(err) => {
+                warn!("Could not inspect stale daemon socket {path}: {err}");
+                continue;
+            }
+        };
+
+        if !file_type.is_socket() {
+            continue;
+        }
+
+        match time::timeout(Duration::from_millis(100), UnixStream::connect(&path)).await {
+            Ok(Ok(_)) => {}
+            Ok(Err(err)) if err.kind() == ErrorKind::ConnectionRefused => {
+                if let Err(err) = fs::remove_file(&path)
+                    && err.kind() != ErrorKind::NotFound
+                {
+                    warn!("Could not remove stale daemon socket {path}: {err}");
+                } else {
+                    info!("Removed stale socket at {path}");
+                }
+            }
+            Ok(Err(err)) if err.kind() == ErrorKind::NotFound => {}
+            Ok(Err(err)) => warn!("Could not connect to stale daemon socket {path}: {err}"),
+            Err(_) => warn!("Timed out connecting to stale daemon socket {path}"),
+        }
+    }
+}
+
+async fn purge_old_sockets() {
+    purge_old_sockets_in(&biome_fs::ensure_cache_dir(), biome_configuration::VERSION).await;
 }
 
 /// Try to connect to the global socket and wait for the connection to become ready
@@ -203,6 +269,8 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
 
     info!("Trying to connect to socket {path}");
 
+    purge_old_sockets().await;
+
     // Try to remove the socket file if it already exists
     if path.exists() {
         info!("Remove socket {path}");
@@ -223,4 +291,118 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
 async fn run_server(connection: ServerConnection, stream: UnixStream) {
     let (read, write) = stream.into_split();
     connection.accept(read, write).await;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{
+        os::unix::fs::symlink,
+        sync::atomic::{AtomicUsize, Ordering},
+    };
+
+    static NEXT_TEST_DIRECTORY: AtomicUsize = AtomicUsize::new(0);
+
+    struct TestDirectory(Utf8PathBuf);
+
+    impl TestDirectory {
+        fn new() -> Self {
+            let path = env::temp_dir().join(format!(
+                "biome-socket-test-{}-{}",
+                std::process::id(),
+                NEXT_TEST_DIRECTORY.fetch_add(1, Ordering::Relaxed)
+            ));
+            fs::create_dir(&path).unwrap();
+            Self(Utf8PathBuf::from_path_buf(path).unwrap())
+        }
+
+        fn socket(&self, version: &str) -> Utf8PathBuf {
+            self.0.join(format!("biome-socket-{version}"))
+        }
+    }
+
+    impl Drop for TestDirectory {
+        fn drop(&mut self) {
+            fs::remove_dir_all(&self.0).ok();
+        }
+    }
+
+    fn create_stale_socket(path: &Utf8Path) {
+        drop(UnixListener::bind(path).unwrap());
+    }
+
+    #[tokio::test]
+    async fn removes_stale_older_sockets() {
+        let directory = TestDirectory::new();
+        let stable = directory.socket("1.9.0");
+        let prerelease = directory.socket("2.0.0-beta.1");
+        create_stale_socket(&stable);
+        create_stale_socket(&prerelease);
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(!stable.exists());
+        assert!(!prerelease.exists());
+    }
+
+    #[tokio::test]
+    async fn preserves_active_older_sockets() {
+        let directory = TestDirectory::new();
+        let socket = directory.socket("1.9.0");
+        let _listener = UnixListener::bind(&socket).unwrap();
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(socket.exists());
+    }
+
+    #[tokio::test]
+    async fn preserves_equal_and_newer_sockets() {
+        let directory = TestDirectory::new();
+        let equal = directory.socket("2.0.0");
+        let newer = directory.socket("2.0.1");
+        let same_precedence = directory.socket("2.0.0+build.1");
+        create_stale_socket(&equal);
+        create_stale_socket(&newer);
+        create_stale_socket(&same_precedence);
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(equal.exists());
+        assert!(newer.exists());
+        assert!(same_precedence.exists());
+    }
+
+    #[tokio::test]
+    async fn preserves_unparseable_and_non_socket_entries() {
+        let directory = TestDirectory::new();
+        let invalid = directory.socket("not-a-version");
+        let legacy = directory.0.join("biome-socket");
+        let regular_file = directory.socket("1.9.0");
+        let target = directory.0.join("target");
+        let symlink_path = directory.socket("1.8.0");
+        create_stale_socket(&invalid);
+        create_stale_socket(&legacy);
+        fs::write(&regular_file, "not a socket").unwrap();
+        fs::write(&target, "not a socket").unwrap();
+        symlink(&target, &symlink_path).unwrap();
+
+        purge_old_sockets_in(&directory.0, "2.0.0").await;
+
+        assert!(invalid.exists());
+        assert!(legacy.exists());
+        assert!(regular_file.exists());
+        assert!(symlink_path.exists());
+    }
+
+    #[tokio::test]
+    async fn skips_cleanup_for_an_unparseable_current_version() {
+        let directory = TestDirectory::new();
+        let socket = directory.socket("1.9.0");
+        create_stale_socket(&socket);
+
+        purge_old_sockets_in(&directory.0, "not-a-version").await;
+
+        assert!(socket.exists());
+    }
 }

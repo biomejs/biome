@@ -1,12 +1,15 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
-    ParseResult, ParserCapabilities, SearchCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities,
+    LintParams, LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
+    format_on_type_noop, matches_on_type_char,
 };
+use crate::db::WorkspaceDb;
 use crate::settings::{
-    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    FormatSettings, OverrideSettings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity,
 };
-use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
+use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -16,16 +19,16 @@ use biome_configuration::grit::{
     GritAssistConfiguration, GritAssistEnabled, GritFormatterConfiguration, GritFormatterEnabled,
     GritLinterConfiguration, GritLinterEnabled,
 };
+use biome_db::AnyParsedSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_tree};
+use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
-use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
-use biome_parser::AnyParse;
-use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenAtOffset};
+use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use tracing::debug_span;
 
@@ -109,44 +112,46 @@ impl ServiceLanguage for GritLanguage {
     }
 
     fn resolve_format_options(
-        global: &crate::settings::FormatSettings,
-        overrides: &crate::settings::OverrideSettings,
+        global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &biome_fs::BiomePath,
-        file_source: &super::DocumentFileSource,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        let indent_style = language
-            .indent_style
-            .or(global.indent_style)
-            .unwrap_or_default();
-        let line_width = language
-            .line_width
-            .or(global.line_width)
-            .unwrap_or_default();
-        let indent_width = language
-            .indent_width
-            .or(global.indent_width)
-            .unwrap_or_default();
+        let source = file_source.to_grit_file_source().unwrap_or_default();
+        let mut options = GritFormatOptions::new(source)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
+            .with_trailing_newline(
+                language
+                    .trailing_newline
+                    .or(global.trailing_newline)
+                    .unwrap_or_default(),
+            );
 
-        let line_ending = language
-            .line_ending
-            .or(global.line_ending)
-            .unwrap_or_default();
-
-        let trailing_newline = language
-            .trailing_newline
-            .or(global.trailing_newline)
-            .unwrap_or_default();
-
-        let mut options =
-            GritFormatOptions::new(file_source.to_grit_file_source().unwrap_or_default())
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_line_ending(line_ending)
-                .with_trailing_newline(trailing_newline);
-
-        overrides.apply_override_grit_format_options(path, &mut options);
+        overrides.apply_override_grit_format_options_by_indices(override_indices, &mut options);
 
         options
     }
@@ -155,13 +160,10 @@ impl ServiceLanguage for GritLanguage {
         _global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
-        path: &BiomePath,
+        _override_indices: &[usize],
         _file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_suppression_reason(suppression_reason)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -246,6 +248,50 @@ impl ServiceLanguage for GritLanguage {
     }
 }
 
+#[salsa::interned]
+struct GritFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_grit_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: GritFormatOptionsInput<'db>,
+) -> GritFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<GritLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    _path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> GritFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<GritLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = GritFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
+    resolved_grit_format_options(&query_db, input)
+}
+
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct GritFileHandler;
 
@@ -324,9 +370,13 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: GritSyntaxNode = parse.syntax();
-    let tree: GritRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: GritSyntaxNode = parse.syntax(&workspace_db);
+    let tree: GritRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -336,28 +386,30 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -370,13 +422,14 @@ fn format(
 fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let printed = biome_grit_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -385,13 +438,14 @@ fn format_range(
 fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
 
     let range = tree.text_range();
     if offset < range.start() || offset > range.end() {
@@ -410,12 +464,36 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: GritSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let formatting_root = root_node
+        .ancestors()
+        .find(|node: &GritSyntaxNode| {
+            node.parent()
+                .is_some_and(|parent| parent.kind() == GritSyntaxKind::GRIT_ROOT)
+        })
+        .unwrap_or(root_node);
+
+    let printed =
+        biome_grit_formatter::format_range(options, &tree, formatting_root.text_trimmed_range())?;
     Ok(printed)
 }
 
@@ -423,9 +501,7 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
         .entered();
-    let diagnostics = params
-        .parse
-        .into_serde_diagnostics(params.diagnostic_offset);
+    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
     let diagnostic_count = diagnostics.len() as u32;
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
@@ -446,24 +522,12 @@ fn lint(params: LintParams) -> LintResults {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let tree: GritRoot = params.parse.tree();
-    let code = if params.should_format {
-        format_node(
-            params
-                .settings
-                .format_options::<GritLanguage>(params.biome_path, &params.document_file_source),
-            tree.syntax(),
-        )?
-        .print()?
-        .into_code()
-    } else {
-        tree.syntax().to_string()
-    };
-    Ok(FixFileResult {
-        code,
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
+    let tree: GritRoot = params.parsed_source.tree(&params.workspace_db);
+    Ok(Some(FixedFileResult {
+        root: tree.syntax().as_send().unwrap(),
         skipped_suggested_fixes: 0,
         actions: vec![],
         errors: 0,
-    })
+    }))
 }

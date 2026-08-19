@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComputedMember.js
+---
+# Input
+```js
+import { env } from "node:process";
+
+env["NODE_ENV"];
+env["HOME"];
+process["env"];
+process["env"].NODE_ENV;
+process["env"]["NODE_ENV"];
+process.env["NODE_ENV"];
+
+```
+
+# Diagnostics
+```
+invalidComputedMember.js:3:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ import { env } from "node:process";
+    2 │ 
+  > 3 │ env["NODE_ENV"];
+      │ ^^^^^^^^^^^^^^^
+    4 │ env["HOME"];
+    5 │ process["env"];
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidComputedMember.js:4:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    3 │ env["NODE_ENV"];
+  > 4 │ env["HOME"];
+      │ ^^^^^^^^^^^
+    5 │ process["env"];
+    6 │ process["env"].NODE_ENV;
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidComputedMember.js:5:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    3 │ env["NODE_ENV"];
+    4 │ env["HOME"];
+  > 5 │ process["env"];
+      │ ^^^^^^^^^^^^^^
+    6 │ process["env"].NODE_ENV;
+    7 │ process["env"]["NODE_ENV"];
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidComputedMember.js:6:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    4 │ env["HOME"];
+    5 │ process["env"];
+  > 6 │ process["env"].NODE_ENV;
+      │ ^^^^^^^^^^^^^^
+    7 │ process["env"]["NODE_ENV"];
+    8 │ process.env["NODE_ENV"];
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidComputedMember.js:7:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    5 │ process["env"];
+    6 │ process["env"].NODE_ENV;
+  > 7 │ process["env"]["NODE_ENV"];
+      │ ^^^^^^^^^^^^^^
+    8 │ process.env["NODE_ENV"];
+    9 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidComputedMember.js:8:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    6 │ process["env"].NODE_ENV;
+    7 │ process["env"]["NODE_ENV"];
+  > 8 │ process.env["NODE_ENV"];
+      │ ^^^^^^^^^^^
+    9 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```

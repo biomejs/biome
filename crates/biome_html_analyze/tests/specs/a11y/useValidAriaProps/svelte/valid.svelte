@@ -1,6 +1,7 @@
 <!-- should not generate diagnostics -->
 <input type="text" aria-label="Name" />
 <div aria-hidden="true"></div>
+<div aria-hidden={ariaHidden}></div>
 <div aria-live="polite"></div>
 <button aria-pressed="false"></button>
 <input aria-required="true" />

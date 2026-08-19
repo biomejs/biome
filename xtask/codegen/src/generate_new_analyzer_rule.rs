@@ -11,6 +11,7 @@ pub enum LanguageKind {
     Graphql,
     Html,
     HtmlVue,
+    Markdown,
 }
 
 impl LanguageKind {
@@ -22,6 +23,7 @@ impl LanguageKind {
             Self::Graphql => "graphql",
             Self::Html => "html",
             Self::HtmlVue => "html",
+            Self::Markdown => "markdown",
         }
     }
 }
@@ -36,6 +38,7 @@ impl FromStr for LanguageKind {
             "graphql" => Ok(Self::Graphql),
             "html" => Ok(Self::Html),
             "html-vue" => Ok(Self::HtmlVue),
+            "markdown" => Ok(Self::Markdown),
             _ => Err("Unsupported value"),
         }
     }
@@ -557,21 +560,102 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
+        LanguageKind::Markdown => {
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
+use biome_console::markup;
+use biome_markdown_syntax::MdRoot;
+use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
+
+{macro_name}! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```md,expect_diagnostic
+    /// # A heading-1
+    /// # A heading-1
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```md
+    /// # A heading-1
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        language: "md",
+        recommended: false,
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<MdRoot>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = {rule_name_upper_camel}Options;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
+        let _node = ctx.query();
+        None
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected empty block is not allowed"
+                }},
+            )
+            .note(markup! {{
+                "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
+        }
     }
 }
 
 pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_name: &str) {
     let rule_name_camel = Case::Camel.convert(rule_name);
     let rule_kind = kind.as_str();
-    let test_extension = if matches!(kind, LanguageKind::HtmlVue) {
-        "vue"
-    } else {
-        rule_kind
+
+    let test_extension = match kind {
+        LanguageKind::Markdown => "md",
+        LanguageKind::HtmlVue => "vue",
+        _ => rule_kind,
     };
+
     let valid_contents = match kind {
         LanguageKind::Json => "{\n\t\"test\": \"value\"\n}",
         LanguageKind::Css => "/* should not generate diagnostics */\np {\n\tcolor: red;\n}",
         LanguageKind::Graphql => "# should not generate diagnostics\nquery {\n\tfield\n}",
+        LanguageKind::Markdown => "<!-- should not generate diagnostics -->\n# Heading-1",
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should not generate diagnostics -->\n<div>ok</div>"
         }
@@ -581,6 +665,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Json => "{\n\t\"test\": \"value\",\n\t\"test\": \"value\"\n}",
         LanguageKind::Css => "/* should generate diagnostics */\np {}",
         LanguageKind::Graphql => "# should generate diagnostics\nquery {}",
+        LanguageKind::Markdown => "<!-- should generate diagnostics -->\n# Heading-1\n# Heading-1",
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should generate diagnostics -->\n<div></div>"
         }

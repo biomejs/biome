@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/hyphen-boundaries.scss
+---
+
+# Input
+
+```scss
+$block:button;
+$modifier:primary;
+$state:active;
+.#{$block}--#{$modifier}{color:red}
+.-#{$modifier}{color:blue}
+.-text-#{$state}-{color:purple}
+.#{$block}---#{$modifier}{color:orange}
+.#{$block}--{color:green}
+.#{$block}-- div{color:black}
+.component{&--#{$state}{display:block}&#{$state}--{display:inline}&---{display:none}&--{visibility:hidden}&#{$state}-- div{display:grid}}
+
+```
+
+
+# Formatted
+
+```scss
+$block: button;
+$modifier: primary;
+$state: active;
+.#{$block}--#{$modifier} {
+	color: red;
+}
+.-#{$modifier} {
+	color: blue;
+}
+.-text-#{$state}- {
+	color: purple;
+}
+.#{$block}---#{$modifier} {
+	color: orange;
+}
+.#{$block}-- {
+	color: green;
+}
+.#{$block}-- div {
+	color: black;
+}
+.component {
+	&--#{$state} {
+		display: block;
+	}
+	&#{$state}-- {
+		display: inline;
+	}
+	&--- {
+		display: none;
+	}
+	&-- {
+		visibility: hidden;
+	}
+	&#{$state}-- div {
+		display: grid;
+	}
+}
+
+```

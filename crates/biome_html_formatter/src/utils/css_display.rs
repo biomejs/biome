@@ -196,19 +196,21 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
         "rt" | "rtc" => CssDisplay::RubyText,
         "rp" => CssDisplay::None,
 
-        // Hidden elements (display: none)
+        // Hidden elements
         "area" | "base" | "basefont" | "datalist" | "head" | "link" | "meta" | "noembed"
-        | "noframes" | "script" | "style" | "title" | "noscript" => CssDisplay::None,
+        | "noframes" | "script" | "style" | "title" => CssDisplay::None,
 
-        // Media elements - these have special handling but are essentially block-like
-        // for formatting purposes when considering children
-        "audio" | "video" | "object" | "svg" => CssDisplay::InlineBlock,
+        // Media elements
+        "svg" => CssDisplay::InlineBlock,
         "param" => CssDisplay::Block,
 
         // Form elements - inline-block
         "button" | "textarea" | "input" | "select" | "meter" | "progress" => {
             CssDisplay::InlineBlock
         }
+
+        // https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2
+        "marquee" => CssDisplay::InlineBlock,
 
         // Replaced/embedded content (inline or inline-block depending on context)
         "img" | "embed" | "iframe" | "canvas" | "template" => CssDisplay::Inline,
@@ -317,6 +319,19 @@ mod tests {
                 get_css_display(tag),
                 CssDisplay::InlineBlock,
                 "Expected '{tag}' to be inline-block"
+            );
+        }
+    }
+
+    #[test]
+    fn test_whitespace_sensitive_display_classifications() {
+        assert_eq!(get_css_display("marquee"), CssDisplay::InlineBlock);
+
+        for tag in ["noscript", "video", "audio", "object"] {
+            assert_eq!(
+                get_css_display(tag),
+                CssDisplay::Inline,
+                "Expected '{tag}' to be inline"
             );
         }
     }

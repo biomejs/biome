@@ -2,6 +2,7 @@ use crate::frameworks::vue::vue_call::{
     is_to_refs_call, is_vue_api_reference, is_vue_compiler_macro_call,
 };
 use crate::services::semantic::Semantic;
+use crate::utils::rename::RenamableNode;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsBinding, AnyJsBindingPattern,
@@ -16,15 +17,13 @@ use biome_js_syntax::{
     JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TsIdentifierBinding, TsInterfaceDeclaration,
     TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText, declare_node_union,
 };
 use camino::Utf8Path;
-use std::iter;
-
-use crate::utils::rename::RenamableNode;
-use biome_languages::JsFileSource;
 use enumflags2::{BitFlags, bitflags};
+use std::iter;
 
 mod component_name;
 

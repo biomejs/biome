@@ -77,3 +77,7 @@
 <td role="menuitem" />
 <tfoot role="menuitem" />
 <thead role="menuitem" />
+<!-- static Vue role bindings assigning interactive roles to non-interactive elements should also be flagged -->
+<h1 :role="'button'"></h1>
+<main v-bind:role="'button'" />
+<ol :role="'menuitem'" />

@@ -34,6 +34,17 @@ use tower_lsp_server::ls_types::{
     WorkspaceFolder,
 };
 
+#[test]
+fn catches_regular_panics_as_panic_errors() {
+    let result: std::result::Result<
+        std::result::Result<(), salsa::Cancelled>,
+        biome_diagnostics::panic::PanicError,
+    > = super::catch_lsp_operation(|| panic!("boom"));
+
+    let error = result.expect_err("regular panic should be caught as a panic error");
+    assert!(error.info.contains("boom"), "{error:?}");
+}
+
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
     Ok(lsp::Diagnostic {
         range: Range {
@@ -120,6 +131,14 @@ fn create_document_content_change_event() -> Vec<TextDocumentContentChangeEvent>
             text: String::from("statement"),
         },
     ]
+}
+
+fn full_document_change(text: impl Into<String>) -> Vec<TextDocumentContentChangeEvent> {
+    vec![TextDocumentContentChangeEvent {
+        range: None,
+        range_length: None,
+        text: text.into(),
+    }]
 }
 
 const EXPECTED_CST: &str = "0: JS_MODULE@0..57
@@ -559,6 +578,88 @@ async fn pull_diagnostics() -> Result<()> {
     );
 
     server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn debounces_diagnostics_after_rapid_changes() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+    let _ = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    server
+        .change_document(1, full_document_change("const b = 1; b = 2;"))
+        .await?;
+    server
+        .change_document(2, full_document_change("const c = 1; c = 2;"))
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected publishDiagnostics notification");
+    };
+
+    assert_eq!(params.version, Some(2));
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_publish_debounced_diagnostics_after_close() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+    let _ = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    server
+        .change_document(1, full_document_change("const b = 1; b = 2;"))
+        .await?;
+    server.close_document().await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: None,
+                diagnostics: vec![],
+            }
+        ))
+    );
+
+    wait_for_no_notification(&mut receiver, Duration::from_millis(750), |n| {
+        n.is_publish_diagnostics()
+    })
+    .await;
 
     server.shutdown().await?;
     reader.abort();
@@ -3553,8 +3654,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3782,8 +3884,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3966,8 +4069,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();

@@ -1,9 +1,13 @@
 <!-- should generate diagnostics -->
 
 <template>
-  <!-- Missing value -->
-  <Foo v-bind:foo />
-  <Foo :foo />
+  <!-- Missing value with no argument -->
+  <Foo v-bind />
+  <div v-bind></div>
+
+  <!-- Missing value with a dynamic argument: no static name to derive a binding from -->
+  <Foo v-bind:[dynamic] />
+  <Foo :[dynamic] />
 
   <!-- Missing value with modifier -->
   <div v-bind.prop></div>

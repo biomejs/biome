@@ -3,12 +3,12 @@
 mod assist;
 mod baseline_data;
 mod fonts;
-mod keywords;
 mod lint;
 mod order;
 mod registry;
 mod services;
 mod suppression_action;
+mod syntax;
 mod utils;
 
 pub use crate::registry::visit_registry;
@@ -21,10 +21,11 @@ use biome_analyze::{
 use biome_css_syntax::{CssLanguage, TextRange};
 use biome_diagnostics::Error;
 use biome_languages::CssFileSource;
-use biome_module_graph::ProjectDatabase;
+use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
 
 pub(crate) type CssRuleAction = RuleAction<CssLanguage>;
@@ -39,7 +40,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct CssAnalyzerServices<'a> {
     pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
     pub file_source: CssFileSource,
-    pub module_db: Option<ProjectDatabase>,
+    pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -66,7 +67,7 @@ impl<'a> CssAnalyzerServices<'a> {
         self
     }
 
-    pub fn with_module_db(mut self, module_db: ProjectDatabase) -> Self {
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
         self.module_db = Some(module_db);
         self
     }
@@ -92,10 +93,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = services.module_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         services,
         plugins,
@@ -169,10 +175,7 @@ where
 
     services.insert_service(css_services.file_source);
     if let Some(semantic_model) = css_services.semantic_model {
-        services.insert_service(Arc::new(semantic_model.clone()));
-    } else {
-        let semantic_model = biome_css_semantic::semantic_model(root);
-        services.insert_service(Arc::new(semantic_model));
+        services.insert_service(semantic_model.clone());
     }
     if let Some(module_db) = css_services.module_db {
         services.insert_service(module_db);
@@ -191,7 +194,7 @@ where
         .cloned()
         .collect();
 
-    if !css_plugins.is_empty() {
+    if filter.match_plugins() && !css_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target CSS above.
         unsafe {
             analyzer.add_visitor(
@@ -308,7 +311,7 @@ mod tests {
     fn top_level_suppression_simple() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/suspicious/noEmptyBlock: reason
+ * biome-ignore-all lint/suspicious/noEmptyBlock: reason
 */
 
 #foo {}
@@ -318,7 +321,8 @@ mod tests {
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noEmptyBlock")]),
             ..AnalysisFilter::default()
         };
 
@@ -353,11 +357,11 @@ mod tests {
     fn top_level_suppression_multiple() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/suspicious/noEmptyBlock: reason
+ * biome-ignore-all lint/suspicious/noEmptyBlock: reason
 */
 
 /**
-* biome-ignore lint/correctness/noUnknownProperty: reason2
+ * biome-ignore-all lint/correctness/noUnknownProperty: reason2
 */
 
 
@@ -370,7 +374,11 @@ a {
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noEmptyBlock"),
+                RuleFilter::Rule("correctness", "noUnknownProperty"),
+            ]),
             ..AnalysisFilter::default()
         };
 
@@ -405,8 +413,8 @@ a {
     fn top_level_suppression_multiple2() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/suspicious/noEmptyBlock: reason
-* biome-ignore lint/correctness/noUnknownProperty: reason2
+ * biome-ignore-all lint/suspicious/noEmptyBlock: reason
+ * biome-ignore-all lint/correctness/noUnknownProperty: reason2
 */
 
 #foo {}
@@ -418,7 +426,11 @@ a {
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noEmptyBlock"),
+                RuleFilter::Rule("correctness", "noUnknownProperty"),
+            ]),
             ..AnalysisFilter::default()
         };
 
@@ -452,18 +464,16 @@ a {
     #[test]
     fn top_level_suppression_with_unused() {
         const SOURCE: &str = "
-/**
-*/
-
-#foo {}
+#foo { color: red; }
 // biome-ignore lint/suspicious/noEmptyBlock: reason
-#bar {}
+#bar { color: blue; }
         ";
 
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noEmptyBlock")]),
             ..AnalysisFilter::default()
         };
 

@@ -25,9 +25,12 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..5 "focus" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@5..6 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwArbitraryCandidate {
                 l_brack_token: L_BRACKET@6..7 "[" [] [],
@@ -65,9 +68,12 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..5
             0: TW_NAMED_VARIANT_SEGMENT@0..5
               0: TW_VARIANT_SEGMENT@0..5 "focus" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@5..6 ":" [] []
       1: (empty)
-      2: TW_ARBITRARY_CANDIDATE@6..30
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@6..30
         0: L_BRACKET@6..7 "[" [] []
         1: TW_PROPERTY@7..11 "mask" [] []
         2: COLON@11..12 ":" [] []
@@ -80,7 +86,7 @@ TwRoot {
             3: R_PAREN@28..29 ")" [] []
         4: R_BRACKET@29..30 "]" [] []
         5: (empty)
-      3: (empty)
+      4: (empty)
   2: EOF@30..31 "" [Newline("\n")] []
 
 ```

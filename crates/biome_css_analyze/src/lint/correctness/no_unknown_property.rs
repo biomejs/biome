@@ -92,7 +92,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("property-no-unknown").same()],
+        sources: &[RuleSource::Stylelint("property-no-unknown").same(), RuleSource::EslintCss("no-invalid-properties").inspired()],
     }
 }
 

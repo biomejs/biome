@@ -416,6 +416,17 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
     error
 }
 
+pub(crate) fn cancelled_to_lsp_error(cancelled: salsa::Cancelled) -> LspError {
+    let mut error = match cancelled {
+        salsa::Cancelled::PendingWrite => LspError::content_modified(),
+        salsa::Cancelled::PropagatedPanic => LspError::internal_error(),
+        _ => LspError::request_cancelled(),
+    };
+    error.message = Cow::Owned(cancelled.to_string());
+    error.data = Some(format!("{cancelled:?}").into());
+    error
+}
+
 pub(crate) fn apply_document_changes(
     position_encoding: PositionEncoding,
     current_content: String,

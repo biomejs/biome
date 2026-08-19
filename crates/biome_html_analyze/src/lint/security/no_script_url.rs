@@ -3,16 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlOpeningElement, element_ext::AnyHtmlTagElement,
-    inner_string_text,
-};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{HtmlOpeningElement, T, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_script_url::NoScriptUrlOptions;
 use biome_string_case::StrOnlyExtension;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Disallow `javascript:` URLs in HTML.
@@ -67,29 +61,22 @@ impl Rule for NoScriptUrl {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(&AnyHtmlTagElement::from(element.clone()), source_type, "a") {
+        if AnyHtmlTagElement::from(element.clone()).tag_name_kind() != Some(T![a]) {
             return None;
         }
 
         let attrs = element.attributes();
-        let attr = attrs.find_by_name("href")?;
-        let initializer = attr.initializer()?;
-        let value = initializer.value().ok()?;
+        let href_attribute = attrs.find_attribute_or_vue_binding("href")?;
+        let value = href_attribute.as_static_value()?;
 
-        let string_text = match &value {
-            AnyHtmlAttributeInitializer::HtmlString(html_string) => html_string
-                .value_token()
-                .ok()
-                .map(|token| inner_string_text(&token).into()),
-            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => value.string_value(),
-            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_)
-            | AnyHtmlAttributeInitializer::VueVForValue(_) => None,
-        };
-
-        if string_text.is_some_and(|text| text.trim().to_lowercase_cow().starts_with("javascript:")) {
-            return Some(initializer.range());
+        if value
+            .text()
+            .trim()
+            .to_lowercase_cow()
+            .starts_with("javascript:")
+        {
+            return Some(href_attribute.range());
         }
 
         None

@@ -13,8 +13,24 @@ pub enum CssEmbeddingKind {
     /// The CSS is embedded inside HTML-like files
     Html(EmbeddingHtmlKind),
 
+    /// The value of a `style` attribute, which is a list of declarations
+    /// rather than a stylesheet.
+    HtmlStyleAttribute,
+
     #[default]
     None,
+}
+
+impl CssEmbeddingKind {
+    /// Whether the CSS is a bare list of declarations, with no selector or
+    /// block around it.
+    pub fn is_snippet(self) -> bool {
+        matches!(self, Self::Styled | Self::HtmlStyleAttribute)
+    }
+
+    pub fn is_html_style_attribute(self) -> bool {
+        matches!(self, Self::HtmlStyleAttribute)
+    }
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -53,6 +69,16 @@ pub enum EmbeddingStyleApplicability {
     /// Unknown applicability
     #[default]
     Unknown,
+}
+
+impl EmbeddingStyleApplicability {
+    pub const fn is_local(&self) -> bool {
+        matches!(self, EmbeddingStyleApplicability::Local)
+    }
+
+    pub const fn is_global(&self) -> bool {
+        matches!(self, EmbeddingStyleApplicability::Global)
+    }
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -197,6 +223,19 @@ impl CssFileSource {
 
     pub fn is_tailwind_css(&self) -> bool {
         self.variant == CssVariant::TailwindCss
+    }
+
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        if self.language.is_scss() {
+            "scss"
+        } else {
+            "css"
+        }
     }
 
     pub fn set_variant(&mut self, variant: CssVariant) {

@@ -14,5 +14,6 @@ expression: valid.astro
 <div role="switch row" />
 <div />
 <div role="tabpanel row" />
+<div role={roleValue} />
 
 ```

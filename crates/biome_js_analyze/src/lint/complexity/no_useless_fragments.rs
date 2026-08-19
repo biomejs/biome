@@ -6,16 +6,13 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_factory::make::{
-    JsxExpressionChildBuilder, js_string_literal_expression, jsx_expression_attribute_value,
-    jsx_expression_child, jsx_string, jsx_string_literal, jsx_tag_expression, token,
-};
+use biome_js_factory::make::{jsx_expression_attribute_value, jsx_tag_expression, token};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
-    JsParenthesizedExpression, JsSyntaxKind, JsxAttributeInitializerClause, JsxChildList,
-    JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxOpeningElement,
-    JsxTagExpression, JsxText, T,
+    AnyJsExpression, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
+    AnyJsxTag, JsLanguage, JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind,
+    JsxAttributeInitializerClause, JsxChildList, JsxElement, JsxExpressionAttributeValue,
+    JsxExpressionChild, JsxFragment, JsxOpeningElement, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
@@ -36,6 +33,16 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <></>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <Component prop={<><div /></>} />
+    /// ```
+    ///
+    /// The rule doesn't emit a code fix if the a fragment inside an attribute doesn't have any value:
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <Component prop={<>{}</>} />
     /// ```
     ///
     /// ### Valid
@@ -356,11 +363,6 @@ impl Rule for NoUselessFragments {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let is_in_jsx_attr = node
-            .syntax()
-            .grand_parent()
-            .is_some_and(|parent| JsxExpressionAttributeValue::can_cast(parent.kind()));
-
         let is_in_list = node
             .syntax()
             .parent()
@@ -378,10 +380,7 @@ impl Rule for NoUselessFragments {
                 }
             }
         } else if let Some(parent) = node.parent::<JsxTagExpression>() {
-            let parent = match parent.parent::<JsxExpressionAttributeValue>() {
-                Some(grand_parent) => grand_parent.into_syntax(),
-                None => parent.into_syntax(),
-            };
+            let attribute_value = parent.parent::<JsxExpressionAttributeValue>();
             let child = node
                 .children()
                 .iter()
@@ -400,68 +399,57 @@ impl Rule for NoUselessFragments {
                 });
 
             if let Some(child) = child {
-                let new_node = match child {
-                    AnyJsxChild::JsxElement(node) => {
-                        let jsx_tag_expr = jsx_tag_expression(AnyJsxTag::JsxElement(node));
-                        if is_in_jsx_attr {
-                            let jsx_expr_attr_value = jsx_expression_attribute_value(
-                                token(T!['{']),
-                                AnyJsExpression::JsxTagExpression(jsx_tag_expr.clone()),
-                                token(T!['}']),
-                            );
-                            Some(jsx_expr_attr_value.into_syntax())
-                        } else {
-                            Some(jsx_tag_expr.into_syntax())
-                        }
-                    }
-                    AnyJsxChild::JsxFragment(node) => {
-                        Some(jsx_tag_expression(AnyJsxTag::JsxFragment(node)).into_syntax())
-                    }
-                    AnyJsxChild::JsxSelfClosingElement(node) => Some(
-                        jsx_tag_expression(AnyJsxTag::JsxSelfClosingElement(node)).into_syntax(),
+                match child {
+                    AnyJsxChild::JsxElement(node) => replace_fragment_with_expression(
+                        &mut mutation,
+                        attribute_value,
+                        parent,
+                        AnyJsExpression::JsxTagExpression(jsx_tag_expression(
+                            AnyJsxTag::JsxElement(node),
+                        )),
                     ),
-                    AnyJsxChild::JsxText(text) => {
-                        let new_value = text.value_token().ok()?.token_text();
-                        let new_value = new_value.trim();
-                        if parent.kind() == JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE {
-                            Some(jsx_string(jsx_string_literal(new_value)).into_syntax())
-                        } else {
-                            Some(
-                                js_string_literal_expression(jsx_string_literal(new_value))
-                                    .into_syntax(),
-                            )
+                    AnyJsxChild::JsxFragment(node) => replace_fragment_with_expression(
+                        &mut mutation,
+                        attribute_value,
+                        parent,
+                        AnyJsExpression::JsxTagExpression(jsx_tag_expression(
+                            AnyJsxTag::JsxFragment(node),
+                        )),
+                    ),
+                    AnyJsxChild::JsxSelfClosingElement(node) => replace_fragment_with_expression(
+                        &mut mutation,
+                        attribute_value,
+                        parent,
+                        AnyJsExpression::JsxTagExpression(jsx_tag_expression(
+                            AnyJsxTag::JsxSelfClosingElement(node),
+                        )),
+                    ),
+                    // A fragment holding nothing but text is never reported here: `run`
+                    // skips it when the fragment is an attribute value, and everywhere
+                    // else the great-great-grandparent check rejects it, since a tag
+                    // expression is never the direct child of a fragment or an element.
+                    // Text fragments inside a child list take the `is_in_list` branch.
+                    AnyJsxChild::JsxText(_) => return None,
+                    AnyJsxChild::JsxExpressionChild(child) => match child.expression() {
+                        Some(expression) => replace_fragment_with_expression(
+                            &mut mutation,
+                            attribute_value,
+                            parent,
+                            expression,
+                        ),
+                        // An attribute always needs a value, so `prop={<>{}</>}` can't be
+                        // fixed, while `<>{}</>` on its own can simply be removed.
+                        None if attribute_value.is_some() => return None,
+                        None => {
+                            mutation.remove_element(AnyJsExpression::JsxTagExpression(parent).into())
                         }
-                    }
-                    AnyJsxChild::JsxExpressionChild(child) => {
-                        if is_in_jsx_attr
-                            || !JsxTagExpression::can_cast(node.syntax().parent()?.kind())
-                        {
-                            child.expression().map(|expression| {
-                                let jsx_expr_child =
-                                    jsx_expression_child(token(T!['{']), token(T!['}']));
-                                JsxExpressionChildBuilder::with_expression(
-                                    jsx_expr_child,
-                                    expression,
-                                )
-                                .build()
-                                .into_syntax()
-                            })
-                        } else {
-                            child
-                                .expression()
-                                .map(|expression| expression.into_syntax())
-                        }
-                    }
+                    },
 
-                    // can't apply a code action because it will create invalid syntax
-                    // for example `<>{...foo}</>` would become `{...foo}` which would produce
-                    // a syntax error
-                    AnyJsxChild::JsxSpreadChild(_) | AnyJsxChild::JsMetavariable(_) => return None,
-                };
-                if let Some(new_node) = new_node {
-                    mutation.replace_element(parent.into(), new_node.into());
-                } else {
-                    mutation.remove_element(parent.into());
+                    // Can't apply a code action because it would create invalid syntax.
+                    // For example, `<>{...foo}</>` would become `{...foo}`.
+                    AnyJsxChild::JsxSpreadChild(_) | AnyJsxChild::JsMetavariable(_) => {
+                        return None;
+                    }
                 }
             } else {
                 // can't apply a code action when there is no children because it will create invalid syntax
@@ -492,6 +480,34 @@ impl Rule for NoUselessFragments {
         ).note(markup! {
             "A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed "<Hyperlink href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">"fragment"</Hyperlink>"."
         }))
+    }
+}
+
+/// Replaces the useless fragment wrapped by `tag_expression` with `expression`.
+///
+/// `attribute_value` is the `{…}` the fragment is nested in when it is used as an
+/// attribute value. It has to be rebuilt around `expression`, because an attribute
+/// can't hold a bare expression: `prop={<><div /></>}` becomes `prop={<div />}`,
+/// not `prop=<div />`.
+fn replace_fragment_with_expression(
+    mutation: &mut BatchMutation<JsLanguage>,
+    attribute_value: Option<JsxExpressionAttributeValue>,
+    tag_expression: JsxTagExpression,
+    expression: AnyJsExpression,
+) {
+    match attribute_value {
+        Some(attribute_value) => mutation.replace_node(
+            AnyJsxAttributeValue::JsxExpressionAttributeValue(attribute_value),
+            AnyJsxAttributeValue::JsxExpressionAttributeValue(jsx_expression_attribute_value(
+                token(T!['{']),
+                expression,
+                token(T!['}']),
+            )),
+        ),
+        None => mutation.replace_node(
+            AnyJsExpression::JsxTagExpression(tag_expression),
+            expression,
+        ),
     }
 }
 

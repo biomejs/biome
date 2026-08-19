@@ -30,8 +30,9 @@ Trailing whitespace before close paren:
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -61,10 +62,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@55..56 "\n" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@56..57 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@57..58 " " [] [],
+                            value_token: MD_TEXTUAL_LITERAL@56..58 "  " [] [],
                         },
                     ],
                     title: MdLinkTitle {
@@ -254,9 +252,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..300
+0: MD_ROOT@0..300
   0: (empty)
-  1: MD_BLOCK_LIST@0..300
+  1: (empty)
+  2: MD_BLOCK_LIST@0..300
     0: MD_PARAGRAPH@0..69
       0: MD_INLINE_ITEM_LIST@0..69
         0: MD_TEXTUAL@0..40
@@ -277,10 +276,8 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@51..55 "/uri" [] []
             2: MD_TEXTUAL@55..56
               0: MD_TEXTUAL_LITERAL@55..56 "\n" [] []
-            3: MD_TEXTUAL@56..57
-              0: MD_TEXTUAL_LITERAL@56..57 " " [] []
-            4: MD_TEXTUAL@57..58
-              0: MD_TEXTUAL_LITERAL@57..58 " " [] []
+            3: MD_TEXTUAL@56..58
+              0: MD_TEXTUAL_LITERAL@56..58 "  " [] []
           5: MD_LINK_TITLE@58..67
             0: MD_INLINE_ITEM_LIST@58..67
               0: MD_TEXTUAL@58..65
@@ -396,6 +393,6 @@ MdDocument {
           6: R_PAREN@298..299 ")" [] []
         3: MD_TEXTUAL@299..300
           0: MD_TEXTUAL_LITERAL@299..300 "\n" [] []
-  2: EOF@300..300 "" [] []
+  3: EOF@300..300 "" [] []
 
 ```

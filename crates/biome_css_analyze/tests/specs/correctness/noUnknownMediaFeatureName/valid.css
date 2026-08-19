@@ -22,3 +22,11 @@
 
 @media (prefers-reduced-transparency: reduce) {
 }
+
+@custom-media --mobile (max-width: 768px);
+
+@media (--mobile) {
+}
+
+@media only screen and (--mobile) {
+}

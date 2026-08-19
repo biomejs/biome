@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/event-binding/function-expression-ts.vue
+---
+
+# Input
+
+```vue
+<script setup lang="ts"></script>
+
+<template>
+  <div @click=" (  x :   never) =>      null">arrow</div>
+  <div @click=" function(  a    :   unknown[])      {
+      console.log(    'abcdefg');
+      return;
+  }">anonymous function</div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,14 +1,12 @@
+ <script setup lang="ts"></script>
+ 
+ <template>
+-  <div @click="(x: never) => null">arrow</div>
++  <div @click=" (  x :   never) =>      null">arrow</div>
+   <div
+-    @click="
+-      function (a: unknown[]) {
+-        console.log('abcdefg');
+-        return;
+-      }
+-    "
++    @click=" function(  a    :   unknown[])      {
++      console.log(    'abcdefg');
++      return;
++  }"
+   >
+     anonymous function
+   </div>
+```
+
+# Output
+
+```vue
+<script setup lang="ts"></script>
+
+<template>
+  <div @click=" (  x :   never) =>      null">arrow</div>
+  <div
+    @click=" function(  a    :   unknown[])      {
+      console.log(    'abcdefg');
+      return;
+  }"
+  >
+    anonymous function
+  </div>
+</template>
+```

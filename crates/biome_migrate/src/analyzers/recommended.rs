@@ -75,12 +75,12 @@ impl Rule for Recommended {
             json_member_name(
                 json_string_literal("preset")
                     .with_leading_trivia_pieces(name.leading_trivia().pieces())
-                    .with_trailing_trivia_pieces(name.leading_trivia().pieces()),
+                    .with_trailing_trivia_pieces(name.trailing_trivia().pieces()),
             )
             .into(),
             token(T![:])
                 .with_leading_trivia_pieces(node.colon_token().ok()?.leading_trivia().pieces())
-                .with_leading_trivia_pieces(node.colon_token().ok()?.trailing_trivia().pieces()),
+                .with_trailing_trivia_pieces(node.colon_token().ok()?.trailing_trivia().pieces()),
             AnyJsonValue::JsonStringValue(new_value.clone()),
         );
 

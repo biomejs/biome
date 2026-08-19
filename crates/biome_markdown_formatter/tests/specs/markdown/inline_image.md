@@ -2,6 +2,14 @@
 
 ![alt text](image.png "title")
 
+![alt text](image.png "")
+
+![alt text](image.png '')
+
+![alt text](image.png " ")
+
+![alt text](image.png ' ')
+
 ![](image.png)
 
 ![alt text](image.png "title with spaces")
@@ -27,3 +35,7 @@
 ![alt with `code`](image.png)
 
 ![alt with `code`](<url>)
+
+![encoded](https://www.google.fr/()foo->bar)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)

@@ -15,8 +15,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -77,13 +78,7 @@ MdDocument {
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@17..18 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@18..19 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@19..20 "x" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@17..20 "--x" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
@@ -104,9 +99,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..21
+0: MD_ROOT@0..21
   0: (empty)
-  1: MD_BLOCK_LIST@0..21
+  1: (empty)
+  2: MD_BLOCK_LIST@0..21
     0: MD_QUOTE@0..21
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -150,14 +146,10 @@ MdDocument {
                       0: MD_INDENT_CHAR@16..17 "\t" [] []
                 4: MD_PARAGRAPH@17..21
                   0: MD_INLINE_ITEM_LIST@17..21
-                    0: MD_TEXTUAL@17..18
-                      0: MD_TEXTUAL_LITERAL@17..18 "-" [] []
-                    1: MD_TEXTUAL@18..19
-                      0: MD_TEXTUAL_LITERAL@18..19 "-" [] []
-                    2: MD_TEXTUAL@19..20
-                      0: MD_TEXTUAL_LITERAL@19..20 "x" [] []
-                    3: MD_TEXTUAL@20..21
+                    0: MD_TEXTUAL@17..20
+                      0: MD_TEXTUAL_LITERAL@17..20 "--x" [] []
+                    1: MD_TEXTUAL@20..21
                       0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
-  2: EOF@21..21 "" [] []
+  3: EOF@21..21 "" [] []
 
 ```

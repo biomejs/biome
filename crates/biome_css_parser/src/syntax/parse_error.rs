@@ -63,6 +63,18 @@ pub(crate) fn expected_any_rule(p: &CssParser, range: TextRange) -> ParseDiagnos
     expected_any(&["qualified rule", "at rule"], range, p)
 }
 
+pub(crate) fn expected_any_rule_list_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    if p.source_type.is_scss() {
+        expected_any(
+            &["qualified rule", "at rule", "SCSS variable declaration"],
+            range,
+            p,
+        )
+    } else {
+        expected_any_rule(p, range)
+    }
+}
+
 pub(crate) fn expected_any_declaration_or_at_rule(
     p: &CssParser,
     range: TextRange,
@@ -252,12 +264,20 @@ pub(crate) fn scss_only_syntax_error(
     syntax: &str,
     range: TextRange,
 ) -> ParseDiagnostic {
+    if !p.options().should_report_scss_exclusive_syntax() {
+        return unsupported_css_syntax(p, range);
+    }
+
     p.err_builder(
         format!(
             "{syntax} are an SCSS only feature. Convert your file to an SCSS file or remove the syntax."
         ),
         range,
     )
+}
+
+pub(crate) fn unsupported_css_syntax(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("This syntax is not supported in CSS.", range)
 }
 
 pub(crate) fn inconsistent_scss_bracketed_list_separators(

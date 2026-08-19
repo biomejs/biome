@@ -46,3 +46,8 @@ const v = reqCache.p ? "yes" : "no";
 
 declare const roCache: Readonly<{p: Promise<string>}>;
 if (roCache.p) console.log("cached");
+
+declare const directUnion: boolean | Promise<boolean>;
+if (directUnion) {
+  // Do something
+}

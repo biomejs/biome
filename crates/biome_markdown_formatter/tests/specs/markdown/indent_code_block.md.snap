@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/indent_code_block.md
+---
+
+# Input
+
+```md
+    Top-level indented code
+	Tab-indented code
+
+- following list item
+
+1.  Run command:
+
+        cd
+
+1. Run command:
+
+       cd
+
+```
+
+
+# Formatted
+
+```md
+    Top-level indented code
+    Tab-indented code
+
+- following list item
+
+1.  Run command:
+
+        cd
+
+1.  Run command:
+
+        cd
+
+```

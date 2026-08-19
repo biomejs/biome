@@ -1,0 +1,131 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 207
+expression: snapshot
+---
+
+## Input
+
+```css
+a {
+  -#{"foo"}-bar: b;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: ScssInterpolatedIdentifier {
+                                    items: ScssInterpolatedIdentifierPartList [
+                                        ScssInterpolatedIdentifierHyphen {
+                                            minus_token: MINUS@3..7 "-" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                        ScssInterpolation {
+                                            hash_token: HASH@7..8 "#" [] [],
+                                            l_curly_token: L_CURLY@8..9 "{" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@9..14 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            r_curly_token: R_CURLY@14..15 "}" [] [],
+                                        },
+                                        CssIdentifier {
+                                            value_token: IDENT@15..19 "-bar" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@21..22 "b" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@22..23 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@23..25 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..26
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..25
+    0: CSS_QUALIFIED_RULE@0..25
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..2
+            0: (empty)
+            1: CSS_IDENTIFIER@0..2
+              0: IDENT@0..2 "a" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@2..2
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..25
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..23
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..23
+            0: CSS_DECLARATION@3..22
+              0: CSS_GENERIC_PROPERTY@3..22
+                0: SCSS_INTERPOLATED_IDENTIFIER@3..19
+                  0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@3..19
+                    0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@3..7
+                      0: MINUS@3..7 "-" [Newline("\n"), Whitespace("  ")] []
+                    1: SCSS_INTERPOLATION@7..15
+                      0: HASH@7..8 "#" [] []
+                      1: L_CURLY@8..9 "{" [] []
+                      2: SCSS_EXPRESSION@9..14
+                        0: SCSS_EXPRESSION_ITEM_LIST@9..14
+                          0: CSS_STRING@9..14
+                            0: CSS_STRING_LITERAL@9..14 "\"foo\"" [] []
+                      3: R_CURLY@14..15 "}" [] []
+                    2: CSS_IDENTIFIER@15..19
+                      0: IDENT@15..19 "-bar" [] []
+                1: COLON@19..21 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@21..22
+                  0: SCSS_EXPRESSION_ITEM_LIST@21..22
+                    0: CSS_IDENTIFIER@21..22
+                      0: IDENT@21..22 "b" [] []
+              1: (empty)
+            1: SEMICOLON@22..23 ";" [] []
+        2: R_CURLY@23..25 "}" [Newline("\n")] []
+  2: EOF@25..26 "" [Newline("\n")] []
+
+```

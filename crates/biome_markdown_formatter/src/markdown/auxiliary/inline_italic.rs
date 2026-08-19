@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
-    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
+    AnyMdInline, MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
+    emphasis_ext::MdItalicFence,
 };
 use biome_rowan::AstNode;
 
@@ -82,6 +83,100 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             return write!(f, [l_fence.format(), content.format(), r_fence.format()]);
         }
 
+        // Swap the outer italic and inner strong fences in `***...***` to produce
+        // `**_..._**`. This applies only when text exists on both sides and
+        // underscores can delimit the inner italic; joined and paragraph-wide
+        // spans keep their original fences.
+        let has_surrounding_text = l_fence
+            .prev_token()
+            .is_some_and(|token| token.text().chars().any(|char| !char.is_whitespace()))
+            && r_fence
+                .next_token()
+                .is_some_and(|token| token.text().chars().any(|char| !char.is_whitespace()));
+        let mut content_items = content.iter();
+        if node.fence()? == MdItalicFence::Star
+            && resolve_target_kind(node) == MarkdownSyntaxKind::UNDERSCORE
+            && has_surrounding_text
+            && let Some(AnyMdInline::MdInlineEmphasis(emphasis)) = content_items.next()
+            && content_items.next().is_none()
+            && emphasis.fence()? == biome_markdown_syntax::emphasis_ext::MdEmphasisFence::DoubleStar
+        {
+            let emphasis_l_fence = emphasis.l_fence()?;
+            let emphasis_r_fence = emphasis.r_fence()?;
+            f.context()
+                .comments()
+                .mark_suppression_checked(emphasis.syntax());
+            return write!(
+                f,
+                [
+                    format_replaced(&l_fence, &text("**", Some(l_fence.text_range().start()))),
+                    format_replaced(
+                        &emphasis_l_fence,
+                        &text("_", Some(emphasis_l_fence.text_range().start()))
+                    ),
+                    emphasis.content().format(),
+                    format_replaced(
+                        &emphasis_r_fence,
+                        &text("_", Some(emphasis_r_fence.text_range().start()))
+                    ),
+                    format_replaced(&r_fence, &text("**", Some(r_fence.text_range().start()))),
+                ]
+            );
+        }
+
+        let mut content_items = content.iter();
+        if let Some(AnyMdInline::MdTextual(textual)) = content_items.next()
+            && content_items.next().is_none()
+        {
+            let content_token = textual.value_token()?;
+            if node.fence()? == MdItalicFence::Star && content_token.text() == "\\*" {
+                return write!(
+                    f,
+                    [
+                        format_replaced(&l_fence, &text("\\*", Some(l_fence.text_range().start()))),
+                        content.format(),
+                        format_replaced(&r_fence, &text("\\*", Some(r_fence.text_range().start()))),
+                    ]
+                );
+            }
+
+            if node.fence()? == MdItalicFence::Underscore {
+                if content_token.text() == "\\_" {
+                    return write!(
+                        f,
+                        [
+                            format_replaced(
+                                &l_fence,
+                                &text("\\_", Some(l_fence.text_range().start()))
+                            ),
+                            content.format(),
+                            format_replaced(
+                                &r_fence,
+                                &text("\\_", Some(r_fence.text_range().start()))
+                            ),
+                        ]
+                    );
+                }
+
+                if content_token.text() == "*" {
+                    f.context()
+                        .comments()
+                        .mark_suppression_checked(textual.syntax());
+                    return write!(
+                        f,
+                        [
+                            l_fence.format(),
+                            format_replaced(
+                                &content_token,
+                                &text("\\*", Some(content_token.text_range().start()))
+                            ),
+                            r_fence.format(),
+                        ]
+                    );
+                }
+            }
+        }
+
         // Use `*` if inside another italic or near alphanumeric chars; otherwise `_`.
         let mut target_kind = if has_ancestor_italic(node) {
             MarkdownSyntaxKind::STAR
@@ -110,12 +205,18 @@ fn write_fence(
     if fence.kind() == target_kind {
         write!(f, [fence.format()])
     } else {
-        let text = if target_kind == MarkdownSyntaxKind::STAR {
+        let target_text = if target_kind == MarkdownSyntaxKind::STAR {
             "*"
         } else {
             "_"
         };
-        write!(f, [format_replaced(fence, &token(text))])
+        write!(
+            f,
+            [format_replaced(
+                fence,
+                &text(target_text, Some(fence.text_range().start()))
+            )]
+        )
     }
 }
 

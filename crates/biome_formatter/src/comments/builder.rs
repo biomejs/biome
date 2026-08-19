@@ -22,6 +22,15 @@ pub(super) struct CommentsBuilderVisitor<'a, Style: CommentStyle> {
     following_node_index: Option<usize>,
     parents: Vec<SyntaxNode<Style::Language>>,
     last_token: Option<SyntaxToken<Style::Language>>,
+    root: Option<SyntaxNode<Style::Language>>,
+    /// Whether the formatted root has a parent, which is the case when only a
+    /// part of a document is formatted (range and on-type formatting).
+    is_sub_tree: bool,
+    /// Whether the formatted root is a list.
+    is_list_root: bool,
+    /// Where the text of the root's first token starts. Comments that come
+    /// before this offset sit in front of the whole formatted sub-tree.
+    root_content_start: TextSize,
 }
 
 impl<'a, Style> CommentsBuilderVisitor<'a, Style>
@@ -39,6 +48,10 @@ where
             following_node_index: Default::default(),
             parents: Default::default(),
             last_token: Default::default(),
+            root: Default::default(),
+            is_sub_tree: false,
+            is_list_root: false,
+            root_content_start: TextSize::default(),
         }
     }
 
@@ -49,6 +62,25 @@ where
         CommentsMap<SyntaxElementKey, SourceComment<Style::Language>>,
         FxHashSet<SyntaxElementKey>,
     ) {
+        // A root with a parent means that only a part of a document is
+        // formatted (range and on-type formatting). Full documents always
+        // start at a parentless root and take none of the subtree paths
+        // below.
+        self.is_sub_tree = root.parent().is_some();
+        self.is_list_root = root.kind().is_list();
+        self.root = Some(root.clone());
+        self.root_content_start = root.text_trimmed_range().start();
+
+        // Lists are normally skipped because comments belong to the parent or
+        // to a child. When the formatted root is itself a list, there is no
+        // parent to take that role, so the list goes onto the stack: comments
+        // between its children are then enclosed by the list instead of by
+        // the child that follows them.
+        let push_list_root = self.is_sub_tree && self.is_list_root;
+        if push_list_root {
+            self.parents.push(root.clone());
+        }
+
         for event in root.preorder_with_tokens(Direction::Next) {
             match event {
                 WalkEvent::Enter(SyntaxElement::Node(node)) => {
@@ -64,6 +96,10 @@ where
                     // Handled as part of enter
                 }
             }
+        }
+
+        if push_list_root {
+            self.parents.pop();
         }
 
         assert!(
@@ -248,8 +284,99 @@ where
         for mut comment in self.pending_comments.drain(..) {
             comment.following = following.cloned();
 
+            // A comment that comes before the formatted root itself always
+            // becomes a leading comment of the root, printed before
+            // everything else. The placement rules are skipped because they
+            // need to see the code around the comment, and here everything
+            // before the comment is outside of the formatted root.
+            //
+            // Lists don't print their own comments, so a comment before a
+            // list root goes through the normal placement instead and ends up
+            // on the list's first child.
+            if self.is_sub_tree
+                && !self.is_list_root
+                && comment.piece().text_range().end() <= self.root_content_start
+            {
+                let root = self
+                    .root
+                    .clone()
+                    .expect("Expected the root to be set before visiting comments.");
+                self.builder.push_leading_comment(&root, comment);
+                continue;
+            }
+
             let placement = self.style.place_comment(comment);
+            let placement = Self::normalize_placement_into_formatted_tree(&self.root, placement);
             self.builder.add_comment(placement);
+        }
+    }
+
+    /// Makes sure that every comment ends up on a node that is part of the
+    /// formatted tree. The formatter only prints comments attached to nodes
+    /// it visits; a comment attached to any other node is silently lost.
+    ///
+    /// When only a part of a document is formatted, a placement rule can pick
+    /// a node that lies outside of that part. Take `for (;;) continue; /* a */`:
+    /// when only the `continue` statement is formatted, the rule for the
+    /// comment picks the surrounding `for` loop, and the loop is not part of
+    /// what gets printed.
+    ///
+    /// In that case the comment is moved back onto the formatted tree itself:
+    /// a comment written before the tree becomes a leading comment of it, and
+    /// a comment written after it becomes a trailing comment. When the tree
+    /// is a list, the comment goes on the first or last child instead,
+    /// because lists don't print their own comments.
+    fn normalize_placement_into_formatted_tree(
+        root: &Option<SyntaxNode<Style::Language>>,
+        placement: CommentPlacement<Style::Language>,
+    ) -> CommentPlacement<Style::Language> {
+        let Some(root) = root else {
+            return placement;
+        };
+
+        match placement {
+            CommentPlacement::Leading { node, comment }
+            | CommentPlacement::Trailing { node, comment }
+            | CommentPlacement::Dangling { node, comment }
+                if !node.ancestors().any(|ancestor| &ancestor == root) =>
+            {
+                let root_content = root.text_trimmed_range();
+                let comment_range = comment.piece().text_range();
+
+                // Only comments before or after the whole formatted tree can
+                // legitimately end up on an outside node. An inner comment
+                // placed outside means a placement rule resolved a wrong node.
+                debug_assert!(
+                    comment_range.end() <= root_content.start()
+                        || comment_range.start() >= root_content.end(),
+                    "A comment inside of the formatted tree was placed on a node outside of it.\nComment: {comment:#?}\nNode: {node:#?}"
+                );
+
+                // The anchor must be a node whose format rule prints comments,
+                // which excludes lists: use the closest child instead.
+                if comment_range.start() >= root_content.end() {
+                    let anchor = if root.kind().is_list() {
+                        root.last_child()
+                    } else {
+                        Some(root.clone())
+                    };
+                    match anchor {
+                        Some(anchor) => CommentPlacement::trailing(anchor, comment),
+                        None => CommentPlacement::dangling(root.clone(), comment),
+                    }
+                } else {
+                    let anchor = if root.kind().is_list() {
+                        root.first_child()
+                    } else {
+                        Some(root.clone())
+                    };
+                    match anchor {
+                        Some(anchor) => CommentPlacement::leading(anchor, comment),
+                        None => CommentPlacement::dangling(root.clone(), comment),
+                    }
+                }
+            }
+            placement => placement,
         }
     }
 
@@ -1018,6 +1145,108 @@ b;"#;
             .unwrap();
 
         assert!(!comments.trailing(&sequence.syntax().key()).is_empty());
+    }
+
+    /// Comments between the children of a list that is the formatted root are
+    /// enclosed by the list itself, and the surrounding children are siblings.
+    #[test]
+    fn list_as_sub_tree_root() {
+        let root = parse_module(
+            "function test() {\n\tfirst();\n\n\t// comment\n\tsecond();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let list = root
+            .descendants()
+            .find(|node| node.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
+            .unwrap();
+
+        let (decorated, _) = extract_comments_from_node(&list);
+
+        assert_eq!(decorated.len(), 1);
+        let comment = &decorated[0];
+        assert_eq!(comment.enclosing_node(), &list);
+        assert_eq!(
+            comment.preceding_node().and_then(|node| node.parent()),
+            Some(list.clone())
+        );
+        assert_eq!(
+            comment.following_node().and_then(|node| node.parent()),
+            Some(list)
+        );
+    }
+
+    /// Comments before the first token of a sub-tree root become leading
+    /// comments of the root without going through the placement rules.
+    #[test]
+    fn sub_tree_root_leading_comments() {
+        let root = parse_module(
+            "// comment\nif (a) {\n\tb();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let if_statement = root
+            .descendants()
+            .find(|node| node.kind() == JsSyntaxKind::JS_IF_STATEMENT)
+            .unwrap();
+
+        let (decorated, comments) = extract_comments_from_node(&if_statement);
+
+        assert!(decorated.is_empty());
+        assert_eq!(comments.leading(&if_statement.key()).len(), 1);
+    }
+
+    /// Comments before the first child of a list root are attached to that
+    /// child, because list format rules never print their own comments.
+    #[test]
+    fn list_root_leading_comments() {
+        let root = parse_module(
+            "function test() {\n\t// comment\n\tfirst();\n\tsecond();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let list = root
+            .descendants()
+            .find(|node| node.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
+            .unwrap();
+        let first_statement = list.first_child().unwrap();
+
+        let (decorated, comments) = extract_comments_from_node(&list);
+
+        assert_eq!(decorated.len(), 1);
+        assert!(comments.leading(&list.key()).is_empty());
+        assert_eq!(comments.leading(&first_statement.key()).len(), 1);
+    }
+
+    /// A parentless root keeps the full-document behavior: its leading
+    /// comments still go through the placement rules.
+    #[test]
+    fn parentless_root_leading_comments() {
+        let root = parse_module(
+            "// comment\nif (a) {\n\tb();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let (decorated, comments) = extract_comments_from_node(&root);
+
+        assert_eq!(decorated.len(), 1);
+        assert!(comments.leading(&root.key()).is_empty());
+    }
+
+    fn extract_comments_from_node(
+        root: &JsSyntaxNode,
+    ) -> (
+        Vec<DecoratedComment<JsLanguage>>,
+        CommentsMap<SyntaxElementKey, SourceComment<JsLanguage>>,
+    ) {
+        let style = TestCommentStyle::default();
+        let builder = CommentsBuilderVisitor::new(&style, None);
+        let (comments, _) = builder.visit(root);
+        (style.finish(), comments)
     }
 
     fn extract_comments(

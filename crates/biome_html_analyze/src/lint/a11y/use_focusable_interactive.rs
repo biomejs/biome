@@ -63,11 +63,11 @@ impl Rule for UseFocusableInteractive {
         }
 
         if ctx.aria_roles().is_not_interactive_element(node) {
-            let role_attribute = node.find_attribute_by_name("role");
+            let role_attribute = node.find_attribute_or_vue_binding("role");
             if let Some(role_attribute) = role_attribute {
-                let tabindex_attribute = node.find_attribute_by_name("tabindex");
-                let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-                let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
+                let tabindex_attribute = node.find_attribute_or_vue_binding("tabindex");
+                let role_value = role_attribute.as_static_value()?;
+                let role = AriaRole::from_roles(role_value.text())?;
                 if role.is_interactive() && !role.is_composite() && tabindex_attribute.is_none() {
                     return Some(());
                 }
@@ -78,17 +78,18 @@ impl Rule for UseFocusableInteractive {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_value = role_attribute.as_static_value()?;
+        let role_value_text = role_value.text().trim();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "The HTML element with the interactive role "<Emphasis>{role_attribute_value.to_trimmed_string()}</Emphasis>" is not focusable."
+                    "The HTML element with the interactive role "<Emphasis>{role_value_text}</Emphasis>" is not focusable."
                 },
             ).note(markup! {
-                "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{role_attribute_value.to_trimmed_string()}</Emphasis>"."
+                "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{role_value_text}</Emphasis>"."
             })
             .note(markup! {
                 "Add a "<Emphasis>"tabindex"</Emphasis>" attribute to make this element focusable."

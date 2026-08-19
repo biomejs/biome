@@ -461,7 +461,7 @@ impl TsBindingReference {
 }
 
 /// Internal type with all the semantic data of a specific binding
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelBindingData {
     pub(crate) range: TextRange,
     pub(crate) references: Vec<SemanticModelReference>,
@@ -473,14 +473,14 @@ pub(crate) struct SemanticModelBindingData {
     pub(crate) jsdoc: Option<JsdocComment>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SemanticModelReferenceType {
     Read { hoisted: bool },
     Write { hoisted: bool },
 }
 
 /// Internal type with all the semantic data of a specific reference
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelReference {
     pub(crate) range_start: TextSize,
     pub(crate) ty: SemanticModelReferenceType,
@@ -604,7 +604,7 @@ impl Binding {
     /// Returns all exports of the binding.
     ///
     /// The node kind is either an identifier binding (if the declaration is
-    /// itself an `export` statement) or an identifier usage.
+    /// itself an `export` statement) or an identifier reference.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
         binding.export_ranges.iter().filter_map(|export_start| {

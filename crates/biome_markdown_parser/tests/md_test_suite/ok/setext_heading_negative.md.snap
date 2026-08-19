@@ -26,8 +26,9 @@ of dashes"/>
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -57,16 +58,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
                 },
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@13..14 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@15..16 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@16..17 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@13..17 "    " [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@17..20 "---" [] [],
@@ -112,10 +104,7 @@ MdDocument {
         MdSetextHeader {
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@35..36 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@36..50 "a title=\"a lot" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@35..50 "<a title=\"a lot" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@50..51 "\n" [] [],
@@ -147,9 +136,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..68
+0: MD_ROOT@0..68
   0: (empty)
-  1: MD_BLOCK_LIST@0..68
+  1: (empty)
+  2: MD_BLOCK_LIST@0..68
     0: MD_PARAGRAPH@0..8
       0: MD_INLINE_ITEM_LIST@0..8
         0: MD_TEXTUAL@0..3
@@ -168,17 +158,11 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@9..12 "Foo" [] []
         1: MD_TEXTUAL@12..13
           0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
-        2: MD_INDENT_TOKEN@13..14
-          0: MD_INDENT_CHAR@13..14 " " [] []
-        3: MD_INDENT_TOKEN@14..15
-          0: MD_INDENT_CHAR@14..15 " " [] []
-        4: MD_INDENT_TOKEN@15..16
-          0: MD_INDENT_CHAR@15..16 " " [] []
-        5: MD_INDENT_TOKEN@16..17
-          0: MD_INDENT_CHAR@16..17 " " [] []
-        6: MD_TEXTUAL@17..20
+        2: MD_INDENT_TOKEN@13..17
+          0: MD_INDENT_CHAR@13..17 "    " [] []
+        3: MD_TEXTUAL@17..20
           0: MD_TEXTUAL_LITERAL@17..20 "---" [] []
-        7: MD_TEXTUAL@20..21
+        4: MD_TEXTUAL@20..21
           0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
     3: MD_NEWLINE@21..22
       0: NEWLINE@21..22 "\n" [] []
@@ -203,11 +187,9 @@ MdDocument {
       0: NEWLINE@34..35 "\n" [] []
     8: MD_SETEXT_HEADER@35..54
       0: MD_INLINE_ITEM_LIST@35..51
-        0: MD_TEXTUAL@35..36
-          0: MD_TEXTUAL_LITERAL@35..36 "<" [] []
-        1: MD_TEXTUAL@36..50
-          0: MD_TEXTUAL_LITERAL@36..50 "a title=\"a lot" [] []
-        2: MD_TEXTUAL@50..51
+        0: MD_TEXTUAL@35..50
+          0: MD_TEXTUAL_LITERAL@35..50 "<a title=\"a lot" [] []
+        1: MD_TEXTUAL@50..51
           0: MD_TEXTUAL_LITERAL@50..51 "\n" [] []
       1: MD_SETEXT_UNDERLINE_LITERAL@51..54 "---" [] []
     9: MD_NEWLINE@54..55
@@ -220,6 +202,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@66..67 ">" [] []
         2: MD_TEXTUAL@67..68
           0: MD_TEXTUAL_LITERAL@67..68 "\n" [] []
-  2: EOF@68..68 "" [] []
+  3: EOF@68..68 "" [] []
 
 ```

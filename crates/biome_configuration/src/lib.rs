@@ -1,12 +1,13 @@
-//! This module contains the configuration of `biome.json`
+//! This module contains the configuration of `biome.json`.
 //!
-//! The configuration is divided by "tool", and then it's possible to further customise it
-//! by language. The language might further option divided by tool.
+//! The configuration is divided by tool and can be further customized by language. Each
+//! language's configuration can contain tool-specific options.
 
 #![deny(clippy::use_self)]
 
 pub mod analyzer;
 pub mod bool;
+#[cfg(feature = "lang_css")]
 pub mod css;
 pub mod diagnostics;
 pub mod editorconfig;
@@ -16,8 +17,11 @@ pub mod generated;
 #[cfg(feature = "lang_graphql")]
 pub mod graphql;
 pub mod grit;
+#[cfg(feature = "lang_html")]
 pub mod html;
+#[cfg(feature = "lang_js")]
 pub mod javascript;
+#[cfg(feature = "lang_json")]
 pub mod json;
 #[cfg(feature = "lang_md")]
 pub mod markdown;
@@ -27,12 +31,13 @@ pub mod vcs;
 #[cfg(feature = "lang_yaml")]
 pub mod yaml;
 
+use crate::analyzer::RuleDomains;
 #[cfg(feature = "cli")]
 use crate::analyzer::assist::assist_configuration;
-use crate::analyzer::assist::{Actions, AssistConfiguration, Source};
+use crate::analyzer::assist::{Actions, AssistConfiguration};
 use crate::analyzer::presets::PresetConfig;
-use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
 use crate::bool::Bool;
+#[cfg(feature = "lang_css")]
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
@@ -43,7 +48,9 @@ use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::GritConfiguration;
 #[cfg(feature = "cli")]
 pub use crate::grit::grit_configuration;
+#[cfg(feature = "lang_js")]
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
+#[cfg(feature = "lang_json")]
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 #[cfg(feature = "lang_md")]
 pub use crate::markdown::MarkdownConfiguration;
@@ -68,24 +75,30 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
-use biome_formatter::{IndentStyle, QuoteStyle};
+use biome_formatter::IndentStyle;
+#[cfg(feature = "lang_js")]
+use biome_formatter::QuoteStyle;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
+#[cfg(feature = "lang_css")]
 pub use css::CssConfiguration;
-#[cfg(feature = "cli")]
+#[cfg(all(feature = "cli", feature = "lang_css"))]
 pub use css::css_configuration;
 pub use formatter::FormatterConfiguration;
 #[cfg(feature = "cli")]
 pub use formatter::formatter_configuration;
+#[cfg(feature = "lang_html")]
 pub use html::HtmlConfiguration;
-#[cfg(feature = "cli")]
+#[cfg(all(feature = "cli", feature = "lang_html"))]
 pub use html::html_configuration;
+#[cfg(feature = "lang_js")]
 pub use javascript::JsConfiguration;
-#[cfg(feature = "cli")]
+#[cfg(all(feature = "cli", feature = "lang_js"))]
 pub use javascript::js_configuration;
+#[cfg(feature = "lang_json")]
 pub use json::JsonConfiguration;
-#[cfg(feature = "cli")]
+#[cfg(all(feature = "cli", feature = "lang_json"))]
 pub use json::json_configuration;
 pub use overrides::{
     OverrideAssistConfiguration, OverrideFilesConfiguration, OverrideFormatterConfiguration,
@@ -122,7 +135,7 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 
 pub type RootEnabled = Bool<true>;
 
-/// The configuration that is contained inside the file `biome.json`
+/// The configuration contained in `biome.json`.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -147,7 +160,7 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extends: Option<Extends>,
 
-    /// The configuration of the VCS integration
+    /// The version control integration configuration.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(vcs_configuration), optional, hide_usage)
@@ -155,7 +168,7 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vcs: Option<VcsConfiguration>,
 
-    /// The configuration of the filesystem
+    /// The file handling configuration.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(files_configuration), optional, hide_usage)
@@ -163,32 +176,35 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<FilesConfiguration>,
 
-    /// The configuration of the formatter
+    /// The formatter configuration.
     #[cfg_attr(feature = "cli", bpaf(external(formatter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<FormatterConfiguration>,
 
-    /// The configuration for the linter
+    /// The linter configuration.
     #[cfg_attr(feature = "cli", bpaf(external(linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<LinterConfiguration>,
 
-    /// Specific configuration for the JavaScript language
+    /// Configuration specific to JavaScript.
+    #[cfg(feature = "lang_js")]
     #[cfg_attr(feature = "cli", bpaf(external(js_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub javascript: Option<JsConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Configuration specific to JSON.
+    #[cfg(feature = "lang_json")]
     #[cfg_attr(feature = "cli", bpaf(external(json_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub json: Option<JsonConfiguration>,
 
-    /// Specific configuration for the Css language
+    /// Configuration specific to CSS.
+    #[cfg(feature = "lang_css")]
     #[cfg_attr(feature = "cli", bpaf(external(css_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssConfiguration>,
 
-    /// Specific configuration for the Markdown language
+    /// Configuration specific to Markdown.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(markdown_configuration), optional, hide)
@@ -197,7 +213,7 @@ pub struct Configuration {
     #[cfg(feature = "lang_md")]
     pub markdown: Option<MarkdownConfiguration>,
 
-    /// Specific configuration for the YAML language
+    /// Configuration specific to YAML.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(crate::yaml::yaml_configuration), optional, hide)
@@ -206,7 +222,7 @@ pub struct Configuration {
     #[cfg(feature = "lang_yaml")]
     pub yaml: Option<crate::yaml::YamlConfiguration>,
 
-    /// Specific configuration for the GraphQL language
+    /// Configuration specific to GraphQL.
     #[cfg(feature = "lang_graphql")]
     #[cfg_attr(
         all(feature = "cli", feature = "lang_graphql"),
@@ -218,17 +234,18 @@ pub struct Configuration {
     )]
     pub graphql: Option<crate::graphql::GraphqlConfiguration>,
 
-    /// Specific configuration for the GraphQL language
+    /// Configuration specific to GritQL.
     #[cfg_attr(feature = "cli", bpaf(external(grit_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit: Option<GritConfiguration>,
 
-    /// Specific configuration for the HTML language
+    /// Configuration specific to HTML.
+    #[cfg(feature = "lang_html")]
     #[cfg_attr(feature = "cli", bpaf(external(html_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
 
-    /// A list of granular patterns that should be applied only to a sub set of files
+    /// A list of granular patterns applied only to a subset of files.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub overrides: Option<Overrides>,
@@ -239,7 +256,7 @@ pub struct Configuration {
     #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<biome_plugin_loader::Plugins>,
 
-    /// Specific configuration for assists
+    /// The assist configuration.
     #[cfg_attr(feature = "cli", bpaf(external(assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<AssistConfiguration>,
@@ -301,17 +318,29 @@ impl Configuration {
             }),
             assist: Some(AssistConfiguration {
                 enabled: Some(true.into()),
-                actions: Some(Actions {
-                    source: Some(Source {
-                        organize_imports: Some(RuleAssistConfiguration::Plain(
-                            crate::analyzer::RuleAssistPlainConfiguration::On,
-                        )),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
+                actions: Some({
+                    #[cfg(feature = "lang_js")]
+                    {
+                        Actions {
+                            source: Some(crate::analyzer::assist::Source {
+                                organize_imports: Some(
+                                    crate::analyzer::RuleAssistConfiguration::Plain(
+                                        crate::analyzer::RuleAssistPlainConfiguration::On,
+                                    ),
+                                ),
+                                ..Default::default()
+                            }),
+                            ..Default::default()
+                        }
+                    }
+                    #[cfg(not(feature = "lang_js"))]
+                    {
+                        Actions::default()
+                    }
                 }),
                 ..Default::default()
             }),
+            #[cfg(feature = "lang_js")]
             javascript: Some(JsConfiguration {
                 formatter: Some(JsFormatterConfiguration {
                     quote_style: Some(QuoteStyle::Double),
@@ -343,6 +372,7 @@ impl Configuration {
         self.formatter.clone().unwrap_or_default()
     }
 
+    #[cfg(feature = "lang_js")]
     pub fn get_javascript_formatter_configuration(&self) -> JsFormatterConfiguration {
         self.javascript
             .as_ref()
@@ -350,7 +380,7 @@ impl Configuration {
             .cloned()
             .unwrap_or_default()
     }
-
+    #[cfg(feature = "lang_js")]
     pub fn get_javascript_linter_configuration(&self) -> JsLinterConfiguration {
         self.javascript
             .as_ref()
@@ -359,6 +389,7 @@ impl Configuration {
             .unwrap_or_default()
     }
 
+    #[cfg(feature = "lang_json")]
     pub fn get_json_formatter_configuration(&self) -> JsonFormatterConfiguration {
         self.json
             .as_ref()
@@ -416,13 +447,14 @@ impl Configuration {
             .is_some_and(|c| c.use_editorconfig_resolved())
     }
 
+    #[cfg(feature = "lang_json")]
     pub fn get_json_linter_configuration(&self) -> JsonLinterConfiguration {
         self.json
             .as_ref()
             .and_then(|lang| lang.linter.clone())
             .unwrap_or_default()
     }
-
+    #[cfg(feature = "lang_css")]
     pub fn get_css_parser_configuration(&self) -> CssParserConfiguration {
         self.css
             .as_ref()
@@ -430,7 +462,7 @@ impl Configuration {
             .cloned()
             .unwrap_or_default()
     }
-
+    #[cfg(feature = "lang_css")]
     pub fn get_css_formatter_configuration(&self) -> CssFormatterConfiguration {
         self.css
             .as_ref()
@@ -439,6 +471,7 @@ impl Configuration {
             .unwrap_or_default()
     }
 
+    #[cfg(feature = "lang_css")]
     pub fn get_css_linter_configuration(&self) -> CssLinterConfiguration {
         self.css
             .as_ref()
@@ -603,19 +636,18 @@ impl Display for Version<'_> {
 
 pub type FilesIgnoreUnknownEnabled = Bool<false>;
 
-/// The configuration of the filesystem
+/// The file handling configuration.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
-    /// The maximum allowed size for source code files in bytes. Files above
-    /// this limit will be ignored for performance reasons. Defaults to 1 MiB
+    /// The maximum source file size in bytes. Biome ignores larger files. Defaults to `1 MiB`.
     #[cfg_attr(feature = "cli", bpaf(long("files-max-size"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 
-    /// Tells Biome to not emit diagnostics when handling files that it doesn't know
+    /// Prevents Biome from emitting diagnostics for unrecognized file types.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("files-ignore-unknown"), argument("true|false"), optional)
@@ -623,8 +655,8 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 
-    /// A list of glob patterns. Biome will handle only those files/folders that will
-    /// match these patterns.
+    /// A list of glob patterns. Biome handles only files and directories that match these
+    /// patterns.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,

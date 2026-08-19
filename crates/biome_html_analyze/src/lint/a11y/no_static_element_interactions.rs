@@ -73,6 +73,11 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
+        // Svelte special elements (e.g. `<svelte:window>`) are not real DOM elements.
+        if node.is_svelte_special_element() {
+            return None;
+        }
+
         if is_hidden_from_screen_reader(node) {
             return None;
         }

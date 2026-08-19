@@ -1,0 +1,144 @@
+---
+source: crates/biome_css_syntax/src/property_syntax/parser.rs
+expression: snapshot
+---
+property.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property syntax cannot be empty.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "   ";
+      │            ^^^
+    3 │ }
+    4 │
+
+  i Add a syntax component, such as <length>, or use * to accept any value.
+
+
+
+property.css:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property syntax component.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "foo | | bar";
+      │                  ^
+    3 │ }
+    4 │
+
+  i Add a data type, such as <length>, or a custom identifier at this position.
+
+
+
+property.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Separate property syntax components with |.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "foo bar";
+      │                ^^^
+    3 │ }
+    4 │
+
+
+
+property.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a supported property syntax type.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "<unknown>";
+      │            ^^^^^^^^^
+    3 │ }
+    4 │
+
+  i Supported types:
+
+  - <angle>
+  - <color>
+  - <custom-ident>
+  - <image>
+  - <integer>
+  - <length>
+  - <length-percentage>
+  - <number>
+  - <percentage>
+  - <resolution>
+  - <string>
+  - <time>
+  - <transform-function>
+  - <transform-list>
+  - <url>
+
+
+
+property.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a custom identifier that isn't reserved.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "initial";
+      │            ^^^^^^^
+    3 │ }
+    4 │
+
+  i Reserved identifiers:
+
+  - default
+  - inherit
+  - initial
+  - revert
+  - revert-layer
+  - unset
+
+
+
+property.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The * can't appear with other syntax components.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "* | auto";
+      │            ^^^^^^^^
+    3 │ }
+    4 │
+
+  i Remove * or remove the other syntax components.
+
+
+
+property.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The * can't appear with other syntax components.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "<length> | *";
+      │            ^^^^^^^^^^^^
+    3 │ }
+    4 │
+
+  i Remove * or remove the other syntax components.
+
+
+
+property.css:2:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Remove the multiplier after <transform-list>.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "<transform-list>+";
+      │                            ^
+    3 │ }
+    4 │
+
+
+
+property.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Remove whitespace inside the type name or before the multiplier.
+
+    1 │ @property --foo {
+  > 2 │   syntax: "<color> #";
+      │                   ^
+    3 │ }
+    4 │

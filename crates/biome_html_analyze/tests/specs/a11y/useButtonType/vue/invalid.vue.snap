@@ -12,6 +12,9 @@ expression: invalid.vue
 <button type="incorrectType" />
 <button type>Do something</button>
 <button type="" />
+<!-- static Vue bindings with invalid type values should also be flagged -->
+<button :type="'incorrectType'">Do something</button>
+<button v-bind:type="'invalid'">Do something</button>
 
 ```
 
@@ -101,7 +104,7 @@ invalid.vue:7:1 lint/a11y/useButtonType ━━━━━━━━━━━━━�
   > 7 │ <button type>Do something</button>
       │ ^^^^^^^^^^^^^
     8 │ <button type="" />
-    9 │ 
+    9 │ <!-- static Vue bindings with invalid type values should also be flagged -->
   
   i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
   
@@ -115,11 +118,49 @@ invalid.vue:8:1 lint/a11y/useButtonType ━━━━━━━━━━━━━�
 
   × Provide a valid type attribute for the button element.
   
-    6 │ <button type="incorrectType" />
-    7 │ <button type>Do something</button>
-  > 8 │ <button type="" />
-      │ ^^^^^^^^^^^^^^^^^^
-    9 │ 
+     6 │ <button type="incorrectType" />
+     7 │ <button type>Do something</button>
+   > 8 │ <button type="" />
+       │ ^^^^^^^^^^^^^^^^^^
+     9 │ <!-- static Vue bindings with invalid type values should also be flagged -->
+    10 │ <button :type="'incorrectType'">Do something</button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.vue:10:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+     8 │ <button type="" />
+     9 │ <!-- static Vue bindings with invalid type values should also be flagged -->
+  > 10 │ <button :type="'incorrectType'">Do something</button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <button v-bind:type="'invalid'">Do something</button>
+    12 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+invalid.vue:11:1 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type attribute for the button element.
+  
+     9 │ <!-- static Vue bindings with invalid type values should also be flagged -->
+    10 │ <button :type="'incorrectType'">Do something</button>
+  > 11 │ <button v-bind:type="'invalid'">Do something</button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
   
   i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element.
   

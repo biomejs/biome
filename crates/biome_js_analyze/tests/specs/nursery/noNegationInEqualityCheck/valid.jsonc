@@ -1,0 +1,12 @@
+[
+	"foo === bar",
+	"foo !== bar",
+	"!(foo === bar)",
+	"!(foo !== bar)",
+	"!foo == bar",
+	"!foo != bar",
+	"!!foo === bar",
+	"if (a !== b) {}",
+	"!foo instanceof bar",
+	"!foo in bar"
+]

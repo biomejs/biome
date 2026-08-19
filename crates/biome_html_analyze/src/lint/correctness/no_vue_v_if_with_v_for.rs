@@ -69,15 +69,9 @@ impl Rule for NoVueVIfWithVFor {
                 .as_any_vue_directive()
                 .and_then(|dir| dir.as_vue_directive())
             {
-                if directive
-                    .name_token()
-                    .is_ok_and(|t| t.text_trimmed() == "v-if")
-                {
+                if directive.is_if() {
                     v_if = Some(directive.range());
-                } else if directive
-                    .name_token()
-                    .is_ok_and(|t| t.text_trimmed() == "v-for")
-                {
+                } else if directive.is_for() {
                     v_for = Some(directive.range());
                 }
             }

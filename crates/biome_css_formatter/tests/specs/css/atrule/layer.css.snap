@@ -166,7 +166,7 @@ reset.type
 }
 
 @layer framework {
-	@media only screen and (color) {
+	@media ONLY screen AND (color) {
 		article {
 			padding: 1rem 3rem;
 		}

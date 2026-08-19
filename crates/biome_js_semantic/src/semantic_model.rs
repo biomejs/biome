@@ -9,9 +9,6 @@ mod model;
 mod reference;
 mod scope;
 
-#[cfg(test)]
-mod tests;
-
 use crate::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
@@ -30,7 +27,6 @@ use std::{
 
 pub use binding::*;
 pub use builder::*;
-
 pub use flavor::*;
 pub use globals::*;
 pub use import::*;

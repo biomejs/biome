@@ -24,7 +24,7 @@ use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges, error::GritR
 use path_absolutize::Absolutize;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GritQueryContext;
@@ -278,7 +278,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
                 // TODO: Verify the workspace's maximum file size.
 
                 let file = file_owner_from_matches(
-                    file.path.as_ref(),
+                    file.path.as_path(),
                     &file.parse,
                     None,
                     FileOrigin::Fresh,
@@ -370,14 +370,14 @@ pub(crate) fn new_file_owner(
 /// that can use the Biome workspace.
 #[derive(Clone, Debug)]
 pub struct GritTargetFile {
-    pub path: Arc<Utf8PathBuf>,
+    pub path: Utf8PathBuf,
     pub parse: AnyParse,
 }
 
 impl GritTargetFile {
     pub fn new(path: impl Into<Utf8PathBuf>, parse: AnyParse) -> Self {
         Self {
-            path: Arc::new(path.into()),
+            path: path.into(),
             parse,
         }
     }

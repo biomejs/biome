@@ -802,14 +802,14 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 children,
                 AnyYamlFlowMapEntry::can_cast,
                 T ! [,],
-                false,
+                true,
             ),
             YAML_FLOW_SEQUENCE_ENTRY_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
                 AnyYamlFlowSequenceEntry::can_cast,
                 T ! [,],
-                false,
+                true,
             ),
             YAML_PROPERTY_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyYamlProperty::can_cast)

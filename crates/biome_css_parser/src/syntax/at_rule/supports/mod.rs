@@ -1,5 +1,6 @@
 pub(crate) mod error;
 
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::CssParser;
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
 use crate::syntax::at_rule::supports::error::{
@@ -7,13 +8,16 @@ use crate::syntax::at_rule::supports::error::{
 };
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::declaration::parse_declaration_important;
-use crate::syntax::parse_error::{expected_declaration, expected_selector, scss_only_syntax_error};
+use crate::syntax::parse_error::{
+    expected_component_value, expected_declaration, expected_selector, scss_only_syntax_error,
+};
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
     parse_generic_property_name, parse_property_value_with_end_set,
+    parse_supports_custom_property_value,
 };
 use crate::syntax::scss::{
-    is_at_scss_supports_interpolated_condition, is_nth_at_scss_interpolated_property,
+    is_at_scss_supports_interpolated_condition, is_nth_at_scss_interpolated_property_name,
     parse_scss_supports_interpolated_condition,
 };
 use crate::syntax::selector::parse_selector;
@@ -231,8 +235,6 @@ fn parse_any_supports_condition_in_parens(
     } else if is_at_supports_condition_in_parens(p) {
         parse_supports_condition_in_parens(p)
     } else if is_at_scss_supports_interpolated_condition(p) {
-        // TODO(#10456): Add CSS-mode error fixtures for this SCSS-exclusive
-        // branch after the shared SCSS interpolation gating lands.
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
             parse_scss_supports_interpolated_condition,
@@ -306,7 +308,8 @@ fn parse_supports_feature_selector(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 fn is_at_supports_feature_declaration(p: &mut CssParser) -> bool {
     p.at(T!['('])
-        && (is_nth_at_direct_generic_property(p, 1) || is_nth_at_scss_interpolated_property(p, 1))
+        && (is_nth_at_direct_generic_property(p, 1)
+            || is_nth_at_scss_interpolated_property_name(p, 1))
 }
 
 #[inline]
@@ -347,10 +350,31 @@ pub(crate) fn parse_supports_declaration(p: &mut CssParser) -> ParsedSyntax {
 fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
-    parse_generic_property_name(p).ok();
+    let is_custom_property = parse_generic_property_name(p).ok().is_some_and(|name| {
+        matches!(
+            name.kind(p),
+            CSS_DASHED_IDENTIFIER | SCSS_INTERPOLATED_DASHED_IDENTIFIER
+        )
+    });
 
-    p.expect(T![:]);
-    parse_supports_property_value(p);
+    let is_scss_custom_property = CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property;
+    let has_colon = if is_scss_custom_property {
+        p.expect_with_context(
+            T![:],
+            CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::ScssLineComments),
+        )
+    } else {
+        p.expect(T![:])
+    };
+    let value = parse_supports_property_value(p, is_scss_custom_property);
+
+    if has_colon
+        && is_scss_custom_property
+        && value.range(p).is_empty()
+        && !p.source().has_preceding_block_comment()
+    {
+        p.error(expected_component_value(p, p.cur_range()));
+    }
 
     Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
@@ -358,11 +382,21 @@ fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
 const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set!(T!['}'], T![;], T![')'], T![!]);
 
+/// Parses a supports-declaration value, including raw custom-property values
+/// such as `$gap` in `@supports (--space: $gap) {}`.
 #[inline]
-fn parse_supports_property_value(p: &mut CssParser) {
-    parse_property_value_with_end_set(
-        p,
-        END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
-        END_OF_PROPERTY_VALUE_TOKEN_SET,
-    );
+fn parse_supports_property_value(
+    p: &mut CssParser,
+    is_scss_custom_property: bool,
+) -> CompletedMarker {
+    if is_scss_custom_property {
+        parse_supports_custom_property_value(p, END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET)
+    } else {
+        parse_property_value_with_end_set(
+            p,
+            false,
+            END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
+            END_OF_PROPERTY_VALUE_TOKEN_SET,
+        )
+    }
 }

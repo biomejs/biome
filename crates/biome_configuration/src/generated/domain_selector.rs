@@ -79,6 +79,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noJsxNamespace"),
         RuleFilter::Rule("nursery", "noReactStringRefs"),
         RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
+        RuleFilter::Rule("nursery", "useReactCompiler"),
         RuleFilter::Rule("nursery", "useReactFunctionComponentDefinition"),
         RuleFilter::Rule("performance", "noJsxPropsBind"),
         RuleFilter::Rule("performance", "noSyncScripts"),
@@ -107,6 +108,14 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("performance", "useSolidForComponent"),
         RuleFilter::Rule("suspicious", "noDuplicatedSpreadProps"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
+    ]
+});
+static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap")]);
+static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
     ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -175,6 +184,8 @@ impl DomainSelector {
             "react" => REACT_FILTERS.clone(),
             "reactNative" => REACTNATIVE_FILTERS.clone(),
             "solid" => SOLID_FILTERS.clone(),
+            "svelte" => SVELTE_FILTERS.clone(),
+            "tailwind" => TAILWIND_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
             "types" => TYPES_FILTERS.clone(),
@@ -203,6 +214,10 @@ impl DomainSelector {
                 .iter()
                 .any(|filter| filter.match_rule::<R>()),
             "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "svelte" => SVELTE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "tailwind" => TAILWIND_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule::<R>()),
             "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "turborepo" => TURBOREPO_FILTERS
                 .iter()

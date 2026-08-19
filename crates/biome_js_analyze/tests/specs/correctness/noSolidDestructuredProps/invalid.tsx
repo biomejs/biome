@@ -61,3 +61,29 @@ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
 let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
 
 let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+
+function Component({ a }) {
+	return <div a={a} />;
+}
+
+let Component = ({ a }) => <div>{a}</div>;
+
+function Component({ a }) {
+	return <div>{a}</div>;
+}
+
+let Component = function ({ a }) {
+	return <div>{a}</div>;
+};
+
+let Component = function ({ a }) {
+	return <div a={a} />;
+};
+
+export function Component({ a }) {
+	return <div>{a}</div>;
+}
+
+export default function Component({ a }) {
+	return <div>{a}</div>;
+}

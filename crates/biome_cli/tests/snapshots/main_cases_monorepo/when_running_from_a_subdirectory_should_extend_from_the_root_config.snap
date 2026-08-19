@@ -2,6 +2,17 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}
+```
+
 ## `packages/lib/biome.json`
 
 ```json
@@ -12,17 +23,6 @@ expression: redactor(content)
     "formatter": {
       "quoteStyle": "double"
     }
-  }
-}
-```
-
-## `biome.json`
-
-```json
-{
-  "formatter": {
-    "indentStyle": "space",
-    "indentWidth": 2
   }
 }
 ```

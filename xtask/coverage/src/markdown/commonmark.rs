@@ -13,10 +13,10 @@
 //   just test-markdown-conformance
 
 use crate::runner::{TestCase, TestRunOutcome, TestSuite};
-use biome_markdown_parser::{document_to_html, parse_markdown};
-use biome_markdown_syntax::MdDocument;
+use biome_markdown_parser::{MarkdownParserOptions, document_to_html, parse_markdown_with_cache};
+use biome_markdown_syntax::MdRoot;
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, NodeCache, TextRange};
 use serde::Deserialize;
 use std::io;
 use std::path::Path;
@@ -43,9 +43,13 @@ impl TestCase for CommonMarkTestCase {
     }
 
     fn run(&self) -> TestRunOutcome {
-        let parsed = parse_markdown(&self.markdown);
+        let parsed = parse_markdown_with_cache(
+            &self.markdown,
+            &mut NodeCache::default(),
+            MarkdownParserOptions::default().with_frontmatter(false),
+        );
 
-        let Some(document) = MdDocument::cast(parsed.syntax()) else {
+        let Some(document) = MdRoot::cast(parsed.syntax()) else {
             return TestRunOutcome::IncorrectlyErrored {
                 errors: vec![ParseDiagnostic::new(
                     format!("Bogus node: {:?}", parsed.syntax().kind()),

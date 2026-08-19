@@ -26,6 +26,7 @@ Another paragraph
 [escaped\]bracket]: /url
 
 [trailing-spaces]: /url   
+[next-definition]: /url
 
 [invalid-trailing]: /url invalid
 

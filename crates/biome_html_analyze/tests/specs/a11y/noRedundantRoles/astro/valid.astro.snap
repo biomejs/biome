@@ -24,6 +24,7 @@ expression: valid.astro
 
 <!-- Native elements with non-redundant roles -->
 <article role="presentation"></article>
+<article role={roleValue}></article>
 <span></span>
 <div></div>
 

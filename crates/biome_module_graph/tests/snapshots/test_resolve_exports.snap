@@ -257,6 +257,39 @@ Module TypeId(18) => sync Function "Component" {
 }
 ```
 
+# `/src/reexports.ts`
+
+## Source
+
+```ts
+/**
+ * Hello, namespace 1.
+ */
+export * as renamed from "./renamed-reexports";
+```
+
+## Module Info
+
+```
+Exports {
+  "renamed" => {
+    ExportOwnExport => JsOwnExport::Namespace(Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: "/src/renamed-reexports.ts"
+      Import Symbol: All
+      Exported range: (80..127)
+    ))
+  }
+}
+Imports {
+  No imports
+}
+Side-effect imports: [
+  "./renamed-reexports" => /src/renamed-reexports.ts,
+]
+```
+
+
 # `/src/renamed-reexports.ts`
 
 ## Source
@@ -298,36 +331,4 @@ Module TypeId(1) => sync Function "ohNo" {
   }
   returns: Module(0) TypeId(0)
 }
-```
-
-# `/src/reexports.ts`
-
-## Source
-
-```ts
-/**
- * Hello, namespace 1.
- */
-export * as renamed from "./renamed-reexports";
-```
-
-## Module Info
-
-```
-Exports {
-  "renamed" => {
-    ExportOwnExport => JsOwnExport::Namespace(Reexport(
-      Specifier: "./renamed-reexports"
-      Resolved path: "/src/renamed-reexports.ts"
-      Import Symbol: All
-      Exported range: (80..127)
-    ))
-  }
-}
-Imports {
-  No imports
-}
-Side-effect imports: [
-  "./renamed-reexports" => /src/renamed-reexports.ts,
-]
 ```

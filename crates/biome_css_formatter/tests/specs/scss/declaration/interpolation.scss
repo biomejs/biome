@@ -1,6 +1,7 @@
 .box{
 #{$name}:1px;
 margin-#{$side}:1px;
+-#{$prefix}-radius:4px;
 --#{$prop}:10px;
 --theme-#{$slot}:red;
 color:var(--#{$name});

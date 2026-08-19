@@ -25,6 +25,9 @@ expression: invalid.vue
 <thead aria-expanded="true" />
 <input type="radio" aria-selected="true" />
 <menu type="toolbar" aria-expanded="true" />
+<!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
+<a :href="'#'" aria-checked="true" />
+<a v-bind:href="'http://x.y.z'" aria-checked="true" />
 
 ```
 
@@ -344,7 +347,7 @@ invalid.vue:20:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
   > 20 │ <input type="radio" aria-selected="true" />
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ <menu type="toolbar" aria-expanded="true" />
-    22 │ 
+    22 │ <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -360,7 +363,41 @@ invalid.vue:21:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     20 │ <input type="radio" aria-selected="true" />
   > 21 │ <menu type="toolbar" aria-expanded="true" />
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ 
+    22 │ <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
+    23 │ <a :href="'#'" aria-checked="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.vue:23:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    21 │ <menu type="toolbar" aria-expanded="true" />
+    22 │ <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
+  > 23 │ <a :href="'#'" aria-checked="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ <a v-bind:href="'http://x.y.z'" aria-checked="true" />
+    25 │ 
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.vue:24:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    22 │ <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
+    23 │ <a :href="'#'" aria-checked="true" />
+  > 24 │ <a v-bind:href="'http://x.y.z'" aria-checked="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
   
   i Ensure that ARIA attributes are valid for the role of the element.
   

@@ -1,0 +1,57 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-tailwind.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<div class="text-["></div>
+<div class=bg-[></div>
+
+```
+
+# Diagnostics
+```
+invalid-tailwind.html:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '['.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div class="text-["></div>
+      │                  ^
+    4 │ <div class=bg-[></div>
+    5 │ 
+  
+  i Expected a value here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div class="text-["></div>
+      │                  ^
+    4 │ <div class=bg-[></div>
+    5 │ 
+  
+
+```
+
+```
+invalid-tailwind.html:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '['.
+  
+    3 │ <div class="text-["></div>
+  > 4 │ <div class=bg-[></div>
+      │               ^
+    5 │ 
+  
+  i Expected a value here.
+  
+    3 │ <div class="text-["></div>
+  > 4 │ <div class=bg-[></div>
+      │               ^
+    5 │ 
+  
+
+```

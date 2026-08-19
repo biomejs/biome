@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/await-inline-no-args.svelte
+---
+
+# Input
+
+```svelte
+{#await promise}loading{:then}the value is {value}{:catch}oops {error}{/await}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,7 @@
+-{#await promise}loading{:then}the value is {value}{:catch}oops {error}{/await}
++{#await promise}
++    loading
++{:then}
++    the value is {value}
++{:catch}
++    oops {error}
++{/await}
+```
+
+# Output
+
+```svelte
+{#await promise}
+    loading
+{:then}
+    the value is {value}
+{:catch}
+    oops {error}
+{/await}
+```

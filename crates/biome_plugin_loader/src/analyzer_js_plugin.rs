@@ -84,6 +84,11 @@ impl AnalyzerJsPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
+    fn name(&self) -> &str {
+        // JS plugins don't declare a name; fall back to the plugin file stem.
+        self.path.file_stem().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         PluginTargetLanguage::JavaScript
     }
@@ -100,7 +105,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .collect()
     }
 
-    fn evaluate(&self, _node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult {
+    fn evaluate(&self, _node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -191,6 +196,12 @@ mod tests {
     }
 
     #[test]
+    fn name_is_derived_from_the_plugin_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "plugin");
+    }
+
+    #[test]
     fn applies_to_all_files_without_includes() {
         let plugin = load_test_plugin(None);
         assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
@@ -240,7 +251,7 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), Arc::new("/foo.js".into()))
+                plugin.evaluate(parse.syntax().into(), "/foo.js".into())
             })
         };
 
@@ -254,7 +265,7 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), Arc::new("/bar.js".into()))
+                plugin.evaluate(parse.syntax().into(), "/bar.js".into())
             })
         };
 

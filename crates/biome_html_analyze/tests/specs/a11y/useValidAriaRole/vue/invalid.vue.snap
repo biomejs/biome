@@ -12,6 +12,10 @@ expression: invalid.vue
 <div role="unknown-invalid-role" />
 <div role="tabpanel row foobar"></div>
 <div role="doc-endnotes range"></div>
+<!-- static Vue bindings with invalid roles should also be flagged -->
+<div :role="'range'" />
+<div v-bind:role="'datepicker'" />
+<div :role="'unknown-invalid-role'" />
 
 ```
 
@@ -135,7 +139,7 @@ invalid.vue:7:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
   > 7 │ <div role="tabpanel row foobar"></div>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <div role="doc-endnotes range"></div>
-    9 │ 
+    9 │ <!-- static Vue bindings with invalid roles should also be flagged -->
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -152,11 +156,12 @@ invalid.vue:8:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 
   × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
-    6 │ <div role="unknown-invalid-role" />
-    7 │ <div role="tabpanel row foobar"></div>
-  > 8 │ <div role="doc-endnotes range"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     6 │ <div role="unknown-invalid-role" />
+     7 │ <div role="tabpanel row foobar"></div>
+   > 8 │ <div role="doc-endnotes range"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <!-- static Vue bindings with invalid roles should also be flagged -->
+    10 │ <div :role="'range'" />
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -165,5 +170,70 @@ invalid.vue:8:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
   
     8 │ <div·role="doc-endnotes·range"></div>
       │      -------------------------       
+
+```
+
+```
+invalid.vue:10:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+     8 │ <div role="doc-endnotes range"></div>
+     9 │ <!-- static Vue bindings with invalid roles should also be flagged -->
+  > 10 │ <div :role="'range'" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <div v-bind:role="'datepicker'" />
+    12 │ <div :role="'unknown-invalid-role'" />
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    10 │ <div·:role="'range'"·/>
+       │      ----------------  
+
+```
+
+```
+invalid.vue:11:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+     9 │ <!-- static Vue bindings with invalid roles should also be flagged -->
+    10 │ <div :role="'range'" />
+  > 11 │ <div v-bind:role="'datepicker'" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <div :role="'unknown-invalid-role'" />
+    13 │ 
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    11 │ <div·v-bind:role="'datepicker'"·/>
+       │      ---------------------------  
+
+```
+
+```
+invalid.vue:12:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  
+    10 │ <div :role="'range'" />
+    11 │ <div v-bind:role="'datepicker'" />
+  > 12 │ <div :role="'unknown-invalid-role'" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Check WAI-ARIA for valid roles or provide options accordingly.
+  
+  i Unsafe fix: Remove the invalid role attribute.
+     Check the list of all valid role attributes.
+  
+    12 │ <div·:role="'unknown-invalid-role'"·/>
+       │      -------------------------------  
 
 ```

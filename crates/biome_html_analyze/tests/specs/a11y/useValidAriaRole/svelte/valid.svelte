@@ -8,3 +8,5 @@
 <div role="switch row" />
 <div />
 <div role="tabpanel row" />
+<div role={roleValue} />
+<div {role} />

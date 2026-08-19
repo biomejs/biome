@@ -43,3 +43,7 @@
 <input role="textbox" />
 <th role="columnheader"></th>
 <th role="rowheader"></th>
+<!-- static Vue role bindings that map to semantic elements should also be flagged -->
+<div :role="'button'"></div>
+<div v-bind:role="'checkbox'"></div>
+<div :role="'heading'"></div>

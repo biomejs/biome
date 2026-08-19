@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
-use crate::{NUM_PREDEFINED_TYPES, TypeData, TypeStore};
+use crate::{TypeData, TypeStore, globals_ids::NUM_PREDEFINED_TYPES};
 
-use super::{globals::GlobalsResolver, globals_ids::GlobalTypeId};
+use super::{globals::RawGlobalTypes, globals_ids::GlobalTypeId};
 
-/// Requires every predefined manifest slot to be populated before producing a [`GlobalsResolver`].
+/// Tracks predefined manifest slots before producing the raw global table.
 pub(crate) struct GlobalsResolverBuilder {
     /// `None` reserves a manifest row until its `TypeData` is written.
     types: Vec<Option<TypeData>>,
@@ -48,15 +46,22 @@ impl GlobalsResolverBuilder {
         }
     }
 
-    /// Consumes the builder and produces the immutable [`GlobalsResolver`].
-    pub(crate) fn build(self) -> GlobalsResolver {
-        let types: Vec<Arc<TypeData>> = self
+    /// Consumes the builder and produces the immutable raw global table.
+    pub(crate) fn build(self) -> RawGlobalTypes {
+        for (index, slot) in self.types.iter().enumerate() {
+            debug_assert!(
+                slot.is_some(),
+                "global type resolver slot {index} was not populated"
+            );
+        }
+
+        let types: Vec<TypeData> = self
             .types
             .into_iter()
-            .map(|slot| Arc::new(slot.unwrap_or(TypeData::Unknown)))
+            .map(|slot| slot.unwrap_or(TypeData::Unknown))
             .collect();
 
-        GlobalsResolver {
+        RawGlobalTypes {
             types: TypeStore::from_types(types),
         }
     }
@@ -89,5 +94,11 @@ mod tests {
         let mut builder = GlobalsResolverBuilder::default();
         builder.set_type_data(UNKNOWN_ID_GLOBAL_TYPE_ID, TypeData::Unknown);
         builder.set_type_data(UNKNOWN_ID_GLOBAL_TYPE_ID, TypeData::Unknown);
+    }
+
+    #[test]
+    #[should_panic(expected = "global type resolver slot 0 was not populated")]
+    fn build_panics_on_missing_slot() {
+        GlobalsResolverBuilder::with_capacity(1).build();
     }
 }

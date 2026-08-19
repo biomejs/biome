@@ -157,13 +157,7 @@ impl Display for GitLabDiagnostics<'_> {
             .diagnostics
             .iter()
             .filter(|d| d.severity() >= payload.diagnostic_level)
-            .filter(|d| {
-                if *verbose {
-                    d.tags().is_verbose()
-                } else {
-                    true
-                }
-            })
+            .filter(|d| !d.tags().is_verbose() || *verbose)
             .filter_map(|biome_diagnostic| {
                 let absolute_path = match biome_diagnostic.location().resource {
                     Some(Resource::File(file)) => Some(file),

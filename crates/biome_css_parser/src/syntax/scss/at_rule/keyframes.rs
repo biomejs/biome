@@ -1,19 +1,18 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::{
     is_at_scss_interpolation, is_at_scss_variable, is_nth_at_scss_interpolation,
     parse_scss_interpolated_name, parse_scss_regular_interpolation, parse_scss_variable,
 };
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier};
 use biome_css_syntax::CssSyntaxKind::{SCSS_KEYFRAMES_NAME, SCSS_KEYFRAMES_SELECTOR};
 use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::prelude::SyntaxFeature;
 
 #[inline]
 pub(crate) fn is_at_scss_keyframes_selector(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_interpolation(p)
+    is_at_scss_interpolation(p)
 }
 
 /// Parses an interpolated keyframe selector.
@@ -46,10 +45,9 @@ pub(crate) fn parse_scss_keyframes_selector(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_scss_keyframes_name(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && (is_at_scss_variable(p)
-            || is_at_scss_interpolation(p)
-            || is_at_identifier_with_interpolation_suffix(p))
+    is_at_scss_variable(p)
+        || is_at_scss_interpolation(p)
+        || is_at_identifier_with_interpolation_suffix(p)
 }
 
 /// Parses a dynamic SCSS keyframes name.

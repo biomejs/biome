@@ -22,7 +22,10 @@ impl FormatNodeRule<CssSupportsConditionInParens> for FormatCssSupportsCondition
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                soft_block_indent_with_maybe_space(&condition.format(), should_insert_space),
+                soft_block_indent_with_maybe_space(
+                    &condition?.format().with_text_case(CssCase::Preserve),
+                    should_insert_space
+                ),
                 r_paren_token.format()
             ])]
         )

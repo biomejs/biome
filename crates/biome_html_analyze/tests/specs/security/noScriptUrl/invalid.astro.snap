@@ -17,14 +17,14 @@ expression: invalid.astro
 
 # Diagnostics
 ```
-invalid.astro:6:8 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:6:4 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
     4 │ ---
     5 │ 
   > 6 │ <a href="javascript:void(0)">Void</a>
-      │        ^^^^^^^^^^^^^^^^^^^^^
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
     8 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
   
@@ -36,13 +36,13 @@ invalid.astro:6:8 lint/security/noScriptUrl ━━━━━━━━━━━━
 ```
 
 ```
-invalid.astro:7:8 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:7:4 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
     6 │ <a href="javascript:void(0)">Void</a>
   > 7 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
     9 │ 
   
@@ -54,14 +54,14 @@ invalid.astro:7:8 lint/security/noScriptUrl ━━━━━━━━━━━━
 ```
 
 ```
-invalid.astro:8:8 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:8:4 lint/security/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
     6 │ <a href="javascript:void(0)">Void</a>
     7 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
   > 8 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     9 │ 
   
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).

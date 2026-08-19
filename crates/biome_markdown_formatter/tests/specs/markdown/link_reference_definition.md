@@ -41,6 +41,12 @@ Use [foo] in text.
 
 [foo]: /url ""
 
+[foo]: /url ''
+
+[foo]: /url " "
+
+[foo]: /url ' '
+
 [foo]: /url "a"
 
 [CapitalCase]: /url

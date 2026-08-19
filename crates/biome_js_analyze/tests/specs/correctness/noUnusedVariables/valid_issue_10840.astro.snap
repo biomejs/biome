@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_10840.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import MyComponent from "./my-component.astro";
+
+const text = "abc";
+---
+
+<MyComponent {text} />
+
+```

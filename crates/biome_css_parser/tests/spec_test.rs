@@ -50,7 +50,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let mut options = CssParserOptions::default()
         // it is an internal option that cannot be configured via options.json
         // TODO: find a way to make it configurable
-        .allow_metavariables();
+        .allow_metavariables()
+        .report_scss_exclusive_syntax();
 
     let mut css_modules_enabled = false;
     let mut css_modules_kind = CssModulesKind::Classic;

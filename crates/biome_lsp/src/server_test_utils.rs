@@ -432,6 +432,22 @@ pub(crate) async fn wait_for_notification(
     }
 }
 
+pub(crate) async fn wait_for_no_notification(
+    receiver: &mut (impl Stream<Item = ServerNotification> + Unpin),
+    duration: Duration,
+    check: impl Fn(&ServerNotification) -> bool,
+) {
+    loop {
+        match tokio::time::timeout(duration, receiver.next()).await {
+            Ok(Some(notification)) if check(&notification) => {
+                panic!("unexpected server notification: {notification:?}");
+            }
+            Ok(Some(_)) => {}
+            Ok(None) | Err(_) => return,
+        }
+    }
+}
+
 /// Basic handler for requests and notifications coming from the server for tests
 pub(crate) async fn client_handler<I, O>(
     stream: I,

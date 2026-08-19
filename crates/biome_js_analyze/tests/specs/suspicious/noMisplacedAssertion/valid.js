@@ -9,6 +9,22 @@ test("something", () => {
 	expect("something").toBeTrue()
 })
 
+test.each(arr)("works as expected", () => {
+	expect();
+});
+
+test.concurrent.each(arr)("works as expected", () => {
+	expect();
+});
+
+it.concurrent.each(arr)("works as expected", () => {
+	expect();
+});
+
+test.concurrent.only.each(arr)("works as expected", () => {
+	expect();
+});
+
 Deno.test("something", () => {
 	expect("something").toBeTrue()
 })

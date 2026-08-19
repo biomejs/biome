@@ -1,0 +1,80 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/ts-expression/comment.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div v-if="
+            // leading comment
+    isFolder(   /* NOTE: I like pizza */file)
+    // trailing comment
+    "
+  :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
+  >{{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */    }}</div>
+</template>
+
+<script lang="ts"></script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,13 @@
+ <template>
+   <div
+     v-if="
+-      // leading comment
+-      isFolder(/* NOTE: I like pizza */ file)
+-      // trailing comment
+-    "
+-    :format="
+-      /* leading comment */ myFunc(
+-        /* NOTE: I like banana */ o as unknown,
+-      ) /* trailing comment */
++            // leading comment
++    isFolder(   /* NOTE: I like pizza */file)
++    // trailing comment
+     "
++    :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
+   >
+-    {{
+-      /* leading comment */ (file as /* NOTE: I like sushi */ mymodule.Folder)
+-        .deadline /* trailing comment */
+-    }}
++    {{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */ }}
+   </div>
+ </template>
+ 
+```
+
+# Output
+
+```vue
+<template>
+  <div
+    v-if="
+            // leading comment
+    isFolder(   /* NOTE: I like pizza */file)
+    // trailing comment
+    "
+    :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
+  >
+    {{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */ }}
+  </div>
+</template>
+
+<script lang="ts"></script>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    8:     :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
+   10:     {{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */ }}
+```

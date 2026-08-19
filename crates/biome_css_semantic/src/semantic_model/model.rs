@@ -1,8 +1,10 @@
 use biome_css_syntax::{
-    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
-    CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
-    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssExpression,
+    AnyCssRoot, AnyCssSelector, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
+    CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
+    CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
+    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
+    property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
@@ -20,40 +22,38 @@ use std::sync::Arc;
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
     pub(crate) data: Arc<SemanticModelData>,
-    root: SendNode,
 }
 
 impl SemanticModel {
-    pub(crate) fn new(data: SemanticModelData, root: SendNode) -> Self {
+    pub(crate) fn new(data: SemanticModelData) -> Self {
         Self {
             data: Arc::new(data),
-            root,
         }
     }
 
     pub fn root(&self) -> AnyCssRoot {
-        self.root.to_language_root::<AnyCssRoot>()
+        self.data.root()
     }
 
     /// Returns all top-level rules in the CSS document.
-    pub fn rules(&self) -> Vec<&Rule> {
+    pub fn rules(&self) -> Vec<Rule> {
         self.data
             .top_level_rule_ids
             .iter()
-            .filter_map(|id| self.data.all_rules.get(id.index()))
+            .filter_map(|id| self.rule(*id))
             .collect()
     }
 
-    pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
-        &self.data.global_custom_variables
+    pub fn global_custom_variables(&self) -> GlobalCustomVariables<'_> {
+        GlobalCustomVariables { data: &self.data }
     }
 
-    pub fn get_rule_by_id(&self, id: &RuleId) -> Option<&Rule> {
-        self.data.all_rules.get(id.index())
+    pub fn get_rule_by_id(&self, id: &RuleId) -> Option<Rule> {
+        self.rule(*id)
     }
 
     /// Returns the rule that contains the given range.
-    pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
+    pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<Rule> {
         // Generally, this function narrows down the search before finding the most specific rule for better performance.
         // But when the target range starts from 0, the BTreeMap's range method may not work as expected due to
         // the comparison semantics of TextRange.
@@ -74,7 +74,7 @@ impl SemanticModel {
                 .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, id)| id)
         };
-        rule_id.and_then(|id| self.data.all_rules.get(id.index()))
+        rule_id.and_then(|id| self.rule(*id))
     }
 
     /// Returns an iterator over the specificity of all rules in source order.
@@ -82,13 +82,26 @@ impl SemanticModel {
         self.data
             .range_to_rule_id
             .values()
-            .filter_map(|id| self.data.all_rules.get(id.index()))
-            .flat_map(|rule| rule.selectors())
+            .filter_map(|id| self.rule(*id))
+            .flat_map(|rule| rule.selectors().to_vec())
             .map(|selector| selector.specificity())
     }
 
     pub fn is_media_rule(&self, rule: &Rule) -> bool {
         matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
+    }
+
+    fn rule(&self, id: RuleId) -> Option<Rule> {
+        let rule = self.data.all_rules.get(id.index())?;
+        Some(Rule::new(self.data.clone(), rule))
+    }
+
+    fn all_rules(&self) -> Vec<Rule> {
+        self.data
+            .all_rules
+            .iter()
+            .map(|rule| Rule::new(self.data.clone(), rule))
+            .collect()
     }
 }
 
@@ -98,14 +111,93 @@ impl SemanticModel {
 /// and a list of all rules in the document.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
+    pub(crate) root: SendNode,
     /// Single source of truth for all rules, indexed by RuleId
-    pub(crate) all_rules: Vec<Rule>,
+    pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    /// Custom property names declared in `:root` or by an `@property` rule.
+    ///
+    /// The associated data retains the `:root` declaration. `@property` data is
+    /// stored separately because the same name may be declared more than once.
+    pub(crate) global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
+    /// Every authored `@property` rule in source order, including declarations
+    /// shadowed by a later rule with the same name.
+    pub(crate) at_property_rules: Vec<CssPropertyAtRuleData>,
+    /// Maps each authored `@property` rule range to its index.
+    pub(crate) at_property_by_range: FxHashMap<TextRange, usize>,
+    /// The last `@property` rule with the required registration descriptors for each name.
+    ///
+    /// Each value indexes the last matching declaration in
+    /// [`Self::at_property_rules`].
+    pub(crate) last_at_property_by_name: FxHashMap<TokenText, usize>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
+}
+
+impl SemanticModelData {
+    pub(crate) fn root(&self) -> AnyCssRoot {
+        self.root.to_language_root::<AnyCssRoot>()
+    }
+}
+
+impl PartialEq for SemanticModel {
+    fn eq(&self, other: &Self) -> bool {
+        let self_rules = self.all_rules();
+        let other_rules = other.all_rules();
+        let self_root = self.data.root();
+        let other_root = other.data.root();
+
+        self_rules.len() == other_rules.len()
+            && self_rules
+                .iter()
+                .zip(other_rules.iter())
+                .all(|(self_rule, other_rule)| self_rule == other_rule)
+            && self.data.top_level_rule_ids == other.data.top_level_rule_ids
+            && self.data.range_to_rule_id.len() == other.data.range_to_rule_id.len()
+            && self.data.at_property_rules.len() == other.data.at_property_rules.len()
+            && self
+                .data
+                .at_property_rules
+                .iter()
+                .zip(&other.data.at_property_rules)
+                .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
+            && self.data.global_custom_variables.len() == other.data.global_custom_variables.len()
+            && self.data.global_custom_variables.iter().all(|(key, val)| {
+                other
+                    .data
+                    .global_custom_variables
+                    .get(key)
+                    .is_some_and(|other_val| val.semantic_eq(other_val, &self_root, &other_root))
+            })
+    }
+}
+
+/// Stored data for a CSS rule.
+#[derive(Debug, Clone)]
+pub(crate) struct RuleData {
+    pub(crate) id: RuleId,
+    pub(crate) node: AstPtr<AnyRuleStart>,
+    /// The selectors associated with this rule.
+    pub(crate) selectors: Vec<SelectorData>,
+    /// The declarations within this rule.
+    pub(crate) declarations: Vec<CssModelDeclarationData>,
+    /// The id of the parent rule
+    pub(crate) parent_id: Option<RuleId>,
+    /// The ids of the child rules
+    pub(crate) child_ids: Vec<RuleId>,
+    /// Specificity context of this rule
+    /// See https://drafts.csswg.org/selectors-4/#specificity-rules
+    pub(crate) specificity: Specificity,
+}
+
+impl RuleData {
+    pub(crate) fn range(&self, css_root: &AnyCssRoot) -> TextRange {
+        self.node
+            .to_node(css_root.syntax())
+            .syntax()
+            .text_trimmed_range()
+    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -126,6 +218,7 @@ pub(crate) struct SemanticModelData {
 ///
 #[derive(Debug, Clone)]
 pub struct Rule {
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
     /// The selectors associated with this rule.
@@ -141,18 +234,65 @@ pub struct Rule {
     pub(crate) specificity: Specificity,
 }
 
+impl PartialEq for Rule {
+    fn eq(&self, other: &Self) -> bool {
+        self.specificity == other.specificity
+            && self.id == other.id
+            && self.parent_id == other.parent_id
+            && self.child_ids == other.child_ids
+            && self.selectors.len() == other.selectors.len()
+            && self
+                .selectors
+                .iter()
+                .zip(other.selectors.iter())
+                .all(|(s, o)| s == o)
+            && self.declarations.len() == other.declarations.len()
+            && self
+                .declarations
+                .iter()
+                .zip(other.declarations.iter())
+                .all(|(s, o)| s == o)
+    }
+}
+
 impl Rule {
+    fn new(data: Arc<SemanticModelData>, rule: &RuleData) -> Self {
+        let selectors = rule
+            .selectors
+            .iter()
+            .enumerate()
+            .map(|(index, _)| Selector::new(data.clone(), rule.id, index))
+            .collect();
+        let declarations = rule
+            .declarations
+            .iter()
+            .enumerate()
+            .map(|(index, _)| CssModelDeclaration::new(data.clone(), rule.id, index))
+            .collect();
+
+        Self {
+            data,
+            id: rule.id,
+            node: rule.node.clone(),
+            selectors,
+            declarations,
+            parent_id: rule.parent_id,
+            child_ids: rule.child_ids.clone(),
+            specificity: rule.specificity,
+        }
+    }
+
     pub fn id(&self) -> RuleId {
         self.id
     }
 
-    pub fn node(&self, css_root: &AnyCssRoot) -> AnyRuleStart {
-        self.node.to_node(css_root.syntax())
+    pub fn node(&self, _css_root: &AnyCssRoot) -> AnyRuleStart {
+        self.node.to_node(self.data.root().syntax())
     }
 
-    pub fn range(&self, css_root: &AnyCssRoot) -> TextRange {
+    pub fn range(&self, _css_root: &AnyCssRoot) -> TextRange {
         self.node
-            .to_node(css_root.syntax())
+            .to_node(self.data.root().syntax())
             .syntax()
             .text_trimmed_range()
     }
@@ -165,8 +305,8 @@ impl Rule {
         &self.declarations
     }
 
-    pub fn parent_id(&self) -> Option<&RuleId> {
-        self.parent_id.as_ref()
+    pub fn parent_id(&self) -> Option<RuleId> {
+        self.parent_id
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
@@ -197,22 +337,33 @@ impl AnyRuleStart {
 }
 
 declare_node_union! {
-    pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector
+    pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector | ScssPartialCombinatorSelector
 }
 
 impl AnyCssSelectorLike {
     pub fn has_nesting_selectors(&self) -> bool {
-        match self {
-            Self::CssCompoundSelector(node) => !node.nesting_selectors().is_empty(),
-            Self::CssComplexSelector(node) => node.nesting_level() > 0,
-        }
+        self.nesting_level() > 0
     }
 
     pub fn nesting_level(&self) -> usize {
         match self {
             Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
             Self::CssComplexSelector(node) => node.nesting_level(),
+            Self::ScssPartialCombinatorSelector(node) => {
+                node.left().as_ref().map_or(0, selector_nesting_level)
+            }
         }
+    }
+}
+
+fn selector_nesting_level(selector: &AnyCssSelector) -> usize {
+    match selector {
+        AnyCssSelector::CssCompoundSelector(node) => node.nesting_selectors().len(),
+        AnyCssSelector::CssComplexSelector(node) => node.nesting_level(),
+        AnyCssSelector::ScssPartialCombinatorSelector(node) => {
+            node.left().as_ref().map_or(0, selector_nesting_level)
+        }
+        AnyCssSelector::CssBogusSelector(_) | AnyCssSelector::CssMetavariable(_) => 0,
     }
 }
 
@@ -404,8 +555,22 @@ impl std::fmt::Display for ResolvedSelector {
     }
 }
 
+/// Stored data for a CSS selector.
+#[derive(Debug, Clone)]
+pub(crate) struct SelectorData {
+    pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    /// The resolved selector, accounting for nesting and `&` references.
+    /// For top-level selectors this is the token sequence from the source.
+    /// For nested selectors each `&` is replaced by the parent token sequence,
+    /// and a space-literal token is inserted when there is no `&`.
+    pub(crate) resolved: ResolvedSelector,
+    /// The specificity of the selector.
+    pub(crate) specificity: Specificity,
+}
+
 /// Represents a CSS selector.
-/// /// ```css
+///
+/// ```css
 /// span {
 /// ^^^^
 ///   color: red;
@@ -413,6 +578,7 @@ impl std::fmt::Display for ResolvedSelector {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
@@ -424,8 +590,29 @@ pub struct Selector {
 }
 
 impl Selector {
-    pub fn node(&self, root: &AnyCssRoot) -> AnyCssSelectorLike {
-        self.node.to_node(root.syntax())
+    fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
+        let selector = &data.all_rules[rule_id.index()].selectors[index];
+        let node = selector.node.clone();
+        let resolved = selector.resolved.clone();
+        let specificity = selector.specificity;
+        Self {
+            data,
+            node,
+            resolved,
+            specificity,
+        }
+    }
+}
+
+impl PartialEq for Selector {
+    fn eq(&self, other: &Self) -> bool {
+        self.specificity == other.specificity && self.resolved == other.resolved
+    }
+}
+
+impl Selector {
+    pub fn node(&self, _root: &AnyCssRoot) -> AnyCssSelectorLike {
+        self.node.to_node(self.data.root().syntax())
     }
 
     /// Returns the resolved selector, accounting for CSS nesting and `&` references.
@@ -433,9 +620,9 @@ impl Selector {
         &self.resolved
     }
 
-    pub fn range(&self, root: &AnyCssRoot) -> TextRange {
+    pub fn range(&self, _root: &AnyCssRoot) -> TextRange {
         self.node
-            .to_node(root.syntax())
+            .to_node(self.data.root().syntax())
             .syntax()
             .text_trimmed_range()
     }
@@ -508,7 +695,31 @@ impl std::fmt::Display for Specificity {
     }
 }
 
+/// Source handles and semantic data retained for a CSS declaration.
+#[derive(Debug, Clone)]
+pub(crate) struct CssModelDeclarationData {
+    /// The complete declaration node.
+    pub(crate) declaration: AstPtr<CssDeclaration>,
+    /// The declaration name node.
+    pub(crate) property: AstPtr<CssProperty>,
+    /// The trimmed property-name token used for lookup and semantic equality.
+    pub(crate) property_name: TokenText,
+    /// The declaration value classified by its CSS or SCSS syntax shape.
+    pub(crate) value: CssPropertyInitialValueKind,
+}
+
+impl CssModelDeclarationData {
+    /// Compares declaration semantics using the root that owns each side's pointers.
+    /// This keeps equality independent from source ranges while still comparing the
+    /// property name and the meaningful value tokens.
+    fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
+        self.property_name == other.property_name
+            && self.value.semantic_eq(&other.value, self_root, other_root)
+    }
+}
+
 /// Represents a CSS declaration (property-value pair).
+///
 /// ```css
 /// a {
 ///   color: red;
@@ -517,18 +728,41 @@ impl std::fmt::Display for Specificity {
 /// ```
 #[derive(Debug, Clone)]
 pub struct CssModelDeclaration {
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) declaration: AstPtr<CssDeclaration>,
     pub(crate) property: AstPtr<CssProperty>,
+    pub(crate) property_name: TokenText,
     pub(crate) value: CssPropertyInitialValue,
 }
 
+impl PartialEq for CssModelDeclaration {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value && self.property_name == other.property_name
+    }
+}
+
 impl CssModelDeclaration {
-    pub fn declaration(&self, root: &AnyCssRoot) -> CssDeclaration {
-        self.declaration.to_node(root.syntax())
+    fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
+        let declaration = &data.all_rules[rule_id.index()].declarations[index];
+        let declaration_ptr = declaration.declaration.clone();
+        let property = declaration.property.clone();
+        let property_name = declaration.property_name.clone();
+        let value = declaration.value.clone();
+        Self {
+            data: data.clone(),
+            declaration: declaration_ptr,
+            property,
+            property_name,
+            value: CssPropertyInitialValue { data, kind: value },
+        }
     }
 
-    pub fn property(&self, root: &AnyCssRoot) -> CssProperty {
-        self.property.to_node(root.syntax())
+    pub fn declaration(&self, _root: &AnyCssRoot) -> CssDeclaration {
+        self.declaration.to_node(self.data.root().syntax())
+    }
+
+    pub fn property(&self, _root: &AnyCssRoot) -> CssProperty {
+        self.property.to_node(self.data.root().syntax())
     }
 
     pub fn value(&self) -> &CssPropertyInitialValue {
@@ -551,33 +785,265 @@ impl CssProperty {
     }
 }
 
+/// A declaration value retained by the semantic model.
 #[derive(Debug, Clone)]
-pub enum CssPropertyInitialValue {
+pub enum CssPropertyInitialValueKind {
+    /// A standard CSS component-value list.
     GenericComponent(AstPtr<CssGenericComponentValueList>),
+    /// A custom-property value.
+    CustomProperty(AstPtr<CssCustomPropertyValue>),
+    /// A CSS Modules `composes` value.
     Composes(AstPtr<CssComposesPropertyValue>),
+    /// An SCSS expression.
     ScssExpression(AstPtr<ScssExpression>),
 }
 
-impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
+impl CssPropertyInitialValueKind {
+    /// Compares values from potentially different syntax trees by restoring each
+    /// stored pointer with its own root. Source ranges do not affect semantic
+    /// equality.
+    fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
+        match (self, other) {
+            (Self::GenericComponent(a), Self::GenericComponent(b)) => {
+                let a = a.to_node(self_root.syntax());
+                let b = b.to_node(other_root.syntax());
+                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+            }
+            (Self::CustomProperty(a), Self::CustomProperty(b)) => {
+                let a = a.to_node(self_root.syntax());
+                let b = b.to_node(other_root.syntax());
+                semantic_custom_property_tokens(a.syntax())
+                    == semantic_custom_property_tokens(b.syntax())
+            }
+            (Self::Composes(a), Self::Composes(b)) => {
+                let a = a.to_node(self_root.syntax());
+                let b = b.to_node(other_root.syntax());
+                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+            }
+            (Self::ScssExpression(a), Self::ScssExpression(b)) => {
+                let a = a.to_node(self_root.syntax());
+                let b = b.to_node(other_root.syntax());
+                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+            }
+            _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CssPropertyInitialValue {
+    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) kind: CssPropertyInitialValueKind,
+}
+
+impl CssPropertyInitialValue {
+    pub fn kind(&self) -> &CssPropertyInitialValueKind {
+        &self.kind
+    }
+
+    pub fn is_composes(&self) -> bool {
+        matches!(self.kind, CssPropertyInitialValueKind::Composes(_))
+    }
+
+    pub fn is_generic_component(&self) -> bool {
+        matches!(self.kind, CssPropertyInitialValueKind::GenericComponent(_))
+    }
+
+    pub fn is_custom_property(&self) -> bool {
+        matches!(self.kind, CssPropertyInitialValueKind::CustomProperty(_))
+    }
+
+    pub fn is_scss_expression(&self) -> bool {
+        matches!(self.kind, CssPropertyInitialValueKind::ScssExpression(_))
+    }
+}
+
+impl PartialEq for CssPropertyInitialValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind
+            .semantic_eq(&other.kind, &self.data.root(), &other.data.root())
+    }
+}
+
+impl From<CssGenericComponentValueList> for CssPropertyInitialValueKind {
     fn from(value: CssGenericComponentValueList) -> Self {
         Self::GenericComponent(AstPtr::new(&value))
     }
 }
 
-impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
+impl From<CssCustomPropertyValue> for CssPropertyInitialValueKind {
+    fn from(value: CssCustomPropertyValue) -> Self {
+        Self::CustomProperty(AstPtr::new(&value))
+    }
+}
+
+impl From<CssComposesPropertyValue> for CssPropertyInitialValueKind {
     fn from(value: CssComposesPropertyValue) -> Self {
         Self::Composes(AstPtr::new(&value))
     }
 }
 
-impl From<ScssExpression> for CssPropertyInitialValue {
+impl From<ScssExpression> for CssPropertyInitialValueKind {
     fn from(value: ScssExpression) -> Self {
         Self::ScssExpression(AstPtr::new(&value))
     }
 }
 
+/// Returns the non-trivia token kind/text pairs for a CSS value node.
+///
+/// This is used for semantic equality: whitespace, comments, and source ranges
+/// do not affect the result, while different value tokens still make values
+/// unequal.
+fn semantic_value_tokens(node: &CssSyntaxNode) -> Vec<(CssSyntaxKind, TokenText)> {
+    node.descendants_tokens(Direction::Next)
+        .filter(|token| !token.kind().is_trivia())
+        .map(|token| (token.kind(), token.token_text_trimmed()))
+        .collect()
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+enum CustomPropertyTokenRole {
+    Plain,
+    FunctionOpen,
+    InterpolationStart,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct SemanticCustomPropertyToken {
+    kind: CssSyntaxKind,
+    text: TokenText,
+    role: CustomPropertyTokenRole,
+    has_component_gap_before: bool,
+}
+
+/// Returns raw custom-property tokens and marks source-tight constructs.
+///
+/// The role distinguishes `url(foo)` from `url (foo)` and `#{$value}` from
+/// `# {$value}`. Component gaps distinguish `//` from `/ /` while allowing
+/// normalized whitespace at container boundaries.
+fn semantic_custom_property_tokens(node: &CssSyntaxNode) -> Vec<SemanticCustomPropertyToken> {
+    node.descendants_tokens(Direction::Next)
+        .filter(|token| !token.kind().is_trivia())
+        .map(|token| {
+            let role = match (token.kind(), token.parent().map(|parent| parent.kind())) {
+                (biome_css_syntax::T!['('], Some(CssSyntaxKind::CSS_CUSTOM_PROPERTY_FUNCTION)) => {
+                    CustomPropertyTokenRole::FunctionOpen
+                }
+                (biome_css_syntax::T![#], Some(CssSyntaxKind::SCSS_INTERPOLATION)) => {
+                    CustomPropertyTokenRole::InterpolationStart
+                }
+                _ => CustomPropertyTokenRole::Plain,
+            };
+
+            SemanticCustomPropertyToken {
+                kind: token.kind(),
+                text: token.token_text_trimmed(),
+                role,
+                has_component_gap_before: has_custom_property_component_gap_before(&token),
+            }
+        })
+        .collect()
+}
+
+/// Returns whether a raw component starts after source trivia.
+///
+/// Example: the second `/` in `/ /`.
+fn has_custom_property_component_gap_before(token: &CssSyntaxToken) -> bool {
+    let Some(component) = token.ancestors().find(|node| {
+        node.parent().is_some_and(|parent| {
+            parent.kind() == CssSyntaxKind::CSS_CUSTOM_PROPERTY_COMPONENT_LIST
+        })
+    }) else {
+        return false;
+    };
+
+    if component.first_token().as_ref() != Some(token) {
+        return false;
+    }
+
+    component
+        .prev_sibling()
+        .and_then(|previous| previous.last_token())
+        .is_some_and(|previous| {
+            previous.text_trimmed_range().end() < token.text_trimmed_range().start()
+        })
+}
+
+/// The `:root` declaration associated with one global custom-property name.
+#[derive(Debug, Clone, Default)]
+pub(crate) struct CssGlobalCustomVariableData {
+    /// The declaration from a `:root` rule, if one is retained for the name.
+    pub(crate) root: Option<CssModelDeclarationData>,
+}
+
+/// Authored descriptors and source handles retained for an `@property` rule.
+///
+/// Invalid or incomplete descriptor sets remain represented. Descriptor validity
+/// is available through the individual fields rather than through the presence of
+/// this structure.
+#[derive(Debug, Clone)]
+pub(crate) struct CssPropertyAtRuleData {
+    /// The authored custom-property name.
+    pub(crate) name: TokenText,
+    /// The custom-property name node in the rule declarator.
+    pub(crate) property: AstPtr<CssDashedIdentifier>,
+    /// The parsed `syntax` descriptor, including missing and invalid states.
+    pub(crate) syntax: PropertySyntaxResult,
+    /// The `inherits` descriptor when its value is `true` or `false`.
+    pub(crate) inherits: Option<bool>,
+    /// The `initial-value` descriptor when a value node is present.
+    pub(crate) initial_value: Option<CssPropertyInitialValueKind>,
+    /// The absolute source range of the complete rule.
+    pub(crate) range: TextRange,
+}
+
+impl CssGlobalCustomVariableData {
+    /// Compares global custom variable semantics using the root that owns each
+    /// side's stored pointers.
+    fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
+        match (&self.root, &other.root) {
+            (Some(this), Some(other)) => this.semantic_eq(other, self_root, other_root),
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+
+impl CssPropertyAtRuleData {
+    /// Returns whether the rule's descriptors form a registration candidate.
+    pub(crate) fn is_registration_candidate(&self, root: &AnyCssRoot) -> bool {
+        let Some(syntax) = self.syntax.as_valid() else {
+            return false;
+        };
+        if self.inherits.is_none() {
+            return false;
+        }
+        if syntax.is_universal() {
+            return true;
+        }
+        let Some(CssPropertyInitialValueKind::GenericComponent(initial_value)) =
+            &self.initial_value
+        else {
+            return false;
+        };
+        syntax.matches_initial_value(&initial_value.to_node(root.syntax()))
+    }
+
+    fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
+        self.name == other.name
+            && self.inherits == other.inherits
+            && match (&self.initial_value, &other.initial_value) {
+                (Some(this), Some(other)) => this.semantic_eq(other, self_root, other_root),
+                (None, None) => true,
+                _ => false,
+            }
+            && self.syntax.semantic_eq(&other.syntax)
+    }
+}
+
 /// Represents a CSS global custom variable declaration.
 /// This can be declared in the `:root` selector or using the `@property` rule.
+///
 /// ```css
 /// :root {
 ///   --custom-color: red;
@@ -590,15 +1056,190 @@ impl From<ScssExpression> for CssPropertyInitialValue {
 /// }
 /// ```
 #[derive(Debug, Clone)]
-pub enum CssGlobalCustomVariable {
-    Root(CssModelDeclaration),
-    AtProperty {
-        property: AstPtr<CssProperty>,
-        syntax: Option<String>,
-        inherits: Option<bool>,
-        initial_value: Option<CssPropertyInitialValue>,
-        range: TextRange,
-    },
+pub struct CssGlobalCustomVariable {
+    data: Arc<SemanticModelData>,
+    name: TokenText,
+}
+
+impl CssGlobalCustomVariable {
+    fn value(&self) -> &CssGlobalCustomVariableData {
+        &self.data.global_custom_variables[&self.name]
+    }
+
+    /// Returns the custom property name.
+    pub fn name(&self) -> &TokenText {
+        &self.name
+    }
+
+    /// Returns whether the property has an `@property` rule.
+    pub fn is_at_property(&self) -> bool {
+        self.data.last_at_property_by_name.contains_key(&self.name)
+    }
+
+    /// Returns whether the property is declared in a `:root` rule.
+    pub fn is_root(&self) -> bool {
+        self.value().root.is_some()
+    }
+
+    /// Returns the semantic data for the `@property` rule, if present.
+    pub fn at_property(&self) -> Option<CustomProperty> {
+        let index = *self.data.last_at_property_by_name.get(&self.name)?;
+        Some(CustomProperty {
+            data: self.data.clone(),
+            index,
+        })
+    }
+}
+
+/// The descriptors and source data declared by an `@property` rule.
+///
+/// This view represents the authored rule even when its descriptors do not
+/// form a valid browser registration.
+#[derive(Debug, Clone)]
+pub struct CustomProperty {
+    data: Arc<SemanticModelData>,
+    index: usize,
+}
+
+impl CustomProperty {
+    fn value(&self) -> &CssPropertyAtRuleData {
+        // SAFETY: Instances are created only from indices stored by the semantic model builder.
+        &self.data.at_property_rules[self.index]
+    }
+
+    /// Returns the authored custom property name.
+    pub fn name(&self) -> &TokenText {
+        &self.value().name
+    }
+
+    /// Returns the custom property name node from the rule declarator.
+    pub fn name_node(&self) -> CssDashedIdentifier {
+        self.value().property.to_node(self.data.root().syntax())
+    }
+
+    /// Returns the parsed `syntax` descriptor.
+    pub fn syntax(&self) -> &PropertySyntaxResult {
+        &self.value().syntax
+    }
+
+    /// Returns the `inherits` descriptor when it is `true` or `false`.
+    pub fn inherits(&self) -> Option<bool> {
+        self.value().inherits
+    }
+
+    /// Returns the `initial-value` descriptor, if present.
+    pub fn initial_value(&self) -> Option<CssPropertyInitialValue> {
+        self.value()
+            .initial_value
+            .clone()
+            .map(|kind| CssPropertyInitialValue {
+                data: self.data.clone(),
+                kind,
+            })
+    }
+
+    /// Returns the absolute source range of the `@property` rule.
+    pub fn range(&self) -> TextRange {
+        self.value().range
+    }
+}
+
+/// A view over global custom properties indexed by name.
+#[derive(Debug)]
+pub struct GlobalCustomVariables<'a> {
+    pub(crate) data: &'a Arc<SemanticModelData>,
+}
+
+impl<'a> GlobalCustomVariables<'a> {
+    /// Returns every authored registration candidate in source order.
+    pub(crate) fn at_property_registration_candidates(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = CustomProperty> + '_ {
+        let root = self.data.root();
+        self.data
+            .at_property_rules
+            .iter()
+            .enumerate()
+            .filter(move |(_, rule)| rule.is_registration_candidate(&root))
+            .map(|(index, _)| CustomProperty {
+                data: self.data.clone(),
+                index,
+            })
+    }
+
+    /// Returns whether a custom property with `name` is present.
+    pub fn contains_key(&self, name: impl AsRef<str>) -> bool {
+        self.data
+            .global_custom_variables
+            .contains_key(name.as_ref())
+    }
+
+    /// Returns the number of custom properties.
+    pub fn len(&self) -> usize {
+        self.data.global_custom_variables.len()
+    }
+
+    /// Returns whether the collection contains no custom properties.
+    pub fn is_empty(&self) -> bool {
+        self.data.global_custom_variables.is_empty()
+    }
+
+    /// Returns the custom property with `name`, if present.
+    pub fn get(&self, name: impl AsRef<str>) -> Option<CssGlobalCustomVariable> {
+        let (name, _) = self
+            .data
+            .global_custom_variables
+            .get_key_value(name.as_ref())?;
+        Some(CssGlobalCustomVariable {
+            data: self.data.clone(),
+            name: name.clone(),
+        })
+    }
+
+    /// Returns `@property` registration candidates in the source order of their last valid
+    /// descriptor sets.
+    ///
+    /// Each custom-property name occurs at most once. When a name is authored
+    /// multiple times, only its last rule with all required descriptors is returned.
+    pub fn at_properties(&self) -> impl Iterator<Item = CustomProperty> + '_ {
+        self.data
+            .at_property_rules
+            .iter()
+            .enumerate()
+            .filter(|(index, rule)| {
+                self.data
+                    .last_at_property_by_name
+                    .get(&rule.name)
+                    .is_some_and(|last| last == index)
+            })
+            .map(|(index, _)| CustomProperty {
+                data: self.data.clone(),
+                index,
+            })
+    }
+
+    /// Returns the authored `@property` rule at `range`, including definitions
+    /// shadowed by a later rule with the same name.
+    pub fn at_property_by_range(&self, range: TextRange) -> Option<CustomProperty> {
+        let index = *self.data.at_property_by_range.get(&range)?;
+        Some(CustomProperty {
+            data: self.data.clone(),
+            index,
+        })
+    }
+
+    /// Returns all custom properties in unspecified order.
+    pub fn iter(&self) -> impl Iterator<Item = (&TokenText, CssGlobalCustomVariable)> + '_ {
+        self.data.global_custom_variables.keys().map(|name| {
+            (
+                name,
+                CssGlobalCustomVariable {
+                    data: self.data.clone(),
+                    name: name.clone(),
+                },
+            )
+        })
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]

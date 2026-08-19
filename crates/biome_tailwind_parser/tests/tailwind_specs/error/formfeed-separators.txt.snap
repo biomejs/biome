@@ -1,0 +1,163 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+flexhover:flexfocus:flex uppercase
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..5 "flex" [] [Whitespace("\u{c}")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@5..10 "hover" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@10..11 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@11..16 "flex" [] [Whitespace("\u{b}")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@16..21 "focus" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@21..22 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@22..27 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@27..36 "uppercase" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@36..36 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..36
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..36
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..5
+        0: TW_BASE@0..5 "flex" [] [Whitespace("\u{c}")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@5..16
+      0: TW_VARIANT_LIST@5..11
+        0: TW_VARIANT_EXPRESSION@5..10
+          0: TW_VARIANT_SEGMENT_LIST@5..10
+            0: TW_NAMED_VARIANT_SEGMENT@5..10
+              0: TW_VARIANT_SEGMENT@5..10 "hover" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@10..11 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@11..16
+        0: TW_BASE@11..16 "flex" [] [Whitespace("\u{b}")]
+        1: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@16..27
+      0: TW_VARIANT_LIST@16..22
+        0: TW_VARIANT_EXPRESSION@16..21
+          0: TW_VARIANT_SEGMENT_LIST@16..21
+            0: TW_NAMED_VARIANT_SEGMENT@16..21
+              0: TW_VARIANT_SEGMENT@16..21 "focus" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@21..22 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@22..27
+        0: TW_BASE@22..27 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@27..36
+      0: TW_VARIANT_LIST@27..27
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@27..36
+        0: TW_BASE@27..36 "uppercase" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@36..36 "" [] []
+
+```
+
+## Diagnostics
+
+```
+formfeed-separators.txt:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.
+  
+  > 1 │ flex↡hover:flex␋focus:flex uppercase
+      │     ^
+  
+  i Use a regular whitespace character instead.
+  
+formfeed-separators.txt:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.
+  
+  > 1 │ flex↡hover:flex␋focus:flex uppercase
+      │                ^
+  
+  i Use a regular whitespace character instead.
+  
+```

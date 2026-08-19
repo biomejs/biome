@@ -31,26 +31,20 @@ TwRoot {
                         DASH@10..11 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@11..12 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@12..23 "collapsible" [] [],
-                                },
-                                CssGenericDelimiter {
-                                    value: EQ@23..24 "=" [] [],
-                                },
-                                CssIdentifier {
-                                    ident_token: IDENT@24..28 "icon" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@12..28 "collapsible=icon" [] [],
                             r_brack_token: R_BRACKET@28..29 "]" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@29..30 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@30..36 "hidden" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -77,19 +71,17 @@ TwRoot {
             3: DASH@10..11 "-" [] []
             4: TW_ARBITRARY_VARIANT_SEGMENT@11..29
               0: L_BRACKET@11..12 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@12..28
-                0: CSS_IDENTIFIER@12..23
-                  0: IDENT@12..23 "collapsible" [] []
-                1: CSS_GENERIC_DELIMITER@23..24
-                  0: EQ@23..24 "=" [] []
-                2: CSS_IDENTIFIER@24..28
-                  0: IDENT@24..28 "icon" [] []
+              1: TW_SELECTOR@12..28 "collapsible=icon" [] []
               2: R_BRACKET@28..29 "]" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@29..30 ":" [] []
       1: (empty)
-      2: TW_STATIC_CANDIDATE@30..36
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@30..36
         0: TW_BASE@30..36 "hidden" [] []
-      3: (empty)
+        1: (empty)
+      4: (empty)
   2: EOF@36..37 "" [Newline("\n")] []
 
 ```

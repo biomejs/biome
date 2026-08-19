@@ -1,0 +1,109 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: thenableInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// A non-callable `then` member does not make a thenable, so `await` is still reported.
+interface NotThenable { then: number; }
+class PromiseLike<T> {}
+class InstanceThen { then() {} }
+class Other {}
+declare const value: unknown;
+declare const promiseLike: PromiseLike<void>;
+declare const constructors: typeof InstanceThen | typeof Other;
+async function awaitNonCallableThen(): Promise<void> {
+    await (value as NotThenable);
+    await Promise;
+    await promiseLike;
+    await constructors;
+}
+
+```
+
+# Diagnostics
+```
+thenableInvalid.ts:12:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    10 │ declare const constructors: typeof InstanceThen | typeof Other;
+    11 │ async function awaitNonCallableThen(): Promise<void> {
+  > 12 │     await (value as NotThenable);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     await Promise;
+    14 │     await promiseLike;
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+thenableInvalid.ts:13:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    11 │ async function awaitNonCallableThen(): Promise<void> {
+    12 │     await (value as NotThenable);
+  > 13 │     await Promise;
+       │     ^^^^^^^^^^^^^
+    14 │     await promiseLike;
+    15 │     await constructors;
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+thenableInvalid.ts:14:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    12 │     await (value as NotThenable);
+    13 │     await Promise;
+  > 14 │     await promiseLike;
+       │     ^^^^^^^^^^^^^^^^^
+    15 │     await constructors;
+    16 │ }
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+thenableInvalid.ts:15:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    13 │     await Promise;
+    14 │     await promiseLike;
+  > 15 │     await constructors;
+       │     ^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

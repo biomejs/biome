@@ -3,7 +3,7 @@ use crate::{
     prelude::*,
     utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
-use biome_formatter::{FormatRuleWithOptions, GroupId, trivia::format_dangling_comments, write};
+use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, GroupId, write};
 use biome_html_syntax::{
     HtmlElement, HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken,
 };
@@ -68,14 +68,40 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             .and_then(|c| c.l_angle_token().ok())
             .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
+        let comments = f.context().comments().clone();
+        let dangling_comments = comments.dangling_comments(node.syntax());
+        let format_comments = format_with(|f| {
+            for (index, comment) in dangling_comments.iter().enumerate() {
+                let format_comment = FormatRefWithRule::new(
+                    comment,
+                    <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+                );
+                if index == 0 && comment.lines_before() == 0 && comment.kind().is_line() {
+                    write!(f, [space()])?;
+                } else if index > 0 && comment.lines_before() > 0 {
+                    if comment.lines_before() > 1 {
+                        write!(f, [empty_line()])?;
+                    } else {
+                        write!(f, [hard_line_break()])?;
+                    }
+                }
+                write!(f, [format_comment])?;
+                comment.mark_formatted();
+            }
+            if !has_source_newline
+                && dangling_comments
+                    .last()
+                    .is_some_and(|comment| comment.kind().is_line())
+            {
+                write!(f, [hard_line_break()])?;
+            }
+            Ok(())
+        });
+
         if has_source_newline {
-            format_dangling_comments(node.syntax())
-                .with_block_indent()
-                .fmt(f)
+            write!(f, [block_indent(&format_comments)])
         } else {
-            format_dangling_comments(node.syntax())
-                .with_soft_block_indent()
-                .fmt(f)
+            write!(f, [soft_block_indent(&format_comments)])
         }
     }
 

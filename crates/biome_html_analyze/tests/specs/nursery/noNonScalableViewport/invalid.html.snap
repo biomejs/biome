@@ -1,0 +1,74 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<meta NAME="VIEWPORT" CONTENT="user-scalable = no, initial-scale=1" />
+<meta name="viewport" content="USER-SCALABLE=NO" />
+
+```
+
+# Diagnostics
+```
+invalid.html:2:23 lint/nursery/noNonScalableViewport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The viewport disables user scaling.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <meta name="viewport" content="width=device-width, user-scalable=no">
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <meta NAME="VIEWPORT" CONTENT="user-scalable = no, initial-scale=1" />
+    4 │ <meta name="viewport" content="USER-SCALABLE=NO" />
+  
+  i Disabling zoom can make page content difficult to read for people with low vision.
+  
+  i Remove the user-scalable=no directive from the content attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:3:23 lint/nursery/noNonScalableViewport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The viewport disables user scaling.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <meta name="viewport" content="width=device-width, user-scalable=no">
+  > 3 │ <meta NAME="VIEWPORT" CONTENT="user-scalable = no, initial-scale=1" />
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <meta name="viewport" content="USER-SCALABLE=NO" />
+    5 │ 
+  
+  i Disabling zoom can make page content difficult to read for people with low vision.
+  
+  i Remove the user-scalable=no directive from the content attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:4:23 lint/nursery/noNonScalableViewport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The viewport disables user scaling.
+  
+    2 │ <meta name="viewport" content="width=device-width, user-scalable=no">
+    3 │ <meta NAME="VIEWPORT" CONTENT="user-scalable = no, initial-scale=1" />
+  > 4 │ <meta name="viewport" content="USER-SCALABLE=NO" />
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Disabling zoom can make page content difficult to read for people with low vision.
+  
+  i Remove the user-scalable=no directive from the content attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

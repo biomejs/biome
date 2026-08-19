@@ -25,6 +25,8 @@ TwRoot {
                             value_token: TW_VARIANT_SEGMENT@0..5 "hover" [] [],
                         },
                     ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
                 },
                 COLON@5..6 ":" [] [],
                 TwArbitraryVariant {
@@ -34,9 +36,11 @@ TwRoot {
                 },
                 COLON@11..12 ":" [] [],
             ],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
                 base_token: TW_BASE@12..21 "underline" [] [],
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -57,6 +61,8 @@ TwRoot {
           0: TW_VARIANT_SEGMENT_LIST@0..5
             0: TW_NAMED_VARIANT_SEGMENT@0..5
               0: TW_VARIANT_SEGMENT@0..5 "hover" [] []
+          1: (empty)
+          2: (empty)
         1: COLON@5..6 ":" [] []
         2: TW_ARBITRARY_VARIANT@6..11
           0: L_BRACKET@6..7 "[" [] []
@@ -64,9 +70,11 @@ TwRoot {
           2: R_BRACKET@10..11 "]" [] []
         3: COLON@11..12 ":" [] []
       1: (empty)
-      2: TW_STATIC_CANDIDATE@12..21
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@12..21
         0: TW_BASE@12..21 "underline" [] []
-      3: (empty)
+        1: (empty)
+      4: (empty)
   2: EOF@21..22 "" [Newline("\n")] []
 
 ```

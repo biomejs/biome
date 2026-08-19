@@ -285,9 +285,9 @@ CssRoot {
                                         ],
                                     },
                                     colon_token: COLON@214..216 ":" [] [Whitespace(" ")],
-                                    value: ScssExpression {
-                                        items: ScssExpressionItemList [
-                                            CssIdentifier {
+                                    value: CssCustomPropertyValue {
+                                        components: CssCustomPropertyComponentList [
+                                            CssCustomIdentifier {
                                                 value_token: IDENT@216..219 "red" [] [],
                                             },
                                         ],
@@ -811,9 +811,9 @@ CssRoot {
                                                         ],
                                                     },
                                                     colon_token: COLON@591..593 ":" [] [Whitespace(" ")],
-                                                    value: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            CssIdentifier {
+                                                    value: CssCustomPropertyValue {
+                                                        components: CssCustomPropertyComponentList [
+                                                            CssCustomIdentifier {
                                                                 value_token: IDENT@593..596 "red" [] [],
                                                             },
                                                         ],
@@ -976,9 +976,9 @@ CssRoot {
                                                 ],
                                             },
                                             colon_token: COLON@721..723 ":" [] [Whitespace(" ")],
-                                            value: ScssExpression {
-                                                items: ScssExpressionItemList [
-                                                    CssIdentifier {
+                                            value: CssCustomPropertyValue {
+                                                components: CssCustomPropertyComponentList [
+                                                    CssCustomIdentifier {
                                                         value_token: IDENT@723..726 "red" [] [],
                                                     },
                                                 ],
@@ -1256,9 +1256,9 @@ CssRoot {
                                 0: IDENT@209..213 "slot" [] []
                         3: R_CURLY@213..214 "}" [] []
                   1: COLON@214..216 ":" [] [Whitespace(" ")]
-                  2: SCSS_EXPRESSION@216..219
-                    0: SCSS_EXPRESSION_ITEM_LIST@216..219
-                      0: CSS_IDENTIFIER@216..219
+                  2: CSS_CUSTOM_PROPERTY_VALUE@216..219
+                    0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@216..219
+                      0: CSS_CUSTOM_IDENTIFIER@216..219
                         0: IDENT@216..219 "red" [] []
                 1: (empty)
               3: R_PAREN@219..220 ")" [] []
@@ -1598,9 +1598,9 @@ CssRoot {
                                         0: IDENT@586..590 "slot" [] []
                                 3: R_CURLY@590..591 "}" [] []
                           1: COLON@591..593 ":" [] [Whitespace(" ")]
-                          2: SCSS_EXPRESSION@593..596
-                            0: SCSS_EXPRESSION_ITEM_LIST@593..596
-                              0: CSS_IDENTIFIER@593..596
+                          2: CSS_CUSTOM_PROPERTY_VALUE@593..596
+                            0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@593..596
+                              0: CSS_CUSTOM_IDENTIFIER@593..596
                                 0: IDENT@593..596 "red" [] []
                         1: (empty)
                       2: R_PAREN@596..597 ")" [] []
@@ -1703,9 +1703,9 @@ CssRoot {
                                     0: IDENT@716..720 "slot" [] []
                             3: R_CURLY@720..721 "}" [] []
                       1: COLON@721..723 ":" [] [Whitespace(" ")]
-                      2: SCSS_EXPRESSION@723..726
-                        0: SCSS_EXPRESSION_ITEM_LIST@723..726
-                          0: CSS_IDENTIFIER@723..726
+                      2: CSS_CUSTOM_PROPERTY_VALUE@723..726
+                        0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@723..726
+                          0: CSS_CUSTOM_IDENTIFIER@723..726
                             0: IDENT@723..726 "red" [] []
                     1: (empty)
                   2: R_PAREN@726..728 ")" [] [Whitespace(" ")]

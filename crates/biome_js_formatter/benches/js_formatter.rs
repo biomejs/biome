@@ -49,7 +49,7 @@ fn bench_js_formatter(criterion: &mut Criterion) {
                             let formatted = biome_js_formatter::format_node(
                                 JsFormatOptions::default(),
                                 root.syntax(),
-                                false,
+                                Vec::new(),
                             )
                             .unwrap();
                             let printed = formatted.print();

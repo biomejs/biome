@@ -1,6 +1,5 @@
 use crate::JsRuleAction;
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -10,10 +9,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
+    AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
     JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType, TsInterfaceDeclaration,
-    TsTypeAliasDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsInferType,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -227,6 +226,194 @@ pub enum SuggestedFix {
     PrefixUnderscore,
 }
 
+impl Rule for NoUnusedVariables {
+    type Query = Semantic<AnyJsIdentifierBinding>;
+    type State = SuggestedFix;
+    type Signals = Option<Self::State>;
+    type Options = NoUnusedVariablesOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let binding = ctx.query();
+        let model = ctx.model();
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
+
+        let file_source = ctx.source_type::<JsFileSource>();
+
+        let is_declaration_file = file_source.language().is_definition_file();
+        if is_declaration_file
+            && let Some(items) = binding
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsModuleItemList::cast)
+        {
+            // A declaration file without top-level exports and imports is a global declaration file.
+            // All top-level types and variables are available in every file of the project.
+            // Thus, it is ok if top-level types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
+            }
+        }
+
+        if is_ignored(binding, ctx.options()).unwrap_or_default() {
+            return None;
+        }
+
+        let binding_name_token = binding.name_token().ok()?;
+        let binding_name = binding_name_token.text_trimmed();
+        let binding_token_text = binding_name_token.token_text_trimmed();
+
+        // Ignore name prefixed with `_`
+        let is_underscore_prefixed = binding_name.starts_with('_');
+        // Source and declaration snippets contribute their own declarations to
+        // the embedded-binding set. Checking that set would make every local
+        // binding appear used. Template usage is handled by the reference check.
+        let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && !file_source.is_svelte_declaration()
+            && embedded.contains_binding(binding_token_text.clone())
+            && binding
+                .declaration()
+                .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
+                .is_some_and(|d| {
+                    matches!(
+                        d,
+                        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                    )
+                });
+        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+            || matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && embedded.is_svelte_store_used(binding_token_text);
+
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
+            return None;
+        }
+
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
+        if binding_name == "Props"
+            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
+        {
+            return None;
+        }
+
+        if is_unused(model, binding) {
+            // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the
+            // parent component. Such a variable may be write-only in the script block but is
+            // still meaningful — suppress the diagnostic to avoid a false positive.
+            if matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && is_svelte_bindable_prop(binding)
+            {
+                return None;
+            }
+            suggested_fix_if_unused(binding, ctx.options())
+        } else {
+            None
+        }
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let binding = ctx.query();
+
+        let symbol_type = match binding.syntax().parent()?.kind() {
+            JsSyntaxKind::JS_FORMAL_PARAMETER => "parameter",
+            JsSyntaxKind::JS_FUNCTION_DECLARATION => "function",
+            JsSyntaxKind::JS_CLASS_DECLARATION => "class",
+            JsSyntaxKind::TS_INTERFACE_DECLARATION => "interface",
+            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => "type alias",
+            JsSyntaxKind::TS_TYPE_PARAMETER => "type parameter",
+            _ => "variable",
+        };
+
+        let binding_name = match binding {
+            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
+            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
+        };
+
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            binding.syntax().text_trimmed_range(),
+            markup! {
+                "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
+            },
+        ).note(
+            markup! {
+                "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+            },
+        );
+
+        // Check if this binding is part of an object destructuring pattern with a rest property
+        if let Some(decl) = binding.declaration()
+            && is_rest_spread_sibling(&decl)
+        {
+            diag = diag.note(
+                markup! {
+                        "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
+                        "inside destructured objects with rest properties."
+                    },
+            );
+        }
+
+        Some(diag)
+    }
+
+    fn action(ctx: &RuleContext<Self>, suggestion: &Self::State) -> Option<JsRuleAction> {
+        match suggestion {
+            SuggestedFix::NoSuggestion => None,
+            SuggestedFix::PrefixUnderscore => {
+                let binding = ctx.query();
+                let mut mutation = ctx.root().begin();
+
+                let name = match binding {
+                    AnyJsIdentifierBinding::JsIdentifierBinding(binding) => {
+                        binding.name_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsIdentifierBinding(binding) => {
+                        binding.name_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
+                        binding.ident_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
+                        return None;
+                    }
+                };
+                let name_trimmed = name.text_trimmed();
+                let new_name = format!("_{name_trimmed}");
+
+                let model = ctx.model();
+                if !mutation.rename_node_declaration(model, binding, &new_name) {
+                    return None;
+                }
+
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
+                        .to_owned(),
+                    mutation,
+                ))
+            }
+        }
+    }
+}
+
 /// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
 fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
     if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
@@ -360,182 +547,6 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::JsRestParameter(_)
         | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
             None
-        }
-    }
-}
-
-impl Rule for NoUnusedVariables {
-    type Query = Semantic<AnyJsIdentifierBinding>;
-    type State = SuggestedFix;
-    type Signals = Option<Self::State>;
-    type Options = NoUnusedVariablesOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let binding = ctx.query();
-        let model = ctx.model();
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
-        let embedded_references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded references service");
-
-        let file_source = ctx.source_type::<JsFileSource>();
-
-        let is_declaration_file = file_source.language().is_definition_file();
-        if is_declaration_file
-            && let Some(items) = binding
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .find_map(JsModuleItemList::cast)
-        {
-            // A declaration file without top-level exports and imports is a global declaration file.
-            // All top-level types and variables are available in every file of the project.
-            // Thus, it is ok if top-level types are not used locally.
-            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                return None;
-            }
-        }
-
-        if is_ignored(binding, ctx.options()).unwrap_or_default() {
-            return None;
-        }
-
-        let binding_name = binding.name_token().ok()?;
-        let binding_name = binding_name.text_trimmed();
-
-        // Ignore name prefixed with `_`
-        let is_underscore_prefixed = binding_name.starts_with('_');
-        // Only suppress noUnusedVariables for imports and variable declarations in
-        // embedded script blocks. Function/class/type declarations should still be
-        // flagged unless they are actually referenced in the template
-        // (handled by is_used_as_reference below).
-        // Eventually, we should probably not ignore bindings in embedded blocks, because they might be genuinely unused.
-        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name)
-            && binding
-                .declaration()
-                .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
-                .is_some_and(|d| {
-                    matches!(
-                        d,
-                        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-                            | AnyJsBindingDeclaration::JsVariableDeclarator(_)
-                    )
-                });
-        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
-
-        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
-            return None;
-        }
-
-        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
-        // read by the framework.
-        if binding_name == "Props"
-            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
-            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
-            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
-                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
-            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
-        {
-            return None;
-        }
-
-        if is_unused(model, binding) {
-            suggested_fix_if_unused(binding, ctx.options())
-        } else {
-            None
-        }
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let binding = ctx.query();
-
-        let symbol_type = match binding.syntax().parent()?.kind() {
-            JsSyntaxKind::JS_FORMAL_PARAMETER => "parameter",
-            JsSyntaxKind::JS_FUNCTION_DECLARATION => "function",
-            JsSyntaxKind::JS_CLASS_DECLARATION => "class",
-            JsSyntaxKind::TS_INTERFACE_DECLARATION => "interface",
-            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => "type alias",
-            JsSyntaxKind::TS_TYPE_PARAMETER => "type parameter",
-            _ => "variable",
-        };
-
-        let binding_name = match binding {
-            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
-            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
-            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
-            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
-        };
-
-        let mut diag = RuleDiagnostic::new(
-            rule_category!(),
-            binding.syntax().text_trimmed_range(),
-            markup! {
-                "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
-            },
-        ).note(
-            markup! {
-                "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
-            },
-        );
-
-        // Check if this binding is part of an object destructuring pattern with a rest property
-        if let Some(decl) = binding.declaration()
-            && is_rest_spread_sibling(&decl)
-        {
-            diag = diag.note(
-                markup! {
-                        "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
-                        "inside destructured objects with rest properties."
-                    },
-            );
-        }
-
-        Some(diag)
-    }
-
-    fn action(ctx: &RuleContext<Self>, suggestion: &Self::State) -> Option<JsRuleAction> {
-        match suggestion {
-            SuggestedFix::NoSuggestion => None,
-            SuggestedFix::PrefixUnderscore => {
-                let binding = ctx.query();
-                let mut mutation = ctx.root().begin();
-
-                let name = match binding {
-                    AnyJsIdentifierBinding::JsIdentifierBinding(binding) => {
-                        binding.name_token().ok()?
-                    }
-                    AnyJsIdentifierBinding::TsIdentifierBinding(binding) => {
-                        binding.name_token().ok()?
-                    }
-                    AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
-                        binding.ident_token().ok()?
-                    }
-                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
-                        return None;
-                    }
-                };
-                let name_trimmed = name.text_trimmed();
-                let new_name = format!("_{name_trimmed}");
-
-                let model = ctx.model();
-                if !mutation.rename_node_declaration(model, binding, &new_name) {
-                    return None;
-                }
-
-                Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
-                        .to_owned(),
-                    mutation,
-                ))
-            }
         }
     }
 }
@@ -676,6 +687,57 @@ fn is_declaration_merged_with_used(
         }
         _ => None,
     }
+}
+
+/// Returns `true` if `call` is a call to a simple identifier named `name`.
+fn is_call_to(call: &JsCallExpression, name: &str) -> bool {
+    let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee() else {
+        return false;
+    };
+    ident.name().is_ok_and(|n| n.has_name(name))
+}
+
+/// Returns `true` if the binding is a `$bindable()` shorthand property in a `$props()`
+/// destructuring in a Svelte 5 component.
+///
+/// In Svelte 5, assigning to a `$bindable()` prop reflects the new value back to the parent
+/// component. A variable that appears write-only in the script is therefore intentional and
+/// should not be flagged as unused.
+fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
+    // The binding must be declared as a shorthand property in an object destructuring pattern.
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+    let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(shorthand) = decl else {
+        return false;
+    };
+
+    // The shorthand property must have a default initializer `= $bindable(...)`.
+    let Some(init) = shorthand.init() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(call)) = init.expression() else {
+        return false;
+    };
+    if !is_call_to(&call, "$bindable") {
+        return false;
+    }
+
+    // Walk up to find the enclosing `JsVariableDeclarator` whose rhs must be `$props()`.
+    let Some(declarator) = shorthand
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableDeclarator::cast)
+    else {
+        return false;
+    };
+    let Some(declarator_init) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(props_call)) = declarator_init.expression() else {
+        return false;
+    };
+    is_call_to(&props_call, "$props")
 }
 
 /// Returns `true` if `binding` is considered as unused.

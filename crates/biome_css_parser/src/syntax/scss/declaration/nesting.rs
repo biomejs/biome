@@ -1,13 +1,17 @@
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::declaration::{
     complete_declaration_with_semicolon, parse_declaration_important,
 };
-use crate::syntax::parse_error::expected_component_value;
+use crate::syntax::parse_error::{expected_component_value, scss_only_syntax_error};
+use crate::syntax::property::{
+    END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, parse_custom_property_value,
+};
 use crate::syntax::scss::{
     SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
-    is_at_scss_interpolated_property, parse_scss_interpolated_identifier,
+    is_at_scss_interpolated_property_name, parse_scss_interpolated_identifier,
     parse_scss_interpolated_property_name, parse_scss_optional_value_until,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse};
@@ -44,10 +48,12 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
 
 #[inline]
 pub(crate) fn is_at_scss_nesting_declaration(p: &mut CssParser) -> bool {
-    if !CssSyntaxFeatures::Scss.is_supported(p) || p.at(T![composes]) {
+    if p.at(T![composes]) {
         return false;
     }
 
+    // The colon after an interpolated dashed name is not available through
+    // fixed lookahead, so parse its declaration prefix speculatively.
     if is_at_scss_interpolated_dashed_identifier(p) {
         return true;
     }
@@ -56,12 +62,13 @@ pub(crate) fn is_at_scss_nesting_declaration(p: &mut CssParser) -> bool {
         return false;
     }
 
-    is_at_scss_interpolated_property(p) || (is_at_identifier(p) && p.nth_at(1, T![:]))
+    is_at_scss_interpolated_property_name(p) || (is_at_identifier(p) && p.nth_at(1, T![:]))
 }
 
 struct ScssNestingMarkers {
     declaration: Marker,
     property: Marker,
+    is_custom_property: bool,
 }
 
 /// Parses a SCSS nested-property/declaration candidate and returns both the
@@ -92,6 +99,11 @@ fn parse_scss_nesting_declaration_after_prefix(
     p: &mut CssParser,
     markers: ScssNestingMarkers,
 ) -> ParsedSyntax {
+    if markers.is_custom_property {
+        parse_custom_property_value(p, END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET);
+        return complete_scss_nesting_regular_declaration(p, markers, false);
+    }
+
     let missing_value =
         // Allow an empty value here because nested-property syntax may continue
         // directly into `{ ... }`, and the explicit missing-value diagnostic is
@@ -124,8 +136,9 @@ fn parse_scss_nesting_declaration_prefix(p: &mut CssParser) -> Option<(ScssNesti
 
     let declaration = p.start();
     let property = p.start();
+    let is_custom_property = is_at_scss_interpolated_dashed_identifier(p);
 
-    if is_at_scss_interpolated_property(p) {
+    if is_at_scss_interpolated_property_name(p) {
         parse_scss_interpolated_property_name(p).ok();
     } else if is_at_scss_interpolated_identifier(p) {
         parse_scss_interpolated_identifier(p).ok();
@@ -137,7 +150,14 @@ fn parse_scss_nesting_declaration_prefix(p: &mut CssParser) -> Option<(ScssNesti
         return None;
     }
 
-    p.expect(T![:]);
+    if is_custom_property {
+        p.expect_with_context(
+            T![:],
+            CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::PreserveDoubleSlash),
+        );
+    } else {
+        p.expect(T![:]);
+    }
 
     let could_be_selector = !p.has_preceding_whitespace()
         && (is_at_identifier(p) || is_at_scss_interpolated_identifier(p) || p.at(T![:]));
@@ -146,6 +166,7 @@ fn parse_scss_nesting_declaration_prefix(p: &mut CssParser) -> Option<(ScssNesti
         ScssNestingMarkers {
             declaration,
             property,
+            is_custom_property,
         },
         could_be_selector,
     ))
@@ -223,4 +244,29 @@ pub(crate) fn try_parse_scss_nesting_declaration(
             _ => Err(()),
         }
     })
+}
+
+/// Parses only the SCSS nested-property block form, rewinding for regular
+/// declarations that share the same `name:` prefix.
+#[inline]
+fn try_parse_scss_nested_property_declaration(p: &mut CssParser) -> Result<ParsedSyntax, ()> {
+    try_parse(p, |p| {
+        let Some((syntax, could_be_selector)) = parse_scss_nesting_declaration_candidate(p) else {
+            return Err(());
+        };
+
+        match syntax.kind(p) {
+            Some(SCSS_NESTING_DECLARATION) if !could_be_selector => Ok(syntax),
+            _ => Err(()),
+        }
+    })
+}
+
+#[inline]
+pub(crate) fn parse_exclusive_scss_nested_property_declaration(p: &mut CssParser) -> ParsedSyntax {
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+        p,
+        |p| try_parse_scss_nested_property_declaration(p).unwrap_or(Absent),
+        |p, marker| scss_only_syntax_error(p, "SCSS nested property declarations", marker.range(p)),
+    )
 }

@@ -5,6 +5,7 @@ mod cst;
 mod generated;
 mod markdown;
 mod prelude;
+mod quote;
 mod shared;
 mod trivia;
 mod verbatim;

@@ -133,14 +133,12 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
     match vue {
         // Longhand directive: v-bind:foo
         AnyVueDirective::VueDirective(directive) => {
-            let name_token = directive.name_token().ok()?;
-            let name = name_token.text_trimmed();
-            if name != "v-bind" {
+            if !directive.is_binding() {
                 return None;
             }
 
             let argument = directive.arg()?;
-            let argument = argument.arg().ok()?;
+            let argument = argument.arg()?;
             let static_argument = argument.as_vue_static_argument()?;
             let name_token = static_argument.name_token().ok()?;
 
@@ -155,7 +153,7 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
         // Shorthand bind: :foo
         AnyVueDirective::VueVBindShorthandDirective(directive) => {
             let argument = directive.arg().ok()?;
-            let argument = argument.arg().ok()?;
+            let argument = argument.arg()?;
             let static_argument = argument.as_vue_static_argument()?;
             let name_token = static_argument.name_token().ok()?;
 

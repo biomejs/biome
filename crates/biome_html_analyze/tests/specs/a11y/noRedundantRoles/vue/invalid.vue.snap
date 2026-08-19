@@ -10,6 +10,10 @@ expression: invalid.vue
   <button role="button"></button>
   <h1 role="heading" aria-level="1">title</h1>
   <nav role="navigation"></nav>
+  <!-- static Vue bindings with redundant roles should also be flagged -->
+  <article :role="'article'"></article>
+  <button v-bind:role="'button'"></button>
+  <nav :role="'navigation'"></nav>
 </template>
 
 ```
@@ -63,7 +67,7 @@ invalid.vue:5:7 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━
   > 5 │   <h1 role="heading" aria-level="1">title</h1>
       │       ^^^^^^^^^^^^^^
     6 │   <nav role="navigation"></nav>
-    7 │ </template>
+    7 │   <!-- static Vue bindings with redundant roles should also be flagged -->
   
   i Unsafe fix: Remove the role attribute.
   
@@ -81,12 +85,69 @@ invalid.vue:6:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━
     5 │   <h1 role="heading" aria-level="1">title</h1>
   > 6 │   <nav role="navigation"></nav>
       │        ^^^^^^^^^^^^^^^^^
-    7 │ </template>
-    8 │ 
+    7 │   <!-- static Vue bindings with redundant roles should also be flagged -->
+    8 │   <article :role="'article'"></article>
   
   i Unsafe fix: Remove the role attribute.
   
     6 │ ··<nav·role="navigation"></nav>
       │        -----------------       
+
+```
+
+```
+invalid.vue:8:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
+  
+     6 │   <nav role="navigation"></nav>
+     7 │   <!-- static Vue bindings with redundant roles should also be flagged -->
+   > 8 │   <article :role="'article'"></article>
+       │            ^^^^^^^^^^^^^^^^^
+     9 │   <button v-bind:role="'button'"></button>
+    10 │   <nav :role="'navigation'"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    8 │ ··<article·:role="'article'"></article>
+      │            -----------------           
+
+```
+
+```
+invalid.vue:9:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
+  
+     7 │   <!-- static Vue bindings with redundant roles should also be flagged -->
+     8 │   <article :role="'article'"></article>
+   > 9 │   <button v-bind:role="'button'"></button>
+       │           ^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <nav :role="'navigation'"></nav>
+    11 │ </template>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    9 │ ··<button·v-bind:role="'button'"></button>
+      │           ----------------------          
+
+```
+
+```
+invalid.vue:10:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantics.
+  
+     8 │   <article :role="'article'"></article>
+     9 │   <button v-bind:role="'button'"></button>
+  > 10 │   <nav :role="'navigation'"></nav>
+       │        ^^^^^^^^^^^^^^^^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    10 │ ··<nav·:role="'navigation'"></nav>
+       │        --------------------       
 
 ```

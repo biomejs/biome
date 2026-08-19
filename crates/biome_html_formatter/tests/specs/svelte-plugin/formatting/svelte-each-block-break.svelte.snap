@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/svelte-each-block-break.svelte
+---
+
+# Input
+
+```svelte
+{#each bla as blubb}<p>loooooooooooooooooooooooooooooong</p>{:else}<p>loooooooooooooooooooooooooooooong</p>{/each}
+
+{#each bla as blubb} <p>loooooooooooooooooooooooooooooong</p> {:else} <p>loooooooooooooooooooooooooooooong</p> {/each}
+
+{#each bla as blubb}<p>loooooooooooooooooooooooooooooong</p><p>loooooooooooooooooooooooooooooong</p>{:else}<p>loooooooooooooooooooooooooooooong</p><p>loooooooooooooooooooooooooooooong</p>{/each}
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,8 @@
+-{#each bla as blubb}<p>loooooooooooooooooooooooooooooong</p>{:else}<p>
+-        loooooooooooooooooooooooooooooong
+-    </p>{/each}
++{#each bla as blubb}
++    <p>loooooooooooooooooooooooooooooong</p>
++{:else}
++    <p>loooooooooooooooooooooooooooooong</p>
++{/each}
+ 
+ {#each bla as blubb}
+     <p>loooooooooooooooooooooooooooooong</p>
+@@ -8,8 +10,10 @@
+     <p>loooooooooooooooooooooooooooooong</p>
+ {/each}
+ 
+-{#each bla as blubb}<p>loooooooooooooooooooooooooooooong</p>
+-    <p>loooooooooooooooooooooooooooooong</p>{:else}<p>
+-        loooooooooooooooooooooooooooooong
+-    </p>
+-    <p>loooooooooooooooooooooooooooooong</p>{/each}
++{#each bla as blubb}
++    <p>loooooooooooooooooooooooooooooong</p>
++    <p>loooooooooooooooooooooooooooooong</p>
++{:else}
++    <p>loooooooooooooooooooooooooooooong</p>
++    <p>loooooooooooooooooooooooooooooong</p>
++{/each}
+```
+
+# Output
+
+```svelte
+{#each bla as blubb}
+    <p>loooooooooooooooooooooooooooooong</p>
+{:else}
+    <p>loooooooooooooooooooooooooooooong</p>
+{/each}
+
+{#each bla as blubb}
+    <p>loooooooooooooooooooooooooooooong</p>
+{:else}
+    <p>loooooooooooooooooooooooooooooong</p>
+{/each}
+
+{#each bla as blubb}
+    <p>loooooooooooooooooooooooooooooong</p>
+    <p>loooooooooooooooooooooooooooooong</p>
+{:else}
+    <p>loooooooooooooooooooooooooooooong</p>
+    <p>loooooooooooooooooooooooooooooong</p>
+{/each}
+```

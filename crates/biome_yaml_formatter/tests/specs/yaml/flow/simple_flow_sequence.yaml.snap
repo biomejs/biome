@@ -14,12 +14,6 @@ info: yaml/flow/simple_flow_sequence.yaml
 # Formatted
 
 ```yaml
-[1, 'abc', "xyz", plain]
+[1, "abc", "xyz", plain]
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"[1, 'abc', \"xyz\", plain]" => 0..24

@@ -63,10 +63,10 @@ impl Rule for UseVueVForKey {
             if let Some(dir_any) = attr.as_any_vue_directive() {
                 match dir_any {
                     AnyVueDirective::VueDirective(dir) => {
-                        if dir.name_token().is_ok_and(|t| t.text_trimmed() == "v-for") {
+                        if dir.is_for() {
                             has_v_for = Some(dir.range());
                         }
-                        if dir.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind")
+                        if dir.is_binding()
                             && let Some(arg) = dir.arg()
                             && is_v_bind_key_argument(&arg)
                         {
@@ -114,7 +114,7 @@ impl Rule for UseVueVForKey {
 }
 
 fn is_v_bind_key_argument(arg: &VueDirectiveArgument) -> bool {
-    let Ok(arg) = arg.arg() else {
+    let Some(arg) = arg.arg() else {
         return false;
     };
     let Some(static_arg) = arg.as_vue_static_argument() else {
