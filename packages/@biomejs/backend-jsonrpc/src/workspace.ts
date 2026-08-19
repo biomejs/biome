@@ -1355,8 +1355,8 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 This only affects plugin resolution. It does not change how `includes`
 are interpreted.
 
-When omitted, relative plugin paths are resolved from the consuming
-project. 
+When omitted, relative paths and package names are resolved from the
+consuming project. 
 	 */
 	resolutionKind?: PluginResolvePath;
 }
