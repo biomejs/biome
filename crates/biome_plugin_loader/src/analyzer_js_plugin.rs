@@ -13,7 +13,7 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_glob::NormalizedGlob;
 use biome_js_runtime::JsExecContext;
-use biome_js_syntax::AnyJsRoot;
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -105,7 +105,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .collect()
     }
 
-    fn evaluate(&self, _node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
+    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -127,13 +127,26 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 
         let plugin = plugin.deref_mut();
 
-        // TODO: pass the AST to the plugin
+        let Some(node) = node.downcast_ref::<JsSyntaxNode>().cloned() else {
+            return PluginEvalResult {
+                entries: vec![PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!("Could not pass the AST to the plugin"),
+                    ),
+                    action: None,
+                }],
+            };
+        };
+
+        let ast = plugin.ctx.create_js_ast(node);
         let diagnostics = plugin
             .ctx
             .call_function(
                 &plugin.entrypoint,
                 &JsValue::undefined(),
-                &[JsValue::from(JsString::from(path.as_str()))],
+                &[JsValue::from(JsString::from(path.as_str())), ast],
             )
             .map_or_else(
                 |err| {
@@ -161,17 +174,28 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_diagnostics::{Error, print_diagnostic_to_string};
+    use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
     use biome_js_parser::JsParserOptions;
     use biome_languages::JsFileSource;
 
-    fn snap_diagnostics(test_name: &str, diagnostics: Vec<Error>) {
-        let content = diagnostics
-            .iter()
-            .map(print_diagnostic_to_string)
-            .collect::<String>();
+    /// Renders the diagnostics of a single evaluation the same way the CLI does, by attaching the
+    /// path and the content of the analyzed file so the code frame can be printed.
+    fn render_diagnostics(path: &str, source: &str, result: PluginEvalResult) -> String {
+        result
+            .entries
+            .into_iter()
+            .map(|entry| {
+                print_diagnostic_to_string(
+                    &Error::from(entry.diagnostic)
+                        .with_file_path(path)
+                        .with_file_source_code(source.to_string()),
+                )
+            })
+            .collect()
+    }
 
+    fn snap_diagnostics(test_name: &str, content: String) {
         // Normalize Windows paths...
         let content = content.replace('\\', "/");
 
@@ -182,17 +206,24 @@ mod tests {
         });
     }
 
-    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
+    fn load_test_plugin_from_source(
+        source: &str,
+        includes: Option<&[NormalizedGlob]>,
+    ) -> AnalyzerJsPlugin {
         let fs = MemoryFileSystem::default();
-        fs.insert(
-            "/plugin.js".into(),
-            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
-            export default function useMyPlugin() {
-                registerDiagnostic("information", "Hello, world!");
-            }"#,
-        );
+        fs.insert("/plugin.js".into(), source);
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         AnalyzerJsPlugin::load(fs, "/plugin.js".into(), includes).unwrap()
+    }
+
+    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
+        load_test_plugin_from_source(
+            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+            export default function useMyPlugin(_path, root) {
+                registerDiagnostic(root, "information", "Hello, world!");
+            }"#,
+            includes,
+        )
     }
 
     #[test]
@@ -224,6 +255,80 @@ mod tests {
         assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
     }
 
+    /// The AST is exposed through lazy getters installed on the prototype of each kind, so the
+    /// fields are only cast when the plugin accesses them.
+    #[test]
+    fn passes_ast_as_the_second_argument() {
+        let plugin = load_test_plugin_from_source(
+            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+            export default function useMyPlugin(path, root) {
+                const descriptor = Object.getOwnPropertyDescriptor(
+                    Object.getPrototypeOf(root),
+                    "items",
+                );
+                const hasChildNodes = "childNodes" in root;
+                registerDiagnostic(
+                    root,
+                    "information",
+                    `${path}|${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "items")}|${hasChildNodes}`,
+                );
+            }"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "let foo;",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+
+        let [entry] = result.entries.as_slice() else {
+            panic!("expected a single diagnostic, got {result:?}");
+        };
+
+        assert_eq!(
+            PrintDescription(&entry.diagnostic).to_string(),
+            // path | kind | the `items` field is a getter | it isn't an own property | unknown
+            // fields aren't exposed
+            "/file.js|JS_MODULE|function|false|false"
+        );
+    }
+
+    #[test]
+    fn reports_top_level_var_declarations_using_ast_fields() {
+        let source = r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+            export default function noTopLevelVar(_path, root) {
+                const statements = root.kind === "JS_MODULE" ? root.items : [];
+                for (const statement of statements) {
+                    if (
+                        statement.kind === "JS_VARIABLE_STATEMENT" &&
+                        statement.declaration?.kindToken === "var"
+                    ) {
+                        registerDiagnostic(
+                            statement,
+                            "warning",
+                            "Use let or const instead of a top-level var declaration.",
+                        );
+                    }
+                }
+            }"#;
+        let content = "var legacy = 1; const modern = 2;";
+        let parse = biome_js_parser::parse(
+            content,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source(source, None);
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+
+        snap_diagnostics(
+            "reports_top_level_var_declarations_using_ast_fields",
+            render_diagnostics("/file.js", content, result),
+        );
+    }
+
     #[test]
     fn evaluate_in_worker_threads() {
         let fs = MemoryFileSystem::default();
@@ -232,8 +337,8 @@ mod tests {
         fs.insert(
             "/plugin.js".into(),
             r#"import { registerDiagnostic } from "@biomejs/plugin-api";
-            export default function useMyPlugin() {
-                registerDiagnostic("information", "Hello, world!");
+            export default function useMyPlugin(_path, root) {
+                registerDiagnostic(root, "information", "Hello, world!");
             }"#,
         );
 
@@ -271,13 +376,13 @@ mod tests {
 
         let result1 = worker1.join().unwrap();
         let result2 = worker2.join().unwrap();
-        let mut diagnostics: Vec<_> = result1.entries.into_iter().map(|e| e.diagnostic).collect();
-        diagnostics.extend(result2.entries.into_iter().map(|e| e.diagnostic));
 
-        assert_eq!(diagnostics.len(), 2);
-        snap_diagnostics(
-            "evaluate_in_worker_threads",
-            diagnostics.into_iter().map(|diag| diag.into()).collect(),
-        );
+        assert_eq!(result1.entries.len(), 1);
+        assert_eq!(result2.entries.len(), 1);
+
+        let content = render_diagnostics("/foo.js", "let foo;", result1)
+            + &render_diagnostics("/bar.js", "let bar;", result2);
+
+        snap_diagnostics("evaluate_in_worker_threads", content);
     }
 }

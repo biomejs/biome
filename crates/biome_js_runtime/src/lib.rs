@@ -1,3 +1,4 @@
+mod ast;
 mod context;
 mod module_loader;
 mod plugin_api;

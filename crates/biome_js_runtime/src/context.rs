@@ -9,9 +9,11 @@ use boa_engine::{
 use camino::Utf8Path;
 
 use biome_analyze::RuleDiagnostic;
+use biome_js_syntax::JsSyntaxNode;
 use biome_resolver::FsWithResolverProxy;
 
 use crate::JsModuleLoader;
+use crate::ast::JsAstNode;
 use crate::plugin_api::JsPluginApi;
 
 pub struct JsExecContext {
@@ -27,6 +29,8 @@ impl JsExecContext {
         let mut ctx = Context::builder()
             .module_loader(Rc::clone(&module_loader))
             .build()?;
+
+        JsAstNode::register(&mut ctx)?;
 
         module_loader.register_module(
             js_string!("@biomejs/plugin-api"),
@@ -101,6 +105,15 @@ impl JsExecContext {
         let namespace = module.namespace(ctx);
 
         namespace.get(js_string!("default"), ctx)
+    }
+
+    /// Wraps `node` in the AST bindings exposed to the plugins, so it can be passed to a plugin
+    /// function as an argument.
+    ///
+    /// The returned value is bound to this context: it must not outlive it, nor be passed to
+    /// another [`JsExecContext`].
+    pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsValue {
+        JsAstNode::from_node(node, &mut self.ctx)
     }
 
     pub fn call_function(

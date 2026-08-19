@@ -1,3 +1,11 @@
-export type Severity = "fatal" | "error" | "warning" | "information" | "hint";
+import type { Severity } from "./diagnostics";
+import type { JsAstNode } from "./js_ast";
 
-export function registerDiagnostic(severity: Severity, message: string): void;
+export * from "./diagnostics";
+export * from "./js_ast";
+
+export function registerDiagnostic(
+	node: JsAstNode,
+	severity: Severity,
+	message: string,
+): void;
