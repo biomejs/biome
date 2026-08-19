@@ -1656,7 +1656,7 @@ impl WorkspaceServerWithDb<'_> {
         plugins: &Plugins,
     ) -> (PluginCache, Vec<PluginDiagnostic>) {
         let mut diagnostics = Vec::new();
-        let mut plugin_cache = PluginCache::default();
+        let plugin_cache = PluginCache::default();
 
         for plugin_config in plugins.iter() {
             let plugin_path = plugin_config.path();

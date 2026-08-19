@@ -34,6 +34,7 @@ boa_engine               = { workspace = true, optional = true }
 camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
+papaya                   = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }

@@ -10,6 +10,7 @@ use biome_resolver::{
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::{
+    hash::{Hash, Hasher},
     ops::{Deref, DerefMut},
     str::FromStr,
 };
@@ -226,7 +227,7 @@ impl DerefMut for Plugins {
 ///   ]
 /// }
 /// ```
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum PluginConfiguration {
@@ -259,6 +260,33 @@ impl PluginConfiguration {
             Self::Path(_) => None,
             Self::PathWithOptions(opts) => opts.resolved_package_name.as_deref(),
         }
+    }
+
+    fn resolution_kind(&self) -> PluginResolvePath {
+        match self {
+            Self::Path(_) => PluginResolvePath::Project,
+            Self::PathWithOptions(opts) => opts.resolution_kind.unwrap_or_default(),
+        }
+    }
+}
+
+impl PartialEq for PluginConfiguration {
+    fn eq(&self, other: &Self) -> bool {
+        self.path() == other.path()
+            && self.includes() == other.includes()
+            && self.resolution_kind() == other.resolution_kind()
+            && self.resolved_package_name() == other.resolved_package_name()
+    }
+}
+
+impl Eq for PluginConfiguration {}
+
+impl Hash for PluginConfiguration {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.path().hash(state);
+        self.includes().hash(state);
+        self.resolution_kind().hash(state);
+        self.resolved_package_name().hash(state);
     }
 }
 
@@ -317,7 +345,9 @@ pub struct PluginWithOptions {
     pub resolved_package_name: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Hash, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum PluginResolvePath {
@@ -468,26 +498,28 @@ mod tests {
     #[test]
     fn normalize_relative_paths_normalizes_bare_local_directories() {
         let fs = MemoryFileSystem::default();
+        let base_dir = normalize_path(Utf8Path::new("/project"));
+        let plugin_path = base_dir.join("my-plugin");
         fs.insert(
-            "/project/my-plugin/biome-manifest.json".into(),
+            plugin_path.join("biome-manifest.json"),
             r#"{ "version": 1, "rules": ["rules/1.grit"] }"#,
         );
-        let base_dir = Utf8Path::new("/project");
         let mut plugins = Plugins(vec![PluginConfiguration::Path("my-plugin".into())]);
 
-        plugins.normalize_relative_paths(&fs, base_dir).unwrap();
+        plugins.normalize_relative_paths(&fs, &base_dir).unwrap();
 
-        assert_eq!(plugins.0[0].path(), "/project/my-plugin");
+        assert_eq!(plugins.0[0].path(), plugin_path.as_str());
     }
 
     #[test]
     fn normalize_config_relative_package_specifiers() {
         let fs = MemoryFileSystem::default();
+        let base_dir = normalize_path(Utf8Path::new("/config"));
+        let package_root = base_dir.join("node_modules/@scope/plugin");
         fs.insert(
-            "/config/node_modules/@scope/plugin/package.json".into(),
+            package_root.join("package.json"),
             r#"{ "name": "@scope/plugin" }"#,
         );
-        let base_dir = Utf8Path::new("/config");
         let mut plugins = Plugins(vec![PluginConfiguration::PathWithOptions(
             PluginWithOptions {
                 path: "@scope/plugin".into(),
@@ -498,10 +530,10 @@ mod tests {
         )]);
 
         plugins
-            .normalize_object_relative_paths(&fs, base_dir)
+            .normalize_object_relative_paths(&fs, &base_dir)
             .unwrap();
 
-        assert_eq!(plugins.0[0].path(), "/config/node_modules/@scope/plugin");
+        assert_eq!(plugins.0[0].path(), package_root.as_str());
         assert_eq!(plugins.0[0].resolved_package_name(), Some("@scope/plugin"));
 
         let plugins: Plugins = serde_json::from_str(&serde_json::to_string(&plugins).unwrap())
@@ -531,6 +563,19 @@ mod tests {
             serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
+    }
+
+    #[test]
+    fn equivalent_plugin_syntaxes_compare_equal() {
+        let string: PluginConfiguration = serde_json::from_str(r#""my-plugin.grit""#).unwrap();
+        let object: PluginConfiguration =
+            serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
+        let explicit_project: PluginConfiguration =
+            serde_json::from_str(r#"{ "path": "my-plugin.grit", "resolutionKind": "project" }"#)
+                .unwrap();
+
+        assert_eq!(string, object);
+        assert_eq!(string, explicit_project);
     }
 
     #[test]

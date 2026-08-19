@@ -1717,6 +1717,7 @@ dependencies = [
  "grit-util",
  "insta",
  "libc",
+ "papaya",
  "rustc-hash 2.1.3",
  "schemars",
  "serde",

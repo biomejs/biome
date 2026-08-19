@@ -1,5 +1,5 @@
 use biome_console::markup;
-use biome_deserialize::{DeserializationContext, DeserializationDiagnostic};
+use biome_deserialize::{DeserializationContext, DeserializationDiagnostic, non_empty};
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
 use serde::{Deserialize, Serialize};
@@ -19,7 +19,7 @@ pub struct PluginManifest {
     pub version: u8,
 
     /// Normalized paths to Grit rules, relative to the manifest directory.
-    #[deserializable(required)]
+    #[deserializable(required, validate = "non_empty")]
     pub rules: Vec<String>,
 }
 

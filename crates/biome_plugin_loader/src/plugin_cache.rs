@@ -1,5 +1,7 @@
 use biome_analyze::AnalyzerPluginVec;
 use camino::Utf8PathBuf;
+use papaya::HashMap;
+use rustc_hash::{FxBuildHasher, FxHashSet};
 
 use crate::configuration::{PluginConfiguration, Plugins};
 use crate::{BiomePlugin, PluginDiagnostic};
@@ -9,19 +11,12 @@ use crate::{BiomePlugin, PluginDiagnostic};
 /// Each configured instance is stored separately so the same plugin can use
 /// different options in different overrides.
 #[derive(Debug, Default)]
-pub struct PluginCache(Vec<(PluginConfiguration, BiomePlugin)>);
+pub struct PluginCache(HashMap<PluginConfiguration, BiomePlugin, FxBuildHasher>);
 
 impl PluginCache {
     /// Inserts a new plugin into the cache.
-    pub fn insert_plugin(&mut self, configuration: &PluginConfiguration, plugin: BiomePlugin) {
-        match self
-            .0
-            .iter_mut()
-            .find(|(cached_configuration, _)| cached_configuration == configuration)
-        {
-            Some((_, cached_plugin)) => *cached_plugin = plugin,
-            None => self.0.push((configuration.clone(), plugin)),
-        }
+    pub fn insert_plugin(&self, configuration: &PluginConfiguration, plugin: BiomePlugin) {
+        self.0.pin().insert(configuration.clone(), plugin);
     }
 
     /// Returns the loaded and matched analyzer plugins, deduped
@@ -30,21 +25,17 @@ impl PluginCache {
         plugin_configs: &Plugins,
     ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         let mut result = AnalyzerPluginVec::new();
-        let mut seen = Vec::new();
+        let mut seen = FxHashSet::default();
         let mut diagnostics: Vec<PluginDiagnostic> = Vec::new();
 
+        let map = self.0.pin();
         for plugin_config in plugin_configs.iter() {
-            if seen.contains(&plugin_config) {
+            if !seen.insert(plugin_config) {
                 continue;
             }
-            seen.push(plugin_config);
 
-            match self
-                .0
-                .iter()
-                .find(|(cached_configuration, _)| cached_configuration == plugin_config)
-            {
-                Some((_, plugin)) => {
+            match map.get(plugin_config) {
+                Some(plugin) => {
                     result.extend_from_slice(&plugin.analyzer_plugins);
                 }
                 None => {

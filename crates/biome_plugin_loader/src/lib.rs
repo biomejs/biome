@@ -101,7 +101,7 @@ impl BiomePlugin {
         } else {
             let jsonc_manifest_path = plugin_path.join(ManifestName::biome_manifest_jsonc());
             if !fs.path_is_file(&jsonc_manifest_path) {
-                return Err(PluginDiagnostic::cant_resolve(json_manifest_path, None));
+                return Err(PluginDiagnostic::cant_resolve(plugin_path, None));
             }
             (
                 jsonc_manifest_path,
@@ -123,13 +123,6 @@ impl BiomePlugin {
             ));
         };
 
-        if manifest.rules.is_empty() {
-            return Err(PluginDiagnostic::invalid_manifest(
-                markup!("Plugin manifest "<Emphasis>{manifest_path.to_string()}</Emphasis>" must contain at least one rule"),
-                None,
-            ));
-        }
-
         let mut rule_names = FxHashSet::default();
         let plugin = Self {
             analyzer_plugins: manifest
@@ -138,7 +131,7 @@ impl BiomePlugin {
                 .map(|rule| {
                     let rule_path = resolve_manifest_rule_path(fs.as_ref(), &plugin_path, &rule)?;
                     let rule_name = rule_path.file_stem().unwrap_or_default();
-                    if !rule_names.insert(rule_name.to_string()) {
+                    if package_name.is_some() && !rule_names.insert(rule_name.to_string()) {
                         return Err(PluginDiagnostic::invalid_manifest(
                             markup!(
                                 "Plugin manifest contains multiple rules named "
@@ -293,6 +286,23 @@ mod test {
     }
 
     #[test]
+    fn local_manifest_allows_duplicate_rule_names() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/my-plugin/biome-manifest.json".into(),
+            r#"{ "version": 1, "rules": ["first/1.grit", "second/1.grit"] }"#,
+        );
+        fs.insert("/my-plugin/first/1.grit".into(), r#"`hello`"#);
+        fs.insert("/my-plugin/second/1.grit".into(), r#"`world`"#);
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
+            .expect("local manifests may contain duplicate rule stems");
+
+        assert_eq!(plugin.analyzer_plugins.len(), 2);
+    }
+
+    #[test]
     fn load_plugin_from_json_manifest() {
         let fs = MemoryFileSystem::default();
         fs.insert(
@@ -387,6 +397,31 @@ mod test {
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         BiomePlugin::load(fs, "plugin", Utf8Path::new("/project"), None)
             .expect_err("package rule names should be valid suppression identifiers");
+    }
+
+    #[test]
+    fn package_manifest_rejects_duplicate_rule_names() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/project/node_modules/plugin/package.json".into(),
+            r#"{ "name": "plugin" }"#,
+        );
+        fs.insert(
+            "/project/node_modules/plugin/biome-manifest.json".into(),
+            r#"{ "version": 1, "rules": ["first/1.grit", "second/1.grit"] }"#,
+        );
+        fs.insert(
+            "/project/node_modules/plugin/first/1.grit".into(),
+            r#"`hello`"#,
+        );
+        fs.insert(
+            "/project/node_modules/plugin/second/1.grit".into(),
+            r#"`world`"#,
+        );
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        BiomePlugin::load(fs, "plugin", Utf8Path::new("/project"), None)
+            .expect_err("package manifests should contain unique rule names");
     }
 
     #[test]
