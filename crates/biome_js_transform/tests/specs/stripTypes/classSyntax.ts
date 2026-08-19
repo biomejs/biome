@@ -11,3 +11,13 @@ abstract class Foo<T> extends Base<T> implements Iface {
 		this.c = 'c';
 	}
 }
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}

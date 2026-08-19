@@ -422,8 +422,9 @@ fn range_with_trailing_separator(node: &JsSyntaxNode) -> TextRange {
 
 /// Returns the class members carrying an `abstract` modifier.
 ///
-/// Abstract members are always signature members without a body, so they contain no nested
-/// class that could produce a false positive.
+/// Only the modifier list a member owns directly is matched. `abstract` is reachable from the
+/// two lists below and nowhere else in the grammar, so a `TS_ABSTRACT_MODIFIER` found deeper in
+/// a member belongs to a nested class, which erases its own abstract members.
 fn abstract_members(class: &JsSyntaxNode) -> impl Iterator<Item = JsSyntaxNode> {
     class
         .children()
@@ -432,8 +433,19 @@ fn abstract_members(class: &JsSyntaxNode) -> impl Iterator<Item = JsSyntaxNode> 
         .flat_map(|members| members.children())
         .filter(|member| {
             member
-                .descendants()
-                .any(|node| node.kind() == JsSyntaxKind::TS_ABSTRACT_MODIFIER)
+                .children()
+                .filter(|child| {
+                    matches!(
+                        child.kind(),
+                        JsSyntaxKind::TS_PROPERTY_SIGNATURE_MODIFIER_LIST
+                            | JsSyntaxKind::TS_METHOD_SIGNATURE_MODIFIER_LIST
+                    )
+                })
+                .any(|modifiers| {
+                    modifiers
+                        .children()
+                        .any(|modifier| modifier.kind() == JsSyntaxKind::TS_ABSTRACT_MODIFIER)
+                })
         })
 }
 

@@ -18,6 +18,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 # Transformations
@@ -33,6 +43,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -53,6 +73,16 @@ abstract class Foo    extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -67,6 +97,16 @@ abstract class Foo<T> extends Base    implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -87,6 +127,16 @@ abstract class Foo<T> extends Base<T>                  {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -101,6 +151,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -121,6 +181,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -135,6 +205,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -155,6 +235,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -169,6 +259,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -189,6 +289,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -206,6 +316,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -220,6 +340,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -240,6 +370,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -254,6 +394,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -274,6 +424,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -288,6 +448,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
 	}
 }
 
@@ -308,6 +478,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	}
 }
 
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
 ```
 
 ```ts
@@ -322,6 +502,124 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+         class Nesting {
+	                   
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	                   
+	h() {
+		abstract class Inner {
+			abstract i: number;
+		}
+		return Inner;
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		         class Inner {
+			                   
+		}
+		return Inner;
+	}
+}
+
+```
+
+```ts
+abstract class Foo<T> extends Base<T> implements Iface {
+	private readonly a: string = 'a';
+	b?: number;
+	c!: string;
+	declare d: number;
+	abstract e(): void;
+	[key: string]: unknown;
+	override f?(this: Foo<T>, a?: T): void {}
+	constructor() {
+		super();
+		this.c = 'c';
+	}
+}
+
+abstract class Nesting {
+	abstract g(): void;
+	h() {
+		abstract class Inner {
+			                   
+		}
+		return Inner;
 	}
 }
 
@@ -340,6 +638,16 @@ abstract class Foo<T> extends Base<T> implements Iface {
 	constructor() {
 		super();
 		this.c = 'c';
+	}
+}
+
+         class Nesting {
+	                   
+	h() {
+		         class Inner {
+			                   
+		}
+		return Inner;
 	}
 }
 
