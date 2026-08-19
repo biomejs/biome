@@ -904,7 +904,10 @@ impl<'src> HtmlLexer<'src> {
         }
     }
     /// Consume a token in the [HtmlLexContext::AstroFencedCodeBlock] context until
-    /// either the closing `---` fence is reached or a script tag is encountered.
+    /// the closing `---` fence is reached.
+    ///
+    /// A closing tag does not end the block: `</script>` inside frontmatter is
+    /// ordinary JavaScript, as it is in Astro.
     fn consume_astro_frontmatter(
         &mut self,
         current: u8,

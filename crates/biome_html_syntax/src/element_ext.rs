@@ -344,7 +344,10 @@ impl HtmlElement {
         self.get_script_type().is_some_and(ScriptType::is_supported) && !self.has_astro_is_raw()
     }
 
-    /// It's a style tag, and it doesn't contain `scss` as `lang`
+    /// Whether the content of a `<style>` should be handled as CSS.
+    ///
+    /// Excludes `lang="sass"`/`lang="scss"`, and Astro's `is:raw`, whose content
+    /// is emitted verbatim.
     pub fn is_supported_style_tag(&self) -> bool {
         self.is_style_tag() && !self.is_sass_lang() && !self.has_astro_is_raw()
     }
