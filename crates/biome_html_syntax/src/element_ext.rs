@@ -606,7 +606,8 @@ impl AnyHtmlTagElement {
     /// - `<Span />` is a component and it would return `true`
     /// - `<span ></span>` is **not** component and it returns `false`
     pub fn is_custom_component(&self) -> bool {
-        self.name().is_some_and(|it| it.as_html_tag_name().is_none())
+        self.name()
+            .is_some_and(|it| it.as_html_tag_name().is_none())
     }
 
     /// Returns `true` if the element is a Svelte special element, such as

@@ -561,7 +561,8 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
-    p.bump_with_context(T![/], inside_tag_context(p));
+    // Bumping `<` re-lexes what follows, so the `/` this started on may be gone.
+    p.expect_with_context(T![/], inside_tag_context(p));
     // The closing tag name has been classified by the lexer; component closings
     // (`HTML_COMPONENT_LITERAL`) are never void, so this is `O(1)` and correct.
     let is_void_element = VOID_ELEMENTS.contains(p.cur());

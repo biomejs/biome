@@ -1,4 +1,7 @@
-use crate::{prelude::*, utils::css_display::{CssDisplay, get_css_display_from_tag}};
+use crate::{
+    prelude::*,
+    utils::css_display::{CssDisplay, get_css_display_from_tag},
+};
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlClosingElement, HtmlClosingElementFields};
 #[derive(Debug, Clone, Default)]
