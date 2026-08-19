@@ -1,0 +1,28 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "PluginManifest",
+	"description": "Declares the Grit rules provided by a plugin package or directory.",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"description": "An optional JSON Schema reference used by editors.",
+			"type": ["string", "null"]
+		},
+		"rules": {
+			"description": "Normalized paths to Grit rules, relative to the manifest directory.",
+			"type": "array",
+			"items": { "type": "string" },
+			"minItems": 1
+		},
+		"version": {
+			"description": "The manifest format version.",
+			"type": "integer",
+			"format": "uint8",
+			"const": 1,
+			"maximum": 255,
+			"minimum": 0
+		}
+	},
+	"additionalProperties": false,
+	"required": ["version", "rules"]
+}
