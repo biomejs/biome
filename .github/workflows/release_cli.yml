@@ -90,15 +90,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Install cargo-audit
+      - name: Install cargo-deny
         uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
         if: matrix.code-target == 'linux-x64-musl'
         with:
-          tool: cargo-audit
+          tool: cargo-deny
 
       - name: Audit crates.io dependencies
         if: matrix.code-target == 'linux-x64-musl'
-        run: cargo audit
+        run: cargo deny check bans advisories
 
       # Build the CLI binary
       - name: Build binaries
