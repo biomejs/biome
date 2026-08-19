@@ -4,8 +4,7 @@ use crate::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
     AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement,
     JsxFragment, JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
-    inner_string_text,
-    static_value::StaticValue,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
