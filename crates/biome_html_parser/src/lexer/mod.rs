@@ -652,7 +652,10 @@ impl<'src> HtmlLexer<'src> {
                 quotes_seen.check_byte(byte);
             }
 
-            if self.is_at_closing_tag(closing_tag_name) {
+            // Frontmatter ends at its fence; `</script>` inside it is ordinary JS.
+            if context != HtmlLexContext::AstroFencedCodeBlock
+                && self.is_at_closing_tag(closing_tag_name)
+            {
                 break;
             }
             self.advance_byte_or_char(byte);
