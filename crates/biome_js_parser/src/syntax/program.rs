@@ -129,7 +129,6 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     let expr_marker = p.start();
     let expr_result = parse_expression(p, ExpressionContext::default());
 
-    // Check if we got a valid expression
     let has_expression = !expr_result.is_absent();
 
     // Astro renders a body that holds only comments as nothing, the way JSX does

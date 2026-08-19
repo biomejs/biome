@@ -185,6 +185,7 @@ impl Rule for UseConsistentCurlyBraces {
                             );
                             Ok(AnyJsxAttributeValue::JsxExpressionAttributeValue(value))
                         }
+                        // Unreachable: `handle_attr_init_clause` never signals on a template.
                         AnyJsxAttributeValue::JsTemplateExpression(node) => {
                             let value = make::jsx_expression_attribute_value(
                                 make::token(T!['{']),
