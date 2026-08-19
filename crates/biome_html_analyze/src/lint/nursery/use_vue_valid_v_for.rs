@@ -433,7 +433,7 @@ fn contains_identifier(expression: &str, expected: &str) -> bool {
 
 fn is_custom_component(element: &AnyHtmlTagElement) -> bool {
     let is_component_name = matches!(
-        element.name(),
+        element.name().ok(),
         Some(AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_))
     );
 

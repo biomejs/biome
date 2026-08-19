@@ -41,6 +41,7 @@ impl AnyHtmlElement {
     pub fn is_javascript_tag(&self) -> bool {
         match self {
             Self::AnyHtmlContent(_)
+            | Self::AstroFragment(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
             | Self::HtmlProcessingInstruction(_)
@@ -52,6 +53,7 @@ impl AnyHtmlElement {
     pub fn is_style_tag(&self) -> bool {
         match self {
             Self::AnyHtmlContent(_)
+            | Self::AstroFragment(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
             | Self::HtmlProcessingInstruction(_)
@@ -71,7 +73,10 @@ impl AnyHtmlElement {
                 element.find_attribute_by_name(name_to_lookup)
             }
             // Other variants don't have attributes
-            Self::AnyHtmlContent(_) | Self::HtmlBogusElement(_) | Self::HtmlCdataSection(_) => None,
+            Self::AnyHtmlContent(_)
+            | Self::AstroFragment(_)
+            | Self::HtmlBogusElement(_)
+            | Self::HtmlCdataSection(_) => None,
         }
     }
 
@@ -256,7 +261,7 @@ impl HtmlProcessingInstruction {
 impl HtmlOpeningElement {
     /// Returns the tag name of the element (trimmed), if it has one.
     pub fn tag_name(&self) -> Option<TokenText> {
-        let name = self.name()?;
+        let name = self.name().ok()?;
         get_tag_name_text(&name)
     }
 
@@ -401,7 +406,7 @@ impl HtmlElement {
     pub fn is_style_tag(&self) -> bool {
         self.opening_element()
             .ok()
-            .and_then(|el| el.name())
+            .and_then(|el| el.name().ok())
             .and_then(|name| name.tag_name_kind())
             == Some(STYLE_KW)
     }
@@ -409,7 +414,7 @@ impl HtmlElement {
     pub fn is_script_tag(&self) -> bool {
         self.opening_element()
             .ok()
-            .and_then(|el| el.name())
+            .and_then(|el| el.name().ok())
             .and_then(|name| name.tag_name_kind())
             == Some(SCRIPT_KW)
     }
@@ -469,7 +474,7 @@ impl HtmlElement {
     }
 
     pub fn name(&self) -> Option<AnyHtmlTagName> {
-        self.opening_element().ok()?.name()
+        self.opening_element().ok()?.name().ok()
     }
 }
 
@@ -526,13 +531,13 @@ impl AnyHtmlTagElement {
     /// Returns the token kind of this element's tag name.
     /// See [`AnyHtmlTagName::tag_name_kind`].
     pub fn tag_name_kind(&self) -> Option<HtmlSyntaxKind> {
-        self.name()?.tag_name_kind()
+        self.name().ok()?.tag_name_kind()
     }
 
-    pub fn name(&self) -> Option<AnyHtmlTagName> {
+    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         match self {
             Self::HtmlOpeningElement(element) => element.name(),
-            Self::HtmlSelfClosingElement(element) => element.name().ok(),
+            Self::HtmlSelfClosingElement(element) => element.name(),
         }
     }
 
@@ -544,7 +549,7 @@ impl AnyHtmlTagElement {
     }
 
     pub fn name_value_token(&self) -> Option<HtmlSyntaxToken> {
-        let name = self.name()?;
+        let name = self.name().ok()?;
         match name {
             AnyHtmlTagName::HtmlTagName(tag) => tag.value_token().ok(),
             AnyHtmlTagName::HtmlComponentName(_) => None,
@@ -632,8 +637,7 @@ impl AnyHtmlTagElement {
     /// - `<Span />` is a component and it would return `true`
     /// - `<span ></span>` is **not** component and it returns `false`
     pub fn is_custom_component(&self) -> bool {
-        self.name()
-            .is_some_and(|it| it.as_html_tag_name().is_none())
+        self.name().is_ok_and(|it| it.as_html_tag_name().is_none())
     }
 
     /// Returns `true` if the element is a Svelte special element, such as

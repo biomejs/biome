@@ -117,7 +117,7 @@ impl Rule for UseVueHyphenatedAttributes {
         }
 
         if let Some(ignore_tags) = ctx.options().ignore_tags.as_ref()
-            && let Some(tag_name) = node.name()
+            && let Ok(tag_name) = node.name()
             && let Some(tag_name_text) = tag_name.token_text_trimmed()
             && ignore_tags.contains(tag_name_text.as_ref())
         {

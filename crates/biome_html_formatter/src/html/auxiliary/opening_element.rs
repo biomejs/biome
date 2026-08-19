@@ -1,10 +1,7 @@
 use crate::{
     html::lists::attribute_list::FormatHtmlAttributeListOptions,
     prelude::*,
-    utils::{
-        css_display::{CssDisplay, get_css_display_from_tag},
-        metadata::should_lowercase_html_tag,
-    },
+    utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, GroupId, write};
 use biome_html_syntax::{
@@ -117,13 +114,11 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         } = node.as_fields();
 
         let l_angle_token = l_angle_token?;
-        let css_display = name
-            .as_ref()
-            .map_or(CssDisplay::Inline, get_css_display_from_tag);
+        let name = name?;
+        let css_display = get_css_display_from_tag(&name);
         let is_whitespace_sensitive = css_display.is_internally_whitespace_sensitive(f);
         let is_canonical_html_element = name
-            .as_ref()
-            .and_then(|name| name.as_html_tag_name())
+            .as_html_tag_name()
             .is_some_and(|name| should_lowercase_html_tag(f, name));
 
         let bracket_same_line = f.options().bracket_same_line().value();
@@ -145,7 +140,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
                     .format()
                     .with_options(FormatHtmlAttributeListOptions {
                         is_canonical_html_element,
-                        tag_name: name.clone(),
+                        tag_name: Some(name.clone()),
                     })
                     .fmt(f)?;
 

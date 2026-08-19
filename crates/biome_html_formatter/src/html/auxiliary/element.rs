@@ -146,10 +146,8 @@ impl FormatHtmlElement {
 
         let closing_element = closing_element?;
         let opening_element = opening_element?;
-        let tag_name = opening_element.name();
-        let css_display = tag_name
-            .as_ref()
-            .map_or(CssDisplay::Inline, get_css_display_from_tag);
+        let tag_name = opening_element.name()?;
+        let css_display = get_css_display_from_tag(&tag_name);
         let is_element_internally_whitespace_sensitive =
             css_display.is_internally_whitespace_sensitive(f);
         let is_root_element_list = node
@@ -160,7 +158,7 @@ impl FormatHtmlElement {
             // third one is either `HtmlRoot` or another `HtmlElement`
             .nth(2)
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
-        let tag_name_kind = tag_name.as_ref().and_then(|name| name.tag_name_kind());
+        let tag_name_kind = tag_name.tag_name_kind();
         let is_template_element = tag_name_kind == Some(TEMPLATE_KW);
         // Although audio, video, and object are inline elements, their children describe
         // resources or fallback content and retain their own display layout. Borrowing a tag
@@ -183,11 +181,8 @@ impl FormatHtmlElement {
         });
         let should_be_verbatim = has_embedded_content
             || match tag_name {
-                None
-                | Some(AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_)) => {
-                    false
-                }
-                Some(AnyHtmlTagName::HtmlTagName(tag_name)) => tag_name
+                AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
+                AnyHtmlTagName::HtmlTagName(tag_name) => tag_name
                     .value_token()
                     .as_ref()
                     .is_ok_and(|tag_name_token| is_verbatim_tag(tag_name_token.text_trimmed())),

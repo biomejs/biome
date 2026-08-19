@@ -208,6 +208,20 @@ pub fn astro_client_directive(
         ],
     ))
 }
+pub fn astro_closing_fragment(
+    l_angle_token: SyntaxToken,
+    slash_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> AstroClosingFragment {
+    AstroClosingFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_CLOSING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
 pub fn astro_define_directive(
     define_token: SyntaxToken,
     value: AstroDirectiveValue,
@@ -272,6 +286,20 @@ impl AstroEmbeddedContentBuilder {
         ))
     }
 }
+pub fn astro_fragment(
+    opening_fragment: AstroOpeningFragment,
+    children: HtmlElementList,
+    closing_fragment: AstroClosingFragment,
+) -> AstroFragment {
+    AstroFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_FRAGMENT,
+        [
+            Some(SyntaxElement::Node(opening_fragment.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_fragment.into_syntax())),
+        ],
+    ))
+}
 pub fn astro_frontmatter_element(
     l_fence_token: SyntaxToken,
     content: AstroEmbeddedContent,
@@ -292,6 +320,18 @@ pub fn astro_is_directive(is_token: SyntaxToken, value: AstroDirectiveValue) -> 
         [
             Some(SyntaxElement::Token(is_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn astro_opening_fragment(
+    l_angle_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> AstroOpeningFragment {
+    AstroOpeningFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_OPENING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
         ],
     ))
 }
@@ -408,38 +448,18 @@ pub fn html_cdata_section(
 pub fn html_closing_element(
     l_angle_token: SyntaxToken,
     slash_token: SyntaxToken,
+    name: AnyHtmlTagName,
     r_angle_token: SyntaxToken,
-) -> HtmlClosingElementBuilder {
-    HtmlClosingElementBuilder {
-        l_angle_token,
-        slash_token,
-        r_angle_token,
-        name: None,
-    }
-}
-pub struct HtmlClosingElementBuilder {
-    l_angle_token: SyntaxToken,
-    slash_token: SyntaxToken,
-    r_angle_token: SyntaxToken,
-    name: Option<AnyHtmlTagName>,
-}
-impl HtmlClosingElementBuilder {
-    pub fn with_name(mut self, name: AnyHtmlTagName) -> Self {
-        self.name = Some(name);
-        self
-    }
-    pub fn build(self) -> HtmlClosingElement {
-        HtmlClosingElement::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_CLOSING_ELEMENT,
-            [
-                Some(SyntaxElement::Token(self.l_angle_token)),
-                Some(SyntaxElement::Token(self.slash_token)),
-                self.name
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_angle_token)),
-            ],
-        ))
-    }
+) -> HtmlClosingElement {
+    HtmlClosingElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_CLOSING_ELEMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
 }
 pub fn html_component_name(value_token: SyntaxToken) -> HtmlComponentName {
     HtmlComponentName::unwrap_cast(SyntaxNode::new_detached(
@@ -572,39 +592,19 @@ pub fn html_member_name(
 }
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
+    name: AnyHtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
-) -> HtmlOpeningElementBuilder {
-    HtmlOpeningElementBuilder {
-        l_angle_token,
-        attributes,
-        r_angle_token,
-        name: None,
-    }
-}
-pub struct HtmlOpeningElementBuilder {
-    l_angle_token: SyntaxToken,
-    attributes: HtmlAttributeList,
-    r_angle_token: SyntaxToken,
-    name: Option<AnyHtmlTagName>,
-}
-impl HtmlOpeningElementBuilder {
-    pub fn with_name(mut self, name: AnyHtmlTagName) -> Self {
-        self.name = Some(name);
-        self
-    }
-    pub fn build(self) -> HtmlOpeningElement {
-        HtmlOpeningElement::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_OPENING_ELEMENT,
-            [
-                Some(SyntaxElement::Token(self.l_angle_token)),
-                self.name
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.attributes.into_syntax())),
-                Some(SyntaxElement::Token(self.r_angle_token)),
-            ],
-        ))
-    }
+) -> HtmlOpeningElement {
+    HtmlOpeningElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_OPENING_ELEMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
 }
 pub fn html_processing_instruction(
     start_token: SyntaxToken,

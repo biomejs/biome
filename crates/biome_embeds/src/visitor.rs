@@ -1268,7 +1268,7 @@ impl EmbeddedReferencesBuilder {
         }
 
         let opening = element.opening_element().ok()?;
-        let name = opening.name()?;
+        let name = opening.name().ok()?;
 
         self.track_component_reference(&name);
 

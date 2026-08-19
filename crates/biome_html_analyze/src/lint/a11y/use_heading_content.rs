@@ -151,6 +151,10 @@ impl Rule for UseHeadingContent {
 fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: bool) -> bool {
     children.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
+        // A fragment renders nothing itself, so its children carry the content.
+        AnyHtmlElement::AstroFragment(fragment) => {
+            has_accessible_content(&fragment.children(), is_html, is_astro)
+        }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 return false;
@@ -164,7 +168,7 @@ fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: b
                 let tag_text = element
                     .opening_element()
                     .ok()
-                    .and_then(|o| o.name())
+                    .and_then(|o| o.name().ok())
                     .and_then(|n| n.token_text_trimmed());
                 if matches!(tag_text.as_ref().map(|t| t.as_ref()),
                     Some(name) if name.starts_with(|c: char| c.is_uppercase()))

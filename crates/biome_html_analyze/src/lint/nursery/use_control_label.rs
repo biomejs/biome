@@ -162,6 +162,10 @@ fn has_labeling_attribute(element: &AnyHtmlTagElement) -> bool {
 fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
     html_child_list.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
+        // A fragment renders nothing itself, so its children carry the content.
+        AnyHtmlElement::AstroFragment(fragment) => {
+            has_accessible_content(&fragment.children())
+        }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 return false;

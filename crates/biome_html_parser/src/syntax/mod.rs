@@ -337,6 +337,7 @@ fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, names_a_language: bool) -> b
     }
 }
 
+/// Parses an element. See [parse_element_allowing_sfc_blocks] for `in_math`.
 fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool, in_math: bool) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -362,6 +363,10 @@ fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool, in_math: bool) 
 /// Parses an element, reading its content as opaque text when it opens a block
 /// of a Vue single-file component and `sfc_blocks` allows it.
 ///
+/// `in_math` marks the element as a descendant of an Astro `<math>`, where a `{`
+/// is text rather than the start of an expression. It propagates to the
+/// children, since MathML is foreign content all the way down.
+///
 /// Returns `Absent` only when such a block turned out to have no closing tag.
 /// The caller has already established that the parser is at a `<`, so nothing
 /// else can make this fail.
@@ -372,7 +377,15 @@ fn parse_element_allowing_sfc_blocks(
 ) -> ParsedSyntax {
     let m = p.start();
 
+    // The opening `<` has to be inside the fragment's own node, and `>` only
+    // lexes as such once we are in tag context, so start both before bumping.
+    let opening_fragment = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
+
+    if Astro.is_supported(p) && p.at(T![>]) {
+        return parse_astro_fragment(p, m, opening_fragment, in_math);
+    }
+    opening_fragment.abandon(p);
     // The tag-name token has already been lexed and classified by the lexer, so
     // these checks are now `O(1)` on the token kind.
     let name_kind = p.cur();
@@ -394,11 +407,7 @@ fn parse_element_allowing_sfc_blocks(
         && name_kind != HTML_COMPONENT_LITERAL
         && opening_tag_name.eq_ignore_ascii_case("math");
 
-    // `<>` opens a fragment in Astro; elsewhere a missing name is still an error.
-    let is_fragment = Astro.is_supported(p) && p.at(T![>]);
-    if !is_fragment {
-        parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
-    }
+    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
     match html_framework(p) {
         HtmlFramework::Svelte => {
@@ -416,8 +425,7 @@ fn parse_element_allowing_sfc_blocks(
     attributes.parse_list(p);
     let is_raw_text_block =
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
-    // A fragment has no name for the lexer to scan its closing tag for.
-    let is_astro_raw = attributes.is_raw && !is_fragment;
+    let is_astro_raw = attributes.is_raw;
     let is_raw_text = is_embedded_language_tag || is_raw_text_block || is_astro_raw;
 
     if p.at(T![/]) {
@@ -501,16 +509,7 @@ fn parse_element_allowing_sfc_blocks(
                         continue;
                     }
 
-                    let closing_matches = if is_fragment {
-                        // Astro accepts inner whitespace, so `</ >` closes a fragment.
-                        !closing
-                            .text(p)
-                            .chars()
-                            .any(|c| !c.is_whitespace() && c != '<' && c != '/' && c != '>')
-                    } else {
-                        closing.text(p).contains(opening_tag_name.as_str())
-                    };
-                    if !closing_matches {
+                    if !closing.text(p).contains(opening_tag_name.as_str()) {
                         p.error(
                             expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
                         );
@@ -525,6 +524,34 @@ fn parse_element_allowing_sfc_blocks(
 
         Present(previous.complete(p, HTML_ELEMENT))
     }
+}
+
+/// Parses the rest of `<>...</>` once the opening `<` has been bumped.
+///
+/// A fragment has no tag name, so it is its own node rather than an element
+/// whose name happens to be missing.
+fn parse_astro_fragment(
+    p: &mut HtmlParser,
+    m: Marker,
+    opening_fragment: Marker,
+    in_math: bool,
+) -> ParsedSyntax {
+    p.bump_with_context(T![>], regular_context(p));
+    opening_fragment.complete(p, ASTRO_OPENING_FRAGMENT);
+
+    ElementList {
+        vue_sfc_top_level: false,
+        in_math,
+    }
+    .parse_list(p);
+
+    let closing = p.start();
+    p.expect_with_context(T![<], inside_tag_context(p));
+    p.expect_with_context(T![/], inside_tag_context(p));
+    p.expect_with_context(T![>], regular_context(p));
+    closing.complete(p, ASTRO_CLOSING_FRAGMENT);
+
+    Present(m.complete(p, ASTRO_FRAGMENT))
 }
 
 fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
@@ -575,6 +602,8 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
         .is_some_and(|kind| VOID_ELEMENTS.contains(kind))
 }
 
+/// Parses any element or text-expression child. See
+/// [parse_element_allowing_sfc_blocks] for `in_math`.
 #[inline]
 pub(crate) fn parse_html_element(
     p: &mut HtmlParser,

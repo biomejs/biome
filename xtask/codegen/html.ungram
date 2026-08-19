@@ -75,6 +75,7 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
+	| AstroFragment
 	| AnyHtmlContent
 	| HtmlCdataSection
 	| HtmlProcessingInstruction
@@ -123,12 +124,27 @@ HtmlElement =
 	children: HtmlElementList
 	closing_element: HtmlClosingElement
 
+// <>a</>, Astro's fragment shorthand
+AstroFragment =
+	opening_fragment: AstroOpeningFragment
+	children: HtmlElementList
+	closing_fragment: AstroClosingFragment
+
+AstroOpeningFragment =
+	'<'
+	'>'
+
+AstroClosingFragment =
+	'<'
+	'/'
+	'>'
+
 
 // <a href="">
 // ^^        ^
 HtmlOpeningElement =
 	'<'
-	name: AnyHtmlTagName?
+	name: AnyHtmlTagName
 	attributes: HtmlAttributeList
 	'>'
 
@@ -136,7 +152,7 @@ HtmlOpeningElement =
 HtmlClosingElement =
 	'<'
 	'/'
-	name: AnyHtmlTagName?
+	name: AnyHtmlTagName
 	'>'
 
 AnyHtmlTagName =
