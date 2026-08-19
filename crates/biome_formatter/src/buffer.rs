@@ -791,7 +791,7 @@ where
         let elements = buffer.elements();
 
         let recorded = if self.start > elements.len() {
-            // May happen if buffer was rewinded.
+            // May happen if buffer was rewound.
             &[]
         } else {
             &elements[self.start..]

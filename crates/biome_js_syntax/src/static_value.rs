@@ -73,7 +73,7 @@ impl StaticValue {
         }
     }
 
-    /// Return teh range of the static value.
+    /// Return the range of the static value.
     ///
     /// ## Examples
     ///
