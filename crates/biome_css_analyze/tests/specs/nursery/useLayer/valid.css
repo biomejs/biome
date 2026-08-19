@@ -1,0 +1,32 @@
+/* should not generate diagnostics */
+@layer {
+	p {
+		color: red;
+	}
+}
+
+@layer named {
+	p {
+		color: red;
+	}
+}
+
+@layer named.something {
+	p {
+		color: red;
+	}
+}
+
+@media (min-width: 600px) {
+	@layer foo {
+		a {
+			color: bar
+		}
+
+		@layer bar {
+			b {
+				color: red;
+			}
+		}
+	}
+}
