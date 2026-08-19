@@ -502,75 +502,21 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     );
 }
 
-/// Closing a file must evict its cached parsed source from the database, so
-/// the database does not retain parsed sources for files the client no
-/// longer has open.
+/// Closing a file evicts its own cached parsed source through
+/// `DbState::remove_file`, and closing a project evicts the cached parsed
+/// sources of the files still open under its root through
+/// `DbState::unload_path`. Neither operation touches parsed sources that
+/// belong to a different project.
 #[test]
-fn close_file_evicts_cached_parsed_source() {
-    const PATH: &str = "/project/file.js";
+fn close_file_and_close_project_evict_cached_parsed_sources() {
+    const PATH_A: &str = "/project/file_a.js";
+    const PATH_B: &str = "/project/file_b.js";
+    const OTHER_PATH: &str = "/other/file_c.js";
     const SOURCE: &str = "let a = 1;";
 
     let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
-    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
-
-    workspace
-        .open_file(OpenFileParams {
-            project_key,
-            path: BiomePath::new(PATH),
-            content: FileContent::from_client(SOURCE),
-            document_file_source: None,
-            persist_node_cache: false,
-            inline_config: None,
-            editor_features: None,
-        })
-        .unwrap();
-
-    assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
-            .is_some(),
-        "opening the file must cache its parsed source"
-    );
-    assert_eq!(
-        workspace.get_db().parsed_sources_len(),
-        1,
-        "opening the file must add exactly one entry to the parsed source cache"
-    );
-
-    workspace
-        .close_file(CloseFileParams {
-            project_key,
-            path: BiomePath::new(PATH),
-        })
-        .unwrap();
-
-    assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
-            .is_none(),
-        "closing the file must evict its cached parsed source"
-    );
-    assert_eq!(
-        workspace.get_db().parsed_sources_len(),
-        0,
-        "closing the file must remove its entry from the parsed source cache"
-    );
-}
-
-/// Closing a project must evict the cached parsed sources of every file
-/// under its root, alongside the open documents and module graph entries it
-/// already evicts.
-#[test]
-fn close_project_evicts_cached_parsed_sources_under_root() {
-    const PATH: &str = "/project/file.js";
-    const OTHER_PATH: &str = "/other/file.js";
-    const SOURCE: &str = "let a = 1;";
-
-    let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    fs.insert(Utf8PathBuf::from(PATH_A), SOURCE.as_bytes());
+    fs.insert(Utf8PathBuf::from(PATH_B), SOURCE.as_bytes());
     fs.insert(Utf8PathBuf::from(OTHER_PATH), SOURCE.as_bytes());
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
     let other_project_key = workspace
@@ -581,40 +527,55 @@ fn close_project_evicts_cached_parsed_sources_under_root() {
         .unwrap()
         .project_key;
 
+    for (key, path) in [
+        (project_key, PATH_A),
+        (project_key, PATH_B),
+        (other_project_key, OTHER_PATH),
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key: key,
+                path: BiomePath::new(path),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        3,
+        "opening all three files must add three entries to the parsed source cache"
+    );
+
     workspace
-        .open_file(OpenFileParams {
+        .close_file(CloseFileParams {
             project_key,
-            path: BiomePath::new(PATH),
-            content: FileContent::from_client(SOURCE),
-            document_file_source: None,
-            persist_node_cache: false,
-            inline_config: None,
-            editor_features: None,
-        })
-        .unwrap();
-    workspace
-        .open_file(OpenFileParams {
-            project_key: other_project_key,
-            path: BiomePath::new(OTHER_PATH),
-            content: FileContent::from_client(SOURCE),
-            document_file_source: None,
-            persist_node_cache: false,
-            inline_config: None,
-            editor_features: None,
+            path: BiomePath::new(PATH_A),
         })
         .unwrap();
 
     assert!(
         workspace
             .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
+            .get_parsed_source(Utf8Path::new(PATH_A))
+            .is_none(),
+        "closing a file must evict its cached parsed source"
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_B))
             .is_some(),
-        "opening the file must cache its parsed source"
+        "closing a file must not evict the cached parsed source of a file that is still open"
     );
     assert_eq!(
         workspace.get_db().parsed_sources_len(),
         2,
-        "opening both files must add two entries to the parsed source cache"
+        "closing a file must remove only its own entry from the parsed source cache"
     );
 
     workspace
@@ -624,21 +585,21 @@ fn close_project_evicts_cached_parsed_sources_under_root() {
     assert!(
         workspace
             .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
+            .get_parsed_source(Utf8Path::new(PATH_B))
             .is_none(),
-        "closing the project must evict cached parsed sources under its root"
+        "closing a project must evict cached parsed sources still open under its root"
     );
     assert!(
         workspace
             .get_db()
             .get_parsed_source(Utf8Path::new(OTHER_PATH))
             .is_some(),
-        "closing the project must not evict cached parsed sources outside its root"
+        "closing a project must not evict cached parsed sources outside its root"
     );
     assert_eq!(
         workspace.get_db().parsed_sources_len(),
         1,
-        "closing the project must remove only the entry under its root from the parsed source cache"
+        "closing a project must remove only the entries under its root from the parsed source cache"
     );
 }
 
