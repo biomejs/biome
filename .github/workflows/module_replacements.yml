@@ -17,10 +17,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
+      # Avoid the expensive Rust compilation below unless e18e published a new
+      # release since the previous scheduled run. Manual runs always proceed.
+      - name: Check for a new e18e release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The releases/latest endpoint excludes pre-releases and drafts.
+          release=$(gh api repos/e18e/module-replacements/releases/latest)
+          version=$(echo "$release" | jq -r .tag_name)
+          published_at=$(echo "$release" | jq -r .published_at)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual run, proceeding."
+            echo "has_new_release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          published_ts=$(date -d "$published_at" +%s)
+          age_days=$(( ( $(date +%s) - published_ts ) / 86400 ))
+          echo "Latest e18e release ($version) was published at $published_at ($age_days days ago)."
+          if [ "$age_days" -le 7 ]; then
+            echo "has_new_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No new e18e release in the last week, skipping."
+            echo "has_new_release=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install just
+        if: steps.release.outputs.has_new_release == 'true'
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
       - name: Install toolchain
+        if: steps.release.outputs.has_new_release == 'true'
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
           cache-base: main
@@ -28,9 +57,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate e18e module replacements data
+        if: steps.release.outputs.has_new_release == 'true'
         run: just gen-module-replacements
 
       - name: Check for changes
+        if: steps.release.outputs.has_new_release == 'true'
         id: changes
         run: |
           if git diff --quiet; then
@@ -55,13 +86,21 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          E18E_VERSION: ${{ steps.release.outputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "chore: update e18e module replacements data"
+          git commit -m "chore: update e18e module replacements data to $version"
           git push origin HEAD:chore/update-module-replacements-data -f
-          PR_URL=$(gh pr create --title "chore: update e18e module replacements data" --body "Automated update for module replacements data." --base main)
+          # Force-pushing updates any existing open PR in place, so reuse it
+          # instead of failing when one is already open.
+          PR_URL=$(gh pr list --head chore/update-module-replacements-data --base main --state open --json url --jq '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            PR_URL=$(gh pr create --title "chore: update e18e module replacements data to $E18E_VERSION" --body "Automated update for module replacements data ($version)." --base main)
+          else
+            gh pr edit "$PR_URL" --title "chore: update e18e module replacements data to $E18E_VERSION"
+          fi
           echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
 
       - name: Auto merge
