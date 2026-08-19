@@ -524,7 +524,9 @@ impl<'src> HtmlLexer<'src> {
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             QOT => self.consume_string_literal(current),
-            TPL => self.consume_template_literal_attribute_value(),
+            TPL if self.framework == HtmlFramework::Astro => {
+                self.consume_template_literal_attribute_value()
+            }
             _ => self.consume_unquoted_string_literal(),
         }
     }
@@ -563,12 +565,12 @@ impl<'src> HtmlLexer<'src> {
         HTML_TEMPLATE_CHUNK
     }
 
-    /// Consume a `` ` ``-delimited template literal in attribute-value
-    /// position. Used by Astro and other JSX-like dialects that allow
-    /// `attr=\`tag\``. Returns the same token kind as a regular quoted
-    /// string so downstream parsing can reuse the existing initializer
-    /// path; the renderer disambiguates by inspecting the leading byte.
+    /// Consume a `` ` ``-delimited attribute value, which only Astro allows.
+    ///
+    /// The token kind matches a quoted string so the existing initializer path
+    /// is reused; consumers that must tell the two apart check the leading byte.
     fn consume_template_literal_attribute_value(&mut self) -> HtmlSyntaxKind {
+        let start = self.text_position();
         self.advance(1);
         while let Some(byte) = self.current_byte() {
             match byte {
@@ -585,8 +587,13 @@ impl<'src> HtmlLexer<'src> {
                 _ => self.advance_byte_or_char(byte),
             }
         }
-        // Unterminated — still emit the token so the rest of the file
-        // continues parsing.
+        self.diagnostics.push(
+            ParseDiagnostic::new("Missing closing backtick", start..self.text_position())
+                .with_detail(
+                    self.source.text_len()..self.source.text_len(),
+                    "file ends here",
+                ),
+        );
         HTML_STRING_LITERAL
     }
 
