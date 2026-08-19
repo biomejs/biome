@@ -40,7 +40,6 @@ pub struct MarkdownConfiguration {
 pub type MarkdownFormatterEnabled = Bool<true>;
 pub type MarkdownLinterEnabled = Bool<true>;
 pub type MarkdownAssistEnabled = Bool<true>;
-pub type MarkdownParseInterpolation = Bool<false>;
 pub type MarkdownParseFrontmatter = Bool<false>;
 
 /// Options that change how the Markdown parser behaves
