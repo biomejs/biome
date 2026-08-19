@@ -1132,6 +1132,30 @@ console.log(a);
     }
 
     #[test]
+    fn format_keeps_unquoted_astro_attribute_values_whole() {
+        // An unquoted value used to lose its first character, and a single
+        // character one sliced `1..0` and panicked.
+        for (src, expected) in [
+            ("cond && <div class=foo />", "class=\"foo\""),
+            ("cond && <div a=b />", "a=\"b\""),
+            ("cond && <img src=/x.png />", "src=\"/x.png\""),
+        ] {
+            let output = format_astro_template(src);
+            assert!(
+                output.contains(expected),
+                "expected {expected:?} in {output:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn format_still_quotes_normal_astro_attribute_values() {
+        let output = format_astro_template("cond && <div class='a' />");
+
+        assert!(output.contains("class=\"a\""), "{output:?}");
+    }
+
+    #[test]
     fn format_keeps_comment_between_implicit_fragment_siblings() {
         let output = format_astro_template("<p>a</p>\n/* c */ <div />");
 
