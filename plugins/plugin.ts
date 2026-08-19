@@ -1,8 +1,13 @@
-import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+import {
+	type AnyJsRoot,
+	ast,
+	defineRule,
+	registerDiagnostic,
+} from "@biomejs/plugin-api";
 
 export const noTopLevelVar = defineRule({
 	query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
-	run(root) {
+	run(root: AnyJsRoot) {
 		const statements = root.kind === "JS_SCRIPT" ? root.statements : root.items;
 
 		for (const statement of statements) {
