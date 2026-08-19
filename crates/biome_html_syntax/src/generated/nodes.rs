@@ -1513,8 +1513,8 @@ impl HtmlSingleTextExpression {
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn expression(&self) -> Option<HtmlTextExpression> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -1531,7 +1531,7 @@ impl Serialize for HtmlSingleTextExpression {
 #[derive(Serialize)]
 pub struct HtmlSingleTextExpressionFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub expression: Option<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7563,7 +7563,10 @@ impl std::fmt::Debug for HtmlSingleTextExpression {
                     "l_curly_token",
                     &support::DebugSyntaxResult(self.l_curly_token()),
                 )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field(
                     "r_curly_token",
                     &support::DebugSyntaxResult(self.r_curly_token()),

@@ -101,9 +101,10 @@ HtmlDoubleTextExpression =
 
 // {expression}
 // ^^^^^^^^^^^^
+// The expression is absent in Astro, where `{}` renders nothing
 HtmlSingleTextExpression =
 	'{'
-	expression: HtmlTextExpression
+	expression: HtmlTextExpression?
 	'}'
 
 HtmlTextExpression = 'html_literal'

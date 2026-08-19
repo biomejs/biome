@@ -63,7 +63,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 match text_expression {
                     HtmlTextExpressions::Single => {
                         if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-                            && let Ok(expression) = text_expression.expression()
+                            && let Some(expression) = text_expression.expression()
                             && let Some(candidate) = build_text_expression_candidate(&expression)
                         {
                             ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
@@ -94,7 +94,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
                 // Text expressions via registry
                 if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-                    && let Ok(expression) = text_expression.expression()
+                    && let Some(expression) = text_expression.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
@@ -297,7 +297,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
             // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
-                if let Ok(expression) = snippet.expression()
+                if let Some(expression) = snippet.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(

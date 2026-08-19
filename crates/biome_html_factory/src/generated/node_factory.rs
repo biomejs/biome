@@ -718,17 +718,35 @@ impl HtmlSelfClosingElementBuilder {
 }
 pub fn html_single_text_expression(
     l_curly_token: SyntaxToken,
-    expression: HtmlTextExpression,
     r_curly_token: SyntaxToken,
-) -> HtmlSingleTextExpression {
-    HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+) -> HtmlSingleTextExpressionBuilder {
+    HtmlSingleTextExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        expression: None,
+    }
+}
+pub struct HtmlSingleTextExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    expression: Option<HtmlTextExpression>,
+}
+impl HtmlSingleTextExpressionBuilder {
+    pub fn with_expression(mut self, expression: HtmlTextExpression) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+    pub fn build(self) -> HtmlSingleTextExpression {
+        HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.expression
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
 }
 pub fn html_spread_attribute(
     l_curly_token: SyntaxToken,
