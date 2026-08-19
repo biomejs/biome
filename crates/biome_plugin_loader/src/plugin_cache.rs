@@ -1,7 +1,7 @@
 use biome_analyze::AnalyzerPluginVec;
 use camino::Utf8PathBuf;
 use papaya::HashMap;
-use rustc_hash::{FxBuildHasher, FxHashSet};
+use rustc_hash::FxBuildHasher;
 
 use crate::configuration::{PluginConfiguration, Plugins};
 use crate::{BiomePlugin, PluginDiagnostic};
@@ -25,14 +25,15 @@ impl PluginCache {
         plugin_configs: &Plugins,
     ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         let mut result = AnalyzerPluginVec::new();
-        let mut seen = FxHashSet::default();
+        let mut seen = Vec::new();
         let mut diagnostics: Vec<PluginDiagnostic> = Vec::new();
 
         let map = self.0.pin();
         for plugin_config in plugin_configs.iter() {
-            if !seen.insert(plugin_config) {
+            if seen.contains(&plugin_config) {
                 continue;
             }
+            seen.push(plugin_config);
 
             match map.get(plugin_config) {
                 Some(plugin) => {
