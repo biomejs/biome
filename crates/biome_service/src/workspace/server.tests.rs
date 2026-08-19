@@ -510,7 +510,7 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
 #[test]
 fn close_file_and_close_project_evict_cached_parsed_sources() {
     const PATH_A: &str = "/project/file_a.js";
-    const PATH_B: &str = "/project/file_b.js";
+    const PATH_B: &str = "/project/nested/file_b.js";
     const OTHER_PATH: &str = "/other/file_c.js";
     const SOURCE: &str = "let a = 1;";
 
