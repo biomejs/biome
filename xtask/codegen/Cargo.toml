@@ -37,6 +37,7 @@ biome_json_syntax      = { workspace = true, optional = true }
 biome_languages        = { workspace = true, features = ["lang_js"] }
 biome_markdown_analyze = { workspace = true, optional = true }
 biome_markdown_syntax  = { workspace = true, optional = true }
+biome_plugin_loader    = { workspace = true, features = ["schema"], optional = true }
 biome_rowan            = { workspace = true, optional = true }
 biome_service          = { workspace = true, features = ["schema"], optional = true }
 biome_string_case      = { workspace = true }
@@ -82,6 +83,7 @@ schema        = [
   "biome_js_syntax",
   "biome_json_formatter",
   "biome_json_parser",
+  "biome_plugin_loader",
   "biome_rowan",
   "biome_service",
   "schemars",

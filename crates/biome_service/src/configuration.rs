@@ -127,12 +127,18 @@ impl LoadedConfiguration {
                         .parent()
                         .unwrap_or(external_resolution_base_path.as_path());
                     if let Some(plugins) = partial_configuration.plugins.as_mut() {
-                        plugins.normalize_relative_paths(config_dir);
+                        plugins
+                            .normalize_relative_paths(fs, config_dir)
+                            .map_err(|diagnostic| {
+                                WorkspaceError::plugin_errors(vec![diagnostic])
+                            })?;
                     }
                     if let Some(overrides) = partial_configuration.overrides.as_mut() {
                         for pattern in overrides.0.iter_mut() {
                             if let Some(plugins) = pattern.plugins.as_mut() {
-                                plugins.normalize_relative_paths(config_dir);
+                                plugins.normalize_relative_paths(fs, config_dir).map_err(
+                                    |diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]),
+                                )?;
                             }
                         }
                     }
@@ -583,10 +589,11 @@ pub trait ConfigurationExt {
 
     fn normalize_plugin(
         &self,
+        fs: &dyn FsWithResolverProxy,
         config: &mut Configuration,
         relative_resolution_base_path: Utf8PathBuf,
         external_resolution_base_path: &Utf8Path,
-    );
+    ) -> Result<(), WorkspaceError>;
 }
 
 impl ConfigurationExt for Configuration {
@@ -738,10 +745,11 @@ impl ConfigurationExt for Configuration {
                 let (mut config, diagnostics) = deserialized.consume();
                 if let Some(config) = config.as_mut() {
                     self.normalize_plugin(
+                        fs,
                         config,
                         extend_configuration_file_path,
                         external_resolution_base_path,
-                    );
+                    )?;
                 }
                 deserialized_configurations.push(Deserialized::new(config, diagnostics))
             }
@@ -752,33 +760,40 @@ impl ConfigurationExt for Configuration {
     #[cfg(feature = "plugins")]
     fn normalize_plugin(
         &self,
+        fs: &dyn FsWithResolverProxy,
         config: &mut Configuration,
         extend_configuration_file_path: Utf8PathBuf,
         external_resolution_base_path: &Utf8Path,
-    ) {
+    ) -> Result<(), WorkspaceError> {
         let config_dir = extend_configuration_file_path
             .parent()
             .unwrap_or(external_resolution_base_path);
         if let Some(plugins) = config.plugins.as_mut() {
-            plugins.normalize_object_relative_paths(config_dir);
+            plugins
+                .normalize_object_relative_paths(fs, config_dir)
+                .map_err(|diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]))?;
         }
         if let Some(overrides) = config.overrides.as_mut() {
             for pattern in overrides.0.iter_mut() {
                 if let Some(plugins) = pattern.plugins.as_mut() {
-                    // Normalize object-syntax plugin paths only
-                    plugins.normalize_object_relative_paths(config_dir);
+                    plugins
+                        .normalize_object_relative_paths(fs, config_dir)
+                        .map_err(|diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]))?;
                 }
             }
         }
+        Ok(())
     }
 
     #[cfg(not(feature = "plugins"))]
     fn normalize_plugin(
         &self,
+        _fs: &dyn FsWithResolverProxy,
         _config: &mut Configuration,
         _relative_resolution_base_path: Utf8PathBuf,
         _external_resolution_base_path: &Utf8Path,
-    ) {
+    ) -> Result<(), WorkspaceError> {
+        Ok(())
     }
 
     /// Checks for the presence of deprecated fields and updates the

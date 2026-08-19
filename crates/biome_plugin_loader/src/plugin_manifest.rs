@@ -2,18 +2,27 @@ use biome_console::markup;
 use biome_deserialize::{DeserializationContext, DeserializationDiagnostic};
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
+use serde::{Deserialize, Serialize};
 
-use std::path::PathBuf;
-
-#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+/// Declares the Grit rules provided by a plugin package or directory.
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[deserializable(unknown_fields = "deny")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PluginManifest {
+    /// An optional JSON Schema reference used by editors.
+    #[serde(rename = "$schema", skip_serializing_if = "Option::is_none")]
+    pub schema: Option<String>,
+
+    /// The manifest format version.
     #[deserializable(required, validate = "supported_version")]
     pub version: u8,
 
-    pub rules: Vec<PathBuf>,
+    /// Normalized paths to Grit rules, relative to the manifest directory.
+    #[deserializable(required)]
+    pub rules: Vec<String>,
 }
 
-// There's only one manifest version now.
 pub fn supported_version(
     ctx: &mut impl DeserializationContext,
     value: &u8,

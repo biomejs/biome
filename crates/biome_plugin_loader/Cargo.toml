@@ -34,7 +34,6 @@ boa_engine               = { workspace = true, optional = true }
 camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
-papaya                   = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
@@ -54,7 +53,7 @@ windows = { workspace = true, features = ["Win32_System_Threading"], optional = 
 [features]
 default   = []
 js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
-schema    = ["dep:schemars"]
+schema    = ["biome_glob/schema", "dep:schemars"]
 
 [lints]
 workspace = true
