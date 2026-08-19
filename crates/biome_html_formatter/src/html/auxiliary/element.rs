@@ -184,8 +184,9 @@ impl FormatHtmlElement {
         let should_be_verbatim = has_embedded_content
             || match tag_name {
                 None
-                | Some(AnyHtmlTagName::HtmlComponentName(_))
-                | Some(AnyHtmlTagName::HtmlMemberName(_)) => false,
+                | Some(AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_)) => {
+                    false
+                }
                 Some(AnyHtmlTagName::HtmlTagName(tag_name)) => tag_name
                     .value_token()
                     .as_ref()
