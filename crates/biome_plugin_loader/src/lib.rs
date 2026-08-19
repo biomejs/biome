@@ -239,7 +239,11 @@ mod test {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin.js".into(),
-            r#"export default function useMyPlugin() {}"#,
+            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            export const useMyPlugin = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {},
+            });"#,
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;

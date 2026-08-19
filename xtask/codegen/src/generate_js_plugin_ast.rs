@@ -35,6 +35,13 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
 
 fn generate_rust(ast: &AstSrc) -> Result<String> {
     let mut prototype_arms = Vec::new();
+    let mut kind_name_arms = Vec::new();
+
+    for name in ast.nodes.iter().map(|node| &node.name).chain(&ast.bogus) {
+        let kind_name = Case::Constant.convert(name);
+        let node_kind = format_ident!("{kind_name}");
+        kind_name_arms.push(quote! { #kind_name => JsSyntaxKind::#node_kind });
+    }
 
     for node in &ast.nodes {
         let node_type = format_ident!("{}", node.name);
@@ -118,6 +125,15 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                 }
                 prototype.build()
             }
+
+            /// Resolves a syntax kind from the name used in the plugin API type definitions,
+            /// e.g. `"JS_CALL_EXPRESSION"`.
+            pub(crate) fn syntax_kind_from_ast_name(name: &str) -> Option<JsSyntaxKind> {
+                Some(match name {
+                    #(#kind_name_arms,)*
+                    _ => return None,
+                })
+            }
         }
     };
 
@@ -179,6 +195,17 @@ fn generate_typescript(ast: &AstSrc) -> String {
             ),
         ));
     }
+
+    items.push(export_interface(
+        make::token(T![export]),
+        "JsNodeByKind",
+        None,
+        ast.nodes
+            .iter()
+            .map(|node| &node.name)
+            .chain(&ast.bogus)
+            .map(|name| property(&Case::Constant.convert(name), reference_type(name).into())),
+    ));
 
     for (name, list) in ast.lists() {
         let array_type = make::ts_array_type(
