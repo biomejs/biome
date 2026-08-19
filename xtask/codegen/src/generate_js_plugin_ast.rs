@@ -1,3 +1,5 @@
+use anyhow::Context;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_syntax::{
@@ -8,6 +10,7 @@ use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_string_case::Case;
 use quote::{format_ident, quote};
+use schemars::schema_for;
 use xtask_glue::{Mode, Result, project_root};
 
 use crate::js_kinds_src::{AstSrc, Field, TokenKind};
@@ -22,6 +25,10 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
     let types_path = project_root().join("packages/@biomejs/plugin-api/js_ast.d.ts");
     let types = generate_typescript(ast);
     update(&types_path, &types, mode)?;
+
+    let diagnostics_path = project_root().join("packages/@biomejs/plugin-api/diagnostics.d.ts");
+    let diagnostics = generate_diagnostics_typescript()?;
+    update(&diagnostics_path, &diagnostics, mode)?;
 
     Ok(())
 }
@@ -118,18 +125,8 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
 }
 
 fn generate_typescript(ast: &AstSrc) -> String {
-    let leading_comment = [
-        (
-            TriviaPieceKind::SingleLineComment,
-            "// Generated file, do not edit by hand, see `xtask/codegen`.",
-        ),
-        (TriviaPieceKind::Newline, "\n"),
-        (TriviaPieceKind::Newline, "\n"),
-    ];
-
-    let export_token = make::token(T![export]).with_leading_trivia(leading_comment);
     let mut items = vec![export_interface(
-        export_token,
+        generated_export_token(),
         "JsAstNode",
         None,
         [
@@ -172,6 +169,7 @@ fn generate_typescript(ast: &AstSrc) -> String {
 
     for union in &ast.unions {
         items.push(export_type_alias(
+            make::token(T![export]),
             &union.name,
             union_type(
                 union
@@ -192,9 +190,59 @@ fn generate_typescript(ast: &AstSrc) -> String {
             make::token(T![readonly]),
             AnyTsType::TsArrayType(array_type),
         );
-        items.push(export_type_alias(name, readonly_array_type.into()));
+        items.push(export_type_alias(
+            make::token(T![export]),
+            name,
+            readonly_array_type.into(),
+        ));
     }
 
+    print_module(items)
+}
+
+/// Generates the plugin API types mirroring [biome_diagnostics], so that
+/// plugin authors get the same set of severities the runtime accepts.
+fn generate_diagnostics_typescript() -> Result<String> {
+    let schema = schema_for!(Severity);
+    // Every variant is documented, so `schemars` describes them one by one
+    // instead of emitting a single `enum` array.
+    let variants = schema
+        .get("oneOf")
+        .and_then(|variants| variants.as_array())
+        .context("expected the schema of `Severity` to be a `oneOf`")?
+        .iter()
+        .map(|variant| {
+            variant
+                .get("const")
+                .and_then(|value| value.as_str())
+                .map(string_literal_type)
+                .context("expected every variant of `Severity` to be a constant")
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    let items = vec![export_type_alias(
+        generated_export_token(),
+        "Severity",
+        union_type(variants),
+    )];
+
+    Ok(print_module(items))
+}
+
+/// Returns the `export` token opening a generated file, carrying the comment
+/// warning readers the file is generated.
+fn generated_export_token() -> JsSyntaxToken {
+    make::token(T![export]).with_leading_trivia([
+        (
+            TriviaPieceKind::SingleLineComment,
+            "// Generated file, do not edit by hand, see `xtask/codegen`.",
+        ),
+        (TriviaPieceKind::Newline, "\n"),
+        (TriviaPieceKind::Newline, "\n"),
+    ])
+}
+
+fn print_module(items: Vec<AnyJsModuleItem>) -> String {
     let module = make::js_module(
         make::js_directive_list(None),
         make::js_module_item_list(items),
@@ -242,10 +290,10 @@ fn export_interface(
     ))
 }
 
-fn export_type_alias(name: &str, ty: AnyTsType) -> AnyJsModuleItem {
+fn export_type_alias(export_token: JsSyntaxToken, name: &str, ty: AnyTsType) -> AnyJsModuleItem {
     AnyJsModuleItem::JsExport(make::js_export(
         make::js_decorator_list([]),
-        make::token(T![export]),
+        export_token,
         AnyJsExportClause::AnyJsDeclarationClause(AnyJsDeclarationClause::TsTypeAliasDeclaration(
             make::ts_type_alias_declaration(
                 make::token(T![type]),
