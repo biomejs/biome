@@ -1149,6 +1149,7 @@ dependencies = [
  "biome_text_size",
  "boa_engine",
  "camino",
+ "getrandom 0.3.2",
  "rustc-hash 2.1.3",
 ]
 
