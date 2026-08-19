@@ -520,6 +520,7 @@ impl<'src> HtmlLexer<'src> {
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             QOT => self.consume_string_literal(current),
+            TPL => self.consume_template_literal_attribute_value(),
             _ => self.consume_unquoted_string_literal(),
         }
     }
@@ -556,6 +557,33 @@ impl<'src> HtmlLexer<'src> {
         }
 
         HTML_TEMPLATE_CHUNK
+    }
+
+    /// Consume a `` ` ``-delimited template literal in attribute-value
+    /// position. Used by Astro and other JSX-like dialects that allow
+    /// `attr=\`tag\``. Returns the same token kind as a regular quoted
+    /// string so downstream parsing can reuse the existing initializer
+    /// path; the renderer disambiguates by inspecting the leading byte.
+    fn consume_template_literal_attribute_value(&mut self) -> HtmlSyntaxKind {
+        self.advance(1);
+        while let Some(byte) = self.current_byte() {
+            match byte {
+                b'`' => {
+                    self.advance(1);
+                    return HTML_STRING_LITERAL;
+                }
+                b'\\' => {
+                    self.advance(1);
+                    if let Some(next) = self.current_byte() {
+                        self.advance_byte_or_char(next);
+                    }
+                }
+                _ => self.advance_byte_or_char(byte),
+            }
+        }
+        // Unterminated — still emit the token so the rest of the file
+        // continues parsing.
+        HTML_STRING_LITERAL
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
