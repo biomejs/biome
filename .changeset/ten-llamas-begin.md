@@ -37,7 +37,7 @@ title: Lorem ipsum
 The formatter has great compatibility with Prettier formatting, more than 90% detected by our infrastructure. The formatter ships with
 a new option called `proseWrap`, that allows controlling how the Biome formatter should wrap paragraphs.
 
-For example, when `proseWrap` is set to `always`, the formatter will wrap the paragraph to match the configured `lineWidth`:
+For example, when `proseWrap` is set to `always`, the formatter will wrap the paragraph to match the conown::markdown_formatter_configurfigured `lineWidth`:
 
 ```json5
 // biome.json
@@ -62,5 +62,5 @@ compact.
 The linter ships with a few rules inspired by [markdownlint](https://github.com/markdownlint/markdownlint). We plan to ship more rules in the upcoming releases.
 
 Some rules you can start using already:
-- [`useTopLevelHeading`]()
-- [`useConsistentHeadingLevel`]()
+- [`useTopLevelHeading`](https://biomejs.dev/linter/rules/use-top-level-heading/)
+- [`useConsistentHeadingLevel`](https://biomejs.dev/linter/rules/use-consistent-heading-level/)

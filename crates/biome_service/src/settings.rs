@@ -28,7 +28,7 @@ use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsU
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, DEFAULT_SCANNER_IGNORE_ENTRIES,
     ExtendedConfigurations, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
+    JsonConfiguration, LinterConfiguration, MarkdownConfiguration, OverrideAssistConfiguration,
     OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
     push_to_analyzer_assist, push_to_analyzer_rules,
 };
@@ -70,6 +70,8 @@ use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
 #[cfg(feature = "lang_md")]
 use biome_markdown_formatter::context::MdFormatOptions;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -2353,6 +2355,8 @@ pub fn to_override_settings(
         let css = pattern.css.take().unwrap_or_default();
         #[cfg(feature = "lang_html")]
         let html = pattern.html.take().unwrap_or_default();
+        #[cfg(feature = "lang_md")]
+        let markdown = pattern.markdown.take().unwrap_or_default();
 
         #[cfg(feature = "lang_js")]
         {
@@ -2383,8 +2387,8 @@ pub fn to_override_settings(
         }
         #[cfg(feature = "lang_md")]
         {
-            let markdown = pattern.markdown.take().unwrap_or_default();
-            languages.markdown = markdown.into();
+            languages.markdown =
+                to_markdown_language_settings(markdown, &current_settings.languages.markdown);
         }
 
         let pattern_setting = OverrideSettingPattern {
@@ -2528,6 +2532,18 @@ fn to_html_language_settings(
     _parent_settings: &LanguageSettings<HtmlLanguage>,
 ) -> LanguageSettings<HtmlLanguage> {
     let mut language_setting: LanguageSettings<HtmlLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter = formatter.into();
+
+    language_setting
+}
+#[cfg(feature = "lang_md")]
+fn to_markdown_language_settings(
+    mut conf: MarkdownConfiguration,
+    _parent_settings: &LanguageSettings<MarkdownLanguage>,
+) -> LanguageSettings<MarkdownLanguage> {
+    let mut language_setting: LanguageSettings<MarkdownLanguage> = LanguageSettings::default();
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();
