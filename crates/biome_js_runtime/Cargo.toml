@@ -22,5 +22,8 @@ boa_engine        = { workspace = true }
 camino            = { workspace = true }
 rustc-hash        = { workspace = true }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.3.2", features = ["wasm_js"] }
+
 [lints]
 workspace = true
