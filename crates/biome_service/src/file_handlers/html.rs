@@ -11,15 +11,18 @@ use super::{
 };
 #[cfg(not(feature = "html_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use crate::embed::EmbedContent;
 use crate::file_handlers::html::go_to::{resolve_binding_html, resolve_definition};
 #[cfg(feature = "html_embeds")]
 use crate::file_handlers::html::parse_embedded_nodes::parse_embedded_nodes;
+#[cfg(feature = "html_embeds")]
+use crate::file_handlers::{css, javascript, json};
 use crate::settings::{
-    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    OverrideSettings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::CodeAction;
 use crate::workspace::FixFileMode;
@@ -70,7 +73,6 @@ use biome_js_parser::{JsParserOptions, parse as parse_js};
 use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
-#[cfg(feature = "html_embeds")]
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
@@ -176,9 +178,10 @@ impl ServiceLanguage for HtmlLanguage {
         global: &crate::settings::FormatSettings,
         overrides: &crate::settings::OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &biome_fs::BiomePath,
-        file_source: &super::DocumentFileSource,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
+        let file_source = file_source.to_html_file_source().unwrap_or_default();
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -208,20 +211,19 @@ impl ServiceLanguage for HtmlLanguage {
         let self_close_void_elements = language.self_close_void_elements.unwrap_or_default();
         let trailing_newline = language.trailing_newline.unwrap_or_default();
 
-        let mut options =
-            HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_line_ending(line_ending)
-                .with_attribute_position(attribute_position)
-                .with_bracket_same_line(bracket_same_line)
-                .with_whitespace_sensitivity(whitespace_sensitivity)
-                .with_indent_script_and_style(indent_script_and_style)
-                .with_self_close_void_elements(self_close_void_elements)
-                .with_trailing_newline(trailing_newline);
+        let mut options = HtmlFormatOptions::new(file_source)
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_line_ending(line_ending)
+            .with_attribute_position(attribute_position)
+            .with_bracket_same_line(bracket_same_line)
+            .with_whitespace_sensitivity(whitespace_sensitivity)
+            .with_indent_script_and_style(indent_script_and_style)
+            .with_self_close_void_elements(self_close_void_elements)
+            .with_trailing_newline(trailing_newline);
 
-        overrides.apply_override_html_format_options(path, &mut options);
+        overrides.apply_override_html_format_options_by_indices(override_indices, &mut options);
 
         options
     }
@@ -230,17 +232,13 @@ impl ServiceLanguage for HtmlLanguage {
         global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
-        path: &biome_fs::BiomePath,
+        override_indices: &[usize],
         _file_source: &super::DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        let configuration =
-            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices));
 
-        AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -348,6 +346,98 @@ impl ServiceLanguage for HtmlLanguage {
 
         options
     }
+}
+
+#[salsa::interned]
+struct HtmlFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_html_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: HtmlFormatOptionsInput<'db>,
+) -> HtmlFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<HtmlLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+#[salsa::interned]
+struct HtmlAnalyzerOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_html_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: HtmlAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<HtmlLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    _path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> HtmlFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<HtmlLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = HtmlFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
+    resolved_html_format_options(&query_db, input)
+}
+
+fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<HtmlLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = HtmlAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_html_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -474,7 +564,7 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
+    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, false)?;
@@ -491,7 +581,7 @@ fn format(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, true)?;
@@ -511,7 +601,7 @@ fn format_embedded(
     embedded_nodes: Vec<super::ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let indent_script_and_style = options.indent_script_and_style().value();
@@ -543,8 +633,12 @@ fn format_embedded(
 
         match snippet_file_source {
             DocumentFileSource::Js(file_source) => {
-                let js_options =
-                    settings.format_options::<JsLanguage>(biome_path, &snippet_file_source);
+                let js_options = javascript::resolve_format_options(
+                    biome_path,
+                    &snippet_file_source,
+                    settings,
+                    &workspace_db,
+                );
                 let node = snippet
                     .parsed_origin()
                     .parse(&workspace_db)
@@ -568,7 +662,7 @@ fn format_embedded(
             }
             DocumentFileSource::Json(_) => {
                 let json_options =
-                    settings.format_options::<JsonLanguage>(biome_path, &snippet_file_source);
+                    json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
                 let node = snippet
                     .parsed_origin()
                     .parse(&workspace_db)
@@ -578,8 +672,12 @@ fn format_embedded(
                 Some(wrap_document(formatted.into_document(), true))
             }
             DocumentFileSource::Css(_) => {
-                let css_options =
-                    settings.format_options::<CssLanguage>(biome_path, &snippet_file_source);
+                let css_options = css::resolve_format_options(
+                    biome_path,
+                    &snippet_file_source,
+                    settings,
+                    &workspace_db,
+                );
                 let node = snippet
                     .parsed_origin()
                     .parse(&workspace_db)
@@ -623,12 +721,13 @@ fn format_embedded(
 
 #[tracing::instrument(level = "debug", skip(params))]
 fn lint(params: LintParams) -> LintResults {
-    let workspace_settings = &params.settings;
-    let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let tree = params.parsed_source.tree(&params.workspace_db);
 
@@ -637,13 +736,12 @@ fn lint(params: LintParams) -> LintResults {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
-        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -701,7 +799,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
-        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parsed_source.tree(&workspace_db);
@@ -712,11 +809,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let analyzer_options = settings.analyzer_options::<HtmlLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
@@ -724,13 +823,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
-        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -801,23 +899,20 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
 
-    // Compute final rules (taking `overrides` into account)
-    let rules = params
-        .settings
-        .as_ref()
-        .as_linter_rules(params.biome_path.as_path());
-    let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
         analyzer_options,
         fixable_rules,
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.biome_path.as_path())
@@ -832,11 +927,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
-        &params,
-        rules,
-        tree.syntax().text_range_with_trivia().len().into(),
-    );
+    let mut process_fix_all =
+        ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     let source_type = params
         .document_file_source

@@ -5,7 +5,7 @@ use biome_markdown_formatter::{MdFormatLanguage, context::MarkdownFormatContext}
 use biome_markdown_parser::parse_markdown;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_parser::AnyParse;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 
 #[derive(Default)]
 pub struct MarkdownTestFormatLanguage {}
@@ -24,12 +24,9 @@ impl TestFormatLanguage for MarkdownTestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = &settings.languages.markdown.formatter;
-        let options = Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
-            &BiomePath::new(""),
+        let path = BiomePath::new("");
+        let options = settings.format_options::<Self::ServiceLanguage>(
+            &settings.matching_override_indices(path.as_path()),
             file_source,
         );
         MdFormatLanguage::new(options)

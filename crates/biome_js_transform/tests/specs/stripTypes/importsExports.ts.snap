@@ -1,0 +1,152 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: importsExports.ts
+---
+# Input
+```ts
+import type { A } from "a";
+import { type B, C } from "b";
+import { D, type E } from "d";
+import type F from "f";
+import type * as G from "g";
+export type { A };
+export { type B, C };
+export type H = number;
+export interface I {}
+export declare const j: number;
+
+```
+
+# Transformations
+```diff
+@@ -1,4 +1,4 @@
+-import type { A } from "a";
++                           
+ import { type B, C } from "b";
+ import { D, type E } from "d";
+ import type F from "f";
+
+```
+
+```diff
+@@ -1,5 +1,5 @@
+ import type { A } from "a";
+-import { type B, C } from "b";
++import {         C } from "b";
+ import { D, type E } from "d";
+ import type F from "f";
+ import type * as G from "g";
+
+```
+
+```diff
+@@ -1,6 +1,6 @@
+ import type { A } from "a";
+ import { type B, C } from "b";
+-import { D, type E } from "d";
++import { D,        } from "d";
+ import type F from "f";
+ import type * as G from "g";
+ export type { A };
+
+```
+
+```diff
+@@ -1,7 +1,7 @@
+ import type { A } from "a";
+ import { type B, C } from "b";
+ import { D, type E } from "d";
+-import type F from "f";
++                       
+ import type * as G from "g";
+ export type { A };
+ export { type B, C };
+
+```
+
+```diff
+@@ -2,7 +2,7 @@
+ import { type B, C } from "b";
+ import { D, type E } from "d";
+ import type F from "f";
+-import type * as G from "g";
++                            
+ export type { A };
+ export { type B, C };
+ export type H = number;
+
+```
+
+```diff
+@@ -3,7 +3,7 @@
+ import { D, type E } from "d";
+ import type F from "f";
+ import type * as G from "g";
+-export type { A };
++                  
+ export { type B, C };
+ export type H = number;
+ export interface I {}
+
+```
+
+```diff
+@@ -4,7 +4,7 @@
+ import type F from "f";
+ import type * as G from "g";
+ export type { A };
+-export { type B, C };
++export {         C };
+ export type H = number;
+ export interface I {}
+ export declare const j: number;
+
+```
+
+```diff
+@@ -5,6 +5,6 @@
+ import type * as G from "g";
+ export type { A };
+ export { type B, C };
+-export type H = number;
++                       
+ export interface I {}
+ export declare const j: number;
+
+```
+
+```diff
+@@ -6,5 +6,5 @@
+ export type { A };
+ export { type B, C };
+ export type H = number;
+-export interface I {}
++                     
+ export declare const j: number;
+
+```
+
+```diff
+@@ -7,4 +7,4 @@
+ export { type B, C };
+ export type H = number;
+ export interface I {}
+-export declare const j: number;
++                               
+
+```
+
+# Final output
+```ts
+                           
+import {         C } from "b";
+import { D,        } from "d";
+                       
+                            
+                  
+export {         C };
+                       
+                     
+                               
+
+```

@@ -17,6 +17,7 @@ expression: snapshot
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -120,7 +121,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..46
   0: (empty)
-  1: MD_BLOCK_LIST@0..46
+  1: (empty)
+  2: MD_BLOCK_LIST@0..46
     0: MD_QUOTE@0..46
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -181,6 +183,6 @@ MdRoot {
                       0: MD_HTML_LITERAL@41..45 "</i>" [] []
                     3: MD_TEXTUAL@45..46
                       0: MD_TEXTUAL_LITERAL@45..46 "\n" [] []
-  2: EOF@46..46 "" [] []
+  3: EOF@46..46 "" [] []
 
 ```

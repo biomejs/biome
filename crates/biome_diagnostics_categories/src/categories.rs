@@ -259,6 +259,7 @@ define_categories! {
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
     "lint/nursery/noVueVOnNumberValues": "https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
     "lint/nursery/useArraySome": "https://biomejs.dev/linter/rules/use-array-some",
+    "lint/nursery/useAstroClientOnlyDirectiveValue": "https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",
     "lint/nursery/useBaseline": "https://biomejs.dev/linter/rules/use-baseline",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
@@ -284,6 +285,7 @@ define_categories! {
     "lint/nursery/useMathMinMax": "https://biomejs.dev/linter/rules/use-math-min-max",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useNamedCaptureGroup": "https://biomejs.dev/linter/rules/use-named-capture-group",
+    "lint/nursery/useNamedLayer": "https://biomejs.dev/linter/rules/use-named-layer",
     "lint/nursery/useNullishCoalescing": "https://biomejs.dev/linter/rules/use-nullish-coalescing",
     "lint/nursery/usePlaywrightValidDescribeCallback": "https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
     "lint/nursery/useQwikLoaderLocation": "https://biomejs.dev/linter/rules/use-qwik-loader-location",
@@ -300,8 +302,8 @@ define_categories! {
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
-    "lint/nursery/useTestHooksInOrder": "https://biomejs.dev/linter/rules/use-test-hooks-in-order",
     "lint/nursery/useTailwindShorthandClasses": "https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
+    "lint/nursery/useTestHooksInOrder": "https://biomejs.dev/linter/rules/use-test-hooks-in-order",
     "lint/nursery/useTestHooksOnTop": "https://biomejs.dev/linter/rules/use-test-hooks-on-top",
     "lint/nursery/useThisInClassMethods": "https://biomejs.dev/linter/rules/use-this-in-class-methods",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",
@@ -577,6 +579,9 @@ define_categories! {
     "syntax/correctness/noInitializerWithDefinite",
     "syntax/correctness/noDuplicatePrivateClassMembers",
     // end syntax rules
+
+    // transformation categories
+    "transformations/stripTypes",
 
     // General categories
     "files/missingHandler",

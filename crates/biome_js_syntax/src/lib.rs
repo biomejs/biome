@@ -111,12 +111,14 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
                 | JS_BOGUS_IMPORT_ASSERTION_ENTRY
                 | JS_BOGUS_NAMED_IMPORT_SPECIFIER
                 | JS_BOGUS_ASSIGNMENT
+                | JS_BOGUS_VARIABLE_DECLARATION
                 | TS_BOGUS_TYPE
         )
     }
 
     fn to_bogus(&self) -> Self {
         match self {
+            kind if JsVariableDeclaration::can_cast(*kind) => JS_BOGUS_VARIABLE_DECLARATION,
             kind if AnyJsModuleItem::can_cast(*kind) => JS_BOGUS_STATEMENT,
             kind if AnyJsExpression::can_cast(*kind) => JS_BOGUS_EXPRESSION,
             kind if AnyJsBinding::can_cast(*kind) => JS_BOGUS_BINDING,

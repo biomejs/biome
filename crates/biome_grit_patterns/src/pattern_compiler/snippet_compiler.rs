@@ -298,11 +298,12 @@ fn implicit_metavariable_regex(
     let mut last = 0;
     let mut regex_string = String::new();
     let mut variables: Vec<Variable> = vec![];
+    let node_start = node.start_byte() as usize;
     for m in variable_regex.find_iter(source) {
         regex_string.push_str(&regex::escape(&source[last..m.start()]));
-        let range = ByteRange::new(m.start(), m.end());
-        last = range.end;
+        last = m.end();
         let name = m.as_str();
+        let range = ByteRange::new(node_start + m.start(), node_start + m.end());
         let variable = text_to_var(name, range, context_range, range_map, context).ok()?;
         match variable {
             SnippetValue::Dots => return None,
@@ -386,13 +387,9 @@ fn node_sub_variables(node: &GritTargetNode, lang: &GritTargetLanguage) -> Vec<B
 
     let source = node.text();
     let variable_regex = lang.replaced_metavariable_regex();
+    let start_byte = node.start_byte() as usize;
     for m in variable_regex.find_iter(source) {
-        let var_range = ByteRange::new(m.start(), m.end());
-        let start_byte = node.start_byte() as usize;
-        let end_byte = node.end_byte() as usize;
-        if var_range.start >= start_byte && var_range.end <= end_byte {
-            ranges.push(var_range);
-        }
+        ranges.push(ByteRange::new(start_byte + m.start(), start_byte + m.end()));
     }
 
     ranges

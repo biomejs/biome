@@ -1122,7 +1122,7 @@ impl ParseNodeList for SvelteElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_html_element(p, false)
+        parse_html_element(p, false, false)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

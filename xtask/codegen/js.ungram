@@ -46,6 +46,7 @@ JsBogusAssignment = SyntaxElement*
 JsBogusParameter = SyntaxElement*
 JsBogusImportAssertionEntry = SyntaxElement*
 JsBogusNamedImportSpecifier = SyntaxElement*
+JsBogusVariableDeclaration = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
@@ -94,9 +95,13 @@ JsSvelteSnippetRoot =
 
 // Special root created for Svelte declaration tags
 JsSvelteDeclarationRoot =
-		declaration: JsVariableDeclaration
+		declaration: AnyJsSvelteDeclaration
 		semicolon: ';'?
 		eof: 'EOF'
+
+AnyJsSvelteDeclaration =
+	JsVariableDeclaration
+	| JsBogusVariableDeclaration
 
 JsDirective =
 	value: 'js_string_literal'

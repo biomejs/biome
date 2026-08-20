@@ -1646,6 +1646,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useAsConstAssertion",
         TypeId::of::<biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions>(),
     ));
+    result.push(("nursery", "useAstroClientOnlyDirectiveValue", TypeId::of::<biome_rule_options::use_astro_client_only_directive_value::UseAstroClientOnlyDirectiveValueOptions>()));
     result.push((
         "style",
         "useAtIndex",
@@ -2072,6 +2073,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "useNamedCaptureGroup",
         TypeId::of::<biome_rule_options::use_named_capture_group::UseNamedCaptureGroupOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useNamedLayer",
+        TypeId::of::<biome_rule_options::use_named_layer::UseNamedLayerOptions>(),
     ));
     result.push((
         "suspicious",

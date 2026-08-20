@@ -11369,6 +11369,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusStatement {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsBogusVariableDeclaration>
+    for crate::js::bogus::bogus_variable_declaration::FormatJsBogusVariableDeclaration
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsBogusVariableDeclaration,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_js_syntax::JsBogusVariableDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusVariableDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsBogusVariableDeclaration,
+        crate::js::bogus::bogus_variable_declaration::FormatJsBogusVariableDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::bogus::bogus_variable_declaration::FormatJsBogusVariableDeclaration::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusVariableDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsBogusVariableDeclaration,
+        crate::js::bogus::bogus_variable_declaration::FormatJsBogusVariableDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::bogus::bogus_variable_declaration::FormatJsBogusVariableDeclaration::default(
+            ),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::TsBogusType> for crate::ts::bogus::bogus_type::FormatTsBogusType {
     type Context = JsFormatContext;
     #[inline(always)]
@@ -12431,6 +12471,31 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsStatement {
         FormatOwnedWithRule::new(
             self,
             crate::js::any::statement::FormatAnyJsStatement::default(),
+        )
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsSvelteDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyJsSvelteDeclaration,
+        crate::js::any::svelte_declaration::FormatAnyJsSvelteDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::any::svelte_declaration::FormatAnyJsSvelteDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsSvelteDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyJsSvelteDeclaration,
+        crate::js::any::svelte_declaration::FormatAnyJsSvelteDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::any::svelte_declaration::FormatAnyJsSvelteDeclaration::default(),
         )
     }
 }

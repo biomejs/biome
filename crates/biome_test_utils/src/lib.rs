@@ -52,7 +52,7 @@ use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use biome_service::settings::ModuleGraphResolutionKind;
-use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 #[cfg(feature = "html_embeds")]
 use biome_service::test_utils::setup_workspace_and_open_project;
 #[cfg(feature = "html_embeds")]
@@ -121,17 +121,15 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             )
             .unwrap();
 
-        L::resolve_analyzer_options(
-            &settings,
-            &L::lookup_settings(&settings.languages).linter,
-            L::resolve_environment(&settings),
-            &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(
-                input_file,
-                settings.experimental_full_html_support_enabled(),
-            ),
-            None,
-        )
+        settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(input_file),
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            )
+            .with_file_path(input_file)
     }
 }
 
@@ -211,8 +209,13 @@ pub fn create_parser_options<L: ServiceLanguage>(
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+        let language_settings = &L::lookup_settings(&settings.languages).parser;
+        Some(L::resolve_parse_options(
+            &settings.override_settings,
+            language_settings,
+            &input_file.into(),
+            &document_file_source,
+        ))
     }
 }
 
@@ -258,8 +261,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        let override_indices = settings.matching_override_indices(input_file);
+        settings.format_options::<L>(&override_indices, &document_file_source)
     }
 }
 
@@ -779,17 +782,19 @@ pub fn register_leak_checker() {
     });
 }
 
-pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
-
-    let output = text_edit.new_string(source);
-
-    let diff = TextDiff::from_lines(source, &output);
+pub fn unified_diff(before: &str, after: &str) -> String {
+    let diff = TextDiff::from_lines(before, after);
 
     let mut diff = diff.unified_diff();
     diff.context_radius(3);
 
     diff.to_string()
+}
+
+pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
+    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+
+    unified_diff(source, &text_edit.new_string(source))
 }
 
 /// The test runner for the analyzer is currently designed to have a
@@ -918,6 +923,8 @@ pub fn write_transformation_snapshot(
     snapshot: &mut String,
     input_code: &str,
     transformations: &[String],
+    final_output: Option<&str>,
+    diagnostics: &[String],
     extension: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
@@ -929,8 +936,26 @@ pub fn write_transformation_snapshot(
     if !transformations.is_empty() {
         writeln!(snapshot, "# Transformations").unwrap();
         for transformation in transformations {
-            writeln!(snapshot, "```{extension}").unwrap();
+            writeln!(snapshot, "```diff").unwrap();
             writeln!(snapshot, "{transformation}").unwrap();
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot).unwrap();
+        }
+    }
+
+    if let Some(final_output) = final_output {
+        writeln!(snapshot, "# Final output").unwrap();
+        writeln!(snapshot, "```{extension}").unwrap();
+        writeln!(snapshot, "{final_output}").unwrap();
+        writeln!(snapshot, "```").unwrap();
+        writeln!(snapshot).unwrap();
+    }
+
+    if !diagnostics.is_empty() {
+        writeln!(snapshot, "# Diagnostics").unwrap();
+        for diagnostic in diagnostics {
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot, "{diagnostic}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }

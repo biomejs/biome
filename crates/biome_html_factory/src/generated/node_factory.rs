@@ -208,6 +208,20 @@ pub fn astro_client_directive(
         ],
     ))
 }
+pub fn astro_closing_fragment(
+    l_angle_token: SyntaxToken,
+    slash_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> AstroClosingFragment {
+    AstroClosingFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_CLOSING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
 pub fn astro_define_directive(
     define_token: SyntaxToken,
     value: AstroDirectiveValue,
@@ -272,6 +286,20 @@ impl AstroEmbeddedContentBuilder {
         ))
     }
 }
+pub fn astro_fragment(
+    opening_fragment: AstroOpeningFragment,
+    children: HtmlElementList,
+    closing_fragment: AstroClosingFragment,
+) -> AstroFragment {
+    AstroFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_FRAGMENT,
+        [
+            Some(SyntaxElement::Node(opening_fragment.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_fragment.into_syntax())),
+        ],
+    ))
+}
 pub fn astro_frontmatter_element(
     l_fence_token: SyntaxToken,
     content: AstroEmbeddedContent,
@@ -292,6 +320,18 @@ pub fn astro_is_directive(is_token: SyntaxToken, value: AstroDirectiveValue) -> 
         [
             Some(SyntaxElement::Token(is_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn astro_opening_fragment(
+    l_angle_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> AstroOpeningFragment {
+    AstroOpeningFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_OPENING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
         ],
     ))
 }
@@ -678,17 +718,35 @@ impl HtmlSelfClosingElementBuilder {
 }
 pub fn html_single_text_expression(
     l_curly_token: SyntaxToken,
-    expression: HtmlTextExpression,
     r_curly_token: SyntaxToken,
-) -> HtmlSingleTextExpression {
-    HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+) -> HtmlSingleTextExpressionBuilder {
+    HtmlSingleTextExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        expression: None,
+    }
+}
+pub struct HtmlSingleTextExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    expression: Option<HtmlTextExpression>,
+}
+impl HtmlSingleTextExpressionBuilder {
+    pub fn with_expression(mut self, expression: HtmlTextExpression) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+    pub fn build(self) -> HtmlSingleTextExpression {
+        HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.expression
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
 }
 pub fn html_spread_attribute(
     l_curly_token: SyntaxToken,

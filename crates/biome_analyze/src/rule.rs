@@ -601,6 +601,8 @@ impl RuleSourceKind {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
+    /// Astro framework rules
+    Astro,
     /// Drizzle ORM rules
     Drizzle,
     /// React library rules
@@ -635,6 +637,7 @@ impl Display for RuleDomain {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         // use lower case naming, it needs to match the name of the configuration
         match self {
+            Self::Astro => fmt.write_str("astro"),
             Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::ReactNative => fmt.write_str("reactNative"),
@@ -672,6 +675,7 @@ impl RuleDomain {
     /// If the array is empty, it means that the rules that belong to a certain domain won't enable themselves automatically.
     pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
         match self {
+            Self::Astro => &[&("astro", ">=1.0.0")],
             Self::React => &[&("react", ">=16.0.0")],
             Self::ReactNative => &[&("react-native", ">=0.60.0")],
             Self::Test => &[
@@ -700,6 +704,7 @@ impl RuleDomain {
     /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
+            Self::Astro => &[],
             Self::React => &[],
             Self::ReactNative => &[],
             Self::Test => &[
@@ -742,6 +747,7 @@ impl RuleDomain {
 
     pub const fn as_str(&self) -> &'static str {
         match self {
+            Self::Astro => "astro",
             Self::React => "react",
             Self::ReactNative => "reactNative",
             Self::Test => "test",
@@ -761,6 +767,9 @@ impl RuleDomain {
 
     pub const fn as_description(&self) -> &'static str {
         match self {
+            Self::Astro => {
+                "Use this domain inside Astro projects. This domain enables rules that are specific to Astro projects."
+            }
             Self::React => {
                 "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enables rules that might conflict with the Solid domain."
             }
@@ -808,6 +817,7 @@ impl FromStr for RuleDomain {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "astro" => Ok(Self::Astro),
             "react" => Ok(Self::React),
             "reactNative" => Ok(Self::ReactNative),
             "test" => Ok(Self::Test),

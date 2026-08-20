@@ -11,7 +11,7 @@ use biome_languages::HtmlFileSource;
 
 use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct HtmlFormatOptions {
     /// The file source.
     file_source: HtmlFileSource,

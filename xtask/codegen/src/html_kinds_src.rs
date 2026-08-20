@@ -345,6 +345,9 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_PROCESSING_INSTRUCTION",
         // Astro nodes
         "ASTRO_FRONTMATTER_ELEMENT",
+        "ASTRO_FRAGMENT",
+        "ASTRO_OPENING_FRAGMENT",
+        "ASTRO_CLOSING_FRAGMENT",
         "ASTRO_EMBEDDED_CONTENT",
         "ASTRO_CLIENT_DIRECTIVE",
         "ASTRO_SET_DIRECTIVE",

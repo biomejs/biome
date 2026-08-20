@@ -78,7 +78,7 @@ impl<T: Clone + Default + Merge> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static + Debug> RuleConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -187,7 +187,7 @@ impl<T: Clone + Default + Merge> Merge for RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static> RuleFixConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static> RuleFixConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -355,7 +355,7 @@ impl<T: Clone + Default> Merge for RuleAssistConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleAssistConfiguration<T> {
+impl<T: Clone + Default + Send + Sync + 'static> RuleAssistConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,

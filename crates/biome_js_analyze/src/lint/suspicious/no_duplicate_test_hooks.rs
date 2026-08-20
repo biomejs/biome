@@ -72,6 +72,39 @@ declare_lint_rule! {
     }
 }
 
+// Declare a query match struct type containing a JavaScript function node
+pub struct DuplicateHooks(JsCallExpression);
+
+impl Rule for NoDuplicateTestHooks {
+    type Query = DuplicateHooks;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = NoDuplicateTestHooksOptions;
+
+    fn run(_: &RuleContext<Self>) -> Self::Signals {
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let callee = node.callee().ok()?;
+        let node_name = callee.get_callee_object_name()?;
+
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Duplicate "<Emphasis>{node_name.text_trimmed()}</Emphasis>" hook found."
+                },
+            )
+            .note(markup! {
+                "Remove this duplicate hook or consolidate the logic into a single hook."
+            }),
+        )
+    }
+}
+
 #[derive(Debug, Default)]
 struct HooksContext {
     after: u8,
@@ -189,9 +222,6 @@ impl DuplicateHooksVisitor {
     }
 }
 
-// Declare a query match struct type containing a JavaScript function node
-pub struct DuplicateHooks(JsCallExpression);
-
 impl QueryMatch for DuplicateHooks {
     fn text_range(&self) -> TextRange {
         self.0.range()
@@ -217,35 +247,5 @@ impl Queryable for DuplicateHooks {
     // Extract the output object from the input type
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.0.clone()
-    }
-}
-
-impl Rule for NoDuplicateTestHooks {
-    type Query = DuplicateHooks;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = NoDuplicateTestHooksOptions;
-
-    fn run(_: &RuleContext<Self>) -> Self::Signals {
-        Some(())
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let callee = node.callee().ok()?;
-        let node_name = callee.get_callee_object_name()?;
-
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                ctx.query().range(),
-                markup! {
-                    "Duplicate "<Emphasis>{node_name.text_trimmed()}</Emphasis>" hook found."
-                },
-            )
-            .note(markup! {
-                "Remove this duplicate hook or consolidate the logic into a single hook."
-            }),
-        )
     }
 }

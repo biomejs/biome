@@ -4,10 +4,10 @@ expression: invalid.astro
 ---
 # Input
 ```astro
-<!-- should generate diagnostics -->
 ---
 // Astro frontmatter
 ---
+<!-- should generate diagnostics -->
 <a></a>
 <a>    </a>
 <a aria-hidden="true">content</a>
@@ -42,8 +42,8 @@ invalid.astro:5:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    3 │ // Astro frontmatter
-    4 │ ---
+    3 │ ---
+    4 │ <!-- should generate diagnostics -->
   > 5 │ <a></a>
       │ ^^^^^^^
     6 │ <a>    </a>
@@ -65,7 +65,7 @@ invalid.astro:6:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    4 │ ---
+    4 │ <!-- should generate diagnostics -->
     5 │ <a></a>
   > 6 │ <a>    </a>
       │ ^^^^^^^^^^^

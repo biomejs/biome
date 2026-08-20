@@ -13,6 +13,24 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
+/// Markup before the opening `---` makes a later `---` content, not a fence.
+pub(crate) fn source_has_astro_frontmatter(source: &str) -> bool {
+    let mut dashes = 0u32;
+    for &byte in source.as_bytes() {
+        match byte {
+            b'-' => {
+                dashes += 1;
+                if dashes == 3 {
+                    return true;
+                }
+            }
+            b'<' | b'{' | b'}' => return false,
+            _ => dashes = 0,
+        }
+    }
+    false
+}
+
 pub(crate) fn parse_astro_fence(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![---]) {
         return Absent;
@@ -107,6 +125,31 @@ pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
 
     let first_is_directive = is_astro_directive_keyword(first_token);
     first_is_directive && second_token == T![:]
+}
+
+/// Whether the parser sits at `is:raw`, the directive that turns an element's
+/// children into raw text.
+///
+/// The directive name is only reachable as a token while it is being consumed,
+/// so this looks ahead over it in the same contexts [`parse_directive_value`]
+/// uses rather than reading it back off the parsed node.
+pub(crate) fn is_at_astro_raw_directive(p: &mut HtmlParser) -> bool {
+    if Astro.is_unsupported(p) {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        if p.re_lex(HtmlReLexContext::InsideTagAstro) != T![is] {
+            return false;
+        }
+        p.bump_with_context(T![is], super::inside_tag_context(p));
+        if !p.at(T![:]) {
+            return false;
+        }
+        p.bump_with_context(T![:], super::inside_tag_context(p));
+
+        p.at(HTML_LITERAL) && p.cur_text() == "raw"
+    })
 }
 
 pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {

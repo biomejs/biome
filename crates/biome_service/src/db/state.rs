@@ -517,6 +517,18 @@ impl DbState {
         }
     }
 
+    /// Removes the cached parsed source for `path`.
+    ///
+    /// This is an untracked removal: the `files` map is not read by any
+    /// Salsa-tracked query, so no generation signal needs to be bumped. See
+    /// the "Remove" section of the module documentation above.
+    pub(crate) fn remove_file(&self, path: &Utf8Path) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => shared_db.data().remove_file(path),
+            DbStorage::Owned(db) => db.data.remove_file(path),
+        }
+    }
+
     #[cfg(feature = "module_graph")]
     pub(crate) fn upsert_module_kind(
         &self,
@@ -759,6 +771,7 @@ mod tests {
         assert_eq!(
             project
                 .root_settings(&*retained_db)
+                .as_ref()
                 .vcs_settings
                 .client_kind,
             None
@@ -783,6 +796,7 @@ mod tests {
         assert_eq!(
             updated_project
                 .root_settings(&*retained_db)
+                .as_ref()
                 .vcs_settings
                 .client_kind,
             Some(VcsClientKind::Git)
@@ -801,7 +815,14 @@ mod tests {
             let db = state.fork();
             let project = db.get_project(&project_key).unwrap();
             assert_eq!(project.path(&*db), path.as_path());
-            assert_eq!(project.root_settings(&*db).vcs_settings.client_kind, None);
+            assert_eq!(
+                project
+                    .root_settings(&*db)
+                    .as_ref()
+                    .vcs_settings
+                    .client_kind,
+                None
+            );
             project
         };
 
@@ -812,7 +833,11 @@ mod tests {
             let updated_project = db.get_project(&project_key).unwrap();
             assert_eq!(updated_project.as_id(), project.as_id());
             assert_eq!(
-                updated_project.root_settings(&*db).vcs_settings.client_kind,
+                updated_project
+                    .root_settings(&*db)
+                    .as_ref()
+                    .vcs_settings
+                    .client_kind,
                 Some(VcsClientKind::Git)
             );
         }
