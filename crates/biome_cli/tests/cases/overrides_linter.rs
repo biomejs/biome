@@ -355,7 +355,7 @@ fn does_override_recommended() {
                     "includes": ["test.js"],
                     "linter": {
                         "rules": {
-                            "recommended": false
+                            "preset": "none"
                         }
                     }
                 }
@@ -410,7 +410,7 @@ fn does_override_groupe_recommended() {
                     "linter": {
                         "rules": {
                             "suspicious": {
-                                "recommended": false
+                                "preset": "none"
                             }
                         }
                     }
@@ -456,7 +456,7 @@ fn does_preserve_group_recommended_when_override_global_recommended() {
             "linter": {
                 "rules": {
                     "suspicious": {
-                        "recommended": false
+                        "preset": "none"
                     }
                 }
             },

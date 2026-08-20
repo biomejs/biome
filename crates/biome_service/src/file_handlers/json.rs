@@ -757,7 +757,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_provider: workspace.configuration_provider(),
+        configuration_provider: settings.configuration_provider(),
         project_layout: Some(project_layout_for_services),
     };
     analyze(
