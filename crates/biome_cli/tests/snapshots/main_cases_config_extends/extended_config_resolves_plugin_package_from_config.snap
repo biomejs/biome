@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/biome"] }
+```
+
+## `node_modules/@shared/config/biome.jsonc`
+
+```json
+{
+  "root": false,
+  "plugins": [{ "path": "@shared/plugin", "resolutionKind": "config" }]
+}
+```
+
+## `node_modules/@shared/config/node_modules/@shared/plugin/biome-manifest.json`
+
+```json
+{ "version": 1, "rules": ["rules/noAssign.grit"] }
+```
+
+## `node_modules/@shared/config/node_modules/@shared/plugin/package.json`
+
+```json
+{ "name": "@shared/plugin" }
+```
+
+## `node_modules/@shared/config/node_modules/@shared/plugin/rules/noAssign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of Object.assign()"
+    )
+}
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+    "name": "@shared/config",
+    "exports": { "./biome": "./biome.jsonc" }
+}
+```
+
+## `test.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread instead of Object.assign()
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

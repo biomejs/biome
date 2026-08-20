@@ -7777,9 +7777,12 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolutionKind\": \"config\" }\n  ]\n}\n```",
+			"description": "Configuration for a single plugin entry.\n\nCan be either a path or package name string, or an object with options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    \"@scope/biome-plugin\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolutionKind\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
-				{ "description": "A plain path to the plugin.", "type": "string" },
+				{
+					"description": "A path or installed package name.",
+					"type": "string"
+				},
 				{
 					"description": "A path with additional options.",
 					"$ref": "#/$defs/PluginWithOptions"
@@ -7789,19 +7792,19 @@
 		"PluginResolvePath": {
 			"oneOf": [
 				{
-					"description": "Resolve relative paths from the consuming project.",
+					"description": "Resolve relative paths and package names from the consuming project.",
 					"type": "string",
 					"const": "project"
 				},
 				{
-					"description": "Resolve relative paths from the configuration file that declared the plugin.",
+					"description": "Resolve relative paths and package names from the configuration file\nthat declared the plugin.",
 					"type": "string",
 					"const": "config"
 				}
 			]
 		},
 		"PluginWithOptions": {
-			"description": "Plugin path with additional options.",
+			"description": "Plugin reference with additional options.",
 			"type": "object",
 			"properties": {
 				"includes": {
@@ -7809,9 +7812,12 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
-				"path": { "description": "The path to the plugin.", "type": "string" },
+				"path": {
+					"description": "The path or installed package name.",
+					"type": "string"
+				},
 				"resolutionKind": {
-					"description": "Controls how the plugin is resolved.\n\nThis only affects plugin resolution. It does not change how `includes`\nare interpreted.\n\nWhen omitted, relative plugin paths are resolved from the consuming\nproject.",
+					"description": "Controls how the plugin is resolved.\n\nThis only affects plugin resolution. It does not change how `includes`\nare interpreted.\n\nWhen omitted, relative paths and package names are resolved from the\nconsuming project.",
 					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
 				}
 			},

@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 
 use biome_console::fmt::Display;
@@ -105,6 +105,21 @@ impl PluginDiagnostic {
                 .to_owned(),
             ),
             source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
+        })
+    }
+
+    pub fn cant_resolve_package(package: &str, base_path: &Utf8Path, kind: ResolveError) -> Self {
+        let package_path = Utf8PathBuf::from(package);
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                   "Failed to resolve plugin package "
+                   <Emphasis>{package}</Emphasis>
+                   " from "<Emphasis>{base_path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+            source: Some(ResolveErrorDiagnostic::new(kind, package_path).into()),
         })
     }
 
@@ -239,7 +254,7 @@ mod test {
 
     #[test]
     fn deserialization_error() {
-        let content = "{}";
+        let content = r#"{ "rules": ["rules/1.grit"] }"#;
         let result =
             deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "");
 

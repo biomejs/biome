@@ -7631,6 +7631,7 @@ dependencies = [
  "biome_languages",
  "biome_markdown_analyze",
  "biome_markdown_syntax",
+ "biome_plugin_loader",
  "biome_rowan",
  "biome_service",
  "biome_string_case",

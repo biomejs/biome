@@ -17,6 +17,33 @@ use camino::Utf8Path;
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
 
+#[cfg(feature = "plugins")]
+#[test]
+fn close_project_removes_descendant_plugin_caches() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let plugin_caches = workspace.server.plugin_caches.pin();
+    plugin_caches.insert(Utf8PathBuf::from("/project"), PluginCache::default());
+    plugin_caches.insert(
+        Utf8PathBuf::from("/project/packages/nested"),
+        PluginCache::default(),
+    );
+    plugin_caches.insert(
+        Utf8PathBuf::from("/project-sibling"),
+        PluginCache::default(),
+    );
+    drop(plugin_caches);
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+
+    let plugin_caches = workspace.server.plugin_caches.pin();
+    assert!(!plugin_caches.contains_key(Utf8Path::new("/project")));
+    assert!(!plugin_caches.contains_key(Utf8Path::new("/project/packages/nested")));
+    assert!(plugin_caches.contains_key(Utf8Path::new("/project-sibling")));
+}
+
 #[test]
 fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     const PATH: &str = "/project/file.js";

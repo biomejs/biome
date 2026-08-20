@@ -62,6 +62,61 @@ pub fn resolve(
     resolve_module(specifier, base_dir, fs, options)
 }
 
+/// Resolves the root directory of an installed package.
+///
+/// Unlike [`resolve`], this ignores package entry points and `exports`. The
+/// `specifier` must be an unscoped or scoped package name without a subpath.
+///
+/// # Errors
+///
+/// Returns an error when the specifier is invalid, the package cannot be
+/// found, its symlink is broken, or its `package.json` cannot be loaded.
+pub fn resolve_package_root(
+    specifier: &str,
+    base_dir: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+) -> Result<Utf8PathBuf, ResolveError> {
+    let (package_name, subpath) = parse_package_specifier(specifier)?;
+    if !subpath.is_empty()
+        || specifier.ends_with('/')
+        || package_name
+            .strip_prefix('@')
+            .is_some_and(|name| !name.contains('/') || name.starts_with('/'))
+        || package_name
+            .split('/')
+            .any(|component| matches!(component, "." | ".."))
+    {
+        return Err(ResolveError::InvalidPackageSpecifier);
+    }
+
+    for dir in base_dir.ancestors() {
+        let node_modules_path = dir.join("node_modules");
+        let node_modules_path = match fs.path_info(&node_modules_path) {
+            Ok(PathInfo::Directory) => Cow::Borrowed(&node_modules_path),
+            Ok(PathInfo::Symlink {
+                canonicalized_target,
+            }) => Cow::Owned(canonicalized_target),
+            Ok(PathInfo::File) | Err(ResolveError::NotFound) => continue,
+            Err(error) => return Err(error),
+        };
+
+        let package_path = node_modules_path.join(package_name);
+        let package_path = match fs.path_info(&package_path) {
+            Ok(PathInfo::Directory) => package_path,
+            Ok(PathInfo::Symlink {
+                canonicalized_target,
+            }) => canonicalized_target,
+            Ok(PathInfo::File) | Err(ResolveError::NotFound) => continue,
+            Err(error) => return Err(error),
+        };
+
+        fs.read_package_json_in_directory(&package_path)?;
+        return Ok(package_path);
+    }
+
+    Err(ResolveError::NotFound)
+}
+
 /// Resolves the given absolute `path` with the extension aliases specified in the options.
 fn resolve_absolute_path_with_extension_aliases(
     path: Utf8PathBuf,

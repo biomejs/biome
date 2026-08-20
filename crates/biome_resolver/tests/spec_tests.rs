@@ -1,5 +1,5 @@
 use biome_fs::OsFileSystem;
-use biome_package::{CompilerOptions, TsConfigJson};
+use biome_package::{CompilerOptions, PackageJson, TsConfigJson};
 use biome_resolver::*;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -275,6 +275,95 @@ fn test_resolve_dependency() {
             "{base_dir}/foo/node_modules/bar/index.js"
         )))
     );
+}
+
+#[test]
+fn test_resolve_package_root() {
+    let base_dir = get_fixtures_path("resolver_cases_2");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve_package_root("bar", &base_dir.join("foo"), &fs),
+        Ok(base_dir.join("foo/node_modules/bar"))
+    );
+    assert_eq!(
+        resolve_package_root("qux", &base_dir.join("foo"), &fs),
+        Ok(base_dir.join("node_modules/qux"))
+    );
+    assert_eq!(
+        resolve_package_root("qux/prelude", &base_dir.join("foo"), &fs),
+        Err(ResolveError::InvalidPackageSpecifier)
+    );
+    assert_eq!(
+        resolve_package_root("qux/", &base_dir.join("foo"), &fs),
+        Err(ResolveError::InvalidPackageSpecifier)
+    );
+
+    let scoped_base_dir = get_fixtures_path("resolver_cases_8");
+    let scoped_fs = OsFileSystem::new(scoped_base_dir.clone());
+    assert_eq!(
+        resolve_package_root("@kcconfigs/biome", &scoped_base_dir, &scoped_fs),
+        Ok(scoped_base_dir.join("node_modules/@kcconfigs/biome"))
+    );
+    assert_eq!(
+        resolve_package_root("@kcconfigs", &scoped_base_dir, &scoped_fs),
+        Err(ResolveError::InvalidPackageSpecifier)
+    );
+    assert_eq!(
+        resolve_package_root("@scope/.", &scoped_base_dir, &scoped_fs),
+        Err(ResolveError::InvalidPackageSpecifier)
+    );
+    assert_eq!(
+        resolve_package_root("@scope/..", &scoped_base_dir, &scoped_fs),
+        Err(ResolveError::InvalidPackageSpecifier)
+    );
+}
+
+struct BrokenSymlinkFs {
+    broken_path: Utf8PathBuf,
+}
+
+impl ResolverFsProxy for BrokenSymlinkFs {
+    fn find_package_json(
+        &self,
+        _search_dir: &Utf8Path,
+    ) -> Result<(Utf8PathBuf, PackageJson), ResolveError> {
+        Err(ResolveError::NotFound)
+    }
+
+    fn path_info(&self, path: &Utf8Path) -> Result<PathInfo, ResolveError> {
+        if path == self.broken_path {
+            Err(ResolveError::BrokenSymlink)
+        } else {
+            Ok(PathInfo::Directory)
+        }
+    }
+
+    fn read_package_json_in_directory(
+        &self,
+        _dir_path: &Utf8Path,
+    ) -> Result<PackageJson, ResolveError> {
+        Err(ResolveError::NotFound)
+    }
+
+    fn read_tsconfig_json(&self, _path: &Utf8Path) -> Result<TsConfigJson, ResolveError> {
+        Err(ResolveError::NotFound)
+    }
+}
+
+#[test]
+fn test_resolve_package_root_propagates_broken_symlinks() {
+    let base_dir = Utf8Path::new("/project");
+    for broken_path in [
+        base_dir.join("node_modules"),
+        base_dir.join("node_modules/plugin"),
+    ] {
+        let fs = BrokenSymlinkFs { broken_path };
+        assert_eq!(
+            resolve_package_root("plugin", base_dir, &fs),
+            Err(ResolveError::BrokenSymlink)
+        );
+    }
 }
 
 #[test]

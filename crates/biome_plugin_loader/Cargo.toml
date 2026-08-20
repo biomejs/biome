@@ -54,7 +54,7 @@ windows = { workspace = true, features = ["Win32_System_Threading"], optional = 
 [features]
 default   = []
 js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
-schema    = ["dep:schemars"]
+schema    = ["biome_glob/schema", "dep:schemars"]
 
 [lints]
 workspace = true
