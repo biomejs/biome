@@ -38,7 +38,9 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
     fn visit_map(
         self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>,
+        members: &mut dyn ExactSizeIterator<
+            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
+        >,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

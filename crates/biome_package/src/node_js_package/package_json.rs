@@ -459,7 +459,9 @@ impl Deserializable for Dependencies {
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>,
+                members: &mut dyn ExactSizeIterator<
+                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
+                >,
                 _range: TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -631,7 +633,9 @@ impl DeserializationVisitor for PackageJsonVisitor {
     fn visit_map(
         self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>,
+        members: &mut dyn ExactSizeIterator<
+            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
+        >,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
