@@ -89,6 +89,7 @@ pub(crate) fn extract_module_constant_with_reserved_names(
         header_trivia
             .as_ref()
             .map_or(&[][..], |trivia| trivia.first_item.as_slice()),
+        insertion_slot > 0,
         insertion_slot == 0,
         &line_ending,
     );
@@ -389,11 +390,14 @@ fn make_declaration(
     value: AnyJsExpression,
     declaration_leading_trivia: &[(TriviaPieceKind, String)],
     declaration_trailing_trivia: &[SyntaxTriviaPiece<JsLanguage>],
+    add_leading_line_ending: bool,
     add_trailing_line_ending: bool,
     line_ending: &str,
 ) -> JsSyntaxNode {
     let mut leading_trivia = declaration_leading_trivia.to_vec();
-    if !leading_trivia.is_empty()
+    // Inserted list items take the following item's leading trivia with them, so a nonzero-slot
+    // declaration needs its own separator even when the preceding statement used ASI.
+    if (add_leading_line_ending || !leading_trivia.is_empty())
         && !matches!(leading_trivia.last(), Some((TriviaPieceKind::Newline, _)))
     {
         leading_trivia.push((TriviaPieceKind::Newline, line_ending.to_string()));
@@ -593,6 +597,52 @@ function read(input) {
                 .descendants()
                 .any(|node| JsRegexLiteralExpression::can_cast(node.kind()))
         );
+    }
+
+    #[test]
+    fn merges_expressions_after_semicolonless_import_and_directive() {
+        let parsed = parse(
+            r#""use strict"
+import value from "module"
+
+function read(input) {
+    return /x/.test(input) && /y/.test(input);
+}
+"#,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let targets = parsed
+            .syntax()
+            .descendants()
+            .filter_map(JsRegexLiteralExpression::cast)
+            .collect::<Vec<_>>();
+        assert_eq!(targets.len(), 2);
+
+        let mut mutations = targets.into_iter().enumerate().map(|(index, target)| {
+            let value = AnyJsExpression::cast(target.syntax().clone()).expect("regex expression");
+            extract_module_constant(
+                &parsed.tree(),
+                &model,
+                target.syntax(),
+                value,
+                &format!("REGEX_{}", index + 1),
+            )
+            .expect("expected a module-level extraction")
+        });
+        let (mut mutation, first_name) = mutations.next().expect("first extraction");
+        let (second_mutation, second_name) = mutations.next().expect("second extraction");
+        mutation.merge(second_mutation);
+
+        let output = mutation.commit().to_string();
+        assert_eq!(first_name, "REGEX_1");
+        assert_eq!(second_name, "REGEX_2");
+        assert!(output.contains(
+            "\"use strict\"\nimport value from \"module\"\nconst REGEX_1 = /x/;\nconst REGEX_2 = /y/;\n\nfunction"
+        ));
+        assert!(!output.contains("module\"const"));
+        assert!(output.contains("return REGEX_1.test(input) && REGEX_2.test(input);"));
     }
 
     #[test]
