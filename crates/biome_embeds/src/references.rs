@@ -261,6 +261,51 @@ mod tests {
         path
     }
 
+    fn parse_vue_template_source(db: &TestDb, html_source: &str) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/App.vue");
+        let parsed = parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
+        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![]);
+        db.insert_file(path.clone(), parsed);
+        path
+    }
+
+    #[test]
+    fn is_value_reference_used_finds_vue_same_name_binding_shorthand() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><button :disabled /></template>"#);
+
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("disabled")),
+        ));
+    }
+
+    #[test]
+    fn is_value_reference_used_finds_vue_v_bind_same_name_binding_shorthand() {
+        let db = TestDb::new();
+        let path =
+            parse_vue_template_source(&db, r#"<template><button v-bind:disabled /></template>"#);
+
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("disabled")),
+        ));
+    }
+
+    #[test]
+    fn is_value_reference_used_ignores_vue_binding_attribute_name() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(
+            &db,
+            r#"<template><button :disabled="isDisabled" /><button v-bind:disabled="isDisabled" /></template>"#,
+        );
+
+        assert!(!is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("disabled")),
+        ));
+    }
+
     #[test]
     fn is_value_reference_used_finds_references_across_groups() {
         let db = TestDb::new();

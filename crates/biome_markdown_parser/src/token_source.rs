@@ -117,6 +117,10 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.source()
     }
 
+    pub fn has_frontmatter_closing_fence(&self) -> bool {
+        self.lexer.lexer().has_frontmatter_closing_fence()
+    }
+
     /// Count leading indentation on the current line, including whitespace
     /// inside the current token.
     ///

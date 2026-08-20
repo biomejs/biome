@@ -27,6 +27,16 @@ pub(crate) struct HtmlLexer<'src> {
     /// consumed. Once set, the `Regular` context will no longer treat `---` as a
     /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
     after_frontmatter: bool,
+    /// Parse options, not state. The lexer cannot read them from the lex
+    /// context, because `bump()` passes [HtmlLexContext::default].
+    options: HtmlLexerOptions,
+}
+
+/// The parse options the lexer needs. Fixed for the whole file, unlike the
+/// lexer's position and flags.
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct HtmlLexerOptions {
+    pub(crate) framework: HtmlFramework,
 }
 
 enum IdentifierContext {
@@ -88,7 +98,12 @@ impl<'src> HtmlLexer<'src> {
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
             after_frontmatter: false,
+            options: HtmlLexerOptions::default(),
         }
+    }
+
+    pub(crate) fn with_options(self, options: HtmlLexerOptions) -> Self {
+        Self { options, ..self }
     }
 
     /// Sets the `after_frontmatter` flag. When `true`, `---` in the `Regular`
@@ -165,7 +180,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => self.consume_byte(T![/]),
+            SLH => match self.consume_js_comment_in_tag() {
+                Some(comment) => comment,
+                None => self.consume_byte(T![/]),
+            },
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             // Handle colons as separate tokens for Astro directives
@@ -280,7 +298,9 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
-    /// When `svelte` is `true`, also handles `//` and `/* */` as JS-style comments.
+    ///
+    /// `svelte` controls brace handling only. `//` and `/* */` comments follow
+    /// [`HtmlLexerOptions::framework`], since Astro accepts them too.
     fn consume_token_inside_tag_directives(
         &mut self,
         current: u8,
@@ -293,16 +313,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => {
-                if svelte {
-                    match self.byte_at(1).map(lookup_byte) {
-                        Some(SLH) => return self.consume_js_line_comment(),
-                        Some(MUL) => return self.consume_js_block_comment(),
-                        _ => {}
-                    }
-                }
-                self.consume_byte(T![/])
-            }
+            SLH => match self.consume_js_comment_in_tag() {
+                Some(comment) => comment,
+                None => self.consume_byte(T![/]),
+            },
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
@@ -393,11 +407,7 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            SLH => match self.byte_at(1).map(lookup_byte) {
-                Some(SLH) => return self.consume_js_line_comment(),
-                Some(MUL) => return self.consume_js_block_comment(),
-                _ => {}
-            },
+            SLH if let Some(comment) = self.consume_js_comment_in_tag() => return comment,
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
@@ -484,13 +494,17 @@ impl<'src> HtmlLexer<'src> {
                 }) {
                     self.consume_l_angle()
                 } else {
-                    self.push_diagnostic(
-                        ParseDiagnostic::new(
-                            "Unescaped `<` bracket character. Expected a tag or escaped character.",
-                            self.text_position()..self.text_position() + TextSize::from(1),
-                        )
-                        .with_hint("Replace this character with `&lt;` to escape it."),
-                    );
+                    // Astro keeps the HTML5 reading, where a `<` that cannot open
+                    // a tag is text and so needs no escaping.
+                    if self.options.framework != HtmlFramework::Astro {
+                        self.push_diagnostic(
+                            ParseDiagnostic::new(
+                                "Unescaped `<` bracket character. Expected a tag or escaped character.",
+                                self.text_position()..self.text_position() + TextSize::from(1),
+                            )
+                            .with_hint("Replace this character with `&lt;` to escape it."),
+                        );
+                    }
                     self.consume_byte(HTML_LITERAL)
                 }
             }
@@ -520,6 +534,9 @@ impl<'src> HtmlLexer<'src> {
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             QOT => self.consume_string_literal(current),
+            TPL if self.options.framework == HtmlFramework::Astro => {
+                self.consume_template_literal_attribute_value()
+            }
             _ => self.consume_unquoted_string_literal(),
         }
     }
@@ -556,6 +573,38 @@ impl<'src> HtmlLexer<'src> {
         }
 
         HTML_TEMPLATE_CHUNK
+    }
+
+    /// Consume a `` ` ``-delimited attribute value, which only Astro allows.
+    ///
+    /// The token kind matches a quoted string so the existing initializer path
+    /// is reused; consumers that must tell the two apart check the leading byte.
+    fn consume_template_literal_attribute_value(&mut self) -> HtmlSyntaxKind {
+        let start = self.text_position();
+        self.advance(1);
+        while let Some(byte) = self.current_byte() {
+            match byte {
+                b'`' => {
+                    self.advance(1);
+                    return HTML_STRING_LITERAL;
+                }
+                b'\\' => {
+                    self.advance(1);
+                    if let Some(next) = self.current_byte() {
+                        self.advance_byte_or_char(next);
+                    }
+                }
+                _ => self.advance_byte_or_char(byte),
+            }
+        }
+        self.diagnostics.push(
+            ParseDiagnostic::new("Missing closing backtick", start..self.text_position())
+                .with_detail(
+                    self.source.text_len()..self.source.text_len(),
+                    "file ends here",
+                ),
+        );
+        HTML_STRING_LITERAL
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
@@ -620,7 +669,10 @@ impl<'src> HtmlLexer<'src> {
                 quotes_seen.check_byte(byte);
             }
 
-            if self.is_at_closing_tag(closing_tag_name) {
+            // Frontmatter ends at its fence; `</script>` inside it is ordinary JS.
+            if context != HtmlLexContext::AstroFencedCodeBlock
+                && self.is_at_closing_tag(closing_tag_name)
+            {
                 break;
             }
             self.advance_byte_or_char(byte);
@@ -785,6 +837,23 @@ impl<'src> HtmlLexer<'src> {
         COMMENT
     }
 
+    /// Consumes a comment between attributes, which only Svelte and Astro
+    /// accept; elsewhere a `/` inside a tag can only open a self-closing tag.
+    fn consume_js_comment_in_tag(&mut self) -> Option<HtmlSyntaxKind> {
+        if !matches!(
+            self.options.framework,
+            HtmlFramework::Svelte | HtmlFramework::Astro
+        ) {
+            return None;
+        }
+
+        match self.byte_at(1).map(lookup_byte) {
+            Some(SLH) => Some(self.consume_js_line_comment()),
+            Some(MUL) => Some(self.consume_js_block_comment()),
+            _ => None,
+        }
+    }
+
     /// Consumes a `//` single-line comment, returning COMMENT.
     /// Does NOT consume the terminating newline — it must be emitted as a
     /// separate NEWLINE trivia token to preserve leading/trailing trivia boundaries.
@@ -848,7 +917,10 @@ impl<'src> HtmlLexer<'src> {
         }
     }
     /// Consume a token in the [HtmlLexContext::AstroFencedCodeBlock] context until
-    /// either the closing `---` fence is reached or a script tag is encountered.
+    /// the closing `---` fence is reached.
+    ///
+    /// A closing tag does not end the block: `</script>` inside frontmatter is
+    /// ordinary JavaScript, as it is in Astro.
     fn consume_astro_frontmatter(
         &mut self,
         current: u8,
@@ -860,8 +932,7 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS if self.at_start_cdata() => self.consume_cdata_start(),
             LSS => self.consume_byte(T![<]),
-            MIN => {
-                debug_assert!(self.at_frontmatter_edge());
+            MIN if self.at_frontmatter_edge() => {
                 self.advance(3);
                 self.after_frontmatter = true;
                 T![---]
@@ -883,7 +954,7 @@ impl<'src> HtmlLexer<'src> {
             COM => self.consume_byte(T![,]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
-            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BEO if self.at_svelte_block_start() => self.consume_svelte_opening_block(),
             BEO => self.consume_byte(T!['{']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
@@ -1272,6 +1343,14 @@ impl<'src> HtmlLexer<'src> {
             match current {
                 // these characters safely terminate an unquoted attribute value
                 b'\n' | b'\r' | b'\t' | b' ' | b'>' => break,
+                // HTML5 makes these a parse error but not a terminator, which is
+                // the reading Astro takes.
+                b'?' | b'\'' | b'"' | b'=' | b'`'
+                    if self.options.framework == HtmlFramework::Astro =>
+                {
+                    self.advance(1);
+                    content_started = true;
+                }
                 // these characters are absolutely invalid in an unquoted attribute value
                 b'?' | b'\'' | b'"' | b'=' | b'<' | b'`' => {
                     encountered_invalid = true;
@@ -1340,7 +1419,7 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consumes a Svelte opening block token starting with '{' followed by @, #, : or /.
     fn consume_svelte_opening_block(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_svelte_opening_block());
+        debug_assert!(self.at_svelte_block_start());
         let next_byte = self.byte_at(1);
         let token = match next_byte {
             Some(b'@') => T!["{@"],
@@ -1423,12 +1502,16 @@ impl<'src> HtmlLexer<'src> {
     }
 
     #[inline(always)]
-    fn at_svelte_opening_block(&self) -> bool {
+    fn at_svelte_block_start(&self) -> bool {
         self.current_byte() == Some(b'{')
             && (self.byte_at(1) == Some(b'@')
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    fn at_svelte_opening_block(&self) -> bool {
+        self.options.framework == HtmlFramework::Svelte && self.at_svelte_block_start()
     }
 
     #[inline(always)]
@@ -1827,6 +1910,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTagSvelte => {
                     self.consume_token_inside_tag_svelte(current, TagNameMode::Html)
                 }
+                HtmlReLexContext::SingleCurly => self.consume_byte(T!['{']),
                 HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,

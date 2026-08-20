@@ -1,3 +1,4 @@
+use crate::transformers::strip_types::StripTypes;
 use crate::transformers::ts_enum::TsEnum;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_js_syntax::JsLanguage;
@@ -20,6 +21,7 @@ impl RuleGroup for TransformationGroup {
     const NAME: &'static str = "transformations";
 
     fn record_rules<V: RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
+        registry.record_rule::<StripTypes>();
         registry.record_rule::<TsEnum>();
     }
 }

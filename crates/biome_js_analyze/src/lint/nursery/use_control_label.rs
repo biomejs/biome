@@ -71,7 +71,7 @@ declare_lint_rule! {
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     pub UseControlLabel {
-        version: "next",
+        version: "2.5.9",
         name: "useControlLabel",
         language: "jsx",
         recommended: false,

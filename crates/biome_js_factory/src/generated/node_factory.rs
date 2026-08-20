@@ -3393,7 +3393,7 @@ pub fn js_super_expression(super_token: SyntaxToken) -> JsSuperExpression {
     ))
 }
 pub fn js_svelte_declaration_root(
-    declaration: JsVariableDeclaration,
+    declaration: AnyJsSvelteDeclaration,
     eof_token: SyntaxToken,
 ) -> JsSvelteDeclarationRootBuilder {
     JsSvelteDeclarationRootBuilder {
@@ -3403,7 +3403,7 @@ pub fn js_svelte_declaration_root(
     }
 }
 pub struct JsSvelteDeclarationRootBuilder {
-    declaration: JsVariableDeclaration,
+    declaration: AnyJsSvelteDeclaration,
     eof_token: SyntaxToken,
     semicolon_token: Option<SyntaxToken>,
 }
@@ -7579,6 +7579,16 @@ where
 {
     JsBogusStatement::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_BOGUS_STATEMENT,
+        slots,
+    ))
+}
+pub fn js_bogus_variable_declaration<I>(slots: I) -> JsBogusVariableDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    JsBogusVariableDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_BOGUS_VARIABLE_DECLARATION,
         slots,
     ))
 }

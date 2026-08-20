@@ -8,6 +8,7 @@ pub mod generate_analyzer_rule_options;
 #[cfg(feature = "global_types")]
 pub mod generate_global_types;
 mod generate_grit_mappings;
+mod generate_js_plugin_ast;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
 mod generate_node_factory;

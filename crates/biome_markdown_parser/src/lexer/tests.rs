@@ -572,6 +572,46 @@ fn setext_underline_dashes() {
 }
 
 #[test]
+fn frontmatter_context_preserves_yaml_content() {
+    let source = "--- \r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n--- \t\r\n# Heading";
+    let mut lexer = MarkdownLexer::from_str(source);
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Regular),
+        MD_THEMATIC_BREAK_LITERAL
+    );
+    assert!(lexer.has_frontmatter_closing_fence());
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Frontmatter),
+        MD_FRONTMATTER_LITERAL
+    );
+    assert_eq!(
+        &source[lexer.current_range()],
+        "\r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n"
+    );
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Frontmatter),
+        FENCE
+    );
+    assert_eq!(&source[lexer.current_range()], "--- \t");
+    assert_eq!(lexer.next_token(MarkdownLexContext::Regular), NEWLINE);
+    assert_eq!(lexer.next_token(MarkdownLexContext::Regular), HASH);
+}
+
+#[test]
+fn frontmatter_requires_closing_fence() {
+    let mut lexer = MarkdownLexer::from_str("---\nvalue");
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Regular),
+        MD_THEMATIC_BREAK_LITERAL
+    );
+    assert!(!lexer.has_frontmatter_closing_fence());
+}
+
+#[test]
 fn link_reference_definition_tokens() {
     // Test tokenizing a link reference definition
     // Whitespace after colon is included in textual (not at line start)

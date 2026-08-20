@@ -102,7 +102,7 @@ JsModule {
         },
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         LET_KW@132..139 "let" [Newline("\n"), Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         JsBogus {
@@ -132,7 +132,7 @@ JsModule {
         },
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         LET_KW@150..155 "let" [Newline("\n")] [Whitespace(" ")],
                         JsBogus {
@@ -219,7 +219,7 @@ JsModule {
                   2: R_PAREN@127..131 ")" [Newline("\n"), Whitespace("  ")] []
       1: SEMICOLON@131..132 ";" [] []
     1: JS_BOGUS_STATEMENT@132..150
-      0: JS_BOGUS@132..150
+      0: JS_BOGUS_VARIABLE_DECLARATION@132..150
         0: LET_KW@132..139 "let" [Newline("\n"), Newline("\n"), Newline("\n")] [Whitespace(" ")]
         1: JS_BOGUS@139..150
           0: JS_BOGUS@139..150
@@ -230,7 +230,7 @@ JsModule {
               1: JS_BOGUS@143..150
                 0: ERROR_TOKEN@143..150 "'string" [] []
     2: JS_BOGUS_STATEMENT@150..166
-      0: JS_BOGUS@150..166
+      0: JS_BOGUS_VARIABLE_DECLARATION@150..166
         0: LET_KW@150..155 "let" [Newline("\n")] [Whitespace(" ")]
         1: JS_BOGUS@155..166
           0: JS_BOGUS@155..166

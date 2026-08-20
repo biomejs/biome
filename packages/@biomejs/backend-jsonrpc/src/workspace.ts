@@ -1201,6 +1201,7 @@ export type JsonTrailingCommas = "none" | "all";
  * Rule domains
  */
 export type RuleDomain =
+	| "astro"
 	| "drizzle"
 	| "react"
 	| "reactNative"
@@ -2646,6 +2647,11 @@ See https://biomejs.dev/linter/rules/use-array-some
 	 */
 	useArraySome?: UseArraySomeConfiguration;
 	/**
+	* Require a value for Astro's client:only directive.
+See https://biomejs.dev/linter/rules/use-astro-client-only-directive-value 
+	 */
+	useAstroClientOnlyDirectiveValue?: UseAstroClientOnlyDirectiveValueConfiguration;
+	/**
 	* Enforce that await is only used on Promise values.
 See https://biomejs.dev/linter/rules/use-await-thenable 
 	 */
@@ -2725,6 +2731,11 @@ See https://biomejs.dev/linter/rules/use-math-min-max
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
+	* Disallow anonymous cascade layers.
+See https://biomejs.dev/linter/rules/use-named-layer 
+	 */
+	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
 	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
@@ -4859,6 +4870,9 @@ export type NoVueVOnNumberValuesConfiguration =
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
+export type UseAstroClientOnlyDirectiveValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
@@ -4907,6 +4921,9 @@ export type UseMathMinMaxConfiguration =
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNamedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedLayerOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -6808,6 +6825,10 @@ export interface RuleWithUseArraySomeOptions {
 	level: RulePlainConfiguration;
 	options?: UseArraySomeOptions;
 }
+export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
+	level: RulePlainConfiguration;
+	options?: UseAstroClientOnlyDirectiveValueOptions;
+}
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
@@ -6878,6 +6899,10 @@ export interface RuleWithUseMathMinMaxOptions {
 export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
+}
+export interface RuleWithUseNamedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedLayerOptions;
 }
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
@@ -8576,6 +8601,7 @@ export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVOnNumberValuesOptions = {};
 export type UseArraySomeOptions = {};
+export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 /**
  * Options for the `useBaseline` rule.
@@ -8668,6 +8694,7 @@ export type UseImportsFirstOptions = {};
 export type UseIncludesOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
+export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
  */
@@ -9988,6 +10015,7 @@ export type Category =
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/useArraySome"
+	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -10013,6 +10041,7 @@ export type Category =
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikLoaderLocation"
@@ -10029,8 +10058,8 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
-	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useTopLevelHeading"
@@ -10301,6 +10330,7 @@ export type Category =
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
 	| "syntax/correctness/noDuplicatePrivateClassMembers"
+	| "transformations/stripTypes"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -10562,6 +10592,7 @@ exposes extra service globals (e.g. `SpreadsheetApp`).
 export interface JsonFileSource {
 	allowComments: boolean;
 	allowTrailingCommas: boolean;
+	kind: JsonSourceKind;
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
@@ -10648,6 +10679,7 @@ The versions are ordered in increasing order; The newest version comes last.
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
+export type JsonSourceKind = "regular" | "biomeJson" | "packageJson";
 /**
  * It represents the extension of the file
  */

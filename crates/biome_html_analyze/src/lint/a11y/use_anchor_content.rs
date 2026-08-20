@@ -186,6 +186,10 @@ impl Rule for UseAnchorContent {
 fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> bool {
     html_child_list.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
+        // A fragment renders nothing itself, so its children carry the content.
+        AnyHtmlElement::AstroFragment(fragment) => {
+            has_accessible_content(&fragment.children(), is_astro)
+        }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 false

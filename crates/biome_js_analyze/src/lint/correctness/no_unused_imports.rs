@@ -113,158 +113,30 @@ declare_lint_rule! {
     }
 }
 
-/// Model for tracking any types referenced in JsDoc or TSDoc comments (like {@link TypeName} or @param {TypeName})
-#[derive(Clone, Default)]
-struct JsDocTypeModel(FxHashSet<String>);
-
-impl Deref for JsDocTypeModel {
-    type Target = FxHashSet<String>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for JsDocTypeModel {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-#[derive(Default)]
-struct JsDocTypeCollectorVisitor {
-    jsdoc_types: JsDocTypeModel,
-}
-
-declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyJsObjectMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
-}
-
-impl Visitor for JsDocTypeCollectorVisitor {
-    type Language = JsLanguage;
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        _ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
-                    load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
-                }
-            }
-            WalkEvent::Leave(_) => {}
-        }
-    }
-
-    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(self.jsdoc_types);
-    }
-}
-
-fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
-    JsdocComment::get_jsdocs(node)
-        .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
-}
-
-static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
-});
-
-static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
-
-static JSDOC_TYPE_PART_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\w+)").unwrap());
-
-fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str) {
-    // regex matching for typical JSDoc patterns containing types `{@link ClassName}` and `@sometag {TypeSyntax}`
-    // This should likely become a proper parser.
-    // This will definitely fail in object types like { a: { b: number } }
-
-    for (_, [_tag_name, type_name]) in JSDOC_INLINE_TAG_REGEX
-        .captures_iter(comment)
-        .map(|c| c.extract())
-    {
-        model.insert(type_name.to_string());
-    }
-
-    for (_, [_tag_name, type_name]) in JSDOC_TYPE_TAG_REGEX
-        .captures_iter(comment)
-        .map(|c| c.extract())
-    {
-        // can the TS type parser be used here? for now we simply match with words
-        for (_, [type_part]) in JSDOC_TYPE_PART_REGEX
-            .captures_iter(type_name)
-            .map(|c| c.extract())
-        {
-            model.insert(type_part.to_string());
-        }
-    }
-}
-
-pub struct JsDocTypeServices {
-    jsdoc_types: JsDocTypeModel,
-    semantic_services: SemanticServices,
-}
-impl JsDocTypeServices {
-    fn jsdoc_types(&self) -> &JsDocTypeModel {
-        &self.jsdoc_types
-    }
-
-    fn semantic_model(&self) -> &SemanticModel {
-        self.semantic_services.model()
-    }
-}
-
-impl FromServices for JsDocTypeServices {
-    fn from_services(
-        rule_key: &RuleKey,
-        rule_metadata: &RuleMetadata,
-        services: &ServiceBag,
-    ) -> Result<Self, ServicesDiagnostic> {
-        let jsdoc_types: &JsDocTypeModel = services
-            .get_service()
-            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
-
-        Ok(Self {
-            jsdoc_types: jsdoc_types.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
-        })
-    }
-}
-
-impl Phase for JsDocTypeServices {
-    fn phase() -> Phases {
-        Phases::Semantic
-    }
-}
-
 #[derive(Clone)]
 pub struct NoUnusedImportsQuery(pub AnyJsImportClause);
 
-impl Queryable for NoUnusedImportsQuery {
-    type Input = JsSyntaxNode;
-    type Output = AnyJsImportClause;
-
-    type Language = JsLanguage;
-    type Services = JsDocTypeServices;
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        root: &<Self::Language as Language>::Root,
-    ) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
-        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
-    }
-
-    fn key() -> QueryKey<Self::Language> {
-        QueryKey::Syntax(AnyJsImportClause::KIND_SET)
-    }
-
-    fn unwrap_match(_services: &ServiceBag, node: &Self::Input) -> Self::Output {
-        AnyJsImportClause::unwrap_cast(node.clone())
-    }
+#[derive(Debug)]
+pub enum Unused {
+    /// Empty import such as `import {} from "mod"`
+    EmptyStatement(TextRange),
+    //// All imports of the statements are unused
+    AllImports(TextRange),
+    /// The default import of the combined clause is unused. e.g.:
+    /// - `import UnusedDefault, * as Ns from "mod"`
+    /// - `import UnusedDefault, { A } from "mod"`
+    DefaultImport(TextRange),
+    /// The imports of the second specifier of the combined clause are unused. e.g.:
+    /// - `import Default, * as UnusedNs from "mod"`
+    /// - `import Default, { UnusedA }from "mod"`
+    CombinedImport(TextRange),
+    /// The default and some named imports in a combined clause are unused. e.g.:
+    /// - `import UnusedDefault, { UnusedA, B, UnusedC } from "mod"`
+    DefaultNamedImport(TextRange, Box<[AnyJsNamedImportSpecifier]>),
+    /// Some named specifoers are unused. e.g.:
+    /// - import { UnusedA, B, UnusedC } from "mod"`
+    /// - `import Default, { UnusedA, B, UnusedC }from "mod"`
+    NamedImports(Box<[AnyJsNamedImportSpecifier]>),
 }
 
 impl Rule for NoUnusedImports {
@@ -631,27 +503,157 @@ impl Rule for NoUnusedImports {
     }
 }
 
-#[derive(Debug)]
-pub enum Unused {
-    /// Empty import such as `import {} from "mod"`
-    EmptyStatement(TextRange),
-    //// All imports of the statements are unused
-    AllImports(TextRange),
-    /// The default import of the combined clause is unused. e.g.:
-    /// - `import UnusedDefault, * as Ns from "mod"`
-    /// - `import UnusedDefault, { A } from "mod"`
-    DefaultImport(TextRange),
-    /// The imports of the second specifier of the combined clause are unused. e.g.:
-    /// - `import Default, * as UnusedNs from "mod"`
-    /// - `import Default, { UnusedA }from "mod"`
-    CombinedImport(TextRange),
-    /// The default and some named imports in a combined clause are unused. e.g.:
-    /// - `import UnusedDefault, { UnusedA, B, UnusedC } from "mod"`
-    DefaultNamedImport(TextRange, Box<[AnyJsNamedImportSpecifier]>),
-    /// Some named specifoers are unused. e.g.:
-    /// - import { UnusedA, B, UnusedC } from "mod"`
-    /// - `import Default, { UnusedA, B, UnusedC }from "mod"`
-    NamedImports(Box<[AnyJsNamedImportSpecifier]>),
+/// Model for tracking any types referenced in JsDoc or TSDoc comments (like {@link TypeName} or @param {TypeName})
+#[derive(Clone, Default)]
+struct JsDocTypeModel(FxHashSet<String>);
+
+impl Deref for JsDocTypeModel {
+    type Target = FxHashSet<String>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for JsDocTypeModel {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Default)]
+struct JsDocTypeCollectorVisitor {
+    jsdoc_types: JsDocTypeModel,
+}
+
+declare_node_union! {
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyJsObjectMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
+}
+
+impl Visitor for JsDocTypeCollectorVisitor {
+    type Language = JsLanguage;
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        _ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(node) => {
+                if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
+                    load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
+                }
+            }
+            WalkEvent::Leave(_) => {}
+        }
+    }
+
+    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        ctx.services.insert_service(self.jsdoc_types);
+    }
+}
+
+fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
+    JsdocComment::get_jsdocs(node)
+        .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
+}
+
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
+});
+
+static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
+
+static JSDOC_TYPE_PART_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\w+)").unwrap());
+
+fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str) {
+    // regex matching for typical JSDoc patterns containing types `{@link ClassName}` and `@sometag {TypeSyntax}`
+    // This should likely become a proper parser.
+    // This will definitely fail in object types like { a: { b: number } }
+
+    for (_, [_tag_name, type_name]) in JSDOC_INLINE_TAG_REGEX
+        .captures_iter(comment)
+        .map(|c| c.extract())
+    {
+        model.insert(type_name.to_string());
+    }
+
+    for (_, [_tag_name, type_name]) in JSDOC_TYPE_TAG_REGEX
+        .captures_iter(comment)
+        .map(|c| c.extract())
+    {
+        // can the TS type parser be used here? for now we simply match with words
+        for (_, [type_part]) in JSDOC_TYPE_PART_REGEX
+            .captures_iter(type_name)
+            .map(|c| c.extract())
+        {
+            model.insert(type_part.to_string());
+        }
+    }
+}
+
+pub struct JsDocTypeServices {
+    jsdoc_types: JsDocTypeModel,
+    semantic_services: SemanticServices,
+}
+impl JsDocTypeServices {
+    fn jsdoc_types(&self) -> &JsDocTypeModel {
+        &self.jsdoc_types
+    }
+
+    fn semantic_model(&self) -> &SemanticModel {
+        self.semantic_services.model()
+    }
+}
+
+impl FromServices for JsDocTypeServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        let jsdoc_types: &JsDocTypeModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
+
+        Ok(Self {
+            jsdoc_types: jsdoc_types.clone(),
+            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
+        })
+    }
+}
+
+impl Phase for JsDocTypeServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
+
+
+impl Queryable for NoUnusedImportsQuery {
+    type Input = JsSyntaxNode;
+    type Output = AnyJsImportClause;
+
+    type Language = JsLanguage;
+    type Services = JsDocTypeServices;
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        root: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(AnyJsImportClause::KIND_SET)
+    }
+
+    fn unwrap_match(_services: &ServiceBag, node: &Self::Input) -> Self::Output {
+        AnyJsImportClause::unwrap_cast(node.clone())
+    }
 }
 
 fn unused_named_specifiers(

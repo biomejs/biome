@@ -1,3 +1,4 @@
+use crate::lexer::HtmlLexerOptions;
 use crate::token_source::{
     HtmlFramework, HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
     TextExpressionKind,
@@ -24,9 +25,14 @@ pub(crate) struct HtmlParser<'source> {
 impl<'source> HtmlParser<'source> {
     pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
         let framework = options.framework();
+        let lexer_options = HtmlLexerOptions { framework };
         Self {
             context: ParserContext::default(),
-            source: HtmlTokenSource::from_str(source, HtmlLexContext::Regular { framework }),
+            source: HtmlTokenSource::from_str(
+                source,
+                HtmlLexContext::Regular { framework },
+                lexer_options,
+            ),
             options,
         }
     }
