@@ -1,14 +1,12 @@
 {
 	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"tailwind": {
+		"attributes": ["class", "classList"]
+	},
 	"linter": {
 		"rules": {
 			"nursery": {
-				"noTailwindArbitraryValue": {
-					"level": "error",
-					"options": {
-						"attributes": ["classList"]
-					}
-				}
+				"noTailwindArbitraryValue": "error"
 			}
 		}
 	}
