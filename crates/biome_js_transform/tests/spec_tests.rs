@@ -6,7 +6,7 @@ use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_diagnostics_expectation_comment, assert_errors_are_absent, create_analyzer_options,
     diagnostic_to_string, has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
-    write_transformation_snapshot,
+    unified_diff, write_transformation_snapshot,
 };
 
 use camino::Utf8Path;
@@ -100,7 +100,7 @@ pub(crate) fn analyze_and_snap(
     let options =
         create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diagnostics);
 
-    let mut transformations = vec![];
+    let mut outputs = vec![];
     let (_, errors) =
         biome_js_transform::transform(&root, filter, &options, source_type, |event| {
             if let Some(diagnostic) = event.diagnostic() {
@@ -119,10 +119,10 @@ pub(crate) fn analyze_and_snap(
                     parser_options,
                 );
 
-                // Snapshot the raw output of the transformation without formatting it, so
+                // Keep the raw output of the transformation without formatting it, so
                 // text-level properties (like the whitespace replacement of `stripTypes`
                 // preserving positions) stay visible.
-                transformations.push(transformation.mutation.commit().to_string());
+                outputs.push(transformation.mutation.commit().to_string());
             }
             ControlFlow::<Never>::Continue(())
         });
@@ -133,14 +133,14 @@ pub(crate) fn analyze_and_snap(
 
     // When every transformation preserves the text length (like the whitespace replacement of
     // `stripTypes`), their outputs can be merged bytewise into the final result.
-    let final_output = (!transformations.is_empty()
-        && transformations
+    let final_output = (!outputs.is_empty()
+        && outputs
             .iter()
-            .all(|transformation| transformation.len() == input_code.len()))
+            .all(|output| output.len() == input_code.len()))
     .then(|| {
         let mut merged = input_code.as_bytes().to_vec();
-        for transformation in &transformations {
-            for (index, byte) in transformation.bytes().enumerate() {
+        for output in &outputs {
+            for (index, byte) in output.bytes().enumerate() {
                 if byte != input_code.as_bytes()[index] {
                     merged[index] = byte;
                 }
@@ -153,6 +153,13 @@ pub(crate) fn analyze_and_snap(
         let re_parse = parse(final_output, source_type, parser_options);
         assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), input_file);
     }
+
+    // Each transformation is snapshotted as a diff, so what it changes stays readable instead
+    // of being buried in a copy of the whole file.
+    let transformations: Vec<_> = outputs
+        .iter()
+        .map(|output| unified_diff(input_code, output))
+        .collect();
 
     write_transformation_snapshot(
         snapshot,

@@ -40,399 +40,177 @@ class Klass<
 ```
 
 # Transformations
-```ts
-function foo 
-       
-       
- (
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -1,7 +1,7 @@
+-function foo<
+-	Lorem,
+-	Ipsum,
+->(
++function foo 
++       
++       
++ (
+ 	a: Lorem,
+ 	b?: Ipsum,
+ ): Bar<
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a       ,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -2,7 +2,7 @@
+ 	Lorem,
+ 	Ipsum,
+ >(
+-	a: Lorem,
++	a       ,
+ 	b?: Ipsum,
+ ): Bar<
+ 	Lorem
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b : Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -3,7 +3,7 @@
+ 	Ipsum,
+ >(
+ 	a: Lorem,
+-	b?: Ipsum,
++	b : Ipsum,
+ ): Bar<
+ 	Lorem
+ > {
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?       ,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -3,7 +3,7 @@
+ 	Ipsum,
+ >(
+ 	a: Lorem,
+-	b?: Ipsum,
++	b?       ,
+ ): Bar<
+ 	Lorem
+ > {
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-)      
-      
-  {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -4,9 +4,9 @@
+ >(
+ 	a: Lorem,
+ 	b?: Ipsum,
+-): Bar<
+-	Lorem
+-> {
++)      
++      
++  {
+ 	return a as unknown as Bar<
+ 		// comment inside an erased range
+ 		Lorem
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a            as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -7,7 +7,7 @@
+ ): Bar<
+ 	Lorem
+ > {
+-	return a as unknown as Bar<
++	return a            as Bar<
+ 		// comment inside an erased range
+ 		Lorem
+ 	>;
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown        
-                                   
-       
-  ;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
-
-```
-
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-                 
-           
-           
+```diff
+@@ -7,10 +7,10 @@
+ ): Bar<
+ 	Lorem
+ > {
+-	return a as unknown as Bar<
+-		// comment inside an erased range
+-		Lorem
+-	>;
++	return a as unknown        
++                                   
++       
++  ;
+ }
  
-
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+ interface Multi {
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass 
-   
+```diff
+@@ -13,10 +13,10 @@
+ 	>;
+ }
  
-	implements
-		Iface,
-		Other
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+-interface Multi {
+-	a: string;
+-	b: number;
+-}
++                 
++           
++           
++ 
+ 
+ class Klass<
+ 	T,
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
-
-interface Multi {
-	a: string;
-	b: number;
-}
-
-class Klass<
-	T,
->
-	          
-        
-       
-{
-	value: Map<
-		string,
-		T
-	> = new Map();
-}
+```diff
+@@ -18,9 +18,9 @@
+ 	b: number;
+ }
+ 
+-class Klass<
+-	T,
+->
++class Klass 
++   
++ 
+ 	implements
+ 		Iface,
+ 		Other
 
 ```
 
-```ts
-function foo<
-	Lorem,
-	Ipsum,
->(
-	a: Lorem,
-	b?: Ipsum,
-): Bar<
-	Lorem
-> {
-	return a as unknown as Bar<
-		// comment inside an erased range
-		Lorem
-	>;
-}
+```diff
+@@ -21,9 +21,9 @@
+ class Klass<
+ 	T,
+ >
+-	implements
+-		Iface,
+-		Other
++	          
++        
++       
+ {
+ 	value: Map<
+ 		string,
 
-interface Multi {
-	a: string;
-	b: number;
-}
+```
 
-class Klass<
-	T,
->
-	implements
-		Iface,
-		Other
-{
-	value      
-         
-   
-   = new Map();
-}
+```diff
+@@ -25,8 +25,8 @@
+ 		Iface,
+ 		Other
+ {
+-	value: Map<
+-		string,
+-		T
+-	> = new Map();
++	value      
++         
++   
++   = new Map();
+ }
 
 ```
 

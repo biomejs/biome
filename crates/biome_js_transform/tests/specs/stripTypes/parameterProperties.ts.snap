@@ -12,19 +12,23 @@ class Foo {
 ```
 
 # Transformations
-```ts
-// should generate diagnostics
-class Foo {
-	constructor(        a: string) {}
-}
+```diff
+@@ -1,4 +1,4 @@
+ // should generate diagnostics
+ class Foo {
+-	constructor(private a: string) {}
++	constructor(        a: string) {}
+ }
 
 ```
 
-```ts
-// should generate diagnostics
-class Foo {
-	constructor(private a        ) {}
-}
+```diff
+@@ -1,4 +1,4 @@
+ // should generate diagnostics
+ class Foo {
+-	constructor(private a: string) {}
++	constructor(private a        ) {}
+ }
 
 ```
 
