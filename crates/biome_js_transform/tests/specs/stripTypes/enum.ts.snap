@@ -15,7 +15,7 @@ enum Foo {
 ```
 enum.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i `enum` declarations are not supported because they generate runtime code.
+  i enum declarations cannot be stripped because they generate runtime code.
   
     1 │ // should generate diagnostics
   > 2 │ enum Foo {
@@ -24,6 +24,8 @@ enum.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
     5 │ 
+  
+  i Only type syntax that can be erased is supported. Rewrite this using JavaScript syntax.
   
 
 ```

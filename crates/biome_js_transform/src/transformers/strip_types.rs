@@ -1,6 +1,7 @@
 use crate::{JsBatchMutation, declare_transformation};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic};
+use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExportClause, AnyJsExpression, AnyJsImportClause, AnyTsType,
@@ -202,10 +203,10 @@ impl Rule for StripTypes {
             }
 
             AnyTsStrippableSyntax::TsEnumDeclaration(_) => Some(StripTypesState::Unsupported {
-                syntax: "`enum` declarations",
+                syntax: "enum declarations",
             }),
             AnyTsStrippableSyntax::TsModuleDeclaration(_) => Some(StripTypesState::Unsupported {
-                syntax: "`namespace` and `module` declarations",
+                syntax: "namespace and module declarations",
             }),
             AnyTsStrippableSyntax::TsGlobalDeclaration(_)
             | AnyTsStrippableSyntax::TsExternalModuleDeclaration(_) => {
@@ -218,12 +219,12 @@ impl Rule for StripTypes {
             }),
             AnyTsStrippableSyntax::TsExportAssignmentClause(_) => {
                 Some(StripTypesState::Unsupported {
-                    syntax: "`export =` assignments",
+                    syntax: "export = assignments",
                 })
             }
             AnyTsStrippableSyntax::TsExportAsNamespaceClause(_) => {
                 Some(StripTypesState::Unsupported {
-                    syntax: "`export as namespace` declarations",
+                    syntax: "export as namespace declarations",
                 })
             }
 
@@ -233,7 +234,7 @@ impl Rule for StripTypes {
                     Some(StripTypesState::Erase(vec![export_erase_range(syntax)]))
                 } else {
                     Some(StripTypesState::Unsupported {
-                        syntax: "`import =` declarations",
+                        syntax: "import = declarations",
                     })
                 }
             }
@@ -286,11 +287,18 @@ impl Rule for StripTypes {
             return None;
         };
 
-        Some(RuleDiagnostic::new(
-            category!("transformations/stripTypes"),
-            ctx.query().range(),
-            format!("{syntax} are not supported because they generate runtime code."),
-        ))
+        Some(
+            RuleDiagnostic::new(
+                category!("transformations/stripTypes"),
+                ctx.query().range(),
+                markup! {
+                    <Emphasis>{syntax}</Emphasis>" cannot be stripped because they generate runtime code."
+                },
+            )
+            .note(markup! {
+                "Only type syntax that can be erased is supported. Rewrite this using JavaScript syntax."
+            }),
+        )
     }
 
     fn transform(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsBatchMutation> {

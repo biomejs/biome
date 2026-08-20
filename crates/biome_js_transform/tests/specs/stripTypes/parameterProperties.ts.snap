@@ -41,7 +41,7 @@ class Foo {
 ```
 parameterProperties.ts:3:14 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i parameter properties are not supported because they generate runtime code.
+  i parameter properties cannot be stripped because they generate runtime code.
   
     1 │ // should generate diagnostics
     2 │ class Foo {
@@ -49,6 +49,8 @@ parameterProperties.ts:3:14 transformations/stripTypes ━━━━━━━━�
       │ 	            ^^^^^^^^^^^^^^^^^
     4 │ }
     5 │ 
+  
+  i Only type syntax that can be erased is supported. Rewrite this using JavaScript syntax.
   
 
 ```

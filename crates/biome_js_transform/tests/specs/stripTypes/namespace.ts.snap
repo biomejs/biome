@@ -15,7 +15,7 @@ namespace Foo {
 ```
 namespace.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i `namespace` and `module` declarations are not supported because they generate runtime code.
+  i namespace and module declarations cannot be stripped because they generate runtime code.
   
     1 │ // should generate diagnostics
   > 2 │ namespace Foo {
@@ -24,6 +24,8 @@ namespace.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━
   > 4 │ }
       │ ^
     5 │ 
+  
+  i Only type syntax that can be erased is supported. Rewrite this using JavaScript syntax.
   
 
 ```
