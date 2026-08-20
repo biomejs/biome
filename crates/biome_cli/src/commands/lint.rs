@@ -11,7 +11,7 @@ use biome_configuration::css::{CssLinterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlLinterConfiguration;
 use biome_configuration::javascript::JsLinterConfiguration;
 use biome_configuration::json::{JsonLinterConfiguration, JsonParserConfiguration};
-use biome_configuration::markdown::MarkdownLinterConfiguration;
+use biome_configuration::markdown::{MarkdownLinterConfiguration, MarkdownParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::{Console, MarkupBuf};
@@ -54,6 +54,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) markdown_linter: Option<MarkdownLinterConfiguration>,
+    pub(crate) markdown_parser: Option<MarkdownParserConfiguration>,
     pub(crate) profile_rules: bool,
     pub(crate) profile_type_inference: bool,
     pub(crate) watch: bool,
@@ -306,11 +307,14 @@ impl TraversalCommand for LintCommandPayload {
             json.parser.merge_with(self.json_parser.clone());
         }
 
+        let markdown = loaded_configuration
+            .markdown
+            .get_or_insert_with(Default::default);
         if self.markdown_linter.is_some() {
-            let markdown = loaded_configuration
-                .markdown
-                .get_or_insert_with(Default::default);
             markdown.linter.merge_with(self.markdown_linter.clone());
+        }
+        if self.markdown_parser.is_some() {
+            markdown.parser.merge_with(self.markdown_parser.clone());
         }
 
         Ok(loaded_configuration)

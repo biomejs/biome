@@ -1825,13 +1825,13 @@ impl OverrideSettings {
     }
 
     #[cfg(feature = "lang_md")]
-    pub fn apply_override_markdown_format_options(
+    pub fn apply_override_markdown_format_options_by_indices(
         &self,
-        path: &Utf8Path,
+        indices: &[usize],
         options: &mut MdFormatOptions,
     ) {
-        for pattern in self.patterns.iter() {
-            if pattern.is_file_included(path) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_markdown_format_options(options);
             }
         }

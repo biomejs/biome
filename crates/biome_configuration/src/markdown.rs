@@ -51,6 +51,10 @@ pub struct MarkdownParserConfiguration {
     /// Enables parsing frontmatter at the start of the file. Defaults to `false`.
     #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-parse-frontmatter"), argument("true|false"))
+    )]
     pub frontmatter: Option<MarkdownParseFrontmatter>,
 }
 
@@ -63,7 +67,7 @@ pub struct MarkdownFormatterConfiguration {
     /// Control the formatter for Markdown (and its super languages) files.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-formatter-enabled"), argument("true|false"))
+        bpaf(long("md-formatter-enabled"), argument("true|false"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<MarkdownFormatterEnabled>,
@@ -71,7 +75,7 @@ pub struct MarkdownFormatterConfiguration {
     /// The indent style applied to Markdown files.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-formatter-indent-style"), argument("tab|space"))
+        bpaf(long("md-formatter-indent-style"), argument("tab|space"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
@@ -79,7 +83,7 @@ pub struct MarkdownFormatterConfiguration {
     /// The size of the indentation applied to Markdown files. Defaults to 2.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-formatter-indent-width"), argument("NUMBER"))
+        bpaf(long("md-formatter-indent-width"), argument("NUMBER"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
@@ -87,7 +91,7 @@ pub struct MarkdownFormatterConfiguration {
     /// What's the max width of a line applied to Markdown files. Defaults to 80.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-formatter-line-width"), argument("NUMBER"))
+        bpaf(long("md-formatter-line-width"), argument("NUMBER"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
@@ -104,7 +108,7 @@ pub struct MarkdownFormatterConfiguration {
     /// Defaults to true.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-formatter-trailing-newline"), argument("true|false"))
+        bpaf(long("md-formatter-trailing-newline"), argument("true|false"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
@@ -112,7 +116,7 @@ pub struct MarkdownFormatterConfiguration {
     /// The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-formatter-line-ending"), argument("lf|crlf|cr|auto"))
+        bpaf(long("md-formatter-line-ending"), argument("lf|crlf|cr|auto"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
@@ -123,10 +127,7 @@ pub struct MarkdownFormatterConfiguration {
     /// line with two spaces or a backslash.
     #[cfg_attr(
         feature = "cli",
-        bpaf(
-            long("markdown-formatter-prose-wrap"),
-            argument("preserve|always|never")
-        )
+        bpaf(long("md-formatter-prose-wrap"), argument("preserve|always|never"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prose_wrap: Option<ProseWrap>,
@@ -141,7 +142,7 @@ pub struct MarkdownLinterConfiguration {
     /// Control the linter for Markdown files.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("markdown-linter-enabled"), argument("true|false"))
+        bpaf(long("md-linter-enabled"), argument("true|false"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<MarkdownLinterEnabled>,

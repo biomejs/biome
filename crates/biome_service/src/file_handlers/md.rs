@@ -150,7 +150,7 @@ impl ServiceLanguage for MarkdownLanguage {
             .with_trailing_newline(trailing_newline)
             .with_prose_wrap(prose_wrap);
 
-        overrides.apply_override_markdown_format_options(path, &mut options);
+        overrides.apply_override_markdown_format_options_by_indices(override_indices, &mut options);
 
         options
     }

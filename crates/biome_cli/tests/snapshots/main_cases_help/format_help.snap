@@ -178,15 +178,15 @@ Options that change how the HTML formatter behaves.
                               setting.
 
 Options that change how the Markdown formatter behaves
-        --markdown-formatter-enabled=<true|false>  Control the formatter for Markdown (and its super
+        --md-formatter-enabled=<true|false>  Control the formatter for Markdown (and its super
                               languages) files.
-        --markdown-formatter-indent-style=<tab|space>  The indent style applied to Markdown files.
-        --markdown-formatter-indent-width=NUMBER  The size of the indentation applied to Markdown
-                              files. Defaults to 2.
-        --markdown-formatter-line-width=NUMBER  What's the max width of a line applied to Markdown
-                              files. Defaults to 80.
-        --markdown-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the
-                              end of the file.
+        --md-formatter-indent-style=<tab|space>  The indent style applied to Markdown files.
+        --md-formatter-indent-width=NUMBER  The size of the indentation applied to Markdown files.
+                              Defaults to 2.
+        --md-formatter-line-width=NUMBER  What's the max width of a line applied to Markdown files.
+                              Defaults to 80.
+        --md-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
                               Setting this option to `false` is **highly discouraged** because it
                               could cause many problems with other tools: -
                               https://thoughtbot.com/blog/no-newline-at-end-of-file -
@@ -195,11 +195,11 @@ Options that change how the Markdown formatter behaves
                               https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
                               Disable the option at your own risk.
                               Defaults to true.
-        --markdown-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to
-                              Markdown (and its super languages) files. `auto` uses CRLF on Windows
-                              and LF on other platforms.
-        --markdown-formatter-prose-wrap=<preserve|always|never>  Controls whether Biome keeps, adds,
-                              or removes line breaks in Markdown paragraphs.
+        --md-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to Markdown
+                              (and its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
+        --md-formatter-prose-wrap=<preserve|always|never>  Controls whether Biome keeps, adds, or
+                              removes line breaks in Markdown paragraphs.
                               Manual line breaks are always kept. In Markdown, a manual line break
                               is created by ending a line with two spaces or a backslash.
 

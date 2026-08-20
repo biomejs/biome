@@ -186,9 +186,9 @@ fn format_markdown_files_with_prose_wrap_cli_option() {
             [
                 "format",
                 "--write",
-                "--markdown-formatter-line-width",
+                "--md-formatter-line-width",
                 "40",
-                "--markdown-formatter-prose-wrap",
+                "--md-formatter-prose-wrap",
                 "always",
                 file_path.as_str(),
             ]
