@@ -545,31 +545,37 @@ fn append_trivia_piece(
 
 /// Appends `source` blanked as whitespace trivia of the same byte length, keeping the line
 /// breaks as dedicated newline pieces so the line numbers don't shift.
+///
+/// Blanking one space per *byte* is what preserves the byte offsets of the code that follows.
+/// UTF-8 encodes every non-ASCII character with bytes outside the ASCII range, so a line break
+/// can never be part of a multi-byte character and scanning bytes needs no decoding.
 fn append_blanked_trivia(source: &str, text: &mut String, pieces: &mut Vec<TriviaPiece>) {
+    let bytes = source.as_bytes();
     let mut whitespace_len = 0u32;
-    let mut chars = source.chars().peekable();
+    let mut index = 0;
 
-    while let Some(char) = chars.next() {
-        if matches!(char, '\n' | '\r') {
+    while let Some(&byte) = bytes.get(index) {
+        if matches!(byte, b'\n' | b'\r') {
             if whitespace_len > 0 {
                 pieces.push(TriviaPiece::whitespace(whitespace_len));
                 whitespace_len = 0;
             }
 
-            text.push(char);
-            let mut len = 1u32;
-            if char == '\r' && chars.peek() == Some(&'\n') {
-                chars.next();
-                text.push('\n');
-                len = 2;
-            }
+            // `\r\n` is a single line break.
+            let len = if byte == b'\r' && bytes.get(index + 1) == Some(&b'\n') {
+                text.push_str("\r\n");
+                2
+            } else {
+                text.push(char::from(byte));
+                1
+            };
+
             pieces.push(TriviaPiece::newline(len));
+            index += len as usize;
         } else {
-            // One space per byte, so byte offsets are preserved even for multi-byte characters.
-            for _ in 0..char.len_utf8() {
-                text.push(' ');
-            }
-            whitespace_len += char.len_utf8() as u32;
+            text.push(' ');
+            whitespace_len += 1;
+            index += 1;
         }
     }
 
@@ -578,15 +584,13 @@ fn append_blanked_trivia(source: &str, text: &mut String, pieces: &mut Vec<Trivi
     }
 }
 
-/// Appends `source` with every character other than a line break replaced by whitespace.
+/// Appends `source` with every byte other than a line break replaced by whitespace.
 fn append_blanked_text(source: &str, text: &mut String) {
-    for char in source.chars() {
-        if matches!(char, '\n' | '\r') {
-            text.push(char);
+    for &byte in source.as_bytes() {
+        if matches!(byte, b'\n' | b'\r') {
+            text.push(char::from(byte));
         } else {
-            for _ in 0..char.len_utf8() {
-                text.push(' ');
-            }
+            text.push(' ');
         }
     }
 }
