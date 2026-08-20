@@ -76,7 +76,7 @@ impl<'source> ConfigurationInspector<'source> {
                 continue;
             };
             let previous_value = value.clone();
-            Self::apply_override(&mut effective_configuration, pattern)?;
+            pattern.apply_to_configuration(&mut effective_configuration, &self.configuration);
             value = key.value_in_configuration(&effective_configuration)?;
             let Some(source) = self.files.override_source(
                 &self.serialized_configuration,
@@ -86,7 +86,13 @@ impl<'source> ConfigurationInspector<'source> {
             ) else {
                 continue;
             };
-            if previous_value != value || source.declares_key {
+            if previous_value != value && !source.declares_key {
+                sources = if value.is_some() {
+                    self.files.base_sources(&self.configuration, key)?
+                } else {
+                    Vec::new()
+                };
+            } else if previous_value != value || source.declares_key {
                 if value.as_ref().is_some_and(JsonValueExt::is_scalar) {
                     sources = vec![source];
                 } else {
@@ -109,45 +115,6 @@ impl<'source> ConfigurationInspector<'source> {
         }
 
         Ok(KeyInspection { value, sources })
-    }
-
-    /// Applies the configuration portion of an override and preserves replacement semantics for
-    /// language globals.
-    fn apply_override(
-        configuration: &mut Configuration,
-        pattern: &OverridePattern,
-    ) -> Result<(), WorkspaceError> {
-        let mut value = serde_json::to_value(pattern)
-            .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
-        if let Some(pattern) = value.as_object_mut() {
-            pattern.remove("includes");
-        }
-        let override_configuration = serde_json::from_value::<Configuration>(value)
-            .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
-        let javascript_globals = override_configuration
-            .javascript
-            .as_ref()
-            .and_then(|javascript| javascript.globals.clone());
-        let css_globals = override_configuration
-            .css
-            .as_ref()
-            .and_then(|css| css.globals.clone());
-
-        configuration.merge_with(override_configuration);
-
-        if let Some(globals) = javascript_globals {
-            configuration
-                .javascript
-                .get_or_insert_with(Default::default)
-                .globals = Some(globals);
-        }
-        if let Some(globals) = css_globals {
-            configuration
-                .css
-                .get_or_insert_with(Default::default)
-                .globals = Some(globals);
-        }
-        Ok(())
     }
 }
 
@@ -177,13 +144,11 @@ impl KeyInspection<'_> {
 }
 
 /// Identifies whether a declaration belongs to the root file or an extended file.
-#[derive(Debug, Clone)]
 pub(super) enum ConfigurationKind {
     Root,
     Extend { specifier: Option<String> },
 }
 
-#[derive(Debug)]
 struct InspectedConfigurationFile<'source> {
     path: &'source Utf8Path,
     source: &'source str,
@@ -194,7 +159,6 @@ struct InspectedConfigurationFile<'source> {
 }
 
 /// Parsed retained files in merge order: extended configurations followed by the root.
-#[derive(Debug)]
 struct InspectedConfigurationFiles<'source> {
     files: Vec<InspectedConfigurationFile<'source>>,
 }
@@ -339,7 +303,7 @@ impl<'source> InspectedConfigurationFiles<'source> {
             None,
             None,
             key,
-        )?;
+        );
         let merged_value = key.value_in_configuration(&merged)?;
         let mut sources = Vec::new();
 
@@ -350,7 +314,7 @@ impl<'source> InspectedConfigurationFiles<'source> {
                 Some(file_index),
                 None,
                 key,
-            )?;
+            );
             if key.value_in_configuration(&without)? != merged_value {
                 sources.push(file.source_reference(None, key, SourceScope::Base, None, None, None));
             }
@@ -363,12 +327,32 @@ impl<'source> InspectedConfigurationFiles<'source> {
                 None,
                 Some(override_index),
                 key,
-            )?;
+            );
             if key.value_in_configuration(&without)? != merged_value
                 && let Some(source) =
                     self.override_source(configuration, key, override_index, matched_path)
             {
                 sources.push(source);
+            }
+        }
+
+        if sources.is_empty() {
+            if let Some(&override_index) = matching_overrides.iter().rev().find(|&&index| {
+                self.override_source(configuration, key, index, matched_path)
+                    .is_some_and(|source| source.declares_key)
+            }) {
+                if let Some(source) =
+                    self.override_source(configuration, key, override_index, matched_path)
+                {
+                    sources.push(source);
+                }
+            } else if let Some(file) = self
+                .files
+                .iter()
+                .rev()
+                .find(|file| file.declares_key(None, key))
+            {
+                sources.push(file.source_reference(None, key, SourceScope::Base, None, None, None));
             }
         }
 
@@ -382,17 +366,18 @@ impl<'source> InspectedConfigurationFiles<'source> {
         skipped_file: Option<usize>,
         skipped_override: Option<usize>,
         key: &ConfigurationKey,
-    ) -> Result<Configuration, WorkspaceError> {
+    ) -> Configuration {
         let mut configuration = self.merge_base_files(skipped_file, key);
+        let base_configuration = configuration.clone();
         for &override_index in matching_overrides {
             if Some(override_index) == skipped_override {
                 continue;
             }
             if let Some(pattern) = override_patterns.get(override_index) {
-                ConfigurationInspector::apply_override(&mut configuration, pattern)?;
+                pattern.apply_to_configuration(&mut configuration, &base_configuration);
             }
         }
-        Ok(configuration)
+        configuration
     }
 }
 
@@ -521,14 +506,13 @@ impl<'source> InspectedConfigurationFile<'source> {
     }
 }
 
-#[derive(Debug)]
 enum PathSegment {
     Property(String),
     Index(usize),
 }
 
 /// Collects value ranges while the retained JSON syntax tree is deserialized.
-#[derive(Debug, Default)]
+#[derive(Default)]
 struct SourceRangeCollector {
     entries: BTreeMap<String, TextRange>,
     diagnostics: Vec<Error>,
@@ -589,14 +573,13 @@ impl JsonValueExt for Value {
 }
 
 /// Identifies whether a value comes from a base configuration or a matching override.
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub(super) enum SourceScope {
     Base,
     Override,
 }
 
 /// A declaration that contributes to an inspected value and its diagnostic metadata.
-#[derive(Debug, Clone)]
 pub(super) struct SourceReference<'source> {
     pub(super) path: &'source Utf8Path,
     pub(super) source: &'source str,

@@ -3,15 +3,13 @@
 
 use crate::CliDiagnostic;
 use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_deserialize::Merge;
 use biome_service::WorkspaceError;
-use serde_json::{Map, Value};
+use serde_json::Value;
 
 /// A validated dot-separated path into a serialized configuration.
 ///
 /// A numeric segment indexes an array only when the preceding value is an array. The same segment
 /// remains an object property when the preceding value is an object.
-#[derive(Debug)]
 pub(super) struct ConfigurationKey {
     text: String,
     segments: Vec<String>,
@@ -36,7 +34,7 @@ impl ConfigurationKey {
         self.value_in_prefix(value, self.segments.len())
     }
 
-    /// Returns the value after applying the typed configuration's shorthand normalization.
+    /// Returns the value after accounting for lint-rule group shorthand.
     ///
     /// The normalization step allows a key below a scalar group shorthand to resolve even when the
     /// serialized configuration does not contain the requested leaf.
@@ -50,28 +48,7 @@ impl ConfigurationKey {
             return Ok(Some(value.clone()));
         }
 
-        for parent_len in (1..self.segments.len()).rev() {
-            let probe = self
-                .segments
-                .iter()
-                .take(parent_len)
-                .rev()
-                .fold(Value::Object(Map::new()), |value, segment| {
-                    Value::Object(Map::from_iter([(segment.clone(), value)]))
-                });
-            let Ok(probe) = serde_json::from_value::<Configuration>(probe) else {
-                continue;
-            };
-            let mut normalized = configuration.clone();
-            normalized.merge_with(probe);
-            let normalized = serde_json::to_value(normalized)
-                .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
-            if let Some(value) = self.value_in(&normalized) {
-                return Ok(Some(value.clone()));
-            }
-        }
-
-        Ok(None)
+        Ok(self.rule_group_shorthand_in(&value).cloned())
     }
 
     pub(super) fn with_prefix(&self, prefix: Option<&str>) -> Self {
@@ -112,11 +89,24 @@ impl ConfigurationKey {
                 _ => None,
             })
     }
+
+    fn rule_group_shorthand_in<'a>(&self, value: &'a Value) -> Option<&'a Value> {
+        match self.segments.as_slice() {
+            [linter, rules, _, _] if linter == "linter" && rules == "rules" => self
+                .value_in_prefix(value, 3)
+                .filter(|value| value.is_string()),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_configuration::{
+        LinterConfiguration, Rules,
+        analyzer::{GroupPlainConfiguration, SeverityOrGroup},
+    };
 
     #[test]
     fn owns_dotted_value_traversal() {
@@ -127,5 +117,27 @@ mod tests {
         });
 
         assert_eq!(key.value_in(&value), Some(&Value::from(100)));
+    }
+
+    #[test]
+    fn resolves_rule_group_shorthand_without_deserializing_configuration() {
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    suspicious: Some(SeverityOrGroup::Plain(GroupPlainConfiguration::Error)),
+                    ..Rules::default()
+                }),
+                ..LinterConfiguration::default()
+            }),
+            ..Configuration::default()
+        };
+        let key = ConfigurationKey::parse("linter.rules.suspicious.noConsole".to_string())
+            .expect("valid configuration key");
+
+        assert_eq!(
+            key.value_in_configuration(&configuration)
+                .expect("serializable configuration"),
+            Some(Value::String("error".to_string()))
+        );
     }
 }
