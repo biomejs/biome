@@ -2988,13 +2988,13 @@ impl JsAstNode {
                     JsSyntaxKind::JSX_CLOSING_FRAGMENT,
                     JsxClosingFragment,
                     ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
+                        node.l_angle_token()
                     )),
                     ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token().ok()
+                        node.slash_token()
                     )),
                     ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
+                        node.r_angle_token()
                     )),
                 );
             }
@@ -3147,10 +3147,10 @@ impl JsAstNode {
                     JsSyntaxKind::JSX_OPENING_FRAGMENT,
                     JsxOpeningFragment,
                     ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
+                        node.l_angle_token()
                     )),
                     ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
+                        node.r_angle_token()
                     )),
                 );
             }
@@ -3185,7 +3185,7 @@ impl JsAstNode {
                         context
                     )),
                     ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token().ok()
+                        node.slash_token()
                     )),
                     ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
