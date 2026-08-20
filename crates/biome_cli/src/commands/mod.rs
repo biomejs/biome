@@ -681,10 +681,6 @@ pub enum InspectSubCommand {
     /// Shows the final, resolved configuration, including `extends` and matching `overrides`.
     #[bpaf(command)]
     Config {
-        /// A dotted configuration key, such as `formatter.lineWidth`.
-        #[bpaf(positional("KEY"), optional)]
-        key: Option<String>,
-
         /// Evaluates matching overrides for this file path.
         #[bpaf(long("path"), argument("PATH"), optional)]
         path: Option<String>,
@@ -692,6 +688,10 @@ pub enum InspectSubCommand {
         /// When provided, the output is emitted in JSON format.
         #[bpaf(long("json"), switch)]
         json: bool,
+
+        /// A dotted configuration key, such as `formatter.lineWidth`.
+        #[bpaf(positional("KEY"), optional)]
+        key: Option<String>,
     },
 }
 

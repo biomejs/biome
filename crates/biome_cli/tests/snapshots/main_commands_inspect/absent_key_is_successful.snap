@@ -13,9 +13,9 @@ expression: redactor(content)
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i formatter.unknown is not configured.
+  i The key formatter.unknown doesn't exist.
   
-  i No value was found in the base configuration or matching overrides.
+  i Make sure it's correctly spelled.
   
 
 ```

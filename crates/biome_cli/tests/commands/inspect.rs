@@ -188,6 +188,136 @@ fn composite_value_reports_contributors() {
 }
 
 #[test]
+fn composite_value_diagnostic_identifies_contributors() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "extends": ["base.json"],
+  "files": { "includes": ["tests/**"] }
+}"#,
+    );
+    fs.insert(
+        "base.json".into(),
+        r#"{ "files": { "includes": ["src/**"] } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "files.includes"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "composite_value_diagnostic_identifies_contributors",
+        fs,
+        console,
+        result,
+    );
+}
+
+#[test]
+fn composite_value_diagnostic_shows_three_extended_sources() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["first.json", "second.json", "third.json"] }"#,
+    );
+    fs.insert(
+        "first.json".into(),
+        r#"{ "files": { "includes": ["first/**"] } }"#,
+    );
+    fs.insert(
+        "second.json".into(),
+        r#"{ "files": { "includes": ["second/**"] } }"#,
+    );
+    fs.insert(
+        "third.json".into(),
+        r#"{ "files": { "includes": ["third/**"] } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "files.includes"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "composite_value_diagnostic_shows_three_extended_sources",
+        fs,
+        console,
+        result,
+    );
+}
+
+#[test]
+fn identical_composite_declarations_report_the_last_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "extends": ["base.json"],
+  "formatter": { "lineWidth": 100 }
+}"#,
+    );
+    fs.insert(
+        "base.json".into(),
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter", "--json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "identical_composite_declarations_report_the_last_source",
+        fs,
+        console,
+        result,
+    );
+}
+
+#[test]
+fn identical_override_composite_reports_the_override_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "formatter": { "lineWidth": 100 },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "formatter": { "lineWidth": 100 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter", "--path=file.js", "--json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "identical_override_composite_reports_the_override_source",
+        fs,
+        console,
+        result,
+    );
+}
+
+#[test]
 fn last_matching_override_wins() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -236,6 +366,51 @@ fn last_matching_override_wins() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_inspect_snapshot("last_matching_override_wins", fs, console, result);
+}
+
+#[test]
+fn later_matching_override_uses_runtime_root_fallback() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "formatter": { "formatWithErrors": false },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "formatWithErrors": true }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "formatter.formatWithErrors",
+                "--path=file.test.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "later_matching_override_uses_runtime_root_fallback",
+        fs,
+        console,
+        result,
+    );
 }
 
 #[test]

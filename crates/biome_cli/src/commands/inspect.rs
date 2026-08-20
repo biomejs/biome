@@ -10,7 +10,9 @@ use crate::{CliDiagnostic, CliSession, cli_options::CliOptions};
 use biome_configuration::BiomeDiagnostic;
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
 use biome_deserialize::TextRange;
-use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, PrintDiagnostic, Visit};
+use biome_diagnostics::{
+    Advices, CodeFrameAdvice, Diagnostic, Error, LogCategory, PrintDiagnostic, Visit,
+};
 use biome_service::{WorkspaceError, configuration::load_configuration, settings::Settings};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
@@ -263,13 +265,12 @@ impl InspectionDiagnostic {
 
     fn absent(key: String) -> Self {
         Self {
-            message: markup! { <Emphasis>{key}</Emphasis>" is not configured." }.to_owned(),
+            message: markup! { "The key "<Emphasis>{key}</Emphasis>" doesn't exist." }.to_owned(),
             path: None,
             span: None,
             source_code: None,
             advice: InspectionAdvice(vec![AdviceLine::Info(
-                markup! { "No value was found in the base configuration or matching overrides." }
-                    .to_owned(),
+                markup! { "Make sure it's correctly spelled." }.to_owned(),
             )]),
         }
     }
@@ -284,17 +285,21 @@ impl InspectionDiagnostic {
         root_path: Option<&Utf8Path>,
     ) -> Self {
         let value = Self::display_value(value);
-        let location = sources.last().map(|source| {
-            (
-                source.path.to_string(),
-                source.range,
-                source.source.to_string(),
-            )
-        });
+        let location = if sources.len() == 1 {
+            sources.first().map(|source| {
+                (
+                    source.path.to_string(),
+                    source.range,
+                    source.source.to_string(),
+                )
+            })
+        } else {
+            None
+        };
         let advice = Self::source_advices(sources, root_path);
         Self {
             message: markup! {
-                <Emphasis>{key}</Emphasis>" resolves to "<Emphasis>{value}</Emphasis>"."
+                "The key "<Emphasis>{key}</Emphasis>" has the value "<Emphasis>{value}</Emphasis>"."
             }
             .to_owned(),
             path: location.as_ref().map(|(path, _, _)| path.clone()),
@@ -311,16 +316,33 @@ impl InspectionDiagnostic {
         }
     }
 
-    /// Describes whether the value comes from a root, extended, override, or merged source.
+    /// Describes every contributing declaration for merged values and the effective declaration
+    /// for scalar values.
     fn source_advices(
         sources: &[SourceReference],
         root_path: Option<&Utf8Path>,
     ) -> Vec<AdviceLine> {
         if sources.len() > 1 {
-            return vec![AdviceLine::Info(
-                markup! { "This value is assembled from "{sources.len()}" configuration sources." }
-                    .to_owned(),
+            let source_count = sources.len();
+            let mut advice = vec![AdviceLine::Info(
+                markup! {
+                    "This value is defined across "<Emphasis>{source_count}</Emphasis>
+                    " configuration files."
+                }
+                .to_owned(),
             )];
+            for source in sources {
+                advice.push(Self::composite_source_advice(source));
+                advice.push(AdviceLine::Frame {
+                    path: source.path.to_string(),
+                    span: source.range,
+                    source_code: source.source.to_string(),
+                });
+                if let Some(match_advice) = Self::override_match_advice(source) {
+                    advice.push(match_advice);
+                }
+            }
+            return advice;
         }
         let Some(source) = sources.first() else {
             return Vec::new();
@@ -349,34 +371,99 @@ impl InspectionDiagnostic {
                     ConfigurationKind::Extend { .. } => "extended configuration",
                 };
                 advice.push(AdviceLine::Info(
-                    markup! { "This value is provided by override "{index}" in the "{kind}"." }
-                        .to_owned(),
+                    markup! {
+                        "This value is provided by override "<Emphasis>{index}</Emphasis>
+                        " in the "<Emphasis>{kind}</Emphasis>"."
+                    }
+                    .to_owned(),
                 ));
-                if let Some(path) = &source.matched_path {
-                    let includes = match source.includes.as_deref() {
-                        Some([include]) => include.clone(),
-                        Some(includes) => {
-                            serde_json::to_string(includes).unwrap_or_else(|_| "[]".to_string())
-                        }
-                        None => "[]".to_string(),
-                    };
-                    advice.push(AdviceLine::Info(
-                        markup! {
-                            "The override matched "<Emphasis>{path}</Emphasis>
-                            " using "<Emphasis>{includes}</Emphasis>"."
-                        }
-                        .to_owned(),
-                    ));
+                if let Some(match_advice) = Self::override_match_advice(source) {
+                    advice.push(match_advice);
                 }
             }
         }
         advice
     }
+
+    /// Introduces one merged-value code frame with its configuration path and scope.
+    fn composite_source_advice(source: &SourceReference) -> AdviceLine {
+        let path = source.path.as_str();
+        let index = source.override_index.unwrap_or_default();
+        let text = match (source.scope, source.kind) {
+            (SourceScope::Base, ConfigurationKind::Root) => markup! {
+                "The highlighted value is configured in the root configuration "
+                <Emphasis>{path}</Emphasis>"."
+            }
+            .to_owned(),
+            (SourceScope::Base, ConfigurationKind::Extend { specifier }) => {
+                if let Some(specifier) = specifier.as_deref() {
+                    markup! {
+                        "The highlighted value is configured in "<Emphasis>{path}</Emphasis>
+                        ", referenced by "<Emphasis>"extends"</Emphasis>" as "
+                        <Emphasis>{specifier}</Emphasis>"."
+                    }
+                    .to_owned()
+                } else {
+                    markup! {
+                        "The highlighted value is configured in "<Emphasis>{path}</Emphasis>
+                        ", referenced by "<Emphasis>"extends"</Emphasis>"."
+                    }
+                    .to_owned()
+                }
+            }
+            (SourceScope::Override, ConfigurationKind::Root) => markup! {
+                "The highlighted value is configured by override "<Emphasis>{index}</Emphasis>
+                " in "<Emphasis>{path}</Emphasis>"."
+            }
+            .to_owned(),
+            (SourceScope::Override, ConfigurationKind::Extend { specifier }) => {
+                if let Some(specifier) = specifier.as_deref() {
+                    markup! {
+                        "The highlighted value is configured by override "
+                        <Emphasis>{index}</Emphasis>" in "<Emphasis>{path}</Emphasis>
+                        ", referenced by "<Emphasis>"extends"</Emphasis>" as "
+                        <Emphasis>{specifier}</Emphasis>"."
+                    }
+                    .to_owned()
+                } else {
+                    markup! {
+                        "The highlighted value is configured by override "
+                        <Emphasis>{index}</Emphasis>" in "<Emphasis>{path}</Emphasis>
+                        ", referenced by "<Emphasis>"extends"</Emphasis>"."
+                    }
+                    .to_owned()
+                }
+            }
+        };
+        AdviceLine::Info(text)
+    }
+
+    /// Explains why an override contributor applies to the inspected path.
+    fn override_match_advice(source: &SourceReference) -> Option<AdviceLine> {
+        let path = source.matched_path.as_deref()?;
+        let includes = match source.includes.as_deref() {
+            Some([include]) => include.clone(),
+            Some(includes) => serde_json::to_string(includes).unwrap_or_else(|_| "[]".to_string()),
+            None => "[]".to_string(),
+        };
+        Some(AdviceLine::Info(
+            markup! {
+                "The override matched "<Emphasis>{path}</Emphasis>
+                " using "<Emphasis>{includes}</Emphasis>"."
+            }
+            .to_owned(),
+        ))
+    }
 }
 
-/// One ordered advice entry and the diagnostic log category used to render it.
+/// One ordered advice entry rendered as either a log line or a source code frame.
 #[derive(Debug)]
 enum AdviceLine {
+    Frame {
+        path: String,
+        span: Option<TextRange>,
+        source_code: String,
+    },
     Info(MarkupBuf),
     Plain(MarkupBuf),
 }
@@ -389,6 +476,16 @@ impl Advices for InspectionAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         for line in &self.0 {
             match line {
+                AdviceLine::Frame {
+                    path,
+                    span,
+                    source_code,
+                } => CodeFrameAdvice {
+                    path,
+                    span,
+                    source_code,
+                }
+                .record(visitor)?,
                 AdviceLine::Info(line) => visitor.record_log(LogCategory::Info, line)?,
                 AdviceLine::Plain(line) => visitor.record_log(LogCategory::None, line)?,
             }

@@ -21,7 +21,7 @@ expression: redactor(content)
 ```block
 biome.json:5:23 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i linter.rules.suspicious.noDebugger resolves to error.
+  i The key linter.rules.suspicious.noDebugger has the value error.
   
     3 │     "rules": {
     4 │       "suspicious": {
