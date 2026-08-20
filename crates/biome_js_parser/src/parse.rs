@@ -521,18 +521,24 @@ mod tests {
         })
     }
 
-
-
     #[test]
     fn astro_non_void_element_still_requires_a_closing_tag() {
-        let parse = parse("<span>", astro_template_source(), JsParserOptions::default());
+        let parse = parse(
+            "<span>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
 
         assert!(parse.has_errors(), "`<span>` is not a void element");
     }
 
     #[test]
     fn astro_comment_only_template_expression_is_allowed() {
-        for body in ["/* only a comment */", "// a line comment", "/* a */ /* b */"] {
+        for body in [
+            "/* only a comment */",
+            "// a line comment",
+            "/* a */ /* b */",
+        ] {
             let parse = parse(body, astro_template_source(), JsParserOptions::default());
 
             assert!(
@@ -562,5 +568,4 @@ mod tests {
 
         assert!(parse.has_errors(), "only Astro allows a comment-only body");
     }
-
 }
