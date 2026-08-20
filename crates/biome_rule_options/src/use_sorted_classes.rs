@@ -1,6 +1,6 @@
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, TextRange,
+    DeserializationDiagnostic, DeserializationVisitor, MapMembers, TextRange,
 };
 use biome_rowan::Text;
 use serde::{Deserialize, Serialize};
@@ -82,9 +82,7 @@ impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
     fn visit_map(
         self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<
-            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-        >,
+        members: &mut MapMembers<'_>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

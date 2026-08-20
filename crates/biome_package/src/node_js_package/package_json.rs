@@ -3,7 +3,7 @@ use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationVisitor, Deserialized, Text, json::deserialize_from_json_ast,
+    DeserializationVisitor, Deserialized, MapMembers, Text, json::deserialize_from_json_ast,
 };
 use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
@@ -459,9 +459,7 @@ impl Deserializable for Dependencies {
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -633,9 +631,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
     fn visit_map(
         self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<
-            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-        >,
+        members: &mut MapMembers<'_>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

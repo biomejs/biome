@@ -1,6 +1,6 @@
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Merge,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Merge,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
@@ -518,9 +518,7 @@ impl Deserializable for Rules {
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: biome_rowan::TextRange,
                 name: &str,
             ) -> Option<Self::Output> {

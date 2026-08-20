@@ -71,7 +71,8 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Text,
+    TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
@@ -753,9 +754,7 @@ impl biome_deserialize::Deserializable for FilesConfiguration {
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

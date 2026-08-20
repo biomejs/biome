@@ -3,7 +3,7 @@
 //! Tests of these implementations are available in [biome_deserialize::json::tests] module.
 use crate::{
     Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
-    DeserializationVisitor, diagnostics::DeserializableTypes,
+    DeserializationVisitor, MapMembers, diagnostics::DeserializableTypes,
 };
 use biome_rowan::{Text, TextRange, TokenText};
 use std::{
@@ -668,9 +668,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -703,9 +701,7 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -742,9 +738,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

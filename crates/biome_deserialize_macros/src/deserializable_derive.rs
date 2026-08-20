@@ -497,7 +497,7 @@ fn generate_deserializable_struct(
                     fn visit_map(
                         self,
                         ctx: &mut dyn biome_deserialize::DeserializationContext,
-                        members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn biome_deserialize::DeserializableValue>, Box<dyn biome_deserialize::DeserializableValue>)>>,
+                        members: &mut biome_deserialize::MapMembers<'_>,
                         range: biome_deserialize::TextRange,
                         name: &str,
                     ) -> Option<Self::Output> {

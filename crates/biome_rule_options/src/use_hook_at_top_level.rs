@@ -1,7 +1,7 @@
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, TextRange,
+    DeserializationDiagnostic, DeserializationVisitor, MapMembers, TextRange,
 };
 use biome_deserialize_macros::Merge;
 use biome_rowan::Text;
@@ -38,9 +38,7 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
     fn visit_map(
         self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<
-            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-        >,
+        members: &mut MapMembers<'_>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

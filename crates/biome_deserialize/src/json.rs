@@ -1,7 +1,7 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
     DefaultDeserializationContext, Deserializable, DeserializableValue, DeserializationContext,
-    DeserializationVisitor, Deserialized, ErasedDeserializationVisitor, TextNumber,
+    DeserializationVisitor, Deserialized, ErasedDeserializationVisitor, MapMembers, TextNumber,
     diagnostics::DeserializableType,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
@@ -234,9 +234,7 @@ impl Deserializable for serde_json::Value {
             fn visit_map(
                 self,
                 ctx: &mut dyn DeserializationContext,
-                members: &mut dyn ExactSizeIterator<
-                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-                >,
+                members: &mut MapMembers<'_>,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

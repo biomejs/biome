@@ -188,6 +188,11 @@ impl DeserializableValue for Box<dyn DeserializableValue> {
     }
 }
 
+/// Iterator over the key-value pairs of a map, as passed to
+/// [DeserializationVisitor::visit_map].
+pub type MapMembers<'a> = dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>
+    + 'a;
+
 /// Object-safe counterpart of [DeserializationVisitor], used by
 /// [DeserializableValue::deserialize_erased].
 ///
@@ -238,9 +243,7 @@ pub trait ErasedDeserializationVisitor {
     fn visit_map(
         &mut self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<
-            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-        >,
+        members: &mut MapMembers<'_>,
         range: TextRange,
         name: &str,
     );
@@ -311,9 +314,7 @@ impl<V: DeserializationVisitor> ErasedDeserializationVisitor for ErasedVisitor<V
     fn visit_map(
         &mut self,
         ctx: &mut dyn DeserializationContext,
-        members: &mut dyn ExactSizeIterator<
-            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-        >,
+        members: &mut MapMembers<'_>,
         range: TextRange,
         name: &str,
     ) {
@@ -343,7 +344,7 @@ impl<V: DeserializationVisitor> ErasedDeserializationVisitor for ErasedVisitor<V
 /// ## Examples
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, MapMembers, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -369,9 +370,7 @@ impl<V: DeserializationVisitor> ErasedDeserializationVisitor for ErasedVisitor<V
 ///     fn visit_map(
 ///         self,
 ///         ctx: &mut dyn DeserializationContext,
-///         members: &mut dyn ExactSizeIterator<
-///             Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-///         >,
+///         members: &mut MapMembers<'_>,
 ///         range: TextRange,
 ///         _name: &str,
 ///     ) -> Option<Self::Output> {
@@ -408,7 +407,7 @@ impl<V: DeserializationVisitor> ErasedDeserializationVisitor for ErasedVisitor<V
 /// ```
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, MapMembers, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -600,9 +599,7 @@ pub trait DeserializationVisitor: Sized {
     fn visit_map(
         self,
         ctx: &mut dyn DeserializationContext,
-        _members: &mut dyn ExactSizeIterator<
-            Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
-        >,
+        _members: &mut MapMembers<'_>,
         range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
