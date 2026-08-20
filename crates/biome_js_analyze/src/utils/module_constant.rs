@@ -6,9 +6,7 @@ use biome_js_syntax::{
     JsSyntaxNode, T,
 };
 use biome_rowan::TriviaPieceKind;
-use biome_rowan::{
-    AstNode, BatchMutation, BatchMutationExt, Direction, SyntaxElement, SyntaxTriviaPiece,
-};
+use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, SyntaxTriviaPiece};
 use rustc_hash::FxHashSet;
 
 struct HeaderTrivia {
@@ -23,33 +21,61 @@ pub(crate) fn extract_module_constant(
     value: AnyJsExpression,
     candidate_name: &str,
 ) -> Option<(BatchMutation<JsLanguage>, String)> {
+    extract_module_constant_with_reserved_names(
+        root,
+        model,
+        target,
+        value,
+        candidate_name,
+        &FxHashSet::default(),
+        true,
+    )
+}
+
+pub(crate) fn extract_module_constant_with_reserved_names(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+    target: &JsSyntaxNode,
+    value: AnyJsExpression,
+    candidate_name: &str,
+    reserved_names: &FxHashSet<String>,
+    transfer_header: bool,
+) -> Option<(BatchMutation<JsLanguage>, String)> {
+    if !is_module_constant_extractable(root, model, target) {
+        return None;
+    }
+
     let list = root_list(root)?;
     let top_level_item = target
         .ancestors()
         .find(|ancestor| ancestor.parent().is_some_and(|parent| parent == list))?;
-    if target
-        .ancestors()
-        .any(|ancestor| ancestor.kind() == JsSyntaxKind::JS_WITH_STATEMENT)
-    {
-        // A `with` scope can dynamically shadow any generated identifier.
-        return None;
-    }
-    if direct_eval_affects_target(root, model, target) {
-        // Direct eval in a sloppy script can introduce a binding into an enclosing function.
-        return None;
-    }
 
     let occupied_reference_names = occupied_reference_names(model);
-    let name = collision_free_name(model, target, candidate_name, &occupied_reference_names);
+    let name = collision_free_name(
+        model,
+        target,
+        candidate_name,
+        &occupied_reference_names,
+        reserved_names,
+    );
+    let insertion_slot = insertion_slot(&list, top_level_item.index())?;
+    let first_token = if insertion_slot == 0 && transfer_header {
+        Some(list.first_token()?)
+    } else {
+        None
+    };
+    let target_starts_with_first_token = first_token.as_ref().is_some_and(|first_token| {
+        target
+            .first_token()
+            .is_some_and(|target_token| target_token == first_token.clone())
+    });
     let replacement =
         make::js_identifier_expression(make::js_reference_identifier(make::ident(&name)))
             .into_syntax();
-    let replacement = preserve_target_trivia(target, replacement)?;
-    let transformed_item = replace_target(&top_level_item, target, replacement)?;
-    let insertion_slot = insertion_slot(&list, top_level_item.index())?;
+    let replacement = preserve_target_trivia(target, replacement, !target_starts_with_first_token)?;
     let line_ending = source_line_ending(&list);
     let value = trim_expression_trivia(value)?;
-    let header_trivia = if insertion_slot == 0 {
+    let header_trivia = if insertion_slot == 0 && transfer_header {
         Some(split_header_trivia(&list)?)
     } else {
         None
@@ -67,33 +93,36 @@ pub(crate) fn extract_module_constant(
         &line_ending,
     );
 
-    let replaced_list = list.clone().splice_slots(
-        top_level_item.index()..=top_level_item.index(),
-        [Some(SyntaxElement::Node(transformed_item))],
-    );
-    let new_list = if insertion_slot == 0 {
-        // Detach the original first item's remaining whitespace before inserting at slot zero.
-        // Leading trivia on the first list item is rendered before every list child by the CST.
-        let first_item = replaced_list.first_child()?;
-        let first_item = first_item.with_leading_trivia_pieces([])?;
-        let list_without_first_trivia =
-            replaced_list.splice_slots(0..=0, [Some(SyntaxElement::Node(first_item))]);
-        let list_with_declaration =
-            list_without_first_trivia.splice_slots(0..0, [Some(SyntaxElement::Node(declaration))]);
-        list_with_declaration
-    } else {
-        replaced_list.splice_slots(
-            insertion_slot..insertion_slot,
-            [Some(SyntaxElement::Node(declaration))],
-        )
-    };
-
     let mut mutation = root.clone().begin();
-    // The replacement list already contains the deliberate header/item trivia split. The
-    // default replacement would copy the old list's leading trivia and duplicate the header.
-    mutation.replace_element_discard_trivia(list.into(), new_list.into());
+    mutation.replace_element_discard_trivia(target.clone().into(), replacement.into());
+    if let Some(first_token) = first_token.filter(|_| !target_starts_with_first_token) {
+        // Header trivia belongs to the generated declaration; clear it from the actual first
+        // item so attached comments are not moved or duplicated.
+        mutation.clear_leading_trivia(first_token);
+    }
+    if insertion_slot == 0 && transfer_header {
+        mutation.insert_element_with_header(list, insertion_slot, declaration.into());
+    } else {
+        mutation.insert_element(list, insertion_slot, declaration.into());
+    }
 
     Some((mutation, name))
+}
+
+pub(crate) fn collision_free_module_constant_name(
+    model: &SemanticModel,
+    target: &JsSyntaxNode,
+    candidate_name: &str,
+    reserved_names: &FxHashSet<String>,
+) -> String {
+    let occupied_reference_names = occupied_reference_names(model);
+    collision_free_name(
+        model,
+        target,
+        candidate_name,
+        &occupied_reference_names,
+        reserved_names,
+    )
 }
 
 fn root_list(root: &AnyJsRoot) -> Option<JsSyntaxNode> {
@@ -113,15 +142,28 @@ fn collision_free_name(
     target: &JsSyntaxNode,
     candidate_name: &str,
     occupied_reference_names: &FxHashSet<String>,
+    reserved_names: &FxHashSet<String>,
 ) -> String {
-    if name_is_free_in_target_scopes(model, target, candidate_name, occupied_reference_names) {
+    if name_is_free_in_target_scopes(
+        model,
+        target,
+        candidate_name,
+        occupied_reference_names,
+        reserved_names,
+    ) {
         return candidate_name.to_string();
     }
 
     let mut suffix = 2;
     loop {
         let name = format!("{candidate_name}_{suffix}");
-        if name_is_free_in_target_scopes(model, target, &name, occupied_reference_names) {
+        if name_is_free_in_target_scopes(
+            model,
+            target,
+            &name,
+            occupied_reference_names,
+            reserved_names,
+        ) {
             return name;
         }
         suffix += 1;
@@ -133,12 +175,14 @@ fn name_is_free_in_target_scopes(
     target: &JsSyntaxNode,
     name: &str,
     occupied_reference_names: &FxHashSet<String>,
+    reserved_names: &FxHashSet<String>,
 ) -> bool {
     model
         .scope(target)
         .ancestors()
         .all(|scope| scope.get_binding(name).is_none())
         && !occupied_reference_names.contains(name)
+        && !reserved_names.contains(name)
 }
 
 fn occupied_reference_names(model: &SemanticModel) -> FxHashSet<String> {
@@ -159,34 +203,15 @@ fn occupied_reference_names(model: &SemanticModel) -> FxHashSet<String> {
 fn direct_eval_affects_target(
     root: &AnyJsRoot,
     model: &SemanticModel,
-    target: &JsSyntaxNode,
+    _target: &JsSyntaxNode,
 ) -> bool {
-    if !matches!(root, AnyJsRoot::JsScript(_)) {
-        return false;
-    }
-
-    let target_functions = target
-        .ancestors()
-        .filter(|ancestor| AnyJsFunction::can_cast(ancestor.kind()))
-        .collect::<Vec<_>>();
-
     root.syntax()
         .descendants()
         .filter_map(JsCallExpression::cast)
         .any(|call| {
-            if !is_direct_eval(model, &call) {
-                return false;
-            }
-
-            let eval_function = call
-                .syntax()
-                .ancestors()
-                .find(|ancestor| AnyJsFunction::can_cast(ancestor.kind()));
-            eval_function.is_none_or(|eval_function| {
-                target_functions
-                    .iter()
-                    .any(|target_function| target_function == &eval_function)
-            })
+            // A direct eval anywhere in the accepted root can observe a newly inserted
+            // top-level binding, including from a sibling or nested function.
+            is_direct_eval(model, &call)
         })
 }
 
@@ -209,9 +234,14 @@ fn is_direct_eval(model: &SemanticModel, call: &JsCallExpression) -> bool {
 fn preserve_target_trivia(
     target: &JsSyntaxNode,
     replacement: JsSyntaxNode,
+    preserve_leading_trivia: bool,
 ) -> Option<JsSyntaxNode> {
-    let replacement = if let Some(trivia) = target.first_leading_trivia() {
-        replacement.with_leading_trivia_pieces(trivia.pieces())?
+    let replacement = if preserve_leading_trivia {
+        if let Some(trivia) = target.first_leading_trivia() {
+            replacement.with_leading_trivia_pieces(trivia.pieces())?
+        } else {
+            replacement
+        }
     } else {
         replacement
     };
@@ -282,29 +312,6 @@ fn find_first_blank_line_index(pieces: &[SyntaxTriviaPiece<JsLanguage>]) -> Opti
     None
 }
 
-fn replace_target(
-    top_level_item: &JsSyntaxNode,
-    target: &JsSyntaxNode,
-    replacement: JsSyntaxNode,
-) -> Option<JsSyntaxNode> {
-    let mut child = target.clone();
-    let mut replacement = replacement;
-
-    loop {
-        let parent = child.parent()?;
-        let is_top_level_item = &parent == top_level_item;
-        // Keep the original parent for the next ancestor step; replacement returns a new tree.
-        let updated_parent = parent
-            .clone()
-            .replace_child(child.into(), replacement.into())?;
-        if is_top_level_item {
-            return Some(updated_parent);
-        }
-        child = parent;
-        replacement = updated_parent;
-    }
-}
-
 fn insertion_slot(list: &JsSyntaxNode, target_index: usize) -> Option<usize> {
     let mut slot = 0;
     let mut in_directive_prologue = true;
@@ -322,6 +329,37 @@ fn insertion_slot(list: &JsSyntaxNode, target_index: usize) -> Option<usize> {
 
     // Inserting after the target could move initialization below code that uses it.
     (slot <= target_index).then_some(slot)
+}
+
+pub(crate) fn module_constant_insertion_slot(
+    root: &AnyJsRoot,
+    target: &JsSyntaxNode,
+) -> Option<usize> {
+    let list = root_list(root)?;
+    let top_level_item = target
+        .ancestors()
+        .find(|ancestor| ancestor.parent().is_some_and(|parent| parent == list))?;
+    insertion_slot(&list, top_level_item.index())
+}
+
+pub(crate) fn is_module_constant_extractable(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+    target: &JsSyntaxNode,
+) -> bool {
+    if target
+        .ancestors()
+        .any(|ancestor| ancestor.kind() == JsSyntaxKind::JS_WITH_STATEMENT)
+    {
+        // A `with` scope can dynamically shadow any generated identifier.
+        return false;
+    }
+    if direct_eval_affects_target(root, model, target) {
+        // Direct eval in a sloppy script can introduce a binding into an enclosing function.
+        return false;
+    }
+
+    module_constant_insertion_slot(root, target).is_some()
 }
 
 fn is_import_like(node: &JsSyntaxNode) -> bool {
@@ -355,7 +393,9 @@ fn make_declaration(
     line_ending: &str,
 ) -> JsSyntaxNode {
     let mut leading_trivia = declaration_leading_trivia.to_vec();
-    if !matches!(leading_trivia.last(), Some((TriviaPieceKind::Newline, _))) {
+    if !leading_trivia.is_empty()
+        && !matches!(leading_trivia.last(), Some((TriviaPieceKind::Newline, _)))
+    {
         leading_trivia.push((TriviaPieceKind::Newline, line_ending.to_string()));
     }
 
@@ -404,13 +444,16 @@ fn make_declaration(
 fn source_line_ending(list: &JsSyntaxNode) -> &'static str {
     // Detached factory tokens do not inherit the source file's line-separator convention.
     for token in list.descendants_tokens(Direction::Next) {
-        for text in [
-            token.leading_trivia().text(),
-            token.text(),
-            token.trailing_trivia().text(),
-        ] {
-            if let Some(line_ending) = find_line_ending(text) {
-                return line_ending;
+        for trivia in [token.leading_trivia(), token.trailing_trivia()] {
+            // A comment or template token can contain a different separator than the
+            // separators between source tokens. Only newline trivia establishes the file convention.
+            for piece in trivia.pieces() {
+                if !piece.is_newline() {
+                    continue;
+                }
+                if let Some(line_ending) = find_line_ending(piece.text()) {
+                    return line_ending;
+                }
             }
         }
     }
@@ -436,15 +479,16 @@ fn find_line_ending(text: &str) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
-    use super::extract_module_constant;
+    use super::{extract_module_constant, extract_module_constant_with_reserved_names};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::{
-        AnyJsExpression, JsFunctionDeclaration, JsModuleItemList, JsReferenceIdentifier,
-        JsRegexLiteralExpression,
+        AnyJsExpression, JsFunctionDeclaration, JsModuleItemList, JsNumberLiteralExpression,
+        JsReferenceIdentifier, JsRegexLiteralExpression,
     };
     use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
+    use rustc_hash::FxHashSet;
 
     #[test]
     fn extracts_expression_after_imports_and_directives() {
@@ -549,6 +593,177 @@ function read(input) {
                 .descendants()
                 .any(|node| JsRegexLiteralExpression::can_cast(node.kind()))
         );
+    }
+
+    #[test]
+    fn preserves_first_target_replacement_when_transferring_header() {
+        let source = "// header\n\n31 + value;\n";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let target = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsNumberLiteralExpression::cast)
+            .expect("expected a number literal");
+        let value = AnyJsExpression::cast(target.syntax().clone()).expect("number expression");
+
+        let (mutation, name) =
+            extract_module_constant(&parsed.tree(), &model, target.syntax(), value, "NUMBER")
+                .expect("expected a module-level extraction");
+        let output = mutation.commit().to_string();
+
+        assert_eq!(name, "NUMBER");
+        assert_eq!(output.matches("const NUMBER = 31;").count(), 1);
+        assert!(output.contains("NUMBER + value;"));
+        assert!(!output.contains("31 + value;"));
+    }
+
+    #[test]
+    fn merges_header_cleanup_with_first_target_replacement() {
+        let source = "// header\n\n31 + 32;\n";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let targets = parsed
+            .syntax()
+            .descendants()
+            .filter_map(JsNumberLiteralExpression::cast)
+            .collect::<Vec<_>>();
+        assert_eq!(targets.len(), 2);
+
+        let mut mutations = targets.into_iter().enumerate().map(|(index, target)| {
+            let value = AnyJsExpression::cast(target.syntax().clone()).expect("number expression");
+            extract_module_constant(
+                &parsed.tree(),
+                &model,
+                target.syntax(),
+                value,
+                &format!("NUMBER_{}", index + 31),
+            )
+            .expect("expected a module-level extraction")
+        });
+        let (mut mutation, first_name) = mutations.next().expect("first extraction");
+        let (second_mutation, second_name) = mutations.next().expect("second extraction");
+        mutation.merge(second_mutation);
+
+        let (committed_tree, text_edit) = mutation.clone().commit_with_text_range_and_edit(true);
+        let output = mutation.commit().to_string();
+        let (_, text_edit) = text_edit.expect("merged mutation should produce a text edit");
+
+        assert_eq!(first_name, "NUMBER_31");
+        assert_eq!(second_name, "NUMBER_32");
+        assert!(output.contains("NUMBER_31 + NUMBER_32;"));
+        assert!(!output.contains("31 + 32;"));
+        assert_eq!(committed_tree.to_string(), output);
+        assert_eq!(text_edit.new_string(source), output);
+    }
+
+    #[test]
+    fn merges_two_extractions_for_fix_all() {
+        let parsed = parse(
+            r#"function read(input) {
+    return /first/.test(input) && /second/.test(input);
+}
+"#,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let targets = parsed
+            .syntax()
+            .descendants()
+            .filter_map(JsRegexLiteralExpression::cast)
+            .collect::<Vec<_>>();
+        assert_eq!(targets.len(), 2);
+
+        let mut mutations = targets.into_iter().enumerate().map(|(index, target)| {
+            let value = AnyJsExpression::cast(target.syntax().clone()).expect("regex expression");
+            extract_module_constant(
+                &parsed.tree(),
+                &model,
+                target.syntax(),
+                value,
+                &format!("REGEX_{}", index + 1),
+            )
+            .expect("expected a module-level extraction")
+        });
+        let (mut mutation, first_name) = mutations.next().expect("first extraction");
+        let (second_mutation, second_name) = mutations.next().expect("second extraction");
+        mutation.merge(second_mutation);
+
+        let output = mutation.commit().to_string();
+        assert_eq!(first_name, "REGEX_1");
+        assert_eq!(second_name, "REGEX_2");
+        assert!(output.contains("const REGEX_1 = /first/;"));
+        assert!(output.contains("const REGEX_2 = /second/;"));
+        assert!(output.contains("return REGEX_1.test(input) && REGEX_2.test(input);"));
+    }
+
+    #[test]
+    fn coordinates_repeated_names_and_header_for_fix_all() {
+        let source = "// header\n\nfunction read(input) {\n    return 5 + 5 + 5;\n}\n";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let targets = parsed
+            .syntax()
+            .descendants()
+            .filter_map(JsNumberLiteralExpression::cast)
+            .collect::<Vec<_>>();
+        assert_eq!(targets.len(), 3);
+
+        let mut reserved_names = FxHashSet::default();
+        let mut mutations = targets
+            .into_iter()
+            .map(|target| {
+                let value =
+                    AnyJsExpression::cast(target.syntax().clone()).expect("number expression");
+                let (mutation, name) = extract_module_constant_with_reserved_names(
+                    &parsed.tree(),
+                    &model,
+                    target.syntax(),
+                    value,
+                    "NUMBER_5",
+                    &reserved_names,
+                    true,
+                )
+                .expect("expected a module-level extraction");
+                reserved_names.insert(name.clone());
+                (mutation, name)
+            })
+            .collect::<Vec<_>>();
+        let (mut mutation, first_name) = mutations.remove(0);
+        let (second_mutation, second_name) = mutations.remove(0);
+        let (third_mutation, third_name) = mutations.remove(0);
+        let standalone_second = second_mutation.clone().commit().to_string();
+        assert!(standalone_second.starts_with("// header\nconst NUMBER_5_2 = 5;"));
+        mutation.merge(second_mutation);
+        mutation.merge(third_mutation);
+
+        let (committed_tree, text_edit) = mutation.clone().commit_with_text_range_and_edit(true);
+        let output = mutation.commit().to_string();
+        let (_, text_edit) = text_edit.expect("merged mutation should produce a text edit");
+        assert_eq!(first_name, "NUMBER_5");
+        assert_eq!(second_name, "NUMBER_5_2");
+        assert_eq!(third_name, "NUMBER_5_3");
+        assert_eq!(output.matches("// header").count(), 1);
+        assert!(output.contains("const NUMBER_5 = 5;"));
+        assert!(output.contains("const NUMBER_5_2 = 5;"));
+        assert!(output.contains("const NUMBER_5_3 = 5;"));
+        assert!(output.contains("return NUMBER_5 + NUMBER_5_2 + NUMBER_5_3;"));
+        assert!(output.find("// header").unwrap() < output.find("const NUMBER_5 =").unwrap());
+        assert_eq!(committed_tree.to_string(), output);
+        assert_eq!(text_edit.new_string(source), output);
     }
 
     #[test]
@@ -799,6 +1014,61 @@ console.log(REGEX);
     }
 
     #[test]
+    fn rejects_script_target_with_sibling_nested_direct_eval() {
+        let parsed = parse(
+            r#"function other() {
+    function nested() {
+        eval("var REGEX = /other/;");
+    }
+    nested();
+}
+function read(input) {
+    return /x/.test(input);
+}
+"#,
+            JsFileSource::js_script(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let target = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsRegexLiteralExpression::cast)
+            .expect("expected a regex literal");
+        let value = AnyJsExpression::cast(target.syntax().clone()).expect("regex expression");
+
+        assert!(
+            extract_module_constant(&parsed.tree(), &model, target.syntax(), value, "REGEX")
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn rejects_module_target_observable_to_direct_eval() {
+        let parsed = parse(
+            r#"function read(input) {
+    eval("REGEX");
+    return /x/.test(input);
+}
+"#,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let target = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsRegexLiteralExpression::cast)
+            .expect("expected a regex literal");
+        let value = AnyJsExpression::cast(target.syntax().clone()).expect("regex expression");
+
+        assert!(
+            extract_module_constant(&parsed.tree(), &model, target.syntax(), value, "REGEX")
+                .is_none()
+        );
+    }
+
+    #[test]
     fn rejects_target_before_later_import() {
         let parsed = parse(
             r#"function read(input) {
@@ -969,7 +1239,7 @@ function read(input) {
     }
 
     #[test]
-    fn preserves_crlf_inside_multiline_comment_tokens() {
+    fn ignores_crlf_inside_multiline_comment_tokens() {
         let source = "const before = /* first line\r\nsecond line */ 0;\nfunction read(input) {\n    return /x/.test(input);\n}\n";
         let parsed = parse(
             source,
@@ -989,6 +1259,6 @@ function read(input) {
                 .expect("expected a script-level extraction");
         let output = mutation.commit().to_string();
 
-        assert!(output.contains("const REGEX = /x/;\r\nconst before"));
+        assert!(output.contains("const REGEX = /x/;\nconst before"));
     }
 }
