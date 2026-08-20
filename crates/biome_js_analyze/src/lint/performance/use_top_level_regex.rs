@@ -18,9 +18,9 @@ use crate::{
     JsRuleAction,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::module_constant::{
-        collision_free_module_constant_name, extract_module_constant,
-        extract_module_constant_with_reserved_names, is_module_constant_extractable,
-        module_constant_insertion_slot,
+        collision_free_module_constant_name_with_facts, extract_module_constant,
+        extract_module_constant_with_reserved_names, is_module_constant_extractable_with_facts,
+        module_constant_facts, module_constant_insertion_slot,
     },
 };
 
@@ -30,6 +30,9 @@ declare_lint_rule! {
     /// This rule is useful to avoid performance issues when using regex literals inside functions called many times (hot paths). Regex literals create a new RegExp object when they are evaluated. (See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) By declaring them at the top level, this overhead can be avoided.
     ///
     /// It's important to note that this rule is not recommended for all cases. Placing regex literals at the top level can hurt startup times. In browser contexts, this can result in longer page loads.
+    ///
+    /// The unsafe fix intentionally changes evaluation timing and may change object identity or the
+    /// visibility of mutable properties. Apply it only when those runtime semantics are acceptable.
     ///
     /// Additionally, this rule ignores regular expressions with the `g` and/or `y` flags, as they maintain internal state and can cause
     /// [side effects](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex#avoiding_side_effects) when calling `test` and `exec` with them.
@@ -179,6 +182,7 @@ fn coordinated_extraction(
 ) -> Option<(String, FxHashSet<String>, bool)> {
     // Actions are merged in source order, so reserve names from earlier
     // extractable literals to keep repeated candidates unique in a fix-all.
+    let facts = module_constant_facts(root, model);
     let mut reserved_names = FxHashSet::default();
 
     for descendant in root.syntax().descendants() {
@@ -186,17 +190,18 @@ fn coordinated_extraction(
             continue;
         };
         if !is_actionable_regex(&regex)
-            || !is_module_constant_extractable(root, model, regex.syntax())
+            || !is_module_constant_extractable_with_facts(root, regex.syntax(), &facts)
         {
             continue;
         }
 
         let candidate_name = regex_constant_name(&regex);
-        let name = collision_free_module_constant_name(
+        let name = collision_free_module_constant_name_with_facts(
             model,
             regex.syntax(),
             &candidate_name,
             &reserved_names,
+            &facts,
         );
         let transfer_header = module_constant_insertion_slot(root, regex.syntax()) == Some(0);
 
@@ -218,30 +223,28 @@ fn regex_constant_name(regex: &JsRegexLiteralExpression) -> String {
                 .ok()
                 .and_then(|pattern| pattern.as_any_js_binding().cloned())
                 .and_then(|binding| binding_name(&binding))
+            && let Some(name) = normalize_name_component(&name, true)
         {
-            if let Some(name) = normalize_name_component(&name, true) {
-                return format!("{name}_REGEX");
-            }
+            return format!("{name}_REGEX");
         }
 
         if let Some(function) = AnyJsFunction::cast(ancestor.clone())
             && let Some(name) = function_name(&function)
+            && let Some(name) = normalize_name_component(&name, true)
         {
-            if let Some(name) = normalize_name_component(&name, true) {
-                return format!("{name}_REGEX");
-            }
+            return format!("{name}_REGEX");
         }
 
-        if let Some(name) = method_name(&ancestor) {
-            if let Some(name) = normalize_name_component(&name, true) {
-                return format!("{name}_REGEX");
-            }
+        if let Some(name) = method_name(&ancestor)
+            && let Some(name) = normalize_name_component(&name, true)
+        {
+            return format!("{name}_REGEX");
         }
 
-        if let Some(name) = property_name(&ancestor) {
-            if let Some(name) = normalize_name_component(&name, true) {
-                return format!("{name}_REGEX");
-            }
+        if let Some(name) = property_name(&ancestor)
+            && let Some(name) = normalize_name_component(&name, true)
+        {
+            return format!("{name}_REGEX");
         }
     }
 
