@@ -1,4 +1,4 @@
-use crate::globals::is_js_global;
+use crate::globals::{is_google_apps_script_global, is_js_global};
 
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
@@ -6,6 +6,7 @@ use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rul
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsIdentifierAssignment, TextRange};
+use biome_languages::JsFileSource;
 use biome_rule_options::no_global_assign::NoGlobalAssignOptions;
 
 declare_lint_rule! {
@@ -62,7 +63,13 @@ impl Rule for NoGlobalAssign {
             return None;
         }
         let token = assignment.name_token().ok()?;
-        is_js_global(token.text_trimmed()).then(|| token.text_trimmed_range())
+        let name = token.text_trimmed();
+        // Apps Script service globals (e.g. `SpreadsheetApp`) are read-only
+        // globals too, so reassigning them in a `.gs` file is reported.
+        let source_type = ctx.source_type::<JsFileSource>();
+        let is_global_var = is_js_global(name)
+            || (source_type.is_google_apps_script() && is_google_apps_script_global(name));
+        is_global_var.then(|| token.text_trimmed_range())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

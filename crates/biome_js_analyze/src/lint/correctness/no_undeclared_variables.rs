@@ -1,4 +1,4 @@
-use crate::globals::{is_js_global, is_ts_global};
+use crate::globals::{is_google_apps_script_global, is_js_global, is_ts_global};
 use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
@@ -148,8 +148,14 @@ impl Rule for NoUndeclaredVariables {
 }
 
 fn is_global(reference_name: &str, source_type: &JsFileSource) -> bool {
+    // Google Apps Script runs plain JavaScript in Google's runtime, which exposes
+    // extra service globals (e.g. `SpreadsheetApp`) on top of the language ones.
+    let is_gas_global =
+        source_type.is_google_apps_script() && is_google_apps_script_global(reference_name);
     match source_type.language() {
-        Language::JavaScript => is_js_global(reference_name),
-        Language::TypeScript { .. } => is_js_global(reference_name) || is_ts_global(reference_name),
+        Language::JavaScript => is_js_global(reference_name) || is_gas_global,
+        Language::TypeScript { .. } => {
+            is_js_global(reference_name) || is_ts_global(reference_name) || is_gas_global
+        }
     }
 }
