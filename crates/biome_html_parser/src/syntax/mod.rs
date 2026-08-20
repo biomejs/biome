@@ -599,7 +599,7 @@ fn looks_like_angular_block_start(p: &mut HtmlParser) -> bool {
         }
 
         p.bump_with_context(T![@], HtmlLexContext::Angular);
-        p.at_ts(token_set![T![let], T![if], T![for]])
+        p.at_ts(token_set![T![let], T![if], T![for], T![switch]])
     })
 }
 

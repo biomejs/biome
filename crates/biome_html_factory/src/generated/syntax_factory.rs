@@ -76,6 +76,105 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(ANGULAR_BLOCK_BODY, children)
             }
+            ANGULAR_CASE_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [@]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![case]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularSwitchParameters::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularBlockBody::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_CASE_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_CASE_CLAUSE, children)
+            }
+            ANGULAR_DEFAULT_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [@]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![default]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyAngularDefaultClauseBody::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_DEFAULT_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_DEFAULT_CLAUSE, children)
+            }
+            ANGULAR_DEFAULT_EXPRESSION_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_DEFAULT_EXPRESSION_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_DEFAULT_EXPRESSION_CLAUSE, children)
+            }
             ANGULAR_ELSE_CLAUSE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -732,6 +831,119 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(ANGULAR_STRUCTURAL_DIRECTIVE, children)
+            }
+            ANGULAR_SWITCH_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AngularSwitchOpeningBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularCaseClauseList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularDefaultClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_SWITCH_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_SWITCH_BLOCK, children)
+            }
+            ANGULAR_SWITCH_OPENING_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [@]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![switch]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AngularSwitchParameters::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_SWITCH_OPENING_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_SWITCH_OPENING_BLOCK, children)
+            }
+            ANGULAR_SWITCH_PARAMETERS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        ANGULAR_SWITCH_PARAMETERS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(ANGULAR_SWITCH_PARAMETERS, children)
             }
             ANGULAR_TEMPLATE_REF_VARIABLE => {
                 let mut elements = (&children).into_iter();
@@ -4346,6 +4558,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(VUE_V_SLOT_SHORTHAND_DIRECTIVE, children)
+            }
+            ANGULAR_CASE_CLAUSE_LIST => {
+                Self::make_node_list_syntax(kind, children, AngularCaseClause::can_cast)
             }
             ANGULAR_ELSE_IF_CLAUSE_LIST => {
                 Self::make_node_list_syntax(kind, children, AngularElseIfClause::can_cast)

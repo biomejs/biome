@@ -26,7 +26,10 @@ pub const ANGULAR_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![for],
     T![empty],
     T![track],
-    T![of]
+    T![of],
+    T![switch],
+    T![case],
+    T![default],
 );
 
 pub(crate) fn parse_angular_event_binding(p: &mut HtmlParser) -> ParsedSyntax {
@@ -188,6 +191,7 @@ pub(crate) fn parse_angular_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![let] => parse_let_block(p, m),
         T![if] => parse_if_block(p, m),
         T![for] => parse_for_block(p, m),
+        T![switch] => parse_switch_block(p, m),
         _ => {
             p.error(p.err_builder(
                 "Expected `if`, `for`, `switch`, `let`, or `defer`",
@@ -646,6 +650,182 @@ impl ParseSeparatedList for AngularForLetBindingList {
         p.expect_with_context(
             T![,],
             HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::Comma),
+        )
+    }
+}
+
+pub(crate) fn parse_switch_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyntax {
+    if !p.at(T![switch]) {
+        marker.abandon(p);
+        return Absent;
+    }
+
+    let opening = parse_switch_opening_block(p, marker);
+    let m = opening.precede(p);
+
+    p.expect(T!['{']);
+
+    re_lex_angular_clause_start(p);
+    AngularCaseClauseList.parse_list(p);
+    re_lex_angular_clause_start(p);
+    parse_default_clause(p).ok();
+
+    while !p.at(T!['}']) && !p.at(EOF) {
+        re_lex_angular_clause_start(p);
+        if p.at(T![@]) {
+            let m = p.start();
+            p.bump_remap(HTML_LITERAL);
+            m.complete(p, HTML_BOGUS);
+            continue;
+        }
+
+        if parse_html_element(p).is_present() {
+            continue;
+        }
+
+        let m = p.start();
+        p.bump_remap(HTML_LITERAL);
+        m.complete(p, HTML_BOGUS);
+    }
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, ANGULAR_SWITCH_BLOCK))
+}
+
+fn parse_switch_opening_block(p: &mut HtmlParser, marker: Marker) -> CompletedMarker {
+    p.bump_with_context(T![switch], HtmlLexContext::Angular);
+
+    parse_angular_switch_parameters(p)
+        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+
+    marker.complete(p, ANGULAR_SWITCH_OPENING_BLOCK)
+}
+
+fn parse_case_clause(p: &mut HtmlParser) -> ParsedSyntax {
+    re_lex_angular_clause_start(p);
+    if !p.at(T![@]) {
+        return Absent;
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    p.bump_with_context(T![@], HtmlLexContext::Angular);
+
+    if !p.at(T![case]) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    p.bump_with_context(T![case], HtmlLexContext::Angular);
+
+    parse_angular_switch_parameters(p)
+        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+
+    parse_angular_block_body(p).ok();
+
+    Present(m.complete(p, ANGULAR_CASE_CLAUSE))
+}
+
+fn parse_angular_switch_parameters(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(
+        T!['('],
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::ClosingParen),
+    );
+
+    parse_angular_text_expression(p).or_add_diagnostic(p, |p, range| expected_expression(p, range));
+
+    p.re_lex(HtmlReLexContext::Angular);
+
+    p.expect(T![')']);
+
+    Present(m.complete(p, ANGULAR_SWITCH_PARAMETERS))
+}
+
+fn parse_default_clause(p: &mut HtmlParser) -> ParsedSyntax {
+    re_lex_angular_clause_start(p);
+    if !p.at(T![@]) {
+        return Absent;
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    p.bump_with_context(T![@], HtmlLexContext::Angular);
+
+    if !p.at(T![default]) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    p.bump_with_context(T![default], HtmlLexContext::Angular);
+
+    if parse_angular_block_body(p).is_absent() {
+        parse_angular_default_expression_clause(p).or_add_diagnostic(p, |p, range| {
+            p.err_builder("Expected a block body or expression.", range)
+        });
+    }
+
+    Present(m.complete(p, ANGULAR_DEFAULT_CLAUSE))
+}
+
+fn parse_angular_default_expression_clause(p: &mut HtmlParser) -> ParsedSyntax {
+    if p.at(T!['{']) || p.at(T![@]) || p.at(T!['}']) || p.at(EOF) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_angular_text_expression(p).or_add_diagnostic(p, |p, range| expected_expression(p, range));
+    p.re_lex(HtmlReLexContext::Angular);
+    p.expect(T![;]);
+
+    Present(m.complete(p, ANGULAR_DEFAULT_EXPRESSION_CLAUSE))
+}
+
+#[derive(Debug)]
+struct AngularCaseClauseList;
+
+impl ParseNodeList for AngularCaseClauseList {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const LIST_KIND: Self::Kind = ANGULAR_CASE_CLAUSE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_case_clause(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        re_lex_angular_clause_start(p);
+
+        if !p.at(T![@]) {
+            return true;
+        }
+
+        let checkpoint = p.checkpoint();
+        let m = p.start();
+        p.bump_with_context(T![@], HtmlLexContext::Angular);
+        let is_case = p.at(T![case]);
+        m.abandon(p);
+        p.rewind(checkpoint);
+
+        !is_case
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T![@], T!['}']]),
+            expected_child,
         )
     }
 }

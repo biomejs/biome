@@ -1199,6 +1199,7 @@ AnyAngularBlock =
 	AngularLetBlock
 	| AngularIfBlock
 	| AngularForBlock
+	| AngularSwitchBlock
 
 // @let name = expression;
 // ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1319,3 +1320,55 @@ AngularEmptyClause =
 	'@'
 	'empty'
 	children: AngularBlockBody
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularSwitchBlock =
+	opening_block: AngularSwitchOpeningBlock
+	'{'
+	cases: AngularCaseClauseList
+	default_clause: AngularDefaultClause?
+	'}'
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+// ^^^^^^^^^^^^^^
+AngularSwitchOpeningBlock =
+	'@'
+	'switch'
+	parameters: AngularSwitchParameters
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//         ^^^^^^
+AngularSwitchParameters =
+	'('
+	expression: HtmlTextExpression
+	')'
+
+AngularCaseClauseList = AngularCaseClause*
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//                  ^^^^^^^^^^^^^^^^^
+AngularCaseClause =
+	'@'
+	'case'
+	parameters: AngularSwitchParameters
+	children: AngularBlockBody?
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//                                    ^^^^^^^^^^^^^^^^
+AngularDefaultClause =
+	'@'
+	'default'
+	children: AnyAngularDefaultClauseBody
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//                                             ^^^^^^^
+AnyAngularDefaultClauseBody =
+	AngularBlockBody
+	| AngularDefaultExpressionClause
+
+// @switch (expr) { @case (a) { ... } @default never; }
+//                                             ^^^^^^
+AngularDefaultExpressionClause =
+	expression: HtmlTextExpression
+	';'
