@@ -4025,6 +4025,10 @@
 				"skipBlankLines": {
 					"description": "When this option is set to `true`, blank lines are not counted towards the maximum line limit.",
 					"type": ["boolean", "null"]
+				},
+				"skipComments": {
+					"description": "When this option is set to `true`, lines that only contain comments\nare not counted towards the maximum line limit.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false

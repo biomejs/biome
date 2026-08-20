@@ -8832,6 +8832,11 @@ export interface NoExcessiveLinesPerFileOptions {
 	 * When this option is set to `true`, blank lines are not counted towards the maximum line limit.
 	 */
 	skipBlankLines?: boolean;
+	/**
+	* When this option is set to `true`, lines that only contain comments
+are not counted towards the maximum line limit. 
+	 */
+	skipComments?: boolean;
 }
 export type NoExportedImportsOptions = {};
 export type NoHeadElementOptions = {};
