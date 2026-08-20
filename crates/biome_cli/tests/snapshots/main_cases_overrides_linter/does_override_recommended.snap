@@ -16,7 +16,7 @@ expression: redactor(content)
       "includes": ["test.js"],
       "linter": {
         "rules": {
-          "recommended": false
+          "preset": "none"
         }
       }
     }

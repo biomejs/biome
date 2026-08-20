@@ -159,13 +159,7 @@ impl Settings {
 
     pub(crate) fn with_inline_configuration(&self, configuration: Configuration) -> Self {
         let mut settings = self.clone();
-        let workspace_directory = self.source.as_ref().and_then(|source| {
-            source
-                .as_ref()
-                .source
-                .as_ref()
-                .and_then(|source| source.1.clone())
-        });
+        let workspace_directory = self.source_path();
 
         // TODO handle error
         let _ = settings.merge_with_configuration(configuration, workspace_directory, vec![]);
@@ -1616,9 +1610,7 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
 
 impl Settings {
     pub fn matching_override_indices(&self, path: &Utf8Path) -> Box<[usize]> {
-        self.override_settings
-            .matching_indices(path)
-            .into_boxed_slice()
+        self.override_settings.matching_indices(path).collect()
     }
 
     /// Whether the formatter should format with parsing errors, for this file path
@@ -1850,7 +1842,7 @@ impl OverrideSettings {
         path: &Utf8Path,
         analyzer_rules: AnalyzerRules,
     ) -> AnalyzerRules {
-        let indices = self.matching_indices(path);
+        let indices = self.matching_indices(path).collect::<Vec<_>>();
         self.override_analyzer_rules_by_indices(&indices, analyzer_rules)
     }
 
