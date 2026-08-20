@@ -267,7 +267,7 @@ fn generate_deserializable_enum(
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds{
             fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
+                ctx: &mut dyn biome_deserialize::DeserializationContext,
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
             ) -> Option<Self> {
@@ -311,7 +311,7 @@ fn generate_deserializable_newtype(
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
+                ctx: &mut dyn biome_deserialize::DeserializationContext,
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
             ) -> Option<Self> {
@@ -483,7 +483,7 @@ fn generate_deserializable_struct(
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
+                ctx: &mut dyn biome_deserialize::DeserializationContext,
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
             ) -> Option<Self> {
@@ -496,8 +496,8 @@ fn generate_deserializable_struct(
 
                     fn visit_map(
                         self,
-                        ctx: &mut impl biome_deserialize::DeserializationContext,
-                        members: impl Iterator<Item = Option<(impl biome_deserialize::DeserializableValue, impl biome_deserialize::DeserializableValue)>>,
+                        ctx: &mut dyn biome_deserialize::DeserializationContext,
+                        members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn biome_deserialize::DeserializableValue>, Box<dyn biome_deserialize::DeserializableValue>)>>,
                         range: biome_deserialize::TextRange,
                         name: &str,
                     ) -> Option<Self::Output> {
@@ -544,7 +544,7 @@ fn generate_deserializable_from(
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
+                ctx: &mut dyn biome_deserialize::DeserializationContext,
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
             ) -> Option<Self> {
@@ -577,7 +577,7 @@ fn generate_deserializable_try_from(
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
-                ctx: &mut impl biome_deserialize::DeserializationContext,
+                ctx: &mut dyn biome_deserialize::DeserializationContext,
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
             ) -> Option<Self> {

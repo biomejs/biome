@@ -447,7 +447,7 @@ pub struct Dependencies(pub Box<[(Box<str>, Box<str>)]>);
 
 impl Deserializable for Dependencies {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -458,10 +458,8 @@ impl Deserializable for Dependencies {
 
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
-                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
-                >,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>,
                 _range: TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -527,7 +525,7 @@ pub struct BundleDependencies(pub Box<[Box<str>]>);
 /// It can also be a boolean (`true` to mean “bundle everything”).
 impl Deserializable for BundleDependencies {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -541,8 +539,8 @@ impl Deserializable for BundleDependencies {
 
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                items: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -558,7 +556,7 @@ impl Deserializable for BundleDependencies {
 
             fn visit_bool(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 _value: bool,
                 _range: TextRange,
                 _name: &str,
@@ -616,7 +614,7 @@ impl From<String> for Version {
 
 impl Deserializable for PackageJson {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -632,8 +630,8 @@ impl DeserializationVisitor for PackageJsonVisitor {
 
     fn visit_map(
         self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        ctx: &mut dyn DeserializationContext,
+        members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
@@ -733,7 +731,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
 
 impl Deserializable for Version {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

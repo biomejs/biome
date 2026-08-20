@@ -1,7 +1,8 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
     DefaultDeserializationContext, Deserializable, DeserializableValue, DeserializationContext,
-    DeserializationVisitor, Deserialized, TextNumber, diagnostics::DeserializableType,
+    DeserializationVisitor, Deserialized, ErasedDeserializationVisitor, TextNumber,
+    diagnostics::DeserializableType,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{JsonParserOptions, parse_json};
@@ -84,40 +85,45 @@ impl DeserializableValue for AnyJsonValue {
         AstNode::range(self)
     }
 
-    fn deserialize<V: DeserializationVisitor>(
+    fn deserialize_erased(
         &self,
-        ctx: &mut impl DeserializationContext,
-        visitor: V,
+        ctx: &mut dyn DeserializationContext,
+        visitor: &mut dyn ErasedDeserializationVisitor,
         name: &str,
-    ) -> Option<V::Output> {
+    ) {
         let range = AstNode::range(self);
         match self {
             Self::JsonArrayValue(array) => {
-                let items = array.elements().iter().map(|x| x.ok());
-                visitor.visit_array(ctx, items, range, name)
+                let mut items = array.elements().iter().map(|x| {
+                    x.ok()
+                        .map(|item| Box::new(item) as Box<dyn DeserializableValue>)
+                });
+                visitor.visit_array(ctx, &mut items, range, name)
             }
             Self::JsonBogusValue(_) => {
                 // The parser should emit an error about this node
                 // No need to emit another diagnostic.
-                None
             }
             Self::JsonMetavariable(_) => {
                 // Metavariables are for GritQL pattern matching only
                 // They can't be deserialized.
-                None
             }
             Self::JsonBooleanValue(value) => {
-                let value = value.value_token().ok()?;
+                let Ok(value) = value.value_token() else {
+                    return;
+                };
                 visitor.visit_bool(ctx, value.kind() == T![true], range, name)
             }
             Self::JsonNullValue(_) => visitor.visit_null(ctx, range, name),
             Self::JsonNumberValue(value) => {
-                let value = value.value_token().ok()?;
+                let Ok(value) = value.value_token() else {
+                    return;
+                };
                 let token_text = value.token_text_trimmed();
                 visitor.visit_number(ctx, TextNumber(token_text), range, name)
             }
             Self::JsonObjectValue(object) => {
-                let members = object.json_member_list().iter().map(|member| {
+                let mut members = object.json_member_list().iter().map(|member| {
                     let member = member.ok()?;
                     // Extract JsonMemberName from AnyJsonMemberName
                     let name = match member.name().ok()? {
@@ -125,13 +131,18 @@ impl DeserializableValue for AnyJsonValue {
                         // Metavariables and bogus nodes can't be deserialized
                         _ => return None,
                     };
-                    Some((name, member.value().ok()?))
+                    Some((
+                        Box::new(name) as Box<dyn DeserializableValue>,
+                        Box::new(member.value().ok()?) as Box<dyn DeserializableValue>,
+                    ))
                 });
-                visitor.visit_map(ctx, members, range, name)
+                visitor.visit_map(ctx, &mut members, range, name)
             }
             Self::JsonStringValue(value) => {
-                let value = unescape_json_string(value.inner_string_text().ok()?);
-                visitor.visit_str(ctx, value, range, name)
+                let Ok(text) = value.inner_string_text() else {
+                    return;
+                };
+                visitor.visit_str(ctx, unescape_json_string(text), range, name)
             }
         }
     }
@@ -153,7 +164,7 @@ impl DeserializableValue for AnyJsonValue {
 #[cfg(feature = "serde")]
 impl Deserializable for serde_json::Value {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -163,7 +174,7 @@ impl Deserializable for serde_json::Value {
             const EXPECTED_TYPE: crate::DeserializableTypes = crate::DeserializableTypes::all();
             fn visit_null(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -172,7 +183,7 @@ impl Deserializable for serde_json::Value {
 
             fn visit_bool(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 value: bool,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -182,7 +193,7 @@ impl Deserializable for serde_json::Value {
 
             fn visit_number(
                 self,
-                ctx: &mut impl DeserializationContext,
+                ctx: &mut dyn DeserializationContext,
                 value: TextNumber,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -198,7 +209,7 @@ impl Deserializable for serde_json::Value {
 
             fn visit_str(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 value: Text,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -208,8 +219,8 @@ impl Deserializable for serde_json::Value {
 
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -222,9 +233,9 @@ impl Deserializable for serde_json::Value {
 
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
-                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut dyn ExactSizeIterator<
+                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
                 >,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -251,14 +262,16 @@ impl DeserializableValue for JsonMemberName {
         AstNode::range(self)
     }
 
-    fn deserialize<V: DeserializationVisitor>(
+    fn deserialize_erased(
         &self,
-        ctx: &mut impl DeserializationContext,
-        visitor: V,
+        ctx: &mut dyn DeserializationContext,
+        visitor: &mut dyn ErasedDeserializationVisitor,
         name: &str,
-    ) -> Option<V::Output> {
-        let value = unescape_json_string(self.inner_string_text().ok()?);
-        visitor.visit_str(ctx, value, AstNode::range(self), name)
+    ) {
+        let Ok(text) = self.inner_string_text() else {
+            return;
+        };
+        visitor.visit_str(ctx, unescape_json_string(text), AstNode::range(self), name)
     }
 
     fn visitable_type(&self) -> Option<DeserializableType> {
@@ -370,7 +383,7 @@ mod tests {
         }
         impl Deserializable for Name {
             fn deserialize(
-                ctx: &mut impl DeserializationContext,
+                ctx: &mut dyn DeserializationContext,
                 _value: &impl DeserializableValue,
                 name: &str,
             ) -> Option<Self> {

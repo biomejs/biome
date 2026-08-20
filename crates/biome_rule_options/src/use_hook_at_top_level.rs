@@ -20,7 +20,7 @@ pub struct UseHookAtTopLevelOptions {
 
 impl Deserializable for UseHookAtTopLevelOptions {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -37,8 +37,8 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
 
     fn visit_map(
         self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        ctx: &mut dyn DeserializationContext,
+        members: &mut dyn ExactSizeIterator<Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

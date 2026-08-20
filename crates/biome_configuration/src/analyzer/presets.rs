@@ -70,7 +70,7 @@ impl PresetConfig {
 
 impl Deserializable for PresetConfig {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -80,7 +80,7 @@ impl Deserializable for PresetConfig {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
             fn visit_str(
                 self,
-                ctx: &mut impl DeserializationContext,
+                ctx: &mut dyn DeserializationContext,
                 value: Text,
                 range: TextRange,
                 _name: &str,

@@ -17,7 +17,7 @@ use std::{
 
 impl Deserializable for Text {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -27,7 +27,7 @@ impl Deserializable for Text {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
             fn visit_str(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 value: Text,
                 _range: TextRange,
                 _name: &str,
@@ -61,7 +61,7 @@ impl std::fmt::Display for TextNumber {
 }
 impl Deserializable for TextNumber {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -71,7 +71,7 @@ impl Deserializable for TextNumber {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
             fn visit_number(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 value: TextNumber,
                 _range: TextRange,
                 _name: &str,
@@ -85,7 +85,7 @@ impl Deserializable for TextNumber {
 
 impl Deserializable for () {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -100,7 +100,7 @@ impl Deserializable for () {
 
 impl Deserializable for bool {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -110,7 +110,7 @@ impl Deserializable for bool {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL;
             fn visit_bool(
                 self,
-                _ctx: &mut impl DeserializationContext,
+                _ctx: &mut dyn DeserializationContext,
                 value: bool,
                 _range: TextRange,
                 _name: &str,
@@ -124,7 +124,7 @@ impl Deserializable for bool {
 
 impl Deserializable for f32 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -142,7 +142,7 @@ impl Deserializable for f32 {
 
 impl Deserializable for f64 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -160,7 +160,7 @@ impl Deserializable for f64 {
 
 impl Deserializable for i8 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -179,7 +179,7 @@ impl Deserializable for i8 {
 
 impl Deserializable for i16 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -198,7 +198,7 @@ impl Deserializable for i16 {
 
 impl Deserializable for i32 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -217,7 +217,7 @@ impl Deserializable for i32 {
 
 impl Deserializable for isize {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -236,7 +236,7 @@ impl Deserializable for isize {
 
 impl Deserializable for i64 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -255,7 +255,7 @@ impl Deserializable for i64 {
 
 impl Deserializable for u8 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -274,7 +274,7 @@ impl Deserializable for u8 {
 
 impl Deserializable for u16 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -293,7 +293,7 @@ impl Deserializable for u16 {
 
 impl Deserializable for u32 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -312,7 +312,7 @@ impl Deserializable for u32 {
 
 impl Deserializable for usize {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -331,7 +331,7 @@ impl Deserializable for usize {
 
 impl Deserializable for u64 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -350,7 +350,7 @@ impl Deserializable for u64 {
 
 impl Deserializable for NonZeroU8 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -369,7 +369,7 @@ impl Deserializable for NonZeroU8 {
 
 impl Deserializable for NonZeroU16 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -388,7 +388,7 @@ impl Deserializable for NonZeroU16 {
 
 impl Deserializable for NonZeroU32 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -407,7 +407,7 @@ impl Deserializable for NonZeroU32 {
 
 impl Deserializable for NonZeroUsize {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -426,7 +426,7 @@ impl Deserializable for NonZeroUsize {
 
 impl Deserializable for NonZeroU64 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -445,7 +445,7 @@ impl Deserializable for NonZeroU64 {
 
 impl Deserializable for String {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -455,7 +455,7 @@ impl Deserializable for String {
 
 impl Deserializable for Box<str> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -465,7 +465,7 @@ impl Deserializable for Box<str> {
 
 impl Deserializable for PathBuf {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -475,7 +475,7 @@ impl Deserializable for PathBuf {
 
 impl<T: Deserializable> Deserializable for Box<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -485,7 +485,7 @@ impl<T: Deserializable> Deserializable for Box<T> {
 
 impl<T: Deserializable> Deserializable for Option<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -499,7 +499,7 @@ impl<T: Deserializable> Deserializable for Option<T> {
 
 impl<T: Deserializable> Deserializable for Vec<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -509,8 +509,8 @@ impl<T: Deserializable> Deserializable for Vec<T> {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -527,7 +527,7 @@ impl<T: Deserializable> Deserializable for Vec<T> {
 
 impl<T: Deserializable> Deserializable for Box<[T]> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -538,7 +538,7 @@ impl<T: Deserializable> Deserializable for Box<[T]> {
 #[cfg(feature = "smallvec")]
 impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T; L]> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -548,8 +548,8 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -566,7 +566,7 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
 
 impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for HashSet<T, S> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -578,8 +578,8 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -596,7 +596,7 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
 
 impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -606,8 +606,8 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -625,7 +625,7 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
 #[cfg(feature = "indexmap")]
 impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -635,8 +635,8 @@ impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl ExactSizeIterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -655,7 +655,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
     for HashMap<K, V, S>
 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -667,9 +667,9 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl ExactSizeIterator<
-                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut dyn ExactSizeIterator<
+                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -692,7 +692,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
 
 impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, V> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -702,9 +702,9 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl ExactSizeIterator<
-                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut dyn ExactSizeIterator<
+                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -729,7 +729,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
     for indexmap::IndexMap<K, V, S>
 {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -741,9 +741,9 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl ExactSizeIterator<
-                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut dyn ExactSizeIterator<
+                    Item = Option<(Box<dyn DeserializableValue>, Box<dyn DeserializableValue>)>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -767,7 +767,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
 #[cfg(feature = "camino")]
 impl Deserializable for camino::Utf8PathBuf {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
