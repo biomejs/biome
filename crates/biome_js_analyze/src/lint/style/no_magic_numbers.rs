@@ -25,9 +25,9 @@ use crate::{
     JsRuleAction,
     services::semantic::Semantic,
     utils::module_constant::{
-    collision_free_module_constant_name, extract_module_constant,
-    extract_module_constant_with_reserved_names, is_module_constant_extractable,
-    module_constant_insertion_slot,
+        collision_free_module_constant_name_with_facts, extract_module_constant,
+        extract_module_constant_with_reserved_names, is_module_constant_extractable_with_facts,
+        module_constant_facts, module_constant_insertion_slot,
     },
 };
 
@@ -162,6 +162,7 @@ fn coordinated_extraction(
     model: &SemanticModel,
     current: &AnyJsNumericLiteral,
 ) -> Option<(String, FxHashSet<String>, bool)> {
+    let facts = module_constant_facts(root, model);
     let mut reserved_names = FxHashSet::default();
 
     for descendant in root.syntax().descendants() {
@@ -171,17 +172,18 @@ fn coordinated_extraction(
         let query = JsOrTsNumericLiteral::AnyJsNumericLiteral(numeric_literal.clone());
         if is_valid_number_in_relevant_context(&query)
             || !is_actionable_numeric_literal(&numeric_literal)
-            || !is_module_constant_extractable(root, model, numeric_literal.syntax())
+            || !is_module_constant_extractable_with_facts(root, numeric_literal.syntax(), &facts)
         {
             continue;
         }
 
         let candidate_name = numeric_constant_name(&numeric_literal);
-        let name = collision_free_module_constant_name(
+        let name = collision_free_module_constant_name_with_facts(
             model,
             numeric_literal.syntax(),
             &candidate_name,
             &reserved_names,
+            &facts,
         );
         let insertion_slot = module_constant_insertion_slot(root, numeric_literal.syntax());
         let owns_header = insertion_slot == Some(0);
