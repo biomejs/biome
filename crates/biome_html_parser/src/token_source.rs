@@ -34,7 +34,10 @@ pub(crate) enum HtmlLexContext {
     /// expression (e.g. `Foo` / `Foo.Bar`), after the parser has already decided
     /// the name is a component. The tag-name token is always emitted as
     /// `HTML_COMPONENT_LITERAL`, and `.` is lexed as a token for member access.
-    /// When `svelte` is `true`, also recognizes `//` and `/* */` JS-style comments.
+    ///
+    /// `svelte` controls brace handling only. Whether `//` and `/* */` comments
+    /// are recognized follows [`HtmlLexerOptions::framework`], since Astro
+    /// accepts them too.
     InsideTagWithDirectives { svelte: bool },
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,

@@ -298,7 +298,9 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
-    /// When `svelte` is `true`, also handles `//` and `/* */` as JS-style comments.
+    ///
+    /// `svelte` controls brace handling only. `//` and `/* */` comments follow
+    /// [`HtmlLexerOptions::framework`], since Astro accepts them too.
     fn consume_token_inside_tag_directives(
         &mut self,
         current: u8,

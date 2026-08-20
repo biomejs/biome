@@ -614,6 +614,16 @@ pub(crate) fn parse_html_element(
         T!["<![CDATA["] => parse_cdata_section(p),
         T![<?] => parse_processing_instruction(p),
         T![<] => parse_element(p, at_vue_sfc_top_level, in_math),
+        // Astro turns expression parsing off inside MathML, so that LaTeX such
+        // as `R^{2x}` and `R^{{2x}}` survives as text.
+        T!['{'] | T!["{{"] if in_math => {
+            if p.at(T!["{{"]) {
+                p.re_lex(HtmlReLexContext::SingleCurly);
+            }
+            let m = p.start();
+            p.bump_remap_with_context(HTML_LITERAL, regular_context(p));
+            Present(m.complete(p, HTML_CONTENT))
+        }
         // Where a file has single text expressions, `{{` opens an object literal
         // rather than an interpolation, so re-read it as one `{`.
         T!["{{"] if SingleTextExpressions.is_supported(p) => {
@@ -627,13 +637,6 @@ pub(crate) fn parse_html_element(
         ),
         T!["{@"] => parse_svelte_at_block(p),
         T!["{#"] => parse_svelte_hash_block(p),
-        // Astro turns expression parsing off inside MathML, so that LaTeX such
-        // as `R^{2x}` survives as text.
-        T!['{'] if in_math => {
-            let m = p.start();
-            p.bump_remap_with_context(HTML_LITERAL, regular_context(p));
-            Present(m.complete(p, HTML_CONTENT))
-        }
         T!['{'] => parse_svelte_declaration_or_expression(p).or_else(|| {
             let m = p.start();
             p.bump_remap(HTML_LITERAL);

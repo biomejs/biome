@@ -52,6 +52,8 @@ macro_rules! assert_lex {
             HtmlLexContext::Regular { framework } | HtmlLexContext::InsideTag { framework } => {
                 framework
             }
+            // The context carries no framework, so infer the one that produces it.
+            HtmlLexContext::InsideTagWithDirectives { svelte: true } => HtmlFramework::Svelte,
             _ => HtmlFramework::Plain,
         };
         let mut lexer = HtmlLexer::from_str($src).with_options(HtmlLexerOptions { framework });
