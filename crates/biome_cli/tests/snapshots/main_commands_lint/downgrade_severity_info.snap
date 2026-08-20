@@ -26,6 +26,31 @@ debugger;
 # Emitted Messages
 
 ```block
+biome.json:2:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │   "linter": {
+       │             ^
+   > 3 │     "rules": {
+   > 4 │         "recommended": true,
+   > 5 │         "suspicious": {
+   > 6 │             "noDebugger": "info"
+   > 7 │         }
+   > 8 │     }
+   > 9 │   }
+       │   ^
+    10 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This is an unexpected use of the debugger statement.

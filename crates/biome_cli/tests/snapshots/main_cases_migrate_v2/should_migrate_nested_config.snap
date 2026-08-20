@@ -5,19 +5,19 @@ expression: redactor(content)
 ## `bar/biome.json`
 
 ```json
-{ "linter": { "rules": { "recommended": true } } }
+{ "linter": { "rules": { "preset": "recommended" } } }
 ```
 
 ## `biome.json`
 
 ```json
-{ "linter": { "rules": { "recommended": true } } }
+{ "linter": { "rules": { "preset": "recommended" } } }
 ```
 
 ## `foo/biome.json`
 
 ```json
-{ "linter": { "rules": { "recommended": true } } }
+{ "linter": { "rules": { "preset": "recommended" } } }
 ```
 
 # Emitted Messages
@@ -27,21 +27,13 @@ expression: redactor(content)
 
   i Configuration file can be updated.
   
-  - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
-  + {·"root":·false,"linter":·{·"rules":·{·"preset":·"none"·}·}·}
-  
+    1 │ {·"root":·false,"linter":·{·"rules":·{·"preset":·"recommended"·}·}·}
+      │    ++++++++++++++                                                   
 
 ```
 
 ```block
-<TEMP_DIR>/should_migrate_nested_config/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
-
-  i Configuration file can be updated.
-  
-  - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
-  + {·"linter":·{·"rules":·{·"preset":·"none"·}·}·}
-  
-
+Your configuration file is up to date.
 ```
 
 ```block
@@ -49,9 +41,8 @@ expression: redactor(content)
 
   i Configuration file can be updated.
   
-  - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
-  + {·"root":·false,"linter":·{·"rules":·{·"preset":·"none"·}·}·}
-  
+    1 │ {·"root":·false,"linter":·{·"rules":·{·"preset":·"recommended"·}·}·}
+      │    ++++++++++++++                                                   
 
 ```
 
@@ -61,7 +52,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   i Migration results:
   
   - <TEMP_DIR>/should_migrate_nested_config/bar/biome.json: configuration needs migration.
-  - <TEMP_DIR>/should_migrate_nested_config/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/biome.json: no migration needed.
   - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration.
   
   i Use --write to apply the changes.
