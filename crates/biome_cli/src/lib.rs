@@ -275,6 +275,10 @@ impl<'app> CliSession<'app> {
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
+            BiomeCommand::Inspect {
+                cli_options,
+                sub_command,
+            } => commands::inspect::inspect(self, &cli_options, sub_command),
             BiomeCommand::LspProxy {
                 watcher_options,
                 stdio: _,

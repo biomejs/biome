@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": { "noDebugger": "warn" }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noDebugger": "error" }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noDebugger": "off" }
+        }
+      }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:20:41 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i linter.rules.suspicious.noDebugger resolves to off.
+  
+    18 │       "linter": {
+    19 │         "rules": {
+  > 20 │           "suspicious": { "noDebugger": "off" }
+       │                                         ^^^^^
+    21 │         }
+    22 │       }
+  
+  i This value is provided by override 1 in the root configuration.
+  
+  i The override matched file.test.js using **/*.test.js.
+  
+
+```

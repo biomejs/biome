@@ -72,14 +72,25 @@ pub fn deserialize_from_json_ast<Output: Deserializable>(
     id: &str,
 ) -> Deserialized<Output> {
     let mut ctx = DefaultDeserializationContext::new(id);
-    let deserialized = parse
-        .value()
-        .ok()
-        .and_then(|value| Output::deserialize(&mut ctx, &value, ""));
+    let deserialized = deserialize_from_json_ast_with_context(parse, &mut ctx);
     Deserialized {
         diagnostics: ctx.diagnostics,
         deserialized,
     }
+}
+
+/// Attempts to deserialize a JSON AST using a caller-provided context.
+///
+/// Parse diagnostics are owned by the parser result. Deserialization diagnostics
+/// are reported through `ctx`.
+pub fn deserialize_from_json_ast_with_context<Output: Deserializable>(
+    parse: &JsonRoot,
+    ctx: &mut impl DeserializationContext,
+) -> Option<Output> {
+    parse
+        .value()
+        .ok()
+        .and_then(|value| Output::deserialize(ctx, &value, ""))
 }
 
 impl DeserializableValue for AnyJsonValue {
@@ -226,11 +237,19 @@ impl Deserializable for serde_json::Value {
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(serde_json::Value::Array(
-                    values
-                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
-                        .collect(),
-                ))
+                let mut result = Vec::new();
+                for (index, value) in values.enumerate() {
+                    let Some(value) = value else {
+                        continue;
+                    };
+                    let deserialized = ctx.with_index(index, value.range(), |ctx| {
+                        Deserializable::deserialize(ctx, &value, "")
+                    });
+                    if let Some(value) = deserialized {
+                        result.push(value);
+                    }
+                }
+                Some(serde_json::Value::Array(result))
             }
 
             fn visit_map(
@@ -240,16 +259,20 @@ impl Deserializable for serde_json::Value {
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(serde_json::Value::Object(
-                    members
-                        .filter_map(|entry| {
-                            let (key, value) = entry?;
-                            let key = Deserializable::deserialize(ctx, &key, "")?;
-                            let value = value.deserialize(ctx, Self, "")?;
-                            Some((key, value))
-                        })
-                        .collect(),
-                ))
+                let mut result = serde_json::Map::new();
+                for entry in members.flatten() {
+                    let (key, value) = entry;
+                    let Some(key_text) = Text::deserialize(ctx, &key, "") else {
+                        continue;
+                    };
+                    ctx.enter_property(key_text.text(), key.range(), value.range());
+                    let deserialized = value.deserialize(ctx, Self, "");
+                    ctx.exit_property();
+                    if let Some(value) = deserialized {
+                        result.insert(key_text.text().to_string(), value);
+                    }
+                }
+                Some(serde_json::Value::Object(result))
             }
         }
 
@@ -357,12 +380,125 @@ pub fn unescape_json_string(text: TokenText) -> Text {
 #[cfg(test)]
 mod tests {
     use std::{
-        collections::{BTreeMap, HashMap, HashSet},
+        collections::{BTreeMap, BTreeSet, HashMap, HashSet},
         num::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize},
     };
 
     use super::*;
+    use crate as biome_deserialize;
+    use crate::{DeserializationDiagnostic, TextRange};
+    use biome_deserialize_macros::Deserializable;
     use biome_json_parser::JsonParserOptions;
+
+    #[derive(Debug, Default)]
+    struct RecordingContext {
+        diagnostics: Vec<DeserializationDiagnostic>,
+        events: Vec<String>,
+    }
+
+    impl DeserializationContext for RecordingContext {
+        fn id(&self) -> Option<&str> {
+            None
+        }
+
+        fn report(&mut self, diagnostic: DeserializationDiagnostic) {
+            self.diagnostics.push(diagnostic);
+        }
+
+        fn enter_property(&mut self, name: &str, _key_range: TextRange, _value_range: TextRange) {
+            self.events.push(format!("enter property {name}"));
+        }
+
+        fn exit_property(&mut self) {
+            self.events.push("exit property".to_string());
+        }
+
+        fn enter_index(&mut self, index: usize, _range: TextRange) {
+            self.events.push(format!("enter index {index}"));
+        }
+
+        fn exit_index(&mut self) {
+            self.events.push("exit index".to_string());
+        }
+    }
+
+    #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
+    struct ContextConfiguration {
+        values: Vec<u8>,
+    }
+
+    #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
+    struct ContextSetConfiguration {
+        values: BTreeSet<u8>,
+    }
+
+    #[test]
+    fn caller_provided_context_observes_balanced_traversal() {
+        let parse = parse_json(
+            r#"{ "values": [1, "invalid", 2] }"#,
+            JsonParserOptions::default(),
+        );
+        let mut context = RecordingContext::default();
+
+        let configuration = deserialize_from_json_ast_with_context::<ContextConfiguration>(
+            &parse.tree(),
+            &mut context,
+        );
+
+        assert_eq!(
+            configuration,
+            Some(ContextConfiguration { values: vec![1, 2] })
+        );
+        assert_eq!(
+            context.events,
+            [
+                "enter property values",
+                "enter index 0",
+                "exit index",
+                "enter index 1",
+                "exit index",
+                "enter index 2",
+                "exit index",
+                "exit property",
+            ]
+        );
+        assert_eq!(context.diagnostics.len(), 1);
+    }
+
+    #[test]
+    fn caller_provided_context_balances_failed_set_elements() {
+        let parse = parse_json(
+            r#"{ "values": [1, "invalid", 2] }"#,
+            JsonParserOptions::default(),
+        );
+        let mut context = RecordingContext::default();
+
+        let configuration = deserialize_from_json_ast_with_context::<ContextSetConfiguration>(
+            &parse.tree(),
+            &mut context,
+        );
+
+        assert_eq!(
+            configuration,
+            Some(ContextSetConfiguration {
+                values: BTreeSet::from([1, 2]),
+            })
+        );
+        assert_eq!(
+            context.events,
+            [
+                "enter property values",
+                "enter index 0",
+                "exit index",
+                "enter index 1",
+                "exit index",
+                "enter index 2",
+                "exit index",
+                "exit property",
+            ]
+        );
+        assert_eq!(context.diagnostics.len(), 1);
+    }
 
     #[test]
     fn test_unit() {
