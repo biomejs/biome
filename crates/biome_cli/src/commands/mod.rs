@@ -831,9 +831,7 @@ fn is_github_actions() -> bool {
     std::env::var("GITHUB_ACTIONS").is_ok_and(|v| v == "true")
 }
 
-/// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
-///
-/// If it contains [errors](Severity::Error) or higher, it returns an error.
+/// Prints configuration diagnostics and reports an error when loading produced an error.
 pub(crate) fn validate_configuration_diagnostics(
     loaded_configuration: &LoadedConfiguration,
     console: &mut dyn Console,
@@ -841,17 +839,17 @@ pub(crate) fn validate_configuration_diagnostics(
 ) -> Result<(), CliDiagnostic> {
     let diagnostics = loaded_configuration.as_diagnostics_iter();
 
-    // We want to print the diagnostics only if there are errors. Other diagnostics such as
-    // information/warnings will be printed during the traversal
-    if loaded_configuration.has_errors() {
-        for diagnostic in diagnostics {
-            if diagnostic.tags().is_verbose() && verbose {
+    for diagnostic in diagnostics {
+        if diagnostic.tags().is_verbose() {
+            if verbose {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
             }
+        } else {
+            console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
         }
+    }
 
+    if loaded_configuration.has_errors() {
         return Err(CliDiagnostic::workspace_error(
             BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
@@ -1012,6 +1010,29 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn configuration_diagnostics_require_verbose_flag() {
+        let loaded_configuration = LoadedConfiguration {
+            diagnostics: vec![
+                biome_service::diagnostics::ProtectedFile {
+                    file_path: "package-lock.json".to_string(),
+                    verbose_advice: biome_service::diagnostics::ProtectedFileAdvice,
+                }
+                .into(),
+            ],
+            ..LoadedConfiguration::default()
+        };
+        let mut console = biome_console::BufferConsole::default();
+
+        validate_configuration_diagnostics(&loaded_configuration, &mut console, false)
+            .expect("an informational diagnostic should not fail validation");
+        assert!(console.out_buffer.is_empty());
+
+        validate_configuration_diagnostics(&loaded_configuration, &mut console, true)
+            .expect("an informational diagnostic should not fail validation");
+        assert_eq!(console.out_buffer.len(), 1);
+    }
 
     #[test]
     fn incompatible_arguments() {

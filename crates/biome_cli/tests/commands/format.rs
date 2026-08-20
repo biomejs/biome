@@ -3289,7 +3289,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
                 "includes": ["**", "!**/build"],
                 "enabled": true,
                 "rules": {
-                    "recommended": true
+                    "preset": "recommended"
                 }
             }
         }"#,

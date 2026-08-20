@@ -324,7 +324,7 @@ fn group_preset_none_disables_group_rules() {
         r#"{
     "linter": {
         "rules": {
-            "recommended": true,
+            "preset": "recommended",
             "suspicious": {
                 "preset": "none"
             }
@@ -680,7 +680,7 @@ fn recommended_true_does_not_enable_nursery_rules() {
         r#"{
     "linter": {
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     }
 }"#

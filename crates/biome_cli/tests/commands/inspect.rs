@@ -825,3 +825,99 @@ fn replaced_composite_omits_superseded_source() {
         result,
     );
 }
+
+#[test]
+fn repeated_nested_configuration_emits_information() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["first.json", "second.json"] }"#,
+    );
+    fs.insert("first.json".into(), r#"{ "extends": ["shared.json"] }"#);
+    fs.insert("second.json".into(), r#"{ "extends": ["shared.json"] }"#);
+    fs.insert(
+        "shared.json".into(),
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "repeated_nested_configuration_emits_information",
+        fs,
+        console,
+        result,
+    );
+}
+
+#[test]
+fn conflicting_nested_package_versions_block_inspection() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["package-b", "package-c"] }"#,
+    );
+    insert_configuration_package(
+        &fs,
+        "node_modules/package-b",
+        "package-b",
+        "1.0.0",
+        r#"{ "extends": ["biome-config-vodoo"] }"#,
+    );
+    insert_configuration_package(
+        &fs,
+        "node_modules/package-c",
+        "package-c",
+        "1.0.0",
+        r#"{ "extends": ["biome-config-vodoo"] }"#,
+    );
+    insert_configuration_package(
+        &fs,
+        "node_modules/package-b/node_modules/biome-config-vodoo",
+        "biome-config-vodoo",
+        "0.2.0",
+        r#"{ "formatter": { "lineWidth": 90 } }"#,
+    );
+    insert_configuration_package(
+        &fs,
+        "node_modules/package-c/node_modules/biome-config-vodoo",
+        "biome-config-vodoo",
+        "0.5.0",
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "conflicting_nested_package_versions_block_inspection",
+        fs,
+        console,
+        result,
+    );
+}
+
+fn insert_configuration_package(
+    fs: &MemoryFileSystem,
+    directory: &str,
+    name: &str,
+    version: &str,
+    configuration: &str,
+) {
+    fs.insert(
+        format!("{directory}/package.json").into(),
+        format!(r#"{{ "name": "{name}", "version": "{version}", "main": "biome.json" }}"#),
+    );
+    fs.insert(format!("{directory}/biome.json").into(), configuration);
+}

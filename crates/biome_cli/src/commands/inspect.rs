@@ -198,8 +198,10 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         verbose: bool,
     ) -> CliDiagnostic {
         for diagnostic in diagnostics {
-            if diagnostic.tags().is_verbose() && verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}});
+            if diagnostic.tags().is_verbose() {
+                if verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}});
+                }
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
             }
