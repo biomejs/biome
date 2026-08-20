@@ -12,6 +12,8 @@ use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::CssConfiguration;
 #[cfg(feature = "lang_js")]
 use biome_configuration::JsConfiguration;
+#[cfg(feature = "lang_md")]
+use biome_configuration::MarkdownConfiguration;
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
@@ -28,7 +30,7 @@ use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsU
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, DEFAULT_SCANNER_IGNORE_ENTRIES,
     ExtendedConfigurations, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    JsonConfiguration, LinterConfiguration, MarkdownConfiguration, OverrideAssistConfiguration,
+    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
     OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
     push_to_analyzer_assist, push_to_analyzer_rules,
 };
