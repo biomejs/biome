@@ -48,6 +48,7 @@ pub(crate) mod daemon;
 pub(crate) mod explain;
 pub(crate) mod format;
 pub(crate) mod init;
+pub(crate) mod inspect;
 pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
@@ -527,6 +528,15 @@ pub enum BiomeCommand {
         #[bpaf(long("jsonc"), switch)]
         bool,
     ),
+    /// Inspects Biome state without modifying files.
+    #[bpaf(command)]
+    Inspect {
+        #[bpaf(external, hide_usage)]
+        cli_options: CliOptions,
+
+        #[bpaf(external(inspect_sub_command))]
+        sub_command: InspectSubCommand,
+    },
     /// Ensures that the Biome daemon server is running, then forwards Language Server Protocol messages between the daemon server and standard input and output.
     #[bpaf(command("lsp-proxy"))]
     LspProxy {
@@ -666,6 +676,25 @@ pub enum MigrateSubCommand {
     },
 }
 
+#[derive(Debug, Bpaf, Clone)]
+pub enum InspectSubCommand {
+    /// Shows the final, resolved configuration, including `extends` and matching `overrides`.
+    #[bpaf(command)]
+    Config {
+        /// A dotted configuration key, such as `formatter.lineWidth`.
+        #[bpaf(positional("KEY"), optional)]
+        key: Option<String>,
+
+        /// Evaluates matching overrides for this file path.
+        #[bpaf(long("path"), argument("PATH"), optional)]
+        path: Option<String>,
+
+        /// When provided, the output is emitted in JSON format.
+        #[bpaf(long("json"), switch)]
+        json: bool,
+    },
+}
+
 impl MigrateSubCommand {
     pub const fn is_prettier(&self) -> bool {
         matches!(self, Self::Prettier)
@@ -681,6 +710,7 @@ impl BiomeCommand {
             | Self::Lint { cli_options, .. }
             | Self::Ci { cli_options, .. }
             | Self::Format { cli_options, .. }
+            | Self::Inspect { cli_options, .. }
             | Self::Migrate { cli_options, .. }
             | Self::Search { cli_options, .. } => Some(cli_options),
             Self::LspProxy { .. }
@@ -711,6 +741,7 @@ impl BiomeCommand {
             | Self::Start { .. }
             | Self::Stop
             | Self::Init(_)
+            | Self::Inspect { .. }
             | Self::Explain { .. }
             | Self::RunServer { .. }
             | Self::Clean { .. }

@@ -35,7 +35,7 @@ use biome_formatter::{
     LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
-use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
+use biome_json_analyze::{JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
@@ -668,10 +668,7 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_provider: params
-            .settings
-            .full_source()
-            .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        configuration_provider: params.settings.configuration_provider(),
         project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
@@ -760,9 +757,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_provider: settings
-            .full_source()
-            .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        configuration_provider: workspace.configuration_provider(),
         project_layout: Some(project_layout_for_services),
     };
     analyze(
@@ -855,10 +850,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
         loop {
             let services = JsonAnalyzeServices {
                 file_source,
-                configuration_provider: params
-                    .settings
-                    .full_source()
-                    .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+                configuration_provider: params.settings.configuration_provider(),
                 project_layout: Some(params.project_layout.clone()),
             };
             let mut pending_actions = Vec::new();
@@ -905,10 +897,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
     loop {
         let services = JsonAnalyzeServices {
             file_source,
-            configuration_provider: params
-                .settings
-                .full_source()
-                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            configuration_provider: params.settings.configuration_provider(),
             project_layout: Some(params.project_layout.clone()),
         };
         let mut pending_actions = Vec::new();
@@ -964,10 +953,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
     if params.collect_final_diagnostics {
         let services = JsonAnalyzeServices {
             file_source,
-            configuration_provider: params
-                .settings
-                .full_source()
-                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            configuration_provider: params.settings.configuration_provider(),
             project_layout: Some(params.project_layout.clone()),
         };
 

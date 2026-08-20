@@ -1,0 +1,18 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing argument KEY
+  
+  i Type the following command for more information
+  
+  $ biome inspect config --help
+  
+
+
+```

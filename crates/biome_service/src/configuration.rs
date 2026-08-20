@@ -9,15 +9,18 @@ use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
-use biome_configuration::{BiomeDiagnostic, ConfigurationPathHint, push_to_analyzer_rules};
-use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
+use biome_configuration::{
+    BiomeDiagnostic, Configuration, ConfigurationPathHint, ConfigurationSource,
+    ConfigurationSourceEntry, ExtendedConfiguration, ExtendedConfigurations, VERSION,
+    push_to_analyzer_assist, push_to_analyzer_rules,
+};
 use biome_console::markup;
 #[cfg(feature = "lang_css")]
 use biome_css_analyze::METADATA as css_lint_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
+use biome_deserialize::Deserialized;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 #[cfg(feature = "lang_graphql")]
@@ -51,22 +54,13 @@ use std::ops::Deref;
 use std::str::FromStr;
 use tracing::instrument;
 
-/// Information regarding the configuration that was found.
-///
-/// This contains the expanded configuration including default values where no
-/// configuration was present.
+/// Information regarding the configuration inputs that were found.
 #[derive(Default, Debug)]
 pub struct LoadedConfiguration {
-    /// If present, the path of the directory where it was found
-    pub directory_path: Option<Utf8PathBuf>,
-    /// If present, the path of the file where it was found
-    pub file_path: Option<Utf8PathBuf>,
-    /// The Deserialized configuration
-    pub configuration: Configuration,
+    /// The unmerged root and extended configuration inputs.
+    pub source: ConfigurationSource,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
-    /// The list of possible extended configuration files
-    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     /// Where the configuration was loaded from.
     pub loaded_location: LoadedLocation,
 }
@@ -89,7 +83,7 @@ impl LoadedLocation {
 }
 
 impl LoadedConfiguration {
-    /// It consumes the payload, applies and extends and returns the final, extended configuration.
+    /// Consumes a payload and loads its extended configuration inputs.
     pub fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &dyn FsWithResolverProxy,
@@ -103,21 +97,23 @@ impl LoadedConfiguration {
             configuration_file_path,
             deserialized,
             loaded_location,
+            source,
         } = value;
-        let (partial_configuration, mut diagnostics) = deserialized.consume();
+        let (partial_configuration, diagnostics) = deserialized.consume();
+        let mut diagnostics = diagnostics
+            .into_iter()
+            .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
+            .collect::<Vec<_>>();
 
-        let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
-
-        let configuration = match partial_configuration {
-            Some(mut partial_configuration) => {
-                extended_configurations.extend(partial_configuration.apply_extends(
+        let mut partial_configuration = partial_configuration;
+        let extended_configurations = match partial_configuration.as_mut() {
+            Some(partial_configuration) => {
+                let extended_configurations = partial_configuration.load_extends(
                     fs,
                     &configuration_file_path,
                     &external_resolution_base_path,
                     &mut diagnostics,
-                )?);
-                partial_configuration.migrate_deprecated_fields();
-
+                )?;
                 // Normalize plugin paths relative to the configuration file directory so
                 // merged configurations (e.g. nested configs extending from root) can
                 // still load plugins defined in other configuration files.
@@ -137,32 +133,56 @@ impl LoadedConfiguration {
                         }
                     }
                 }
-                partial_configuration
+                extended_configurations
             }
-            None => Configuration::default(),
+            None => Vec::new(),
         };
 
+        let directory_path = configuration_file_path.parent().map(Utf8PathBuf::from);
+
         Ok(Self {
-            configuration,
-            diagnostics: diagnostics
-                .into_iter()
-                .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
-                .collect(),
-            directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
-            file_path: Some(configuration_file_path),
-            extended_configurations,
+            source: ConfigurationSource {
+                directory_path,
+                root: Some(ConfigurationSourceEntry {
+                    configuration: partial_configuration,
+                    file_path: Some(configuration_file_path),
+                    file_source: Some(source.into()),
+                }),
+                extended_configurations: ExtendedConfigurations::from(extended_configurations),
+            },
+            diagnostics,
             loaded_location,
         })
     }
 
+    /// Resolves the loaded configuration inputs.
+    pub fn resolved_configuration(&self) -> Configuration {
+        self.source.resolve()
+    }
+
+    /// Returns the extended configurations with their resolved file paths.
+    pub fn extended_configurations(&self) -> Vec<(Utf8PathBuf, Configuration)> {
+        self.source
+            .extended_configurations
+            .as_slice()
+            .iter()
+            .filter_map(|extended| {
+                Some((
+                    extended.source.file_path.clone()?,
+                    extended.source.configuration.clone()?,
+                ))
+            })
+            .collect()
+    }
+
     /// Return the path of the **directory** where the configuration is
     pub fn directory_path(&self) -> Option<&Utf8Path> {
-        self.directory_path.as_deref()
+        self.source.directory_path.as_deref()
     }
 
     /// Return the path of the **file** where the configuration is
     pub fn file_path(&self) -> Option<&Utf8Path> {
-        self.file_path.as_deref()
+        self.source.root.as_ref()?.file_path.as_deref()
     }
 
     /// Whether they are errors emitted. Error are [Severity::Error] or greater.
@@ -228,6 +248,8 @@ pub struct ConfigurationPayload {
     pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
     pub external_resolution_base_path: Utf8PathBuf,
+    /// The exact source text used to deserialize the configuration.
+    pub source: String,
 
     pub loaded_location: LoadedLocation,
 }
@@ -344,6 +366,7 @@ pub fn read_config(
         deserialized: deserialized.unwrap(),
         configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
+        source: auto_search_result.content,
         loaded_location,
     }))
 }
@@ -376,6 +399,7 @@ fn load_user_config(
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
+            source: content,
             loaded_location,
         }))
     } else {
@@ -414,6 +438,7 @@ fn load_user_config(
             deserialized,
             configuration_file_path: result.file_path.to_path_buf(),
             external_resolution_base_path,
+            source: content,
             loaded_location,
         }))
     }
@@ -572,23 +597,28 @@ pub(crate) fn to_analyzer_rules_by_indices(
         .override_analyzer_rules_by_indices(override_indices, analyzer_rules)
 }
 
-pub trait ConfigurationExt {
-    fn apply_extends(
-        &mut self,
+struct DeserializedExtendedConfiguration {
+    specifier: String,
+    file_path: Utf8PathBuf,
+    source: String,
+    deserialized: Deserialized<Configuration>,
+}
+
+trait ConfigurationExt {
+    fn load_extends(
+        &self,
         fs: &dyn FsWithResolverProxy,
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError>;
+    ) -> Result<Vec<ExtendedConfiguration>, WorkspaceError>;
 
     fn deserialize_extends(
-        &mut self,
+        &self,
         fs: &dyn FsWithResolverProxy,
         relative_resolution_base_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
-    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
-
-    fn migrate_deprecated_fields(&mut self);
+    ) -> Result<Vec<DeserializedExtendedConfiguration>, WorkspaceError>;
 
     fn normalize_plugin(
         &self,
@@ -599,65 +629,41 @@ pub trait ConfigurationExt {
 }
 
 impl ConfigurationExt for Configuration {
-    /// Mutates the configuration so that any fields that have not been
-    /// configured explicitly are filled in with their values from configs
-    /// listed in the `extends` field.
-    ///
-    /// The `extends` configs are applied from left to right.
-    ///
-    /// If a configuration can't be resolved from the file system, the operation
-    /// will fail.
-    ///
-    /// `file_path` is the path to the configuration file and is used for
-    /// resolving relative paths in the `extends` field.
-    ///
-    /// `external_resolution_base_path` is used for resolving non-relative
-    /// `extends` entries.
-    fn apply_extends(
-        &mut self,
+    fn load_extends(
+        &self,
         fs: &dyn FsWithResolverProxy,
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError> {
+    ) -> Result<Vec<ExtendedConfiguration>, WorkspaceError> {
         let deserialized = self.deserialize_extends(
             fs,
             file_path.parent().expect("file path should have a parent"),
             external_resolution_base_path,
         )?;
-        let (configurations, errors): (Vec<_>, Vec<_>) =
-            deserialized.into_iter().map(Deserialized::consume).unzip();
-
-        let configuration_list = configurations
-            .iter()
-            .flatten()
-            .cloned()
-            .map(|c| (file_path.to_path_buf(), c))
-            .collect::<Vec<_>>();
-
-        let extended_configuration = configurations.into_iter().flatten().reduce(
-            |mut previous_configuration, current_configuration| {
-                previous_configuration.merge_with(current_configuration);
-                previous_configuration
-            },
-        );
-        if let Some(mut extended_configuration) = extended_configuration {
-            // Make sure our root value is set explicitly, so it cannot be set
-            // by configs we extend.
-            self.root = Some(self.is_root().into());
-
-            // We swap them to avoid having to clone `self.configuration` to merge it.
-            std::mem::swap(self, &mut extended_configuration);
-            self.merge_with(extended_configuration)
+        let mut configuration_list = Vec::with_capacity(deserialized.len());
+        for extended in deserialized {
+            let DeserializedExtendedConfiguration {
+                specifier,
+                file_path,
+                source,
+                deserialized,
+            } = extended;
+            let (configuration, errors) = deserialized.consume();
+            diagnostics.extend(
+                errors
+                    .into_iter()
+                    .map(|diagnostic| diagnostic.with_file_path(file_path.to_string())),
+            );
+            configuration_list.push(ExtendedConfiguration {
+                specifier: Some(specifier),
+                source: ConfigurationSourceEntry {
+                    configuration,
+                    file_path: Some(file_path),
+                    file_source: Some(source.into()),
+                },
+            });
         }
-
-        diagnostics.extend(
-            errors
-                .into_iter()
-                .flatten()
-                .map(|diagnostic| diagnostic.with_file_path(file_path.to_string()))
-                .collect::<Vec<_>>(),
-        );
 
         Ok(configuration_list)
     }
@@ -665,11 +671,11 @@ impl ConfigurationExt for Configuration {
     /// Deserializes all the configuration files that were specified in the
     /// `extends` field.
     fn deserialize_extends(
-        &mut self,
+        &self,
         fs: &dyn FsWithResolverProxy,
         relative_resolution_base_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
-    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
+    ) -> Result<Vec<DeserializedExtendedConfiguration>, WorkspaceError> {
         let Some(extends) = &self.extends else {
             return Ok(Vec::new());
         };
@@ -748,11 +754,16 @@ impl ConfigurationExt for Configuration {
                 if let Some(config) = config.as_mut() {
                     self.normalize_plugin(
                         config,
-                        extend_configuration_file_path,
+                        extend_configuration_file_path.clone(),
                         external_resolution_base_path,
                     );
                 }
-                deserialized_configurations.push(Deserialized::new(config, diagnostics))
+                deserialized_configurations.push(DeserializedExtendedConfiguration {
+                    specifier: extend_entry.as_ref().to_string(),
+                    file_path: extend_configuration_file_path,
+                    source: content,
+                    deserialized: Deserialized::new(config, diagnostics),
+                });
             }
         }
         Ok(deserialized_configurations)
@@ -789,10 +800,6 @@ impl ConfigurationExt for Configuration {
         _external_resolution_base_path: &Utf8Path,
     ) {
     }
-
-    /// Checks for the presence of deprecated fields and updates the
-    /// configuration to apply them to the new schema.
-    fn migrate_deprecated_fields(&mut self) {}
 }
 
 #[cfg(test)]
@@ -832,7 +839,7 @@ mod test {
             Ok(loaded) => {
                 assert!(
                     loaded
-                        .configuration
+                        .resolved_configuration()
                         .linter
                         .is_some_and(|linter| !linter.is_enabled())
                 );
@@ -867,6 +874,90 @@ mod test {
                 ));
             }
         }
+    }
+
+    #[test]
+    fn should_preserve_unmerged_configuration_sources() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            r#"{ "extends": ["./first.json", "./second.json"] }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/first.json"),
+            r#"{ "formatter": { "lineWidth": 100 } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/second.json"),
+            r#"{ "formatter": { "indentWidth": 4 } }"#.to_string(),
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromUser(Utf8PathBuf::from("/project/biome.json")),
+        )
+        .expect("valid configuration");
+
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .filter_map(|extended| extended.source.file_path.as_deref())
+                .collect::<Vec<_>>(),
+            [
+                Utf8PathBuf::from("/project/first.json"),
+                Utf8PathBuf::from("/project/second.json"),
+            ]
+        );
+        assert_eq!(
+            loaded
+                .source
+                .root
+                .as_ref()
+                .and_then(|root| root.file_source.as_deref()),
+            Some(r#"{ "extends": ["./first.json", "./second.json"] }"#)
+        );
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .map(|extended| (
+                    extended.specifier.as_deref(),
+                    extended.source.file_source.as_deref()
+                ))
+                .collect::<Vec<_>>(),
+            [
+                (
+                    Some("./first.json"),
+                    Some(r#"{ "formatter": { "lineWidth": 100 } }"#)
+                ),
+                (
+                    Some("./second.json"),
+                    Some(r#"{ "formatter": { "indentWidth": 4 } }"#)
+                ),
+            ]
+        );
+        assert_eq!(
+            loaded
+                .source
+                .root
+                .as_ref()
+                .and_then(|root| root.configuration.as_ref())
+                .and_then(|configuration| configuration.formatter.as_ref()),
+            None
+        );
+        assert_eq!(
+            loaded
+                .resolved_configuration()
+                .formatter
+                .and_then(|formatter| formatter.line_width)
+                .map(u16::from),
+            Some(100)
+        );
     }
 }
 

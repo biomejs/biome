@@ -1,0 +1,30 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.jsonc`
+
+```json
+{
+  // café
+  "formatter": { "lineWidth": 100 }
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth",
+  "value": 100,
+  "source": {
+    "configurationKind": "root",
+    "path": "biome.jsonc",
+    "range": {
+      "end": 46,
+      "start": 43
+    },
+    "scope": "base"
+  }
+}
+```

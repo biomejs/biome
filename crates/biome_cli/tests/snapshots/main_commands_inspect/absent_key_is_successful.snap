@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i formatter.unknown is not configured.
+  
+  i No value was found in the base configuration or matching overrides.
+  
+
+```
