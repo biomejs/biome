@@ -1,17 +1,61 @@
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallExpression,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsRoot, JsCallExpression,
     JsExpressionStatement, JsLanguage, JsModuleItemList, JsStatementList, JsSyntaxKind,
     JsSyntaxNode, T,
 };
 use biome_rowan::TriviaPieceKind;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, SyntaxTriviaPiece};
 use rustc_hash::FxHashSet;
+use std::{cell::RefCell, sync::Arc};
 
 struct HeaderTrivia {
     declaration: Vec<(TriviaPieceKind, String)>,
     first_item: Vec<SyntaxTriviaPiece<JsLanguage>>,
+}
+
+#[derive(Clone)]
+pub(crate) struct ModuleConstantFacts {
+    occupied_reference_names: Arc<FxHashSet<String>>,
+    has_unbound_direct_eval: bool,
+}
+
+struct CachedModuleConstantFacts {
+    root: JsSyntaxNode,
+    facts: ModuleConstantFacts,
+}
+
+thread_local! {
+    // Rule actions for one file share this bounded cache; replacing the entry keeps memory use
+    // independent of the number of files analyzed on a worker thread.
+    static MODULE_CONSTANT_FACTS: RefCell<Option<CachedModuleConstantFacts>> = const { RefCell::new(None) };
+}
+
+pub(crate) fn module_constant_facts(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+) -> ModuleConstantFacts {
+    let root_syntax = root.syntax();
+    MODULE_CONSTANT_FACTS.with(|cache| {
+        let mut cache = cache.borrow_mut();
+        if let Some(cached) = cache
+            .as_ref()
+            .filter(|cached| cached.root == root_syntax.clone())
+        {
+            return cached.facts.clone();
+        }
+
+        let facts = ModuleConstantFacts {
+            occupied_reference_names: Arc::new(occupied_reference_names(model)),
+            has_unbound_direct_eval: has_unbound_direct_eval(root, model),
+        };
+        *cache = Some(CachedModuleConstantFacts {
+            root: root_syntax.clone(),
+            facts: facts.clone(),
+        });
+        facts
+    })
 }
 
 pub(crate) fn extract_module_constant(
@@ -41,7 +85,8 @@ pub(crate) fn extract_module_constant_with_reserved_names(
     reserved_names: &FxHashSet<String>,
     transfer_header: bool,
 ) -> Option<(BatchMutation<JsLanguage>, String)> {
-    if !is_module_constant_extractable(root, model, target) {
+    let facts = module_constant_facts(root, model);
+    if !is_module_constant_extractable_with_facts(root, target, &facts) {
         return None;
     }
 
@@ -50,12 +95,11 @@ pub(crate) fn extract_module_constant_with_reserved_names(
         .ancestors()
         .find(|ancestor| ancestor.parent().is_some_and(|parent| parent == list))?;
 
-    let occupied_reference_names = occupied_reference_names(model);
     let name = collision_free_name(
         model,
         target,
         candidate_name,
-        &occupied_reference_names,
+        &facts.occupied_reference_names,
         reserved_names,
     );
     let insertion_slot = insertion_slot(&list, top_level_item.index())?;
@@ -91,7 +135,7 @@ pub(crate) fn extract_module_constant_with_reserved_names(
             .map_or(&[][..], |trivia| trivia.first_item.as_slice()),
         insertion_slot > 0,
         insertion_slot == 0,
-        &line_ending,
+        line_ending,
     );
 
     let mut mutation = root.clone().begin();
@@ -110,18 +154,18 @@ pub(crate) fn extract_module_constant_with_reserved_names(
     Some((mutation, name))
 }
 
-pub(crate) fn collision_free_module_constant_name(
+pub(crate) fn collision_free_module_constant_name_with_facts(
     model: &SemanticModel,
     target: &JsSyntaxNode,
     candidate_name: &str,
     reserved_names: &FxHashSet<String>,
+    facts: &ModuleConstantFacts,
 ) -> String {
-    let occupied_reference_names = occupied_reference_names(model);
     collision_free_name(
         model,
         target,
         candidate_name,
-        &occupied_reference_names,
+        &facts.occupied_reference_names,
         reserved_names,
     )
 }
@@ -201,11 +245,7 @@ fn occupied_reference_names(model: &SemanticModel) -> FxHashSet<String> {
     names
 }
 
-fn direct_eval_affects_target(
-    root: &AnyJsRoot,
-    model: &SemanticModel,
-    _target: &JsSyntaxNode,
-) -> bool {
+fn has_unbound_direct_eval(root: &AnyJsRoot, model: &SemanticModel) -> bool {
     root.syntax()
         .descendants()
         .filter_map(JsCallExpression::cast)
@@ -318,9 +358,7 @@ fn insertion_slot(list: &JsSyntaxNode, target_index: usize) -> Option<usize> {
     let mut in_directive_prologue = true;
 
     for child in list.children() {
-        if is_import_like(&child) {
-            slot = child.index() + 1;
-        } else if in_directive_prologue && is_directive_statement(&child) {
+        if is_import_like(&child) || in_directive_prologue && is_directive_statement(&child) {
             slot = child.index() + 1;
         } else {
             // A non-leading statement ends the prologue, so later string expressions are ordinary code.
@@ -343,10 +381,10 @@ pub(crate) fn module_constant_insertion_slot(
     insertion_slot(&list, top_level_item.index())
 }
 
-pub(crate) fn is_module_constant_extractable(
+pub(crate) fn is_module_constant_extractable_with_facts(
     root: &AnyJsRoot,
-    model: &SemanticModel,
     target: &JsSyntaxNode,
+    facts: &ModuleConstantFacts,
 ) -> bool {
     if target
         .ancestors()
@@ -355,7 +393,7 @@ pub(crate) fn is_module_constant_extractable(
         // A `with` scope can dynamically shadow any generated identifier.
         return false;
     }
-    if direct_eval_affects_target(root, model, target) {
+    if facts.has_unbound_direct_eval {
         // Direct eval in a sloppy script can introduce a binding into an enclosing function.
         return false;
     }
