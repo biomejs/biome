@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 197
 expression: invalid.jsonc
 ---
 # Input
@@ -646,6 +647,102 @@ invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━
   
   - /foo··😀/;
   + /foo·{2}😀/;
+  
+
+```
+
+# Input
+```cjs
+/[[]  /;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /[[]  /;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /[[]··/;
+  + /[[]·{2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  [bar]/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  [bar]/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··[bar]/;
+  + /foo·{2}[bar]/;
+  
+
+```
+
+# Input
+```cjs
+/foo  ]/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  ]/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··]/;
+  + /foo·{2}]/;
+  
+
+```
+
+# Input
+```cjs
+/\[  /;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/complexity/noAdjacentSpacesInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /\[  /;
+      │    ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /\[··/;
+  + /\[·{2}/;
   
 
 ```

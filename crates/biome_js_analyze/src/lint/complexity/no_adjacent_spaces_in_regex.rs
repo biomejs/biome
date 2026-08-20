@@ -46,6 +46,10 @@ declare_lint_rule! {
     /// ```js
     /// /foo bar	baz/
     ///```
+    ///
+    /// ```js
+    /// /[\s   ]/
+    ///```
     pub NoAdjacentSpacesInRegex {
         version: "1.0.0",
         name: "noAdjacentSpacesInRegex",
@@ -64,12 +68,44 @@ impl Rule for NoAdjacentSpacesInRegex {
     type Options = NoAdjacentSpacesInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let value_token = ctx.query().value_token().ok()?;
+        let node = ctx.query();
+        let value_token = node.value_token().ok()?;
+        let (_, flags) = node.decompose().ok()?;
+        let has_v_flag = flags.text().as_bytes().contains(&b'v');
         let trimmed_text = value_token.text_trimmed();
         let mut range_list = vec![];
         let mut previous_is_space = false;
         let mut first_consecutive_space_index = 0;
+        let mut escaped = false;
+        let mut character_class_depth = 0;
         for (i, ch) in trimmed_text.bytes().enumerate() {
+            let was_in_character_class = character_class_depth > 0;
+            let is_escaped = escaped;
+            escaped = ch == b'\\' && !is_escaped;
+
+            if !is_escaped {
+                match ch {
+                    b'[' if character_class_depth == 0 || has_v_flag => {
+                        character_class_depth += 1;
+                    }
+                    b']' if character_class_depth > 0 => {
+                        character_class_depth -= 1;
+                    }
+                    _ => {}
+                }
+            }
+
+            if was_in_character_class || character_class_depth > 0 {
+                if !was_in_character_class
+                    && previous_is_space
+                    && i - first_consecutive_space_index > 1
+                {
+                    range_list.push(first_consecutive_space_index..i);
+                }
+                previous_is_space = false;
+                continue;
+            }
+
             if ch == b' ' {
                 if !previous_is_space {
                     previous_is_space = true;
