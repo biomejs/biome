@@ -1150,6 +1150,7 @@ dependencies = [
  "boa_engine",
  "camino",
  "rustc-hash 2.1.3",
+ "web-time",
 ]
 
 [[package]]
@@ -1391,7 +1392,6 @@ version = "0.1.0"
 dependencies = [
  "biome_text_size",
  "rustc-hash 2.1.3",
- "web-time",
 ]
 
 [[package]]
