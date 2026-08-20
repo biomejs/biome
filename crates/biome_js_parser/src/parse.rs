@@ -561,8 +561,6 @@ mod tests {
         assert!(parse.has_errors(), "`<span>` is not a void element");
     }
 
-
-
     #[test]
     fn comment_only_template_expression_is_an_error_outside_astro() {
         let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
