@@ -1,0 +1,474 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: multiline.ts
+---
+# Input
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+# Transformations
+```ts
+function foo 
+       
+       
+ (
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a       ,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b : Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?       ,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+)      
+      
+  {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a            as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown        
+                                   
+       
+  ;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+                 
+           
+           
+ 
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass 
+   
+ 
+	implements
+		Iface,
+		Other
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	          
+        
+       
+{
+	value: Map<
+		string,
+		T
+	> = new Map();
+}
+
+```
+
+```ts
+function foo<
+	Lorem,
+	Ipsum,
+>(
+	a: Lorem,
+	b?: Ipsum,
+): Bar<
+	Lorem
+> {
+	return a as unknown as Bar<
+		// comment inside an erased range
+		Lorem
+	>;
+}
+
+interface Multi {
+	a: string;
+	b: number;
+}
+
+class Klass<
+	T,
+>
+	implements
+		Iface,
+		Other
+{
+	value      
+         
+   
+   = new Map();
+}
+
+```
+
+# Final output
+```ts
+function foo 
+       
+       
+ (
+	a       ,
+	b        ,
+)      
+      
+  {
+	return a                   
+                                   
+       
+  ;
+}
+
+                 
+           
+           
+ 
+
+class Klass 
+   
+ 
+	          
+        
+       
+{
+	value      
+         
+   
+   = new Map();
+}
+
+```
