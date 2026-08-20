@@ -782,17 +782,19 @@ pub fn register_leak_checker() {
     });
 }
 
-pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
-
-    let output = text_edit.new_string(source);
-
-    let diff = TextDiff::from_lines(source, &output);
+pub fn unified_diff(before: &str, after: &str) -> String {
+    let diff = TextDiff::from_lines(before, after);
 
     let mut diff = diff.unified_diff();
     diff.context_radius(3);
 
     diff.to_string()
+}
+
+pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
+    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+
+    unified_diff(source, &text_edit.new_string(source))
 }
 
 /// The test runner for the analyzer is currently designed to have a
@@ -921,6 +923,8 @@ pub fn write_transformation_snapshot(
     snapshot: &mut String,
     input_code: &str,
     transformations: &[String],
+    final_output: Option<&str>,
+    diagnostics: &[String],
     extension: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
@@ -932,8 +936,26 @@ pub fn write_transformation_snapshot(
     if !transformations.is_empty() {
         writeln!(snapshot, "# Transformations").unwrap();
         for transformation in transformations {
-            writeln!(snapshot, "```{extension}").unwrap();
+            writeln!(snapshot, "```diff").unwrap();
             writeln!(snapshot, "{transformation}").unwrap();
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot).unwrap();
+        }
+    }
+
+    if let Some(final_output) = final_output {
+        writeln!(snapshot, "# Final output").unwrap();
+        writeln!(snapshot, "```{extension}").unwrap();
+        writeln!(snapshot, "{final_output}").unwrap();
+        writeln!(snapshot, "```").unwrap();
+        writeln!(snapshot).unwrap();
+    }
+
+    if !diagnostics.is_empty() {
+        writeln!(snapshot, "# Diagnostics").unwrap();
+        for diagnostic in diagnostics {
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot, "{diagnostic}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }

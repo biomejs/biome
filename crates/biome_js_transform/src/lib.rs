@@ -90,7 +90,8 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
+        // Transformations don't support suppression comments.
+        |_, _| -> Vec<Result<_, Infallible>> { Vec::new() },
         Box::new(TestAction),
         &mut emit_signal,
     );
