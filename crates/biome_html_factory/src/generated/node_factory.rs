@@ -12,6 +12,52 @@ pub fn angular_binding_name(value_token: SyntaxToken) -> AngularBindingName {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn angular_block_body(
+    l_curly_token: SyntaxToken,
+    children: HtmlElementList,
+    r_curly_token: SyntaxToken,
+) -> AngularBlockBody {
+    AngularBlockBody::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_BLOCK_BODY,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn angular_else_clause(
+    at_token: SyntaxToken,
+    else_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularElseClause {
+    AngularElseClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ELSE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_else_if_clause(
+    at_token: SyntaxToken,
+    else_token: SyntaxToken,
+    if_token: SyntaxToken,
+    condition: AngularIfParameters,
+    children: AngularBlockBody,
+) -> AngularElseIfClause {
+    AngularElseIfClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_event_binding(
     l_paren_token: SyntaxToken,
     name: AngularBindingName,
@@ -44,6 +90,104 @@ impl AngularEventBindingBuilder {
                 Some(SyntaxElement::Token(self.r_paren_token)),
                 self.initializer
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_if_as_clause(
+    semicolon_token: SyntaxToken,
+    as_token: SyntaxToken,
+    binding: HtmlTextExpression,
+) -> AngularIfAsClause {
+    AngularIfAsClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_IF_AS_CLAUSE,
+        [
+            Some(SyntaxElement::Token(semicolon_token)),
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_if_block(
+    opening_block: AngularIfOpeningBlock,
+    else_if_clauses: AngularElseIfClauseList,
+) -> AngularIfBlockBuilder {
+    AngularIfBlockBuilder {
+        opening_block,
+        else_if_clauses,
+        else_clause: None,
+    }
+}
+pub struct AngularIfBlockBuilder {
+    opening_block: AngularIfOpeningBlock,
+    else_if_clauses: AngularElseIfClauseList,
+    else_clause: Option<AngularElseClause>,
+}
+impl AngularIfBlockBuilder {
+    pub fn with_else_clause(mut self, else_clause: AngularElseClause) -> Self {
+        self.else_clause = Some(else_clause);
+        self
+    }
+    pub fn build(self) -> AngularIfBlock {
+        AngularIfBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_IF_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                Some(SyntaxElement::Node(self.else_if_clauses.into_syntax())),
+                self.else_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_if_opening_block(
+    at_token: SyntaxToken,
+    if_token: SyntaxToken,
+    condition: AngularIfParameters,
+    children: AngularBlockBody,
+) -> AngularIfOpeningBlock {
+    AngularIfOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_IF_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_if_parameters(
+    l_paren_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+) -> AngularIfParametersBuilder {
+    AngularIfParametersBuilder {
+        l_paren_token,
+        expression,
+        r_paren_token,
+        as_clause: None,
+    }
+}
+pub struct AngularIfParametersBuilder {
+    l_paren_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+    as_clause: Option<AngularIfAsClause>,
+}
+impl AngularIfParametersBuilder {
+    pub fn with_as_clause(mut self, as_clause: AngularIfAsClause) -> Self {
+        self.as_clause = Some(as_clause);
+        self
+    }
+    pub fn build(self) -> AngularIfParameters {
+        AngularIfParameters::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_IF_PARAMETERS,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.expression.into_syntax())),
+                self.as_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
             ],
         ))
     }
@@ -213,12 +357,6 @@ impl AngularTwoWayBindingBuilder {
             ],
         ))
     }
-}
-pub fn any_angular_block(angular_let_block: AngularLetBlock) -> AnyAngularBlock {
-    AnyAngularBlock::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::ANY_ANGULAR_BLOCK,
-        [Some(SyntaxElement::Node(angular_let_block.into_syntax()))],
-    ))
 }
 pub fn astro_class_directive(
     class_token: SyntaxToken,
@@ -2045,6 +2183,18 @@ impl VueVSlotShorthandDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn angular_else_if_clause_list<I>(items: I) -> AngularElseIfClauseList
+where
+    I: IntoIterator<Item = AngularElseIfClause>,
+    I::IntoIter: ExactSizeIterator,
+{
+    AngularElseIfClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
