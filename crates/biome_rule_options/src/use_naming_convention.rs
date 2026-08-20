@@ -85,7 +85,7 @@ pub struct Convention {
 impl DeserializableValidator for Convention {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {
@@ -247,7 +247,7 @@ impl Selector {
 impl DeserializableValidator for Selector {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {

@@ -43,7 +43,7 @@ impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
 
 impl Deserializable for CustomRestrictedType {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
