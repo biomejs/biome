@@ -61,6 +61,17 @@ declare_lint_rule! {
     /// - `ctl`
     ///
     /// Tagged template members like `tw.div` are also checked when their base function name is recognized.
+    /// Configure the recognized attributes and functions with the top-level `tailwind` configuration.
+    /// Specified arrays replace the defaults.
+    ///
+    /// ```json
+    /// {
+    ///     "tailwind": {
+    ///         "attributes": ["class", "className", "classList"],
+    ///         "functions": ["clsx", "tw"]
+    ///     }
+    /// }
+    /// ```
     ///
     /// ## Known limitations
     ///

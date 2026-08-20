@@ -4,6 +4,7 @@
 //! various AST nodes that can contain CSS class strings (string literals,
 //! JSX strings, template chunks, etc.).
 
+use biome_analyze::options::TailwindOptions;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsLiteralMemberName,
     JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
@@ -70,12 +71,12 @@ impl ClassStringOptions for NoTailwindArbitraryValueOptions {
 }
 
 impl TailwindClassStringHost for AnyClassStringLike {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+    fn tailwind_class_string(&self, options: &TailwindOptions) -> Option<TailwindClassString> {
         match self {
-            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(),
-            Self::JsxString(node) => node.tailwind_class_string(),
-            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(),
-            Self::JsLiteralMemberName(node) => node.tailwind_class_string(),
+            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(options),
+            Self::JsxString(node) => node.tailwind_class_string(options),
+            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(options),
+            Self::JsLiteralMemberName(node) => node.tailwind_class_string(options),
         }
     }
 }

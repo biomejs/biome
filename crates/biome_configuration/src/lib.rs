@@ -27,6 +27,7 @@ pub mod json;
 pub mod markdown;
 pub mod max_size;
 mod overrides;
+pub mod tailwind;
 pub mod vcs;
 #[cfg(feature = "lang_yaml")]
 pub mod yaml;
@@ -57,6 +58,7 @@ pub use crate::markdown::MarkdownConfiguration;
 #[cfg(all(feature = "cli", feature = "lang_md"))]
 pub use crate::markdown::markdown_configuration;
 use crate::max_size::MaxSize;
+pub use crate::tailwind::TailwindConfiguration;
 use crate::vcs::VcsConfiguration;
 #[cfg(feature = "cli")]
 use crate::vcs::vcs_configuration;
@@ -185,6 +187,11 @@ pub struct Configuration {
     #[cfg_attr(feature = "cli", bpaf(external(linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<LinterConfiguration>,
+
+    /// Configures how Biome recognizes Tailwind class strings.
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tailwind: Option<TailwindConfiguration>,
 
     /// Configuration specific to JavaScript.
     #[cfg(feature = "lang_js")]

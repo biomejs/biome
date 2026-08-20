@@ -67,6 +67,10 @@
 			"description": "Indicates whether this configuration file is at the root of a Biome\nproject. By default, this is `true`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 		},
+		"tailwind": {
+			"description": "Configures how Biome recognizes Tailwind class strings.",
+			"anyOf": [{ "$ref": "#/$defs/TailwindConfiguration" }, { "type": "null" }]
+		},
 		"vcs": {
 			"description": "The version control integration configuration.",
 			"anyOf": [{ "$ref": "#/$defs/VcsConfiguration" }, { "type": "null" }]
@@ -14860,6 +14864,23 @@
 						{ "$ref": "#/$defs/UseStrictModeConfiguration" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"TailwindConfiguration": {
+			"description": "Configures how Biome recognizes Tailwind class strings.",
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Attribute names whose values contain Tailwind classes.\n\nDefaults to `class` for HTML and to `class` and `className` for JSX.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Function and tagged-template names whose arguments contain Tailwind classes.\n\nDefaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`,\n`cnb`, and `ctl`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

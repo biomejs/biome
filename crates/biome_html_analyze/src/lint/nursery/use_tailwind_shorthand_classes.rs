@@ -42,6 +42,17 @@ declare_lint_rule! {
     /// <div class="size-4"></div>
     /// ```
     ///
+    /// Configure the recognized attributes with the top-level `tailwind` configuration.
+    /// Specified arrays replace the defaults.
+    ///
+    /// ```json
+    /// {
+    ///     "tailwind": {
+    ///         "attributes": ["class", "classList"]
+    ///     }
+    /// }
+    /// ```
+    ///
     /// ## Known limitations
     ///
     /// This rule currently doesn't check bare strings inside framework-specific class collections,
