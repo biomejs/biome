@@ -105,6 +105,101 @@ pub struct AngularEventBindingFields {
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularLetBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularLetBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularLetBlockFields {
+        AngularLetBlockFields {
+            at_token: self.at_token(),
+            let_token: self.let_token(),
+            name: self.name(),
+            initializer: self.initializer(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn let_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AngularBindingName> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> SyntaxResult<AngularLetInitializerClause> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for AngularLetBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularLetBlockFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub let_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AngularBindingName>,
+    pub initializer: SyntaxResult<AngularLetInitializerClause>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularLetInitializerClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularLetInitializerClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularLetInitializerClauseFields {
+        AngularLetInitializerClauseFields {
+            eq_token: self.eq_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularLetInitializerClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularLetInitializerClauseFields {
+    pub eq_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularPropertyBinding {
     pub(crate) syntax: SyntaxNode,
 }
@@ -293,6 +388,41 @@ pub struct AngularTwoWayBindingFields {
     pub name: SyntaxResult<AngularBindingName>,
     pub r_bracket_paren_token: SyntaxResult<SyntaxToken>,
     pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AnyAngularBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AnyAngularBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AnyAngularBlockFields {
+        AnyAngularBlockFields {
+            angular_let_block: self.angular_let_block(),
+        }
+    }
+    pub fn angular_let_block(&self) -> SyntaxResult<AngularLetBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for AnyAngularBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AnyAngularBlockFields {
+    pub angular_let_block: SyntaxResult<AngularLetBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroClassDirective {
@@ -5196,12 +5326,19 @@ impl AnyHtmlTagName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlTextExpression {
+    AnyAngularBlock(AnyAngularBlock),
     AnySvelteBlock(AnySvelteBlock),
     HtmlBogusTextExpression(HtmlBogusTextExpression),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
     HtmlSingleTextExpression(HtmlSingleTextExpression),
 }
 impl AnyHtmlTextExpression {
+    pub fn as_any_angular_block(&self) -> Option<&AnyAngularBlock> {
+        match &self {
+            Self::AnyAngularBlock(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_any_svelte_block(&self) -> Option<&AnySvelteBlock> {
         match &self {
             Self::AnySvelteBlock(item) => Some(item),
@@ -5852,6 +5989,111 @@ impl From<AngularEventBinding> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for AngularLetBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_LET_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_LET_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularLetBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularLetBlock")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("let_token", &support::DebugSyntaxResult(self.let_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugSyntaxResult(self.initializer()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularLetBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularLetBlock> for SyntaxNode {
+    fn from(n: AngularLetBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularLetBlock> for SyntaxElement {
+    fn from(n: AngularLetBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularLetInitializerClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_LET_INITIALIZER_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_LET_INITIALIZER_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularLetInitializerClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularLetInitializerClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularLetInitializerClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularLetInitializerClause> for SyntaxNode {
+    fn from(n: AngularLetInitializerClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularLetInitializerClause> for SyntaxElement {
+    fn from(n: AngularLetInitializerClause) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for AngularPropertyBinding {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6071,6 +6313,56 @@ impl From<AngularTwoWayBinding> for SyntaxNode {
 }
 impl From<AngularTwoWayBinding> for SyntaxElement {
     fn from(n: AngularTwoWayBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AnyAngularBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANY_ANGULAR_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANY_ANGULAR_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AnyAngularBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AnyAngularBlock")
+                .field(
+                    "angular_let_block",
+                    &support::DebugSyntaxResult(self.angular_let_block()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AnyAngularBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AnyAngularBlock> for SyntaxNode {
+    fn from(n: AnyAngularBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AnyAngularBlock> for SyntaxElement {
+    fn from(n: AnyAngularBlock) -> Self {
         n.syntax.into()
     }
 }
@@ -12417,6 +12709,11 @@ impl From<AnyHtmlTagName> for SyntaxElement {
         node.into()
     }
 }
+impl From<AnyAngularBlock> for AnyHtmlTextExpression {
+    fn from(node: AnyAngularBlock) -> Self {
+        Self::AnyAngularBlock(node)
+    }
+}
 impl From<HtmlBogusTextExpression> for AnyHtmlTextExpression {
     fn from(node: HtmlBogusTextExpression) -> Self {
         Self::HtmlBogusTextExpression(node)
@@ -12434,13 +12731,15 @@ impl From<HtmlSingleTextExpression> for AnyHtmlTextExpression {
 }
 impl AstNode for AnyHtmlTextExpression {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnySvelteBlock::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyAngularBlock::KIND_SET
+        .union(AnySvelteBlock::KIND_SET)
         .union(HtmlBogusTextExpression::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
         .union(HtmlSingleTextExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_BOGUS_TEXT_EXPRESSION
+            ANY_ANGULAR_BLOCK
+            | HTML_BOGUS_TEXT_EXPRESSION
             | HTML_DOUBLE_TEXT_EXPRESSION
             | HTML_SINGLE_TEXT_EXPRESSION => true,
             k if AnySvelteBlock::can_cast(k) => true,
@@ -12449,6 +12748,7 @@ impl AstNode for AnyHtmlTextExpression {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            ANY_ANGULAR_BLOCK => Self::AnyAngularBlock(AnyAngularBlock { syntax }),
             HTML_BOGUS_TEXT_EXPRESSION => {
                 Self::HtmlBogusTextExpression(HtmlBogusTextExpression { syntax })
             }
@@ -12469,6 +12769,7 @@ impl AstNode for AnyHtmlTextExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::AnyAngularBlock(it) => it.syntax(),
             Self::HtmlBogusTextExpression(it) => it.syntax(),
             Self::HtmlDoubleTextExpression(it) => it.syntax(),
             Self::HtmlSingleTextExpression(it) => it.syntax(),
@@ -12477,6 +12778,7 @@ impl AstNode for AnyHtmlTextExpression {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::AnyAngularBlock(it) => it.into_syntax(),
             Self::HtmlBogusTextExpression(it) => it.into_syntax(),
             Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
             Self::HtmlSingleTextExpression(it) => it.into_syntax(),
@@ -12487,6 +12789,7 @@ impl AstNode for AnyHtmlTextExpression {
 impl std::fmt::Debug for AnyHtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyAngularBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::AnySvelteBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -12497,6 +12800,7 @@ impl std::fmt::Debug for AnyHtmlTextExpression {
 impl From<AnyHtmlTextExpression> for SyntaxNode {
     fn from(n: AnyHtmlTextExpression) -> Self {
         match n {
+            AnyHtmlTextExpression::AnyAngularBlock(it) => it.into_syntax(),
             AnyHtmlTextExpression::AnySvelteBlock(it) => it.into_syntax(),
             AnyHtmlTextExpression::HtmlBogusTextExpression(it) => it.into_syntax(),
             AnyHtmlTextExpression::HtmlDoubleTextExpression(it) => it.into_syntax(),
@@ -14089,6 +14393,16 @@ impl std::fmt::Display for AngularEventBinding {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AngularLetBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularLetInitializerClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AngularPropertyBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -14105,6 +14419,11 @@ impl std::fmt::Display for AngularTemplateRefVariable {
     }
 }
 impl std::fmt::Display for AngularTwoWayBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyAngularBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -24,6 +24,15 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AngularEventBinding::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ANGULAR_LET_BLOCK => {
+                    let $pattern = unsafe { $crate::AngularLetBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_LET_INITIALIZER_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::AngularLetInitializerClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ANGULAR_PROPERTY_BINDING => {
                     let $pattern = unsafe { $crate::AngularPropertyBinding::new_unchecked(node) };
                     $body
@@ -40,6 +49,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_TWO_WAY_BINDING => {
                     let $pattern = unsafe { $crate::AngularTwoWayBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANY_ANGULAR_BLOCK => {
+                    let $pattern = unsafe { $crate::AnyAngularBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_CLASS_DIRECTIVE => {

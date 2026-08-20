@@ -89,6 +89,7 @@ AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
 	| AnySvelteBlock
+	| AnyAngularBlock
 	| HtmlBogusTextExpression
 
 
@@ -1193,3 +1194,18 @@ AngularTemplateRefVariable =
 	initializer: HtmlAttributeInitializerClause?
 
 AngularBindingName = value: 'html_literal'
+
+AnyAngularBlock = AngularLetBlock
+
+// @let name = expression;
+// ^^^^^^^^^^^^^^^^^^^^^^^
+AngularLetBlock =
+	'@'
+	'let'
+	name: AngularBindingName
+	initializer: AngularLetInitializerClause
+	';'
+
+AngularLetInitializerClause =
+	'='
+	expression: HtmlTextExpression
