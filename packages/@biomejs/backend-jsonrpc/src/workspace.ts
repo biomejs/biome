@@ -389,6 +389,10 @@ export interface MarkdownConfiguration {
 	 * Linter options
 	 */
 	linter?: MarkdownLinterConfiguration;
+	/**
+	 * Parsing options
+	 */
+	parser?: MarkdownParserConfiguration;
 }
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
@@ -1083,6 +1087,15 @@ export interface MarkdownLinterConfiguration {
 	 * Control the linter for Markdown files.
 	 */
 	enabled?: Bool;
+}
+/**
+ * Options that change how the Markdown parser behaves
+ */
+export interface MarkdownParserConfiguration {
+	/**
+	 * Enables parsing frontmatter at the start of the file. Defaults to `false`.
+	 */
+	frontmatter?: Bool;
 }
 export interface OverridePattern {
 	/**

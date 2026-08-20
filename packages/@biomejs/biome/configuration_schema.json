@@ -2963,6 +2963,13 @@
 						{ "$ref": "#/$defs/MarkdownLinterConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownParserConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3008,6 +3015,17 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for Markdown files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownParserConfiguration": {
+			"description": "Options that change how the Markdown parser behaves",
+			"type": "object",
+			"properties": {
+				"frontmatter": {
+					"description": "Enables parsing frontmatter at the start of the file. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
