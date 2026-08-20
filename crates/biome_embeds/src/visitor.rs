@@ -4,9 +4,9 @@ use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
-    AnySvelteDirective, AnySvelteEachName, AnyVueVForBinding, AnyVueVForBindingListElement,
-    AnyVueVForDestructuredBinding, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
-    VueVForIdentifierBinding, VueVForValue,
+    AnySvelteDirective, AnySvelteEachName, AnyVueDirective, AnyVueDirectiveArgument,
+    AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlElement,
+    HtmlRoot, HtmlSelfClosingElement, VueVForIdentifierBinding, VueVForValue,
 };
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
@@ -1211,6 +1211,7 @@ impl EmbeddedReferencesBuilder {
 
     fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
         let is_svelte = file_source.is_svelte();
+        let is_vue = file_source.is_vue();
         for node in root.syntax().descendants() {
             if let Some(element) = HtmlElement::cast_ref(&node) {
                 self.visit_html_element(&element);
@@ -1222,6 +1223,10 @@ impl EmbeddedReferencesBuilder {
 
             if is_svelte && let Some(directive) = AnySvelteDirective::cast_ref(&node) {
                 self.register_svelte_directive_reference(&directive);
+            }
+
+            if is_vue && let Some(directive) = AnyVueDirective::cast_ref(&node) {
+                self.register_vue_directive_reference(&directive);
             }
         }
     }
@@ -1258,6 +1263,37 @@ impl EmbeddedReferencesBuilder {
             AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
             AnySvelteBindingProperty::SvelteMemberProperty(_)
             | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
+        };
+
+        self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
+        Some(())
+    }
+
+    fn register_vue_directive_reference(&mut self, directive: &AnyVueDirective) -> Option<()> {
+        let value = match directive {
+            AnyVueDirective::VueVBindShorthandDirective(directive)
+                if directive.initializer().is_none() =>
+            {
+                directive.arg().ok()?
+            }
+            AnyVueDirective::VueDirective(directive)
+                if directive.is_binding() && directive.initializer().is_none() =>
+            {
+                directive.arg()?
+            }
+            _ => return None,
+        };
+
+        self.register_vue_binding_attribute(value.arg())
+    }
+
+    fn register_vue_binding_attribute(
+        &mut self,
+        arg: Option<AnyVueDirectiveArgument>,
+    ) -> Option<()> {
+        let token = match arg? {
+            AnyVueDirectiveArgument::VueStaticArgument(arg) => arg.name_token().ok()?,
+            _ => return None,
         };
 
         self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
