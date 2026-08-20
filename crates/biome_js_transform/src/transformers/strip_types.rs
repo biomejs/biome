@@ -4,8 +4,8 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExportClause, AnyJsExpression, AnyJsImportClause, AnyTsType,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsExport, JsExportNamedFromSpecifier,
+    AnyJsClassMember, AnyJsExportClause, AnyJsImportClause, AnyTsType, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsExport, JsExportNamedFromSpecifier,
     JsExportNamedShorthandSpecifier, JsExportNamedSpecifier, JsFormalParameter, JsImport,
     JsLanguage, JsMethodClassMember, JsNamedImportSpecifier, JsShorthandNamedImportSpecifier,
     JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T, TsAbstractModifier, TsAccessibilityModifier,
@@ -46,20 +46,25 @@ declare_transformation! {
 }
 
 declare_node_union! {
-    pub AnyTsStrippableSyntax =
-        // TS-only syntax that is erased entirely.
+    /// TS-only declarations that are erased together with the `export` in front of them.
+    pub AnyTsErasableDeclaration =
         TsInterfaceDeclaration
         | TsTypeAliasDeclaration
         | TsDeclareStatement
         | TsDeclareFunctionDeclaration
         | TsDeclareFunctionExportDefaultDeclaration
-        | TsTypeAnnotation
+        | TsImportEqualsDeclaration
+}
+
+declare_node_union! {
+    /// TS-only syntax that is erased in place, together with its descendants.
+    pub AnyTsErasableSyntax =
+        TsTypeAnnotation
         | TsReturnTypeAnnotation
         | TsDefiniteVariableAnnotation
         | TsOptionalPropertyAnnotation
         | TsDefinitePropertyAnnotation
         | TsTypeParameters
-        | TsTypeArguments
         | TsImplementsClause
         | TsAccessibilityModifier
         | TsReadonlyModifier
@@ -73,9 +78,13 @@ declare_node_union! {
         | TsSetterSignatureClassMember
         | TsConstructorSignatureClassMember
         | TsIndexSignatureClassMember
-        | TsThisParameter
-        // Expression wrappers: only the type syntax around the inner expression is erased.
-        | TsAsExpression
+}
+
+declare_node_union! {
+    /// TS-only syntax wrapping an expression or an assignment, e.g. `expr as T` or `expr!`.
+    /// Only the type syntax around the inner expression is erased.
+    pub AnyTsTypeWrapper =
+        TsAsExpression
         | TsSatisfiesExpression
         | TsNonNullAssertionExpression
         | TsTypeAssertionExpression
@@ -84,27 +93,69 @@ declare_node_union! {
         | TsSatisfiesAssignment
         | TsNonNullAssertionAssignment
         | TsTypeAssertionAssignment
-        // TS-only syntax that generates runtime code; it can't be erased.
-        | TsEnumDeclaration
+}
+
+declare_node_union! {
+    /// TS-only syntax that generates runtime code and thus can't be erased.
+    pub AnyTsRuntimeSyntax =
+        TsEnumDeclaration
         | TsModuleDeclaration
         | TsGlobalDeclaration
         | TsExternalModuleDeclaration
         | TsPropertyParameter
         | TsExportAssignmentClause
         | TsExportAsNamespaceClause
-        | TsImportEqualsDeclaration
-        // JS nodes hosting TS-only tokens or clauses.
-        | JsImport
-        | JsExport
-        | JsShorthandNamedImportSpecifier
+}
+
+declare_node_union! {
+    /// Import and export specifiers that may be marked with `type`.
+    pub AnyJsMaybeTypeOnlySpecifier =
+        JsShorthandNamedImportSpecifier
         | JsNamedImportSpecifier
         | JsExportNamedShorthandSpecifier
         | JsExportNamedSpecifier
         | JsExportNamedFromSpecifier
-        | JsClassDeclaration
-        | JsClassExportDefaultDeclaration
-        | JsFormalParameter
-        | JsMethodClassMember
+}
+
+declare_node_union! {
+    /// Classes that may carry the `abstract` modifier.
+    pub AnyJsMaybeAbstractClass = JsClassDeclaration | JsClassExportDefaultDeclaration
+}
+
+declare_node_union! {
+    /// Nodes that may carry the `?` marker of an optional parameter or method.
+    pub AnyJsMaybeOptional = JsFormalParameter | JsMethodClassMember
+}
+
+declare_node_union! {
+    pub AnyTsStrippableSyntax =
+        AnyTsErasableDeclaration
+        | AnyTsErasableSyntax
+        | AnyTsTypeWrapper
+        | AnyTsRuntimeSyntax
+        | AnyJsMaybeTypeOnlySpecifier
+        | AnyJsMaybeAbstractClass
+        | AnyJsMaybeOptional
+        | TsTypeArguments
+        | TsThisParameter
+        | JsImport
+        | JsExport
+}
+
+impl AnyTsRuntimeSyntax {
+    /// Returns how the syntax is named in the diagnostic.
+    fn syntax_name(&self) -> &'static str {
+        match self {
+            Self::TsEnumDeclaration(_) => "enum declarations",
+            Self::TsModuleDeclaration(_) => "namespace and module declarations",
+            Self::TsGlobalDeclaration(_) | Self::TsExternalModuleDeclaration(_) => {
+                "ambient module declarations"
+            }
+            Self::TsPropertyParameter(_) => "parameter properties",
+            Self::TsExportAssignmentClause(_) => "export = assignments",
+            Self::TsExportAsNamespaceClause(_) => "export as namespace declarations",
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -123,11 +174,11 @@ impl Rule for StripTypes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let syntax = node.syntax();
 
         // Constructs inside an erased ancestor (a type, a type-only declaration, ...) are
         // already erased with it and must not produce their own overlapping signal.
-        if syntax
+        if node
+            .syntax()
             .ancestors()
             .skip(1)
             .any(|ancestor| erases_descendants(&ancestor))
@@ -136,149 +187,89 @@ impl Rule for StripTypes {
         }
 
         match node {
-            // Erased entirely. If the construct is the clause of an `export`, the `export`
-            // keyword can't be left dangling, so the whole export is erased with it.
-            AnyTsStrippableSyntax::TsInterfaceDeclaration(_)
-            | AnyTsStrippableSyntax::TsTypeAliasDeclaration(_)
-            | AnyTsStrippableSyntax::TsDeclareStatement(_)
-            | AnyTsStrippableSyntax::TsDeclareFunctionDeclaration(_)
-            | AnyTsStrippableSyntax::TsDeclareFunctionExportDefaultDeclaration(_) => {
-                Some(StripTypesState::Erase(vec![export_erase_range(syntax)]))
-            }
-
-            // Erased entirely, never a direct export clause.
-            AnyTsStrippableSyntax::TsTypeAnnotation(_)
-            | AnyTsStrippableSyntax::TsReturnTypeAnnotation(_)
-            | AnyTsStrippableSyntax::TsDefiniteVariableAnnotation(_)
-            | AnyTsStrippableSyntax::TsOptionalPropertyAnnotation(_)
-            | AnyTsStrippableSyntax::TsDefinitePropertyAnnotation(_)
-            | AnyTsStrippableSyntax::TsTypeParameters(_)
-            | AnyTsStrippableSyntax::TsImplementsClause(_)
-            | AnyTsStrippableSyntax::TsAccessibilityModifier(_)
-            | AnyTsStrippableSyntax::TsReadonlyModifier(_)
-            | AnyTsStrippableSyntax::TsOverrideModifier(_)
-            | AnyTsStrippableSyntax::TsAbstractModifier(_)
-            | AnyTsStrippableSyntax::TsDeclareModifier(_)
-            | AnyTsStrippableSyntax::TsPropertySignatureClassMember(_)
-            | AnyTsStrippableSyntax::TsInitializedPropertySignatureClassMember(_)
-            | AnyTsStrippableSyntax::TsMethodSignatureClassMember(_)
-            | AnyTsStrippableSyntax::TsGetterSignatureClassMember(_)
-            | AnyTsStrippableSyntax::TsSetterSignatureClassMember(_)
-            | AnyTsStrippableSyntax::TsConstructorSignatureClassMember(_)
-            | AnyTsStrippableSyntax::TsIndexSignatureClassMember(_) => {
-                Some(StripTypesState::Erase(vec![syntax.text_trimmed_range()]))
-            }
-
-            // The type arguments of an instantiation expression are erased by the wrapper.
-            AnyTsStrippableSyntax::TsTypeArguments(_) => {
-                if syntax.parent().is_some_and(|parent| {
-                    parent.kind() == JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
-                }) {
-                    None
-                } else {
-                    Some(StripTypesState::Erase(vec![syntax.text_trimmed_range()]))
+            // If the declaration is the clause of an `export`, the `export` keyword can't be
+            // left dangling, so the whole export is erased with it.
+            AnyTsStrippableSyntax::AnyTsErasableDeclaration(declaration) => {
+                // `import A = require("a")` generates a runtime require, unlike `import type`.
+                if let AnyTsErasableDeclaration::TsImportEqualsDeclaration(import) = declaration
+                    && import.type_token().is_none()
+                {
+                    return Some(StripTypesState::Unsupported {
+                        syntax: "import = declarations",
+                    });
                 }
-            }
 
-            // A `this` parameter also takes its trailing comma with it, as erasing it alone
-            // may leave the parameter list with a leading comma.
-            AnyTsStrippableSyntax::TsThisParameter(_) => {
-                Some(StripTypesState::Erase(vec![range_with_trailing_separator(
-                    syntax,
+                Some(StripTypesState::Erase(vec![export_erase_range(
+                    declaration,
                 )]))
             }
 
-            // Expression wrappers: keep the inner expression, erase the type syntax around it.
-            // Nested wrappers produce their own signals.
-            AnyTsStrippableSyntax::TsAsExpression(_)
-            | AnyTsStrippableSyntax::TsSatisfiesExpression(_)
-            | AnyTsStrippableSyntax::TsNonNullAssertionExpression(_)
-            | AnyTsStrippableSyntax::TsTypeAssertionExpression(_)
-            | AnyTsStrippableSyntax::TsInstantiationExpression(_)
-            | AnyTsStrippableSyntax::TsAsAssignment(_)
-            | AnyTsStrippableSyntax::TsSatisfiesAssignment(_)
-            | AnyTsStrippableSyntax::TsNonNullAssertionAssignment(_)
-            | AnyTsStrippableSyntax::TsTypeAssertionAssignment(_) => {
-                Some(StripTypesState::Erase(wrapper_ranges(syntax)))
+            AnyTsStrippableSyntax::AnyTsErasableSyntax(erasable) => {
+                Some(StripTypesState::Erase(vec![erasable.range()]))
             }
 
-            AnyTsStrippableSyntax::TsEnumDeclaration(_) => Some(StripTypesState::Unsupported {
-                syntax: "enum declarations",
-            }),
-            AnyTsStrippableSyntax::TsModuleDeclaration(_) => Some(StripTypesState::Unsupported {
-                syntax: "namespace and module declarations",
-            }),
-            AnyTsStrippableSyntax::TsGlobalDeclaration(_)
-            | AnyTsStrippableSyntax::TsExternalModuleDeclaration(_) => {
-                Some(StripTypesState::Unsupported {
-                    syntax: "ambient module declarations",
-                })
-            }
-            AnyTsStrippableSyntax::TsPropertyParameter(_) => Some(StripTypesState::Unsupported {
-                syntax: "parameter properties",
-            }),
-            AnyTsStrippableSyntax::TsExportAssignmentClause(_) => {
-                Some(StripTypesState::Unsupported {
-                    syntax: "export = assignments",
-                })
-            }
-            AnyTsStrippableSyntax::TsExportAsNamespaceClause(_) => {
-                Some(StripTypesState::Unsupported {
-                    syntax: "export as namespace declarations",
-                })
+            // The type arguments of an instantiation expression are erased by the wrapper.
+            AnyTsStrippableSyntax::TsTypeArguments(arguments) => arguments
+                .syntax()
+                .parent()
+                .is_none_or(|parent| parent.kind() != JsSyntaxKind::TS_INSTANTIATION_EXPRESSION)
+                .then(|| StripTypesState::Erase(vec![arguments.range()])),
+
+            // A `this` parameter also takes its trailing comma with it, as erasing it alone
+            // may leave the parameter list with a leading comma.
+            AnyTsStrippableSyntax::TsThisParameter(parameter) => Some(StripTypesState::Erase(
+                vec![range_with_trailing_separator(parameter.syntax())],
+            )),
+
+            // Keep the inner expression, erase the type syntax around it. Nested wrappers
+            // produce their own signals.
+            AnyTsStrippableSyntax::AnyTsTypeWrapper(wrapper) => {
+                Some(StripTypesState::Erase(wrapper_ranges(wrapper)))
             }
 
-            // `import type A = ...` is type-only; without `type` it generates a runtime require.
-            AnyTsStrippableSyntax::TsImportEqualsDeclaration(declaration) => {
-                if declaration.type_token().is_some() {
-                    Some(StripTypesState::Erase(vec![export_erase_range(syntax)]))
-                } else {
-                    Some(StripTypesState::Unsupported {
-                        syntax: "import = declarations",
-                    })
-                }
+            AnyTsStrippableSyntax::AnyTsRuntimeSyntax(runtime) => {
+                Some(StripTypesState::Unsupported {
+                    syntax: runtime.syntax_name(),
+                })
             }
 
             // `import type ... from "..."` is erased entirely.
             AnyTsStrippableSyntax::JsImport(import) => import
                 .import_clause()
                 .is_ok_and(|clause| is_type_only_import_clause(&clause))
-                .then(|| StripTypesState::Erase(vec![syntax.text_trimmed_range()])),
+                .then(|| StripTypesState::Erase(vec![import.range()])),
 
             // `export type { ... }` and `export declare ...` are erased entirely. Exports of a
             // type-only declaration are handled by the declaration itself.
             AnyTsStrippableSyntax::JsExport(export) => export
                 .export_clause()
                 .is_ok_and(|clause| is_type_only_export_clause(&clause))
-                .then(|| StripTypesState::Erase(vec![syntax.text_trimmed_range()])),
+                .then(|| StripTypesState::Erase(vec![export.range()])),
 
             // `import { type A } from "..."` erases the specifier together with its trailing
             // comma, keeping the (side effect of the) import itself, like `verbatimModuleSyntax`
             // does.
-            AnyTsStrippableSyntax::JsShorthandNamedImportSpecifier(_)
-            | AnyTsStrippableSyntax::JsNamedImportSpecifier(_)
-            | AnyTsStrippableSyntax::JsExportNamedShorthandSpecifier(_)
-            | AnyTsStrippableSyntax::JsExportNamedSpecifier(_)
-            | AnyTsStrippableSyntax::JsExportNamedFromSpecifier(_) => {
-                find_direct_token(syntax, T![type])
-                    .map(|_| StripTypesState::Erase(vec![range_with_trailing_separator(syntax)]))
+            AnyTsStrippableSyntax::AnyJsMaybeTypeOnlySpecifier(specifier) => {
+                find_direct_token(specifier.syntax(), T![type]).map(|_| {
+                    StripTypesState::Erase(vec![range_with_trailing_separator(specifier.syntax())])
+                })
             }
 
-            // JS nodes hosting TS-only tokens.
-            AnyTsStrippableSyntax::JsClassDeclaration(_)
-            | AnyTsStrippableSyntax::JsClassExportDefaultDeclaration(_) => {
-                let abstract_token = find_direct_token(syntax, T![abstract])?;
+            AnyTsStrippableSyntax::AnyJsMaybeAbstractClass(class) => {
+                let abstract_token = find_direct_token(class.syntax(), T![abstract])?;
 
                 // Erasing `abstract` from the class alone would leave its abstract members
                 // behind, which no longer parse, so they are erased together.
                 let mut ranges = vec![abstract_token.text_trimmed_range()];
-                ranges.extend(abstract_members(syntax).map(|member| member.text_trimmed_range()));
+                ranges.extend(abstract_members(class).map(|member| member.range()));
 
                 Some(StripTypesState::Erase(ranges))
             }
-            AnyTsStrippableSyntax::JsFormalParameter(_)
-            | AnyTsStrippableSyntax::JsMethodClassMember(_) => find_direct_token(syntax, T![?])
-                .map(|token| StripTypesState::Erase(vec![token.text_trimmed_range()])),
+
+            AnyTsStrippableSyntax::AnyJsMaybeOptional(node) => {
+                find_direct_token(node.syntax(), T![?])
+                    .map(|token| StripTypesState::Erase(vec![token.text_trimmed_range()]))
+            }
         }
     }
 
@@ -380,37 +371,56 @@ fn is_type_only_export_clause(clause: &AnyJsExportClause) -> bool {
     }
 }
 
-/// Returns the range to erase for a declaration, extended to the enclosing `export` when the
+/// Returns the range to erase for `declaration`, extended to the enclosing `export` when the
 /// declaration is its clause, as erasing the declaration alone would leave a dangling `export`.
-fn export_erase_range(node: &JsSyntaxNode) -> TextRange {
-    let target = match node.parent() {
+fn export_erase_range(declaration: &AnyTsErasableDeclaration) -> TextRange {
+    let export = match declaration.syntax().parent() {
         Some(parent) if parent.kind() == JsSyntaxKind::JS_EXPORT => parent,
         Some(parent) if parent.kind() == JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE => {
             parent.parent().unwrap_or(parent)
         }
-        _ => node.clone(),
+        _ => return declaration.range(),
     };
 
-    target.text_trimmed_range()
+    export.text_trimmed_range()
 }
 
-/// Returns the ranges around the inner expression of a wrapper like `expr as T`, `expr!`,
-/// `<T>expr`, or `expr<T>`.
-fn wrapper_ranges(node: &JsSyntaxNode) -> Vec<TextRange> {
-    let Some(inner) = node.children().find(|child| {
-        AnyJsExpression::can_cast(child.kind()) || AnyJsAssignment::can_cast(child.kind())
-    }) else {
-        return vec![node.text_trimmed_range()];
+/// Returns the ranges of the type syntax of `wrapper`, i.e. everything around the expression
+/// (or assignment) it wraps.
+fn wrapper_ranges(wrapper: &AnyTsTypeWrapper) -> Vec<TextRange> {
+    let inner = match wrapper {
+        AnyTsTypeWrapper::TsAsExpression(node) => node.expression().map(|node| node.range()),
+        AnyTsTypeWrapper::TsSatisfiesExpression(node) => node.expression().map(|node| node.range()),
+        AnyTsTypeWrapper::TsNonNullAssertionExpression(node) => {
+            node.expression().map(|node| node.range())
+        }
+        AnyTsTypeWrapper::TsTypeAssertionExpression(node) => {
+            node.expression().map(|node| node.range())
+        }
+        AnyTsTypeWrapper::TsInstantiationExpression(node) => {
+            node.expression().map(|node| node.range())
+        }
+        AnyTsTypeWrapper::TsAsAssignment(node) => node.assignment().map(|node| node.range()),
+        AnyTsTypeWrapper::TsSatisfiesAssignment(node) => node.assignment().map(|node| node.range()),
+        AnyTsTypeWrapper::TsNonNullAssertionAssignment(node) => {
+            node.assignment().map(|node| node.range())
+        }
+        AnyTsTypeWrapper::TsTypeAssertionAssignment(node) => {
+            node.assignment().map(|node| node.range())
+        }
     };
 
-    let outer = node.text_trimmed_range();
-    let inner_range = inner.text_trimmed_range();
+    let outer = wrapper.range();
+    let Ok(inner) = inner else {
+        return vec![outer];
+    };
+
     let mut ranges = Vec::new();
-    if outer.start() < inner_range.start() {
-        ranges.push(TextRange::new(outer.start(), inner_range.start()));
+    if outer.start() < inner.start() {
+        ranges.push(TextRange::new(outer.start(), inner.start()));
     }
-    if inner_range.end() < outer.end() {
-        ranges.push(TextRange::new(inner_range.end(), outer.end()));
+    if inner.end() < outer.end() {
+        ranges.push(TextRange::new(inner.end(), outer.end()));
     }
 
     ranges
@@ -433,28 +443,29 @@ fn range_with_trailing_separator(node: &JsSyntaxNode) -> TextRange {
 /// Only the modifier list a member owns directly is matched. `abstract` is reachable from the
 /// two lists below and nowhere else in the grammar, so a `TS_ABSTRACT_MODIFIER` found deeper in
 /// a member belongs to a nested class, which erases its own abstract members.
-fn abstract_members(class: &JsSyntaxNode) -> impl Iterator<Item = JsSyntaxNode> {
-    class
-        .children()
-        .find(|child| child.kind() == JsSyntaxKind::JS_CLASS_MEMBER_LIST)
-        .into_iter()
-        .flat_map(|members| members.children())
-        .filter(|member| {
-            member
-                .children()
-                .filter(|child| {
-                    matches!(
-                        child.kind(),
-                        JsSyntaxKind::TS_PROPERTY_SIGNATURE_MODIFIER_LIST
-                            | JsSyntaxKind::TS_METHOD_SIGNATURE_MODIFIER_LIST
-                    )
-                })
-                .any(|modifiers| {
-                    modifiers
-                        .children()
-                        .any(|modifier| modifier.kind() == JsSyntaxKind::TS_ABSTRACT_MODIFIER)
-                })
-        })
+fn abstract_members(class: &AnyJsMaybeAbstractClass) -> impl Iterator<Item = AnyJsClassMember> {
+    let members = match class {
+        AnyJsMaybeAbstractClass::JsClassDeclaration(class) => class.members(),
+        AnyJsMaybeAbstractClass::JsClassExportDefaultDeclaration(class) => class.members(),
+    };
+
+    members.into_iter().filter(|member| {
+        member
+            .syntax()
+            .children()
+            .filter(|child| {
+                matches!(
+                    child.kind(),
+                    JsSyntaxKind::TS_PROPERTY_SIGNATURE_MODIFIER_LIST
+                        | JsSyntaxKind::TS_METHOD_SIGNATURE_MODIFIER_LIST
+                )
+            })
+            .any(|modifiers| {
+                modifiers
+                    .children()
+                    .any(|modifier| modifier.kind() == JsSyntaxKind::TS_ABSTRACT_MODIFIER)
+            })
+    })
 }
 
 fn find_direct_token(node: &JsSyntaxNode, kind: JsSyntaxKind) -> Option<JsSyntaxToken> {
