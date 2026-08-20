@@ -58,6 +58,20 @@ pub fn angular_else_if_clause(
         ],
     ))
 }
+pub fn angular_empty_clause(
+    at_token: SyntaxToken,
+    empty_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularEmptyClause {
+    AngularEmptyClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_EMPTY_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(empty_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_event_binding(
     l_paren_token: SyntaxToken,
     name: AngularBindingName,
@@ -93,6 +107,132 @@ impl AngularEventBindingBuilder {
             ],
         ))
     }
+}
+pub fn angular_for_block(opening_block: AngularForOpeningBlock) -> AngularForBlockBuilder {
+    AngularForBlockBuilder {
+        opening_block,
+        empty_clause: None,
+    }
+}
+pub struct AngularForBlockBuilder {
+    opening_block: AngularForOpeningBlock,
+    empty_clause: Option<AngularEmptyClause>,
+}
+impl AngularForBlockBuilder {
+    pub fn with_empty_clause(mut self, empty_clause: AngularEmptyClause) -> Self {
+        self.empty_clause = Some(empty_clause);
+        self
+    }
+    pub fn build(self) -> AngularForBlock {
+        AngularForBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_FOR_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                self.empty_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_for_expression(
+    variable: HtmlTextExpression,
+    of_token: SyntaxToken,
+    iterable: HtmlTextExpression,
+) -> AngularForExpression {
+    AngularForExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_FOR_EXPRESSION,
+        [
+            Some(SyntaxElement::Node(variable.into_syntax())),
+            Some(SyntaxElement::Token(of_token)),
+            Some(SyntaxElement::Node(iterable.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_for_let_clause(
+    semicolon_token: SyntaxToken,
+    let_token: SyntaxToken,
+    bindings: AngularForLetBindingList,
+) -> AngularForLetClause {
+    AngularForLetClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_FOR_LET_CLAUSE,
+        [
+            Some(SyntaxElement::Token(semicolon_token)),
+            Some(SyntaxElement::Token(let_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_for_opening_block(
+    at_token: SyntaxToken,
+    for_token: SyntaxToken,
+    parameters: AngularForParameters,
+    children: AngularBlockBody,
+) -> AngularForOpeningBlock {
+    AngularForOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_FOR_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(for_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_for_parameters(
+    l_paren_token: SyntaxToken,
+    expression: AngularForExpression,
+    semicolon_token: SyntaxToken,
+    track_clause: AngularForTrackClause,
+    r_paren_token: SyntaxToken,
+) -> AngularForParametersBuilder {
+    AngularForParametersBuilder {
+        l_paren_token,
+        expression,
+        semicolon_token,
+        track_clause,
+        r_paren_token,
+        let_clause: None,
+    }
+}
+pub struct AngularForParametersBuilder {
+    l_paren_token: SyntaxToken,
+    expression: AngularForExpression,
+    semicolon_token: SyntaxToken,
+    track_clause: AngularForTrackClause,
+    r_paren_token: SyntaxToken,
+    let_clause: Option<AngularForLetClause>,
+}
+impl AngularForParametersBuilder {
+    pub fn with_let_clause(mut self, let_clause: AngularForLetClause) -> Self {
+        self.let_clause = Some(let_clause);
+        self
+    }
+    pub fn build(self) -> AngularForParameters {
+        AngularForParameters::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_FOR_PARAMETERS,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.expression.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+                Some(SyntaxElement::Node(self.track_clause.into_syntax())),
+                self.let_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn angular_for_track_clause(
+    track_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularForTrackClause {
+    AngularForTrackClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_FOR_TRACK_CLAUSE,
+        [
+            Some(SyntaxElement::Token(track_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
 }
 pub fn angular_if_as_clause(
     semicolon_token: SyntaxToken,
@@ -2194,6 +2334,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn angular_for_let_binding_list<I, S>(items: I, separators: S) -> AngularForLetBindingList
+where
+    I: IntoIterator<Item = HtmlTextExpression>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    AngularForLetBindingList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_FOR_LET_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList

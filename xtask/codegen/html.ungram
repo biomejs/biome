@@ -1198,6 +1198,7 @@ AngularBindingName = value: 'html_literal'
 AnyAngularBlock =
 	AngularLetBlock
 	| AngularIfBlock
+	| AngularForBlock
 
 // @let name = expression;
 // ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1265,3 +1266,56 @@ AngularBlockBody =
 	'{'
 	children: HtmlElementList
 	'}'
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularForBlock =
+	opening_block: AngularForOpeningBlock
+	empty_clause: AngularEmptyClause?
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularForOpeningBlock =
+	'@'
+	'for'
+	parameters: AngularForParameters
+	children: AngularBlockBody
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularForParameters =
+	'('
+	expression: AngularForExpression
+	';'
+	track_clause: AngularForTrackClause
+	let_clause: AngularForLetClause?
+	')'
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//       ^^^^^^^^^^^^^
+AngularForExpression =
+	variable: HtmlTextExpression
+	'of'
+	iterable: HtmlTextExpression
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//                      ^^^^^^^^^^^^^
+AngularForTrackClause =
+	'track'
+	expression: HtmlTextExpression
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//                                   ^^^^^^^^^^^^^^^^
+AngularForLetClause =
+	';'
+	'let'
+	bindings: AngularForLetBindingList
+
+AngularForLetBindingList = (HtmlTextExpression (',' HtmlTextExpression)*)
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//                                                             ^^^^^^^^^^^^^^
+AngularEmptyClause =
+	'@'
+	'empty'
+	children: AngularBlockBody

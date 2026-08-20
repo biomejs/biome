@@ -939,6 +939,7 @@ impl<'src> HtmlLexer<'src> {
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             SEM => self.consume_byte(T![;]),
+            COM => self.consume_byte(T![,]),
             IDT => self
                 .consume_language_identifier(current)
                 .unwrap_or_else(|| {
@@ -1041,6 +1042,9 @@ impl<'src> HtmlLexer<'src> {
             b"style" => STYLE_KW,
             b"class" => CLASS_KW,
             b"let" => LET_KW,
+            b"for" => FOR_KW,
+            b"empty" => EMPTY_KW,
+            b"track" => TRACK_KW,
 
             _ => {
                 self.position = starting_position;
