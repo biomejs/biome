@@ -10,11 +10,13 @@ use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
-use biome_parser::tree_sink::LosslessTreeSink;
+use biome_parser::tree_sink::{LosslessTreeSink, OffsetLosslessTreeSink};
 use biome_parser::{Parser, ParserContext, ParserContextCheckpoint};
 
 pub(crate) type HtmlLosslessTreeSink<'source> =
     LosslessTreeSink<'source, HtmlLanguage, HtmlSyntaxFactory>;
+pub(crate) type HtmlOffsetLosslessTreeSink<'source> =
+    OffsetLosslessTreeSink<'source, HtmlLanguage, HtmlSyntaxFactory>;
 
 pub(crate) struct HtmlParser<'source> {
     context: ParserContext<HtmlSyntaxKind>,

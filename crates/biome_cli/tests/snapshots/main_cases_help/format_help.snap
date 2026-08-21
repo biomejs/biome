@@ -203,6 +203,27 @@ Options that change how the Markdown formatter behaves
                               Manual line breaks are always kept. In Markdown, a manual line break
                               is created by ending a line with two spaces or a backslash.
 
+Options that change how the Yaml formatter behaves
+        --yaml-formatter-enabled=<true|false>  Control the formatter for Yaml (and its super
+                              languages) files.
+        --yaml-formatter-indent-width=NUMBER  The size of the indentation applied to Yaml files.
+                              Defaults to 2.
+        --yaml-formatter-line-width=NUMBER  What's the max width of a line applied to Yaml files.
+                              Defaults to 80.
+        --yaml-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+                              -
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+                              Disable the option at your own risk.
+                              Defaults to true.
+        --yaml-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to Yaml (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
+
 Settings for integrating Biome with version control.
         --vcs-enabled=<true|false>  Whether Biome should integrate with the version control client.
         --vcs-client-kind=<git>  The version control client.

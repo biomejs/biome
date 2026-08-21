@@ -206,10 +206,7 @@ pub struct Configuration {
     pub css: Option<CssConfiguration>,
 
     /// Configuration specific to Markdown.
-    #[cfg_attr(
-        feature = "cli",
-        bpaf(external(markdown_configuration), optional, hide)
-    )]
+    #[cfg_attr(feature = "cli", bpaf(external(markdown_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "lang_md")]
     pub markdown: Option<MarkdownConfiguration>,
@@ -217,7 +214,7 @@ pub struct Configuration {
     /// Configuration specific to YAML.
     #[cfg_attr(
         feature = "cli",
-        bpaf(external(crate::yaml::yaml_configuration), optional, hide)
+        bpaf(external(crate::yaml::yaml_configuration), optional)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "lang_yaml")]
