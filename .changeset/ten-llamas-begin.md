@@ -37,7 +37,7 @@ title: Lorem ipsum
 The formatter has great compatibility with Prettier formatting, more than 90% detected by our infrastructure. The formatter ships with
 a new option called `proseWrap`, that allows controlling how the Biome formatter should wrap paragraphs.
 
-For example, when `proseWrap` is set to `always`, the formatter will wrap the paragraph to match the conown::markdown_formatter_configurfigured `lineWidth`:
+For example, when `proseWrap` is set to `always`, the formatter will wrap the paragraph to match the configured `lineWidth`:
 
 ```json5
 // biome.json
