@@ -7489,14 +7489,14 @@ impl JsxClosingFragment {
             r_angle_token: self.r_angle_token(),
         }
     }
-    pub fn l_angle_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
-    pub fn slash_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
+    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
-    pub fn r_angle_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for JsxClosingFragment {
@@ -7509,9 +7509,9 @@ impl Serialize for JsxClosingFragment {
 }
 #[derive(Serialize)]
 pub struct JsxClosingFragmentFields {
-    pub l_angle_token: Option<SyntaxToken>,
-    pub slash_token: Option<SyntaxToken>,
-    pub r_angle_token: Option<SyntaxToken>,
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxElement {
@@ -7669,14 +7669,14 @@ impl JsxFragment {
             closing_fragment: self.closing_fragment(),
         }
     }
-    pub fn opening_fragment(&self) -> SyntaxResult<JsxOpeningFragment> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn opening_fragment(&self) -> Option<JsxOpeningFragment> {
+        support::node(&self.syntax, 0usize)
     }
     pub fn children(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn closing_fragment(&self) -> SyntaxResult<JsxClosingFragment> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn closing_fragment(&self) -> Option<JsxClosingFragment> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for JsxFragment {
@@ -7689,9 +7689,9 @@ impl Serialize for JsxFragment {
 }
 #[derive(Serialize)]
 pub struct JsxFragmentFields {
-    pub opening_fragment: SyntaxResult<JsxOpeningFragment>,
+    pub opening_fragment: Option<JsxOpeningFragment>,
     pub children: JsxChildList,
-    pub closing_fragment: SyntaxResult<JsxClosingFragment>,
+    pub closing_fragment: Option<JsxClosingFragment>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxMemberName {
@@ -7893,11 +7893,11 @@ impl JsxOpeningFragment {
             r_angle_token: self.r_angle_token(),
         }
     }
-    pub fn l_angle_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
-    pub fn r_angle_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
 }
 impl Serialize for JsxOpeningFragment {
@@ -7910,8 +7910,8 @@ impl Serialize for JsxOpeningFragment {
 }
 #[derive(Serialize)]
 pub struct JsxOpeningFragmentFields {
-    pub l_angle_token: Option<SyntaxToken>,
-    pub r_angle_token: Option<SyntaxToken>,
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxReferenceIdentifier {
@@ -25430,15 +25430,15 @@ impl std::fmt::Debug for JsxClosingFragment {
             f.debug_struct("JsxClosingFragment")
                 .field(
                     "l_angle_token",
-                    &support::DebugOptionalElement(self.l_angle_token()),
+                    &support::DebugSyntaxResult(self.l_angle_token()),
                 )
                 .field(
                     "slash_token",
-                    &support::DebugOptionalElement(self.slash_token()),
+                    &support::DebugSyntaxResult(self.slash_token()),
                 )
                 .field(
                     "r_angle_token",
-                    &support::DebugOptionalElement(self.r_angle_token()),
+                    &support::DebugSyntaxResult(self.r_angle_token()),
                 )
                 .finish()
         } else {
@@ -25656,12 +25656,12 @@ impl std::fmt::Debug for JsxFragment {
             f.debug_struct("JsxFragment")
                 .field(
                     "opening_fragment",
-                    &support::DebugSyntaxResult(self.opening_fragment()),
+                    &support::DebugOptionalElement(self.opening_fragment()),
                 )
                 .field("children", &self.children())
                 .field(
                     "closing_fragment",
-                    &support::DebugSyntaxResult(self.closing_fragment()),
+                    &support::DebugOptionalElement(self.closing_fragment()),
                 )
                 .finish()
         } else {
@@ -25922,11 +25922,11 @@ impl std::fmt::Debug for JsxOpeningFragment {
             f.debug_struct("JsxOpeningFragment")
                 .field(
                     "l_angle_token",
-                    &support::DebugOptionalElement(self.l_angle_token()),
+                    &support::DebugSyntaxResult(self.l_angle_token()),
                 )
                 .field(
                     "r_angle_token",
-                    &support::DebugOptionalElement(self.r_angle_token()),
+                    &support::DebugSyntaxResult(self.r_angle_token()),
                 )
                 .finish()
         } else {

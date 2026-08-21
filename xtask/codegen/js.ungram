@@ -2355,20 +2355,21 @@ JsxClosingElement =
 	'>'
 
 // <>content</>
+// The delimiters are absent only in an Astro file, where adjacent siblings form
+// an implicit fragment. Every fragment written in JSX has both.
 JsxFragment =
-	opening_fragment: JsxOpeningFragment
+	opening_fragment: JsxOpeningFragment?
 	children: JsxChildList
-	closing_fragment: JsxClosingFragment
+	closing_fragment: JsxClosingFragment?
 
-// Tokens are absent in an Astro implicit fragment, which has no delimiters
 JsxOpeningFragment =
-	'<'?
-	'>'?
+	'<'
+	'>'
 
 JsxClosingFragment =
-	'<'?
-	'/'?
-	'>'?
+	'<'
+	'/'
+	'>'
 
 // ==================================
 // Names

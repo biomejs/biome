@@ -792,7 +792,6 @@ pub fn is_void_element(name: &str) -> bool {
 impl JsxFragment {
     /// Written without `<>`, so its children sit in expression context.
     pub fn is_implicit(&self) -> bool {
-        self.opening_fragment()
-            .is_ok_and(|opening| opening.l_angle_token().is_none())
+        self.opening_fragment().is_none()
     }
 }

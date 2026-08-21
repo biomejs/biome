@@ -1,0 +1,153 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+const A = () => <><p>a</p></>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+                            expression: JsArrowFunctionExpression {
+                                async_token: missing (optional),
+                                type_parameters: missing (optional),
+                                parameters: JsParameters {
+                                    l_paren_token: L_PAREN@10..11 "(" [] [],
+                                    items: JsParameterList [],
+                                    r_paren_token: R_PAREN@11..13 ")" [] [Whitespace(" ")],
+                                },
+                                return_type_annotation: missing (optional),
+                                fat_arrow_token: FAT_ARROW@13..16 "=>" [] [Whitespace(" ")],
+                                body: JsxTagExpression {
+                                    tag: JsxFragment {
+                                        opening_fragment: JsxOpeningFragment {
+                                            l_angle_token: L_ANGLE@16..17 "<" [] [],
+                                            r_angle_token: R_ANGLE@17..18 ">" [] [],
+                                        },
+                                        children: JsxChildList [
+                                            JsxElement {
+                                                opening_element: JsxOpeningElement {
+                                                    l_angle_token: L_ANGLE@18..19 "<" [] [],
+                                                    name: JsxName {
+                                                        value_token: JSX_IDENT@19..20 "p" [] [],
+                                                    },
+                                                    type_arguments: missing (optional),
+                                                    attributes: JsxAttributeList [],
+                                                    r_angle_token: R_ANGLE@20..21 ">" [] [],
+                                                },
+                                                children: JsxChildList [
+                                                    JsxText {
+                                                        value_token: JSX_TEXT_LITERAL@21..22 "a" [] [],
+                                                    },
+                                                ],
+                                                closing_element: JsxClosingElement {
+                                                    l_angle_token: L_ANGLE@22..23 "<" [] [],
+                                                    slash_token: SLASH@23..24 "/" [] [],
+                                                    name: JsxName {
+                                                        value_token: JSX_IDENT@24..25 "p" [] [],
+                                                    },
+                                                    r_angle_token: R_ANGLE@25..26 ">" [] [],
+                                                },
+                                            },
+                                        ],
+                                        closing_fragment: JsxClosingFragment {
+                                            l_angle_token: L_ANGLE@26..27 "<" [] [],
+                                            slash_token: SLASH@27..28 "/" [] [],
+                                            r_angle_token: R_ANGLE@28..29 ">" [] [],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@29..30 ";" [] [],
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..31
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
+    0: JS_VARIABLE_STATEMENT@0..30
+      0: JS_VARIABLE_DECLARATION@0..29
+        0: (empty)
+        1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@6..29
+          0: JS_VARIABLE_DECLARATOR@6..29
+            0: JS_IDENTIFIER_BINDING@6..8
+              0: IDENT@6..8 "A" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@8..29
+              0: EQ@8..10 "=" [] [Whitespace(" ")]
+              1: JS_ARROW_FUNCTION_EXPRESSION@10..29
+                0: (empty)
+                1: (empty)
+                2: JS_PARAMETERS@10..13
+                  0: L_PAREN@10..11 "(" [] []
+                  1: JS_PARAMETER_LIST@11..11
+                  2: R_PAREN@11..13 ")" [] [Whitespace(" ")]
+                3: (empty)
+                4: FAT_ARROW@13..16 "=>" [] [Whitespace(" ")]
+                5: JSX_TAG_EXPRESSION@16..29
+                  0: JSX_FRAGMENT@16..29
+                    0: JSX_OPENING_FRAGMENT@16..18
+                      0: L_ANGLE@16..17 "<" [] []
+                      1: R_ANGLE@17..18 ">" [] []
+                    1: JSX_CHILD_LIST@18..26
+                      0: JSX_ELEMENT@18..26
+                        0: JSX_OPENING_ELEMENT@18..21
+                          0: L_ANGLE@18..19 "<" [] []
+                          1: JSX_NAME@19..20
+                            0: JSX_IDENT@19..20 "p" [] []
+                          2: (empty)
+                          3: JSX_ATTRIBUTE_LIST@20..20
+                          4: R_ANGLE@20..21 ">" [] []
+                        1: JSX_CHILD_LIST@21..22
+                          0: JSX_TEXT@21..22
+                            0: JSX_TEXT_LITERAL@21..22 "a" [] []
+                        2: JSX_CLOSING_ELEMENT@22..26
+                          0: L_ANGLE@22..23 "<" [] []
+                          1: SLASH@23..24 "/" [] []
+                          2: JSX_NAME@24..25
+                            0: JSX_IDENT@24..25 "p" [] []
+                          3: R_ANGLE@25..26 ">" [] []
+                    2: JSX_CLOSING_FRAGMENT@26..29
+                      0: L_ANGLE@26..27 "<" [] []
+                      1: SLASH@27..28 "/" [] []
+                      2: R_ANGLE@28..29 ">" [] []
+      1: SEMICOLON@29..30 ";" [] []
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```

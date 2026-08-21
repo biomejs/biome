@@ -3887,41 +3887,19 @@ pub fn jsx_closing_element(
         ],
     ))
 }
-pub fn jsx_closing_fragment() -> JsxClosingFragmentBuilder {
-    JsxClosingFragmentBuilder {
-        l_angle_token: None,
-        slash_token: None,
-        r_angle_token: None,
-    }
-}
-pub struct JsxClosingFragmentBuilder {
-    l_angle_token: Option<SyntaxToken>,
-    slash_token: Option<SyntaxToken>,
-    r_angle_token: Option<SyntaxToken>,
-}
-impl JsxClosingFragmentBuilder {
-    pub fn with_l_angle_token(mut self, l_angle_token: SyntaxToken) -> Self {
-        self.l_angle_token = Some(l_angle_token);
-        self
-    }
-    pub fn with_slash_token(mut self, slash_token: SyntaxToken) -> Self {
-        self.slash_token = Some(slash_token);
-        self
-    }
-    pub fn with_r_angle_token(mut self, r_angle_token: SyntaxToken) -> Self {
-        self.r_angle_token = Some(r_angle_token);
-        self
-    }
-    pub fn build(self) -> JsxClosingFragment {
-        JsxClosingFragment::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JSX_CLOSING_FRAGMENT,
-            [
-                self.l_angle_token.map(|token| SyntaxElement::Token(token)),
-                self.slash_token.map(|token| SyntaxElement::Token(token)),
-                self.r_angle_token.map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
-    }
+pub fn jsx_closing_fragment(
+    l_angle_token: SyntaxToken,
+    slash_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> JsxClosingFragment {
+    JsxClosingFragment::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JSX_CLOSING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
 }
 pub fn jsx_element(
     opening_element: JsxOpeningElement,
@@ -3983,19 +3961,39 @@ impl JsxExpressionChildBuilder {
         ))
     }
 }
-pub fn jsx_fragment(
-    opening_fragment: JsxOpeningFragment,
+pub fn jsx_fragment(children: JsxChildList) -> JsxFragmentBuilder {
+    JsxFragmentBuilder {
+        children,
+        opening_fragment: None,
+        closing_fragment: None,
+    }
+}
+pub struct JsxFragmentBuilder {
     children: JsxChildList,
-    closing_fragment: JsxClosingFragment,
-) -> JsxFragment {
-    JsxFragment::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JSX_FRAGMENT,
-        [
-            Some(SyntaxElement::Node(opening_fragment.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
-            Some(SyntaxElement::Node(closing_fragment.into_syntax())),
-        ],
-    ))
+    opening_fragment: Option<JsxOpeningFragment>,
+    closing_fragment: Option<JsxClosingFragment>,
+}
+impl JsxFragmentBuilder {
+    pub fn with_opening_fragment(mut self, opening_fragment: JsxOpeningFragment) -> Self {
+        self.opening_fragment = Some(opening_fragment);
+        self
+    }
+    pub fn with_closing_fragment(mut self, closing_fragment: JsxClosingFragment) -> Self {
+        self.closing_fragment = Some(closing_fragment);
+        self
+    }
+    pub fn build(self) -> JsxFragment {
+        JsxFragment::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JSX_FRAGMENT,
+            [
+                self.opening_fragment
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+                self.closing_fragment
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn jsx_member_name(
     object: AnyJsxObjectName,
@@ -4071,34 +4069,17 @@ impl JsxOpeningElementBuilder {
         ))
     }
 }
-pub fn jsx_opening_fragment() -> JsxOpeningFragmentBuilder {
-    JsxOpeningFragmentBuilder {
-        l_angle_token: None,
-        r_angle_token: None,
-    }
-}
-pub struct JsxOpeningFragmentBuilder {
-    l_angle_token: Option<SyntaxToken>,
-    r_angle_token: Option<SyntaxToken>,
-}
-impl JsxOpeningFragmentBuilder {
-    pub fn with_l_angle_token(mut self, l_angle_token: SyntaxToken) -> Self {
-        self.l_angle_token = Some(l_angle_token);
-        self
-    }
-    pub fn with_r_angle_token(mut self, r_angle_token: SyntaxToken) -> Self {
-        self.r_angle_token = Some(r_angle_token);
-        self
-    }
-    pub fn build(self) -> JsxOpeningFragment {
-        JsxOpeningFragment::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JSX_OPENING_FRAGMENT,
-            [
-                self.l_angle_token.map(|token| SyntaxElement::Token(token)),
-                self.r_angle_token.map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
-    }
+pub fn jsx_opening_fragment(
+    l_angle_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> JsxOpeningFragment {
+    JsxOpeningFragment::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JSX_OPENING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
 }
 pub fn jsx_reference_identifier(value_token: SyntaxToken) -> JsxReferenceIdentifier {
     JsxReferenceIdentifier::unwrap_cast(SyntaxNode::new_detached(

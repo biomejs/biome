@@ -95,17 +95,11 @@ fn parse_astro_implicit_fragment(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();
     let fragment = p.start();
 
-    let opening = p.start();
-    opening.complete(p, JSX_OPENING_FRAGMENT);
-
     let children = p.start();
     while is_at_jsx_tag_start(p) {
         parse_any_jsx_tag(p, true).ok();
     }
     children.complete(p, JSX_CHILD_LIST);
-
-    let closing = p.start();
-    closing.complete(p, JSX_CLOSING_FRAGMENT);
 
     fragment.complete(p, JSX_FRAGMENT);
     Present(m.complete(p, JSX_TAG_EXPRESSION))

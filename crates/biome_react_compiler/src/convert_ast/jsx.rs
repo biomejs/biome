@@ -117,10 +117,10 @@ pub(super) fn convert_jsx_fragment(
 ) -> Result<JSXFragment> {
     let opening = fragment
         .opening_fragment()
-        .map_err(|_| missing("JsxFragment", "opening_fragment"))?;
+        .ok_or_else(|| missing("JsxFragment", "opening_fragment"))?;
     let closing = fragment
         .closing_fragment()
-        .map_err(|_| missing("JsxFragment", "closing_fragment"))?;
+        .ok_or_else(|| missing("JsxFragment", "closing_fragment"))?;
     Ok(JSXFragment {
         base: ctx.base(fragment.syntax().text_trimmed_range()),
         opening_fragment: JSXOpeningFragment {

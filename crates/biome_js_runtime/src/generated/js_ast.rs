@@ -2988,13 +2988,13 @@ impl JsAstNode {
                     JsSyntaxKind::JSX_CLOSING_FRAGMENT,
                     JsxClosingFragment,
                     ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token()
+                        node.l_angle_token().ok()
                     )),
                     ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token()
+                        node.slash_token().ok()
                     )),
                     ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token()
+                        node.r_angle_token().ok()
                     )),
                 );
             }
@@ -3057,7 +3057,7 @@ impl JsAstNode {
                     JsSyntaxKind::JSX_FRAGMENT,
                     JsxFragment,
                     ("openingFragment", |node, context| Self::wrap_optional_node(
-                        node.opening_fragment().ok(),
+                        node.opening_fragment(),
                         context
                     )),
                     ("children", |node, context| Self::wrap_node_list(
@@ -3065,7 +3065,7 @@ impl JsAstNode {
                         context
                     )),
                     ("closingFragment", |node, context| Self::wrap_optional_node(
-                        node.closing_fragment().ok(),
+                        node.closing_fragment(),
                         context
                     )),
                 );
@@ -3147,10 +3147,10 @@ impl JsAstNode {
                     JsSyntaxKind::JSX_OPENING_FRAGMENT,
                     JsxOpeningFragment,
                     ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token()
+                        node.l_angle_token().ok()
                     )),
                     ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token()
+                        node.r_angle_token().ok()
                     )),
                 );
             }
