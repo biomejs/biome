@@ -165,7 +165,7 @@ syn                          = "1.0.109"
 termcolor                    = "1.4.1"
 terminal_size                = "0.4.4"
 tests_macros                 = { path = "./crates/tests_macros" }
-tikv-jemallocator            = "0.6.1"
+tikv-jemallocator            = "0.7.0"
 tokio                        = "1.51.1"
 tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
