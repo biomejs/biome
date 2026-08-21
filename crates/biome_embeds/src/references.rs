@@ -131,6 +131,11 @@ pub fn is_vue_directive_reference_used(
     db: &dyn LanguageDb,
     reference: InternedReference<'_>,
 ) -> bool {
+    let reference_name = reference.name(db).text();
+    if !is_potential_vue_directive_reference(reference_name) {
+        return false;
+    }
+
     let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
         return false;
     };
@@ -141,10 +146,16 @@ pub fn is_vue_directive_reference_used(
             refs.iter().any(|value_reference| {
                 vue_directive_name_matches_reference_name(
                     value_reference.text.text(),
-                    reference.name(db).text(),
+                    reference_name,
                 )
             })
         })
+}
+
+/// Returns `true` if `reference_name` starts with `v` followed by an uppercase letter,
+/// which is the naming convention for Vue custom directives (e.g. `vHighlight`).
+fn is_potential_vue_directive_reference(reference_name: &str) -> bool {
+    matches!(reference_name.as_bytes(), [b'v', b'A'..=b'Z', ..])
 }
 
 /// Returns `true` if `directive_name` starts with `v-` and its camelCase
