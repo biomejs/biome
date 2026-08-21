@@ -62,6 +62,7 @@ biome_js_analyze             = { path = "./crates/biome_js_analyze", version = "
 biome_js_factory             = { path = "./crates/biome_js_factory", version = "0.5.7" }
 biome_js_formatter           = { path = "./crates/biome_js_formatter", version = "0.5.7" }
 biome_js_parser              = { path = "./crates/biome_js_parser", version = "0.5.7" }
+biome_js_transform           = { path = "./crates/biome_js_transform", version = "0.5.7" }
 biome_js_runtime             = { path = "./crates/biome_js_runtime", version = "0.0.1" }
 biome_js_semantic            = { path = "./crates/biome_js_semantic", version = "0.5.7" }
 biome_js_syntax              = { path = "./crates/biome_js_syntax", version = "0.5.7" }

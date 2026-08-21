@@ -4065,3 +4065,90 @@ const x = 1;
         "cursor before an embedded script should not resolve to any definition"
     );
 }
+
+#[test]
+#[cfg(feature = "js_plugin")]
+fn typescript_plugin_reports_diagnostics_through_the_workspace() {
+    use biome_plugin_loader::{PluginConfiguration, Plugins};
+
+    const PLUGIN_PATH: &str = "/project/plugin.ts";
+    const PLUGIN_SOURCE: &str = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+import type { AnyJsRoot, Severity } from "@biomejs/plugin-api";
+
+export const noTopLevelVar = defineRule({
+    query: ast("JS_MODULE"),
+    run(root: AnyJsRoot): void {
+        for (const item of root.items) {
+            if (
+                item.kind === "JS_VARIABLE_STATEMENT" &&
+                item.declaration?.kindToken === "var"
+            ) {
+                registerDiagnostic(
+                    item,
+                    "warning" satisfies Severity,
+                    "Use let or const instead of a top-level var declaration.",
+                );
+            }
+        }
+    },
+});"#;
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = "var foo: number = 1;\nexport const bar: string = `${foo}`;\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PLUGIN_PATH), PLUGIN_SOURCE);
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "plugin.ts".to_string(),
+                )])),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            categories: RuleCategories::default(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.parse_errors, 0);
+
+    let diagnostics = format!("{:?}", result.diagnostics);
+    assert!(
+        diagnostics.contains("top-level var declaration"),
+        "Expected a diagnostic from the TypeScript plugin, got: {diagnostics}"
+    );
+}

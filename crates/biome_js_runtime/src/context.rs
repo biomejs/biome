@@ -16,6 +16,7 @@ use biome_resolver::FsWithResolverProxy;
 use crate::JsModuleLoader;
 use crate::ast::JsAstNode;
 use crate::plugin_api::JsPluginApi;
+use crate::source::read_module_source;
 
 #[cfg(target_arch = "wasm32")]
 struct Clock;
@@ -83,9 +84,7 @@ impl JsExecContext {
     pub fn import_module(&mut self, path: impl AsRef<Utf8Path>) -> JsResult<Module> {
         let ctx = &mut self.ctx;
         let path = path.as_ref();
-        let source = self.fs.read_file_from_path(path).map_err(|err| {
-            JsNativeError::error().with_message(format!("Failed to read {path}: {err}"))
-        })?;
+        let source = read_module_source(&self.fs, path)?;
         let source = Source::from_bytes(source.as_bytes()).with_path(path.as_std_path());
         let module = Module::parse(source, None, ctx)?;
 
