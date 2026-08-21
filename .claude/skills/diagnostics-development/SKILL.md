@@ -1,381 +1,101 @@
 ---
 name: diagnostics-development
-description: Guide for creating high-quality, user-friendly diagnostics in Biome. Use when creating diagnostics for lint rules, adding helpful advice to error messages, implementing code frame displays, or improving diagnostic quality.
+description: Design or implement Biome user-facing diagnostics, including messages, advice, markup, details, code frames, categories, severity, and standalone `Diagnostic` types. Use for diagnostic presentation and APIs; not for lint matching logic or code-action mutations.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
-## Purpose
-
-Use this skill when creating diagnostics - the error messages, warnings, and hints shown to users. Covers the `Diagnostic` trait, advice types, and best practices for clear, actionable messages.
-
-## Prerequisites
-
-1. Read `crates/biome_diagnostics/CONTRIBUTING.md` for concepts
-2. Understand Biome's [Technical Principles](https://biomejs.dev/internals/philosophy/#technical)
-3. Follow the "show don't tell" philosophy
-
-## Diagnostic Principles
-
-1. **Explain what** - State what the error is (diagnostic message)
-2. **Explain why** - Explain why it's an error (advice notes)
-3. **Tell how to fix** - Provide actionable fixes (code actions, diff advice, command advice)
-
-**Follow Technical Principles:**
-- Informative: Explain, don't just state
-- Concise: Short messages, rich context via advices
-- Actionable: Always suggest how to fix
-- Show don't tell: Prefer code frames over textual explanations
-
-## Common Workflows
-
-### Create a Diagnostic Type
-
-Use the `#[derive(Diagnostic)]` macro:
-
-```rust
-use biome_diagnostics::{Diagnostic, category};
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    severity = Error,
-    category = "lint/correctness/noVar"
-)]
-struct NoVarDiagnostic {
-    #[location(span)]
-    span: TextRange,
-
-    #[message]
-    #[description]
-    message: MessageAndDescription,
-
-    #[advice]
-    advice: NoVarAdvice,
-}
-
-#[derive(Debug)]
-struct MessageAndDescription;
-
-impl fmt::Display for MessageAndDescription {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Use 'let' or 'const' instead of 'var'")
-    }
-}
-```
-
-### Implement Advices
-
-Create advice types that implement `Advices` trait:
-
-```rust
-use biome_diagnostics::{Advices, Visit};
-use biome_console::markup;
-
-struct NoVarAdvice {
-    is_const_candidate: bool,
-}
-
-impl Advices for NoVarAdvice {
-    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        if self.is_const_candidate {
-            visitor.record_log(
-                LogCategory::Info,
-                &markup! {
-                    "This variable is never reassigned, use 'const' instead."
-                }
-            )?;
-        } else {
-            visitor.record_log(
-                LogCategory::Info,
-                &markup! {
-                    "Variables declared with 'var' are function-scoped, use 'let' for block-scoping."
-                }
-            )?;
-        }
-        Ok(())
-    }
-}
-```
-
-### Use Built-in Advice Types
-
-```rust
-use biome_diagnostics::{LogAdvice, CodeFrameAdvice, DiffAdvice, CommandAdvice, LogCategory};
-
-// Log advice - simple text message
-LogAdvice {
-    category: LogCategory::Info,
-    text: markup! { "Consider using arrow functions." },
-}
-
-// Code frame advice - highlight code location
-// Fields: path (AsResource), span (AsSpan), source_code (AsSourceCode)
-CodeFrameAdvice {
-    path: "file.js",
-    span: node.text_range(),
-    source_code: ctx.source_code(),
-}
-
-// Diff advice - show a TextEdit diff
-DiffAdvice {
-    diff: text_edit,  // must implement AsRef<TextEdit>
-}
-
-// Command advice - suggest CLI command
-CommandAdvice {
-    command: "biome check --write",
-}
-```
-
-In practice, most lint rules use the `RuleDiagnostic` builder pattern instead of constructing advice types directly. See the [Add Diagnostic to Rule](#add-diagnostic-to-rule) section below.
-
-### Add Diagnostic to Rule
-
-```rust
-use biome_analyze::{Rule, RuleDiagnostic};
-
-impl Rule for NoVar {
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Using "<Emphasis>"var"</Emphasis>" is not recommended."
-                },
-            )
-            .note(markup! {
-                "Variables declared with "<Emphasis>"var"</Emphasis>" are function-scoped, not block-scoped, which means they can leak outside of loops and conditionals and cause unexpected behavior."
-            })
-            .note(markup! {
-                "Consider using "<Emphasis>"let"</Emphasis>" or "<Emphasis>"const"</Emphasis>" instead."
-            })
-        )
-    }
-}
-```
-
-### Use Markup for Rich Text
-
-Biome supports rich markup in diagnostic messages:
-
-```rust
-use biome_console::markup;
-
-markup! {
-    // Emphasis (bold/colored)
-    "Use "<Emphasis>"const"</Emphasis>" instead."
-
-    // Code/identifiers
-    "The variable "<Emphasis>{variable_name}</Emphasis>" is never used."
-
-    // Hyperlinks
-    "See the "<Hyperlink href="https://example.com">"documentation"</Hyperlink>"."
-
-    // Interpolation
-    "Found "{count}" issues."
-}
-```
-
-### Register Diagnostic Category
-
-Add new categories to `crates/biome_diagnostics_categories/src/categories.rs`:
-
-```rust
-define_categories! {
-    // Existing categories...
-
-    "lint/correctness/noVar": "https://biomejs.dev/linter/rules/no-var",
-    "lint/style/useConst": "https://biomejs.dev/linter/rules/use-const",
-}
-```
-
-### Create Multi-Advice Diagnostics
-
-```rust
-#[derive(Debug, Diagnostic)]
-#[diagnostic(severity = Warning)]
-struct ComplexDiagnostic {
-    #[location(span)]
-    span: TextRange,
-
-    #[message]
-    message: &'static str,
-
-    // Multiple advices
-    #[advice]
-    first_advice: LogAdvice<MarkupBuf>,
-
-    #[advice]
-    code_frame: CodeFrameAdvice<String, TextRange, String>,
-
-    #[verbose_advice]
-    verbose_help: LogAdvice<MarkupBuf>,
-}
-```
-
-### Add Tags to Diagnostics
-
-```rust
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    severity = Warning,
-    tags(FIXABLE, DEPRECATED_CODE)  // Add diagnostic tags
-)]
-struct MyDiagnostic {
-    // ...
-}
-```
-
-Available tags:
-- `FIXABLE` - Diagnostic has fix information
-- `INTERNAL` - Internal error in Biome
-- `UNNECESSARY_CODE` - Code is unused
-- `DEPRECATED_CODE` - Code uses deprecated features
-
-## Best Practices
-
-### Message Guidelines
-
-**Good messages:**
-```rust
-// Good - specific and actionable
-"Use 'let' or 'const' instead of 'var'"
-
-// Good - explains why
-"This variable is never reassigned, consider using 'const'"
-
-// Good - shows what to do
-"Remove the unused import statement"
-```
-
-**Bad messages:**
-```rust
-// Bad - too vague
-"Invalid syntax"
-
-// Bad - just states the obvious
-"Variable declared with 'var'"
-
-// Bad - no guidance
-"This code has a problem"
-```
-
-### Advice Guidelines
-
-**Show, don't tell:**
-```rust
-// Good - shows code frame
-CodeFrameAdvice {
-    path: "file.js",
-    span: node.text_range(),
-    source_code: source,
-}
-
-// Less helpful - just text
-LogAdvice {
-    category: LogCategory::Info,
-    text: markup! { "The expression at line 5 is always truthy" },
-}
-```
-
-**Provide actionable fixes:**
-```rust
-// Good - shows exact change
-DiffAdvice {
-    diff: text_edit,  // AsRef<TextEdit>
-}
-
-// Less helpful - describes change
-LogAdvice {
-    category: LogCategory::Info,
-    text: markup! { "Change 'var' to 'const'" },
-}
-```
-
-### Severity Levels
-
-Choose appropriate severity:
-
-```rust
-// Fatal - Biome can't continue
-severity = Fatal
-
-// Error - Must be fixed (correctness, security, a11y)
-severity = Error
-
-// Warning - Should be fixed (suspicious code)
-severity = Warning
-
-// Information - Style suggestions
-severity = Information
-
-// Hint - Minor improvements
-severity = Hint
-```
-
-## Common Patterns
-
-```rust
-// Pattern 1: Simple diagnostic with note
-RuleDiagnostic::new(
-    rule_category!(),
-    node.range(),
-    markup! { "Main message" },
-)
-.note(markup! { "Additional context" })
-
-// Pattern 2: Diagnostic with code frame
-RuleDiagnostic::new(
-    rule_category!(),
-    node.range(),
-    markup! { "Main message" },
-)
-.detail(
-    node.syntax().text_range(),
-    markup! { "This part is problematic" }
-)
-
-// Pattern 3: Diagnostic with link
-RuleDiagnostic::new(
-    rule_category!(),
-    node.range(),
-    markup! { "Main message" },
-)
-.note(markup! {
-    "See "<Hyperlink href="https://biomejs.dev/linter">"documentation"</Hyperlink>"."
-})
-
-// Pattern 4: Conditional advice
-impl Advices for MyAdvice {
-    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        if self.show_hint {
-            visitor.record_log(
-                LogCategory::Info,
-                &markup! { "Hint: ..." }
-            )?;
-        }
-        Ok(())
-    }
-}
-```
-
-## Tips
-
-- **Category format**: Use `area/group/ruleName` format (e.g., `lint/correctness/noVar`)
-- **Markup formatting**: Use `markup!` macro for all user-facing text
-- **Hyperlinks**: Always link to documentation for more details
-- **Code frames**: Include for spatial context when helpful
-- **Multiple advices**: Chain multiple pieces of information
-- **Verbose advices**: Use for extra details users can opt into
-- **Description vs Message**: Description for plain text contexts (IDE popover), message for rich display
-- **Register categories**: Don't forget to add to `categories.rs`
+# Diagnostics Development
+
+Use `crates/biome_diagnostics/CONTRIBUTING.md` as the canonical API and design guide. Inspect current diagnostics in the same subsystem before choosing an advice type or derive shape.
+
+## Choose the Diagnostic API
+
+Use `RuleDiagnostic` for lint and assist rules. Use a standalone type deriving `Diagnostic` when a parser, service, CLI, configuration, or infrastructure boundary needs its own structured diagnostic.
+
+Do not introduce a standalone type solely to wrap a one-line lint message. Do not force a complex diagnostic with locations, sub-diagnostics, or conditional advice into a `RuleDiagnostic` chain when an owned type expresses the contract more clearly.
+
+## Three Questions
+
+A complete diagnostic answers:
+
+1. What condition was found?
+2. Why does it matter?
+3. What can the user do?
+
+Keep those jobs separate:
+
+- the primary message identifies the condition;
+- a note or detail explains the consequence or rationale;
+- an action, diff, command, or final advice gives the next step.
+
+Do not combine rationale and remediation into vague prose. When an automated action exists, its label normally carries the remediation rather than repeating it in a note.
+
+## Messages and Markup
+
+- Name the actual problem, not only the syntax construct.
+- Highlight the smallest source range that helps the user understand it.
+- Interpolate values directly in `markup!`; do not allocate with `format!` first.
+- Use emphasis for source terms or configuration values where it improves scanning.
+- Keep the primary message short; put explanation in advice.
+- Do not claim a consequence the implementation does not establish.
+
+## Advice Selection
+
+Choose advice based on the information users need:
+
+| Need | Mechanism |
+| --- | --- |
+| Explanation or next step | note or log advice |
+| Point to a related source span | detail or code-frame advice |
+| Show an exact textual change | diff advice or code action |
+| Show a command to run | command advice |
+| Extra opt-in context | verbose advice |
+
+Prefer source evidence over a paragraph describing where the issue is. Avoid adding multiple notes that repeat the same fact in different words.
+
+## Standalone Diagnostics
+
+For `#[derive(Diagnostic)]`, verify the current guide and derive implementation for supported attributes. Typical concerns include:
+
+- severity and category;
+- primary message and plain-text description;
+- location path, source, and span;
+- advice and verbose advice;
+- tags such as fixable, unnecessary, deprecated, or internal.
+
+The diagnostic type owns stable data needed at the reporting boundary. Avoid retaining large source buffers or allocating rendered strings when a range and structured value suffice.
+
+## Categories
+
+Do not edit generated diagnostic-category registries by hand. Use the rule scaffolding or generator responsible for the category, then verify the generated entry and documentation URL.
+
+For non-rule diagnostics, inspect neighboring categories and the current code-generation source before making changes; do not infer the workflow from the generated file.
+
+## Severity
+
+Match established subsystem policy. Severity communicates operational impact, not how strongly the author feels about the message. Inspect nearby diagnostics and the current contributing guide before introducing a different severity or tag.
+
+## Validation
+
+- Add the narrowest test or fixture that renders the diagnostic.
+- Inspect snapshots for message, advice ordering, markup, path, and highlighted range.
+- Test conditional advice in every branch.
+- Test source ranges with surrounding trivia and multibyte text when offsets are computed manually.
+- For lint diagnostics, load `lint-rule-development` and `testing-codegen` for rule-specific fixtures.
+
+## Review Checklist
+
+- The primary message states what is wrong.
+- Advice explains why and gives a concrete next step.
+- The highlighted range is minimal and correct.
+- Structured markup avoids preformatted string allocation.
+- The selected API matches diagnostic complexity.
+- Category changes use the supported source or generator.
+- Snapshot coverage exercises every conditional message or advice path.
 
 ## References
 
-- Full guide: `crates/biome_diagnostics/CONTRIBUTING.md`
-- Technical principles: https://biomejs.dev/internals/philosophy/#technical
+- Diagnostic guide: `crates/biome_diagnostics/CONTRIBUTING.md`
 - Diagnostic trait: `crates/biome_diagnostics/src/diagnostic.rs`
-- Advice types: `crates/biome_diagnostics/src/advice.rs`
-- Examples: Search for `#[derive(Diagnostic)]` in codebase
+- Advice APIs: `crates/biome_diagnostics/src/advice.rs`
+- Existing derive examples: search for `#[derive(Diagnostic)]`

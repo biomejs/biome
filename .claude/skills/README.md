@@ -4,7 +4,7 @@ Procedural knowledge for AI coding assistants working on Biome. Each skill is a 
 
 ## How skills load
 
-Only each skill's `name` and `description` are always in context. Claude reads the full `SKILL.md` (and any `references/` files) on demand, when the description matches the task. Keep descriptions specific and non-overlapping — the description is what decides which skill fires, and two skills competing for the same trigger phrase make the choice unreliable.
+Only each skill's `name` and `description` are always in context. The full `SKILL.md` loads when its description matches the task; referenced files load only when needed. Keep descriptions specific and non-overlapping because they decide which skill fires.
 
 ## Universal rules live in AGENTS.md
 
@@ -18,22 +18,23 @@ Project-wide standards — no emojis, the evidence rule, dev-dependency rules, t
 | lint-rule-development | Creating and implementing lint rules and assists, code actions, rule options |
 | formatter-development | Implementing formatters, IR primitives, comment handling, Prettier comparison |
 | parser-development | Grammars (`.ungram`), lexers, parse rules, error recovery |
-| type-inference | Module graph and type system, for type-aware rules |
+| type-inference | JavaScript/TypeScript inference and module-graph type queries |
 | diagnostics-development | Diagnostic messages, advice, code frames — the canonical diagnostics guide |
 | eslint-migrate-options | ESLint-to-Biome rule option migrators |
 | testing-codegen | Tests, `insta` snapshots, code generation commands |
 | changeset | Writing changesets for the CHANGELOG |
-| pull-request | PR titles, descriptions, branch targeting |
 | doc-comments | `//`, `///`, `//!` style for readers of the source |
-| biome-developer | Cross-cutting gotchas: syntax-node APIs, string extraction, embedded languages |
+| syntax-text-handling | Syntax tokens, `TokenText`, ranges, string extraction, and embedded-language value shapes |
 
 ## Adding a skill
 
 1. Create `.claude/skills/<name>/SKILL.md` with `name` and `description` frontmatter.
 2. Write a specific description (what it does and when to use it) that does not overlap an existing skill's triggers.
-3. Keep the body focused and under 500 lines; move deep reference material into a `references/` subdirectory, linked one level deep from `SKILL.md`.
-4. Do not restate the universal rules from `AGENTS.md`.
-5. Add a row to the catalog above.
+3. Put only trigger conditions and exclusions in the description; leave workflow details in the body.
+4. Keep the body focused and under 500 lines. Prefer a short workflow that links exact canonical sections over copying them.
+5. Move conditional or domain-specific detail into `references/`, and state when each reference should be read.
+6. Do not restate universal rules from `AGENTS.md` or procedures already maintained in another skill.
+7. Add a row to the catalog above.
 
 ## Resources
 

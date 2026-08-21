@@ -1,346 +1,111 @@
 ---
 name: parser-development
-description: Guide for implementing parsers with error recovery for new languages in Biome. Use when adding parsing support for a new language, implementing error recovery in a parser, or writing grammar definitions in .ungram format for JavaScript, CSS, JSON, HTML, GraphQL, or other languages.
+description: Implement or modify Biome grammars, lexers, token sources, parse rules, separated lists, error recovery, and parser fixtures for existing or new languages. Use for parser behavior and `.ungram` changes; not merely for consuming an existing AST/CST.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
-## Purpose
+# Parser Development
 
-Use this skill when creating or modifying Biome's parsers. Covers grammar authoring with ungrammar, lexer implementation, error recovery strategies, and list parsing patterns.
+Use `crates/biome_parser/CONTRIBUTING.md` as the canonical parser guide. Read the section matching the current grammar, lexer, parse-rule, or recovery task.
 
-## Prerequisites
+## Workflow
 
-1. Install required tools: `just install-tools`
-2. Understand the language syntax you're implementing
-3. Read `crates/biome_parser/CONTRIBUTING.md` for detailed concepts
+1. Inspect the language grammar and neighboring parse rules.
+2. Add or adjust focused `ok/` and `error/` fixtures before changing recovery behavior.
+3. Update the grammar when the typed tree shape changes.
+4. Regenerate syntax and factory artifacts after `.ungram` changes.
+5. Implement parser logic with explicit presence tests and bounded recovery.
+6. Run the language parser's focused tests and inspect snapshots.
 
-## Common Workflows
+## Grammar
 
-### Create Grammar for New Language
+Grammar files under `xtask/codegen/` define typed syntax nodes and fields. Follow existing language naming:
 
-Create a `.ungram` file in `xtask/codegen/` (e.g., `html.ungram`):
+- prefix nodes with the language name;
+- name unions with `Any`;
+- use `Bogus` nodes for recoverable invalid syntax;
+- end list node names with `List`;
+- represent lists as present, possibly empty nodes rather than optional fields.
 
-```
-// html.ungram
-// Legend:
-//   Name =                -- non-terminal definition
-//   'ident'               -- token (terminal)
-//   A B                   -- sequence
-//   A | B                 -- alternation
-//   A*                    -- zero or more repetition
-//   (A (',' A)* ','?)     -- repetition with separator and optional trailing comma
-//   A?                    -- zero or one repetition
-//   label:A               -- suggested name for field
-
-HtmlRoot = element*
-
-HtmlElement =
-  '<'
-  tag_name: HtmlName
-  attributes: HtmlAttributeList
-  '>'
-  children: HtmlElementList
-  '<' '/' close_tag_name: HtmlName '>'
-
-HtmlAttributeList = HtmlAttribute*
-
-HtmlAttribute =
-  | HtmlSimpleAttribute
-  | HtmlBogusAttribute
-
-HtmlSimpleAttribute =
-  name: HtmlName
-  '='
-  value: HtmlString
-
-HtmlBogusAttribute = /* error recovery node */
-```
-
-**Naming conventions:**
-- Prefix all nodes with language name: `HtmlElement`, `CssRule`
-- Unions start with `Any`: `AnyHtmlAttribute`
-- Error recovery nodes use `Bogus`: `HtmlBogusAttribute`
-- Lists end with `List`: `HtmlAttributeList`
-- Lists are mandatory (never optional), empty by default
-
-### Generate Parser from Grammar
+After a grammar change, run:
 
 ```shell
-# Generate for specific language
-just gen-grammar html
-
-# Generate for multiple languages
-just gen-grammar html css
-
-# Generate all grammars
-just gen-grammar
+just gen-grammar <lang>
 ```
 
-This creates:
-- `biome_html_syntax/src/generated/` - Node definitions
-- `biome_html_factory/src/generated/` - Node construction helpers
-- Parser skeleton files (you'll implement the actual parsing logic)
+This updates generated syntax nodes, syntax kinds, factories, macros, and language-specific mappings. Parser rules remain hand-written.
 
-### Implement a Lexer
+## Presence Contract
 
-Create `lexer/mod.rs` in your parser crate:
+A parse function returns `Absent` only when it has consumed no tokens. Test the first distinguishing token before calling `start`, `bump`, `eat`, `expect`, or another parser that can advance.
 
-```rust
-use biome_html_syntax::HtmlSyntaxKind;
-use biome_parser::{lexer::Lexer, ParseDiagnostic};
+Use:
 
-pub(crate) struct HtmlLexer<'source> {
-    source: &'source str,
-    position: usize,
-    current_kind: HtmlSyntaxKind,
-    diagnostics: Vec<ParseDiagnostic>,
-}
+- `expect` for required tokens that should create a diagnostic when absent;
+- `eat` for optional tokens;
+- `.ok()` for optional nodes;
+- `.or_add_diagnostic(...)` for required nodes;
+- typed recovery for malformed nodes that should remain in the CST.
 
-impl<'source> Lexer<'source> for HtmlLexer<'source> {
-    const NEWLINE: Self::Kind = HtmlSyntaxKind::NEWLINE;
-    const WHITESPACE: Self::Kind = HtmlSyntaxKind::WHITESPACE;
+Do not use backtracking where a bounded lookahead or a more precise presence test can distinguish the syntax.
 
-    type Kind = HtmlSyntaxKind;
-    type LexContext = ();
-    type ReLexContext = ();
+## Error Recovery
 
-    fn source(&self) -> &'source str {
-        self.source
-    }
+Recovery must preserve following valid syntax and produce a bogus node permitted by the grammar at that position.
 
-    fn current(&self) -> Self::Kind {
-        self.current_kind
-    }
+A recovery set normally includes the nearest relevant:
 
-    fn position(&self) -> usize {
-        self.position
-    }
+- list separator;
+- list or block terminator;
+- statement boundary;
+- token that starts the next valid construct.
 
-    fn advance(&mut self, context: Self::LexContext) -> Self::Kind {
-        // Implement token scanning logic
-        let start = self.position;
-        let kind = self.read_next_token();
-        self.current_kind = kind;
-        kind
-    }
+Do not copy a recovery set from an unrelated grammar position. Verify which tokens the caller expects after the failed parse.
 
-    // Implement other required methods...
-}
-```
+## Lists
 
-### Implement Token Source
+Use the parser infrastructure's list traits instead of open-coded loops when their contract matches the grammar.
 
-```rust
-use biome_parser::lexer::BufferedLexer;
-use biome_html_syntax::HtmlSyntaxKind;
-use crate::lexer::HtmlLexer;
+For separated lists, verify:
 
-pub(crate) struct HtmlTokenSource<'src> {
-    lexer: BufferedLexer<HtmlSyntaxKind, HtmlLexer<'src>>,
-}
+- the parser recognizes the enclosing terminator;
+- separator handling agrees with trailing-separator grammar;
+- a malformed element makes progress or stops;
+- recovery cannot consume the enclosing terminator;
+- an empty list still produces the required list node.
 
-impl<'source> TokenSourceWithBufferedLexer<HtmlLexer<'source>> for HtmlTokenSource<'source> {
-    fn lexer(&mut self) -> &mut BufferedLexer<HtmlSyntaxKind, HtmlLexer<'source>> {
-        &mut self.lexer
-    }
-}
-```
+## Lexer and Token Source
 
-### Write Parse Rules
+Follow the current `Lexer` and buffered token-source traits from `biome_parser`; do not copy an old trait implementation from a skill or issue.
 
-Example: Parsing an if statement:
+- Use checked byte and character accessors supplied by the lexer infrastructure.
+- Keep lexing context explicit where the same bytes have context-dependent meaning.
+- Ensure every lexer path advances or returns EOF.
+- Test malformed UTF-8 boundaries through `&str` semantics rather than raw string slicing.
 
-```rust
-use biome_parser::prelude::*;
-use biome_js_syntax::JsSyntaxKind::*;
+## Testing
 
-fn parse_if_statement(p: &mut JsParser) -> ParsedSyntax {
-    // Presence test - return Absent if not at 'if'
-    if !p.at(T![if]) {
-        return Absent;
-    }
+Load `testing-codegen` for parser quick tests and snapshot mechanics.
 
-    let m = p.start();
+- Use the crate's `quick_test` to inspect a CST while developing.
+- Add persistent fixtures under the parser crate's current `ok/` and `error/` directories.
+- A parser bug fix needs the smallest fixture that failed before the change.
+- Recovery changes need malformed input followed by valid syntax to prove parsing resumes correctly.
 
-    // Parse required tokens
-    p.expect(T![if]);
-    p.expect(T!['(']);
+## Review Checklist
 
-    // Parse required nodes with error recovery
-    parse_any_expression(p).or_add_diagnostic(p, expected_expression);
-
-    p.expect(T![')']);
-    parse_block_statement(p).or_add_diagnostic(p, expected_block);
-
-    // Parse optional else clause
-    if p.at(T![else]) {
-        parse_else_clause(p).ok();
-    }
-
-    Present(m.complete(p, JS_IF_STATEMENT))
-}
-```
-
-### Parse Lists with Error Recovery
-
-Use `ParseSeparatedList` for comma-separated lists:
-
-```rust
-struct ArrayElementsList;
-
-impl ParseSeparatedList for ArrayElementsList {
-    type ParsedElement = CompletedMarker;
-
-    fn parse_element(&mut self, p: &mut Parser) -> ParsedSyntax<Self::ParsedElement> {
-        parse_array_element(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Parser) -> bool {
-        // Stop at array closing bracket or file end
-        p.at(T![']'])
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Parser,
-        parsed_element: ParsedSyntax<Self::ParsedElement>,
-    ) -> RecoveryResult {
-        parsed_element.or_recover(
-            p,
-            &ParseRecoveryTokenSet::new(
-                JS_BOGUS_EXPRESSION,
-                token_set![T![']'], T![,]]
-            ),
-            expected_array_element,
-        )
-    }
-
-    fn separating_element_kind(&mut self) -> JsSyntaxKind {
-        T![,]
-    }
-}
-
-// Use the list parser
-fn parse_array_elements(p: &mut Parser) -> CompletedMarker {
-    let m = p.start();
-    ArrayElementsList.parse_list(p);
-    m.complete(p, JS_ARRAY_ELEMENT_LIST)
-}
-```
-
-### Implement Error Recovery
-
-Error recovery wraps invalid tokens in `BOGUS` nodes:
-
-```rust
-// Recovery set includes:
-// - List terminator tokens (e.g., ']', '}')
-// - Statement terminators (e.g., ';')
-// - List separators (e.g., ',')
-let recovery_set = token_set![T![']'], T![,], T![;]];
-
-parsed_element.or_recover(
-    p,
-    &ParseRecoveryTokenSet::new(JS_BOGUS_EXPRESSION, recovery_set),
-    expected_expression_error,
-)
-```
-
-### Handle Conditional Syntax
-
-For syntax only valid in certain contexts (e.g., strict mode):
-
-```rust
-fn parse_with_statement(p: &mut Parser) -> ParsedSyntax {
-    if !p.at(T![with]) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![with]);
-    parenthesized_expression(p).or_add_diagnostic(p, expected_expression);
-    parse_statement(p).or_add_diagnostic(p, expected_statement);
-
-    let with_stmt = m.complete(p, JS_WITH_STATEMENT);
-
-    // Mark as invalid in strict mode
-    let conditional = StrictMode.excluding_syntax(p, with_stmt, |p, marker| {
-        p.err_builder(
-            "`with` statements are not allowed in strict mode",
-            marker.range(p)
-        )
-    });
-
-    Present(conditional.or_invalid_to_bogus(p))
-}
-```
-
-### Test Parser
-
-Create test files in `tests/`:
-
-```
-crates/biome_html_parser/tests/
-├── html_specs/
-│   ├── ok/
-│   │   ├── simple_element.html
-│   │   └── nested_elements.html
-│   └── error/
-│       ├── unclosed_tag.html
-│       └── invalid_syntax.html
-└── html_test.rs
-```
-
-Run tests:
-```shell
-cd crates/biome_html_parser
-cargo test
-```
-
-## Tips
-
-- **Presence test**: Always return `Absent` if the first token doesn't match - never progress parsing before returning `Absent`
-- **Required vs optional**: Use `p.expect()` for required tokens, `p.eat()` for optional ones
-- **Missing markers**: Use `.or_add_diagnostic()` for required nodes to add missing markers and errors
-- **Error recovery**: Include list terminators, separators, and statement boundaries in recovery sets
-- **Bogus nodes**: Check grammar for which `BOGUS_*` node types are valid in your context
-- **Checkpoints**: Use `p.checkpoint()` to save state and `p.rewind()` if parsing fails
-- **Lookahead**: Use `p.at()` to check tokens, `p.nth_at()` for lookahead beyond current token
-- **Lists are mandatory**: Always create list nodes even if empty - use `parse_list()` not `parse_list().ok()`
-
-## Common Patterns
-
-```rust
-// Optional token
-if p.eat(T![async]) {
-    // handle async
-}
-
-// Required token with error
-p.expect(T!['{']);
-
-// Optional node
-parse_type_annotation(p).ok();
-
-// Required node with error
-parse_expression(p).or_add_diagnostic(p, expected_expression);
-
-// Lookahead
-if p.at(T![if]) || p.at(T![for]) {
-    // handle control flow
-}
-
-// Checkpoint for backtracking
-let checkpoint = p.checkpoint();
-if parse_something(p).is_absent() {
-    p.rewind(checkpoint);
-    parse_something_else(p);
-}
-```
+- `Absent` paths consume no input.
+- Required nodes and tokens produce useful diagnostics.
+- Recovery emits a grammar-valid bogus node.
+- Every loop either advances or exits.
+- List recovery stops before the enclosing boundary.
+- The CST retains all source text, including malformed input.
+- Grammar changes include generated syntax and factory artifacts.
+- Valid and malformed fixtures exercise the changed path.
 
 ## References
 
-- Full guide: `crates/biome_parser/CONTRIBUTING.md`
-- Grammar examples: `xtask/codegen/*.ungram`
-- Parser examples: `crates/biome_js_parser/src/syntax/`
-- Error recovery: Search for `ParseRecoveryTokenSet` in existing parsers
+- Parser guide: `crates/biome_parser/CONTRIBUTING.md`
+- Grammars: `xtask/codegen/*.ungram`
+- Parser infrastructure: `crates/biome_parser/src/`
+- Language implementations: `crates/biome_*_parser/src/`

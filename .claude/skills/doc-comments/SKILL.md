@@ -1,6 +1,6 @@
 ---
 name: doc-comments
-description: How to write inline comments, rustdoc, and module documentation in the Biome codebase. The audience is Biome developers reading the source, not end users. Use whenever writing or editing `//` comments, `///` item docs, or `//!` module docs — including comments added incidentally while fixing bugs or implementing features.
+description: Write or edit developer-facing `//`, `///`, and `//!` documentation in Biome source, including comments added incidentally during implementation. Use for contributor documentation; not for end-user rustdoc inside lint/assist declarations or formatter handling of comments in user code.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 

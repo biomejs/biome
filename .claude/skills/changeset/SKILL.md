@@ -1,137 +1,91 @@
 ---
 name: changeset
-description: Guide for creating and writing proper changesets for Biome PRs. Use when a PR introduces user-visible changes (bug fixes, new features, rule changes, formatter changes, parser changes) that need a changeset entry for the CHANGELOG. Trigger when creating changesets, writing changeset descriptions, or choosing the correct change type.
+description: Decide whether a Biome change needs a changeset, choose its release level, or create and edit `.changeset/*.md` release-note text. Use for user-visible behavior and release entries; not for implementation details or PR descriptions.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
-## Purpose
+# Changesets
 
-Use this skill when a PR introduces user-facing changes that require a changeset. Changesets drive CHANGELOG generation and release automation. Internal-only changes (refactors with no user-visible effect) do not need changesets.
+Changesets describe user-visible behavior for release notes. Root `AGENTS.md` defines when automated contributions require one; `CONTRIBUTING.md` is canonical for package selection, versioning, branch targets, and prose format.
 
-## Create a Changeset
+## Decide Whether One Is Required
 
-**Do not create changeset files manually.** Use:
+A changeset is required for behavior visible to users of the CLI, libraries, published crates, diagnostics, parser, formatter, linter, or assists.
+
+No changeset is needed for an internal refactor with identical behavior, tests only, CI/build maintenance, or documentation-only edits.
+
+Before opening a PR, explicitly confirm the user-facing classification as required by `AGENTS.md`. Do not infer user visibility only from the files changed.
+
+## Choose the Release Level
+
+| Change | Level | Target |
+| --- | --- | --- |
+| Bug fix or non-breaking behavior correction | `patch` | `main` |
+| New nursery lint rule | `patch` | `main` |
+| New user-facing feature or nursery promotion | `minor` | `next` |
+| Breaking user API change | `major` | `next` |
+
+Nursery rules are the exception to the usual new-feature mapping because they do not follow semantic versioning. Verify unusual cases against the current versioning policy.
+
+## Create the File
+
+The contributor workflow is:
+
+```shell
+just new-changeset
+```
+
+For a non-interactive automated workflow, use the repository's empty generator and then edit the generated file:
 
 ```shell
 just new-changeset-empty
 ```
 
-The command will create a file in `.changeset/`. Edit it directly to add detail.
+Do not invent a changeset filename manually. Both commands require project dependencies installed because they invoke `pnpm changeset`.
 
-Note that the file will *not* be literally empty. It will have this content:
-
-```markdown
----
----
-```
-
-Do not simply append to the changeset description below the existing content, which creates an invalid changeset.
-
-> Requires `pnpm` — run `pnpm i` from repo root first.
-
-## Choose the Correct Change Type
-
-- `patch` — Bug fixes.
-- `minor` — New features. PR must target the `next` branch.
-- `major` — Breaking user API changes. PR must target the `next` branch. These are rare and strictly controlled.
-
-Refer to the [versioning page](https://biomejs.dev/internals/versioning/) when unsure.
-
-## Changeset Format
+An empty generated entry starts with frontmatter delimiters. Replace that frontmatter with the package and release level rather than appending a second block:
 
 ```markdown
 ---
 "@biomejs/biome": patch
 ---
 
-Description here.
+Description.
 ```
 
-If you need headers inside the description, use `####` or `#####` only. Other header levels break the CHANGELOG tooling.
+Use `####` or `#####` for headings inside a longer entry. Other heading levels interfere with changelog generation.
 
-## Writing Guidelines
+## Write the Entry
 
-### General Rules
+- Describe user-visible behavior, not implementation.
+- Use one to three sentences unless the impact genuinely needs an example.
+- Use past tense for the contribution and present tense for resulting Biome behavior.
+- Start bug fixes with the linked issue when one exists.
+- Link rule and assist names to their Biome website pages.
+- End every sentence with a full stop.
 
-- Write about **user-facing changes only**. No changeset needed for pure refactoring. Describe how the change affects the user.
-- Be **concise and clear** — 1 to 3 sentences. Longer entries signal to users that the change deserves attention.
-- **Past tense** for what you did: "Added", "Fixed", "Changed".
-- **Present tense** for Biome behavior: "Biome now supports...", "The rule now detects...".
-- End every sentence with a **full stop** (`.`).
+Include only the example needed to understand impact:
 
-### Bug Fixes
+- new rule: an invalid example;
+- existing rule: what became valid or invalid;
+- formatter: a `diff` block;
+- parser: source that now parses or is now rejected.
 
-Start with a link to the issue:
+Do not copy a PR summary into the changeset. A changeset is release-note text and should omit test plans, internal design, and reviewer guidance.
 
-```markdown
-Fixed [#4444](https://github.com/biomejs/biome/issues/4444): [`useOptionalChain`](https://biomejs.dev/linter/rules/use-optional-chain/) now detects negated logical OR chains.
-```
+## Review Checklist
 
-### New Lint Rules
-
-Show an example of an invalid case. Use inline code for simple things, a code block for complex ones:
-
-```markdown
-Added a new nursery rule [`noDuplicateSelectors`](https://biomejs.dev/linter/rules/no-duplicate-selectors/), that disallows duplicate selector lists within the same at-rule context.
-
-For example, the following snippet triggers the rule:
-
-` ` `css
-.foo {}
-.foo {}
-` ` `
-```
-
-### Changes to Existing Rules
-
-Clearly show what is now invalid that was not before (or vice versa). Show both sides if helpful:
-
-```markdown
-Fixed [#7211](https://github.com/biomejs/biome/issues/7211): [`useOptionalChain`](https://biomejs.dev/linter/rules/use-optional-chain/) now detects negated logical OR chains. The following code is now considered invalid:
-
-` ` `js
-!foo || !foo.bar
-` ` `
-```
-
-### Formatter Changes
-
-Show the formatting diff:
-
-```markdown
-Changed formatting of arrow function parameters. Example:
-
-` ` `diff
-- const fn = (  a,  b  ) => {};
-+ const fn = (a, b) => {};
-` ` `
-```
-
-### Parser Changes
-
-Brief inline example of what can now be parsed:
-
-```markdown
-Added support for parsing `using` declarations in JavaScript.
-```
-
-Use a code block if multiline clarity helps.
-
-### Linking Rules and Assists
-
-Always link to the website, even if the page does not exist yet (it will after merge):
-
-- Rules: `` [`useConst`](https://biomejs.dev/linter/rules/use-const/) ``
-- Assists: `` [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) ``
-
-## Tips
-
-- Create the changeset before opening the PR; you can edit it after.
-- Look at existing files in `.changeset/` or recent `CHANGELOG.md` entries for reference.
-- One changeset per PR is typical. Multiple changesets are allowed if the PR addresses multiple, distinct bugs.
+- The behavior is user-visible.
+- The package is correct.
+- The release level agrees with branch policy.
+- The description matches the implemented behavior.
+- Issue, rule, and assist links are accurate.
+- Examples show observable impact.
+- The file has one valid frontmatter block.
 
 ## References
 
-- Contribution guide: `CONTRIBUTING.md` section "Changelog"
-- Versioning policy: https://biomejs.dev/internals/versioning/
-- Changesets documentation: https://github.com/changesets/changesets
+- Changeset policy: `CONTRIBUTING.md#changelog`
+- Branch targeting: `CONTRIBUTING.md#creating-pull-requests`
+- Versioning: https://biomejs.dev/internals/versioning/
+- Generator recipes: `justfile`

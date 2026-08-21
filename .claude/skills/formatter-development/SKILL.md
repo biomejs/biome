@@ -1,328 +1,104 @@
 ---
 name: formatter-development
-description: Guide for implementing formatting rules using Biome's IR-based formatter infrastructure. Use when implementing formatting for new syntax nodes, handling comments in formatted output, writing or debugging formatter snapshot tests, diagnosing idempotency failures, or comparing Biome's formatting against Prettier for JavaScript, CSS, JSON, HTML, Markdown, or other languages.
+description: Implement or debug Biome formatter behavior, IR composition, node rules, layout selection, source-comment handling, verbatim formatting, idempotency, internal specs, and Prettier comparison. Use for formatting behavior; not for generic snapshot commands or parser changes.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
-## Purpose
+# Formatter Development
 
-Use this skill when implementing or modifying Biome's formatters. It covers the trait-based formatting system, IR generation, comment handling, and testing with Prettier comparison.
+Use `crates/biome_formatter/CONTRIBUTING.md` and the language formatter's guide as the canonical architecture references. Inspect neighboring node implementations before selecting IR primitives.
 
-## Prerequisites
+## Workflow
 
-1. Install required tools: `just install-tools` (includes `wasm-bindgen-cli` and `wasm-opt`)
-2. Language-specific crates must exist: `biome_{lang}_syntax`, `biome_{lang}_formatter`
-3. For Prettier comparison: Install `bun` and run `pnpm install` in repo root
+1. Reproduce the behavior with a focused internal formatter spec or `quick_test`.
+2. Inspect the node fields, comments, and nearby formatting rules.
+3. Implement the smallest layout change using formatter IR.
+4. Run focused formatter tests and inspect snapshots.
+5. Compare with Prettier when compatibility is relevant.
+6. Run formatter codegen for the language, then format and lint.
 
-## Common Workflows
+## Node Rules
 
-### Generate Formatter Boilerplate
+Generated node rules implement `FormatNodeRule`. In `fmt_fields`:
 
-For a new language (e.g., HTML):
+- destructure the generated `*Fields` type explicitly;
+- format source tokens through their typed accessors;
+- use `_` for an intentionally ignored field rather than `..`;
+- preserve every token and comment unless the formatter contract intentionally replaces it;
+- keep layout decisions near the type that owns them.
 
-```shell
-just gen-formatter html
-```
+`format_verbatim_node` preserves a node's source text. Replace verbatim formatting with structured formatting only when tests cover valid, malformed, and commented forms of the node.
 
-This generates `FormatNodeRule` implementations for all syntax nodes. Initial implementations use `format_verbatim_node` (formats code as-is).
+## IR Composition
 
-### Implement FormatNodeRule for a Node
+Use semantic IR rather than writing whitespace as arbitrary text:
 
-Example: Formatting `JsIfStatement`:
+- `space()` for required spaces;
+- soft line breaks for optional wrapping;
+- hard line breaks for mandatory breaks;
+- groups to choose flat versus expanded layout;
+- indentation primitives matching the enclosing construct;
+- conditional content tied to the group whose fit decision controls it.
 
-```rust
-use crate::prelude::*;
-use biome_formatter::write;
-use biome_js_syntax::{JsIfStatement, JsIfStatementFields};
+For a distinct formatting concern, prefer a named type implementing `Format`. A cluster of free functions that pass `&mut Formatter` obscures what has already been written and which layout invariants apply.
 
-#[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsIfStatement;
+Represent multi-way layout with an enum selected once. Recomputing layout at several write sites can produce inconsistent output and idempotency failures.
 
-impl FormatNodeRule<JsIfStatement> for FormatJsIfStatement {
-    fn fmt_fields(&self, node: &JsIfStatement, f: &mut JsFormatter) -> FormatResult<()> {
-        let JsIfStatementFields {
-            if_token,
-            l_paren_token,
-            test,
-            r_paren_token,
-            consequent,
-            else_clause,
-        } = node.as_fields();
+## Comments
 
-        write!(
-            f,
-            [
-                if_token.format(),
-                space(),
-                l_paren_token.format(),
-                test.format(),
-                r_paren_token.format(),
-                space(),
-                consequent.format(),
-            ]
-        )?;
+Leading and trailing comments are generally handled by formatter infrastructure. Explicitly format dangling comments when the node owns a position to which no child can attach them.
 
-        if let Some(else_clause) = else_clause {
-            write!(f, [space(), else_clause.format()])?;
-        }
+Test comments at each structural boundary affected by the change: before the first child, between children, after the last child, and around empty nodes. Dropping or moving a source comment is data loss.
 
-        Ok(())
-    }
-}
-```
+## Tests and Idempotency
 
-### Using IR Primitives
+Load `testing-codegen` for snapshot commands and review.
 
-Common formatting building blocks:
+Internal specs should contain the focused source shapes needed to establish canonical output. Where useful, include both already formatted and deliberately unformatted inputs that should converge to the same result.
 
-```rust
-use biome_formatter::{format_args, write};
+The formatter test infrastructure reformats error-free, non-range output during the test invocation and fails when the second result differs. IR is diagnostic evidence when output differs; it is not a separate equality contract.
 
-write!(f, [
-    token("if"),           // Static text
-    space(),               // Single space
-    soft_line_break(),     // Break if line is too long
-    hard_line_break(),     // Always break
+Add internal specs for behavior changes even when a Prettier snapshot changes or disappears. Agreement with one external corpus input does not cover the changed edge case.
 
-    // Grouping and indentation
-    group(&format_args![
-        token("("),
-        soft_block_indent(&format_args![
-            node.test.format(),
-        ]),
-        token(")"),
-    ]),
+## Prettier Comparison
 
-    // Conditional formatting
-    format_with(|f| {
-        if condition {
-            write!(f, [token("something")])
-        } else {
-            write!(f, [token("other")])
-        }
-    }),
-])?;
-```
-
-### Handle Comments
-
-```rust
-use biome_formatter::format_args;
-use biome_formatter::prelude::*;
-
-impl FormatNodeRule<JsObjectExpression> for FormatJsObjectExpression {
-    fn fmt_fields(&self, node: &JsObjectExpression, f: &mut JsFormatter) -> FormatResult<()> {
-        let JsObjectExpressionFields {
-            l_curly_token,
-            members,
-            r_curly_token,
-        } = node.as_fields();
-
-        write!(
-            f,
-            [
-                l_curly_token.format(),
-                block_indent(&format_args![
-                    members.format(),
-                    // Handle dangling comments (comments not attached to any node)
-                    format_dangling_comments(node.syntax()).with_soft_block_indent()
-                ]),
-                r_curly_token.format(),
-            ]
-        )
-    }
-}
-```
-
-Leading and trailing comments are handled automatically by the formatter infrastructure.
-
-### Compare Against Prettier
-
-After implementing formatting, validate against Prettier:
+Use the repository tool when compatibility is part of the requirement:
 
 ```shell
-# Compare a code snippet
-bun packages/prettier-compare/bin/prettier-compare.js --rebuild 'const x={a:1,b:2}'
-
-# Compare with explicit language
-bun packages/prettier-compare/bin/prettier-compare.js --rebuild -l ts 'const x: number = 1'
-
-# Compare a file
-bun packages/prettier-compare/bin/prettier-compare.js --rebuild -f path/to/file.tsx
-
-# From stdin (useful for editor selections)
-echo 'const x = 1' | bun packages/prettier-compare/bin/prettier-compare.js --rebuild -l js
+bun packages/prettier-compare/bin/prettier-compare.js --rebuild -l js 'const value={a:1}'
+bun packages/prettier-compare/bin/prettier-compare.js --rebuild -f path/to/file.js
 ```
 
-**Always use `--rebuild`** to ensure WASM bundle matches your Rust changes.
+`--rebuild` rebuilds Biome's WASM bundle and writes build outputs. It is appropriate during implementation, not during a read-only review.
 
-Tips:
-- Pass code snippets in single quotes to avoid shell interpretation.
-- A literal backslash-n in a CLI argument is not converted to a newline — use a real newline or a file (`-f`).
-- Safe to run in read-only or planning mode: `--rebuild` only rebuilds the Biome WASM bundle and does not modify source files.
-- See `packages/prettier-compare/README.md` for full CLI details.
+Treat differences as input to design, not automatic bugs. Biome may intentionally differ when its documented behavior or architecture requires it.
 
-### Format and Build
+## Generation and Verification
 
-After changes:
+After changing a language formatter:
 
 ```shell
-just f              # Format Rust code
-just l              # Lint
-just gen-formatter  # Regenerate formatter infrastructure if needed
+just gen-formatter <lang>
+just f
+just l
 ```
 
-## Testing infrastructure
+Run the narrowest formatter crate or spec test first. Review snapshots before accepting them.
 
-The testing infrastructure of the formatters is divided in two main pieces. Internal and external.
+## Review Checklist
 
-The testing infrastructure is designed for catching idempotency cases, which means that each file inside the infrastructure is designed to fail if:
-- the final **printed** output differs on a second formatting run.
-- the final **IR** output differs on a second formatting run.
-
-**Both must be fixed.**
-
-Run `cargo t` twice. The first run may write or update snapshots; the second run re-formats the just-written output and confirms it is stable. Skipping the second run hides idempotency bugs — a broken formatter can look green on a single pass because the snapshot it wrote matches itself.
-
-### `quick_test.rs`
-
-- Use `quick_test.rs` inside the crate for testing theories and formatting.
-- Only modify the `source` string literal inside the test. Do not change the parse/format/assert scaffolding around it — that scaffolding already verifies idempotency and prints the CST and IR you need for debugging.
-
-### External infra
-
-The external infra relies on a human pulling the tests inside the repository, inside the folder `<crate>/tests/prettier`.
-
-Once the tests are ported, the infrastructure produces two files for each original file:
-- `<file_name>.<ext>.prettier-snap` which contains the output generated by Prettier at the moment the test was ported.
-- `<file_name>.<ext>.snap` which contains three sections
-  - the input source
-  - the list of diffs between Prettier and Biome
-  - the output generated by Biome
-
-The `.snap` file is only created when Biome's output differs from Prettier's. When the two agree, no `.snap` file is written.
-
-The absence of a `.snap` file is **positive** — it means Biome matches Prettier for that input.
-
-### Internal infrastructure
-
-The internal infrastructure relies on creating new test files. For each test, place two snippets in the same file:
-- a piece of source code **already formatted** the way Biome should produce it
-- the same code in an **unformatted** shape
-
-After running the formatter, both snippets should produce identical output. That identity proves the formatter converges on a canonical form and is idempotent.
-
-**Always create new test cases when implementing a feature or fixing a bug.** Internal tests exercise the exact shape you care about and survive even if the Prettier corpus changes.
-
-**Do not rely on Prettier `.snap` files disappearing as proof of correctness.** A missing `.snap` only means Biome and Prettier agree on that specific ported input. It does not cover the edge cases you introduced — write internal tests for those, and do not delete a Prettier `.snap` to make a diff "go away".
-
-### Create Snapshot Tests
-
-Create test files in `tests/specs/` organized by feature:
-
-```
-crates/biome_js_formatter/tests/specs/js/
-├── statement/
-│   ├── if_statement/
-│   │   ├── basic.js
-│   │   ├── nested.js
-│   │   └── with_comments.js
-│   └── for_statement/
-│       └── various.js
-```
-
-Example test file `basic.js`:
-```javascript
-if (condition) {
-  doSomething();
-}
-
-if (condition) doSomething();
-
-if (condition) {
-  doSomething();
-} else {
-  doOther();
-}
-```
-
-Run tests:
-```shell
-cd crates/biome_js_formatter
-cargo test
-```
-
-Review snapshots:
-```shell
-cargo insta review
-```
-
-### Test with Custom Options
-
-Create `options.json` in the test folder:
-
-```json
-{
-  "formatter": {
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 80
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "semicolons": "asNeeded"
-    }
-  }
-}
-```
-
-This applies to all test files in that folder.
-
-## Tips
-
-- **format_verbatim_node**: Initial generated code uses this - replace it with proper IR as you implement formatting
-- **Space tokens**: Use `space()` instead of `token(" ")` for semantic spacing
-- **Breaking**: Use `soft_line_break()` for optional breaks, `hard_line_break()` for mandatory breaks
-- **Grouping**: Wrap related elements in `group()` to keep them together when possible
-- **Indentation**: Use `block_indent()` for block-level indentation, `indent()` for inline
-- **Lists**: Use `join_nodes_with_soft_line()` or `join_nodes_with_hardline()` for formatting lists
-- **Mandatory tokens**: Use `node.token().format()` for tokens that exist in AST, not `token("(")`
-- **Debugging**: Use `dbg_write!` macro (like `dbg!`) to see IR elements: `dbg_write!(f, [token("hello")])?;`
-- **Don't fix code**: Formatter should format existing code, not attempt to fix syntax errors
-
-## IR Primitives Reference
-
-```rust
-// Whitespace
-space()                    // Single space
-soft_line_break()         // Break if needed
-hard_line_break()         // Always break
-soft_line_break_or_space() // Space or break
-
-// Indentation
-indent(&content)          // Indent content
-block_indent(&content)    // Block-level indent
-soft_block_indent(&content) // Indent with soft breaks
-
-// Grouping
-group(&content)           // Keep together if possible
-conditional_group(&content) // Advanced grouping
-
-// Text
-token("text")             // Static text
-dynamic_token(&text, pos) // Dynamic text with position
-
-// Utility
-format_with(|f| { ... })  // Custom formatting function
-format_args![a, b, c]     // Combine multiple items
-if_group_breaks(&content) // Only if group breaks
-if_group_fits_on_line(&content) // Only if fits
-```
+- Every generated field is handled explicitly.
+- Tokens use typed formatting rather than recreated static text where source tokens exist.
+- Comments survive in the intended position.
+- Layout is selected once and composed with semantic IR.
+- Error and bogus syntax remains representable without formatter panics.
+- Internal specs cover the changed behavior.
+- Reformatting converges in one test invocation.
+- Required formatter generation is checked in.
 
 ## References
 
-- Full guide: `crates/biome_formatter/CONTRIBUTING.md`
-- JS-specific: `crates/biome_js_formatter/CONTRIBUTING.md`
-- Prettier comparison tool: `packages/prettier-compare/`
-- Examples: `crates/biome_js_formatter/src/js/` for real implementations
+- Formatter guide: `crates/biome_formatter/CONTRIBUTING.md`
+- JavaScript formatter guide: `crates/biome_js_formatter/CONTRIBUTING.md`
+- Formatter test infrastructure: `crates/biome_formatter_test/src/spec.rs`
+- Prettier comparison: `packages/prettier-compare/README.md`
