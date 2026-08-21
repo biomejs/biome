@@ -77,16 +77,16 @@ impl Rule for UseFragmentSyntax {
         let opening_element = node.opening_element().ok()?;
         let closing_element = node.closing_element().ok()?;
         let fragment = jsx_fragment(
-            jsx_opening_fragment(
-                opening_element.l_angle_token().ok()?,
-                opening_element.r_angle_token().ok()?,
-            ),
+            jsx_opening_fragment()
+                .with_l_angle_token(opening_element.l_angle_token().ok()?)
+                .with_r_angle_token(opening_element.r_angle_token().ok()?)
+                .build(),
             list,
-            jsx_closing_fragment(
-                closing_element.l_angle_token().ok()?,
-                closing_element.slash_token().ok()?,
-                closing_element.r_angle_token().ok()?,
-            ),
+            jsx_closing_fragment()
+                .with_l_angle_token(closing_element.l_angle_token().ok()?)
+                .with_slash_token(closing_element.slash_token().ok()?)
+                .with_r_angle_token(closing_element.r_angle_token().ok()?)
+                .build(),
         );
 
         mutation.replace_element(

@@ -1,0 +1,136 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+cond && <a></a><!-- c --><b></b>
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsLogicalExpression {
+        left: JsIdentifierExpression {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@0..5 "cond" [] [Whitespace(" ")],
+            },
+        },
+        operator_token: AMP2@5..8 "&&" [] [Whitespace(" ")],
+        right: JsxTagExpression {
+            tag: JsxFragment {
+                opening_fragment: JsxOpeningFragment {
+                    l_angle_token: missing (optional),
+                    r_angle_token: missing (optional),
+                },
+                children: JsxChildList [
+                    JsxElement {
+                        opening_element: JsxOpeningElement {
+                            l_angle_token: L_ANGLE@8..9 "<" [] [],
+                            name: JsxName {
+                                value_token: JSX_IDENT@9..10 "a" [] [],
+                            },
+                            type_arguments: missing (optional),
+                            attributes: JsxAttributeList [],
+                            r_angle_token: R_ANGLE@10..11 ">" [] [],
+                        },
+                        children: JsxChildList [],
+                        closing_element: JsxClosingElement {
+                            l_angle_token: L_ANGLE@11..12 "<" [] [],
+                            slash_token: SLASH@12..13 "/" [] [],
+                            name: JsxName {
+                                value_token: JSX_IDENT@13..14 "a" [] [],
+                            },
+                            r_angle_token: R_ANGLE@14..25 ">" [] [Comments("<!-- c -->")],
+                        },
+                    },
+                    JsxElement {
+                        opening_element: JsxOpeningElement {
+                            l_angle_token: L_ANGLE@25..26 "<" [] [],
+                            name: JsxName {
+                                value_token: JSX_IDENT@26..27 "b" [] [],
+                            },
+                            type_arguments: missing (optional),
+                            attributes: JsxAttributeList [],
+                            r_angle_token: R_ANGLE@27..28 ">" [] [],
+                        },
+                        children: JsxChildList [],
+                        closing_element: JsxClosingElement {
+                            l_angle_token: L_ANGLE@28..29 "<" [] [],
+                            slash_token: SLASH@29..30 "/" [] [],
+                            name: JsxName {
+                                value_token: JSX_IDENT@30..31 "b" [] [],
+                            },
+                            r_angle_token: R_ANGLE@31..32 ">" [] [],
+                        },
+                    },
+                ],
+                closing_fragment: JsxClosingFragment {
+                    l_angle_token: missing (optional),
+                    slash_token: missing (optional),
+                    r_angle_token: missing (optional),
+                },
+            },
+        },
+    },
+    eof_token: EOF@32..33 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..33
+  0: JS_LOGICAL_EXPRESSION@0..32
+    0: JS_IDENTIFIER_EXPRESSION@0..5
+      0: JS_REFERENCE_IDENTIFIER@0..5
+        0: IDENT@0..5 "cond" [] [Whitespace(" ")]
+    1: AMP2@5..8 "&&" [] [Whitespace(" ")]
+    2: JSX_TAG_EXPRESSION@8..32
+      0: JSX_FRAGMENT@8..32
+        0: JSX_OPENING_FRAGMENT@8..8
+          0: (empty)
+          1: (empty)
+        1: JSX_CHILD_LIST@8..32
+          0: JSX_ELEMENT@8..25
+            0: JSX_OPENING_ELEMENT@8..11
+              0: L_ANGLE@8..9 "<" [] []
+              1: JSX_NAME@9..10
+                0: JSX_IDENT@9..10 "a" [] []
+              2: (empty)
+              3: JSX_ATTRIBUTE_LIST@10..10
+              4: R_ANGLE@10..11 ">" [] []
+            1: JSX_CHILD_LIST@11..11
+            2: JSX_CLOSING_ELEMENT@11..25
+              0: L_ANGLE@11..12 "<" [] []
+              1: SLASH@12..13 "/" [] []
+              2: JSX_NAME@13..14
+                0: JSX_IDENT@13..14 "a" [] []
+              3: R_ANGLE@14..25 ">" [] [Comments("<!-- c -->")]
+          1: JSX_ELEMENT@25..32
+            0: JSX_OPENING_ELEMENT@25..28
+              0: L_ANGLE@25..26 "<" [] []
+              1: JSX_NAME@26..27
+                0: JSX_IDENT@26..27 "b" [] []
+              2: (empty)
+              3: JSX_ATTRIBUTE_LIST@27..27
+              4: R_ANGLE@27..28 ">" [] []
+            1: JSX_CHILD_LIST@28..28
+            2: JSX_CLOSING_ELEMENT@28..32
+              0: L_ANGLE@28..29 "<" [] []
+              1: SLASH@29..30 "/" [] []
+              2: JSX_NAME@30..31
+                0: JSX_IDENT@30..31 "b" [] []
+              3: R_ANGLE@31..32 ">" [] []
+        2: JSX_CLOSING_FRAGMENT@32..32
+          0: (empty)
+          1: (empty)
+          2: (empty)
+  1: EOF@32..33 "" [Newline("\n")] []
+
+```

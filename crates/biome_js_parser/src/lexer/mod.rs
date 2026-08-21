@@ -67,12 +67,46 @@ pub enum JsLexContext {
     /// - JsxText
     /// - `<` end of the current element, or start of a new element
     /// - expression start: `{`
+    /// - Comment trivia for `<!-- -->` when `astro` is `true`
     /// - EOF
-    JsxChild,
+    JsxChild { astro: bool },
 
     /// Lexes a JSX Attribute value. Calls into normal lex token if positioned at anything
-    /// that isn't `'` or `"`.
-    JsxAttributeValue,
+    /// that isn't `'` or `"`, or an unquoted value when `astro` is `true`.
+    JsxAttributeValue { astro: bool },
+
+    /// Lexes the content of an Astro `<script>` or `<style>` written inside a
+    /// template expression, where a `{` opens no expression and a `<` starts no
+    /// element. Runs to the element's own closing tag.
+    JsxRawText(JsxRawTextElement),
+}
+
+/// The elements whose children an Astro template expression reads as raw text,
+/// each identified by the closing tag that ends that text.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum JsxRawTextElement {
+    Script,
+    Style,
+    /// An `is:raw` element, identified by its name's range in the source.
+    Other(TextRange),
+}
+
+impl JsxRawTextElement {
+    fn closing_tag_name(self) -> Option<&'static str> {
+        match self {
+            Self::Script => Some("script"),
+            Self::Style => Some("style"),
+            Self::Other(_) => None,
+        }
+    }
+
+    pub(crate) fn from_element_name(name: &str) -> Option<Self> {
+        match name {
+            "script" => Some(Self::Script),
+            "style" => Some(Self::Style),
+            _ => None,
+        }
+    }
 }
 
 impl LexContext for JsLexContext {
@@ -101,7 +135,13 @@ pub enum JsReLexContext {
     JsxIdentifier,
 
     /// See [JsLexContext::JsxChild]
-    JsxChild,
+    JsxChild { astro: bool },
+
+    /// Re-lexes an Astro `<!-- -->` comment as comment trivia; a no-op otherwise.
+    AstroHtmlComment,
+
+    /// Re-lexes an Astro attribute name as one flat token; a no-op on an empty scan.
+    AstroJsxAttributeName,
 }
 
 /// An extremely fast, lookup table based, lossless ECMAScript lexer
@@ -175,8 +215,9 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
             match context {
                 JsLexContext::Regular => self.lex_token(),
                 JsLexContext::TemplateElement { tagged } => self.lex_template(tagged),
-                JsLexContext::JsxChild => self.lex_jsx_child_token(),
-                JsLexContext::JsxAttributeValue => self.lex_jsx_attribute_value(),
+                JsLexContext::JsxChild { astro } => self.lex_jsx_child_token(astro),
+                JsLexContext::JsxAttributeValue { astro } => self.lex_jsx_attribute_value(astro),
+                JsLexContext::JsxRawText(element) => self.lex_jsx_raw_text_token(element),
             }
         };
 
@@ -270,7 +311,11 @@ impl<'src> ReLexer<'src> for JsLexer<'src> {
             JsReLexContext::BinaryOperator => self.re_lex_binary_operator(),
             JsReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
             JsReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(old_position),
-            JsReLexContext::JsxChild if !self.is_eof() => self.lex_jsx_child_token(),
+            JsReLexContext::JsxChild { astro } if !self.is_eof() => self.lex_jsx_child_token(astro),
+            JsReLexContext::AstroHtmlComment if self.at_astro_html_comment_start() => {
+                self.consume_astro_html_comment()
+            }
+            JsReLexContext::AstroJsxAttributeName => self.re_lex_astro_jsx_attribute_name(),
             _ => self.current(),
         };
 
@@ -382,13 +427,135 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    fn lex_jsx_child_token(&mut self) -> JsSyntaxKind {
+    fn re_lex_astro_jsx_attribute_name(&mut self) -> JsSyntaxKind {
+        let start = self.position;
+
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'=' | b'>' | b'/' | b'{' | b'}' | b'<' => break,
+                chr if chr.is_ascii_whitespace() => break,
+                chr => self.advance_byte_or_char(chr),
+            }
+        }
+
+        if self.position == start {
+            self.current_kind
+        } else {
+            JSX_IDENT
+        }
+    }
+
+    /// Whether the lexer sits at the closing tag that ends `element`'s raw text.
+    ///
+    /// `<script>` and `<style>` match case-insensitively as HTML does, while an
+    /// `is:raw` element matches exactly, because component names are case-sensitive.
+    fn at_jsx_raw_text_end(&self, element: JsxRawTextElement) -> bool {
+        let Some(rest) = self
+            .source
+            .get(self.position..)
+            .and_then(|rest| rest.strip_prefix("</"))
+        else {
+            return false;
+        };
+        // HTML ends raw text only at an "appropriate" end tag, so `</scriptx>`
+        // is content while `</script >` closes.
+        let ends_the_name = |rest: &str, len: usize| {
+            rest.as_bytes()
+                .get(len)
+                .is_none_or(|byte| matches!(byte, b'>' | b'/') || byte.is_ascii_whitespace())
+        };
+        match element.closing_tag_name() {
+            Some(name) => {
+                rest.get(..name.len())
+                    .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+                    && ends_the_name(rest, name.len())
+            }
+            // Component names are case-sensitive, so `is:raw` names match exactly.
+            None => {
+                let JsxRawTextElement::Other(range) = element else {
+                    return false;
+                };
+                self.source
+                    .get(usize::from(range.start())..usize::from(range.end()))
+                    .is_some_and(|name| {
+                        rest.get(..name.len()) == Some(name) && ends_the_name(rest, name.len())
+                    })
+            }
+        }
+    }
+
+    fn lex_jsx_raw_text_token(&mut self, element: JsxRawTextElement) -> JsSyntaxKind {
+        debug_assert!(!self.is_eof());
+
+        if self.at_jsx_raw_text_end(element) {
+            return self.eat_byte(T![<]);
+        }
+
+        while let Some(chr) = self.current_byte() {
+            if chr == b'<' && self.at_jsx_raw_text_end(element) {
+                break;
+            }
+            if chr.is_ascii() {
+                self.advance(1);
+            } else {
+                self.advance_char_unchecked();
+            }
+        }
+
+        JSX_TEXT_LITERAL
+    }
+
+    fn at_astro_html_comment_start(&self) -> bool {
+        self.source.as_bytes()[self.position..].starts_with(b"<!--")
+    }
+
+    fn consume_astro_html_comment(&mut self) -> JsSyntaxKind {
+        let start = self.position;
+        self.advance(4);
+
+        while let Some(chr) = self.current_byte() {
+            if chr == b'-' && self.source.as_bytes()[self.position..].starts_with(b"-->") {
+                self.advance(3);
+                return MULTILINE_COMMENT;
+            }
+            if chr.is_ascii() {
+                if let b'\r' | b'\n' = chr {
+                    self.after_newline = true;
+                }
+                self.advance(1);
+            } else {
+                let chr = self.current_char_unchecked();
+                if is_linebreak(chr) {
+                    self.after_newline = true;
+                }
+                self.advance(chr.len_utf8());
+            }
+        }
+
+        let err = ParseDiagnostic::new(
+            "unterminated HTML comment",
+            self.position..self.position + 1,
+        )
+        .with_detail(
+            self.position..self.position + 1,
+            "... but the file ends here",
+        )
+        .with_detail(start..start + 4, "A comment starts here");
+        self.push_diagnostic(err);
+
+        MULTILINE_COMMENT
+    }
+
+    fn lex_jsx_child_token(&mut self, astro: bool) -> JsSyntaxKind {
         debug_assert!(!self.is_eof());
 
         // SAFETY: `lex_token` only calls this method if it isn't passed the EOF
         let chr = unsafe { self.current_unchecked() };
 
         match chr {
+            b'<' if astro && self.at_astro_html_comment_start() => {
+                self.consume_astro_html_comment()
+            }
             // `<`: empty jsx text, directly followed by another element or closing element
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
@@ -402,6 +569,8 @@ impl<'src> JsLexer<'src> {
                     match chr {
                         // Start of a new element, the closing tag, or an expression
                         b'<' | b'{' => break,
+                        // Astro reads a bare `>` as ordinary text, as HTML does.
+                        b'>' if astro => self.advance(1),
                         b'>' => {
                             self.push_diagnostic(ParseDiagnostic::new(
                                 "Unexpected token. Did you mean `{'>'}` or `&gt;`?",
@@ -431,7 +600,7 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    fn lex_jsx_attribute_value(&mut self) -> JsSyntaxKind {
+    fn lex_jsx_attribute_value(&mut self, astro: bool) -> JsSyntaxKind {
         debug_assert!(!self.is_eof());
 
         // Safety: Guaranteed because we aren't at the end of the file
@@ -445,8 +614,27 @@ impl<'src> JsLexer<'src> {
                     ERROR_TOKEN
                 }
             }
+            _ if astro
+                && !matches!(chr, b'{' | b'`' | b'<' | b'>' | b'}')
+                && !chr.is_ascii_whitespace() =>
+            {
+                self.consume_astro_unquoted_attribute_value()
+            }
             _ => self.lex_token(),
         }
+    }
+
+    /// `/` does not terminate the value: HTML5 reads `value=4/>` as `4/`.
+    fn consume_astro_unquoted_attribute_value(&mut self) -> JsSyntaxKind {
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'>' | b'{' | b'}' | b'<' => break,
+                chr if chr.is_ascii_whitespace() => break,
+                chr => self.advance_byte_or_char(chr),
+            }
+        }
+
+        JSX_STRING_LITERAL
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind

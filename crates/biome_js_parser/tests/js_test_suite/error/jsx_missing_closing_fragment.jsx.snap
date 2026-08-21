@@ -90,9 +90,9 @@ JsModule {
                         },
                     ],
                     closing_fragment: JsxClosingFragment {
-                        l_angle_token: missing (required),
-                        slash_token: missing (required),
-                        r_angle_token: missing (required),
+                        l_angle_token: missing (optional),
+                        slash_token: missing (optional),
+                        r_angle_token: missing (optional),
                     },
                 },
             },

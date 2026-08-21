@@ -2,15 +2,16 @@ use crate::prelude::*;
 pub mod jsx_parse_errors;
 
 use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::jsx_ext::is_void_element;
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
 
 use crate::JsSyntaxFeature::TypeScript;
-use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
+use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, JsxRawTextElement, T};
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
-    parse_reference_identifier,
+    parse_reference_identifier, parse_template_literal,
 };
 use crate::syntax::js_parse_error::{expected_expression, expected_identifier};
 use crate::syntax::jsx::jsx_parse_errors::{
@@ -61,11 +62,70 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
         return Absent;
     }
 
+    let checkpoint = p.checkpoint();
     let m = p.start();
 
     // Safety: Safe because `parse_any_jsx_tag only returns Absent if the parser isn't positioned
     // at the `<` token which is tested for at the beginning of the function.
     parse_any_jsx_tag(p, true).unwrap();
+
+    if is_at_astro_adjacent_sibling(p) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return parse_astro_implicit_fragment(p);
+    }
+
+    Present(m.complete(p, JSX_TAG_EXPRESSION))
+}
+
+/// Adjacent siblings are an implicit fragment in Astro but invalid in JSX.
+fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
+    if !is_astro(p) {
+        return false;
+    }
+    skip_astro_html_comments(p);
+    is_at_jsx_tag_start(p)
+}
+
+pub(crate) fn skip_astro_html_comments(p: &mut JsParser) {
+    while p.at(T![<]) {
+        let start = p.cur_range().start();
+        p.re_lex(JsReLexContext::AstroHtmlComment);
+        if p.cur_range().start() == start {
+            break;
+        }
+    }
+}
+
+fn is_at_jsx_tag_start(p: &mut JsParser) -> bool {
+    p.at(T![<])
+        && (p.nth_at(1, T![>])
+            || is_nth_at_identifier_or_keyword(p, 1)
+            || is_nth_at_metavariable(p, 1))
+}
+
+/// The opening and closing fragments carry no tokens: the source has none.
+fn parse_astro_implicit_fragment(p: &mut JsParser) -> ParsedSyntax {
+    let m = p.start();
+    let fragment = p.start();
+
+    let opening = p.start();
+    opening.complete(p, JSX_OPENING_FRAGMENT);
+
+    let children = p.start();
+    loop {
+        skip_astro_html_comments(p);
+        if !is_at_jsx_tag_start(p) {
+            break;
+        }
+        parse_any_jsx_tag(p, true).ok();
+    }
+    children.complete(p, JSX_CHILD_LIST);
+
+    let closing = p.start();
+    closing.complete(p, JSX_CLOSING_FRAGMENT);
+
+    fragment.complete(p, JSX_FRAGMENT);
     Present(m.complete(p, JSX_TAG_EXPRESSION))
 }
 
@@ -105,11 +165,18 @@ fn parse_any_jsx_tag(p: &mut JsParser, in_expression: bool) -> ParsedSyntax {
             expect_closing_fragment(p, in_expression, opening_range);
             Present(fragment.complete(p, JSX_FRAGMENT))
         }
-        Some(OpeningElement::Element { name, opening }) => {
+        Some(OpeningElement::Element {
+            name,
+            opening,
+            raw_text,
+        }) => {
             let opening_range = opening.range(p);
             let element = opening.precede(p);
 
-            parse_jsx_children(p);
+            match raw_text {
+                Some(_) => parse_jsx_raw_text_child(p),
+                None => parse_jsx_children(p),
+            }
 
             expect_closing_element(p, in_expression, name, opening_range);
             Present(element.complete(p, JSX_ELEMENT))
@@ -123,6 +190,7 @@ enum OpeningElement {
     Element {
         name: Option<CompletedMarker>,
         opening: CompletedMarker,
+        raw_text: Option<JsxRawTextElement>,
     },
     SelfClosing(CompletedMarker),
 }
@@ -147,7 +215,7 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         //   <
         //   /
         // >;
-        p.bump_with_context(T![>], JsLexContext::JsxChild);
+        p.bump_with_context(T![>], JsLexContext::JsxChild { astro: is_astro(p) });
 
         return Some(OpeningElement::Fragment(
             m.complete(p, JSX_OPENING_FRAGMENT),
@@ -167,7 +235,8 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         let _ = parse_ts_type_arguments(p, TypeContext::default());
     }
 
-    JsxAttributeList.parse_list(p);
+    let mut attributes = JsxAttributeList::default();
+    attributes.parse_list(p);
 
     if p.eat(T![/]) {
         // test_err jsx jsx_self_closing_element_missing_r_angle
@@ -177,16 +246,56 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         Some(OpeningElement::SelfClosing(
             m.complete(p, JSX_SELF_CLOSING_ELEMENT),
         ))
+    } else if is_at_astro_void_element(p, name.as_ref()) {
+        expect_jsx_token(p, T![>], !in_expression);
+
+        Some(OpeningElement::SelfClosing(
+            m.complete(p, JSX_SELF_CLOSING_ELEMENT),
+        ))
     } else {
+        let raw_text = astro_raw_text_element(p, name.as_ref(), attributes.saw_astro_is_raw);
+
         // test_err jsx jsx_opening_element_missing_r_angle
         // <><test <inner> some content</inner></test></>
-        expect_jsx_token(p, T![>], true);
+        match raw_text {
+            Some(element) => expect_jsx_raw_text_token(p, T![>], element),
+            None => expect_jsx_token(p, T![>], true),
+        }
 
         Some(OpeningElement::Element {
             opening: m.complete(p, JSX_OPENING_ELEMENT),
             name,
+            raw_text,
         })
     }
+}
+
+fn is_astro(p: &JsParser) -> bool {
+    p.source_type.as_embedding_kind().is_astro()
+}
+
+/// Unclosed `<br>` is valid in Astro templates but not in JSX, hence the gate.
+fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> bool {
+    if !is_astro(p) || !p.at(T![>]) {
+        return false;
+    }
+    name.is_some_and(|name| is_void_element(p.text(name.range(p))))
+}
+
+/// A `<script>` or `<style>` holds text, not markup, so an Astro template
+/// expression reads its children the way the HTML layer already does. In plain
+/// JSX the same element is an ordinary component call, hence the gate.
+fn astro_raw_text_element(
+    p: &JsParser,
+    name: Option<&CompletedMarker>,
+    saw_is_raw: bool,
+) -> Option<JsxRawTextElement> {
+    if !is_astro(p) || !p.at(T![>]) {
+        return None;
+    }
+    let name = name?;
+    JsxRawTextElement::from_element_name(p.text(name.range(p)))
+        .or_else(|| saw_is_raw.then(|| JsxRawTextElement::Other(name.range(p))))
 }
 
 fn expect_closing_fragment(
@@ -286,17 +395,27 @@ fn expect_closing_element(
     m.complete(p, JSX_CLOSING_ELEMENT)
 }
 
+/// Like [`expect_jsx_token`], but lexes what follows as the raw text of `element`.
+fn expect_jsx_raw_text_token(p: &mut JsParser, token: JsSyntaxKind, element: JsxRawTextElement) {
+    if p.at(token) {
+        p.bump_with_context(token, JsLexContext::JsxRawText(element));
+    } else {
+        p.error(expected_token(token));
+    }
+}
+
 /// Expects a JSX token that may be followed by JSX child content.
 /// Ensures that the child content is lexed with the [JsLexContext::JsxChild] context.
 fn expect_jsx_token(p: &mut JsParser, token: JsSyntaxKind, before_child_content: bool) {
+    let astro = is_astro(p);
     if !before_child_content {
         p.expect(token);
     } else if p.at(token) {
-        p.bump_with_context(token, JsLexContext::JsxChild);
+        p.bump_with_context(token, JsLexContext::JsxChild { astro });
     } else {
         p.error(expected_token(token));
         // Re-lex the current token as a JSX child.
-        p.re_lex(JsReLexContext::JsxChild);
+        p.re_lex(JsReLexContext::JsxChild { astro });
     }
 }
 
@@ -330,7 +449,12 @@ impl ParseNodeList for JsxChildrenList {
             // <test>\u3333</test> // no error for invalid unicode escape
             JsSyntaxKind::JSX_TEXT_LITERAL => {
                 let m = p.start();
-                p.bump(JSX_TEXT_LITERAL);
+                if is_astro(p) {
+                    // Keep the child context so a following `<!-- -->` lexes as trivia.
+                    p.bump_with_context(JSX_TEXT_LITERAL, JsLexContext::JsxChild { astro: true });
+                } else {
+                    p.bump(JSX_TEXT_LITERAL);
+                }
                 ParsedSyntax::Present(m.complete(p, JSX_TEXT))
             }
             _ => ParsedSyntax::Absent,
@@ -358,6 +482,18 @@ impl ParseNodeList for JsxChildrenList {
 #[inline]
 fn parse_jsx_children(p: &mut JsParser) {
     JsxChildrenList.parse_list(p);
+}
+
+/// Raw text is one token, so the list holds at most the single [`JSX_TEXT`] the
+/// lexer produced for everything up to the closing tag.
+fn parse_jsx_raw_text_child(p: &mut JsParser) {
+    let list = p.start();
+    if p.at(JSX_TEXT_LITERAL) {
+        let m = p.start();
+        p.bump(JSX_TEXT_LITERAL);
+        m.complete(p, JSX_TEXT);
+    }
+    list.complete(p, JsSyntaxKind::JSX_CHILD_LIST);
 }
 
 fn parse_jsx_expression_child(p: &mut JsParser) -> ParsedSyntax {
@@ -484,7 +620,10 @@ fn parse_jsx_name(p: &mut JsParser) -> ParsedSyntax {
     }
 }
 
-struct JsxAttributeList;
+#[derive(Default)]
+struct JsxAttributeList {
+    saw_astro_is_raw: bool,
+}
 // test jsx jsx_element_attributes
 // function f() {
 //     return <div string_literal="a" expression={1} novalue el=<a/>></div>;
@@ -500,7 +639,7 @@ impl ParseNodeList for JsxAttributeList {
     const LIST_KIND: Self::Kind = JsSyntaxKind::JSX_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
-        if is_at_jsx_shorthand_attribute(p) {
+        let parsed = if is_at_jsx_shorthand_attribute(p) {
             parse_jsx_shorthand_attribute(p)
         } else if matches!(p.cur(), T!['{'] | T![...]) {
             parse_jsx_spread_attribute(p)
@@ -508,7 +647,18 @@ impl ParseNodeList for JsxAttributeList {
             parse_metavariable(p)
         } else {
             parse_jsx_attribute(p)
+        };
+        if !self.saw_astro_is_raw
+            && is_astro(p)
+            && let Present(attribute) = &parsed
+        {
+            let text = p.text(attribute.range(p));
+            self.saw_astro_is_raw = text == "is:raw"
+                || text
+                    .strip_prefix("is:raw")
+                    .is_some_and(|rest| rest.starts_with(['=', ' ', '\t', '\r', '\n']));
         }
+        parsed
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
@@ -528,6 +678,10 @@ impl ParseNodeList for JsxAttributeList {
 }
 
 fn parse_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
+    if is_astro(p) {
+        return parse_astro_jsx_attribute(p);
+    }
+
     if !is_nth_at_identifier_or_keyword(p, 0) {
         return Absent;
     }
@@ -536,6 +690,23 @@ fn parse_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
 
     // SAFETY: Guaranteed to succeed because the parser is at an identifier or keyword
     parse_jsx_name_or_namespace(p).unwrap();
+    let _ = parse_jsx_attribute_initializer_clause(p);
+
+    Present(m.complete(p, JsSyntaxKind::JSX_ATTRIBUTE))
+}
+
+/// An Astro attribute name like `x-on:keyup.enter` is one flat atom, never a namespace.
+fn parse_astro_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
+    p.re_lex(JsReLexContext::AstroJsxAttributeName);
+
+    if !p.at(JSX_IDENT) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let name = p.start();
+    p.bump(JSX_IDENT);
+    name.complete(p, JSX_NAME);
     let _ = parse_jsx_attribute_initializer_clause(p);
 
     Present(m.complete(p, JsSyntaxKind::JSX_ATTRIBUTE))
@@ -617,7 +788,10 @@ fn parse_jsx_attribute_initializer_clause(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T![=], JsLexContext::JsxAttributeValue);
+    p.bump_with_context(
+        T![=],
+        JsLexContext::JsxAttributeValue { astro: is_astro(p) },
+    );
 
     // test_err jsx jsx_element_attribute_missing_value
     // function f() {
@@ -643,6 +817,10 @@ fn parse_jsx_attribute_value(p: &mut JsParser) -> ParsedSyntax {
             let m = p.start();
             p.bump(JSX_STRING_LITERAL);
             ParsedSyntax::Present(m.complete(p, JSX_STRING))
+        }
+        BACKTICK if is_astro(p) => {
+            let m = p.start();
+            ParsedSyntax::Present(parse_template_literal(p, m, false, false))
         }
         _ => ParsedSyntax::Absent,
     }

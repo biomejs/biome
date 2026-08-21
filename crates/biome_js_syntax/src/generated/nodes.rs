@@ -2522,8 +2522,8 @@ impl JsExpressionTemplateRoot {
             eof_token: self.eof_token(),
         }
     }
-    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn expression(&self) -> Option<AnyJsExpression> {
+        support::node(&self.syntax, 0usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2539,7 +2539,7 @@ impl Serialize for JsExpressionTemplateRoot {
 }
 #[derive(Serialize)]
 pub struct JsExpressionTemplateRootFields {
-    pub expression: SyntaxResult<AnyJsExpression>,
+    pub expression: Option<AnyJsExpression>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7489,14 +7489,14 @@ impl JsxClosingFragment {
             r_angle_token: self.r_angle_token(),
         }
     }
-    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn l_angle_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
     }
-    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn slash_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
-    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn r_angle_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for JsxClosingFragment {
@@ -7509,9 +7509,9 @@ impl Serialize for JsxClosingFragment {
 }
 #[derive(Serialize)]
 pub struct JsxClosingFragmentFields {
-    pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub slash_token: SyntaxResult<SyntaxToken>,
-    pub r_angle_token: SyntaxResult<SyntaxToken>,
+    pub l_angle_token: Option<SyntaxToken>,
+    pub slash_token: Option<SyntaxToken>,
+    pub r_angle_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxElement {
@@ -7893,11 +7893,11 @@ impl JsxOpeningFragment {
             r_angle_token: self.r_angle_token(),
         }
     }
-    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn l_angle_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
     }
-    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn r_angle_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
 }
 impl Serialize for JsxOpeningFragment {
@@ -7910,8 +7910,8 @@ impl Serialize for JsxOpeningFragment {
 }
 #[derive(Serialize)]
 pub struct JsxOpeningFragmentFields {
-    pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub r_angle_token: SyntaxResult<SyntaxToken>,
+    pub l_angle_token: Option<SyntaxToken>,
+    pub r_angle_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxReferenceIdentifier {
@@ -7984,8 +7984,8 @@ impl JsxSelfClosingElement {
     pub fn attributes(&self) -> JsxAttributeList {
         support::list(&self.syntax, 3usize)
     }
-    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn slash_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
@@ -8005,7 +8005,7 @@ pub struct JsxSelfClosingElementFields {
     pub name: SyntaxResult<AnyJsxElementName>,
     pub type_arguments: Option<TsTypeArguments>,
     pub attributes: JsxAttributeList,
-    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: Option<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15737,6 +15737,7 @@ impl AnyJsxAttributeName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttributeValue {
     AnyJsxTag(AnyJsxTag),
+    JsTemplateExpression(JsTemplateExpression),
     JsxExpressionAttributeValue(JsxExpressionAttributeValue),
     JsxString(JsxString),
 }
@@ -15744,6 +15745,12 @@ impl AnyJsxAttributeValue {
     pub fn as_any_jsx_tag(&self) -> Option<&AnyJsxTag> {
         match &self {
             Self::AnyJsxTag(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_template_expression(&self) -> Option<&JsTemplateExpression> {
+        match &self {
+            Self::JsTemplateExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -19644,7 +19651,10 @@ impl std::fmt::Debug for JsExpressionTemplateRoot {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("JsExpressionTemplateRoot")
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
         } else {
@@ -25430,15 +25440,15 @@ impl std::fmt::Debug for JsxClosingFragment {
             f.debug_struct("JsxClosingFragment")
                 .field(
                     "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
+                    &support::DebugOptionalElement(self.l_angle_token()),
                 )
                 .field(
                     "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
+                    &support::DebugOptionalElement(self.slash_token()),
                 )
                 .field(
                     "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
+                    &support::DebugOptionalElement(self.r_angle_token()),
                 )
                 .finish()
         } else {
@@ -25922,11 +25932,11 @@ impl std::fmt::Debug for JsxOpeningFragment {
             f.debug_struct("JsxOpeningFragment")
                 .field(
                     "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
+                    &support::DebugOptionalElement(self.l_angle_token()),
                 )
                 .field(
                     "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
+                    &support::DebugOptionalElement(self.r_angle_token()),
                 )
                 .finish()
         } else {
@@ -26036,7 +26046,7 @@ impl std::fmt::Debug for JsxSelfClosingElement {
                 .field("attributes", &self.attributes())
                 .field(
                     "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
+                    &support::DebugOptionalElement(self.slash_token()),
                 )
                 .field(
                     "r_angle_token",
@@ -38168,6 +38178,11 @@ impl From<AnyJsxAttributeName> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsTemplateExpression> for AnyJsxAttributeValue {
+    fn from(node: JsTemplateExpression) -> Self {
+        Self::JsTemplateExpression(node)
+    }
+}
 impl From<JsxExpressionAttributeValue> for AnyJsxAttributeValue {
     fn from(node: JsxExpressionAttributeValue) -> Self {
         Self::JsxExpressionAttributeValue(node)
@@ -38181,17 +38196,19 @@ impl From<JsxString> for AnyJsxAttributeValue {
 impl AstNode for AnyJsxAttributeValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyJsxTag::KIND_SET
+        .union(JsTemplateExpression::KIND_SET)
         .union(JsxExpressionAttributeValue::KIND_SET)
         .union(JsxString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            JSX_EXPRESSION_ATTRIBUTE_VALUE | JSX_STRING => true,
+            JS_TEMPLATE_EXPRESSION | JSX_EXPRESSION_ATTRIBUTE_VALUE | JSX_STRING => true,
             k if AnyJsxTag::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_TEMPLATE_EXPRESSION => Self::JsTemplateExpression(JsTemplateExpression { syntax }),
             JSX_EXPRESSION_ATTRIBUTE_VALUE => {
                 Self::JsxExpressionAttributeValue(JsxExpressionAttributeValue { syntax })
             }
@@ -38207,6 +38224,7 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::JsTemplateExpression(it) => it.syntax(),
             Self::JsxExpressionAttributeValue(it) => it.syntax(),
             Self::JsxString(it) => it.syntax(),
             Self::AnyJsxTag(it) => it.syntax(),
@@ -38214,6 +38232,7 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::JsTemplateExpression(it) => it.into_syntax(),
             Self::JsxExpressionAttributeValue(it) => it.into_syntax(),
             Self::JsxString(it) => it.into_syntax(),
             Self::AnyJsxTag(it) => it.into_syntax(),
@@ -38224,6 +38243,7 @@ impl std::fmt::Debug for AnyJsxAttributeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyJsxTag(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTemplateExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxExpressionAttributeValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxString(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -38233,6 +38253,7 @@ impl From<AnyJsxAttributeValue> for SyntaxNode {
     fn from(n: AnyJsxAttributeValue) -> Self {
         match n {
             AnyJsxAttributeValue::AnyJsxTag(it) => it.into_syntax(),
+            AnyJsxAttributeValue::JsTemplateExpression(it) => it.into_syntax(),
             AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => it.into_syntax(),
             AnyJsxAttributeValue::JsxString(it) => it.into_syntax(),
         }
