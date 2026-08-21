@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed an Astro expression holding only a comment being reported as a parse error, which also stopped the whole file from being formatted.
+Fixed [#8294](https://github.com/biomejs/biome/issues/8294): an Astro expression holding only a comment is no longer reported as a parse error, which also stopped the whole file from being formatted.
 
 ```astro
 <div>{/* a note */}</div>
