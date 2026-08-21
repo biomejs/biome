@@ -52,7 +52,7 @@ For example, when `proseWrap` is set to `always`, the formatter will wrap the pa
 ```
 
 ```md
-Very tiny line with, so
+Very tiny line width, so
 the paragraph is more
 compact.
 ```
