@@ -17,6 +17,24 @@ use crate::JsModuleLoader;
 use crate::ast::JsAstNode;
 use crate::plugin_api::JsPluginApi;
 
+#[cfg(target_arch = "wasm32")]
+struct Clock;
+
+#[cfg(target_arch = "wasm32")]
+impl boa_engine::context::Clock for Clock {
+    fn now(&self) -> boa_engine::context::time::JsInstant {
+        let now = web_time::SystemTime::now();
+        let duration = now
+            .duration_since(web_time::UNIX_EPOCH)
+            .expect("System clock is before Unix epoch");
+
+        boa_engine::context::time::JsInstant::new(duration.as_secs(), duration.subsec_nanos())
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+use boa_engine::context::time::StdClock as Clock;
+
 pub struct JsExecContext {
     ctx: Context,
     fs: Arc<dyn FsWithResolverProxy>,
@@ -43,6 +61,7 @@ impl JsExecContext {
         let module_loader = Rc::new(JsModuleLoader::new(fs.clone()));
         let api = JsPluginApi::new();
         let mut ctx = Context::builder()
+            .clock(Rc::new(Clock))
             .module_loader(Rc::clone(&module_loader))
             .build()?;
 
