@@ -1,6 +1,6 @@
 use crate::{
     run_cli,
-    snap_test::{SnapshotPayload, assert_cli_snapshot},
+    snap_test::{SnapshotPayload, assert_cli_snapshot_with_redactor},
 };
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
@@ -12,13 +12,14 @@ fn assert_inspect_snapshot(
     console: BufferConsole,
     result: Result<(), biome_cli::CliDiagnostic>,
 ) {
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        test_name,
-        fs,
-        console,
-        result,
-    ));
+    assert_cli_snapshot_with_redactor(
+        SnapshotPayload::new(module_path!(), test_name, fs, console, result),
+        normalize_inspect_snapshot_paths,
+    );
+}
+
+fn normalize_inspect_snapshot_paths(content: String) -> String {
+    content.replace("\\\\", "/").replace('\\', "/")
 }
 
 #[test]
@@ -920,4 +921,20 @@ fn insert_configuration_package(
         format!(r#"{{ "name": "{name}", "version": "{version}", "main": "biome.json" }}"#),
     );
     fs.insert(format!("{directory}/biome.json").into(), configuration);
+}
+
+#[test]
+fn normalizes_windows_paths_in_inspect_snapshots() {
+    let content = r#"{
+  "path": "node_modules\\@shared\\config\\biome.json"
+}
+node_modules\package-b\biome.json configuration"#;
+
+    assert_eq!(
+        normalize_inspect_snapshot_paths(content.to_string()),
+        r#"{
+  "path": "node_modules/@shared/config/biome.json"
+}
+node_modules/package-b/biome.json configuration"#
+    );
 }
