@@ -19,7 +19,7 @@ use biome_js_syntax::{
 use biome_js_semantic::SemanticModel;
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsRuleAction,
@@ -164,6 +164,7 @@ fn coordinated_extraction(
 ) -> Option<(String, FxHashSet<String>, bool)> {
     let facts = module_constant_facts(root, model);
     let mut reserved_names = FxHashSet::default();
+    let mut names_by_value = FxHashMap::default();
 
     for descendant in root.syntax().descendants() {
         let Some(numeric_literal) = AnyJsNumericLiteral::cast(descendant) else {
@@ -177,6 +178,19 @@ fn coordinated_extraction(
             continue;
         }
 
+        let value_key = numeric_literal.syntax().text_trimmed().to_string();
+        if let Some(name) = names_by_value.get(&value_key).cloned() {
+            if numeric_literal.syntax() == current.syntax() {
+                reserved_names.remove(&name);
+                return Some((
+                    name,
+                    reserved_names,
+                    module_constant_insertion_slot(root, numeric_literal.syntax()) == Some(0),
+                ));
+            }
+            continue;
+        }
+
         let candidate_name = numeric_constant_name(&numeric_literal);
         let name = collision_free_module_constant_name_with_facts(
             model,
@@ -187,6 +201,7 @@ fn coordinated_extraction(
         );
         let insertion_slot = module_constant_insertion_slot(root, numeric_literal.syntax());
         let owns_header = insertion_slot == Some(0);
+        names_by_value.insert(value_key, name.clone());
 
         if numeric_literal.syntax() == current.syntax() {
             return Some((name, reserved_names, owns_header));
