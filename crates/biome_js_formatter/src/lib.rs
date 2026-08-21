@@ -1143,6 +1143,10 @@ console.log(a);
             output.find("/* c */").unwrap() > output.find("<p>").unwrap(),
             "comment was hoisted above the first sibling: {output:?}"
         );
+        assert!(
+            output.find("/* c */").unwrap() < output.find("<div />").unwrap(),
+            "comment sank below the following sibling: {output:?}"
+        );
     }
 
     #[test]
@@ -1157,6 +1161,10 @@ console.log(a);
             output.find("/* c */").unwrap() > output.find("<div />").unwrap(),
             "comment was hoisted above the first sibling: {output:?}"
         );
+        assert!(
+            output.find("/* c */").unwrap() < output.find("<p>a</p>").unwrap(),
+            "comment sank below the following sibling: {output:?}"
+        );
     }
 
     #[test]
@@ -1164,6 +1172,16 @@ console.log(a);
         let output = format_astro_template("<p>a</p>\n<div />");
 
         assert!(!output.contains("<>"), "delimiters were added: {output:?}");
+    }
+
+    #[test]
+    fn format_keeps_comment_before_a_nested_explicit_fragment() {
+        let output = format_astro_template("cond && <div />\n/* keep */ <></>");
+
+        assert!(
+            output.contains("/* keep */"),
+            "comment was dropped: {output:?}"
+        );
     }
 
     #[test]

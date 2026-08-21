@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::jsx::tag::element::AnyJsxTagWithChildren;
-use crate::utils::jsx::is_jsx_suppressed;
+use crate::utils::jsx::{is_implicit_fragment_child, is_jsx_suppressed};
 use biome_formatter::write;
 use biome_js_syntax::JsxFragment;
 
@@ -18,7 +18,7 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_leading_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.is_implicit() {
+        if node.is_implicit() || is_implicit_fragment_child(node.syntax()) {
             return format_leading_comments(node.syntax()).fmt(f);
         }
         debug_assert!(
@@ -29,7 +29,7 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_dangling_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.is_implicit() {
+        if node.is_implicit() || is_implicit_fragment_child(node.syntax()) {
             return format_dangling_comments(node.syntax()).fmt(f);
         }
         debug_assert!(
@@ -40,7 +40,7 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_trailing_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.is_implicit() {
+        if node.is_implicit() || is_implicit_fragment_child(node.syntax()) {
             return format_trailing_comments(node.syntax()).fmt(f);
         }
         debug_assert!(
