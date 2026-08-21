@@ -75,8 +75,46 @@ impl<'l> JsTokenSource<'l> {
         next_token_trivia.is_some()
     }
 
+    /// Trivia with no earlier token must be leading, or the tree sink strands it.
+    fn preceding_token_exists(&self) -> bool {
+        let mut position = self.current_range().start();
+        if position == TextSize::from(0) {
+            return false;
+        }
+        for trivia in self.trivia_list.iter().rev() {
+            if trivia.offset() + trivia.len() != position {
+                break;
+            }
+            position = trivia.offset();
+            if position == TextSize::from(0) {
+                return false;
+            }
+        }
+        true
+    }
+
     pub fn re_lex(&mut self, mode: JsReLexContext) -> JsSyntaxKind {
-        self.lexer.re_lex(mode)
+        let continuation = match mode {
+            JsReLexContext::JsxChild { astro } => JsLexContext::JsxChild { astro },
+            _ => JsLexContext::Regular,
+        };
+
+        let mut kind = self.lexer.re_lex(mode);
+        // Astro HTML comments re-lex into trivia, which the parser must never see as current.
+        if TriviaPieceKind::try_from(kind).is_ok() {
+            let mut trailing =
+                self.preceding_token_exists() && !self.lexer.has_preceding_line_break();
+            while let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) {
+                if trivia_kind.is_newline() {
+                    trailing = false;
+                }
+                self.trivia_list
+                    .push(Trivia::new(trivia_kind, self.current_range(), trailing));
+                kind = self.lexer.next_token(continuation);
+            }
+        }
+
+        kind
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].

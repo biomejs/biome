@@ -11,7 +11,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
-    JsxAttribute,
+    JsTemplateExpression, JsxAttribute,
 };
 use biome_package::PackageJson;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
@@ -148,6 +148,16 @@ impl Rule for NoReactStringRefs {
     }
 }
 
+fn is_string_template(template: &JsTemplateExpression) -> bool {
+    template.elements().into_iter().any(|element| {
+        matches!(
+            element,
+            AnyJsTemplateElement::JsTemplateChunkElement(_)
+                | AnyJsTemplateElement::JsTemplateElement(_)
+        )
+    })
+}
+
 /// Check if the attribute value is a string ref, which can be either a string literal or a template literal with only string chunks.
 fn is_string_ref_value(value: &AnyJsxAttributeValue) -> bool {
     match value {
@@ -159,17 +169,12 @@ fn is_string_ref_value(value: &AnyJsxAttributeValue) -> bool {
                     literal.as_js_string_literal_expression().is_some()
                 }
                 Some(AnyJsExpression::JsTemplateExpression(template)) => {
-                    template.elements().into_iter().any(|element| {
-                        matches!(
-                            element,
-                            AnyJsTemplateElement::JsTemplateChunkElement(_)
-                                | AnyJsTemplateElement::JsTemplateElement(_)
-                        )
-                    })
+                    is_string_template(&template)
                 }
                 _ => false,
             }
         }
+        AnyJsxAttributeValue::JsTemplateExpression(template) => is_string_template(template),
     }
 }
 

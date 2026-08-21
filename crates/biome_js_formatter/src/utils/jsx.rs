@@ -3,8 +3,8 @@ use crate::prelude::*;
 use biome_formatter::{FormatOptions, QuoteStyle, comments::CommentStyle, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
-    JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,
-    JsxText, TextLen,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsxChildList, JsxExpressionChild,
+    JsxFragment, JsxTagExpression, JsxText, TextLen,
 };
 use biome_rowan::{Direction, SyntaxResult, TextRange, TextSize, TokenText};
 use std::iter::{FusedIterator, Peekable};
@@ -580,6 +580,14 @@ impl<I: Iterator> Iterator for JsxChildrenIterator<I> {
             None => self.iter.next(),
         }
     }
+}
+
+/// Children of a delimiter-less fragment carry real comments, unlike JSX children.
+pub(crate) fn is_implicit_fragment_child(node: &JsSyntaxNode) -> bool {
+    node.parent()
+        .and_then(|list| list.parent())
+        .and_then(JsxFragment::cast)
+        .is_some_and(|fragment| fragment.is_implicit())
 }
 
 #[cfg(test)]

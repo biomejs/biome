@@ -2156,6 +2156,7 @@ export type AnyJsxAttribute =
 export type AnyJsxAttributeName = JsxName | JsxNamespaceName;
 export type AnyJsxAttributeValue =
 	| AnyJsxTag
+	| JsTemplateExpression
 	| JsxExpressionAttributeValue
 	| JsxString;
 export type AnyJsxChild =

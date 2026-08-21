@@ -440,8 +440,9 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsParserOptions, parse_js_with_cache, parse_js_with_offset};
+    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset};
     use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
 
     use biome_rowan::TextSize;
 
@@ -511,5 +512,516 @@ mod tests {
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
         );
+    }
+
+    fn astro_template_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        })
+    }
+
+    #[test]
+    fn astro_bare_gt_is_jsx_text() {
+        let parse = parse(
+            "x && <div>a > b</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+        assert_eq!(parse.diagnostics().len(), 0, "{:?}", parse.diagnostics());
+        assert!(parse.syntax().to_string().contains("a > b"));
+    }
+
+    #[test]
+    fn astro_void_element_is_self_closing_without_slash() {
+        let parse = parse(
+            "cond && <br>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "`<br>` is valid Astro");
+        assert!(
+            format!("{:#?}", parse.syntax()).contains("JSX_SELF_CLOSING_ELEMENT"),
+            "`<br>` should be a self-closing element"
+        );
+    }
+
+    #[test]
+    fn astro_void_element_does_not_capture_siblings_as_children() {
+        let parse = parse(
+            "<div><br>text</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        let tree = format!("{:#?}", parse.syntax());
+        assert_eq!(tree.matches("JSX_SELF_CLOSING_ELEMENT").count(), 1);
+        assert_eq!(tree.matches("JSX_ELEMENT@").count(), 1);
+    }
+
+    #[test]
+    fn astro_non_void_element_still_requires_a_closing_tag() {
+        let parse = parse(
+            "<span>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "`<span>` is not a void element");
+    }
+
+    #[test]
+    fn comment_only_template_expression_is_an_error_outside_astro() {
+        let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+        });
+        let parse = parse("/* only a comment */", vue, JsParserOptions::default());
+
+        assert!(parse.has_errors(), "only Astro allows a comment-only body");
+    }
+
+    #[test]
+    fn astro_adjacent_siblings_form_an_implicit_fragment() {
+        let parse = parse(
+            "options.map(() => \n  <div />\n  <span />\n)",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "adjacent siblings are valid Astro");
+        let tree = format!("{:#?}", parse.syntax());
+        assert_eq!(tree.matches("JSX_FRAGMENT@").count(), 1);
+        assert_eq!(tree.matches("JSX_SELF_CLOSING_ELEMENT@").count(), 2);
+    }
+
+    #[test]
+    fn astro_style_and_script_children_are_raw_text() {
+        for (body, text) in [
+            (
+                "cond && (\n<style>a { color: red }</style>\n)",
+                "a { color: red }",
+            ),
+            (
+                "cond && (\n<script>let x = {a: 1};</script>\n)",
+                "let x = {a: 1};",
+            ),
+        ] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+
+            assert!(
+                !parse.has_errors(),
+                "`{body}` is valid Astro, got: {:?}",
+                parse.diagnostics()
+            );
+            let tree = format!("{:#?}", parse.syntax());
+            assert_eq!(tree.matches("JSX_TEXT@").count(), 1);
+            assert!(tree.contains(&format!("{text:?}")));
+            assert!(!tree.contains("JSX_EXPRESSION_CHILD"));
+        }
+    }
+
+    #[test]
+    fn astro_raw_text_runs_to_its_own_closing_tag() {
+        let parse = parse(
+            "<script>const re = \"</b>\";</script>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "`</b>` does not end a script");
+        assert!(
+            format!("{:#?}", parse.syntax()).contains(r#""const re = \"</b>\";""#),
+            "the whole body should be one text token"
+        );
+    }
+
+    #[test]
+    fn astro_raw_text_does_not_apply_to_other_elements() {
+        let parse = parse(
+            "<div>{ color }</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        assert!(format!("{:#?}", parse.syntax()).contains("JSX_EXPRESSION_CHILD"));
+    }
+
+    #[test]
+    fn style_children_are_jsx_outside_astro() {
+        let parse = parse(
+            "<style>a { color: red }</style>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(
+            format!("{:#?}", parse.syntax()).contains("JSX_EXPRESSION_CHILD"),
+            "plain JSX reads `{{ color: red }}` as an expression child"
+        );
+    }
+
+    #[test]
+    fn astro_implicit_fragment_delimiters_are_absent() {
+        let parse = parse(
+            "<p>a</p>\n<div />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains("JSX_OPENING_FRAGMENT@0..0"));
+        assert!(tree.contains("JSX_CLOSING_FRAGMENT@16..16"));
+    }
+
+    #[test]
+    fn astro_implicit_fragment_keeps_comments_between_siblings() {
+        let parse = parse(
+            "<p>a</p>\n/* c */ <div />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "a comment between siblings is valid");
+        assert_eq!(
+            format!("{:#?}", parse.syntax())
+                .matches("JSX_FRAGMENT@")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn astro_single_element_is_not_wrapped_in_a_fragment() {
+        let parse = parse(
+            "<div />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        assert!(!format!("{:#?}", parse.syntax()).contains("JSX_FRAGMENT@"));
+    }
+
+    #[test]
+    fn astro_html_comment_is_trivia_in_jsx_children() {
+        let parse = parse(
+            "x && <div>a<!-- c -->b</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(
+            tree.contains(r#"Comments("<!-- c -->")"#),
+            "the comment should be a trivia piece: {tree}"
+        );
+        assert_eq!(tree.matches("JSX_TEXT@").count(), 2);
+    }
+
+    #[test]
+    fn astro_html_comment_between_implicit_fragment_siblings() {
+        let parse = parse(
+            "cond && <a></a><!-- c --><b></b>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains(r#"Comments("<!-- c -->")"#));
+        assert_eq!(tree.matches("JSX_FRAGMENT@").count(), 1);
+        assert_eq!(tree.matches("JSX_ELEMENT@").count(), 2);
+    }
+
+    #[test]
+    fn astro_attribute_name_is_a_single_flat_token() {
+        let parse = parse(
+            "x && <C client:load.foo @click={handler} />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(
+            tree.contains(r#"JSX_IDENT@8..24 "client:load.foo""#),
+            "the full atom should be one token: {tree}"
+        );
+        assert!(tree.contains(r#""@click""#));
+        assert!(!tree.contains("JSX_NAMESPACE_NAME"));
+        assert_eq!(tree.matches("JSX_ATTRIBUTE@").count(), 2);
+    }
+
+    #[test]
+    fn astro_attribute_names_do_not_swallow_the_tag_end() {
+        let parse = parse(
+            "x && <div a=\"1\" is:raw>content</div>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains(r#""is:raw""#));
+        assert_eq!(tree.matches("JSX_ATTRIBUTE@").count(), 2);
+    }
+
+    #[test]
+    fn at_attribute_name_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <button @click={handler} />",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "`@click` is not a valid JSX name");
+    }
+
+    #[test]
+    fn astro_unquoted_attribute_value_is_a_jsx_string_without_quotes() {
+        use biome_rowan::AstNode;
+
+        let parse = parse(
+            "x && <div class=foo />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let value = parse
+            .syntax()
+            .descendants()
+            .find_map(biome_js_syntax::JsxString::cast)
+            .expect("a JsxString attribute value");
+        let token = value.value_token().unwrap();
+        assert_eq!(token.text_trimmed(), "foo");
+        assert_eq!(biome_js_syntax::inner_string_text(&token).text(), "foo");
+    }
+
+    #[test]
+    fn astro_unquoted_attribute_value_keeps_a_trailing_slash() {
+        let parse = parse(
+            "x && <input value=4/>",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        assert!(
+            format!("{:#?}", parse.syntax()).contains(r#"JSX_STRING_LITERAL@18..20 "4/""#),
+            "`/` is part of the value"
+        );
+    }
+
+    #[test]
+    fn unquoted_attribute_value_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <div class=foo />",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX requires quoted attribute values");
+    }
+
+    #[test]
+    fn astro_template_literal_is_an_attribute_value() {
+        use biome_rowan::AstNode;
+
+        let parse = parse(
+            "x && <C data-x=`t${x}` />",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors(), "got: {:?}", parse.diagnostics());
+        let clause = parse
+            .syntax()
+            .descendants()
+            .find_map(biome_js_syntax::JsxAttributeInitializerClause::cast)
+            .expect("an attribute initializer");
+        assert!(matches!(
+            clause.value(),
+            Ok(biome_js_syntax::AnyJsxAttributeValue::JsTemplateExpression(
+                _
+            ))
+        ));
+    }
+
+    #[test]
+    fn template_literal_attribute_value_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <C data-x=`t${x}` />",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX has no template attribute values");
+    }
+
+    #[test]
+    fn astro_unterminated_html_comment_reports_one_diagnostic() {
+        let parse = parse(
+            "<a></a><!-- never closed",
+            astro_template_source(),
+            JsParserOptions::default(),
+        );
+
+        assert_eq!(
+            parse.diagnostics().len(),
+            1,
+            "got: {:?}",
+            parse.diagnostics()
+        );
+    }
+
+    #[test]
+    fn html_comment_in_jsx_children_is_an_error_outside_astro() {
+        let parse = parse(
+            "x && <div>a<!-- c -->b</div>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX has no HTML comments");
+    }
+
+    #[test]
+    fn adjacent_siblings_are_an_error_outside_astro() {
+        let parse = parse(
+            "options.map(() => <div /> <span />)",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "JSX requires a single root");
+    }
+
+    #[test]
+    fn explicit_fragment_keeps_its_delimiters_outside_astro() {
+        let parse = parse(
+            "<><div /><span /></>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(!parse.has_errors());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains("JSX_FRAGMENT@"));
+        assert!(!tree.contains("JSX_OPENING_FRAGMENT@0..0"));
+    }
+
+    #[test]
+    fn void_element_without_slash_is_an_error_outside_astro() {
+        let parse = parse(
+            "cond && <br>",
+            JsFileSource::tsx(),
+            JsParserOptions::default(),
+        );
+
+        assert!(parse.has_errors(), "`<br>` is not valid TSX");
+    }
+    #[test]
+    fn astro_comment_only_template_expression_is_allowed() {
+        for body in [
+            "/* only a comment */",
+            "// a line comment",
+            "/* a */ /* b */",
+        ] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+
+            assert!(
+                !parse.has_errors(),
+                "comment-only body `{body}` is valid Astro, got: {:?}",
+                parse.diagnostics()
+            );
+        }
+    }
+
+    #[test]
+    fn astro_empty_template_expression_is_allowed() {
+        let parse = parse("  ", astro_template_source(), JsParserOptions::default());
+
+        assert!(!parse.has_errors(), "`{{ }}` renders nothing in Astro");
+    }
+}
+
+#[cfg(test)]
+mod astro_raw_and_comment_edges {
+    use super::*;
+    use crate::JsParserOptions;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    fn astro_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        })
+    }
+
+    fn assert_clean(body: &str) -> String {
+        let parse = parse(body, astro_source(), JsParserOptions::default());
+        assert!(
+            parse.diagnostics().is_empty(),
+            "{body:?}: {:?}",
+            parse.diagnostics()
+        );
+        format!("{:#?}", parse.syntax())
+    }
+
+    #[test]
+    fn is_raw_children_are_raw_text() {
+        let tree = assert_clean("x && <div is:raw>{not js} < & oops</div>");
+        assert!(tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+        assert!(tree.contains("{not js} < & oops"), "{tree}");
+    }
+
+    #[test]
+    fn is_raw_ends_at_the_first_matching_closing_tag() {
+        let tree = assert_clean("x && <div is:raw><span></div>");
+        assert!(tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+        assert!(tree.contains("<span>"), "{tree}");
+    }
+
+    #[test]
+    fn is_raw_component_closing_tag_is_case_sensitive() {
+        let tree = assert_clean("x && <Card is:raw></card></Card>");
+        assert!(tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+        assert!(tree.contains("</card>"), "{tree}");
+    }
+
+    #[test]
+    fn raw_text_ends_only_at_an_appropriate_end_tag() {
+        assert_clean("x && <script>a</scriptx>b</script>");
+        assert_clean("x && <div is:raw></divx></div>");
+        // Whitespace before `>` still ends the tag, so only `a` is raw text.
+        let tree = assert_clean("x && <script>a</script >");
+        assert!(tree.contains("JSX_TEXT_LITERAL@13..14 \"a\""), "{tree}");
+    }
+
+    #[test]
+    fn comment_only_expression_body_parses() {
+        assert_clean("<!-- only a comment -->");
+        let parse = parse(
+            "<!-- only a comment -->",
+            astro_source(),
+            JsParserOptions::default(),
+        );
+        let last = parse.syntax().last_token().unwrap();
+        assert_eq!(last.text_trimmed(), "", "comment leaked into EOF text");
+    }
+
+    #[test]
+    fn comment_before_the_expression_parses() {
+        let tree = assert_clean("<!-- lead --> <a></a>");
+        assert!(tree.contains("<!-- lead -->"), "{tree}");
     }
 }

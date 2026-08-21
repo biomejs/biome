@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+x && <img src=x />
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsLogicalExpression {
+        left: JsIdentifierExpression {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@0..2 "x" [] [Whitespace(" ")],
+            },
+        },
+        operator_token: AMP2@2..5 "&&" [] [Whitespace(" ")],
+        right: JsxTagExpression {
+            tag: JsxSelfClosingElement {
+                l_angle_token: L_ANGLE@5..6 "<" [] [],
+                name: JsxName {
+                    value_token: JSX_IDENT@6..10 "img" [] [Whitespace(" ")],
+                },
+                type_arguments: missing (optional),
+                attributes: JsxAttributeList [
+                    JsxAttribute {
+                        name: JsxName {
+                            value_token: JSX_IDENT@10..13 "src" [] [],
+                        },
+                        initializer: JsxAttributeInitializerClause {
+                            eq_token: EQ@13..14 "=" [] [],
+                            value: JsxString {
+                                value_token: JSX_STRING_LITERAL@14..16 "x" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+                slash_token: SLASH@16..17 "/" [] [],
+                r_angle_token: R_ANGLE@17..18 ">" [] [],
+            },
+        },
+    },
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..19
+  0: JS_LOGICAL_EXPRESSION@0..18
+    0: JS_IDENTIFIER_EXPRESSION@0..2
+      0: JS_REFERENCE_IDENTIFIER@0..2
+        0: IDENT@0..2 "x" [] [Whitespace(" ")]
+    1: AMP2@2..5 "&&" [] [Whitespace(" ")]
+    2: JSX_TAG_EXPRESSION@5..18
+      0: JSX_SELF_CLOSING_ELEMENT@5..18
+        0: L_ANGLE@5..6 "<" [] []
+        1: JSX_NAME@6..10
+          0: JSX_IDENT@6..10 "img" [] [Whitespace(" ")]
+        2: (empty)
+        3: JSX_ATTRIBUTE_LIST@10..16
+          0: JSX_ATTRIBUTE@10..16
+            0: JSX_NAME@10..13
+              0: JSX_IDENT@10..13 "src" [] []
+            1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@13..16
+              0: EQ@13..14 "=" [] []
+              1: JSX_STRING@14..16
+                0: JSX_STRING_LITERAL@14..16 "x" [] [Whitespace(" ")]
+        4: SLASH@16..17 "/" [] []
+        5: R_ANGLE@17..18 ">" [] []
+  1: EOF@18..19 "" [Newline("\n")] []
+
+```

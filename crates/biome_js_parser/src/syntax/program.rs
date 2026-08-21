@@ -9,6 +9,7 @@ use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
+use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::TypeContext;
 use biome_js_syntax::JsSyntaxKind::*;
@@ -112,11 +113,22 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
+    if p.source_type().as_embedding_kind().is_astro() {
+        skip_astro_html_comments(p);
+    }
     let expr_marker = p.start();
     let expr_result = parse_expression(p, ExpressionContext::default());
 
-    // Check if we got a valid expression
     let has_expression = !expr_result.is_absent();
+
+    // Astro renders a body that holds only comments as nothing, the way JSX does
+    // for `{/* c */}` children.
+    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro();
+
+    if !has_expression && is_empty_astro_body {
+        expr_marker.abandon(p);
+        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
+    }
 
     if !has_expression {
         p.error(js_parse_error::template_expression_expected_expression(
