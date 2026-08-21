@@ -118,6 +118,15 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     // Check if we got a valid expression
     let has_expression = !expr_result.is_absent();
 
+    // Astro renders a body that holds only comments as nothing, the way JSX does
+    // for `{/* c */}` children.
+    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro();
+
+    if !has_expression && is_empty_astro_body {
+        expr_marker.abandon(p);
+        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
+    }
+
     if !has_expression {
         p.error(js_parse_error::template_expression_expected_expression(
             p,

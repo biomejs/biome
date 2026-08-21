@@ -666,4 +666,28 @@ mod tests {
 
         assert!(parse.has_errors(), "`<br>` is not valid TSX");
     }
+    #[test]
+    fn astro_comment_only_template_expression_is_allowed() {
+        for body in [
+            "/* only a comment */",
+            "// a line comment",
+            "/* a */ /* b */",
+        ] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+
+            assert!(
+                !parse.has_errors(),
+                "comment-only body `{body}` is valid Astro, got: {:?}",
+                parse.diagnostics()
+            );
+        }
+    }
+
+    #[test]
+    fn astro_empty_template_expression_is_allowed() {
+        let parse = parse("  ", astro_template_source(), JsParserOptions::default());
+
+        assert!(!parse.has_errors(), "`{{ }}` renders nothing in Astro");
+    }
+
 }

@@ -1007,7 +1007,7 @@ impl JsAstNode {
                     JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
                     JsExpressionTemplateRoot,
                     ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
+                        node.expression(),
                         context
                     )),
                     ("eofToken", |node, context| Self::wrap_token(
