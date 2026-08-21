@@ -12,6 +12,8 @@ use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::CssConfiguration;
 #[cfg(feature = "lang_js")]
 use biome_configuration::JsConfiguration;
+#[cfg(feature = "lang_md")]
+use biome_configuration::MarkdownConfiguration;
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
@@ -68,6 +70,10 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
+#[cfg(feature = "lang_md")]
+use biome_markdown_formatter::context::MdFormatOptions;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -1125,6 +1131,9 @@ impl From<biome_configuration::MarkdownConfiguration>
         if let Some(formatter) = markdown.formatter {
             language_setting.formatter = formatter.into();
         }
+        if let Some(linter) = markdown.linter {
+            language_setting.linter.enabled = linter.enabled;
+        }
 
         language_setting
     }
@@ -1817,6 +1826,19 @@ impl OverrideSettings {
         }
     }
 
+    #[cfg(feature = "lang_md")]
+    pub fn apply_override_markdown_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut MdFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
+                pattern.apply_overrides_to_markdown_format_options(options);
+            }
+        }
+    }
+
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(
         &self,
@@ -2188,6 +2210,33 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_md")]
+    fn apply_overrides_to_markdown_format_options(&self, options: &mut MdFormatOptions) {
+        let md_formatter = &self.languages.markdown.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = md_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = md_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width);
+        }
+        if let Some(line_ending) = md_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = md_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(trailing_newline) = md_formatter.trailing_newline.or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
+
+        if let Some(prose_wrap) = md_formatter.prose_wrap {
+            options.set_prose_wrap(prose_wrap);
+        }
+    }
+
     #[cfg(feature = "lang_js")]
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         let js_parser = &self.languages.javascript.parser;
@@ -2308,6 +2357,8 @@ pub fn to_override_settings(
         let css = pattern.css.take().unwrap_or_default();
         #[cfg(feature = "lang_html")]
         let html = pattern.html.take().unwrap_or_default();
+        #[cfg(feature = "lang_md")]
+        let markdown = pattern.markdown.take().unwrap_or_default();
 
         #[cfg(feature = "lang_js")]
         {
@@ -2335,6 +2386,11 @@ pub fn to_override_settings(
         #[cfg(feature = "lang_html")]
         {
             languages.html = to_html_language_settings(html, &current_settings.languages.html);
+        }
+        #[cfg(feature = "lang_md")]
+        {
+            languages.markdown =
+                to_markdown_language_settings(markdown, &current_settings.languages.markdown);
         }
 
         let pattern_setting = OverrideSettingPattern {
@@ -2478,6 +2534,18 @@ fn to_html_language_settings(
     _parent_settings: &LanguageSettings<HtmlLanguage>,
 ) -> LanguageSettings<HtmlLanguage> {
     let mut language_setting: LanguageSettings<HtmlLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter = formatter.into();
+
+    language_setting
+}
+#[cfg(feature = "lang_md")]
+fn to_markdown_language_settings(
+    mut conf: MarkdownConfiguration,
+    _parent_settings: &LanguageSettings<MarkdownLanguage>,
+) -> LanguageSettings<MarkdownLanguage> {
+    let mut language_setting: LanguageSettings<MarkdownLanguage> = LanguageSettings::default();
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();
