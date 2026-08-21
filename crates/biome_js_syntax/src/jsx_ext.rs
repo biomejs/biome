@@ -785,6 +785,8 @@ const VOID_ELEMENTS: [&str; 14] = [
     "track", "wbr",
 ];
 
+/// Whether `name` is an HTML void element, matched case-sensitively against the
+/// lowercase spec names. A PascalCase component never matches.
 pub fn is_void_element(name: &str) -> bool {
     VOID_ELEMENTS.contains(&name)
 }
