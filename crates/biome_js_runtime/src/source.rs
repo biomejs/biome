@@ -5,7 +5,7 @@ use boa_engine::{JsNativeError, JsResult};
 use camino::Utf8Path;
 
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
-use biome_diagnostics::PrintDescription;
+use biome_diagnostics::{Error, PrintDescription};
 use biome_js_parser::JsParserOptions;
 use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
@@ -28,7 +28,13 @@ pub(crate) fn read_module_source(
         return Ok(source);
     }
 
-    strip_types(&source, source_type).map_err(|message| {
+    strip_types(&source, source_type).map_err(|errors| {
+        let message = errors
+            .iter()
+            .map(|error| PrintDescription(error).to_string())
+            .collect::<Vec<_>>()
+            .join("\n");
+
         JsNativeError::syntax()
             .with_message(format!("{path}: {message}"))
             .into()
@@ -39,10 +45,14 @@ pub(crate) fn read_module_source(
 ///
 /// The output has the same length as the input: erased syntax is replaced with whitespace, so
 /// positions are preserved and the module needs no source map.
-fn strip_types(source: &str, source_type: JsFileSource) -> Result<String, String> {
+fn strip_types(source: &str, source_type: JsFileSource) -> Result<String, Vec<Error>> {
     let parsed = biome_js_parser::parse(source, source_type, JsParserOptions::default());
     if parsed.has_errors() {
-        return Err("failed to parse the TypeScript source".to_string());
+        return Err(parsed
+            .into_diagnostics()
+            .into_iter()
+            .map(Error::from)
+            .collect());
     }
 
     let rule = RuleFilter::Rule("transformations", "stripTypes");
@@ -61,7 +71,7 @@ fn strip_types(source: &str, source_type: JsFileSource) -> Result<String, String
         source_type,
         |signal| {
             if let Some(diagnostic) = signal.diagnostic() {
-                errors.push(PrintDescription(&diagnostic).to_string());
+                errors.push(Error::from(diagnostic));
             }
 
             // Each transformation rewrites the whole source, blanking out the range it erases.
@@ -81,14 +91,10 @@ fn strip_types(source: &str, source_type: JsFileSource) -> Result<String, String
         },
     );
 
-    errors.extend(
-        analyzer_errors
-            .iter()
-            .map(|error| PrintDescription(error).to_string()),
-    );
+    errors.extend(analyzer_errors);
 
     if !errors.is_empty() {
-        return Err(errors.join("\n"));
+        return Err(errors);
     }
 
     Ok(String::from_utf8(output).expect("erasing types must keep the source valid UTF-8"))
@@ -113,12 +119,15 @@ mod tests {
 
     #[test]
     fn strip_types_reports_syntax_generating_runtime_code() {
-        let error = strip_types("enum Foo { Lorem }", JsFileSource::ts())
+        let errors = strip_types("enum Foo { Lorem }", JsFileSource::ts())
             .expect_err("`enum` can't be erased");
 
         assert_eq!(
-            error,
-            "enum declarations cannot be stripped because they generate runtime code."
+            errors
+                .iter()
+                .map(|error| PrintDescription(error).to_string())
+                .collect::<Vec<_>>(),
+            ["enum declarations cannot be stripped because they generate runtime code."]
         );
     }
 }
