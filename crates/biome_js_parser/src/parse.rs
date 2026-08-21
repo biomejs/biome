@@ -952,7 +952,6 @@ mod tests {
 
         assert!(!parse.has_errors(), "`{{ }}` renders nothing in Astro");
     }
-
 }
 
 #[cfg(test)]
