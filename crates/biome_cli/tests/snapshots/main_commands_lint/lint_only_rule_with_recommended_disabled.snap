@@ -25,6 +25,28 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
+biome.json:2:19 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+  > 2 │         "linter": {
+      │                   ^
+  > 3 │             "rules": {
+  > 4 │                 "recommended": false
+  > 5 │             }
+  > 6 │         }
+      │         ^
+    7 │     }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 check.js:2:21 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This global function name should be in camelCase or PascalCase or UPPERCASE.

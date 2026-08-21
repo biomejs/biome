@@ -4217,13 +4217,12 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             let loaded_nested_configuration =
                 LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
 
-            let LoadedConfiguration {
-                directory_path: nested_directory_path,
-                configuration: nested_configuration,
-                diagnostics,
-                extended_configurations,
-                ..
-            } = loaded_nested_configuration;
+            let nested_directory_path = loaded_nested_configuration
+                .directory_path()
+                .map(Utf8Path::to_path_buf);
+            let nested_configuration = loaded_nested_configuration.resolved_configuration();
+            let extended_configurations = loaded_nested_configuration.extended_configurations();
+            let diagnostics = loaded_nested_configuration.diagnostics;
             let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
             returned_diagnostics.extend(
                 diagnostics

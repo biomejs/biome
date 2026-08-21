@@ -303,7 +303,7 @@ fn with_linter_configuration() {
         "noAutofocus": "off"
       },
       "complexity": {
-        "recommended": true
+        "preset": "recommended"
       },
       "suspicious": {
         "noCommentText": {

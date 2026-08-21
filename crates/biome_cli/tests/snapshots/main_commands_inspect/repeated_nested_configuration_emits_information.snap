@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["first.json", "second.json"] }
+```
+
+## `first.json`
+
+```json
+{ "extends": ["shared.json"] }
+```
+
+## `second.json`
+
+```json
+{ "extends": ["shared.json"] }
+```
+
+## `shared.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+# Emitted Messages
+
+```block
+shared.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The extended configuration shared.json was already loaded.
+  
+  i The first occurrence is referenced from first.json using shared.json.
+  
+  i It is referenced again from second.json using shared.json.
+  
+  i Biome keeps the first occurrence and ignores this reference.
+  
+
+```
+
+```block
+shared.json:1:31 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the value 100.
+  
+  > 1 │ { "formatter": { "lineWidth": 100 } }
+      │                               ^^^
+  
+  i This value comes from shared.json, extended by biome.json.
+  
+
+```
