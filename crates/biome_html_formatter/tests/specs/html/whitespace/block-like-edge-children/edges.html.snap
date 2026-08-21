@@ -52,7 +52,7 @@ info: whitespace/block-like-edge-children/edges.html
 	<source src="brave.webm">
 </video>
 <object>
-	<param name="movie" value="movie.mp4">
+	<param name="movie" value="movie.mp4" />
 	<span>fallback</span>
 </object>
 <div>
@@ -65,7 +65,7 @@ info: whitespace/block-like-edge-children/edges.html
 	<source src="brave.webm">
 </video>
 <object>
-	<param name="movie" value="movie.mp4">
+	<param name="movie" value="movie.mp4" />
 	<span>fallback</span></object
 >
 <div>

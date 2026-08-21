@@ -2328,9 +2328,7 @@ AnyJsxTag =
 	| JsxFragment
 	| AstroImplicitFragment
 
-// Adjacent siblings in an Astro template expression, which need no `<>`. It has
-// no delimiters at all, so it is its own node rather than a JsxFragment missing
-// its own.
+// Adjacent siblings in an Astro template expression, which need no `<>`.
 AstroImplicitFragment =
 	children: JsxChildList
 
