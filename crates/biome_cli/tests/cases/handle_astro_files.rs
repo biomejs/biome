@@ -1018,8 +1018,7 @@ fn comment_only_template_expression_formats() {
         Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
     );
 
-    // A comment-only expression used to be a parse error, which skipped the
-    // whole file rather than just that expression.
+    // A comment-only expression must not cause the CLI to skip the Astro file.
     assert!(result.is_ok(), "Expected no errors but got {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
