@@ -55,16 +55,16 @@ repeated.tsx:4:21 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
-  i Unsafe fix: Extract the magic number into REPEATED_NUMBERS_5_2.
+  i Unsafe fix: Extract the magic number into REPEATED_NUMBERS_5.
   
     1   │ - //·File·header
     2   │ - 
       1 │ + //·File·header
-      2 │ + const·REPEATED_NUMBERS_5_2·=·5;
+      2 │ + const·REPEATED_NUMBERS_5·=·5;
       3 │ + 
     3 4 │   function repeatedNumbers(value) {
     4   │ - → return·value·+·5·+·5;
-      5 │ + → return·value·+·5·+·REPEATED_NUMBERS_5_2;
+      5 │ + → return·value·+·5·+·REPEATED_NUMBERS_5;
     5 6 │   }
     6 7 │   
   
