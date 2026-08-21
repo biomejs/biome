@@ -795,6 +795,38 @@ function read(input) {
     }
 
     #[test]
+    fn deduplicates_identical_extractions_for_fix_all() {
+        let parsed = parse(
+            r#"function read(input) {
+    return input + 5 + 5;
+}
+"#,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let targets = parsed
+            .syntax()
+            .descendants()
+            .filter_map(JsNumberLiteralExpression::cast)
+            .collect::<Vec<_>>();
+        assert_eq!(targets.len(), 2);
+
+        let mut mutations = targets.into_iter().map(|target| {
+            let value = AnyJsExpression::cast(target.syntax().clone()).expect("number expression");
+            extract_module_constant(&parsed.tree(), &model, target.syntax(), value, "NUMBER")
+                .expect("expected a module-level extraction")
+                .0
+        });
+        let mut mutation = mutations.next().expect("first extraction");
+        mutation.merge(mutations.next().expect("second extraction"));
+
+        let output = mutation.commit().to_string();
+        assert_eq!(output.matches("const NUMBER = 5;").count(), 1);
+        assert!(output.contains("return input + NUMBER + NUMBER;"));
+    }
+
+    #[test]
     fn coordinates_repeated_names_and_header_for_fix_all() {
         let source = "// header\n\nfunction read(input) {\n    return 5 + 5 + 5;\n}\n";
         let parsed = parse(

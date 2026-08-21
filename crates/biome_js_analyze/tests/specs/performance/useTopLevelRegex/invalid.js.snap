@@ -289,19 +289,19 @@ invalid.js:29:12 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into R_REGEX.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·R_REGEX·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     27 28 │   
     28 29 │   function foo(someString) {
     29    │ - → const·r·=·/[a-Z]*/;
-       30 │ + → const·r·=·R_REGEX;
+       30 │ + → const·r·=·FOO_REGEX;
     30 31 │     return r.test(someString)
     31 32 │   }
   
@@ -321,19 +321,19 @@ invalid.js:34:9 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into FOO_REGEX_2.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·FOO_REGEX_2·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     32 33 │   
     33 34 │   const foo = (someString) => {
     34    │ - → return·/[a-Z]*/.test(someString)
-       35 │ + → return·FOO_REGEX_2.test(someString)
+       35 │ + → return·FOO_REGEX.test(someString)
     35 36 │   }
     36 37 │   
   
@@ -354,19 +354,19 @@ invalid.js:39:16 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into REGEX_A_Z.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·REGEX_A_Z·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     37 38 │   class Foo {
     38 39 │     constructor() {
     39    │ - → → this.regex·=·/[a-Z]*/;
-       40 │ + → → this.regex·=·REGEX_A_Z;
+       40 │ + → → this.regex·=·FOO_REGEX;
     40 41 │     }
     41 42 │   }
   
@@ -386,19 +386,19 @@ invalid.js:44:10 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into REGEX_REGEX.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·REGEX_REGEX·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     42 43 │   
     43 44 │   class Foo {
     44    │ - → regex·=·/[a-Z]*/;
-       45 │ + → regex·=·REGEX_REGEX;
+       45 │ + → regex·=·FOO_REGEX;
     45 46 │   }
     46 47 │   
   
@@ -419,19 +419,19 @@ invalid.js:49:10 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into REGEX_REGEX_2.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·REGEX_REGEX_2·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     47 48 │   class Foo {
     48 49 │     get regex() {
     49    │ - → → return·/[a-Z]*/;
-       50 │ + → → return·REGEX_REGEX_2;
+       50 │ + → → return·FOO_REGEX;
     50 51 │     }
     51 52 │   }
   
@@ -452,19 +452,19 @@ invalid.js:55:16 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into APPLY_REGEX.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·APPLY_REGEX·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     53 54 │   class Foo {
     54 55 │     set apply(s) {
     55    │ - → → this.value·=·/[a-Z]*/.test(s);
-       56 │ + → → this.value·=·APPLY_REGEX.test(s);
+       56 │ + → → this.value·=·FOO_REGEX.test(s);
     56 57 │     }
     57 58 │   }
   
@@ -485,19 +485,19 @@ invalid.js:61:10 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into REGEX_REGEX_3.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·REGEX_REGEX_3·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     59 60 │   const foo = {
     60 61 │     regex() {
     61    │ - → → return·/[a-Z]*/;
-       62 │ + → → return·REGEX_REGEX_3;
+       62 │ + → → return·FOO_REGEX;
     62 63 │     }
     63 64 │   }
   
@@ -518,19 +518,19 @@ invalid.js:67:10 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into REGEX_REGEX_4.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·REGEX_REGEX_4·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     65 66 │   const foo = {
     66 67 │     get regex() {
     67    │ - → → return·/[a-Z]*/;
-       68 │ + → → return·REGEX_REGEX_4;
+       68 │ + → → return·FOO_REGEX;
     68 69 │     }
     69 70 │   }
   
@@ -551,19 +551,19 @@ invalid.js:73:16 lint/performance/useTopLevelRegex  FIXABLE  ━━━━━━�
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
   
-  i Unsafe fix: Extract the regex literal into APPLY_REGEX_2.
+  i Unsafe fix: Extract the regex literal into FOO_REGEX.
   
      1  1 │   "use strict"
      2    │ - import·dependency·from·"dependency"
         2 │ + import·dependency·from·"dependency"
-        3 │ + const·APPLY_REGEX_2·=·/[a-Z]*/;
+        3 │ + const·FOO_REGEX·=·/[a-Z]*/;
      3  4 │   
      4  5 │   function parseInput(input) {
     ····· │ 
     71 72 │   const foo = {
     72 73 │     set apply(s) {
     73    │ - → → this.value·=·/[a-Z]*/.test(s);
-       74 │ + → → this.value·=·APPLY_REGEX_2.test(s);
+       74 │ + → → this.value·=·FOO_REGEX.test(s);
     74 75 │     }
     75 76 │   }
   
