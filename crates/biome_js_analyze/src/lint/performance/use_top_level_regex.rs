@@ -12,7 +12,7 @@ use biome_js_syntax::{
 use biome_js_semantic::SemanticModel;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_top_level_regex::UseTopLevelRegexOptions;
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsRuleAction,
@@ -180,10 +180,11 @@ fn coordinated_extraction(
     model: &SemanticModel,
     current: &JsRegexLiteralExpression,
 ) -> Option<(String, FxHashSet<String>, bool)> {
-    // Actions are merged in source order, so reserve names from earlier
-    // extractable literals to keep repeated candidates unique in a fix-all.
+    // Actions are merged in source order, so reuse names for repeated literal values and reserve
+    // names from earlier distinct literals in a fix-all.
     let facts = module_constant_facts(root, model);
     let mut reserved_names = FxHashSet::default();
+    let mut names_by_value = FxHashMap::default();
 
     for descendant in root.syntax().descendants() {
         let Some(regex) = JsRegexLiteralExpression::cast(descendant) else {
@@ -192,6 +193,19 @@ fn coordinated_extraction(
         if !is_actionable_regex(&regex)
             || !is_module_constant_extractable_with_facts(root, regex.syntax(), &facts)
         {
+            continue;
+        }
+
+        let value_key = regex.syntax().text_trimmed().to_string();
+        if let Some(name) = names_by_value.get(&value_key).cloned() {
+            if regex.syntax() == current.syntax() {
+                reserved_names.remove(&name);
+                return Some((
+                    name,
+                    reserved_names,
+                    module_constant_insertion_slot(root, regex.syntax()) == Some(0),
+                ));
+            }
             continue;
         }
 
@@ -204,6 +218,7 @@ fn coordinated_extraction(
             &facts,
         );
         let transfer_header = module_constant_insertion_slot(root, regex.syntax()) == Some(0);
+        names_by_value.insert(value_key, name.clone());
 
         if regex.syntax() == current.syntax() {
             return Some((name, reserved_names, transfer_header));

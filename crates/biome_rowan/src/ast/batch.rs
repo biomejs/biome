@@ -77,6 +77,20 @@ impl<L: Language> CommitChange<L> {
             self.order,
         )
     }
+
+    fn is_duplicate_insertion(&self, other: &Self) -> bool {
+        self.is_insertion
+            && other.is_insertion
+            && self.parent == other.parent
+            && self.new_node_slot == other.new_node_slot
+            && match (&self.new_node, &other.new_node) {
+                (Some(left), Some(right)) => {
+                    left.kind() == right.kind() && left.to_string() == right.to_string()
+                }
+                (None, None) => true,
+                _ => false,
+            }
+    }
 }
 
 impl<L: Language> PartialEq for CommitChange<L> {
@@ -200,7 +214,7 @@ where
     /// changes are applied together in a single [`Self::commit`] call.
     /// Non-overlapping changes combine naturally. If two changes target the
     /// same slot of the same parent, the existing last-write-wins semantics
-    /// apply.
+    /// apply. Identical insertions at the same slot are kept only once.
     pub fn merge(&mut self, other: Self) {
         debug_assert!(
             self.root == other.root,
@@ -230,6 +244,11 @@ where
                     .previous_range
                     .is_some_and(|range| incoming_replacement_ranges.contains(&range))
         });
+        let existing_insertions = existing_changes
+            .iter()
+            .filter(|change| change.is_insertion)
+            .cloned()
+            .collect::<Vec<_>>();
         let existing_header_transfers = existing_changes
             .iter()
             .filter(|change| change.is_header_transfer)
@@ -243,6 +262,12 @@ where
         self.changes.extend(existing_changes);
         self.changes
             .extend(incoming_changes.into_iter().filter_map(|mut change| {
+                if existing_insertions
+                    .iter()
+                    .any(|existing| existing.is_duplicate_insertion(&change))
+                {
+                    return None;
+                }
                 change.order += order_offset;
                 if change.is_header_cleanup
                     && change
