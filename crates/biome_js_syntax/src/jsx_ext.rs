@@ -3,8 +3,8 @@ use std::collections::HashSet;
 use crate::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
     AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement,
-    JsxFragment, JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
-    inner_string_text, static_value::StaticValue,
+    JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString, inner_string_text,
+    static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
@@ -47,7 +47,7 @@ impl AnyJsxTag {
     pub fn name(&self) -> Option<AnyJsxElementName> {
         match self {
             Self::JsxElement(element) => element.opening_element().ok()?.name().ok(),
-            Self::JsxFragment(_) => None,
+            Self::JsxFragment(_) | Self::AstroImplicitFragment(_) => None,
             Self::JsxSelfClosingElement(element) => element.name().ok(),
         }
     }
@@ -55,7 +55,7 @@ impl AnyJsxTag {
     pub fn attributes(&self) -> Option<JsxAttributeList> {
         match self {
             Self::JsxElement(element) => Some(element.opening_element().ok()?.attributes()),
-            Self::JsxFragment(_) => None,
+            Self::JsxFragment(_) | Self::AstroImplicitFragment(_) => None,
             Self::JsxSelfClosingElement(element) => Some(element.attributes()),
         }
     }
@@ -787,11 +787,4 @@ const VOID_ELEMENTS: [&str; 14] = [
 
 pub fn is_void_element(name: &str) -> bool {
     VOID_ELEMENTS.contains(&name)
-}
-
-impl JsxFragment {
-    /// Written without `<>`, so its children sit in expression context.
-    pub fn is_implicit(&self) -> bool {
-        self.opening_fragment().is_none()
-    }
 }

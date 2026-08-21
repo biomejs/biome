@@ -5,6 +5,12 @@ use biome_js_syntax::{
     JsSyntaxElement as SyntaxElement, JsSyntaxNode as SyntaxNode, JsSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn astro_implicit_fragment(children: JsxChildList) -> AstroImplicitFragment {
+    AstroImplicitFragment::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
+        [Some(SyntaxElement::Node(children.into_syntax()))],
+    ))
+}
 pub fn js_accessor_modifier(modifier_token: SyntaxToken) -> JsAccessorModifier {
     JsAccessorModifier::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_ACCESSOR_MODIFIER,
@@ -3961,39 +3967,19 @@ impl JsxExpressionChildBuilder {
         ))
     }
 }
-pub fn jsx_fragment(children: JsxChildList) -> JsxFragmentBuilder {
-    JsxFragmentBuilder {
-        children,
-        opening_fragment: None,
-        closing_fragment: None,
-    }
-}
-pub struct JsxFragmentBuilder {
+pub fn jsx_fragment(
+    opening_fragment: JsxOpeningFragment,
     children: JsxChildList,
-    opening_fragment: Option<JsxOpeningFragment>,
-    closing_fragment: Option<JsxClosingFragment>,
-}
-impl JsxFragmentBuilder {
-    pub fn with_opening_fragment(mut self, opening_fragment: JsxOpeningFragment) -> Self {
-        self.opening_fragment = Some(opening_fragment);
-        self
-    }
-    pub fn with_closing_fragment(mut self, closing_fragment: JsxClosingFragment) -> Self {
-        self.closing_fragment = Some(closing_fragment);
-        self
-    }
-    pub fn build(self) -> JsxFragment {
-        JsxFragment::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JSX_FRAGMENT,
-            [
-                self.opening_fragment
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.children.into_syntax())),
-                self.closing_fragment
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
+    closing_fragment: JsxClosingFragment,
+) -> JsxFragment {
+    JsxFragment::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JSX_FRAGMENT,
+        [
+            Some(SyntaxElement::Node(opening_fragment.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_fragment.into_syntax())),
+        ],
+    ))
 }
 pub fn jsx_member_name(
     object: AnyJsxObjectName,

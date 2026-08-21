@@ -101,7 +101,7 @@ fn parse_astro_implicit_fragment(p: &mut JsParser) -> ParsedSyntax {
     }
     children.complete(p, JSX_CHILD_LIST);
 
-    fragment.complete(p, JSX_FRAGMENT);
+    fragment.complete(p, ASTRO_IMPLICIT_FRAGMENT);
     Present(m.complete(p, JSX_TAG_EXPRESSION))
 }
 

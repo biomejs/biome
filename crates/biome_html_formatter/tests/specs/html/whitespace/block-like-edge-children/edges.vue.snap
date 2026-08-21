@@ -47,7 +47,7 @@ info: whitespace/block-like-edge-children/edges.vue
 		<source src="brave.webm">
 	</video>
 	<object>
-		<param name="movie" value="movie.mp4" />
+		<param name="movie" value="movie.mp4">
 		<span>fallback</span>
 	</object>
 </template>
@@ -57,7 +57,7 @@ info: whitespace/block-like-edge-children/edges.vue
 		<track kind="subtitles" src="brave.en.vtt">
 		<source src="brave.webm">
 	</video><object>
-		<param name="movie" value="movie.mp4" />
+		<param name="movie" value="movie.mp4">
 		<span>fallback</span></object
 	></template
 >

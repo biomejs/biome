@@ -18,7 +18,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_leading_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.is_implicit() || is_implicit_fragment_child(node.syntax()) {
+        // A fragment nested in an implicit one is a child of it, so it carries
+        // real comments.
+        if is_implicit_fragment_child(node.syntax()) {
             return format_leading_comments(node.syntax()).fmt(f);
         }
         debug_assert!(
@@ -29,7 +31,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_dangling_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.is_implicit() || is_implicit_fragment_child(node.syntax()) {
+        // A fragment nested in an implicit one is a child of it, so it carries
+        // real comments.
+        if is_implicit_fragment_child(node.syntax()) {
             return format_dangling_comments(node.syntax()).fmt(f);
         }
         debug_assert!(
@@ -40,7 +44,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     }
 
     fn fmt_trailing_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.is_implicit() || is_implicit_fragment_child(node.syntax()) {
+        // A fragment nested in an implicit one is a child of it, so it carries
+        // real comments.
+        if is_implicit_fragment_child(node.syntax()) {
             return format_trailing_comments(node.syntax()).fmt(f);
         }
         debug_assert!(

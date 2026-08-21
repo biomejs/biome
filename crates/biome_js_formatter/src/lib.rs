@@ -165,6 +165,7 @@
 
 #![deny(clippy::use_self)]
 
+mod astro;
 mod cst;
 mod js;
 mod jsx;

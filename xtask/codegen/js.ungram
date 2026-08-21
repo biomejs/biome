@@ -2326,6 +2326,13 @@ AnyJsxTag =
 	JsxElement
 	| JsxSelfClosingElement
 	| JsxFragment
+	| AstroImplicitFragment
+
+// Adjacent siblings in an Astro template expression, which need no `<>`. It has
+// no delimiters at all, so it is its own node rather than a JsxFragment missing
+// its own.
+AstroImplicitFragment =
+	children: JsxChildList
 
 // <a />, or `<br>` in Astro, where HTML void elements need no slash
 JsxSelfClosingElement =
@@ -2355,12 +2362,10 @@ JsxClosingElement =
 	'>'
 
 // <>content</>
-// The delimiters are absent only in an Astro file, where adjacent siblings form
-// an implicit fragment. Every fragment written in JSX has both.
 JsxFragment =
-	opening_fragment: JsxOpeningFragment?
+	opening_fragment: JsxOpeningFragment
 	children: JsxChildList
-	closing_fragment: JsxClosingFragment?
+	closing_fragment: JsxClosingFragment
 
 JsxOpeningFragment =
 	'<'

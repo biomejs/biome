@@ -4,6 +4,10 @@ export interface JsAstNode {
 	readonly kind: string;
 	readonly text: string;
 }
+export interface AstroImplicitFragment extends JsAstNode {
+	readonly kind: "ASTRO_IMPLICIT_FRAGMENT";
+	readonly children: JsxChildList;
+}
 export interface JsAccessorModifier extends JsAstNode {
 	readonly kind: "JS_ACCESSOR_MODIFIER";
 	readonly modifierToken: string | undefined;
@@ -2177,7 +2181,11 @@ export type AnyJsxObjectName =
 	| JsxMemberName
 	| JsxNamespaceName
 	| JsxReferenceIdentifier;
-export type AnyJsxTag = JsxElement | JsxFragment | JsxSelfClosingElement;
+export type AnyJsxTag =
+	| AstroImplicitFragment
+	| JsxElement
+	| JsxFragment
+	| JsxSelfClosingElement;
 export type AnyTsEnumMemberName =
 	| JsComputedMemberName
 	| TsLiteralEnumMemberName;
@@ -2282,6 +2290,7 @@ export type AnyTsVariableAnnotation =
 	| TsDefiniteVariableAnnotation
 	| TsTypeAnnotation;
 export interface JsNodeByKind {
+	readonly ASTRO_IMPLICIT_FRAGMENT: AstroImplicitFragment;
 	readonly JS_ACCESSOR_MODIFIER: JsAccessorModifier;
 	readonly JS_ARRAY_ASSIGNMENT_PATTERN: JsArrayAssignmentPattern;
 	readonly JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT: JsArrayAssignmentPatternElement;

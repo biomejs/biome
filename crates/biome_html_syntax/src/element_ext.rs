@@ -1,6 +1,6 @@
 use crate::HtmlSyntaxKind::{
     self, AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW,
-    SCRIPT_KW, SOURCE_KW, STYLE_KW, TRACK_KW, WBR_KW,
+    PARAM_KW, SCRIPT_KW, SOURCE_KW, STYLE_KW, TRACK_KW, WBR_KW,
 };
 use crate::{
     AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
@@ -18,7 +18,7 @@ use biome_string_case::StrOnlyExtension;
 /// content or a closing tag. Tag names are keywords, so membership is an `O(1)`
 /// token-kind test.
 const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
-    AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW,
+    AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW, PARAM_KW,
     SOURCE_KW, TRACK_KW, WBR_KW
 );
 
