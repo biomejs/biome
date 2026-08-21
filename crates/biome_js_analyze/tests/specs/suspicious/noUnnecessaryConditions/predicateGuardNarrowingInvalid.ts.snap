@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: predicateGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Box = { a: number };
+
+function isBox(value: unknown): value is Box {
+	return typeof value === "object" && value !== null;
+}
+
+function alwaysTruthyAfterGuard(value: unknown) {
+	if (isBox(value)) {
+		// `value` is narrowed to an object here, so this condition is always
+		// truthy.
+		if (value) {
+			value;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+predicateGuardNarrowingInvalid.ts:13:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    11 │ 		// `value` is narrowed to an object here, so this condition is always
+    12 │ 		// truthy.
+  > 13 │ 		if (value) {
+       │ 		    ^^^^^
+    14 │ 			value;
+    15 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

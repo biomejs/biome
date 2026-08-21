@@ -1,0 +1,126 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function booleanGuard(b: boolean | string) {
+	if (typeof b === "boolean") {
+		b;
+	}
+}
+
+export function bigintGuard(n: bigint | string) {
+	if (typeof n === "bigint") {
+		n;
+	}
+}
+
+export function symbolGuard(s: symbol | string) {
+	if (typeof s === "symbol") {
+		s;
+	}
+}
+
+export function numberGuard(v: number | string) {
+	if (typeof v === "number") {
+		v;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding booleanGuard "booleanGuard" => sync Function "booleanGuard" {
+  accepts: {
+    params: [
+      required b: boolean | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding b "b" => boolean | string
+
+Expression "typeof b" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof b === \"boolean\"" => boolean
+
+Expression "b" => boolean | string
+
+Expression "\"boolean\"" => string: boolean
+
+Expression "b" => boolean
+
+Binding bigintGuard "bigintGuard" => sync Function "bigintGuard" {
+  accepts: {
+    params: [
+      required n: BigInt | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding n "n" => BigInt | string
+
+Expression "typeof n" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof n === \"bigint\"" => boolean
+
+Expression "n" => BigInt | string
+
+Expression "\"bigint\"" => string: bigint
+
+Expression "n" => BigInt
+
+Binding symbolGuard "symbolGuard" => sync Function "symbolGuard" {
+  accepts: {
+    params: [
+      required s: symbol | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding s "s" => symbol | string
+
+Expression "typeof s" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof s === \"symbol\"" => boolean
+
+Expression "s" => symbol | string
+
+Expression "\"symbol\"" => string: symbol
+
+Expression "s" => symbol
+
+Binding numberGuard "numberGuard" => sync Function "numberGuard" {
+  accepts: {
+    params: [
+      required v: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding v "v" => number | string
+
+Expression "typeof v" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof v === \"number\"" => boolean
+
+Expression "v" => number | string
+
+Expression "\"number\"" => string: number
+
+Expression "v" => number
+```

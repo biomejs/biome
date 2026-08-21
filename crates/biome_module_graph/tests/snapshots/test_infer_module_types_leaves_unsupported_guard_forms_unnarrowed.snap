@@ -1,0 +1,147 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function negated(x: number | string) {
+	if (typeof x !== "string") {
+		x;
+	}
+}
+
+export function conjunction(x: number | string) {
+	if (typeof x === "string" && x.length > 0) {
+		x;
+	}
+}
+
+export function elseBranch(x: number | string) {
+	if (typeof x === "string") {
+		x.length;
+	} else {
+		x;
+	}
+}
+
+export function afterGuard(x: number | string) {
+	if (typeof x === "string") {
+		x.length;
+	}
+	x;
+}
+```
+
+## Inferred types
+
+```
+Binding negated "negated" => sync Function "negated" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x !== \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => number | string
+
+Binding conjunction "conjunction" => sync Function "conjunction" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "typeof x === \"string\" && x.length > 0" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => number | string
+
+Expression "x.length" => unknown
+
+Expression "x.length > 0" => boolean
+
+Expression "0" => number: 0
+
+Expression "x" => number | string
+
+Binding elseBranch "elseBranch" => sync Function "elseBranch" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => string
+
+Expression "x.length" => unknown
+
+Expression "x" => number | string
+
+Binding afterGuard "afterGuard" => sync Function "afterGuard" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => string
+
+Expression "x.length" => unknown
+
+Expression "x" => number | string
+```

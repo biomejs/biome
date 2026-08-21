@@ -39,7 +39,7 @@ pub use return_type_relation::{
 };
 pub use stringification::{StringificationMode, StringificationUsefulness};
 pub use type_data::*;
-pub use type_store::{RawTypeCollector, TypeStore, UnionCollector};
+pub use type_store::{NarrowingInvalidationKind, RawTypeCollector, TypeStore, UnionCollector};
 
 pub use format_inferred_type_info::{
     FormatInferredTypeContext, InferredTypeDisplay, format_inferred_type,
