@@ -102,10 +102,6 @@ impl Rule for UseTopLevelRegex {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let regex = ctx.query().clone();
-        if !is_actionable_regex(&regex) {
-            return None;
-        }
-
         let root = ctx.root();
         let (candidate_name, reserved_names, transfer_header) =
             coordinated_extraction(&root, ctx.model(), &regex)?;
@@ -180,8 +176,8 @@ fn coordinated_extraction(
     model: &SemanticModel,
     current: &JsRegexLiteralExpression,
 ) -> Option<(String, FxHashSet<String>, bool)> {
-    // Actions are merged in source order, so reuse names for repeated literal values and reserve
-    // names from earlier distinct literals in a fix-all.
+    // Scan regex literals in source order. Reuse a name for identical literals and reserve names
+    // chosen for earlier different literals when fixing multiple diagnostics together.
     let facts = module_constant_facts(root, model);
     let mut reserved_names = FxHashSet::default();
     let mut names_by_value = FxHashMap::default();
