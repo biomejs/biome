@@ -1,6 +1,6 @@
 ---
 name: changeset
-description: Decide whether a Biome change needs a changeset, choose its release level, or create and edit `.changeset/*.md` release-note text. Use for user-visible behavior and release entries; not for implementation details or PR descriptions.
+description: Use this skill when a Biome change may affect users and you must decide whether it needs a changeset, choose the release level, or create and edit `.changeset/*.md` release-note text. Do not use for implementation details or PR descriptions.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -29,20 +29,11 @@ Nursery rules are the exception to the usual new-feature mapping because they do
 
 ## Create the File
 
-The contributor workflow is:
-
-```shell
-just new-changeset
-```
-
-For a non-interactive automated workflow, use the repository's empty generator and then edit the generated file:
+Run `just new-changeset-empty` to generate an empty file.
 
 ```shell
 just new-changeset-empty
 ```
-
-Do not invent a changeset filename manually. Both commands require project dependencies installed because they invoke `pnpm changeset`.
-
 An empty generated entry starts with frontmatter delimiters. Replace that frontmatter with the package and release level rather than appending a second block:
 
 ```markdown

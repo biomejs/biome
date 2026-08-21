@@ -1,6 +1,6 @@
 ---
 name: parser-development
-description: Implement or modify Biome grammars, lexers, token sources, parse rules, separated lists, error recovery, and parser fixtures for existing or new languages. Use for parser behavior and `.ungram` changes; not merely for consuming an existing AST/CST.
+description: Use this skill when implementing or modifying Biome parser behavior, including `.ungram` grammars, lexers, token sources, parse rules, separated lists, error recovery, and parser fixtures. Do not use merely for consuming an existing AST/CST.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -81,7 +81,7 @@ Follow the current `Lexer` and buffered token-source traits from `biome_parser`;
 - Use checked byte and character accessors supplied by the lexer infrastructure.
 - Keep lexing context explicit where the same bytes have context-dependent meaning.
 - Ensure every lexer path advances or returns EOF.
-- Test malformed UTF-8 boundaries through `&str` semantics rather than raw string slicing.
+- Use `&str` lexer tests for valid multibyte characters and character-boundary/index behavior. Test malformed byte sequences only through an existing byte-oriented API.
 
 ## Testing
 

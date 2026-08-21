@@ -1,6 +1,6 @@
 ---
 name: testing-codegen
-description: Select and run Biome test fixtures, quick tests, `insta` snapshot workflows, expectation comments, orphan pruning, and required code generators. Use for test and generated-artifact mechanics; not for subsystem implementation design.
+description: Use this skill when selecting or running Biome test fixtures, quick tests, `insta` snapshot workflows, expectation comments, orphan checks, or required code generators. Do not use for subsystem implementation design.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -34,13 +34,13 @@ Use `cargo insta accept` or `cargo insta reject` only after inspecting the pendi
 
 ### Orphaned Snapshots
 
-Do not delete suspected orphan snapshots manually. Run the relevant tests and let `insta` identify unreferenced files:
+Do not delete suspected orphan snapshots manually. Deletion is safe only after running the complete workspace snapshot suite without package, target, or test filters:
 
 ```shell
-cargo insta test --unreferenced delete -p <crate>
+cargo insta test --workspace --unreferenced delete
 ```
 
-Add the test target and filter when the crate has unrelated snapshot suites. Inspect the resulting deletions.
+For a scoped run, use `--unreferenced warn` or `--unreferenced reject`; incomplete test selection cannot prove that a snapshot is orphaned. Inspect every deletion from a complete run.
 
 ## Analyzer Fixtures
 

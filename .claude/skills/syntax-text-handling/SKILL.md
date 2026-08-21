@@ -1,6 +1,6 @@
 ---
 name: syntax-text-handling
-description: Biome-specific handling of AST/CST text, `SyntaxToken`, `TokenText`, quoted strings, token-relative ranges, and embedded-language attribute values. Use when extracting or storing source text or diagnosing trivia, allocation, range, or temporary-borrow problems; not for parser implementation or formatter comment placement.
+description: Use this skill when extracting or storing Biome AST/CST source text, working with `SyntaxToken`, `TokenText`, quoted strings, token-relative ranges, or embedded-language attribute values, or diagnosing trivia, allocation, range, and temporary-borrow problems. Do not use for parser implementation or formatter comment placement.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -22,7 +22,8 @@ Check every relevant union member and framework-specific value representation. S
 | `SyntaxToken::token_text_trimmed()` | `TokenText` | Retain token-backed text without trivia |
 | `SyntaxToken::text()` | `&str` | Exact source text including trivia |
 | `SyntaxNode::text_trimmed()` | node text | Diagnostics or display where interior trivia is intentional |
-| `inner_string_text()` | `TokenText` | Quote-stripped content through the language syntax helper |
+| `inner_string_text(token)` free helper | `TokenText` | Quote-stripped token content |
+| `HtmlString::inner_string_text()` | `SyntaxResult<TokenText>` | Quote-stripped content from a typed HTML string node |
 
 `SyntaxNode::text_trimmed()` removes only outer trivia. Whitespace and comments between child tokens remain, so it is not a semantic accessor for a multi-token node. Prefer a typed token, typed accessor, or structural match.
 

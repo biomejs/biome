@@ -1,6 +1,6 @@
 ---
 name: lint-rule-development
-description: Create or modify Biome lint rules and assists, including analyzer queries, semantic bindings, rule state, code actions, fix safety, options, registration, and end-user rule rustdoc. Use for rule behavior and implementation; use diagnostics-development for substantial message/advice design and testing-codegen for fixture or snapshot mechanics.
+description: Use this skill when creating or modifying Biome lint rules or assists, including analyzer queries, semantic bindings, rule state, code actions, fix safety, options, registration, and end-user rule rustdoc. Also load diagnostics-development for substantial message/advice design and testing-codegen for fixture or snapshot mechanics.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 

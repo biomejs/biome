@@ -1,6 +1,6 @@
 ---
 name: diagnostics-development
-description: Design or implement Biome user-facing diagnostics, including messages, advice, markup, details, code frames, categories, severity, and standalone `Diagnostic` types. Use for diagnostic presentation and APIs; not for lint matching logic or code-action mutations.
+description: Use this skill when designing or implementing Biome user-facing diagnostic presentation or APIs, including messages, advice, markup, details, code frames, categories, severity, and standalone `Diagnostic` types. Do not use for lint matching logic or code-action mutations.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 

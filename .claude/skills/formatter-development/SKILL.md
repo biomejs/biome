@@ -1,6 +1,6 @@
 ---
 name: formatter-development
-description: Implement or debug Biome formatter behavior, IR composition, node rules, layout selection, source-comment handling, verbatim formatting, idempotency, internal specs, and Prettier comparison. Use for formatting behavior; not for generic snapshot commands or parser changes.
+description: Use this skill when implementing or debugging Biome formatter behavior, IR composition, node rules, layout selection, source-comment handling, verbatim formatting, idempotency, internal specs, or Prettier comparison. Do not use for generic snapshot commands or parser changes.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 

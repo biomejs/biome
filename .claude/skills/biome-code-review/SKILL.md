@@ -1,6 +1,6 @@
 ---
 name: biome-code-review
-description: Read-only static review of a Biome PR, branch, commit range, diff, or working tree. Use only when asked to review completed changes. Reports findings without editing files or running project code; not for triage, reproduction, or implementation.
+description: Use this skill only when asked to review completed Biome changes in a PR, branch, commit range, diff, or working tree. Perform a read-only static review and report findings without editing files or running project code. Do not use for triage, reproduction, or implementation.
 compatibility: Designed for read-only review of the Biome codebase (github.com/biomejs/biome).
 metadata:
   repository: biomejs/biome
@@ -28,14 +28,14 @@ Preserve the working tree exactly as found.
 
 - Do not create, edit, move, or delete files.
 - Do not run project code, builds, tests, formatters, linters, codegen, benchmarks, package managers, LSPs, or daemons.
-- Do not run mutating Git or GitHub commands.
+- Do not run mutating Git or GitHub commands except the single base-branch fetch allowed below.
 - Do not use shell pipelines, scripts, `sed`, or `awk` to inspect source. Use file reads, globs, and text search.
 
-Shell is limited to read-only review commands:
+Shell is limited to these review commands:
 
 ```text
 git fetch origin <main|next>
-git status --short --branch
+git status --short --branch --untracked-files=all
 git branch --show-current
 git rev-parse ...
 git merge-base ...
@@ -58,11 +58,11 @@ For a PR number, read its title, body, base, and files with `gh pr view`, then r
 
 Otherwise review the current branch and working tree:
 
-1. Read branch and upstream information with `git status --short --branch`.
-2. Use the tracking branch when it is `origin/main` or `origin/next`. Otherwise compare merge bases against both branches and choose the actual ancestor. Ask only when the result is genuinely ambiguous.
+1. Read branch, upstream, and every untracked path with `git status --short --branch --untracked-files=all`.
+2. Use the tracking branch when it is `origin/main` or `origin/next`. Otherwise, compare merge bases against both branches and choose the actual ancestor. Ask only when the result is genuinely ambiguous.
 3. Fetch the selected base once.
 4. Diff the merge base through the working tree so committed, staged, and unstaged changes are included.
-5. Read every untracked file reported by `git status`; untracked tests and changesets are part of the review.
+5. Read every reported untracked file; untracked tests and changesets are part of the review.
 
 Never fall back to `HEAD` as the base without saying so. That would omit committed branch changes.
 
@@ -84,7 +84,7 @@ Use this routing table instead of loading every reference:
 | Grammar, lint, parser, formatter, diagnostics, types, tests, generated files | [repository-and-subsystems.md](references/repository-and-subsystems.md) and the matching implementation skill |
 | `biome_service`, workspace DB, CLI/LSP execution, cancellation | [workspace-access.md](references/workspace-access.md) |
 | Production Rust partial operations, recursion, syntax text, ranges, allocation, API shape | [rust-safety-and-syntax.md](references/rust-safety-and-syntax.md) |
-| Comments, rustdoc, changesets, branch target, PR metadata | [documentation-and-process.md](references/documentation-and-process.md) |
+| Comments, rustdoc, user documentation, changesets, branch target, PR metadata | [documentation-and-process.md](references/documentation-and-process.md) |
 
 ## Review Method
 
@@ -133,12 +133,14 @@ Every finding starts with exactly one `<severity>/<area>` token.
 
 | Severity | Meaning |
 | --- | --- |
-| `high` | Regression, corruption or data loss, broad false positive, incorrect safe fix, user-reachable panic, workspace execution violation, or a change that defeats its stated purpose |
+| `high` | Regression, corruption or data loss, exploitable security/privacy failure, availability failure, broad false positive, incorrect safe fix, user-reachable panic, workspace execution violation, or a change that defeats its stated purpose |
 | `medium` | Credible edge-case failure, missing variant or registration, hot-path allocation, material test gap, or unjustified production partial operation |
 | `low` | Localized correctness, maintainability, documentation, or process issue |
 | `optional` | Non-blocking improvement with a concrete benefit |
 
-Areas: `design`, `correctness`, `performance`, `completeness`, `error-handling`, `tests`, `maintainability`, `documentation`, `changeset`, `process`.
+Areas: `design`, `correctness`, `security`, `privacy`, `availability`, `performance`, `completeness`, `error-handling`, `tests`, `maintainability`, `documentation`, `changeset`, `process`.
+
+You **must** adhere to the following format:
 
 ````md
 ```

@@ -51,7 +51,7 @@ After implementation, code generation, formatting, linting, and tests, review th
 
 Before opening a PR, explicitly confirm whether the change is user-facing. User-facing behavior requires a changeset; internal refactors, tests, CI, and documentation-only changes do not.
 
-Load [changeset](./.claude/skills/changeset/SKILL.md) to choose the release level and create or edit the entry. Branch targeting and changeset policy are canonical in [`CONTRIBUTING.md`](./CONTRIBUTING.md#creating-pull-requests).
+For a user-facing change, load [changeset](./.claude/skills/changeset/SKILL.md) to choose the release level and create or edit the entry. Branch targeting and changeset policy are canonical in [`CONTRIBUTING.md`](./CONTRIBUTING.md#creating-pull-requests).
 
 ## Pull Requests
 
@@ -68,7 +68,7 @@ Load [doc-comments](./.claude/skills/doc-comments/SKILL.md) whenever editing `//
 - State contracts in `///`, module rationale and terminology in `//!`, and non-obvious rationale in `//`.
 - Do not narrate change history or address reviewers.
 - Delete comments that only restate names, types, or control flow.
-- Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user documentation and follows the lint-rule guide instead.
+- Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user documentation; also load the lint-rule guide for its content requirements.
 
 ## Cargo Dependencies
 

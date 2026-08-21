@@ -1,6 +1,6 @@
 ---
 name: eslint-migrate-options
-description: Preserve configurable ESLint rule options in `biome migrate eslint` by modeling source options, converting them to Biome options, wiring typed rule variants, and adding migration fixtures. Use for custom option migration; not for generated severity-only mapping or general rule-option design.
+description: Use this skill when `biome migrate eslint` must preserve configurable ESLint rule options through source-option models, Biome conversions, typed rule variants, and migration fixtures. Do not use for generated severity-only mapping or general rule-option design.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 

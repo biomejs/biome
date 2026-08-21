@@ -1,23 +1,26 @@
 ---
 name: doc-comments
-description: Write or edit developer-facing `//`, `///`, and `//!` documentation in Biome source, including comments added incidentally during implementation. Use for contributor documentation; not for end-user rustdoc inside lint/assist declarations or formatter handling of comments in user code.
+description: Use this skill whenever writing or editing Rust `//`, `///`, or `//!` comments in Biome, including comments added incidentally and end-user rustdoc inside lint/assist declarations. For lint/assist rustdoc, also load lint-rule-development for content requirements. Do not use for formatter handling of comments in user code.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
 
-Comments and doc comments in this repository are read by contributors, months
-or years after they were written, with none of the context you have right now.
-This skill defines who that reader is, what each kind of comment is for, and
-which patterns are banned.
+Developer-facing comments and doc comments in this repository are read by
+contributors, months or years after they were written, with none of the context
+you have right now. This skill defines who that reader is, what each kind of
+comment is for, and which patterns are banned.
 
 **Scope boundary:** rustdoc inside `declare_lint_rule!` / `declare_assist_rule!`
-blocks is end-user documentation — it is generated into the website. This skill
-does not apply there; see [lint-rule-development](../lint-rule-development/SKILL.md).
+blocks is end-user documentation generated into the website. Load this skill for
+comment hygiene, but use
+[lint-rule-development](../lint-rule-development/SKILL.md) for the audience,
+content structure, examples, and option documentation. Its content rules take
+precedence for those blocks.
 
 ## The Reader
 
-Write for a Biome contributor who is competent in Rust but has **no access to
+For developer-facing comments, write for a Biome contributor who is competent in Rust but has **no access to
 your current context**: not this conversation, not the pull request, not the
 issue, not the diff. They see only the repository at HEAD.
 

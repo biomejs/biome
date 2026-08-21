@@ -1,6 +1,6 @@
 ---
 name: type-inference
-description: Guide for Biome's Salsa-backed JavaScript and TypeScript type inference. Use when implementing type-aware lint rules, changing raw collection or inferred representations, adding analyzer requests or tracked queries, resolving imports or cycles, profiling inference, or testing Salsa invalidation. Not for CSS/HTML module-graph data or ordinary semantic binding analysis.
+description: Use this skill when working on Biome's Salsa-backed JavaScript and TypeScript inference, including type-aware lint rules, raw collection or inferred representations, analyzer requests, tracked queries, import or cycle resolution, profiling, and Salsa invalidation tests. Do not use for standalone CSS/HTML module-graph data unrelated to JS/TS inference or for ordinary semantic binding analysis.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -176,6 +176,7 @@ Do not conflate these outcomes:
 | `InferredTypeData::Unknown` | Inference produced a type whose structure is undetermined |
 | `InferredTypeData::UnknownKeyword` | Source explicitly uses TypeScript's `unknown` type |
 | `TypeInferenceClassification::Indeterminate` | Inference cannot prove a match or non-match |
+| `TypeInferenceClassification::Match` | Inference conclusively proves the condition |
 | `TypeInferenceClassification::NoMatch` | Inference conclusively disproves the condition |
 
 Unknown or indeterminate information is not a negative result. Preserve it to
