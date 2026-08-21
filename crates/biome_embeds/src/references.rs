@@ -121,6 +121,65 @@ fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
     Some(store_name)
 }
 
+/// Vue custom directives are a special case. The template spells them in
+/// kebab-case (e.g. `v-highlight`), while the JS binding they refer to is
+/// spelled in camelCase (e.g. `vHighlight`).
+///
+/// See also: https://vuejs.org/guide/reusability/custom-directives.html
+#[salsa::tracked]
+pub fn is_vue_directive_reference_used(
+    db: &dyn LanguageDb,
+    reference: InternedReference<'_>,
+) -> bool {
+    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
+        return false;
+    };
+
+    embedded_references_from_source(db, parsed_source)
+        .iter()
+        .any(|refs| {
+            refs.iter().any(|value_reference| {
+                vue_directive_name_matches_reference_name(
+                    value_reference.text.text(),
+                    reference.name(db).text(),
+                )
+            })
+        })
+}
+
+/// Returns `true` if `directive_name` starts with `v-` and its camelCase
+/// form matches `reference_name` (e.g. `v-highlight` matches `vHighlight`),
+/// without allocating.
+fn vue_directive_name_matches_reference_name(directive_name: &str, reference_name: &str) -> bool {
+    if !directive_name.starts_with("v-") {
+        return false;
+    }
+
+    let mut directive_chars = directive_name.chars();
+    let mut reference_chars = reference_name.chars();
+    let mut capitalize_next = false;
+    loop {
+        match directive_chars.next() {
+            Some('-') => capitalize_next = true,
+            None => return reference_chars.next().is_none(),
+            Some(c) => {
+                let Some(expected) = reference_chars.next() else {
+                    return false;
+                };
+                let ok = if capitalize_next {
+                    expected.is_uppercase() && expected.eq_ignore_ascii_case(&c)
+                } else {
+                    expected == c
+                };
+                if !ok {
+                    return false;
+                }
+                capitalize_next = false;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -303,6 +362,66 @@ mod tests {
         assert!(!is_value_reference_used(
             &db,
             InternedReference::new(&db, path, token_text("disabled")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_finds_custom_vue_directive() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
+
+        assert!(is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vHighlight")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_ignores_builtin_vue_directives() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><div v-cloak /></template>"#);
+
+        assert!(!is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vCloak")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_finds_multi_segment_custom_directive() {
+        let db = TestDb::new();
+        let path =
+            parse_vue_template_source(&db, r#"<template><div v-click-outside /></template>"#);
+
+        assert!(is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vClickOutside")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_ignores_mismatched_name() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
+
+        assert!(!is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vSomethingElse")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_ignores_non_directive_hyphenated_reference() {
+        // `:aria-label` (same-name v-bind shorthand) registers "aria-label" as a
+        // plain reference, unrelated to custom directives. It must not be
+        // mistaken for a `v-`-prefixed directive name that happens to also
+        // camelCase-match "ariaLabel".
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><div :aria-label /></template>"#);
+
+        assert!(!is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("ariaLabel")),
         ));
     }
 
