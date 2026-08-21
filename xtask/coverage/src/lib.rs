@@ -89,7 +89,11 @@ impl TestResults {
         self.details = results;
         let passed = self.passed_tests() as u32;
         let tests_ran = self.details.len();
-        let coverage = (f64::from(passed) / tests_ran as f64) * 100.0;
+        let coverage = if tests_ran == 0 {
+            0.0
+        } else {
+            (f64::from(passed) / tests_ran as f64) * 100.0
+        };
         self.summary = Summary {
             tests_ran: self.details.len() as u32,
             passed,
