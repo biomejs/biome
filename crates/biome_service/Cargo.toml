@@ -120,6 +120,16 @@ mimalloc = { workspace = true }
 html_embeds                  = ["dep:biome_embeds", "lang_css", "lang_html", "lang_js", "lang_json"]
 # JavaScript embeds
 js_embeds                    = ["lang_css", "lang_graphql", "lang_js"]
+md_embeds                    = [
+  "lang_css",
+  "lang_graphql",
+  "lang_grit",
+  "lang_html",
+  "lang_js",
+  "lang_json",
+  "lang_md",
+  "lang_yaml"
+]
 js_plugin                    = ["biome_plugin_loader/js_plugin", "plugins"]
 lang_css                     = [
   "biome_configuration/lang_css",
@@ -217,6 +227,7 @@ schema                       = [
   "lang_js",
   "lang_json",
   "lang_md",
+  "lang_yaml",
   "module_graph",
   "type_inference"
 ]
@@ -224,10 +235,12 @@ schema                       = [
 stable                       = [
   "html_embeds",
   "js_embeds",
+  "md_embeds",
   "lang_css",
   "lang_graphql",
   "lang_js",
   "lang_md",
+  "lang_yaml",
   "module_graph",
   "plugins",
   "type_inference"

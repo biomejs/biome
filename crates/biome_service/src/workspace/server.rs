@@ -4413,3 +4413,7 @@ fn init_thread_pool(_threads: Option<usize>) {}
 #[cfg(test)]
 #[path = "server.tests.rs"]
 mod tests;
+
+#[cfg(all(test, feature = "md_embeds"))]
+#[path = "md_embeds.tests.rs"]
+mod md_embeds_tests;

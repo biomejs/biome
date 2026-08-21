@@ -80,9 +80,6 @@ impl ServiceLanguage for YamlLanguage {
         override_indices: &[usize],
         _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        // TODO: apply markdown overrides once markdown override settings are introduced.
-        let _ = (overrides, override_indices);
-
         let line_width = language
             .line_width
             .or(global.line_width)
@@ -99,11 +96,15 @@ impl ServiceLanguage for YamlLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
-        YamlFormatOptions::new()
+        let mut options = YamlFormatOptions::new()
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
-            .with_trailing_newline(trailing_newline)
+            .with_trailing_newline(trailing_newline);
+
+        overrides.apply_override_yaml_format_options_by_indices(override_indices, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(

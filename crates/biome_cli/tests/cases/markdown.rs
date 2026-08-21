@@ -207,3 +207,160 @@ fn format_markdown_files_with_prose_wrap_cli_option() {
         result,
     ));
 }
+
+#[test]
+fn report_markdown_embedded_parse_diagnostics() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "markdown": {
+        "parser": {
+            "frontmatter": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(
+        file_path.into(),
+        r#"---
+items: [
+---
+
+# Embeds
+
+```js
+function () {}
+```
+
+```json
+{
+```
+
+<div>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "report_markdown_embedded_parse_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_markdown_embedded_code_blocks() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(
+        file_path.into(),
+        r#"# Embeds
+
+```js
+debugger;
+```
+
+```css
+a {
+  color: red;
+  color: blue;
+}
+```
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_markdown_embedded_code_blocks",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_markdown_with_embeds() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "markdown": {
+        "parser": {
+            "frontmatter": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(
+        file_path.into(),
+        r#"---
+title: Biome
+---
+
+#   Embeds
+
+```js
+const value = 1;
+```
+
+<div>content</div>
+
+- item
+
+    ```js
+    const =
+    ```
+
+Paragraph with <span>inline HTML</span>.
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_markdown_with_embeds",
+        fs,
+        console,
+        result,
+    ));
+}

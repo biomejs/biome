@@ -2,22 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `biome.json`
+## `file.yaml`
 
-```json
-{ "files": { "ignoreUnknown": true } }
-```
-
-## `format.js`
-
-```js
-  statement(  )  
-```
-
-## `format.unknown`
-
-```unknown
-
+```yaml
+items: [  1 , 2 ]
 ```
 
 # Termination Message
@@ -34,12 +22,12 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.yaml format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
   
-    1   │ - ··statement(··)··
-      1 │ + statement();
+    1   │ - items:·[··1·,·2·]
+      1 │ + items:·[1,·2]
       2 │ + 
   
 
