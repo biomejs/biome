@@ -5,6 +5,10 @@ use biome_rowan::{
     TriviaPiece,
 };
 
+/// Maximum depth of the green tree produced by the parser. This bounds the
+/// recursive `Drop` depth of syntax nodes on pathological input.
+const MAX_TREE_DEPTH: usize = 2048;
+
 /// An abstraction for syntax tree implementations
 pub trait TreeSink {
     type Kind: SyntaxKind;
@@ -37,6 +41,7 @@ where
     text_pos: TextSize,
     trivia_pos: usize,
     parents_count: usize,
+    depth_limit_exceeded: bool,
     errors: Vec<ParseDiagnostic>,
     inner: TreeBuilder<'a, L, Factory>,
     /// Signal that the sink must generate an EOF token when its finishing. See [LosslessTreeSink::finish] for more details.
@@ -56,7 +61,11 @@ where
     }
 
     fn start_node(&mut self, kind: L::Kind) {
-        self.inner.start_node(kind);
+        if self.parents_count < MAX_TREE_DEPTH {
+            self.inner.start_node(kind);
+        } else if !self.depth_limit_exceeded {
+            self.report_depth_limit();
+        }
         self.parents_count += 1;
     }
 
@@ -67,7 +76,9 @@ where
             self.do_token(L::Kind::EOF, TextSize::from(self.text.len() as u32));
         }
 
-        self.inner.finish_node();
+        if self.parents_count < MAX_TREE_DEPTH {
+            self.inner.finish_node();
+        }
     }
 
     fn errors(&mut self, errors: Vec<ParseDiagnostic>) {
@@ -87,6 +98,7 @@ where
             text_pos: 0.into(),
             trivia_pos: 0,
             parents_count: 0,
+            depth_limit_exceeded: false,
             inner: TreeBuilder::default(),
             errors: vec![],
             needs_eof: true,
@@ -103,6 +115,7 @@ where
             text_pos: 0.into(),
             trivia_pos: 0,
             parents_count: 0,
+            depth_limit_exceeded: false,
             inner: TreeBuilder::with_cache(cache),
             errors: vec![],
             needs_eof: true,
@@ -116,6 +129,20 @@ where
     /// will be appended to its leading trivia.
     pub fn finish(self) -> (SyntaxNode<L>, Vec<ParseDiagnostic>) {
         (self.inner.finish(), self.errors)
+    }
+
+    #[cold]
+    fn report_depth_limit(&mut self) {
+        self.depth_limit_exceeded = true;
+        let diagnostic = ParseDiagnostic::new(
+            format!("Syntax nesting exceeds maximum depth of {MAX_TREE_DEPTH}."),
+            TextRange::empty(self.text_pos),
+        );
+        let index = self.errors.partition_point(|error| match error.span() {
+            Some(range) => range.start() <= self.text_pos,
+            None => true,
+        });
+        self.errors.insert(index, diagnostic);
     }
 
     #[inline]
@@ -240,5 +267,82 @@ where
 
     fn errors(&mut self, errors: Vec<ParseDiagnostic>) {
         self.inner.errors(errors);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{LosslessTreeSink, MAX_TREE_DEPTH, TreeSink};
+    use biome_rowan::{
+        SyntaxNode, TextRange, TextSize,
+        raw_language::{RawLanguage, RawLanguageKind, RawLanguageSyntaxFactory},
+    };
+
+    type RawTreeSink<'a> = LosslessTreeSink<'a, RawLanguage, RawLanguageSyntaxFactory>;
+
+    fn nested_tree(depth: usize) -> (SyntaxNode<RawLanguage>, Vec<crate::ParseDiagnostic>) {
+        let mut sink = RawTreeSink::new("a", &[]);
+
+        for _ in 0..depth {
+            sink.start_node(RawLanguageKind::ROOT);
+        }
+        sink.token(RawLanguageKind::STRING_TOKEN, TextSize::from(1));
+        for _ in 0..depth {
+            sink.finish_node();
+        }
+
+        sink.finish()
+    }
+
+    #[test]
+    fn accepts_tree_at_depth_limit() {
+        let (root, diagnostics) = nested_tree(MAX_TREE_DEPTH);
+
+        assert_eq!(root.to_string(), "a");
+        assert_eq!(root.descendants().count(), MAX_TREE_DEPTH);
+        assert!(diagnostics.is_empty());
+    }
+
+    #[test]
+    fn depth_limit_diagnostic_keeps_existing_errors_sorted() {
+        let mut sink = RawTreeSink::new("a", &[]);
+        sink.errors(vec![crate::ParseDiagnostic::new(
+            "later error",
+            TextRange::empty(TextSize::from(1)),
+        )]);
+
+        for _ in 0..=MAX_TREE_DEPTH {
+            sink.start_node(RawLanguageKind::ROOT);
+        }
+        sink.token(RawLanguageKind::STRING_TOKEN, TextSize::from(1));
+        for _ in 0..=MAX_TREE_DEPTH {
+            sink.finish_node();
+        }
+
+        let (_, diagnostics) = sink.finish();
+        let spans: Vec<_> = diagnostics
+            .iter()
+            .map(|error| error.span().unwrap())
+            .collect();
+        assert_eq!(
+            spans,
+            [
+                TextRange::empty(TextSize::from(0)),
+                TextRange::empty(TextSize::from(1)),
+            ]
+        );
+    }
+
+    #[test]
+    fn reports_tree_past_depth_limit_once() {
+        let (root, diagnostics) = nested_tree(MAX_TREE_DEPTH + 100);
+
+        assert_eq!(root.to_string(), "a");
+        assert_eq!(root.descendants().count(), MAX_TREE_DEPTH);
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(
+            diagnostics[0].span(),
+            Some(TextRange::empty(TextSize::from(0)))
+        );
     }
 }
