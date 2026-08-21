@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+if (typeof x === "string") {
+	x;
+}
+
+```
+
+## Result
+
+```
+Narrowed(typeof == "string", unresolved reference "x" (scope ID: 0))
+```
