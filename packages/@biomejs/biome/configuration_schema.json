@@ -74,6 +74,10 @@
 		"vcs": {
 			"description": "The version control integration configuration.",
 			"anyOf": [{ "$ref": "#/$defs/VcsConfiguration" }, { "type": "null" }]
+		},
+		"yaml": {
+			"description": "Configuration specific to YAML.",
+			"anyOf": [{ "$ref": "#/$defs/YamlConfiguration" }, { "type": "null" }]
 		}
 	},
 	"additionalProperties": false,
@@ -7750,6 +7754,10 @@
 				"plugins": {
 					"description": "Specific configuration for additional plugins",
 					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
+				},
+				"yaml": {
+					"description": "Specific configuration for the YAML language",
+					"anyOf": [{ "$ref": "#/$defs/YamlConfiguration" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -17672,6 +17680,47 @@
 					"const": "ignore"
 				}
 			]
+		},
+		"YamlConfiguration": {
+			"description": "Options applied to Yaml files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/YamlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"YamlFormatterConfiguration": {
+			"description": "Options that change how the Yaml formatter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Yaml (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Yaml files. Defaults to 2.",
+					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Yaml files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
 		}
 	}
 }
