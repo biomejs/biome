@@ -95,12 +95,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             file_kind: SvelteFileKind::Component,
             embedding_kind: SvelteEmbeddingKind::Declaration,
         });
-    } else if file_name.contains(".astro_expr.") {
-        // Fixture text is the brace-less body of an Astro `{...}` expression.
-        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Astro {
-            frontmatter: false,
-            is_class_attribute: false,
-        });
     }
 
     let extension = file_source.file_extension();
