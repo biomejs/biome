@@ -27,6 +27,8 @@ use biome_configuration::javascript::{
 };
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
+#[cfg(feature = "lang_yaml")]
+use biome_configuration::yaml::YamlConfiguration;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, DEFAULT_SCANNER_IGNORE_ENTRIES,
     ExtendedConfigurations, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
@@ -76,6 +78,10 @@ use biome_markdown_formatter::context::MdFormatOptions;
 use biome_markdown_syntax::MarkdownLanguage;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_formatter::YamlFormatOptions;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -1839,6 +1845,19 @@ impl OverrideSettings {
         }
     }
 
+    #[cfg(feature = "lang_yaml")]
+    pub fn apply_override_yaml_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut YamlFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
+                pattern.apply_overrides_to_yaml_format_options(options);
+            }
+        }
+    }
+
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(
         &self,
@@ -2237,6 +2256,28 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_yaml")]
+    fn apply_overrides_to_yaml_format_options(&self, options: &mut YamlFormatOptions) {
+        let yaml_formatter = &self.languages.yaml.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_width) = yaml_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width);
+        }
+        if let Some(line_ending) = yaml_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = yaml_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(trailing_newline) = yaml_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
+    }
+
     #[cfg(feature = "lang_js")]
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         let js_parser = &self.languages.javascript.parser;
@@ -2359,6 +2400,8 @@ pub fn to_override_settings(
         let html = pattern.html.take().unwrap_or_default();
         #[cfg(feature = "lang_md")]
         let markdown = pattern.markdown.take().unwrap_or_default();
+        #[cfg(feature = "lang_yaml")]
+        let yaml = pattern.yaml.take().unwrap_or_default();
 
         #[cfg(feature = "lang_js")]
         {
@@ -2391,6 +2434,10 @@ pub fn to_override_settings(
         {
             languages.markdown =
                 to_markdown_language_settings(markdown, &current_settings.languages.markdown);
+        }
+        #[cfg(feature = "lang_yaml")]
+        {
+            languages.yaml = to_yaml_language_settings(yaml, &current_settings.languages.yaml);
         }
 
         let pattern_setting = OverrideSettingPattern {
@@ -2546,6 +2593,19 @@ fn to_markdown_language_settings(
     _parent_settings: &LanguageSettings<MarkdownLanguage>,
 ) -> LanguageSettings<MarkdownLanguage> {
     let mut language_setting: LanguageSettings<MarkdownLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter = formatter.into();
+
+    language_setting
+}
+
+#[cfg(feature = "lang_yaml")]
+fn to_yaml_language_settings(
+    mut conf: YamlConfiguration,
+    _parent_settings: &LanguageSettings<YamlLanguage>,
+) -> LanguageSettings<YamlLanguage> {
+    let mut language_setting: LanguageSettings<YamlLanguage> = LanguageSettings::default();
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();

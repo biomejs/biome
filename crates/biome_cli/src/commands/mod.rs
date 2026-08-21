@@ -19,6 +19,7 @@ use biome_configuration::markdown::{
     MarkdownFormatterConfiguration, MarkdownLinterConfiguration, MarkdownParserConfiguration,
 };
 use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::yaml::YamlFormatterConfiguration;
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
     FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
@@ -36,6 +37,7 @@ use biome_configuration::{
     markdown::markdown_linter_configuration,
     markdown::markdown_parser_configuration,
     vcs::vcs_configuration,
+    yaml::yaml_formatter_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
@@ -397,6 +399,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external(markdown_formatter_configuration), optional, hide_usage)]
         markdown_formatter: Option<MarkdownFormatterConfiguration>,
+
+        #[bpaf(external(yaml_formatter_configuration), optional, hide_usage)]
+        yaml_formatter: Option<YamlFormatterConfiguration>,
 
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,
