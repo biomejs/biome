@@ -537,6 +537,16 @@ mod tests {
     }
 
     #[test]
+    fn astro_legacy_void_elements_still_need_a_closing_tag() {
+        // Astro treats only the HTML spec's void elements as self-closing;
+        // `keygen` and `menuitem` are not among them.
+        for body in ["cond && <keygen>", "cond && <menuitem>"] {
+            let parse = parse(body, astro_template_source(), JsParserOptions::default());
+            assert!(parse.has_errors(), "`{body}` is not valid Astro");
+        }
+    }
+
+    #[test]
     fn astro_void_element_does_not_capture_siblings_as_children() {
         let parse = parse(
             "<div><br>text</div>",
