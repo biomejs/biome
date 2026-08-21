@@ -239,6 +239,8 @@ pub enum ConditionalSubset {
     Falsy,
     Truthy,
     NonNullish,
+    /// The subset that matches a `typeof` guard tag.
+    Typeof(raw::TypeofTag),
 }
 
 impl<'db> TypeData<'db> {
@@ -539,13 +541,17 @@ impl<'db> TypeData<'db> {
             | Self::ThisKeyword
             | Self::Unknown
             | Self::UnknownKeyword => Some(ConditionalType::Anything),
-            Self::BigInt | Self::Boolean | Self::Interface(_) | Self::Number | Self::String => {
+            Self::BigInt | Self::Boolean | Self::Number | Self::String => {
                 Some(ConditionalType::NonNullish)
             }
+            // Following TypeScript's narrowing semantics, a value of an
+            // interface type counts as an object, even though a primitive
+            // could structurally satisfy the interface.
             Self::Class(_)
             | Self::Constructor(_)
             | Self::Function(_)
             | Self::Global
+            | Self::Interface(_)
             | Self::Module(_)
             | Self::Namespace(_)
             | Self::Object(_)
@@ -1336,6 +1342,25 @@ impl<'db> TypeDataSlots<'db> {
             TypeofExpression::LogicalOr(expression) => {
                 self.slots.extend([expression.left, expression.right]);
             }
+            TypeofExpression::Narrowed(expression) => {
+                self.slots.push(expression.ty);
+                // The predicate's own types must follow `ty` in slot order;
+                // `rebuild_typeof_expression` takes them back in the same
+                // order.
+                match &expression.predicate {
+                    NarrowingPredicate::Assigned(ty) | NarrowingPredicate::InstanceOf(ty) => {
+                        self.slots.push(*ty)
+                    }
+                    NarrowingPredicate::PredicateCall(predicate) => {
+                        self.slots.push(predicate.callee);
+                    }
+                    NarrowingPredicate::Falsy
+                    | NarrowingPredicate::MemberEquals(_)
+                    | NarrowingPredicate::StringEquals(_)
+                    | NarrowingPredicate::Truthy
+                    | NarrowingPredicate::Typeof(_) => {}
+                }
+            }
             TypeofExpression::New(expression) => {
                 self.slots.push(expression.callee);
                 self.push_call_argument_slots(&expression.arguments);
@@ -1739,6 +1764,34 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     right: self.take_type()?,
                 })
             }
+            TypeofExpression::Narrowed(expression) => {
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: self.take_type()?,
+                    predicate: match &expression.predicate {
+                        NarrowingPredicate::Assigned(_) => {
+                            NarrowingPredicate::Assigned(self.take_type()?)
+                        }
+                        NarrowingPredicate::InstanceOf(_) => {
+                            NarrowingPredicate::InstanceOf(self.take_type()?)
+                        }
+                        NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
+                        NarrowingPredicate::MemberEquals(predicate) => {
+                            NarrowingPredicate::MemberEquals(predicate.clone())
+                        }
+                        NarrowingPredicate::PredicateCall(predicate) => {
+                            NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                                callee: self.take_type()?,
+                                argument_index: predicate.argument_index,
+                            })
+                        }
+                        NarrowingPredicate::StringEquals(value) => {
+                            NarrowingPredicate::StringEquals(value.clone())
+                        }
+                        NarrowingPredicate::Truthy => NarrowingPredicate::Truthy,
+                        NarrowingPredicate::Typeof(tag) => NarrowingPredicate::Typeof(*tag),
+                    },
+                })
+            }
             TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
                 callee: self.take_type()?,
                 arguments: self.rebuild_call_arguments(&expression.arguments)?,
@@ -2084,6 +2137,7 @@ pub enum TypeofExpression<'db> {
     IterableValueOf(TypeofIterableValueOfExpression<'db>),
     LogicalAnd(TypeofLogicalAndExpression<'db>),
     LogicalOr(TypeofLogicalOrExpression<'db>),
+    Narrowed(TypeofNarrowedExpression<'db>),
     New(TypeofNewExpression<'db>),
     NullishCoalescing(TypeofNullishCoalescingExpression<'db>),
     StaticMember(TypeofStaticMemberExpression<'db>),
@@ -2144,6 +2198,46 @@ pub struct TypeofLogicalAndExpression<'db> {
 pub struct TypeofLogicalOrExpression<'db> {
     pub left: TypeData<'db>,
     pub right: TypeData<'db>,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofNarrowedExpression<'db> {
+    pub ty: TypeData<'db>,
+    pub predicate: NarrowingPredicate<'db>,
+}
+
+/// Predicate that a call returned `true` for a value passed as one of its
+/// arguments, narrowing the value when the callee turns out to be a type
+/// predicate, e.g. `isFoo(x)`.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct PredicateCallPredicate<'db> {
+    /// Reference to the callee.
+    pub callee: TypeData<'db>,
+
+    /// Index of the narrowed value among the call arguments.
+    pub argument_index: usize,
+}
+
+/// Predicate established by a guard, used to narrow the guarded value's type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub enum NarrowingPredicate<'db> {
+    /// The value has the type it was assigned.
+    Assigned(TypeData<'db>),
+    /// The value is falsy.
+    Falsy,
+    /// The value is an instance of the referenced class.
+    InstanceOf(TypeData<'db>),
+    /// A member of the value strictly equals a string literal.
+    MemberEquals(Box<raw::MemberEqualsPredicate>),
+    /// The value was passed to a call whose callee may be a type predicate.
+    PredicateCall(PredicateCallPredicate<'db>),
+    /// The value strictly equals a string literal, with escape sequences
+    /// processed.
+    StringEquals(Text),
+    /// The value is truthy.
+    Truthy,
+    /// The `typeof` operator evaluates to the given tag for the value.
+    Typeof(raw::TypeofTag),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2650,6 +2744,34 @@ fn convert_typeof_expression<'db>(
             TypeofExpression::LogicalOr(TypeofLogicalOrExpression {
                 left: resolve_reference(&expression.left),
                 right: resolve_reference(&expression.right),
+            })
+        }
+        raw::TypeofExpression::Narrowed(expression) => {
+            TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                ty: resolve_reference(&expression.ty),
+                predicate: match &expression.predicate {
+                    raw::NarrowingPredicate::Assigned(assigned) => {
+                        NarrowingPredicate::Assigned(resolve_reference(assigned))
+                    }
+                    raw::NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
+                    raw::NarrowingPredicate::InstanceOf(guard) => {
+                        NarrowingPredicate::InstanceOf(resolve_reference(guard))
+                    }
+                    raw::NarrowingPredicate::MemberEquals(predicate) => {
+                        NarrowingPredicate::MemberEquals(predicate.clone())
+                    }
+                    raw::NarrowingPredicate::PredicateCall(predicate) => {
+                        NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                            callee: resolve_reference(&predicate.callee),
+                            argument_index: predicate.argument_index,
+                        })
+                    }
+                    raw::NarrowingPredicate::StringEquals(value) => {
+                        NarrowingPredicate::StringEquals(value.clone())
+                    }
+                    raw::NarrowingPredicate::Truthy => NarrowingPredicate::Truthy,
+                    raw::NarrowingPredicate::Typeof(tag) => NarrowingPredicate::Typeof(*tag),
+                },
             })
         }
         raw::TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
@@ -3410,6 +3532,36 @@ mod tests {
                 TypeofExpression::LogicalOr(TypeofLogicalOrExpression {
                     left: s.next(),
                     right: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    predicate: NarrowingPredicate::Typeof(raw::TypeofTag::String),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    predicate: NarrowingPredicate::InstanceOf(s.next()),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    predicate: NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                        callee: s.next(),
+                        argument_index: 0,
+                    }),
                 }),
             )
         });

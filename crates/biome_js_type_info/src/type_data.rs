@@ -1310,6 +1310,7 @@ pub enum TypeofExpression {
     IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
+    Narrowed(TypeofNarrowedExpression),
     New(TypeofNewExpression),
     NullishCoalescing(TypeofNullishCoalescingExpression),
     StaticMember(TypeofStaticMemberExpression),
@@ -1383,6 +1384,108 @@ pub struct TypeofLogicalAndExpression {
 pub struct TypeofLogicalOrExpression {
     pub left: TypeReference,
     pub right: TypeReference,
+}
+
+/// Narrows the type of an expression to the subset that matches a guard,
+/// e.g. the type of `x` inside the consequent of
+/// `if (typeof x === "function")`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofNarrowedExpression {
+    /// The type being narrowed.
+    pub ty: TypeReference,
+
+    /// The predicate the guard established for the value.
+    pub predicate: NarrowingPredicate,
+}
+
+/// Predicate established by a guard, used to narrow the guarded value's type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum NarrowingPredicate {
+    /// The value has the type it was assigned.
+    Assigned(TypeReference),
+    /// The value is falsy.
+    Falsy,
+    /// The value is an instance of the referenced class.
+    InstanceOf(TypeReference),
+    /// A member of the value strictly equals a string literal.
+    MemberEquals(Box<MemberEqualsPredicate>),
+    /// The value was passed to a call whose callee may be a type predicate.
+    PredicateCall(Box<PredicateCallPredicate>),
+    /// The value strictly equals a string literal, with escape sequences
+    /// processed.
+    StringEquals(Text),
+    /// The value is truthy.
+    Truthy,
+    /// The `typeof` operator evaluates to the given tag for the value.
+    Typeof(TypeofTag),
+}
+
+/// Predicate that a call returned `true` for a value passed as one of its
+/// arguments, narrowing the value when the callee turns out to be a type
+/// predicate, e.g. `isFoo(x)`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct PredicateCallPredicate {
+    /// Reference to the callee.
+    pub callee: TypeReference,
+
+    /// Index of the narrowed value among the call arguments.
+    pub argument_index: usize,
+}
+
+/// Predicate that a member of a value strictly equals a string literal,
+/// e.g. `x.kind === "tag"`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct MemberEqualsPredicate {
+    /// Name of the member being compared.
+    pub member: Text,
+
+    /// The string the member is compared against, with escape sequences
+    /// processed.
+    pub value: Text,
+}
+
+/// One of the strings the `typeof` operator may evaluate to.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum TypeofTag {
+    Bigint,
+    Boolean,
+    Function,
+    Number,
+    Object,
+    String,
+    Symbol,
+    Undefined,
+}
+
+impl TypeofTag {
+    /// Returns the tag matching the given string literal text, if any.
+    pub fn from_literal(text: &str) -> Option<Self> {
+        match text {
+            "bigint" => Some(Self::Bigint),
+            "boolean" => Some(Self::Boolean),
+            "function" => Some(Self::Function),
+            "number" => Some(Self::Number),
+            "object" => Some(Self::Object),
+            "string" => Some(Self::String),
+            "symbol" => Some(Self::Symbol),
+            "undefined" => Some(Self::Undefined),
+            _ => None,
+        }
+    }
+
+    /// Returns the string the `typeof` operator evaluates to for this tag.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Bigint => "bigint",
+            Self::Boolean => "boolean",
+            Self::Function => "function",
+            Self::Number => "number",
+            Self::Object => "object",
+            Self::String => "string",
+            Self::Symbol => "symbol",
+            Self::Undefined => "undefined",
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

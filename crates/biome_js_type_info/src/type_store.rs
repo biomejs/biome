@@ -4,10 +4,11 @@ use std::{
 };
 
 use hashbrown::{HashTable, hash_table::Entry};
-use rustc_hash::FxHasher;
+use rustc_hash::{FxHashMap, FxHasher};
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
+use biome_rowan::Text;
 
 use crate::{
     RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
@@ -171,6 +172,38 @@ pub trait RawTypeCollector {
             GLOBAL_UNDEFINED_ID.into(),
         ]))))))
     }
+
+    /// Returns a reference to the type this collector already inferred for
+    /// `expression`, if it has one.
+    ///
+    /// Unlike [`Self::reference_to_resolved_expression`], this never infers
+    /// the expression. A caller that needs the type an expression had where
+    /// it was written must not re-infer it somewhere else: the same name can
+    /// resolve to a different binding at the other position, and inferring
+    /// an expression visits its own references, each of which may in turn
+    /// resolve to an expression written earlier.
+    fn recorded_expression_type(&mut self, _expression: &AnyJsExpression) -> Option<TypeReference> {
+        None
+    }
+
+    /// Returns a scratch cache for memoizing guard-narrowing invalidation
+    /// checks, if this collector wants to provide one.
+    fn narrowing_invalidation_cache(
+        &mut self,
+    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>> {
+        None
+    }
+}
+
+/// Distinguishes the scans memoized in the
+/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache).
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum NarrowingInvalidationKind {
+    /// A binding with the name is declared, or the name is assigned to,
+    /// within the node.
+    Binding,
+    /// A member of the named value is written to within the node.
+    MemberWrite,
 }
 
 #[derive(Default)]

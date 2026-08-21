@@ -1,0 +1,266 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Pred = { pr: string };
+
+function isPred(value: unknown): value is Pred {
+	return typeof value === "object" && value !== null;
+}
+
+export function predicates(t: unknown) {
+	if (isPred(t)) {
+		t;
+	}
+}
+
+function isSecond(first: unknown, value: unknown): value is Pred {
+	return typeof value === "object" && value !== null;
+}
+
+export function wrongPosition(w: unknown) {
+	if (isSecond(w, 0)) {
+		w;
+	}
+}
+
+declare const others: unknown[];
+
+export function spreadBefore(b: unknown) {
+	if (isSecond(...others, b)) {
+		b;
+	}
+}
+
+declare function isFirstWithThis(
+	this: void,
+	first: unknown,
+	second: unknown,
+): first is Pred;
+
+export function thisParameter(p: unknown, q: unknown) {
+	if (isFirstWithThis(p, q)) {
+		p;
+		q;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Pred "Pred" => Object {
+  prototype: No prototype
+  members: ["pr": string]
+}
+
+Binding isPred "isPred" => sync Function "isPred" {
+  accepts: {
+    params: [
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate value: instanceof Pred
+}
+
+Binding value "value" => unknown
+
+Expression "typeof value" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof value === \"object\"" => boolean
+
+Expression "typeof value === \"object\" && value !== null" => boolean
+
+Expression "value" => unknown
+
+Expression "\"object\"" => string: object
+
+Expression "value" => unknown
+
+Expression "value !== null" => boolean
+
+Expression "null" => null
+
+Binding predicates "predicates" => sync Function "predicates" {
+  accepts: {
+    params: [
+      required t: unknown
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding t "t" => unknown
+
+Expression "isPred" => sync Function "isPred" {
+  accepts: {
+    params: [
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate value: instanceof Pred
+}
+
+Expression "isPred(t)" => boolean
+
+Expression "t" => unknown
+
+Expression "t" => instanceof Pred
+
+Binding isSecond "isSecond" => sync Function "isSecond" {
+  accepts: {
+    params: [
+      required first: unknown
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate value: instanceof Pred
+}
+
+Binding first "first" => unknown
+
+Binding value "value" => unknown
+
+Expression "typeof value" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof value === \"object\"" => boolean
+
+Expression "typeof value === \"object\" && value !== null" => boolean
+
+Expression "value" => unknown
+
+Expression "\"object\"" => string: object
+
+Expression "value" => unknown
+
+Expression "value !== null" => boolean
+
+Expression "null" => null
+
+Binding wrongPosition "wrongPosition" => sync Function "wrongPosition" {
+  accepts: {
+    params: [
+      required w: unknown
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding w "w" => unknown
+
+Expression "isSecond" => sync Function "isSecond" {
+  accepts: {
+    params: [
+      required first: unknown
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate value: instanceof Pred
+}
+
+Expression "isSecond(w, 0)" => boolean
+
+Expression "w" => unknown
+
+Expression "0" => number: 0
+
+Expression "w" => unknown
+
+Binding others "others" => instanceof Array<unknown>
+
+Binding spreadBefore "spreadBefore" => sync Function "spreadBefore" {
+  accepts: {
+    params: [
+      required b: unknown
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding b "b" => unknown
+
+Expression "isSecond" => sync Function "isSecond" {
+  accepts: {
+    params: [
+      required first: unknown
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate value: instanceof Pred
+}
+
+Expression "isSecond(...others, b)" => boolean
+
+Expression "others" => instanceof Array<unknown>
+
+Expression "b" => unknown
+
+Expression "b" => unknown
+
+Binding isFirstWithThis "isFirstWithThis" => sync Function "isFirstWithThis" {
+  accepts: {
+    params: [
+      required this: void
+      required first: unknown
+      required second: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate first: instanceof Pred
+}
+
+Binding first "first" => unknown
+
+Binding second "second" => unknown
+
+Binding thisParameter "thisParameter" => sync Function "thisParameter" {
+  accepts: {
+    params: [
+      required p: unknown
+      required q: unknown
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding p "p" => unknown
+
+Binding q "q" => unknown
+
+Expression "isFirstWithThis" => sync Function "isFirstWithThis" {
+  accepts: {
+    params: [
+      required this: void
+      required first: unknown
+      required second: unknown
+    ]
+    type_args: []
+  }
+  returns: predicate first: instanceof Pred
+}
+
+Expression "isFirstWithThis(p, q)" => boolean
+
+Expression "p" => unknown
+
+Expression "q" => unknown
+
+Expression "p" => instanceof Pred
+
+Expression "q" => unknown
+```

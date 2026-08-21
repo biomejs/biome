@@ -2,7 +2,7 @@ use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression,
     AnyJsTemplateElement, JsAssignmentOperator, JsLanguage, JsLogicalOperator, JsModule,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryOperator,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryOperator, is_sync_only_function_boundary,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
 
@@ -354,24 +354,6 @@ pub fn is_await_allowed(node: &JsSyntaxNode) -> bool {
         }
     }
     false
-}
-
-/// Returns `true` if the node kind is a sync-only function boundary where
-/// `async` is never valid (getters, setters, static initialization blocks).
-fn is_sync_only_function_boundary(kind: JsSyntaxKind) -> bool {
-    matches!(
-        kind,
-        JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-            | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-            | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
-    )
-}
-
-/// Returns `true` if the node kind is any function-like scope boundary.
-pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
-    AnyFunctionLike::can_cast(kind) || is_sync_only_function_boundary(kind)
 }
 
 #[cfg(test)]

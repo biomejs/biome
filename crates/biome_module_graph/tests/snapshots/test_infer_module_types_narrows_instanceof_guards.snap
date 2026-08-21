@@ -1,0 +1,223 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+class BaseCls {}
+class DerivedCls extends BaseCls {
+	run(): void {}
+}
+
+export function instances(v: BaseCls, w: number | DerivedCls) {
+	if (v instanceof DerivedCls) {
+		v;
+	}
+	if (w instanceof DerivedCls) {
+		w;
+	}
+}
+
+function WithMixin<T extends new (...args: unknown[]) => object>(base: T) {
+	return class extends base {};
+}
+class MixedCls extends WithMixin(BaseCls) {
+	onlyMixed(): void {}
+}
+class SiblingCls extends BaseCls {
+	onlySibling(): void {}
+}
+
+export function mixins(m: MixedCls | SiblingCls) {
+	if (m instanceof BaseCls) {
+		m;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding BaseCls "BaseCls" => class "BaseCls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding DerivedCls "DerivedCls" => class "DerivedCls" {
+  extends: BaseCls
+  implements: []
+  type_args: []
+}
+
+Expression "BaseCls" => class "BaseCls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding instances "instances" => sync Function "instances" {
+  accepts: {
+    params: [
+      required v: instanceof BaseCls
+      required w: number | instanceof DerivedCls
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding v "v" => instanceof BaseCls
+
+Binding w "w" => number | instanceof DerivedCls
+
+Expression "v" => instanceof BaseCls
+
+Expression "v instanceof DerivedCls" => boolean
+
+Expression "DerivedCls" => class "DerivedCls" {
+  extends: BaseCls
+  implements: []
+  type_args: []
+}
+
+Expression "v" => instanceof DerivedCls
+
+Expression "w" => number | instanceof DerivedCls
+
+Expression "w instanceof DerivedCls" => boolean
+
+Expression "DerivedCls" => class "DerivedCls" {
+  extends: BaseCls
+  implements: []
+  type_args: []
+}
+
+Expression "w" => instanceof DerivedCls
+
+Binding WithMixin "WithMixin" => sync Function "WithMixin" {
+  accepts: {
+    params: [
+      required base: instanceof T
+    ]
+    type_args: [
+      T extends constructor {
+        params: [
+          required ...args: instanceof Array<unknown>
+        ]
+        type_args: []
+        returns: object
+      }
+    ]
+  }
+  returns: class {
+    extends: instanceof T
+    implements: []
+    type_args: []
+  }
+}
+
+Binding T "T" => T extends constructor {
+  params: [
+    required ...args: instanceof Array<unknown>
+  ]
+  type_args: []
+  returns: object
+}
+
+Binding args "args" => instanceof Array<unknown>
+
+Binding base "base" => instanceof T
+
+Expression "class extends base {}" => class {
+  extends: instanceof T
+  implements: []
+  type_args: []
+}
+
+Expression "base" => instanceof T
+
+Binding MixedCls "MixedCls" => class "MixedCls" {
+  extends: class {
+    extends: BaseCls
+    implements: []
+    type_args: []
+  }
+  implements: []
+  type_args: []
+}
+
+Expression "WithMixin" => sync Function "WithMixin" {
+  accepts: {
+    params: [
+      required base: instanceof T
+    ]
+    type_args: [
+      T extends constructor {
+        params: [
+          required ...args: instanceof Array<unknown>
+        ]
+        type_args: []
+        returns: object
+      }
+    ]
+  }
+  returns: class {
+    extends: instanceof T
+    implements: []
+    type_args: []
+  }
+}
+
+Expression "WithMixin(BaseCls)" => class {
+  extends: BaseCls
+  implements: []
+  type_args: []
+}
+
+Expression "BaseCls" => class "BaseCls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding SiblingCls "SiblingCls" => class "SiblingCls" {
+  extends: BaseCls
+  implements: []
+  type_args: []
+}
+
+Expression "BaseCls" => class "BaseCls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding mixins "mixins" => sync Function "mixins" {
+  accepts: {
+    params: [
+      required m: instanceof MixedCls | instanceof SiblingCls
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding m "m" => instanceof MixedCls | instanceof SiblingCls
+
+Expression "m" => instanceof MixedCls | instanceof SiblingCls
+
+Expression "m instanceof BaseCls" => boolean
+
+Expression "BaseCls" => class "BaseCls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "m" => instanceof MixedCls | instanceof SiblingCls
+```

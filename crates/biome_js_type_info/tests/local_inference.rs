@@ -1,7 +1,9 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
+use biome_js_syntax::JsExpressionStatement;
 use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
+use biome_rowan::AstNode;
 
 use utils::{
     TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
@@ -398,4 +400,58 @@ fn infer_type_of_dynamic_import() {
         &decl,
     );
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_dynamic_import");
+}
+
+/// A collector that records no expression types must decline assignment
+/// narrowing outright. Resolving the assigned value here would infer the
+/// right-hand side at the reference's position, which both re-runs the
+/// scan for every assignment in the chain and can bind a name in the
+/// right-hand side to a different declaration.
+#[test]
+fn declines_assignment_narrowing_without_recorded_expressions() {
+    const CODE: &str = r#"x = y;
+y = x;
+x = y;
+x;"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .filter_map(JsExpressionStatement::cast)
+        .last()
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+
+    assert!(
+        !matches!(ty, TypeData::TypeofExpression(_)),
+        "assignment narrowing must be declined, got {ty:?}"
+    );
+}
+
+#[test]
+fn infer_type_of_typeof_guard_narrowed_reference() {
+    const CODE: &str = r#"if (typeof x === "string") {
+    x;
+}"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .find_map(JsExpressionStatement::cast)
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_typeof_guard_narrowed_reference",
+    );
 }
