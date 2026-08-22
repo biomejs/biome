@@ -332,21 +332,71 @@ impl std::str::FromStr for Glob {
             (GlobKind::Normal, value)
         };
         validate_glob(value)?;
-        let mut glob_builder = globset::GlobBuilder::new(value);
-        // Allow escaping with `\` on all platforms.
-        glob_builder.backslash_escape(true);
-        // Only `**` can match `/`
-        glob_builder.literal_separator(true);
-        match glob_builder.build() {
-            Ok(glob) => Ok(Self {
-                kind,
-                glob: glob.compile_matcher(),
-            }),
-            Err(error) => Err(GlobError::Generic(
-                error.kind().to_string().into_boxed_str(),
-            )),
-        }
+        Ok(Self {
+            kind,
+            glob: compile_matcher_cached(value)?,
+        })
     }
+}
+
+/// Cache of previously compiled glob matchers, keyed by pattern string.
+type MatcherCache = parking_lot::Mutex<std::collections::HashMap<Box<str>, globset::GlobMatcher>>;
+static MATCHER_CACHE: std::sync::LazyLock<MatcherCache> =
+    std::sync::LazyLock::new(Default::default);
+
+/// Upper bound on the number of distinct patterns [MATCHER_CACHE] holds at
+/// once. Real-world configurations only ever contain a small, fixed set of
+/// patterns, so this is far larger than any legitimate workload needs; it
+/// exists to keep the cache itself from becoming an unbounded, process-global
+/// growth source (the same failure mode this cache was added to fix).
+const MAX_CACHED_MATCHERS: usize = 4096;
+
+/// Counts, per pattern string, how many times a pattern was actually
+/// compiled (as opposed to reused from [MATCHER_CACHE]). Used by tests to
+/// assert that repeated parses of the same pattern don't recompile it.
+#[cfg(test)]
+static COMPILE_COUNTS: std::sync::LazyLock<
+    parking_lot::Mutex<std::collections::HashMap<Box<str>, usize>>,
+> = std::sync::LazyLock::new(Default::default);
+
+/// Compiles `pattern` into a [`globset::GlobMatcher`], reusing a previously
+/// compiled matcher for the same pattern instead of recompiling it.
+///
+/// Settings (and thus their globs) get recompiled from scratch every time a
+/// configuration is reloaded (e.g. on every file watcher event or IDE
+/// settings update), even when a given pattern was already seen in a
+/// previous reload. `globset::GlobMatcher` is cheap to clone, since its
+/// underlying `regex_automata::meta::Regex` shares its compiled state
+/// through an `Arc`, so caching by pattern string avoids the repeated cost
+/// (and allocations) of `regex_automata`'s DFA/NFA construction.
+fn compile_matcher_cached(pattern: &str) -> Result<globset::GlobMatcher, GlobError> {
+    if let Some(matcher) = MATCHER_CACHE.lock().get(pattern) {
+        return Ok(matcher.clone());
+    }
+
+    let mut glob_builder = globset::GlobBuilder::new(pattern);
+    // Allow escaping with `\` on all platforms.
+    glob_builder.backslash_escape(true);
+    // Only `**` can match `/`
+    glob_builder.literal_separator(true);
+    let matcher = glob_builder
+        .build()
+        .map_err(|error| GlobError::Generic(error.kind().to_string().into_boxed_str()))?
+        .compile_matcher();
+    #[cfg(test)]
+    {
+        *COMPILE_COUNTS.lock().entry(pattern.into()).or_insert(0) += 1;
+    }
+
+    {
+        let mut cache = MATCHER_CACHE.lock();
+        if cache.len() >= MAX_CACHED_MATCHERS {
+            cache.clear();
+        }
+        cache.insert(pattern.into(), matcher.clone());
+    }
+
+    Ok(matcher)
 }
 impl TryFrom<String> for Glob {
     type Error = GlobError;
@@ -850,6 +900,45 @@ mod tests {
         assert_eq!(
             Glob::from_str("file.{js,jsx}").unwrap().to_string(),
             "file.{js,jsx}"
+        );
+    }
+
+    /// Regression test for <https://github.com/biomejs/biome/issues/10139>:
+    /// parsing the same glob pattern repeatedly must reuse a single cached
+    /// matcher instead of recompiling it on every call.
+    #[test]
+    fn test_compile_matcher_cache_is_reused_for_repeated_patterns() {
+        // Unique to this test, so concurrent tests can't affect the count.
+        let pattern = "**/regression_test_cache_reuse_pattern/*.rs";
+
+        for _ in 0..50 {
+            Glob::from_str(pattern).unwrap();
+        }
+
+        let compile_count = *COMPILE_COUNTS.lock().get(pattern).unwrap_or(&0);
+
+        assert_eq!(
+            compile_count, 1,
+            "expected the pattern to be compiled exactly once across 50 identical parses, \
+             but it was compiled {compile_count} times"
+        );
+    }
+
+    /// [MATCHER_CACHE] must stay bounded even when it is fed an unbounded
+    /// stream of distinct patterns, otherwise it just becomes a new,
+    /// unbounded growth source instead of fixing one.
+    #[test]
+    fn test_compile_matcher_cache_is_bounded() {
+        for i in 0..(MAX_CACHED_MATCHERS + 100) {
+            let pattern = format!("**/regression_test_cache_bound_pattern_{i}/*.rs");
+            Glob::from_str(&pattern).unwrap();
+        }
+
+        let cache_len = MATCHER_CACHE.lock().len();
+        assert!(
+            cache_len <= MAX_CACHED_MATCHERS,
+            "expected the matcher cache to stay within its {MAX_CACHED_MATCHERS}-entry bound, \
+             but it grew to {cache_len} entries"
         );
     }
 }
