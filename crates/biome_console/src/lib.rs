@@ -38,18 +38,17 @@ pub trait Console: Send + Sync + RefUnwindSafe {
     /// Prints a message (formatted using [markup!]) to the console.
     fn print(&mut self, level: LogLevel, args: Markup);
 
-    /// Prints content that is data rather than console UI, such as source code
-    /// echoed back to the caller.
+    /// Prints `content` with no markup interpretation and no trailing newline.
     ///
-    /// [Self::print] takes markup, which the terminal implementation renders
-    /// with colour escapes and an ASCII fallback for symbols such as `✔`.
-    /// Neither belongs in content the caller may redirect into a file.
+    /// Callers use this for text a user may redirect into a file, such as the
+    /// source `format --stdin-file-path` echoes back. [Self::print] takes
+    /// markup, which a terminal implementation may render with colour escapes
+    /// and with ASCII in place of symbols such as U+2714; both would land in
+    /// the redirected file.
     ///
-    /// This is not byte-transparent: an implementation writing to a terminal
-    /// still replaces the characters that terminal would read as commands
-    /// rather than as text, so printing a file cannot drive the terminal.
-    ///
-    /// It adds no line at the end.
+    /// The output is not byte for byte. An implementation writing to a
+    /// terminal replaces characters that terminal would act on, U+001B among
+    /// them, with U+FFFD.
     fn print_verbatim(&mut self, level: LogLevel, content: &str);
 
     /// It reads from a source, and if this source contains something, it's converted into a [String]
@@ -79,8 +78,7 @@ pub trait ConsoleExt: Console {
     /// It doesn't add any line
     fn append(&mut self, args: Markup);
 
-    /// Prints content that is data rather than console UI with level
-    /// [LogLevel::Log]. See [Console::print_verbatim].
+    /// Calls [Console::print_verbatim] with [LogLevel::Log].
     fn append_verbatim(&mut self, content: &str);
 }
 
@@ -242,9 +240,9 @@ impl BufferConsole {
 pub struct Message {
     pub level: LogLevel,
     pub content: MarkupBuf,
-    /// Set when the message came from [Console::print_verbatim], so a consumer
-    /// that renders the buffer knows not to apply the terminal rewrites it
-    /// applies to markup.
+    /// `true` when the message came from [Console::print_verbatim]. A consumer
+    /// that renders `content` as markup instead would apply substitutions the
+    /// real console did not.
     pub verbatim: bool,
 }
 

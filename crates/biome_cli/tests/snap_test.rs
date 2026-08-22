@@ -519,10 +519,11 @@ pub fn markup_to_string(markup: Markup) -> String {
     String::from_utf8(buffer).unwrap()
 }
 
-/// Renders a message the way the console it was printed to would render it.
+/// Renders `message` the way the user saw it.
 ///
-/// Verbatim messages reach the real console without the markup rewrites, so
-/// rendering them as markup here would show something the user never sees.
+/// [`biome_console::Console::print_verbatim`] does not go through [`Termcolor`],
+/// so rendering such a message as markup here would put ASCII substitutions
+/// into the snapshot that the real run never produced.
 pub fn message_to_string(message: &Message) -> String {
     if !message.verbatim {
         return markup_to_string(markup! {

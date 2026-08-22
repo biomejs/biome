@@ -1285,8 +1285,8 @@ fn format_stdin_keeps_non_ascii_source() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    // Both symbols are in the ASCII fallback table the console applies to
-    // diagnostics; the source echoed back to stdout must not go through it.
+    // U+26A0 and U+2714 are two of the four code points `unicode_to_ascii`
+    // rewrites, so they show whether the echoed source came through intact.
     console
         .in_buffer
         .push("const a = \"\u{26a0}\u{2714}\"".to_string());
