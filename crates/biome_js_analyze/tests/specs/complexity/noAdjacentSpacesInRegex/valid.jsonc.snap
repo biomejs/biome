@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 197
 expression: valid.jsonc
 ---
 # Input
@@ -25,4 +26,24 @@ expression: valid.jsonc
 # Input
 ```cjs
 /‎⁦⁩/gu;
+```
+
+# Input
+```cjs
+/[\s   ]/g;
+```
+
+# Input
+```cjs
+/[a   b]/;
+```
+
+# Input
+```cjs
+/[\]   ]/;
+```
+
+# Input
+```cjs
+/[[a   b]--[c   d]]/v;
 ```
