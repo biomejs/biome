@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_props_always.jsx
+---
+# Input
+```jsx
+<App prop="Hello world" />;
+
+```
+
+# Diagnostics
+```
+invalid_props_always.jsx:1:11 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Should have curly braces around expression.
+  
+  > 1 │ <App prop="Hello world" />;
+      │           ^^^^^^^^^^^^^
+    2 │ 
+  
+  i JSX attribute value should be wrapped in curly braces. This will make the JSX attribute value more readable.
+  
+  i Unsafe fix: Add curly braces around the expression.
+  
+    1 │ <App·prop={"Hello·world"·}·/>;
+      │           +              ++   
+
+```
