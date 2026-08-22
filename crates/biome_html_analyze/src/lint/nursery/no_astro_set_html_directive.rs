@@ -61,7 +61,7 @@ impl Rule for NoAstroSetHtmlDirective {
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "This "<Emphasis>"set:html"</Emphasis>" directive inserts unescaped HTML."
+                    "The "<Emphasis>"set:html"</Emphasis>" directive inserts unescaped HTML."
                 },
             )
             .note(markup! {
