@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_html_syntax::AstroSetDirective;
 use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
@@ -33,7 +34,8 @@ declare_lint_rule! {
         version: "next",
         name: "noAstroSetHtmlDirective",
         language: "html",
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
         domains: &[RuleDomain::Astro],
         sources: &[RuleSource::EslintAstro("no-set-html-directive").same()],
     }

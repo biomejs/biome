@@ -16,7 +16,7 @@ expression: invalid.astro
 ```
 invalid.astro:2:6 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The set:html directive inserts unescaped HTML.
+  × The set:html directive inserts unescaped HTML.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div set:html={content}></div>
@@ -36,7 +36,7 @@ invalid.astro:2:6 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━�
 ```
 invalid.astro:3:10 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The set:html directive inserts unescaped HTML.
+  × The set:html directive inserts unescaped HTML.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div set:html={content}></div>
@@ -57,7 +57,7 @@ invalid.astro:3:10 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━
 ```
 invalid.astro:4:8 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The set:html directive inserts unescaped HTML.
+  × The set:html directive inserts unescaped HTML.
   
     2 │ <div set:html={content}></div>
     3 │ <section set:html="<p>content</p>"></section>
@@ -78,7 +78,7 @@ invalid.astro:4:8 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━�
 ```
 invalid.astro:5:10 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The set:html directive inserts unescaped HTML.
+  × The set:html directive inserts unescaped HTML.
   
     3 │ <section set:html="<p>content</p>"></section>
     4 │ <aside set:html=`<p>content</p>`></aside>
