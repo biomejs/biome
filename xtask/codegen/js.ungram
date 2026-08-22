@@ -2328,14 +2328,19 @@ AnyJsxTag =
 	JsxElement
 	| JsxSelfClosingElement
 	| JsxFragment
+	| AstroImplicitFragment
 
-// <a />
+// Adjacent siblings in an Astro template expression, which need no `<>`.
+AstroImplicitFragment =
+	children: JsxChildList
+
+// <a />, or `<br>` in Astro, where HTML void elements need no slash
 JsxSelfClosingElement =
 	'<'
 	name: AnyJsxElementName
 	type_arguments: TsTypeArguments?
 	attributes: JsxAttributeList
-	'/'
+	'/'?
 	'>'
 
 JsxElement =
