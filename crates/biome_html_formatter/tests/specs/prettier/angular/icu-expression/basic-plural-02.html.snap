@@ -1,0 +1,96 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/icu-expression/basic-plural-02.html
+---
+
+# Input
+
+```html
+{ count, plural,
+    =0 {{ sex, select,
+      other {<p>deeply nested</p>}
+    }}
+    =other {a lot}
+}
+
+{ count123, plural,
+  =0 {{ sex, select,
+    other {<p>deeply nested</p>}
+  }}
+  =other {a lot}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,9 @@
+-{count, plural, =0 {{sex, select, other {<p>deeply nested</p>}}} =other {a lot}}
+-
+-{count123, plural,
+-  =0 {{sex, select, other {<p>deeply nested</p>}}}
+-  =other {a lot}
+-}
++{ count, plural, =0
++{{ sex, select,
++      other {<p>deeply nested</p>}
++    }}
++=other { a lot} } { count123, plural, =0
++{{ sex, select,
++    other {<p>deeply nested</p>}
++  }}
++=other { a lot} }
+```
+
+# Output
+
+```html
+{ count, plural, =0
+{{ sex, select,
+      other {<p>deeply nested</p>}
+    }}
+=other { a lot} } { count123, plural, =0
+{{ sex, select,
+    other {<p>deeply nested</p>}
+  }}
+=other { a lot} }
+```
+
+# Errors
+```
+basic-plural-02.html:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    1 │ { count, plural,
+  > 2 │     =0 {{ sex, select,
+      │        ^^^^^^^^^^^^^^^
+  > 3 │       other {<p>deeply nested</p>}
+  > 4 │     }}
+      │     ^^
+    5 │     =other {a lot}
+    6 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+basic-plural-02.html:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     8 │ { count123, plural,
+   > 9 │   =0 {{ sex, select,
+       │      ^^^^^^^^^^^^^^^
+  > 10 │     other {<p>deeply nested</p>}
+  > 11 │   }}
+       │   ^^
+    12 │   =other {a lot}
+    13 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

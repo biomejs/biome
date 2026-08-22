@@ -1,0 +1,273 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/multiple-switch-cases.html
+---
+
+# Input
+
+```html
+<!-- https://github.com/angular/angular/pull/66210 -->
+
+@switch (expr) {
+  @case (   'one')
+  @case (     'two') {
+    {{                      oneOrTwo()}}
+  }
+  @case (                  'three') {
+    {{   three()}}
+  }
+}
+
+
+@switch (expr) {
+  @case      (1)
+  @case    (2) {
+    {{oneOrTwo()                 }}
+  }
+  @case     (3     )
+  @default {
+    {{default()                  }}
+  }
+}
+
+ <div>
+      {{message}}
+      @switch (value()) {
+        @case (         0)                  @case(1            ) {
+                                    case 01
+        }
+        @case (2) {
+          case 2
+        }
+        @default {
+          default
+        }
+      }
+    </div>
+
+@switch(a){@default @case(2){<div>default before case</div>}}
+@switch(a){@case(1) @case(2){} @case(3) {<div>3</div>}}
+
+@switch(a){@case(1) @case(2) {<!-- comment -->}}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,59 +1,24 @@
+ <!-- https://github.com/angular/angular/pull/66210 -->
+ 
+-@switch (expr) {
+-  @case ("one")
+-  @case ("two") {
+-    {{ oneOrTwo() }}
+-  }
+-  @case ("three") {
+-    {{ three() }}
+-  }
+-}
+-
+-@switch (expr) {
+-  @case (1)
+-  @case (2) {
+-    {{ oneOrTwo() }}
+-  }
+-  @case (3)
+-  @default {
+-    {{ default() }}
+-  }
+-}
++@switch (expr) { @case ( 'one') @case ( 'two') {
++{{                      oneOrTwo()}}
++} @case ( 'three') {
++{{   three()}}
++} } @switch (expr) { @case (1) @case (2) {
++{{oneOrTwo()                 }}
++} @case (3 ) @default {
++{{default()                  }}
++} }
+ 
+ <div>
+-  {{ message }}
+-  @switch (value()) {
+-    @case (0)
+-    @case (1) {
+-      case 01
+-    }
+-    @case (2) {
+-      case 2
+-    }
+-    @default {
+-      default
+-    }
+-  }
++  {{message}}
++  @switch (value()) { @case ( 0) @case(1 ) { case 01 } @case (2) { case 2 }
++  @default { default } }
+ </div>
+-
+-@switch (a) {
+-  @default
+-  @case (2) {
+-    <div>default before case</div>
+-  }
+-}
+-@switch (a) {
+-  @case (1)
+-  @case (2) {}
+-  @case (3) {
+-    <div>3</div>
+-  }
+-}
+-
+-@switch (a) {
+-  @case (1)
+-  @case (2) {
+-    <!-- comment -->
+-  }
+-}
++@switch(a)
++{@default @case(2){<div>default before case</div>}}
++@switch(a){@case(1) @case(2){}
++@case(3) {
++<div>3</div>
++}} @switch(a)
++{@case(1) @case(2) {<!-- comment -->}}
+```
+
+# Output
+
+```html
+<!-- https://github.com/angular/angular/pull/66210 -->
+
+@switch (expr) { @case ( 'one') @case ( 'two') {
+{{                      oneOrTwo()}}
+} @case ( 'three') {
+{{   three()}}
+} } @switch (expr) { @case (1) @case (2) {
+{{oneOrTwo()                 }}
+} @case (3 ) @default {
+{{default()                  }}
+} }
+
+<div>
+  {{message}}
+  @switch (value()) { @case ( 0) @case(1 ) { case 01 } @case (2) { case 2 }
+  @default { default } }
+</div>
+@switch(a)
+{@default @case(2){<div>default before case</div>}}
+@switch(a){@case(1) @case(2){}
+@case(3) {
+<div>3</div>
+}} @switch(a)
+{@case(1) @case(2) {<!-- comment -->}}
+```
+
+# Errors
+```
+multiple-switch-cases.html:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    4 │   @case (   'one')
+    5 │   @case (     'two') {
+  > 6 │     {{                      oneOrTwo()}}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   }
+    8 │   @case (                  'three') {
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+multiple-switch-cases.html:9:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     7 │   }
+     8 │   @case (                  'three') {
+   > 9 │     {{   three()}}
+       │     ^^^^^^^^^^^^^^
+    10 │   }
+    11 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+multiple-switch-cases.html:17:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    15 │   @case      (1)
+    16 │   @case    (2) {
+  > 17 │     {{oneOrTwo()                 }}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   }
+    19 │   @case     (3     )
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+multiple-switch-cases.html:21:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    19 │   @case     (3     )
+    20 │   @default {
+  > 21 │     {{default()                  }}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │   }
+    23 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+multiple-switch-cases.html:26:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    25 │  <div>
+  > 26 │       {{message}}
+       │       ^^^^^^^^^^^
+    27 │       @switch (value()) {
+    28 │         @case (         0)                  @case(1            ) {
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+multiple-switch-cases.html:40:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `render`, `html`, `const`, or `debug`
+  
+    38 │     </div>
+    39 │ 
+  > 40 │ @switch(a){@default @case(2){<div>default before case</div>}}
+       │             ^^^^^^^
+    41 │ @switch(a){@case(1) @case(2){} @case(3) {<div>3</div>}}
+    42 │ 
+  
+multiple-switch-cases.html:43:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `render`, `html`, `const`, or `debug`
+  
+    41 │ @switch(a){@case(1) @case(2){} @case(3) {<div>3</div>}}
+    42 │ 
+  > 43 │ @switch(a){@case(1) @case(2) {<!-- comment -->}}
+       │             ^^^^
+    44 │ 
+  
+multiple-switch-cases.html:44:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    43 │ @switch(a){@case(1) @case(2) {<!-- comment -->}}
+  > 44 │ 
+       │ 
+  
+  i the file ends here
+  
+    43 │ @switch(a){@case(1) @case(2) {<!-- comment -->}}
+  > 44 │ 
+       │ 
+  
+
+```
