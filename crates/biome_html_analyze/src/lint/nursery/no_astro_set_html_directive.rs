@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// - [Astro `set:html` directive](https://docs.astro.build/en/reference/directives-reference/#sethtml)
     /// - [OWASP HTML sanitization guidance](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
     pub NoAstroSetHtmlDirective {
-        version: "next",
+        version: "2.5.11",
         name: "noAstroSetHtmlDirective",
         language: "html",
         recommended: true,
