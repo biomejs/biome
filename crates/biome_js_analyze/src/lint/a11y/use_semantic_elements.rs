@@ -84,6 +84,14 @@ impl Rule for UseSemanticElements {
         if node.is_custom_component() || node.is_custom_element() {
             return None;
         }
+        // Fix #8277: skip if aria-disabled="true" — can't use native <button disabled>
+        if let Some(attr) = node.find_attribute_by_name("aria-disabled") {
+            if let Some(val) = attr.as_static_value() {
+                if val.text() == "true" {
+                    return None;
+                }
+            }
+        }
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_value = role_attribute.as_static_value()?;
