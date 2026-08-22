@@ -18,22 +18,20 @@ use biome_console::markup;
 use biome_css_parser::CssParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::AnyCssRoot;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use biome_db::ParsedSource;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 #[cfg(feature = "html_embeds")]
 use biome_fs::MemoryFileSystem;
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_parser::HtmlParserOptions;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_syntax::HtmlRoot;
+use biome_html_parser::{HtmlParse, HtmlParserOptions};
 #[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
 use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_module_graph::HtmlEmbeddedContent;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_module_graph::resolve_css_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
@@ -309,6 +307,27 @@ pub fn module_graph_for_test_file(
         let css_paths = get_css_like_paths_in_dir(&dir);
         let css_roots = get_css_added_paths(&fs, &css_paths);
         for (path, root) in css_roots {
+            let DocumentFileSource::Css(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                continue;
+            };
+            let content = fs.read_file_from_path(path).expect("CSS test file exists");
+            let options = if file_source.is_css_modules() {
+                CssParserOptions::default().allow_css_modules()
+            } else {
+                CssParserOptions::default()
+            };
+            let parsed = biome_css_parser::parse_css(&content, file_source, options);
+            let source_index = db.insert_source(file_source.into());
+            let parsed_source = ParsedSource::new(
+                &db,
+                path.as_path().to_path_buf(),
+                parsed.into(),
+                source_index,
+                Vec::new(),
+            );
+            db.insert_file(path.as_path(), parsed_source);
             let (module_info, _, _) =
                 resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
             let md = biome_module_graph::ModuleInfo::new(
@@ -343,6 +362,27 @@ pub fn module_graph_for_css_test_file(
     let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
     let css_roots = get_css_added_paths(&fs, &css_paths);
     for (path, root) in css_roots {
+        let DocumentFileSource::Css(file_source) =
+            DocumentFileSource::from_path(path.as_path(), false)
+        else {
+            continue;
+        };
+        let content = fs.read_file_from_path(path).expect("CSS test file exists");
+        let options = if file_source.is_css_modules() {
+            CssParserOptions::default().allow_css_modules()
+        } else {
+            CssParserOptions::default()
+        };
+        let parsed = biome_css_parser::parse_css(&content, file_source, options);
+        let source_index = db.insert_source(file_source.into());
+        let parsed_source = ParsedSource::new(
+            &db,
+            path.as_path().to_path_buf(),
+            parsed.into(),
+            source_index,
+            Vec::new(),
+        );
+        db.insert_file(path.as_path(), parsed_source);
         let (module_info, _, _) =
             resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
         let md = biome_module_graph::ModuleInfo::new(
@@ -355,7 +395,15 @@ pub fn module_graph_for_css_test_file(
 
     #[cfg(feature = "lang_js")]
     {
-        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
+        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir))
+            .into_iter()
+            .filter(|path| {
+                matches!(
+                    path.as_path().extension(),
+                    Some("cjs" | "cts" | "js" | "jsx" | "mjs" | "mts" | "ts" | "tsx")
+                )
+            })
+            .collect::<Vec<_>>();
         let js_roots = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_roots {
             let (module_info, _, _) = resolve_js_module(
@@ -564,7 +612,7 @@ pub fn get_css_added_paths<'a>(
 pub fn get_html_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, HtmlRoot, Vec<HtmlEmbeddedContent>)> {
+) -> Vec<(&'a BiomePath, HtmlParse, DocumentFileSource)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -573,7 +621,7 @@ pub fn get_html_added_paths<'a>(
             else {
                 return None;
             };
-            let root = fs.read_file_from_path(path).ok().map(|content| {
+            let parse = fs.read_file_from_path(path).ok().map(|content| {
                 let parsed =
                     biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
@@ -581,12 +629,9 @@ pub fn get_html_added_paths<'a>(
                     diagnostics.is_empty(),
                     "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
                 );
-                parsed.tree()
+                parsed
             })?;
-            // For test utilities, we don't parse embedded content in HTML files.
-            // In real scenarios, the workspace server handles this by parsing
-            // embedded blocks separately and passing them to update_graph_for_html_paths.
-            Some((path, root, Vec::<HtmlEmbeddedContent>::new()))
+            Some((path, parse, DocumentFileSource::Html(file_source)))
         })
         .collect()
 }

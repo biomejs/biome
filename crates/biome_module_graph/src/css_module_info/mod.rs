@@ -68,14 +68,14 @@ pub struct CssClassReference {
     pub file_path: Utf8PathBuf,
 }
 
-/// An authored `@property` definition found through the module graph.
+/// An authored custom property definition found through the module graph.
 ///
 /// Descriptor data remains owned by the defining document's semantic model.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CssPropertyDefinition {
     /// The CSS or HTML-like document that contains the definition.
     pub module_path: Utf8PathBuf,
-    /// The absolute source range of the complete `@property` rule.
+    /// The absolute source range of the definition.
     pub range: TextRange,
 }
 
