@@ -1865,6 +1865,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_exports_last::UseExportsLastOptions>(),
     ));
     result.push((
+        "nursery",
+        "useFencedCodeLanguage",
+        TypeId::of::<biome_rule_options::use_fenced_code_language::UseFencedCodeLanguageOptions>(),
+    ));
+    result.push((
         "style",
         "useFilenamingConvention",
         TypeId::of::<biome_rule_options::use_filenaming_convention::UseFilenamingConventionOptions>(
