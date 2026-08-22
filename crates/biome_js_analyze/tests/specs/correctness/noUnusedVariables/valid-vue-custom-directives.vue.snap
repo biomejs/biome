@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-custom-directives.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const isHighlighted = ref(false);
+const vHighlight = {
+  mounted(el) {
+    el.style.color = 'red';
+  }
+};
+</script>
+
+<template>
+  <!-- custom directive -->
+  <div v-highlight>Highlighted</div>
+
+  <!-- custom directive with value -->
+  <div v-highlight="isHighlighted">Highlighted</div>
+</template>
+
+```
