@@ -7026,7 +7026,7 @@
 					]
 				},
 				"noUndeclaredCustomProperties": {
-					"description": "Reports custom properties used in static HTML style attributes that have no declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+					"description": "Reports custom properties used with var() that have no visible declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
 						{ "type": "null" }
