@@ -147,7 +147,7 @@ impl ProcessFile for LintAssistProcessFile {
         })?;
 
         if file_features.is_ignored() {
-            console.append(markup! {{content}});
+            console.append_verbatim(content);
             // Write error last because files may generally be long
             console.error(markup! {
                 <Warn>"The content was not fixed because the path `"{biome_path.as_str()}"` is ignored."</Warn>
@@ -164,7 +164,7 @@ impl ProcessFile for LintAssistProcessFile {
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
             }
-            console.append(markup! {{content}});
+            console.append_verbatim(content);
 
             return Ok(());
         };
@@ -209,7 +209,7 @@ impl ProcessFile for LintAssistProcessFile {
             skip_parse_errors: execution.should_skip_parse_errors(),
         })?;
         let source = result.output.as_deref().unwrap_or(content);
-        console.append(markup! {{source}});
+        console.append_verbatim(source);
 
         if result.output.is_none() && !execution.requires_write_access() {
             Err(StdinDiagnostic::new_not_formatted().into())
