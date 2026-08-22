@@ -12,6 +12,7 @@ declare_lint_rule! {
     /// Disallow the use of Astro's `set:html` directive.
     ///
     /// `set:html` renders HTML without escaping it. Using `set:html` can introduce cross-site scripting vulnerabilities.
+    /// When raw HTML is required, sanitize the value before passing it to `set:html`, then suppress the diagnostic with an explanation.
     ///
     /// ## Examples
     ///
@@ -30,6 +31,7 @@ declare_lint_rule! {
     /// ## References
     ///
     /// - [Astro `set:html` directive](https://docs.astro.build/en/reference/directives-reference/#sethtml)
+    /// - [OWASP HTML sanitization guidance](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization)
     pub NoAstroSetHtmlDirective {
         version: "next",
         name: "noAstroSetHtmlDirective",
@@ -70,7 +72,7 @@ impl Rule for NoAstroSetHtmlDirective {
                 "Using "<Emphasis>"set:html"</Emphasis>" can introduce cross-site scripting vulnerabilities."
             })
             .note(markup! {
-                "Use a regular Astro expression to render text. If raw HTML is required, sanitize the value before passing it to "<Emphasis>"set:html"</Emphasis>" and suppress this diagnostic with an explanation."
+                "Use a regular Astro expression to render text, or suppress this diagnostic with an explanation if raw HTML is required."
             }),
         )
     }
