@@ -31,7 +31,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUndeclaredCustomProperties {
-        version: "next",
+        version: "2.5.11",
         name: "noUndeclaredCustomProperties",
         language: "js",
         recommended: false,
