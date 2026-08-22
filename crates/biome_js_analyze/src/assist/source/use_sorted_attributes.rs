@@ -71,6 +71,22 @@ declare_source_rule! {
     /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
     /// ```
     ///
+    /// ### `sortFirst`
+    /// A list of attribute names that should be sorted before all other attributes,
+    /// in the order they appear in this list. The remaining attributes are sorted
+    /// after the listed ones. This is useful to keep attributes such as `key` first.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortFirst": ["key"]
+    ///     }
+    /// }
+    /// ```
+    /// ```jsx,use_options,expect_diagnostic
+    /// <Hello firstName="John" key={id} lastName="Smith" />;
+    /// ```
+    ///
     pub UseSortedAttributes {
         version: "2.0.0",
         name: "useSortedAttributes",
@@ -93,10 +109,15 @@ impl Rule for UseSortedAttributes {
         let mut prop_groups = Vec::new();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = match sort_by {
+        let base = match sort_by {
             SortOrder::Natural => SortableJsxAttribute::ascii_nat_cmp,
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
+        };
+
+        let comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         // Convert to boolean-based comparator for is_sorted_by
@@ -156,10 +177,15 @@ impl Rule for UseSortedAttributes {
         let mut mutation = ctx.root().begin();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = match sort_by {
+        let base = match sort_by {
             SortOrder::Natural => SortableJsxAttribute::ascii_nat_cmp,
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
+        };
+
+        let comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in

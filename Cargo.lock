@@ -127,6 +127,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_text_edit",
+ "bitvec",
  "camino",
  "either",
  "enumflags2",
@@ -271,6 +272,7 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
+ "biome_string_case",
  "biome_yaml_syntax",
  "bpaf",
  "camino",
@@ -1034,7 +1036,6 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
- "bitvec",
  "camino",
  "codspeed-criterion-compat",
  "either",
@@ -2462,9 +2463,9 @@ checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
 
 [[package]]
 name = "cc"
-version = "1.4.1"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9066c49992464636f92905fa096ec58baaa4d57ec19a5c096c68d3e25ef3d136"
+checksum = "5add81bb678e6cb321aff7fa0dc7689ad82b112dbc032cea19f91d6b8e3582b9"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -3180,9 +3181,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.10"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26b73573e6edcd2af0cdf47bd6cb58f0b3839491263c314eaad1ccf24430e1de"
+checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "fixedbitset"
@@ -4295,12 +4296,11 @@ dependencies = [
 
 [[package]]
 name = "libmimalloc-sys"
-version = "0.1.44"
+version = "0.1.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "667f4fec20f29dfc6bc7357c582d91796c169ad7e2fce709468aefeb2c099870"
+checksum = "2d1eacfa31c33ec25e873c136ba5669f00f9866d0688bea7be4d3f7e43067df6"
 dependencies = [
  "cc",
- "libc",
 ]
 
 [[package]]

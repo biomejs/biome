@@ -31,14 +31,41 @@ impl Plugins {
                 PluginConfiguration::Path(path) => path,
                 PluginConfiguration::PathWithOptions(opts) => &mut opts.path,
             };
-            let path_buf = Utf8Path::new(plugin_path.as_str());
-            if path_buf.is_absolute() {
-                continue;
+            if let Some(normalized_path) = normalize_plugin_path(plugin_path, base_dir) {
+                *plugin_path = normalized_path;
             }
-            let normalized = normalize_path(&base_dir.join(path_buf));
-            *plugin_path = normalized.to_string();
         }
     }
+
+    /// Normalizes object-syntax plugin paths with `resolutionKind: "config"` in-place.
+    ///
+    /// For each matching relative path, this joins it with `base_dir` and
+    /// normalizes `.` / `..` segments (without resolving symlinks).
+    ///
+    /// Paths that are already absolute are left unchanged.
+    pub fn normalize_object_relative_paths(&mut self, base_dir: &Utf8Path) {
+        for plugin_config in self.0.iter_mut() {
+            let PluginConfiguration::PathWithOptions(opts) = plugin_config else {
+                continue;
+            };
+            // Only normalize paths for plugins that explicitly opt in to config-relative resolution.
+            if opts.resolution_kind != Some(PluginResolvePath::Config) {
+                continue;
+            }
+
+            if let Some(normalized_path) = normalize_plugin_path(&opts.path, base_dir) {
+                opts.path = normalized_path;
+            }
+        }
+    }
+}
+
+fn normalize_plugin_path(plugin_path: &str, base_dir: &Utf8Path) -> Option<String> {
+    let path_buf = Utf8Path::new(plugin_path);
+    if path_buf.is_absolute() {
+        return None;
+    }
+    Some(normalize_path(&base_dir.join(path_buf)).to_string())
 }
 
 impl FromStr for Plugins {
@@ -71,7 +98,8 @@ impl DerefMut for Plugins {
 /// {
 ///   "plugins": [
 ///     "simple-plugin.grit",
-///     { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] }
+///     { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] },
+///     { "path": "./local-plugin.grit", "includes": ["src/**/*.ts"], "resolutionKind": "config" }
 ///   ]
 /// }
 /// ```
@@ -131,6 +159,27 @@ pub struct PluginWithOptions {
     /// these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<NormalizedGlob>>,
+
+    /// Controls how the plugin is resolved.
+    ///
+    /// This only affects plugin resolution. It does not change how `includes`
+    /// are interpreted.
+    ///
+    /// When omitted, relative plugin paths are resolved from the consuming
+    /// project.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolution_kind: Option<PluginResolvePath>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum PluginResolvePath {
+    /// Resolve relative paths from the consuming project.
+    #[default]
+    Project,
+    /// Resolve relative paths from the configuration file that declared the plugin.
+    Config,
 }
 
 #[cfg(test)]
@@ -178,6 +227,7 @@ mod tests {
             PluginWithOptions {
                 path: "./my-plugin.grit".into(),
                 includes: Some(vec!["src/**/*.ts".parse().unwrap()]),
+                resolution_kind: None,
             },
         )]);
 
@@ -189,6 +239,42 @@ mod tests {
 
         // includes should be unchanged
         assert!(plugins.0[0].includes().is_some());
+    }
+
+    #[test]
+    fn normalize_object_relative_paths_leaves_string_entries_unchanged() {
+        let base_dir = Utf8Path::new("base");
+        let mut plugins = Plugins(vec![
+            PluginConfiguration::Path("./biome/../biome/my-plugin.grit".into()),
+            PluginConfiguration::PathWithOptions(PluginWithOptions {
+                path: "./default-plugin.grit".into(),
+                includes: None,
+                resolution_kind: None,
+            }),
+            PluginConfiguration::PathWithOptions(PluginWithOptions {
+                path: "./other/../other/object-plugin.grit".into(),
+                includes: None,
+                resolution_kind: Some(PluginResolvePath::Config),
+            }),
+            PluginConfiguration::PathWithOptions(PluginWithOptions {
+                path: "./project-plugin.grit".into(),
+                includes: None,
+                resolution_kind: Some(PluginResolvePath::Project),
+            }),
+        ]);
+
+        plugins.normalize_object_relative_paths(base_dir);
+
+        assert_eq!(plugins.0[0].path(), "./biome/../biome/my-plugin.grit");
+
+        assert_eq!(plugins.0[1].path(), "./default-plugin.grit");
+
+        let config_path = plugins.0[2].path();
+        assert!(Utf8Path::new(config_path).starts_with(base_dir));
+        let expected_suffix = Utf8Path::new("other").join("object-plugin.grit");
+        assert!(Utf8Path::new(config_path).ends_with(expected_suffix.as_path()));
+
+        assert_eq!(plugins.0[3].path(), "./project-plugin.grit");
     }
 
     #[test]
@@ -213,6 +299,30 @@ mod tests {
             serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
+    }
+
+    #[test]
+    fn deserialize_object_with_config_resolve_path() {
+        let config: PluginConfiguration =
+            serde_json::from_str(r#"{ "path": "my-plugin.grit", "resolutionKind": "config" }"#)
+                .unwrap();
+        let PluginConfiguration::PathWithOptions(options) = config else {
+            panic!("expected object syntax plugin");
+        };
+        assert_eq!(options.resolution_kind, Some(PluginResolvePath::Config));
+
+        let config = deserialize_from_json_str::<PluginConfiguration>(
+            r#"{ "path": "my-plugin.grit", "resolutionKind": "config" }"#,
+            JsonParserOptions::default(),
+            "",
+        );
+        let (config, diagnostics) = config.consume();
+        assert!(diagnostics.is_empty());
+
+        let Some(PluginConfiguration::PathWithOptions(options)) = config else {
+            panic!("expected object syntax plugin");
+        };
+        assert_eq!(options.resolution_kind, Some(PluginResolvePath::Config));
     }
 
     #[test]

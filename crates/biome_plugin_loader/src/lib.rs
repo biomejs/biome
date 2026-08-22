@@ -49,7 +49,7 @@ impl BiomePlugin {
         base_path: &Utf8Path,
         includes: Option<&[NormalizedGlob]>,
     ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
-        let plugin_path = normalize_path(&base_path.join(plugin_path));
+        let plugin_path = resolve_plugin_path(base_path, plugin_path);
 
         // If the plugin path references a `.grit` file directly, treat it as
         // a single-rule plugin instead of going through the manifest process:
@@ -125,6 +125,17 @@ impl BiomePlugin {
         };
 
         Ok((plugin, plugin_path))
+    }
+}
+
+fn resolve_plugin_path(base_path: &Utf8Path, plugin_path: &str) -> Utf8PathBuf {
+    let plugin_path = Utf8Path::new(plugin_path);
+    if plugin_path.is_absolute()
+        || (!base_path.as_str().is_empty() && plugin_path.starts_with(base_path))
+    {
+        normalize_path(plugin_path)
+    } else {
+        normalize_path(&base_path.join(plugin_path))
     }
 }
 
@@ -220,6 +231,29 @@ mod test {
         let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
+    }
+
+    #[test]
+    fn load_plugin_path_already_rooted_at_base_path() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "node_modules/@shared/config/grit/no-object-assign.grit".into(),
+            r#"`hello`"#,
+        );
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let (plugin, path) = BiomePlugin::load(
+            fs,
+            "node_modules/@shared/config/grit/no-object-assign.grit",
+            Utf8Path::new("node_modules/@shared/config"),
+            None,
+        )
+        .expect("Couldn't load plugin");
+        assert_eq!(plugin.analyzer_plugins.len(), 1);
+        assert_eq!(
+            path,
+            Utf8PathBuf::from("node_modules/@shared/config/grit/no-object-assign.grit")
+        );
     }
 
     #[test]
