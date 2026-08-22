@@ -12,6 +12,7 @@ use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::json::{JsonFormatterConfiguration, JsonParserConfiguration};
 use biome_configuration::markdown::MarkdownFormatterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::yaml::YamlFormatterConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
@@ -32,6 +33,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) graphql_formatter: Option<GraphqlFormatterConfiguration>,
     pub(crate) html_formatter: Option<HtmlFormatterConfiguration>,
     pub(crate) markdown_formatter: Option<MarkdownFormatterConfiguration>,
+    pub(crate) yaml_formatter: Option<YamlFormatterConfiguration>,
     pub(crate) formatter_configuration: Option<FormatterConfiguration>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
@@ -203,6 +205,11 @@ impl TraversalCommand for FormatCommandPayload {
             markdown
                 .formatter
                 .merge_with(self.markdown_formatter.clone());
+        }
+
+        if self.yaml_formatter.is_some() {
+            let yaml = configuration.yaml.get_or_insert_with(Default::default);
+            yaml.formatter.merge_with(self.yaml_formatter.clone());
         }
 
         if self.javascript_formatter.is_some() {

@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.md`
+
+```md
+# Embeds
+
+```js
+debugger;
+```
+
+```css
+a {
+  color: red;
+  color: blue;
+}
+```
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.md:4:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+    3 │ ```js
+  > 4 │ debugger;
+      │ ^^^^^^^^^
+    5 │ ```
+    6 │ 
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1   │ - 
+    2   │ - debugger;
+      1 │ + 
+    3 2 │   
+  
+
+```
+
+```block
+file.md:10:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+     8 │ a {
+     9 │   color: red;
+  > 10 │   color: blue;
+       │   ^^^^^
+    11 │ }
+    12 │ ```
+  
+  i color is already defined here.
+  
+     7 │ ```css
+     8 │ a {
+   > 9 │   color: red;
+       │   ^^^^^
+    10 │   color: blue;
+    11 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

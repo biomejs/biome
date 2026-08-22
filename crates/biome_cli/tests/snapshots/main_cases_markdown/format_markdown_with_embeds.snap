@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+## `file.md`
+
+```md
+---
+title: Biome
+---
+
+# Embeds
+
+```js
+const value = 1;
+```
+
+<div>content</div>
+
+- item
+
+  ```js
+  const =
+  ```
+
+Paragraph with <span>inline HTML</span>.
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
