@@ -24,7 +24,7 @@ invalid.astro:2:6 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━�
     3 │ <section set:html="<p>content</p>"></section>
     4 │ <aside set:html=`<p>content</p>`></aside>
   
-  i Passing untrusted content to set:html can introduce cross-site scripting vulnerabilities.
+  i Using set:html can introduce cross-site scripting vulnerabilities.
   
   i Use a regular Astro expression to render text. If raw HTML is required, sanitize the value before passing it to set:html and suppress this diagnostic with an explanation.
   
@@ -45,7 +45,7 @@ invalid.astro:3:10 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━
     4 │ <aside set:html=`<p>content</p>`></aside>
     5 │ <article set:html></article>
   
-  i Passing untrusted content to set:html can introduce cross-site scripting vulnerabilities.
+  i Using set:html can introduce cross-site scripting vulnerabilities.
   
   i Use a regular Astro expression to render text. If raw HTML is required, sanitize the value before passing it to set:html and suppress this diagnostic with an explanation.
   
@@ -66,7 +66,7 @@ invalid.astro:4:8 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━�
     5 │ <article set:html></article>
     6 │ 
   
-  i Passing untrusted content to set:html can introduce cross-site scripting vulnerabilities.
+  i Using set:html can introduce cross-site scripting vulnerabilities.
   
   i Use a regular Astro expression to render text. If raw HTML is required, sanitize the value before passing it to set:html and suppress this diagnostic with an explanation.
   
@@ -86,7 +86,7 @@ invalid.astro:5:10 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━
       │          ^^^^^^^^
     6 │ 
   
-  i Passing untrusted content to set:html can introduce cross-site scripting vulnerabilities.
+  i Using set:html can introduce cross-site scripting vulnerabilities.
   
   i Use a regular Astro expression to render text. If raw HTML is required, sanitize the value before passing it to set:html and suppress this diagnostic with an explanation.
   

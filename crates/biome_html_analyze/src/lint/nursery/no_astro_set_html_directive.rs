@@ -11,7 +11,7 @@ use biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOpti
 declare_lint_rule! {
     /// Disallow the use of Astro's `set:html` directive.
     ///
-    /// `set:html` renders HTML without escaping it. Passing untrusted content to the directive can introduce cross-site scripting vulnerabilities.
+    /// `set:html` renders HTML without escaping it. Using `set:html` can introduce cross-site scripting vulnerabilities.
     ///
     /// ## Examples
     ///
@@ -67,7 +67,7 @@ impl Rule for NoAstroSetHtmlDirective {
                 },
             )
             .note(markup! {
-                "Passing untrusted content to "<Emphasis>"set:html"</Emphasis>" can introduce cross-site scripting vulnerabilities."
+                "Using "<Emphasis>"set:html"</Emphasis>" can introduce cross-site scripting vulnerabilities."
             })
             .note(markup! {
                 "Use a regular Astro expression to render text. If raw HTML is required, sanitize the value before passing it to "<Emphasis>"set:html"</Emphasis>" and suppress this diagnostic with an explanation."
