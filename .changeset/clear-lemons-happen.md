@@ -11,6 +11,6 @@ Fixed [#11423](https://github.com/biomejs/biome/issues/11423): Multiline templat
           ? "yes"
           : "no"
 -}
-+      }
++     }
  `;
 ```
