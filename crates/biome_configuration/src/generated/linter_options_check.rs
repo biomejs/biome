@@ -2031,6 +2031,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_key_with_mouse_events::UseKeyWithMouseEventsOptions>(),
     ));
     result.push((
+        "nursery",
+        "useLayer",
+        TypeId::of::<biome_rule_options::use_layer::UseLayerOptions>(),
+    ));
+    result.push((
         "style",
         "useLiteralEnumMembers",
         TypeId::of::<biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions>(),
