@@ -250,19 +250,15 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         imported_path: &Utf8Path,
         imports: &[&Utf8Path],
         next_branch: CssPropertyBranch,
-        local_definition: Option<CssPropertyDefinition>,
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
+        let definition = imports
+            .iter()
+            .rev()
+            .find_map(|path| self.last_property_in_module_context_from(path, next_branch.clone()));
         imports
             .iter()
             .filter(|path| **path == imported_path)
-            .map(|_| {
-                let definition = local_definition.clone().or_else(|| {
-                    imports.iter().rev().find_map(|path| {
-                        self.last_property_in_module_context_from(path, next_branch.clone())
-                    })
-                });
-                self.action(definition, next_branch.clone())
-            })
+            .map(|_| self.action(definition.clone(), next_branch.clone()))
             .collect()
     }
 
@@ -385,6 +381,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     }
 
     fn local_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
+        // The semantic extractor assumes the parsed source contains a CSS root.
         self.db.css_module_info_for_path(path)?;
         let parsed = self.db.parsed_source_for_path(path)?;
         let definition = css_property_definitions_from_source(self.db, parsed)
@@ -550,7 +547,7 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 let imports = js_import_paths_in_source_order(&info)
                     .filter_map(|import| import.as_path())
                     .collect::<Vec<_>>();
-                self.actions_for_imports(imported_path, &imports, next_branch, None)
+                self.actions_for_imports(imported_path, &imports, next_branch)
             }
             ModuleInfoKind::Html(_) => {
                 self.actions_for_html_imports(imported_path, importer_path, next_branch)

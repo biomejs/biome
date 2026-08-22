@@ -1,8 +1,8 @@
-<!-- should not generate diagnostics -->
 ---
 import Child from "./invalid.astro";
 import "./global.css";
 ---
+<!-- should not generate diagnostics -->
 
 <style is:global>
 :root { --global-color: green; }
