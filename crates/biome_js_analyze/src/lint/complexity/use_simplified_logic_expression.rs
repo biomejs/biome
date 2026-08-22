@@ -87,14 +87,14 @@ impl Rule for UseSimplifiedLogicExpression {
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
                 {
-                    return simplify_or_expression(literal, right).map(|expr| (false, expr));
+                    return simplify_or_expression(literal, right, true).map(|expr| (false, expr));
                 }
 
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = right
                 {
-                    return simplify_or_expression(literal, left).map(|expr| (false, expr));
+                    return simplify_or_expression(literal, left, false).map(|expr| (false, expr));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
@@ -107,14 +107,14 @@ impl Rule for UseSimplifiedLogicExpression {
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
                 {
-                    return simplify_and_expression(literal, right).map(|expr| (false, expr));
+                    return simplify_and_expression(literal, right, true).map(|expr| (false, expr));
                 }
 
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = right
                 {
-                    return simplify_and_expression(literal, left).map(|expr| (false, expr));
+                    return simplify_and_expression(literal, left, false).map(|expr| (false, expr));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
@@ -189,21 +189,24 @@ fn could_apply_de_morgan(node: &JsLogicalExpression) -> Option<bool> {
 fn simplify_and_expression(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
+    literal_on_left: bool,
 ) -> Option<AnyJsExpression> {
-    keep_expression_if_literal(literal, expression, true)
+    keep_expression_if_literal(literal, expression, true, literal_on_left)
 }
 
 fn simplify_or_expression(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
+    literal_on_left: bool,
 ) -> Option<AnyJsExpression> {
-    keep_expression_if_literal(literal, expression, false)
+    keep_expression_if_literal(literal, expression, false, literal_on_left)
 }
 
 fn keep_expression_if_literal(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
     expected_value: bool,
+    literal_on_left: bool,
 ) -> Option<AnyJsExpression> {
     let eval_value = match literal.value_token().ok()?.kind() {
         T![true] => true,
@@ -211,7 +214,17 @@ fn keep_expression_if_literal(
         _ => return None,
     };
     if eval_value == expected_value {
-        Some(expression)
+        // The literal is the identity element (`false` for `||`, `true` for
+        // `&&`). Simplifying to the other operand is only safe when the literal
+        // is on the left: `false || x` and `true && x` always evaluate to `x`.
+        // On the right, `x || false` and `x && true` differ from `x` for
+        // non-boolean operands (`0 || false` is `false`, `1 && true` is
+        // `true`), so those cases are not reported.
+        if literal_on_left {
+            Some(expression)
+        } else {
+            None
+        }
     } else {
         Some(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),

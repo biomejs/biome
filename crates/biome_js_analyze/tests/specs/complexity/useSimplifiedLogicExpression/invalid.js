@@ -1,4 +1,5 @@
 const r = true && boolExp;
+const r0 = false || boolExp;
 const boolExp2 = true;
 const r2 = boolExp || true;
 const nonNullExp = 123;
