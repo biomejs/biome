@@ -62,6 +62,8 @@ use biome_diagnostics::print_diagnostic_to_string;
 use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Error, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
+#[cfg(feature = "html_embeds")]
+use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
@@ -188,6 +190,36 @@ impl ProcessFileState {
             }
             ParsedOrigin::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
         }
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn collect_embedded_data(&self) -> Option<Arc<EmbeddedData>> {
+        let ParsedOrigin::Interned {
+            parse, snippets, ..
+        } = &self.parsed
+        else {
+            return None;
+        };
+
+        Some(Arc::new(collect_embedded_data(
+            self.file_source,
+            parse,
+            snippets.iter().filter_map(|snippet| {
+                let ParsedSnippetOrigin::Interned {
+                    parse,
+                    content,
+                    file_source,
+                } = snippet
+                else {
+                    return None;
+                };
+                Some(EmbeddedSnippet::new(
+                    parse,
+                    content.content_range,
+                    *file_source,
+                ))
+            }),
+        )))
     }
 
     fn has_errors(&self) -> bool {
@@ -1183,7 +1215,7 @@ impl WorkspaceServerWithDb<'_> {
         let file_source = language.unwrap_or(file_source);
 
         let mut snippet_cache = NodeCache::default();
-        let snippets = if DocumentFileSource::can_contain_embeds(
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(
             path.as_path(),
             settings.as_ref().experimental_full_html_support_enabled(),
         ) {
@@ -1196,16 +1228,18 @@ impl WorkspaceServerWithDb<'_> {
             )?
         } else {
             Vec::new()
-        }
-        .into_iter()
-        .map(
-            |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
-                parse,
-                content,
-                file_source,
-            },
-        )
-        .collect();
+        };
+
+        let snippets = embedded_snippets
+            .into_iter()
+            .map(
+                |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
+                    parse,
+                    content,
+                    file_source,
+                },
+            )
+            .collect();
 
         Ok(ProcessFileState {
             parsed: ParsedOrigin::interned_document(any_parse, snippets),
@@ -1288,6 +1322,8 @@ impl WorkspaceServerWithDb<'_> {
             suppression_reason,
             inline_config,
         } = params;
+        #[cfg(feature = "html_embeds")]
+        let embedded_data = state.collect_embedded_data();
         let (working_directory, settings, query_context) = self
             .project_get_settings_query(&state.db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -1335,6 +1371,8 @@ impl WorkspaceServerWithDb<'_> {
                     settings: &settings,
                     biome_path: &path,
                     workspace_db: state.db.clone(),
+                    #[cfg(feature = "html_embeds")]
+                    embedded_data: embedded_data.clone(),
                     #[cfg(feature = "module_graph")]
                     module_db: module_db.clone(),
                     project_layout: self.project_layout.clone(),
@@ -1428,6 +1466,8 @@ impl WorkspaceServerWithDb<'_> {
             settings: &settings,
             biome_path: &path,
             workspace_db: state.db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data,
             #[cfg(feature = "module_graph")]
             module_db,
             project_layout: self.project_layout.clone(),
@@ -1536,6 +1576,8 @@ impl WorkspaceServerWithDb<'_> {
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
+            #[cfg(feature = "html_embeds")]
+            let embedded_data = state.collect_embedded_data();
             let plugins = cfg_select! {
                 feature = "plugins" => {
                     if categories.is_lint() {
@@ -1564,6 +1606,8 @@ impl WorkspaceServerWithDb<'_> {
                 language: state.file_source,
                 categories,
                 workspace_db: state.db.clone(),
+                #[cfg(feature = "html_embeds")]
+                embedded_data: embedded_data.clone(),
                 #[cfg(feature = "module_graph")]
                 module_db: module_db.clone(),
                 project_layout: self.project_layout.clone(),
@@ -1601,6 +1645,8 @@ impl WorkspaceServerWithDb<'_> {
                     language: file_source,
                     categories,
                     workspace_db: state.db.clone(),
+                    #[cfg(feature = "html_embeds")]
+                    embedded_data: embedded_data.clone(),
                     #[cfg(feature = "module_graph")]
                     module_db: module_db.clone(),
                     project_layout: self.project_layout.clone(),

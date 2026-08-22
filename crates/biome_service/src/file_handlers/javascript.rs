@@ -1187,28 +1187,18 @@ fn js_analyzer_services_for_fix<'a>(
     params: &FixAllParams,
     source_type: JsFileSource,
 ) -> JsAnalyzerServices<'a> {
-    #[cfg(feature = "module_graph")]
-    {
-        js_analyzer_services(
-            root,
-            &params.workspace_db,
-            params.module_db.clone(),
-            params.project_layout.clone(),
-            source_type,
-        )
-        .with_semantic_model(semantic_model)
-    }
-
-    #[cfg(not(feature = "module_graph"))]
-    js_analyzer_services(
+    let services = js_analyzer_services(
         root,
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
         params.module_db.clone(),
         params.project_layout.clone(),
         source_type,
-    )
-    .with_semantic_model(semantic_model)
+    );
+    #[cfg(feature = "html_embeds")]
+    let services = services.with_embedded_data(params.embedded_data.clone());
+
+    services.with_semantic_model(semantic_model)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -1267,6 +1257,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         params.project_layout.clone(),
         files_source,
     );
+    #[cfg(feature = "html_embeds")]
+    let services = services.with_embedded_data(params.embedded_data.clone());
     let services = services.with_semantic_model(&semantic_model);
 
     let (_, analyze_diagnostics) = analyze(
