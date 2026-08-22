@@ -1,5 +1,5 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
-use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
+use crate::utils::css_display::{CssDisplay, get_css_display_from_tag};
 use crate::utils::metadata::{get_css_whitespace, get_element_css_display};
 use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
@@ -7,11 +7,13 @@ use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, HtmlElement, HtmlElementFields,
     HtmlElementList, HtmlRoot, HtmlSelfClosingElement,
-    HtmlSyntaxKind::{self, AUDIO_KW, OBJECT_KW, TEMPLATE_KW, VIDEO_KW},
+    HtmlSyntaxKind::{
+        self, AUDIO_KW, BODY_KW, HEAD_KW, HTML_KW, OBJECT_KW, OL_KW, SCRIPT_KW, SELECT_KW,
+        STYLE_KW, TEMPLATE_KW, UL_KW, VIDEO_KW,
+    },
     HtmlSyntaxToken,
 };
 use biome_parser::{TokenSet, token_set};
-use biome_string_case::StrLikeExtension;
 
 use super::{
     closing_element::{FormatHtmlClosingElement, FormatHtmlClosingElementOptions},
@@ -25,14 +27,16 @@ use super::{
 /// browser user-agent CSS.
 ///
 /// See also: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space>
-fn is_verbatim_tag(tag_name: &str) -> bool {
-    tag_name.eq_ignore_ascii_case("script")
-        || tag_name.eq_ignore_ascii_case("style")
+fn is_verbatim_tag(tag_name: &AnyHtmlTagName) -> bool {
+    matches!(tag_name.tag_name_kind(), Some(SCRIPT_KW | STYLE_KW))
         || get_css_whitespace(tag_name).preserves_content()
 }
 
 const STRUCTURAL_FALLBACK_ELEMENTS: TokenSet<HtmlSyntaxKind> =
     token_set!(AUDIO_KW, OBJECT_KW, VIDEO_KW);
+
+const FORCE_BREAK_CHILDREN_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(HTML_KW, HEAD_KW, UL_KW, OL_KW, SELECT_KW);
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement {
@@ -94,8 +98,9 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // Instead of:
         // <!-- comment --> <div>...</div>
         let css_display = node
-            .tag_name()
-            .map_or(CssDisplay::Block, |tag| get_css_display(&tag));
+            .name()
+            .as_ref()
+            .map_or(CssDisplay::Block, get_css_display_from_tag);
 
         if css_display.is_block_like() {
             format_html_leading_comments_for_block(node.syntax()).fmt(f)
@@ -142,12 +147,12 @@ impl FormatHtmlElement {
             closing_element,
         } = node.as_fields();
 
-        let should_force_break_content = should_force_break_content(node);
-
         let closing_element = closing_element?;
         let opening_element = opening_element?;
         let tag_name = opening_element.name()?;
         let css_display = get_css_display_from_tag(&tag_name);
+        let should_force_break_content =
+            should_force_break_content(node, tag_name.tag_name_kind(), css_display);
         let is_element_internally_whitespace_sensitive =
             css_display.is_internally_whitespace_sensitive(f);
         let is_root_element_list = node
@@ -179,14 +184,7 @@ impl FormatHtmlElement {
                 AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(_))
             )
         });
-        let should_be_verbatim = has_embedded_content
-            || match tag_name {
-                AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
-                AnyHtmlTagName::HtmlTagName(tag_name) => tag_name
-                    .value_token()
-                    .as_ref()
-                    .is_ok_and(|tag_name_token| is_verbatim_tag(tag_name_token.text_trimmed())),
-            };
+        let should_be_verbatim = has_embedded_content || is_verbatim_tag(&tag_name);
 
         let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
             // Only delegate for supported <script> or <style> content
@@ -348,33 +346,33 @@ impl FormatHtmlElement {
 /// This is equivalent to Prettier's `function forceBreakChildren()`.
 ///
 /// Prettier source: src/language-html/utilities/index.js:271-278
-fn should_force_break_children(tag_name: &str) -> bool {
-    let tag_lower = tag_name.to_ascii_lowercase_cow();
-
-    // These elements always break children
-    if matches!(tag_lower.as_ref(), "html" | "head" | "ul" | "ol" | "select") {
+fn should_force_break_children(
+    tag_name_kind: Option<HtmlSyntaxKind>,
+    css_display: CssDisplay,
+) -> bool {
+    if tag_name_kind.is_some_and(|kind| FORCE_BREAK_CHILDREN_ELEMENTS.contains(kind)) {
         return true;
     }
 
     // Table-related elements (except table-cell) break children
-    let display = get_css_display(&tag_lower);
-    display.is_table_like() && !matches!(display, CssDisplay::TableCell)
+    css_display.is_table_like() && !matches!(css_display, CssDisplay::TableCell)
 }
 
 /// Determines if the content of an element should be forcefully broken into multiple lines.
 ///
 /// This is equivalent to Prettier's `function forceBreakContent()`.
-fn should_force_break_content(node: &HtmlElement) -> bool {
-    let Some(tag_name) = node.tag_name() else {
-        return false;
-    };
-    if should_force_break_children(&tag_name) {
+fn should_force_break_content(
+    node: &HtmlElement,
+    tag_name_kind: Option<HtmlSyntaxKind>,
+    css_display: CssDisplay,
+) -> bool {
+    if should_force_break_children(tag_name_kind, css_display) {
         return true;
     }
 
     // prettier also considers `<script>` and `<style>` here, but we handle those elsewhere.
     // if its a `<body>` or if the grandchildren contain non-text nodes
-    if !node.children().is_empty() && tag_name.eq_ignore_ascii_case("body")
+    if !node.children().is_empty() && tag_name_kind == Some(BODY_KW)
         || node.children().iter().any(|child| {
             if let Some(element) = child.as_html_element() {
                 has_non_text_child(&element.children())
