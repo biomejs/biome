@@ -64,3 +64,62 @@ The linter ships with a few rules inspired by [markdownlint](https://github.com/
 Some rules you can start using already:
 - [`useTopLevelHeading`](https://biomejs.dev/linter/rules/use-top-level-heading/)
 - [`useConsistentHeadingLevel`](https://biomejs.dev/linter/rules/use-consistent-heading-level/)
+
+##### Markdown snippets
+
+Thanks to Biome capabilities, elements such as frontmatter, inline HTML and fenced code blocks are recognized as embedded
+languages, which means they are analyzed and formatted using your configuration.
+
+Given the following Markdown document, when you run `biome lint`, Biome will emit a parsing diagnostic for
+the JavaScript snippet, and a lint diagnostic for the CSS snippet:
+
+````md
+# Embeds
+
+```js
+function () {}
+```
+
+```css
+a {
+  color: red;
+  color: blue;
+}
+```
+````
+
+```text
+file.md:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+
+     3 │ ```js
+   > 4 │ function () {}
+       │          ^
+     5 │ ```
+     6 │
+```
+
+```text
+file.md:10:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+
+     8 │ a {
+     9 │   color: red;
+  > 10 │   color: blue;
+       │   ^^^^^
+    11 │ }
+    12 │ ```
+
+  i color is already defined here.
+
+     7 │ ```css
+     8 │ a {
+   > 9 │   color: red;
+       │   ^^^^^
+    10 │   color: blue;
+    11 │ }
+
+  i Remove or rename the duplicate property to ensure consistent styling.
+```
