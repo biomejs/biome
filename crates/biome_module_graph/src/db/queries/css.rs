@@ -323,20 +323,18 @@ pub fn build_import_tree_for_js(db: &dyn ModuleDb, module: ModuleInfo) -> Option
         parent_components: Vec::new(),
     };
 
-    if let Some(js_info) = module.kind(db).as_js_module_info() {
-        root.css_imports = js_info
-            .import_paths
-            .iter()
-            .filter(|import| import.kind.is_static())
-            .filter_map(|import_path| {
-                let path = import_path.as_path()?;
-                db.css_module_info_for_path(path)?;
-                Some(path.to_path_buf())
-            })
-            .collect();
-    } else {
-        return None;
-    }
+    let js_info = module.kind(db);
+    let js_info = js_info.as_js_module_info()?;
+    root.css_imports = js_info
+        .import_paths
+        .iter()
+        .filter(|import| import.kind.is_static())
+        .filter_map(|import_path| {
+            let path = import_path.as_path()?;
+            db.css_module_info_for_path(path)?;
+            Some(path.to_path_buf())
+        })
+        .collect();
 
     let mut visited = FxHashSet::default();
     visited.insert(module.path(db).to_path_buf());

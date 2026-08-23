@@ -37,11 +37,9 @@ impl NodeVisitor for ContinueVisitor {
                     (visitor.label.as_ref(), visitor.continue_block)
                 } else if let Some(visitor) = state.try_downcast::<WhileVisitor>(*type_id, *index) {
                     (visitor.label.as_ref(), visitor.continue_block)
-                } else if let Some(visitor) = state.try_downcast::<DoWhileVisitor>(*type_id, *index)
-                {
-                    (visitor.label.as_ref(), visitor.continue_block)
                 } else {
-                    return None;
+                    let visitor = state.try_downcast::<DoWhileVisitor>(*type_id, *index)?;
+                    (visitor.label.as_ref(), visitor.continue_block)
                 };
 
                 match (block_label, &label) {

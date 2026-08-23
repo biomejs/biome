@@ -1457,7 +1457,8 @@ impl TypeData {
         let parent = decl.syntax().parent()?;
         let (is_awaited, ty) = if JsForInStatement::can_cast(parent.kind()) {
             (false, Self::string())
-        } else if let Some(for_of) = JsForOfStatement::cast(parent) {
+        } else {
+            let for_of = JsForOfStatement::cast(parent)?;
             let ty = Self::from(TypeofExpression::IterableValueOf(
                 TypeofIterableValueOfExpression {
                     ty: TypeReference::from_any_js_expression(
@@ -1468,8 +1469,6 @@ impl TypeData {
                 },
             ));
             (for_of.await_token().is_some(), ty)
-        } else {
-            return None;
         };
 
         let declarator = decl.declarator().ok()?;

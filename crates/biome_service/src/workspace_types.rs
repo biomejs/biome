@@ -446,7 +446,8 @@ fn schema_object_type<'a>(
             } else if let Some(key) = reference.strip_prefix("#/definitions/") {
                 let def = root_schema.get("definitions")?.as_object()?.get(key)?;
                 (key, def)
-            } else if let Some(key) = reference.strip_prefix("#/components/schemas/") {
+            } else {
+                let key = reference.strip_prefix("#/components/schemas/")?;
                 let def = root_schema
                     .get("components")?
                     .as_object()?
@@ -454,8 +455,6 @@ fn schema_object_type<'a>(
                     .as_object()?
                     .get(key)?;
                 (key, def)
-            } else {
-                return None;
             };
 
             queue.push_back((key, def_schema));
