@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-vue-custom-directives.vue
+expression: invalid-vue-custom-directive.vue
 ---
 # Input
 ```vue
@@ -21,7 +21,7 @@ const vHighlight = {
 
 # Diagnostics
 ```
-invalid-vue-custom-directives.vue:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+invalid-vue-custom-directive.vue:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
   ! This variable vHighlight is unused.
   

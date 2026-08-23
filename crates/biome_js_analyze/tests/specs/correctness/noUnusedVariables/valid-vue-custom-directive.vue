@@ -9,9 +9,7 @@ const vHighlight = {
 </script>
 
 <template>
-  <!-- custom directive -->
   <div v-highlight>Highlighted</div>
 
-  <!-- custom directive with value -->
   <div v-highlight="isHighlighted">Highlighted</div>
 </template>

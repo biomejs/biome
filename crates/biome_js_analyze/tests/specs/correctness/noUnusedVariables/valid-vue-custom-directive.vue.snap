@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid-vue-custom-directives.vue
+expression: valid-vue-custom-directive.vue
 ---
 # Input
 ```vue
@@ -15,10 +15,8 @@ const vHighlight = {
 </script>
 
 <template>
-  <!-- custom directive -->
   <div v-highlight>Highlighted</div>
 
-  <!-- custom directive with value -->
   <div v-highlight="isHighlighted">Highlighted</div>
 </template>
 
