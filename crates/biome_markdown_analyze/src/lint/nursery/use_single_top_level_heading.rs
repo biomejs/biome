@@ -14,8 +14,9 @@ declare_lint_rule! {
     /// Multiple top-level headings break document outlines, tables of contents, and the
     /// heading structure produced when the file is converted to HTML.
     ///
-    /// Only a heading that is a direct child of the document can be its title, so a heading
-    /// nested in a blockquote or in a list item never counts as one.
+    /// The rule only looks at headings that are direct children of the document. A heading
+    /// nested in a blockquote or in a list item is ignored entirely: it never counts as the
+    /// title, and it is never reported as an extra top-level heading.
     ///
     /// The rule doesn't report diagnostics when the first heading at the configured level is
     /// preceded by:
@@ -48,6 +49,12 @@ declare_lint_rule! {
     /// ## Heading
     ///
     /// ## Another heading
+    /// ```
+    ///
+    /// ```md
+    /// # Title
+    ///
+    /// > # Quoted heading
     /// ```
     ///
     /// ## Options
@@ -99,10 +106,15 @@ impl Rule for UseSingleTopLevelHeading {
         }
 
         let root = ctx.root();
-        let title = root
+        let block_list = root.value();
+
+        if header.syntax().parent().as_ref() != Some(block_list.syntax()) {
+            return None;
+        }
+
+        let title = block_list
             .syntax()
-            .descendants()
-            .skip(1)
+            .children()
             .filter_map(AnyMdHeader::cast)
             .find(|header| header.level() == level)?;
 

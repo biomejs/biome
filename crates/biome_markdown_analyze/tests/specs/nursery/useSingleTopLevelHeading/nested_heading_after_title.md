@@ -1,4 +1,4 @@
-<!-- should generate diagnostics -->
+<!-- should not generate diagnostics -->
 
 # Title
 
