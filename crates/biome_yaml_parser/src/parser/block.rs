@@ -23,7 +23,9 @@ use super::{
         is_at_alias_node, is_at_flow_json_node, is_at_flow_yaml_node, parse_flow_json_node,
         parse_flow_yaml_node,
     },
-    parse_error::{expected_block_mapping_entry, expected_block_sequence_entry},
+    parse_error::{
+        expected_block_mapping_entry, expected_block_sequence_entry, expected_flow_node,
+    },
 };
 
 pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
@@ -310,7 +312,13 @@ fn parse_flow_in_block_node(p: &mut YamlParser) -> CompletedMarker {
     debug_assert!(p.at(FLOW_START));
     let m = p.start();
     p.expect(FLOW_START);
-    parse_any_flow_node(p).ok();
+    parse_any_flow_node(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(YAML_BOGUS_FLOW_NODE, token_set![FLOW_END]),
+            expected_flow_node,
+        )
+        .ok();
     p.expect(FLOW_END);
     m.complete(p, YAML_FLOW_IN_BLOCK_NODE)
 }

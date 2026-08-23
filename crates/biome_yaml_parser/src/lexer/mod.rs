@@ -1223,8 +1223,8 @@ impl<'src> YamlLexer<'src> {
 
         match self.current_byte() {
             Some(
-                b'0' | b'a' | b'b' | b't' | b'n' | b'v' | b'f' | b'r' | b'e' | b' ' | b'"' | b'/'
-                | b'\\' | b'N' | b'_' | b'L' | b'P',
+                b'0' | b'a' | b'b' | b't' | b'\t' | b'n' | b'v' | b'f' | b'r' | b'e' | b' ' | b'"'
+                | b'/' | b'\\' | b'N' | b'_' | b'L' | b'P',
             ) => self.advance(1),
             Some(b'x') => {
                 self.advance(1);

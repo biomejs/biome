@@ -8,6 +8,7 @@ mod runner;
 pub mod symbols;
 pub mod ts;
 mod util;
+pub mod yaml;
 
 pub use crate::reporters::SummaryDetailLevel;
 
@@ -27,6 +28,7 @@ use symbols::msts::SymbolsMicrosoftTestSuite;
 use ts::ts_babel::BabelTypescriptTestSuite;
 use ts::ts_microsoft::MicrosoftTypescriptTestSuite;
 use util::decode_maybe_utf16_string;
+use yaml::yaml_test_suite::YamlTestSuite;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TestResult {
@@ -171,6 +173,7 @@ const ALL_TS_SUITES: &str = "ts";
 const ALL_JSX_SUITES: &str = "jsx";
 const ALL_SYMBOLS_SUITES: &str = "symbols";
 const ALL_MARKDOWN_SUITES: &str = "markdown";
+const ALL_YAML_SUITES: &str = "yaml";
 
 fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
     let suites = suites.unwrap_or("*").to_lowercase_cow();
@@ -185,7 +188,8 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             ALL_JSX_SUITES => ids.extend(["jsx/babel"]),
             ALL_SYMBOLS_SUITES => ids.extend(["symbols/microsoft"]),
             ALL_MARKDOWN_SUITES => ids.extend(["markdown/commonmark"]),
-            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols", "markdown"]),
+            ALL_YAML_SUITES => ids.extend(["yaml/yaml-test-suite"]),
+            ALL_SUITES => ids.extend(["js", "ts", "jsx", "symbols", "markdown", "yaml"]),
 
             "js/262" => suites.push(Box::new(Test262TestSuite)),
             "ts/microsoft" => suites.push(Box::new(MicrosoftTypescriptTestSuite)),
@@ -193,6 +197,7 @@ fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
             "jsx/babel" => suites.push(Box::new(BabelJsxTestSuite)),
             "symbols/microsoft" => suites.push(Box::new(SymbolsMicrosoftTestSuite)),
             "markdown/commonmark" => suites.push(Box::new(CommonMarkTestSuite)),
+            "yaml/yaml-test-suite" => suites.push(Box::new(YamlTestSuite)),
 
             _ => {}
         }

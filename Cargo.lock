@@ -7665,6 +7665,8 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
  "camino",
  "colored",
  "indicatif 0.18.4",
