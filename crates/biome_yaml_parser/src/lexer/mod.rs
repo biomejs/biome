@@ -74,6 +74,30 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
+    pub(crate) fn collection_content_has_preceding_line_break(&mut self) -> bool {
+        let mut index = 1;
+        let mut has_line_break = false;
+        loop {
+            while self.tokens.len() <= index {
+                let before = self.tokens.len();
+                self.consume_tokens();
+                if self.tokens.len() == before {
+                    return false;
+                }
+            }
+            match self.tokens.get(index).map(|token| token.kind) {
+                Some(ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL | WHITESPACE | COMMENT) => {
+                    index += 1;
+                }
+                Some(NEWLINE) => {
+                    has_line_break = true;
+                    index += 1;
+                }
+                Some(_) | None => return has_line_break,
+            }
+        }
+    }
+
     /// Consume tokens until the lexer found a disambiguated checkpoint.
     /// This usually means that the lexer has determined whether the lexed tokens belong to a block
     /// map entry
@@ -398,6 +422,9 @@ impl<'src> YamlLexer<'src> {
     fn lex_block_content(&mut self, required_indent: Option<usize>) -> LexToken {
         debug_assert!(self.current_byte().is_none_or(is_break));
         let start = self.current_coordinate;
+        if required_indent.is_none() {
+            self.report_over_indented_leading_empty_line();
+        }
 
         while let Some(current) = self.current_byte() {
             if !self.current_char_is_yaml_printable() {
@@ -499,6 +526,16 @@ impl<'src> YamlLexer<'src> {
             if !self.current_char_is_yaml_printable() {
                 collection_tokens.push_back(self.consume_unexpected_token());
                 continue;
+            }
+            if self.is_at_directive_end() || self.is_at_doc_end() {
+                let position = self.text_position();
+                self.diagnostics.push(
+                    ParseDiagnostic::new(
+                        "Document markers are not allowed inside flow collections.",
+                        position..position + TextSize::from(3),
+                    )
+                    .with_hint("Move this marker outside the surrounding collection."),
+                );
             }
 
             if is_break(current) {
@@ -659,6 +696,7 @@ impl<'src> YamlLexer<'src> {
                 Some(c) if is_break(c) => {
                     let might_be_token_end = self.current_coordinate;
                     if !self.is_scalar_continuation(None) {
+                        self.report_missing_closing_quote('"', start);
                         break might_be_token_end;
                     }
                 }
@@ -667,11 +705,7 @@ impl<'src> YamlLexer<'src> {
                 }
                 Some(_) => self.advance_char_unchecked(),
                 None => {
-                    let err = ParseDiagnostic::new(
-                        "Missing closing `\"` quote",
-                        self.text_position()..self.text_position(),
-                    );
-                    self.diagnostics.push(err);
+                    self.report_missing_closing_quote('"', start);
                     break self.current_coordinate;
                 }
             }
@@ -701,6 +735,7 @@ impl<'src> YamlLexer<'src> {
                 Some(current) if is_break(current) => {
                     let might_be_token_end = self.current_coordinate;
                     if !self.is_scalar_continuation(None) {
+                        self.report_missing_closing_quote('\'', start);
                         break might_be_token_end;
                     }
                 }
@@ -709,16 +744,23 @@ impl<'src> YamlLexer<'src> {
                 }
                 Some(_) => self.advance_char_unchecked(),
                 None => {
-                    let err = ParseDiagnostic::new(
-                        "Missing closing `'` quote",
-                        self.text_position()..self.text_position(),
-                    );
-                    self.diagnostics.push(err);
+                    self.report_missing_closing_quote('\'', start);
                     break self.current_coordinate;
                 }
             }
         };
         LexToken::new(SINGLE_QUOTED_LITERAL, start, token_end)
+    }
+
+    fn report_missing_closing_quote(&mut self, quote: char, start: TextCoordinate) {
+        let position = self.text_position();
+        self.diagnostics.push(
+            ParseDiagnostic::new(
+                format!("Missing closing `{quote}` quote"),
+                TextRange::new(start.into(), position),
+            )
+            .with_hint(format!("Add a closing `{quote}` quote.")),
+        );
     }
 
     fn is_at_directive(&self) -> bool {
@@ -793,6 +835,7 @@ impl<'src> YamlLexer<'src> {
             && self.current_byte().is_some_and(is_dot)
             && self.peek_byte().is_some_and(is_dot)
             && self.byte_at(2).is_some_and(is_dot)
+            && self.byte_at(3).is_none_or(is_blank)
     }
 
     fn consume_doc_end(&mut self) -> VecDeque<LexToken> {
@@ -1221,6 +1264,20 @@ impl<'src> YamlLexer<'src> {
             _ => {}
         }
 
+        if self
+            .current_byte()
+            .is_some_and(|byte| matches!(byte, b'[' | b'{'))
+        {
+            let position = self.text_position();
+            self.diagnostics.push(
+                ParseDiagnostic::new(
+                    "A tag must be separated from the following collection.",
+                    position..position + TextSize::from(1),
+                )
+                .with_hint("Add a space after the tag."),
+            );
+        }
+
         LexToken::new(TAG_PROPERTY_LITERAL, start, self.current_coordinate)
     }
 
@@ -1359,6 +1416,74 @@ impl<'src> YamlLexer<'src> {
             "Tabs are not allowed for indentation in YAML.",
             offset..offset + TextSize::from(1),
         ));
+    }
+
+    fn report_over_indented_leading_empty_line(&mut self) {
+        let base_offset = self.current_coordinate.offset;
+        let Some(remaining) = self.source.get(base_offset..) else {
+            return;
+        };
+        let bytes = remaining.as_bytes();
+        let mut offset = 0;
+        match bytes.get(offset).copied() {
+            Some(b'\r') => {
+                offset += 1;
+                if bytes.get(offset) == Some(&b'\n') {
+                    offset += 1;
+                }
+            }
+            Some(b'\n') => offset += 1,
+            _ => return,
+        }
+
+        let mut most_indented_empty_line = None;
+        loop {
+            let line_start = offset;
+            while bytes.get(offset) == Some(&b' ') {
+                offset += 1;
+            }
+            let indentation = offset - line_start;
+
+            match bytes.get(offset).copied() {
+                Some(current) if is_break(current) => {
+                    if most_indented_empty_line
+                        .is_none_or(|(_, previous_indentation)| indentation > previous_indentation)
+                    {
+                        most_indented_empty_line = Some((line_start, indentation));
+                    }
+                    offset += 1;
+                    if current == b'\r' && bytes.get(offset) == Some(&b'\n') {
+                        offset += 1;
+                    }
+                }
+                Some(_) => {
+                    let Some((line_start, empty_line_indentation)) = most_indented_empty_line
+                    else {
+                        return;
+                    };
+                    if empty_line_indentation <= indentation {
+                        return;
+                    }
+                    let Ok(start) = TextSize::try_from(base_offset + line_start) else {
+                        return;
+                    };
+                    let Ok(length) = TextSize::try_from(empty_line_indentation) else {
+                        return;
+                    };
+                    self.diagnostics.push(
+                        ParseDiagnostic::new(
+                            "This empty line is more indented than the first non-empty line.",
+                            TextRange::at(start, length),
+                        )
+                        .with_hint(
+                            "Reduce this line's indentation to match the first non-empty line.",
+                        ),
+                    );
+                    return;
+                }
+                None => return,
+            }
+        }
     }
 
     fn current_char_is_yaml_printable(&self) -> bool {

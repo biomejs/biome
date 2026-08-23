@@ -5,6 +5,7 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
     token_set,
 };
+use biome_rowan::TextRange;
 use biome_yaml_syntax::{
     T,
     YamlSyntaxKind::{self, *},
@@ -51,7 +52,11 @@ pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
 /// b:
 /// &anchor c: 3
 /// ```
-fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
+fn parse_block_map_entry_value(
+    p: &mut YamlParser,
+    colon_range: TextRange,
+    allow_compact_collection: bool,
+) -> ParsedSyntax {
     /// The flow scalar tokens that, following bare own-line properties,
     /// mark them as the next entry's key properties
     const FLOW_SCALARS: TokenSet<YamlSyntaxKind> =
@@ -62,6 +67,35 @@ fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
         && FLOW_SCALARS.contains(p.source_mut().kind_after_properties())
     {
         return Absent;
+    }
+    let collection_content_has_preceding_line_break = (p.at(MAPPING_START) || p.at(SEQUENCE_START))
+        && p.source_mut().collection_content_has_preceding_line_break();
+    if !allow_compact_collection
+        && !p.has_preceding_line_break()
+        && !collection_content_has_preceding_line_break
+    {
+        let diagnostic = if p.at(MAPPING_START) {
+            Some(
+                p.err_builder(
+                    "`:` cannot be followed by another mapping on the same line.",
+                    colon_range,
+                )
+                .with_hint("Move the nested mapping to the next line."),
+            )
+        } else if p.at(SEQUENCE_START) {
+            Some(
+                p.err_builder(
+                    "`:` cannot be followed by a block sequence on the same line.",
+                    colon_range,
+                )
+                .with_hint("Move the sequence to the next line."),
+            )
+        } else {
+            None
+        };
+        if let Some(diagnostic) = diagnostic {
+            p.error(diagnostic);
+        }
     }
     parse_any_block_node(p)
 }
@@ -168,8 +202,9 @@ fn parse_block_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
 
     // Value can be omitted in an explicit entry
     if p.at(T![:]) {
+        let colon_range = p.cur_range();
         p.bump(T![:]);
-        parse_block_map_entry_value(p).ok();
+        parse_block_map_entry_value(p, colon_range, true).ok();
     }
 
     Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_ENTRY))
@@ -182,32 +217,36 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     if is_at_flow_json_node(p) {
         let json_node = parse_flow_json_node(p, property_list);
         let m = json_node.precede(p);
+        let colon_range = p.cur_range();
         p.expect(T![:]);
         // Value can be completely empty according to the spec
-        parse_block_map_entry_value(p).ok();
+        parse_block_map_entry_value(p, colon_range, false).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else if is_at_flow_yaml_node(p) || !property_empty {
         // plain yaml key, or empty key with properties
         let yaml_node = parse_flow_yaml_node(p, property_list);
         let m = yaml_node.precede(p);
+        let colon_range = p.cur_range();
         p.expect(T![:]);
         // Value can be completely empty according to the spec
-        parse_block_map_entry_value(p).ok();
+        parse_block_map_entry_value(p, colon_range, false).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else if is_at_alias_node(p) {
         property_list.undo_completion(p).abandon(p);
         let alias_node = parse_alias_node(p);
         let m = alias_node.precede(p);
+        let colon_range = p.cur_range();
         p.expect(T![:]);
         // Value can be completely empty according to the spec
-        parse_block_map_entry_value(p).ok();
+        parse_block_map_entry_value(p, colon_range, false).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else if p.at(T![:]) {
         // empty key
         property_list.undo_completion(p).abandon(p);
         let m = p.start();
+        let colon_range = p.cur_range();
         p.bump(T![:]);
-        parse_block_map_entry_value(p).ok();
+        parse_block_map_entry_value(p, colon_range, false).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else {
         property_list.undo_completion(p).abandon(p);
