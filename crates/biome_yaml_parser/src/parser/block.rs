@@ -68,7 +68,19 @@ fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
 
 fn parse_block_in_block_node(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
-    PropertyList::default().parse_list(p);
+    let properties = PropertyList::default().parse_list(p);
+    if !properties.range(p).is_empty()
+        && (p.at(MAPPING_START) || p.at(SEQUENCE_START))
+        && !p.has_preceding_line_break()
+    {
+        p.error(
+            p.err_builder(
+                "Block collections must start on a new line after node properties.",
+                properties.range(p),
+            )
+            .with_hint("Move the sequence or mapping to the line after the properties."),
+        );
+    }
     if p.at(MAPPING_START) {
         parse_block_mapping(p);
     } else if p.at(SEQUENCE_START) {

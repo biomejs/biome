@@ -235,6 +235,31 @@ impl<'src> YamlLexer<'src> {
         let mapping_start_coordinate = tokens
             .get(key_properties_start)
             .map_or(key_coordinate, |token| token.start);
+        let parent_mapping_border = self.scopes.last().and_then(|scope| match scope {
+            BlockScope::Map(border) => Some(*border),
+            BlockScope::Sequence(_) => None,
+        });
+        let invalid_property_range = parent_mapping_border.and_then(|border| {
+            tokens
+                .iter()
+                .enumerate()
+                .skip(key_properties_start)
+                .take(properties_end.saturating_sub(key_properties_start))
+                .find(|(index, token)| {
+                    matches!(token.kind, ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL)
+                        && token.start.column <= border
+                        && key_coordinate.column > border
+                        && tokens
+                            .iter()
+                            .take(properties_end)
+                            .skip(index + 1)
+                            .any(|token| token.kind == NEWLINE)
+                })
+                .map(|(_, property)| property.text_range())
+        });
+        if let Some(range) = invalid_property_range {
+            self.report_unindented_property(range);
+        }
         let scope_coordinate = tokens
             .iter()
             .skip(key_properties_start)
@@ -1007,6 +1032,20 @@ impl<'src> YamlLexer<'src> {
             return properties;
         };
 
+        let parent_mapping_border = self.scopes.last().and_then(|scope| match scope {
+            BlockScope::Map(border) => Some(*border),
+            BlockScope::Sequence(_) => None,
+        });
+        if current == b'-'
+            && parent_mapping_border.is_some_and(|border| start_coordinate.column <= border)
+            && let Some(range) = properties
+                .iter()
+                .find(|token| matches!(token.kind, ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL))
+                .map(LexToken::text_range)
+        {
+            self.report_unindented_property(range);
+        }
+
         // Property list terminated by a newline that breaches the enclosing block, which means an
         // empty plain node.
         // We only need to check for is_break here, as the lexer only stops at a line break if
@@ -1056,6 +1095,13 @@ impl<'src> YamlLexer<'src> {
             return tokens;
         }
         properties
+    }
+
+    fn report_unindented_property(&mut self, range: TextRange) {
+        self.diagnostics.push(
+            ParseDiagnostic::new("This anchor or tag is not indented enough.", range)
+                .with_hint("Indent it at least one space more than the key above."),
+        );
     }
 
     fn consume_alias_node(&mut self) -> LexToken {

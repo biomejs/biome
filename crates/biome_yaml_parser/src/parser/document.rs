@@ -53,12 +53,32 @@ fn parse_document(p: &mut YamlParser) -> ParsedSyntax {
     let m = p.start();
     p.eat(UNICODE_BOM);
     let directives = DirectiveList.parse_list(p);
-    if directives.range(p).is_empty() {
-        p.eat(T![---]);
-    } else if !p.eat(T![---]) {
+    let document_start_range = p.cur_range();
+    let has_document_start = p.eat(T![---]);
+    if !directives.range(p).is_empty() && !has_document_start {
         p.error(p.err_builder("Expected `---` after YAML directives.", directives.range(p)));
     }
+    if has_document_start && p.at(MAPPING_START) && !p.has_preceding_line_break() {
+        p.error(
+            p.err_builder(
+                "A mapping cannot start on the same line as `---`.",
+                document_start_range,
+            )
+            .with_hint("Move the mapping to the next line after `---`."),
+        );
+    }
     parse_any_block_node(p).ok();
+    if is_at_any_block_node(p) && p.has_preceding_line_break() {
+        p.error(
+            p.err_builder(
+                "Expected `---` or `...` before another YAML document.",
+                p.cur_range(),
+            )
+            .with_hint(
+                "Add `---` before the next document, or end the current document with `...`.",
+            ),
+        );
+    }
     let has_document_end = p.eat(T![...]);
     if !has_document_end && p.at(DIRECTIVE_LITERAL) {
         p.error(p.err_builder("Expected `...` before YAML directives.", p.cur_range()));
