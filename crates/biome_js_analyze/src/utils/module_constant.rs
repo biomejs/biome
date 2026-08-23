@@ -1,9 +1,12 @@
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsRoot, JsCallExpression,
-    JsExpressionStatement, JsLanguage, JsModuleItemList, JsStatementList, JsSyntaxKind,
-    JsSyntaxNode, T,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsFunction, AnyJsMemberExpression,
+    AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsComputedMemberAssignment,
+    JsExpressionStatement, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsModuleItemList, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSetterClassMember, JsSetterObjectMember, JsStatementList,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, T,
 };
 use biome_rowan::TriviaPieceKind;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, SyntaxTriviaPiece};
@@ -26,12 +29,306 @@ struct CachedModuleConstantFacts {
     facts: ModuleConstantFacts,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ModuleConstantNameKind {
+    Binding,
+    Function,
+    Property,
+    Member,
+    Method,
+    CallCallee,
+}
+
+pub(crate) struct ModuleConstantNameCandidate {
+    pub(crate) kind: ModuleConstantNameKind,
+    pub(crate) name: String,
+}
+
+/// Returns readable naming contexts found while walking from `node` toward its root.
+///
+/// Candidates are emitted in ancestor order. Within one ancestor, bindings, functions, methods,
+/// properties, members, and call callees are emitted in that order.
+pub(crate) fn module_constant_name_candidates(
+    node: &JsSyntaxNode,
+) -> Vec<ModuleConstantNameCandidate> {
+    let mut candidates = Vec::new();
+
+    for ancestor in node.ancestors().skip(1) {
+        if let Some(declarator) = JsVariableDeclarator::cast(ancestor.clone())
+            && let Some(binding) = declarator
+                .id()
+                .ok()
+                .and_then(|pattern| pattern.as_any_js_binding().cloned())
+            && let Some(name) = module_constant_binding_name(&binding)
+        {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::Binding,
+                name,
+            });
+        }
+
+        if let Some(function) = AnyJsFunction::cast(ancestor.clone())
+            && let Some(name) = module_constant_function_name(&function)
+        {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::Function,
+                name,
+            });
+        }
+
+        if let Some(name) = module_constant_method_name(&ancestor) {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::Method,
+                name,
+            });
+        }
+
+        if let Some(name) = module_constant_property_name(&ancestor) {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::Property,
+                name,
+            });
+        }
+
+        if let Some(name) = module_constant_member_name(&ancestor) {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::Member,
+                name,
+            });
+        }
+
+        if let Some(call) = JsCallExpression::cast(ancestor)
+            && let Some(name) = call
+                .callee()
+                .ok()
+                .and_then(|callee| callee.get_callee_member_name())
+                .map(|token| token.text_trimmed().to_string())
+        {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::CallCallee,
+                name,
+            });
+        }
+    }
+
+    candidates
+}
+
+/// Returns the identifier text for a simple binding pattern.
+pub(crate) fn module_constant_binding_name(binding: &AnyJsBinding) -> Option<String> {
+    binding
+        .as_js_identifier_binding()?
+        .name_token()
+        .ok()
+        .map(|token| token.text_trimmed().to_string())
+}
+
+/// Returns the declared name of a named function.
+pub(crate) fn module_constant_function_name(function: &AnyJsFunction) -> Option<String> {
+    let binding = match function {
+        AnyJsFunction::JsFunctionDeclaration(function) => function.id().ok(),
+        AnyJsFunction::JsFunctionExportDefaultDeclaration(function) => function.id(),
+        AnyJsFunction::JsFunctionExpression(function) => function.id(),
+        AnyJsFunction::JsArrowFunctionExpression(_) => None,
+    }?;
+    module_constant_binding_name(&binding)
+}
+
+/// Returns a readable object or class method name.
+pub(crate) fn module_constant_method_name(node: &JsSyntaxNode) -> Option<String> {
+    if let Some(method) = JsMethodObjectMember::cast(node.clone()) {
+        return method.name().ok()?.name().map(|name| name.to_string());
+    }
+    if let Some(method) = JsGetterObjectMember::cast(node.clone()) {
+        return method.name().ok()?.name().map(|name| name.to_string());
+    }
+    if let Some(method) = JsSetterObjectMember::cast(node.clone()) {
+        return method.name().ok()?.name().map(|name| name.to_string());
+    }
+    if let Some(method) = JsMethodClassMember::cast(node.clone()) {
+        return method
+            .name()
+            .ok()?
+            .name()
+            .map(|name| name.text().to_string());
+    }
+    if let Some(method) = JsGetterClassMember::cast(node.clone()) {
+        return method
+            .name()
+            .ok()?
+            .name()
+            .map(|name| name.text().to_string());
+    }
+    if let Some(method) = JsSetterClassMember::cast(node.clone()) {
+        return method
+            .name()
+            .ok()?
+            .name()
+            .map(|name| name.text().to_string());
+    }
+    None
+}
+
+/// Returns the readable name of an object or class property.
+pub(crate) fn module_constant_property_name(node: &JsSyntaxNode) -> Option<String> {
+    if let Some(property) = JsPropertyObjectMember::cast(node.clone()) {
+        return property.name().ok()?.name().map(|name| name.to_string());
+    }
+    if let Some(property) = JsPropertyClassMember::cast(node.clone()) {
+        return property
+            .name()
+            .ok()?
+            .name()
+            .map(|name| name.text().to_string());
+    }
+    None
+}
+
+/// Returns the readable name of a member expression or member assignment.
+pub(crate) fn module_constant_member_name(node: &JsSyntaxNode) -> Option<String> {
+    if let Some(assignment) = JsAssignmentExpression::cast(node.clone()) {
+        return module_constant_member_name(&assignment.left().ok()?.into_syntax());
+    }
+    if let Some(member) = AnyJsMemberExpression::cast(node.clone()) {
+        return member.member_name().map(|name| name.text().to_string());
+    }
+    if let Some(member) = JsStaticMemberAssignment::cast(node.clone()) {
+        return member
+            .member()
+            .ok()?
+            .as_js_name()?
+            .value_token()
+            .ok()
+            .map(|token| token.text_trimmed().to_string());
+    }
+    if let Some(member) = JsComputedMemberAssignment::cast(node.clone()) {
+        return member
+            .member()
+            .ok()?
+            .as_static_value()
+            .map(|value| value.text().to_string());
+    }
+    None
+}
+
+/// Converts text into an uppercase identifier component.
+pub(crate) fn normalize_module_constant_name_component(
+    text: &str,
+    ensure_identifier_start: bool,
+) -> Option<String> {
+    let mut normalized = String::new();
+    let mut previous_is_lowercase = false;
+
+    for character in text.chars() {
+        if character.is_ascii_alphanumeric() {
+            if character.is_ascii_uppercase() && previous_is_lowercase {
+                normalized.push('_');
+            }
+            normalized.push(character.to_ascii_uppercase());
+            previous_is_lowercase = character.is_ascii_lowercase();
+        } else {
+            if !normalized.ends_with('_') {
+                normalized.push('_');
+            }
+            previous_is_lowercase = false;
+        }
+    }
+
+    let normalized = normalized.trim_matches('_');
+    if normalized.is_empty() {
+        return None;
+    }
+
+    // Numeric context names need a prefix before they can participate in a binding name.
+    if ensure_identifier_start
+        && normalized
+            .as_bytes()
+            .first()
+            .is_some_and(|character| character.is_ascii_digit())
+    {
+        Some(format!("NUMBER_{normalized}"))
+    } else {
+        Some(normalized.to_string())
+    }
+}
+
+/// Builds a stable uppercase name from the syntax surrounding a runtime number.
+pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: &str) -> String {
+    let mut variable = None;
+    let mut property = None;
+    let mut function = None;
+    let mut call = None;
+
+    for candidate in module_constant_name_candidates(target) {
+        match candidate.kind {
+            ModuleConstantNameKind::Binding if variable.is_none() => {
+                variable = Some(candidate.name)
+            }
+            ModuleConstantNameKind::Property | ModuleConstantNameKind::Member
+                if property.is_none() =>
+            {
+                property = Some(candidate.name)
+            }
+            ModuleConstantNameKind::Function if function.is_none() => {
+                function = Some(candidate.name)
+            }
+            ModuleConstantNameKind::CallCallee if call.is_none() => call = Some(candidate.name),
+            ModuleConstantNameKind::Binding
+            | ModuleConstantNameKind::Function
+            | ModuleConstantNameKind::Property
+            | ModuleConstantNameKind::Member
+            | ModuleConstantNameKind::Method
+            | ModuleConstantNameKind::CallCallee => {}
+        }
+    }
+
+    let mut parts = Vec::new();
+    for context in [variable, property, function, call].into_iter().flatten() {
+        if let Some(normalized) = normalize_module_constant_name_component(&context, true)
+            && !parts.contains(&normalized)
+        {
+            parts.push(normalized);
+        }
+    }
+
+    let value = normalize_module_constant_name_component(literal_text, false)
+        .unwrap_or_else(|| "NUMBER".to_string());
+    if parts.is_empty() {
+        format!("NUMBER_{value}")
+    } else {
+        parts.push(value);
+        parts.join("_")
+    }
+}
+
+/// Builds a stable uppercase name for a regular-expression constant from its enclosing context.
+pub(crate) fn module_constant_regex_name(target: &JsSyntaxNode, pattern: &str) -> String {
+    for candidate in module_constant_name_candidates(target) {
+        if matches!(
+            candidate.kind,
+            ModuleConstantNameKind::Binding
+                | ModuleConstantNameKind::Function
+                | ModuleConstantNameKind::Method
+                | ModuleConstantNameKind::Property
+        ) && let Some(name) = normalize_module_constant_name_component(&candidate.name, true)
+        {
+            return format!("{name}_REGEX");
+        }
+    }
+
+    let pattern = normalize_module_constant_name_component(pattern, false);
+    pattern.map_or_else(|| "REGEX".to_string(), |pattern| format!("REGEX_{pattern}"))
+}
+
 thread_local! {
     // Rule actions for one file share this bounded cache; replacing the entry keeps memory use
     // independent of the number of files analyzed on a worker thread.
     static MODULE_CONSTANT_FACTS: RefCell<Option<CachedModuleConstantFacts>> = const { RefCell::new(None) };
 }
 
+/// Returns the facts shared by module-constant extraction checks for `root`.
+///
+/// The facts are cached per thread and replaced when the syntax root changes.
 pub(crate) fn module_constant_facts(
     root: &AnyJsRoot,
     model: &SemanticModel,
@@ -58,6 +355,10 @@ pub(crate) fn module_constant_facts(
     })
 }
 
+/// Builds a mutation that replaces `target` with a module-level constant reference.
+///
+/// Returns `None` when the target cannot be safely extracted or the generated declaration cannot be
+/// placed in the root. The candidate name is checked against bindings and references in scope.
 pub(crate) fn extract_module_constant(
     root: &AnyJsRoot,
     model: &SemanticModel,
@@ -76,6 +377,11 @@ pub(crate) fn extract_module_constant(
     )
 }
 
+/// Builds a constant-extraction mutation while excluding names already reserved by sibling fixes.
+///
+/// The mutation replaces the target, inserts a `const` declaration at the earliest safe slot, and
+/// optionally transfers file-header trivia to that declaration. It returns `None` for unsupported
+/// roots, unsafe dynamic scopes, ambiguous header trivia, or unavailable insertion points.
 pub(crate) fn extract_module_constant_with_reserved_names(
     root: &AnyJsRoot,
     model: &SemanticModel,
@@ -154,6 +460,10 @@ pub(crate) fn extract_module_constant_with_reserved_names(
     Some((mutation, name))
 }
 
+/// Chooses a name that is free in the target scopes and absent from known references and reservations.
+///
+/// If `candidate_name` is occupied, numeric suffixes starting at `_2` are tried until a free name is
+/// found.
 pub(crate) fn collision_free_module_constant_name_with_facts(
     model: &SemanticModel,
     target: &JsSyntaxNode,
@@ -170,6 +480,10 @@ pub(crate) fn collision_free_module_constant_name_with_facts(
     )
 }
 
+/// Returns the top-level item list that can receive a generated runtime binding.
+///
+/// Expression and declaration-only roots return `None` because they have no mutable module or
+/// script statement list.
 fn root_list(root: &AnyJsRoot) -> Option<JsSyntaxNode> {
     // Expression snippets and declaration-only roots cannot receive a runtime binding.
     let list = match root {
@@ -182,6 +496,7 @@ fn root_list(root: &AnyJsRoot) -> Option<JsSyntaxNode> {
         .then_some(list)
 }
 
+/// Returns `candidate_name` or the first suffixed name free from scope and reference collisions.
 fn collision_free_name(
     model: &SemanticModel,
     target: &JsSyntaxNode,
@@ -215,6 +530,7 @@ fn collision_free_name(
     }
 }
 
+/// Checks whether `name` is free in every scope enclosing `target` and absent from known references.
 fn name_is_free_in_target_scopes(
     model: &SemanticModel,
     target: &JsSyntaxNode,
@@ -230,6 +546,9 @@ fn name_is_free_in_target_scopes(
         && !reserved_names.contains(name)
 }
 
+/// Collects names used by unresolved and configured-global references in the semantic model.
+///
+/// These names must not be captured by a generated top-level binding.
 fn occupied_reference_names(model: &SemanticModel) -> FxHashSet<String> {
     let mut names = FxHashSet::default();
     for reference in model.all_unresolved_references() {
@@ -245,6 +564,10 @@ fn occupied_reference_names(model: &SemanticModel) -> FxHashSet<String> {
     names
 }
 
+/// Reports whether an unbound direct `eval` can observe or introduce a generated binding.
+///
+/// Any such call makes extraction unsafe because its runtime scope effects cannot be determined
+/// statically.
 fn has_unbound_direct_eval(root: &AnyJsRoot, model: &SemanticModel) -> bool {
     root.syntax()
         .descendants()
@@ -256,6 +579,9 @@ fn has_unbound_direct_eval(root: &AnyJsRoot, model: &SemanticModel) -> bool {
         })
 }
 
+/// Checks whether `call` invokes the unbound identifier named `eval` directly.
+///
+/// Parenthesized callees still count as direct calls; property calls and bound identifiers do not.
 fn is_direct_eval(model: &SemanticModel, call: &JsCallExpression) -> bool {
     let Some(reference) = call
         .callee()
@@ -272,6 +598,9 @@ fn is_direct_eval(model: &SemanticModel, call: &JsCallExpression) -> bool {
         && model.binding(&reference).is_none()
 }
 
+/// Copies the target's selected leading and trailing trivia onto a replacement node.
+///
+/// Leading trivia is copied only when requested; any invalid trivia attachment returns `None`.
 fn preserve_target_trivia(
     target: &JsSyntaxNode,
     replacement: JsSyntaxNode,
@@ -294,6 +623,9 @@ fn preserve_target_trivia(
     }
 }
 
+/// Removes leading and trailing trivia from an expression before embedding it in a declaration.
+///
+/// Returns `None` if the trivia edits no longer produce a valid expression node.
 fn trim_expression_trivia(value: AnyJsExpression) -> Option<AnyJsExpression> {
     let value = value
         .into_syntax()
@@ -303,6 +635,10 @@ fn trim_expression_trivia(value: AnyJsExpression) -> Option<AnyJsExpression> {
     AnyJsExpression::cast(value)
 }
 
+/// Separates file-header trivia from trivia attached to the first top-level item.
+///
+/// Returns `None` when comments occur after the first blank-line separator, because moving those
+/// comments with a new declaration could change their attachment.
 fn split_header_trivia(list: &JsSyntaxNode) -> Option<HeaderTrivia> {
     let first_item = list.first_child()?;
     let pieces = first_item
@@ -330,6 +666,10 @@ fn split_header_trivia(list: &JsSyntaxNode) -> Option<HeaderTrivia> {
     })
 }
 
+/// Finds the newline that ends the first blank line in a trivia sequence.
+///
+/// Whitespace between two newline pieces is treated as part of the blank line; missing separators
+/// return `None`.
 fn find_first_blank_line_index(pieces: &[SyntaxTriviaPiece<JsLanguage>]) -> Option<usize> {
     for (index, piece) in pieces.iter().enumerate() {
         if !piece.is_newline() {
@@ -353,6 +693,9 @@ fn find_first_blank_line_index(pieces: &[SyntaxTriviaPiece<JsLanguage>]) -> Opti
     None
 }
 
+/// Computes the earliest declaration slot after imports and leading directives but before `target`.
+///
+/// Returns `None` when inserting there would place initialization after the target's top-level item.
 fn insertion_slot(list: &JsSyntaxNode, target_index: usize) -> Option<usize> {
     let mut slot = 0;
     let mut in_directive_prologue = true;
@@ -370,6 +713,9 @@ fn insertion_slot(list: &JsSyntaxNode, target_index: usize) -> Option<usize> {
     (slot <= target_index).then_some(slot)
 }
 
+/// Returns the safe top-level insertion slot for extracting `target` from `root`.
+///
+/// Unsupported roots or targets outside the root's item list return `None`.
 pub(crate) fn module_constant_insertion_slot(
     root: &AnyJsRoot,
     target: &JsSyntaxNode,
@@ -381,6 +727,10 @@ pub(crate) fn module_constant_insertion_slot(
     insertion_slot(&list, top_level_item.index())
 }
 
+/// Reports whether `target` can be replaced by a generated module-level constant reference.
+///
+/// Targets under `with`, roots affected by unbound direct `eval`, and roots without a safe
+/// insertion slot are rejected.
 pub(crate) fn is_module_constant_extractable_with_facts(
     root: &AnyJsRoot,
     target: &JsSyntaxNode,
@@ -401,6 +751,7 @@ pub(crate) fn is_module_constant_extractable_with_facts(
     module_constant_insertion_slot(root, target).is_some()
 }
 
+/// Reports whether a top-level node is an import or a TypeScript import-equals declaration.
 fn is_import_like(node: &JsSyntaxNode) -> bool {
     matches!(
         node.kind(),
@@ -411,6 +762,7 @@ fn is_import_like(node: &JsSyntaxNode) -> bool {
             .any(|descendant| descendant.kind() == JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION))
 }
 
+/// Reports whether a node is an expression statement containing a string literal directive.
 fn is_directive_statement(node: &JsSyntaxNode) -> bool {
     let Some(statement) = JsExpressionStatement::cast_ref(node) else {
         return false;
@@ -423,6 +775,10 @@ fn is_directive_statement(node: &JsSyntaxNode) -> bool {
     })
 }
 
+/// Constructs a `const` statement with the supplied value, trivia, separators, and line ending.
+///
+/// The returned statement owns the provided declaration trivia and adds line separators when the
+/// insertion context requires them.
 fn make_declaration(
     name: &str,
     value: AnyJsExpression,
@@ -483,6 +839,10 @@ fn make_declaration(
     statement.build().into_syntax()
 }
 
+/// Returns the first newline convention found in source trivia, defaulting to LF.
+///
+/// Newlines inside comments and templates are ignored unless they are represented as newline
+/// trivia pieces.
 fn source_line_ending(list: &JsSyntaxNode) -> &'static str {
     // Detached factory tokens do not inherit the source file's line-separator convention.
     for token in list.descendants_tokens(Direction::Next) {
@@ -503,6 +863,9 @@ fn source_line_ending(list: &JsSyntaxNode) -> &'static str {
     "\n"
 }
 
+/// Returns the first recognized line-ending sequence in `text`.
+///
+/// CRLF is matched before CR, and CR, LF, and Unicode line separators are returned distinctly.
 fn find_line_ending(text: &str) -> Option<&'static str> {
     let mut characters = text.chars().peekable();
     while let Some(character) = characters.next() {
@@ -671,7 +1034,7 @@ function read(input) {
         });
         let (mut mutation, first_name) = mutations.next().expect("first extraction");
         let (second_mutation, second_name) = mutations.next().expect("second extraction");
-        mutation.merge(second_mutation);
+        mutation.merge_actions(second_mutation);
 
         let output = mutation.commit().to_string();
         assert_eq!(first_name, "REGEX_1");
@@ -739,7 +1102,7 @@ function read(input) {
         });
         let (mut mutation, first_name) = mutations.next().expect("first extraction");
         let (second_mutation, second_name) = mutations.next().expect("second extraction");
-        mutation.merge(second_mutation);
+        mutation.merge_actions(second_mutation);
 
         let (committed_tree, text_edit) = mutation.clone().commit_with_text_range_and_edit(true);
         let output = mutation.commit().to_string();
@@ -784,7 +1147,7 @@ function read(input) {
         });
         let (mut mutation, first_name) = mutations.next().expect("first extraction");
         let (second_mutation, second_name) = mutations.next().expect("second extraction");
-        mutation.merge(second_mutation);
+        mutation.merge_actions(second_mutation);
 
         let output = mutation.commit().to_string();
         assert_eq!(first_name, "REGEX_1");
@@ -819,7 +1182,7 @@ function read(input) {
                 .0
         });
         let mut mutation = mutations.next().expect("first extraction");
-        mutation.merge(mutations.next().expect("second extraction"));
+        mutation.merge_actions(mutations.next().expect("second extraction"));
 
         let output = mutation.commit().to_string();
         assert_eq!(output.matches("const NUMBER = 5;").count(), 1);
@@ -867,8 +1230,8 @@ function read(input) {
         let (third_mutation, third_name) = mutations.remove(0);
         let standalone_second = second_mutation.clone().commit().to_string();
         assert!(standalone_second.starts_with("// header\nconst NUMBER_5_2 = 5;"));
-        mutation.merge(second_mutation);
-        mutation.merge(third_mutation);
+        mutation.merge_actions(second_mutation);
+        mutation.merge_actions(third_mutation);
 
         let (committed_tree, text_edit) = mutation.clone().commit_with_text_range_and_edit(true);
         let output = mutation.commit().to_string();
