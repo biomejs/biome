@@ -871,7 +871,10 @@ impl<'src> YamlLexer<'src> {
                 .get(start.offset..self.current_coordinate.offset)
                 .and_then(|text| text.bytes().position(|byte| byte == b'\t'))
             && (!allow_tab_after_space
-                || required_indent.map_or(relative_offset == 0, |indent| relative_offset < indent))
+                || required_indent.map_or(
+                    !self.scopes.is_empty() && relative_offset == 0,
+                    |indent| relative_offset < indent,
+                ))
             && let Ok(offset) = TextSize::try_from(start.offset + relative_offset)
         {
             self.diagnostics.push(ParseDiagnostic::new(
