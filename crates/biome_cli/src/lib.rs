@@ -274,7 +274,7 @@ impl<'app> CliSession<'app> {
                 }),
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
-            BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
+            BiomeCommand::Init { jsonc, git } => commands::init::init(self, jsonc, git),
             BiomeCommand::Inspect {
                 cli_options,
                 sub_command,

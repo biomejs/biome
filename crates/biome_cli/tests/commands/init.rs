@@ -62,6 +62,23 @@ fn enables_vcs_inside_git_repository() {
 }
 
 #[test]
+fn enables_vcs_with_git_flag() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["init", "--git"].as_slice()));
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_vcs_with_git_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn creates_config_jsonc_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
