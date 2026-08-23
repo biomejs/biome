@@ -1508,6 +1508,7 @@ dependencies = [
  "schemars",
  "serde",
  "similar-asserts",
+ "smallvec",
  "tests_macros",
 ]
 
