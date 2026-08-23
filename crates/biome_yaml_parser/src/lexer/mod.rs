@@ -845,7 +845,11 @@ impl<'src> YamlLexer<'src> {
     }
 
     fn consume_whitespace_token(&mut self) -> LexToken {
-        self.consume_whitespace_token_with_tab_policy(false, None)
+        let required_indent = self.scopes.last().map(|scope| scope.border() + 1);
+        self.consume_whitespace_token_with_tab_policy(
+            required_indent.is_some(),
+            required_indent,
+        )
     }
 
     fn consume_scalar_continuation_whitespace_token(
@@ -863,6 +867,10 @@ impl<'src> YamlLexer<'src> {
         debug_assert!(self.current_byte().is_some_and(is_space));
         let start = self.current_coordinate;
         self.consume_whitespaces();
+        let tab_separates_root_flow = self.scopes.is_empty()
+            && self
+                .current_byte()
+                .is_some_and(is_flow_collection_indicator);
 
         if start.column == 0
             && self.current_byte().is_some_and(|byte| !is_break(byte))
@@ -870,7 +878,7 @@ impl<'src> YamlLexer<'src> {
                 .source
                 .get(start.offset..self.current_coordinate.offset)
                 .and_then(|text| text.bytes().position(|byte| byte == b'\t'))
-            && (!allow_tab_after_space
+            && ((!allow_tab_after_space && !tab_separates_root_flow)
                 || required_indent.map_or(
                     !self.scopes.is_empty() && relative_offset == 0,
                     |indent| relative_offset < indent,
