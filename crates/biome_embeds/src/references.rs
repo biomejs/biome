@@ -178,7 +178,7 @@ fn vue_directive_name_matches_reference_name(directive_name: &str, reference_nam
                     return false;
                 };
                 let ok = if capitalize_next {
-                    expected.is_uppercase() && expected.eq_ignore_ascii_case(&c)
+                    expected.is_ascii_uppercase() && expected.eq_ignore_ascii_case(&c)
                 } else {
                     expected == c
                 };
