@@ -7198,10 +7198,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useLayer": {
-					"description": "Enforce style rules to be defined within a cascade layer.\nSee https://biomejs.dev/linter/rules/use-layer",
+				"useLayeredStyles": {
+					"description": "Enforce style rules to be defined within a cascade layer.\nSee https://biomejs.dev/linter/rules/use-layered-styles",
 					"anyOf": [
-						{ "$ref": "#/$defs/UseLayerConfiguration" },
+						{ "$ref": "#/$defs/UseLayeredStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12067,11 +12067,11 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseLayerOptions": {
+		"RuleWithUseLayeredStylesOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseLayerOptions" }
+				"options": { "$ref": "#/$defs/UseLayeredStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -16083,13 +16083,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseLayerConfiguration": {
+		"UseLayeredStylesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseLayerOptions" }
+				{ "$ref": "#/$defs/RuleWithUseLayeredStylesOptions" }
 			]
 		},
-		"UseLayerOptions": { "type": "object", "additionalProperties": false },
+		"UseLayeredStylesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseLiteralEnumMembersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

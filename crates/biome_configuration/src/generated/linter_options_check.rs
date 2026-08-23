@@ -2032,8 +2032,8 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
-        "useLayer",
-        TypeId::of::<biome_rule_options::use_layer::UseLayerOptions>(),
+        "useLayeredStyles",
+        TypeId::of::<biome_rule_options::use_layered_styles::UseLayeredStylesOptions>(),
     ));
     result.push((
         "style",

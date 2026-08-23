@@ -2,10 +2,10 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssQualifiedRule, CssSyntaxKind};
+use biome_css_syntax::{CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind};
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
-use biome_rule_options::use_layer::UseLayerOptions;
+use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::use_layered_styles::UseLayeredStylesOptions;
 
 declare_lint_rule! {
     /// Enforce style rules to be defined within a cascade layer.
@@ -52,9 +52,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseLayer {
+    pub UseLayeredStyles {
         version: "next",
-        name: "useLayer",
+        name: "useLayeredStyles",
         language: "css",
         recommended: false,
         severity: Severity::Warning,
@@ -62,11 +62,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for UseLayer {
-    type Query = Ast<CssQualifiedRule>;
+impl Rule for UseLayeredStyles {
+    type Query = Ast<AnyUseLayeredStylesQuery>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseLayerOptions;
+    type Options = UseLayeredStylesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -103,4 +103,8 @@ impl Rule for UseLayer {
             }),
         )
     }
+}
+
+declare_node_union! {
+    pub AnyUseLayeredStylesQuery = CssQualifiedRule | CssNestedQualifiedRule
 }

@@ -1,0 +1,111 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@layer {
+	p {
+		color: red;
+	}
+}
+
+@layer named {
+	p {
+		color: red;
+	}
+}
+
+@layer named.something {
+	p {
+		color: red;
+	}
+}
+
+@media (min-width: 600px) {
+	@layer foo {
+		a {
+			color: bar
+		}
+
+		@layer bar {
+			b {
+				color: red;
+			}
+		}
+	}
+}
+
+@layer base {
+	a:hover {
+		color: red;
+	}
+
+	p::before {
+		content: "";
+	}
+}
+
+@LAYER foo {
+	a {
+		color: red;
+	}
+}
+
+@Layer bar {
+	a {
+		color: red;
+	}
+}
+
+@layer base {
+	@supports (display: grid) {
+		.box {
+			display: grid;
+		}
+	}
+}
+
+@layer base {
+	@container (min-width: 200px) {
+		.card {
+			color: red;
+		}
+	}
+}
+
+@layer {
+	.parent {
+		&:hover {
+			color: blue;
+		}
+	}
+}
+
+@layer reset, base, theme;
+
+@keyframes spin {
+	from {
+		transform: rotate(0);
+	}
+
+	50% {
+		transform: rotate(180deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@font-face {
+	font-family: "Test";
+	src: url("test.woff2");
+}
+
+@page :first {
+	margin: 0;
+}
+
+```

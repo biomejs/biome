@@ -1,0 +1,302 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+p {
+	color: red;
+}
+
+@media (min-width: 600px) {
+	a {
+		color: bar
+	}
+}
+
+.parent {
+	color: red;
+
+	& .child {
+		color: blue;
+	}
+}
+
+a:hover {
+	color: red;
+}
+
+::selection {
+	color: red;
+}
+
+:root {
+	--color: red;
+}
+
+@supports (display: grid) {
+	.box {
+		display: grid;
+	}
+}
+
+@container (min-width: 200px) {
+	.card {
+		color: red;
+	}
+}
+
+@scope (.foo) {
+	p {
+		color: red;
+	}
+}
+
+@media (min-width: 600px) {
+	@supports (display: grid) {
+		a {
+			color: red;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ p {
+      │ ^^^
+  > 3 │ 	color: red;
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ @media (min-width: 600px) {
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:7:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+     6 │ @media (min-width: 600px) {
+   > 7 │ 	a {
+       │ 	^^^
+   > 8 │ 		color: bar
+   > 9 │ 	}
+       │ 	^
+    10 │ }
+    11 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:12:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    10 │ }
+    11 │ 
+  > 12 │ .parent {
+       │ ^^^^^^^^^
+  > 13 │ 	color: red;
+        ...
+  > 17 │ 	}
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ a:hover {
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:20:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    18 │ }
+    19 │ 
+  > 20 │ a:hover {
+       │ ^^^^^^^^^
+  > 21 │ 	color: red;
+  > 22 │ }
+       │ ^
+    23 │ 
+    24 │ ::selection {
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:24:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    22 │ }
+    23 │ 
+  > 24 │ ::selection {
+       │ ^^^^^^^^^^^^^
+  > 25 │ 	color: red;
+  > 26 │ }
+       │ ^
+    27 │ 
+    28 │ :root {
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:28:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    26 │ }
+    27 │ 
+  > 28 │ :root {
+       │ ^^^^^^^
+  > 29 │ 	--color: red;
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ @supports (display: grid) {
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:33:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    32 │ @supports (display: grid) {
+  > 33 │ 	.box {
+       │ 	^^^^^^
+  > 34 │ 		display: grid;
+  > 35 │ 	}
+       │ 	^
+    36 │ }
+    37 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:39:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    38 │ @container (min-width: 200px) {
+  > 39 │ 	.card {
+       │ 	^^^^^^^
+  > 40 │ 		color: red;
+  > 41 │ 	}
+       │ 	^
+    42 │ }
+    43 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:45:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    44 │ @scope (.foo) {
+  > 45 │ 	p {
+       │ 	^^^
+  > 46 │ 		color: red;
+  > 47 │ 	}
+       │ 	^
+    48 │ }
+    49 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:52:3 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    50 │ @media (min-width: 600px) {
+    51 │ 	@supports (display: grid) {
+  > 52 │ 		a {
+       │ 		^^^
+  > 53 │ 			color: red;
+  > 54 │ 		}
+       │ 		^
+    55 │ 	}
+    56 │ }
+  
+  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  
+  i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -2712,9 +2712,9 @@ See https://biomejs.dev/linter/rules/use-includes
 	useIncludes?: UseIncludesConfiguration;
 	/**
 	* Enforce style rules to be defined within a cascade layer.
-See https://biomejs.dev/linter/rules/use-layer 
+See https://biomejs.dev/linter/rules/use-layered-styles 
 	 */
-	useLayer?: UseLayerConfiguration;
+	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
@@ -4908,9 +4908,9 @@ export type UseImportsFirstConfiguration =
 export type UseIncludesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIncludesOptions;
-export type UseLayerConfiguration =
+export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
-	| RuleWithUseLayerOptions;
+	| RuleWithUseLayeredStylesOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -6872,9 +6872,9 @@ export interface RuleWithUseIncludesOptions {
 	level: RulePlainConfiguration;
 	options?: UseIncludesOptions;
 }
-export interface RuleWithUseLayerOptions {
+export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
-	options?: UseLayerOptions;
+	options?: UseLayeredStylesOptions;
 }
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
@@ -8677,7 +8677,7 @@ export type UseImportsFirstOptions = {};
  * Options for the `useIncludes` rule.
  */
 export type UseIncludesOptions = {};
-export type UseLayerOptions = {};
+export type UseLayeredStylesOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 export type UseNamedLayerOptions = {};
@@ -10024,7 +10024,7 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useLayer"
+	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"

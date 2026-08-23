@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the nursery rule [`useLayer`](https://biomejs.dev/linter/rules/use-layer/), which enforces that CSS style rules are defined within a cascade layer.
+Added the nursery rule [`useLayeredStyles`](https://biomejs.dev/linter/rules/use-layered-styles/), which enforces that CSS style rules are defined within a cascade layer.
 
 ```css
 /* Invalid */
