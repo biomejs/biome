@@ -159,6 +159,7 @@ impl<'src> YamlLexer<'src> {
 
     fn consume_sequence_entry(&mut self) -> VecDeque<LexToken> {
         self.assert_byte(b'-');
+        self.report_tab_indentation_before_block_node(self.current_coordinate);
         let indicator = self.consume_byte_as_token(T![-]);
 
         if self
@@ -182,6 +183,7 @@ impl<'src> YamlLexer<'src> {
     /// at the current indentation.
     fn consume_explicit_mapping_key(&mut self, current: u8) -> VecDeque<LexToken> {
         debug_assert!(matches!(current, b'?' | b':'));
+        self.report_tab_indentation_before_block_node(self.current_coordinate);
         let indicator = if current == b'?' {
             self.consume_byte_as_token(T![?])
         } else {
@@ -245,13 +247,17 @@ impl<'src> YamlLexer<'src> {
                     coordinate
                 }
             });
+        let is_mapping = self.is_at_mapping_indicator();
+        if is_mapping {
+            self.report_tab_indentation_before_block_node(mapping_start_coordinate);
+        }
 
         if self
             .scopes
             .last()
             .is_none_or(|scope| scope.indent(scope_coordinate))
         {
-            if self.is_at_mapping_indicator() {
+            if is_mapping {
                 self.report_multiline_implicit_key(key_coordinate, key_end);
                 let indicator = self.consume_byte_as_token(T![:]);
                 tokens.insert(
@@ -266,7 +272,7 @@ impl<'src> YamlLexer<'src> {
                 tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
-        } else if self.is_at_mapping_indicator() {
+        } else if is_mapping {
             self.report_multiline_implicit_key(key_coordinate, key_end);
             // At a valid mapping key, lex the `:` so that the lexer wouldn't confuse it with a
             // standalone `:` token, which indicate the start of an empty mapping key
@@ -376,6 +382,7 @@ impl<'src> YamlLexer<'src> {
 
             if is_break(current) {
                 let might_be_token_end = self.current_coordinate;
+                self.report_tab_only_block_scalar_indentation(required_indent);
                 if !self.is_scalar_continuation(required_indent) {
                     return LexToken::new(BLOCK_CONTENT_LITERAL, start, might_be_token_end);
                 }
@@ -699,6 +706,10 @@ impl<'src> YamlLexer<'src> {
         while let Some(current) = self.current_byte() {
             if is_break(current) || self.is_at_directive_trailing_trivia() {
                 break;
+            }
+            if current == b'#' {
+                self.consume_unexpected_character();
+                continue;
             }
             if self.current_char_is_yaml_printable() {
                 self.advance_char_unchecked();
@@ -1244,6 +1255,64 @@ impl<'src> YamlLexer<'src> {
                 TextRange::new(start.into(), end.into()),
             ));
         }
+    }
+
+    fn report_tab_indentation_before_block_node(&mut self, coordinate: TextCoordinate) {
+        let line_start = coordinate.offset.saturating_sub(coordinate.column);
+        let Some(prefix) = self.source.get(line_start..coordinate.offset) else {
+            return;
+        };
+        let Some(relative_offset) = prefix.bytes().position(|byte| byte == b'\t') else {
+            return;
+        };
+        if !prefix[..relative_offset]
+            .bytes()
+            .any(|byte| !is_space(byte))
+        {
+            return;
+        }
+        let Ok(offset) = TextSize::try_from(line_start + relative_offset) else {
+            return;
+        };
+        self.diagnostics.push(ParseDiagnostic::new(
+            "Tabs are not allowed for indentation in YAML.",
+            offset..offset + TextSize::from(1),
+        ));
+    }
+
+    fn report_tab_only_block_scalar_indentation(&mut self, required_indent: Option<usize>) {
+        debug_assert!(self.current_byte().is_some_and(is_break));
+        let break_len =
+            usize::from(self.current_byte() == Some(b'\r') && self.peek_byte() == Some(b'\n')) + 1;
+        let mut offset = break_len;
+        let mut tab_column = None;
+        while let Some(byte) = self.byte_at(offset).filter(|byte| is_space(*byte)) {
+            if byte == b'\t' && tab_column.is_none() {
+                tab_column = Some(offset - break_len);
+            }
+            offset += 1;
+        }
+        let Some(tab_column) = tab_column else {
+            return;
+        };
+        if self.byte_at(offset).is_some_and(|byte| !is_break(byte)) {
+            return;
+        }
+        let required_indent = required_indent
+            .or_else(|| self.scopes.last().map(|scope| scope.border() + 1))
+            .unwrap_or_default();
+        if tab_column >= required_indent {
+            return;
+        }
+        let Ok(offset) =
+            TextSize::try_from(self.current_coordinate.offset + break_len + tab_column)
+        else {
+            return;
+        };
+        self.diagnostics.push(ParseDiagnostic::new(
+            "Tabs are not allowed for indentation in YAML.",
+            offset..offset + TextSize::from(1),
+        ));
     }
 
     fn current_char_is_yaml_printable(&self) -> bool {

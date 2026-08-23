@@ -59,7 +59,10 @@ fn parse_document(p: &mut YamlParser) -> ParsedSyntax {
         p.error(p.err_builder("Expected `---` after YAML directives.", directives.range(p)));
     }
     parse_any_block_node(p).ok();
-    p.eat(T![...]);
+    let has_document_end = p.eat(T![...]);
+    if !has_document_end && p.at(DIRECTIVE_LITERAL) {
+        p.error(p.err_builder("Expected `...` before YAML directives.", p.cur_range()));
+    }
     Present(m.complete(p, YAML_DOCUMENT))
 }
 
