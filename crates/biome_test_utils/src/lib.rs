@@ -915,8 +915,8 @@ pub fn assert_errors_are_absent<L: biome_rowan::Language>(
         "There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
         path,
         std::str::from_utf8(buffer.as_slice()).unwrap(),
-        &program,
-        &program.to_string()
+        program,
+        program
     );
 }
 
