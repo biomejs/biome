@@ -134,7 +134,7 @@ impl<'src> YamlLexer<'src> {
         let tokens = match current {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
-            b'#' => self.consume_comment().into(),
+            b'#' if self.is_at_comment() => self.consume_comment().into(),
             b'%' if self.is_at_directive() => self.consume_directive().into(),
             b'-' if self.is_at_directive_end() => self.consume_directive_end(),
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
@@ -479,7 +479,7 @@ impl<'src> YamlLexer<'src> {
             }
             let token = match (current, self.peek_byte()) {
                 (c, _) if is_space(c) => self.consume_whitespace_token(),
-                (b'#', _) => self.consume_comment(),
+                (b'#', _) if self.is_at_comment() => self.consume_comment(),
                 (b':', _) if just_lexed_json_key => {
                     just_lexed_json_key = false;
                     self.consume_byte_as_token(T![:])
@@ -698,7 +698,7 @@ impl<'src> YamlLexer<'src> {
 
     fn is_at_directive_trailing_trivia(&self) -> bool {
         match self.current_byte() {
-            Some(b'#') => self.prev_byte().is_none_or(is_blank),
+            Some(b'#') => self.is_at_comment(),
             Some(current) if is_space(current) => {
                 let mut offset = 0;
                 while self.byte_at(offset).is_some_and(is_space) {
@@ -778,7 +778,7 @@ impl<'src> YamlLexer<'src> {
                     break;
                 }
                 trivia.push_back(self.consume_newline_token());
-            } else if current == b'#' {
+            } else if current == b'#' && self.is_at_comment() {
                 trivia.push_back(self.consume_comment());
             } else {
                 break;
@@ -893,6 +893,10 @@ impl<'src> YamlLexer<'src> {
         LexToken::new(NEWLINE, start, self.current_coordinate)
     }
 
+    fn is_at_comment(&self) -> bool {
+        self.current_byte() == Some(b'#') && self.prev_byte().is_none_or(is_blank)
+    }
+
     fn consume_comment(&mut self) -> LexToken {
         self.assert_byte(b'#');
         let start = self.current_coordinate;
@@ -928,7 +932,7 @@ impl<'src> YamlLexer<'src> {
                     properties.push_back(self.consume_tag_property());
                 }
                 c if is_space(c) => properties.push_back(self.consume_whitespace_token()),
-                b'#' => properties.push_back(self.consume_comment()),
+                b'#' if self.is_at_comment() => properties.push_back(self.consume_comment()),
                 c if is_break(c) => {
                     // Check if we would breach parent scope before consuming trivia
                     let start = self.current_coordinate;
