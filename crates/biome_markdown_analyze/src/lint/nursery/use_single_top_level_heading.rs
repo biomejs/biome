@@ -2,10 +2,8 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_markdown_syntax::{
-    AnyMdHeader, MarkdownSyntaxKind::*, MdHtmlBlock, MdRoot,
-};
-use biome_rowan::{AstNode, TextRange};
+use biome_markdown_syntax::{AnyMdHeader, MarkdownSyntaxKind::*, MdHtmlBlock, MdRoot};
+use biome_rowan::{AstNode, Direction, TextRange};
 use biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOptions;
 
 declare_lint_rule! {
@@ -13,14 +11,21 @@ declare_lint_rule! {
     ///
     /// A Markdown document should have a single top-level heading (level 1 by default) that
     /// acts as the document's title. Subsequent headings should use lower levels (h2, h3, etc).
-    /// Multiple top-level headings confuse document outlines, tables of contents, and the
+    /// Multiple top-level headings break document outlines, tables of contents, and the
     /// heading structure produced when the file is converted to HTML.
     ///
-    /// This rule only reports extra top-level headings when the *first* matching heading is
-    /// itself the document's title, i.e. nothing but blank lines and HTML comments precede it.
-    /// If other content (a paragraph, a different heading level, etc.) comes before the first
-    /// matching heading, the rule assumes the document doesn't follow the single-title
-    /// convention at all and stays silent.
+    /// Only a heading that is a direct child of the document can be its title, so a heading
+    /// nested in a blockquote or in a list item never counts as one.
+    ///
+    /// The rule doesn't report diagnostics when the first heading at the configured level is
+    /// preceded by:
+    ///
+    /// - a heading at another level
+    /// - other block content, such as a paragraph or a front matter block
+    ///
+    /// In these cases, the rule assumes the document doesn't follow the single-title convention.
+    /// Blank lines and HTML comments are ignored when determining whether the heading is the
+    /// document title.
     ///
     /// ## Examples
     ///
@@ -133,35 +138,23 @@ impl Rule for UseSingleTopLevelHeading {
     }
 }
 
-/// Returns whether a header can serve as the document title.
+/// Returns whether a header is a top-level document title.
 ///
-/// A document title may be preceded only by blank lines, containers that contain the header, and
-/// HTML comments.
+/// A document title must be a direct child of the root block list and may be preceded only by blank
+/// lines and HTML comments.
 fn is_document_title(root: &MdRoot, header: &AnyMdHeader) -> bool {
-    root.syntax()
-        .descendants()
+    if header.syntax().grand_parent().as_ref() != Some(root.syntax()) {
+        return false;
+    }
+
+    header
+        .syntax()
+        .siblings(Direction::Prev)
         .skip(1)
-        .take_while(|node| node != header.syntax())
-        .all(|node| match node.kind() {
-            MD_BLOCK_LIST | MD_QUOTE | MD_BULLET_LIST_ITEM | MD_ORDERED_LIST_ITEM
-            | MD_BULLET_LIST | MD_BULLET => header
-                .syntax()
-                .ancestors()
-                .any(|ancestor| ancestor == node),
-            MD_LIST_MARKER_PREFIX
-            | MD_INDENT_TOKEN_LIST
-            | MD_QUOTE_INDENT_LIST
-            | MD_NEWLINE
-            | MD_QUOTE_PREFIX
-            | MD_QUOTE_INDENT
-            | MD_INDENT_TOKEN
-            | MD_CONTINUATION_INDENT => true,
-            MD_HTML_CONTENT => node
-                .parent()
-                .and_then(MdHtmlBlock::cast)
-                .is_some_and(|block| block.is_html_comment()),
+        .all(|sibling| match sibling.kind() {
+            MD_NEWLINE => true,
             MD_HTML_BLOCK => {
-                MdHtmlBlock::cast(node.clone()).is_some_and(|block| block.is_html_comment())
+                MdHtmlBlock::cast(sibling).is_some_and(|block| block.is_html_comment())
             }
             _ => false,
         })
