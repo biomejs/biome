@@ -5,6 +5,7 @@ use biome_markdown_syntax::{
     emphasis_ext::{MdEmphasisFence, MdItalicFence},
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
+use smallvec::SmallVec;
 
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed, format_replaced};
@@ -74,7 +75,7 @@ enum WordGroupEscape {
 /// Adjacent prose atoms that cannot be separated by whitespace or a line break.
 #[derive(Debug, Clone, Default)]
 pub(crate) struct WordGroup {
-    atoms: Vec<ProseAtom>,
+    atoms: SmallVec<[ProseAtom; 1]>,
     escape: WordGroupEscape,
 }
 
