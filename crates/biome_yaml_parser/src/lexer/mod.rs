@@ -865,6 +865,7 @@ impl<'src> YamlLexer<'src> {
         self.consume_whitespaces();
 
         if start.column == 0
+            && self.current_byte().is_some_and(|byte| !is_break(byte))
             && let Some(relative_offset) = self
                 .source
                 .get(start.offset..self.current_coordinate.offset)
