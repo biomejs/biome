@@ -4,8 +4,9 @@ use biome_configuration::{Configuration, FilesConfiguration};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Category, Diagnostic, PrintDiagnostic, Severity, category};
-use biome_fs::ConfigName;
+use biome_fs::{ConfigName, FileSystem};
 use biome_service::configuration::create_config;
+use camino::Utf8Path;
 
 pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
     let fs = session.app.workspace.fs();
@@ -13,7 +14,8 @@ pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagn
     let mut config = Configuration::init();
     let mut vcs_enabled = false;
     let mut dist_enabled = false;
-    if fs.path_exists(&working_directory.join(IGNORE_FILE_NAME))
+    if is_inside_git_repository(fs, &working_directory)
+        || fs.path_exists(&working_directory.join(IGNORE_FILE_NAME))
         || fs.path_exists(&working_directory.join(GIT_IGNORE_FILE_NAME))
     {
         vcs_enabled = true;
@@ -51,6 +53,13 @@ pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagn
         .log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
 
     Ok(())
+}
+
+fn is_inside_git_repository(fs: &dyn FileSystem, working_directory: &Utf8Path) -> bool {
+    working_directory.ancestors().any(|directory| {
+        let dot_git = directory.join(".git");
+        fs.path_is_dir(&dot_git) || fs.path_is_file(&dot_git)
+    })
 }
 
 /// ANSI colour representation of the Biome logo with the wordmark and slogan.
@@ -127,7 +136,7 @@ impl Display for InitDiagnostic {
 
         if self.vcs_enabled {
             f.write_markup(markup!{
-                "\n\nFound an ignore file. Biome enabled "<Hyperlink href="https://biomejs.dev/guides/integrate-in-vcs">"VCS integration."</Hyperlink>
+                "\n\nFound a Git repository or ignore file. Biome enabled "<Hyperlink href="https://biomejs.dev/guides/integrate-in-vcs">"VCS integration."</Hyperlink>
             })?;
         }
 
@@ -161,5 +170,55 @@ impl Display for InitDiagnostic {
     })?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_inside_git_repository;
+    use biome_fs::MemoryFileSystem;
+    use camino::Utf8Path;
+
+    #[test]
+    fn detects_git_repository_root() {
+        let fs = MemoryFileSystem::default();
+        fs.insert("project/.git/HEAD".into(), []);
+
+        assert!(is_inside_git_repository(&fs, Utf8Path::new("project")));
+    }
+
+    #[test]
+    fn detects_git_repository_from_nested_directory() {
+        let fs = MemoryFileSystem::default();
+        fs.insert("project/.git/HEAD".into(), []);
+
+        assert!(is_inside_git_repository(
+            &fs,
+            Utf8Path::new("project/packages/lib")
+        ));
+    }
+
+    #[test]
+    fn detects_git_worktree_from_nested_directory() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "project/.git".into(),
+            b"gitdir: ../repository/.git/worktrees/project",
+        );
+
+        assert!(is_inside_git_repository(
+            &fs,
+            Utf8Path::new("project/packages/lib")
+        ));
+    }
+
+    #[test]
+    fn rejects_directory_outside_git_repository() {
+        let fs = MemoryFileSystem::default();
+
+        assert!(!is_inside_git_repository(
+            &fs,
+            Utf8Path::new("project/packages/lib")
+        ));
     }
 }
