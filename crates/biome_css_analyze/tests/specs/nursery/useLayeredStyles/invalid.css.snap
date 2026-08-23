@@ -5,6 +5,8 @@ expression: invalid.css
 # Input
 ```css
 /* should generate diagnostics */
+@import "foo.css";
+
 p {
 	color: red;
 }
@@ -65,20 +67,41 @@ a:hover {
 
 # Diagnostics
 ```
-invalid.css:2:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This style rule is defined outside of a cascade layer.
+  ! This import is defined outside of a cascade layer.
   
     1 │ /* should generate diagnostics */
-  > 2 │ p {
+  > 2 │ @import "foo.css";
+      │  ^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ p {
+  
+  i Imported styles without a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Add the layer keyword after the import to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:4:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This style rule is defined outside of a cascade layer.
+  
+    2 │ @import "foo.css";
+    3 │ 
+  > 4 │ p {
       │ ^^^
-  > 3 │ 	color: red;
-  > 4 │ }
+  > 5 │ 	color: red;
+  > 6 │ }
       │ ^
-    5 │ 
-    6 │ @media (min-width: 600px) {
+    7 │ 
+    8 │ @media (min-width: 600px) {
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -88,20 +111,20 @@ invalid.css:2:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:7:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-     6 │ @media (min-width: 600px) {
-   > 7 │ 	a {
+     8 │ @media (min-width: 600px) {
+   > 9 │ 	a {
        │ 	^^^
-   > 8 │ 		color: bar
-   > 9 │ 	}
+  > 10 │ 		color: bar
+  > 11 │ 	}
        │ 	^
-    10 │ }
-    11 │ 
+    12 │ }
+    13 │ 
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -111,23 +134,23 @@ invalid.css:7:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:12:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    10 │ }
-    11 │ 
-  > 12 │ .parent {
+    12 │ }
+    13 │ 
+  > 14 │ .parent {
        │ ^^^^^^^^^
-  > 13 │ 	color: red;
+  > 15 │ 	color: red;
         ...
-  > 17 │ 	}
-  > 18 │ }
+  > 19 │ 	}
+  > 20 │ }
        │ ^
-    19 │ 
-    20 │ a:hover {
+    21 │ 
+    22 │ a:hover {
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -137,21 +160,21 @@ invalid.css:12:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:20:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:22:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    18 │ }
-    19 │ 
-  > 20 │ a:hover {
+    20 │ }
+    21 │ 
+  > 22 │ a:hover {
        │ ^^^^^^^^^
-  > 21 │ 	color: red;
-  > 22 │ }
+  > 23 │ 	color: red;
+  > 24 │ }
        │ ^
-    23 │ 
-    24 │ ::selection {
+    25 │ 
+    26 │ ::selection {
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -161,21 +184,21 @@ invalid.css:20:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:24:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:26:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    22 │ }
-    23 │ 
-  > 24 │ ::selection {
+    24 │ }
+    25 │ 
+  > 26 │ ::selection {
        │ ^^^^^^^^^^^^^
-  > 25 │ 	color: red;
-  > 26 │ }
+  > 27 │ 	color: red;
+  > 28 │ }
        │ ^
-    27 │ 
-    28 │ :root {
+    29 │ 
+    30 │ :root {
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -185,21 +208,21 @@ invalid.css:24:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:28:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:30:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    26 │ }
-    27 │ 
-  > 28 │ :root {
+    28 │ }
+    29 │ 
+  > 30 │ :root {
        │ ^^^^^^^
-  > 29 │ 	--color: red;
-  > 30 │ }
+  > 31 │ 	--color: red;
+  > 32 │ }
        │ ^
-    31 │ 
-    32 │ @supports (display: grid) {
+    33 │ 
+    34 │ @supports (display: grid) {
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -209,20 +232,20 @@ invalid.css:28:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:33:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:35:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    32 │ @supports (display: grid) {
-  > 33 │ 	.box {
+    34 │ @supports (display: grid) {
+  > 35 │ 	.box {
        │ 	^^^^^^
-  > 34 │ 		display: grid;
-  > 35 │ 	}
+  > 36 │ 		display: grid;
+  > 37 │ 	}
        │ 	^
-    36 │ }
-    37 │ 
+    38 │ }
+    39 │ 
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -232,20 +255,20 @@ invalid.css:33:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:39:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:41:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    38 │ @container (min-width: 200px) {
-  > 39 │ 	.card {
+    40 │ @container (min-width: 200px) {
+  > 41 │ 	.card {
        │ 	^^^^^^^
-  > 40 │ 		color: red;
-  > 41 │ 	}
+  > 42 │ 		color: red;
+  > 43 │ 	}
        │ 	^
-    42 │ }
-    43 │ 
+    44 │ }
+    45 │ 
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -255,20 +278,20 @@ invalid.css:39:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:45:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:47:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    44 │ @scope (.foo) {
-  > 45 │ 	p {
+    46 │ @scope (.foo) {
+  > 47 │ 	p {
        │ 	^^^
-  > 46 │ 		color: red;
-  > 47 │ 	}
+  > 48 │ 		color: red;
+  > 49 │ 	}
        │ 	^
-    48 │ }
-    49 │ 
+    50 │ }
+    51 │ 
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   
@@ -278,21 +301,21 @@ invalid.css:45:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:52:3 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:54:3 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This style rule is defined outside of a cascade layer.
   
-    50 │ @media (min-width: 600px) {
-    51 │ 	@supports (display: grid) {
-  > 52 │ 		a {
+    52 │ @media (min-width: 600px) {
+    53 │ 	@supports (display: grid) {
+  > 54 │ 		a {
        │ 		^^^
-  > 53 │ 			color: red;
-  > 54 │ 		}
+  > 55 │ 			color: red;
+  > 56 │ 		}
        │ 		^
-    55 │ 	}
-    56 │ }
+    57 │ 	}
+    58 │ }
   
-  i Style rules outside a cascade layer always take precedence over layered rules, which makes the cascade harder to predict and override.
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
   

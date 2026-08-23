@@ -16091,6 +16091,12 @@
 		},
 		"UseLayeredStylesOptions": {
 			"type": "object",
+			"properties": {
+				"requireImportLayers": {
+					"description": "Require `@import` rules to have a cascade layer. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseLiteralEnumMembersConfiguration": {

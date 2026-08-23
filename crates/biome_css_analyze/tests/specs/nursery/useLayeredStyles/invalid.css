@@ -1,4 +1,6 @@
 /* should generate diagnostics */
+@import "foo.css";
+
 p {
 	color: red;
 }

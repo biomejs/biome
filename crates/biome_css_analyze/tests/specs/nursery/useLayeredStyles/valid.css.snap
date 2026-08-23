@@ -5,6 +5,10 @@ expression: valid.css
 # Input
 ```css
 /* should not generate diagnostics */
+@import "foo.css" layer;
+
+@import "foo.css" layer(base);
+
 @layer {
 	p {
 		color: red;

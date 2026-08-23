@@ -8677,7 +8677,12 @@ export type UseImportsFirstOptions = {};
  * Options for the `useIncludes` rule.
  */
 export type UseIncludesOptions = {};
-export type UseLayeredStylesOptions = {};
+export interface UseLayeredStylesOptions {
+	/**
+	 * Require `@import` rules to have a cascade layer. Defaults to `true`.
+	 */
+	requireImportLayers?: boolean;
+}
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 export type UseNamedLayerOptions = {};
