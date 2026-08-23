@@ -140,7 +140,12 @@ impl<'src> YamlLexer<'src> {
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
             b'!' | b'&' => self.consume_block_properties(),
             current if maybe_at_mapping_start(current, self.peek_byte()) => self
-                .consume_potential_mapping_start(current, VecDeque::new(), self.current_coordinate),
+                .consume_potential_mapping_start(
+                    current,
+                    VecDeque::new(),
+                    0,
+                    self.current_coordinate,
+                ),
             // '?', '-' can be a valid plain token start
             b'?' => self.consume_explicit_mapping_key(current),
             b'-' => self.consume_sequence_entry(),
@@ -198,34 +203,24 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
-    /// Consume and disambiguate a YAML value to determine whether it opens a block
+    /// Consumes and disambiguates a YAML value to determine whether it opens a block
     /// mapping entry, with or without properties, or just a standalone flow value.
+    ///
+    /// When the value opens a mapping, `key_properties_start` partitions
+    /// `properties`: preceding tokens belong to the mapping, while the remaining
+    /// property tokens belong to its key.
     fn consume_potential_mapping_start(
         &mut self,
         current: u8,
         properties: VecDeque<LexToken>,
+        key_properties_start: usize,
         start_coordinate: TextCoordinate,
     ) -> VecDeque<LexToken> {
         debug_assert!(maybe_at_mapping_start(current, self.peek_byte()));
 
-        // When the properties sit on lines of their own above the key, they
-        // belong to the mapping rather than the key, and the mapping's
-        // indentation is set by the key's column, not theirs:
-        //
-        // ```yaml
-        // key: &anchor
-        //   a: 1
-        // ```
         let key_coordinate = self.current_coordinate;
-        let same_line = start_coordinate.offset - start_coordinate.column
-            == key_coordinate.offset - key_coordinate.column;
-        let scope_coordinate = if same_line {
-            start_coordinate
-        } else {
-            key_coordinate
-        };
-
         let mut tokens = properties;
+        let properties_end = tokens.len();
         let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
         let key_end = self.current_coordinate;
         tokens.append(&mut potential_mapping_keys);
@@ -235,6 +230,22 @@ impl<'src> YamlLexer<'src> {
         let mut trivia = self.consume_trivia(true);
         tokens.append(&mut trivia);
 
+        let mapping_start_coordinate = tokens
+            .get(key_properties_start)
+            .map_or(key_coordinate, |token| token.start);
+        let scope_coordinate = tokens
+            .iter()
+            .skip(key_properties_start)
+            .take(properties_end.saturating_sub(key_properties_start))
+            .filter(|token| matches!(token.kind, ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL))
+            .fold(key_coordinate, |coordinate, token| {
+                if token.start.column < coordinate.column {
+                    token.start
+                } else {
+                    coordinate
+                }
+            });
+
         if self
             .scopes
             .last()
@@ -243,7 +254,10 @@ impl<'src> YamlLexer<'src> {
             if self.is_at_mapping_indicator() {
                 self.report_multiline_implicit_key(key_coordinate, key_end);
                 let indicator = self.consume_byte_as_token(T![:]);
-                tokens.push_front(LexToken::pseudo(MAPPING_START, start_coordinate));
+                tokens.insert(
+                    key_properties_start,
+                    LexToken::pseudo(MAPPING_START, mapping_start_coordinate),
+                );
                 tokens.push_back(indicator);
                 self.scopes
                     .push(BlockScope::new_mapping_scope(scope_coordinate));
@@ -846,10 +860,7 @@ impl<'src> YamlLexer<'src> {
 
     fn consume_whitespace_token(&mut self) -> LexToken {
         let required_indent = self.scopes.last().map(|scope| scope.border() + 1);
-        self.consume_whitespace_token_with_tab_policy(
-            required_indent.is_some(),
-            required_indent,
-        )
+        self.consume_whitespace_token_with_tab_policy(required_indent.is_some(), required_indent)
     }
 
     fn consume_scalar_continuation_whitespace_token(
@@ -879,10 +890,10 @@ impl<'src> YamlLexer<'src> {
                 .get(start.offset..self.current_coordinate.offset)
                 .and_then(|text| text.bytes().position(|byte| byte == b'\t'))
             && ((!allow_tab_after_space && !tab_separates_root_flow)
-                || required_indent.map_or(
-                    !self.scopes.is_empty() && relative_offset == 0,
-                    |indent| relative_offset < indent,
-                ))
+                || required_indent
+                    .map_or(!self.scopes.is_empty() && relative_offset == 0, |indent| {
+                        relative_offset < indent
+                    }))
             && let Ok(offset) = TextSize::try_from(start.offset + relative_offset)
         {
             self.diagnostics.push(ParseDiagnostic::new(
@@ -927,15 +938,29 @@ impl<'src> YamlLexer<'src> {
         let start_coordinate = self.current_coordinate;
         let mut start_column = self.current_coordinate.column;
         let mut properties = VecDeque::new();
+        let mut key_properties_start = None;
+        let mut current_line_start = 0;
+        let mut seen_anchor = false;
+        let mut seen_tag = false;
+        let mut anchor_before_line = false;
+        let mut tag_before_line = false;
 
         // Lex all properties until we find a non-property
         while let Some(current) = self.current_byte() {
             match current {
                 b'&' => {
+                    if key_properties_start.is_none() && anchor_before_line {
+                        key_properties_start = Some(current_line_start);
+                    }
+                    seen_anchor = true;
                     start_column = start_column.min(self.current_coordinate.column);
                     properties.push_back(self.consume_anchor_property());
                 }
                 b'!' => {
+                    if key_properties_start.is_none() && tag_before_line {
+                        key_properties_start = Some(current_line_start);
+                    }
+                    seen_tag = true;
                     start_column = start_column.min(self.current_coordinate.column);
                     properties.push_back(self.consume_tag_property());
                 }
@@ -955,6 +980,9 @@ impl<'src> YamlLexer<'src> {
                         break;
                     } else {
                         properties.append(&mut trivia);
+                        current_line_start = properties.len();
+                        anchor_before_line = seen_anchor;
+                        tag_before_line = seen_tag;
                     }
                 }
                 _ => break,
@@ -981,7 +1009,12 @@ impl<'src> YamlLexer<'src> {
         if maybe_at_mapping_start(current, self.peek_byte()) {
             if self.current_coordinate.column >= start_column {
                 // properties of flow collection/scalar that could be a mapping key
-                return self.consume_potential_mapping_start(current, properties, start_coordinate);
+                return self.consume_potential_mapping_start(
+                    current,
+                    properties,
+                    key_properties_start.unwrap_or(0),
+                    start_coordinate,
+                );
             }
 
             // The value can be on the line below its properties:
