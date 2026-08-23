@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: markdown/task_list_markers.md
+---
+
+# Input
+
+```md
+- [ ] unchecked
+- [x] checked
+- [X] uppercase checked
+- parent
+  - [ ] nested unchecked
+  - [x] nested checked
+
+- ordinary list item
+- [ordinary link](https://example.com)
+
+[reference link][reference]
+
+[reference]: https://example.com
+
+```
+
+
+# Formatted
+
+```md
+- [ ] unchecked
+- [x] checked
+- [X] uppercase checked
+- parent
+  - [ ] nested unchecked
+  - [x] nested checked
+
+- ordinary list item
+- [ordinary link](https://example.com)
+
+[reference link][reference]
+
+[reference]: https://example.com
+
+```

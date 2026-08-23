@@ -430,12 +430,6 @@ fn lookahead_reference_common(
 
         let link_text = collect_link_text(p)?;
 
-        // Link text must be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
-        let normalized_link = normalize_reference_label(&link_text);
-        if normalized_link.is_empty() {
-            return None;
-        }
-
         p.bump(R_BRACK);
 
         // `(` after `]` means an inline link tail, not a reference.
@@ -452,11 +446,6 @@ fn lookahead_reference_common(
                 let label = if label_text.is_empty() {
                     link_text.clone()
                 } else {
-                    // Explicit label must also normalize to non-empty
-                    let normalized_label = normalize_reference_label(&label_text);
-                    if normalized_label.is_empty() {
-                        return None;
-                    }
                     label_text
                 };
                 p.bump(R_BRACK);

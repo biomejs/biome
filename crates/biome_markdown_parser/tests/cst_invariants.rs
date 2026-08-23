@@ -423,6 +423,21 @@ fn deferred_references_preserve_cst_and_container_metadata() {
 }
 
 #[test]
+fn whitespace_only_shortcut_reference_stays_literal() {
+    let input = "- [ ] unchecked\n";
+    let parsed = parse_markdown(input);
+
+    assert_eq!(parsed.syntax().to_string(), input);
+    assert!(parsed.diagnostics().is_empty());
+    assert!(
+        !parsed
+            .syntax()
+            .descendants()
+            .any(|node| MdReferenceLink::can_cast(node.kind()))
+    );
+}
+
+#[test]
 fn deferred_references_preserve_headings_and_diagnostics() {
     let heading = "# *[foo*][ref]\n\n[ref]: /uri\n";
     let parsed = parse_markdown(heading);
