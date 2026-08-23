@@ -10,7 +10,7 @@ use biome_rowan::{Direction, SyntaxResult, TextRange, TextSize, TokenText};
 use std::iter::{FusedIterator, Peekable};
 use std::str::Chars;
 
-pub(crate) static JSX_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
+pub(crate) static JSX_WHITESPACE_CHARS: [u8; 4] = *b" \n\t\r";
 
 /// Meaningful JSX text is defined to be text that has either non-whitespace
 /// characters, or does not contain a newline. Whitespace is defined as ASCII
