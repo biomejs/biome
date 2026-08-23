@@ -439,7 +439,6 @@ pub(crate) fn extract_module_constant_with_reserved_names(
         header_trivia
             .as_ref()
             .map_or(&[][..], |trivia| trivia.first_item.as_slice()),
-        insertion_slot > 0,
         insertion_slot == 0,
         line_ending,
     );
@@ -783,15 +782,14 @@ fn make_declaration(
     name: &str,
     value: AnyJsExpression,
     declaration_leading_trivia: &[(TriviaPieceKind, String)],
-    declaration_trailing_trivia: &[SyntaxTriviaPiece<JsLanguage>],
-    add_leading_line_ending: bool,
-    add_trailing_line_ending: bool,
+    first_item_leading_trivia: &[SyntaxTriviaPiece<JsLanguage>],
+    insert_at_start: bool,
     line_ending: &str,
 ) -> JsSyntaxNode {
     let mut leading_trivia = declaration_leading_trivia.to_vec();
     // Inserted list items take the following item's leading trivia with them, so a nonzero-slot
     // declaration needs its own separator even when the preceding statement used ASI.
-    if (add_leading_line_ending || !leading_trivia.is_empty())
+    if (!insert_at_start || !leading_trivia.is_empty())
         && !matches!(leading_trivia.last(), Some((TriviaPieceKind::Newline, _)))
     {
         leading_trivia.push((TriviaPieceKind::Newline, line_ending.to_string()));
@@ -822,10 +820,10 @@ fn make_declaration(
 
     let mut statement = make::js_variable_statement(declaration);
     let mut semicolon = make::token(T![;]);
-    if add_trailing_line_ending {
+    if insert_at_start {
         let mut trailing_trivia = vec![(TriviaPieceKind::Newline, line_ending.to_string())];
         trailing_trivia.extend(
-            declaration_trailing_trivia
+            first_item_leading_trivia
                 .iter()
                 .map(|piece| (piece.kind(), piece.text().to_string())),
         );
@@ -853,7 +851,7 @@ fn source_line_ending(list: &JsSyntaxNode) -> &'static str {
                 if !piece.is_newline() {
                     continue;
                 }
-                if let Some(line_ending) = find_line_ending(piece.text()) {
+                if let Some(line_ending) = line_ending_from_newline(piece.text()) {
                     return line_ending;
                 }
             }
@@ -863,23 +861,16 @@ fn source_line_ending(list: &JsSyntaxNode) -> &'static str {
     "\n"
 }
 
-/// Returns the first recognized line-ending sequence in `text`.
-///
-/// CRLF is matched before CR, and CR, LF, and Unicode line separators are returned distinctly.
-fn find_line_ending(text: &str) -> Option<&'static str> {
-    let mut characters = text.chars().peekable();
-    while let Some(character) = characters.next() {
-        let line_ending = match character {
-            '\r' if characters.peek() == Some(&'\n') => "\r\n",
-            '\r' => "\r",
-            '\n' => "\n",
-            '\u{2028}' => "\u{2028}",
-            '\u{2029}' => "\u{2029}",
-            _ => continue,
-        };
-        return Some(line_ending);
+/// Returns the line-ending represented by a newline trivia piece.
+fn line_ending_from_newline(text: &str) -> Option<&'static str> {
+    match text {
+        "\r\n" => Some("\r\n"),
+        "\r" => Some("\r"),
+        "\n" => Some("\n"),
+        "\u{2028}" => Some("\u{2028}"),
+        "\u{2029}" => Some("\u{2029}"),
+        _ => None,
     }
-    None
 }
 
 #[cfg(test)]
