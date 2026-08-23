@@ -74,6 +74,30 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
+    pub(crate) fn collection_content_has_preceding_line_break(&mut self) -> bool {
+        let mut index = 1;
+        let mut has_line_break = false;
+        loop {
+            while self.tokens.len() <= index {
+                let before = self.tokens.len();
+                self.consume_tokens();
+                if self.tokens.len() == before {
+                    return false;
+                }
+            }
+            match self.tokens.get(index).map(|token| token.kind) {
+                Some(ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL | WHITESPACE | COMMENT) => {
+                    index += 1;
+                }
+                Some(NEWLINE) => {
+                    has_line_break = true;
+                    index += 1;
+                }
+                Some(_) | None => return has_line_break,
+            }
+        }
+    }
+
     /// Consume tokens until the lexer found a disambiguated checkpoint.
     /// This usually means that the lexer has determined whether the lexed tokens belong to a block
     /// map entry
@@ -134,13 +158,18 @@ impl<'src> YamlLexer<'src> {
         let tokens = match current {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
-            b'#' => self.consume_comment().into(),
+            b'#' if self.is_at_comment() => self.consume_comment().into(),
             b'%' if self.is_at_directive() => self.consume_directive().into(),
             b'-' if self.is_at_directive_end() => self.consume_directive_end(),
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
             b'!' | b'&' => self.consume_block_properties(),
             current if maybe_at_mapping_start(current, self.peek_byte()) => self
-                .consume_potential_mapping_start(current, VecDeque::new(), self.current_coordinate),
+                .consume_potential_mapping_start(
+                    current,
+                    VecDeque::new(),
+                    0,
+                    self.current_coordinate,
+                ),
             // '?', '-' can be a valid plain token start
             b'?' => self.consume_explicit_mapping_key(current),
             b'-' => self.consume_sequence_entry(),
@@ -154,6 +183,7 @@ impl<'src> YamlLexer<'src> {
 
     fn consume_sequence_entry(&mut self) -> VecDeque<LexToken> {
         self.assert_byte(b'-');
+        self.report_tab_indentation_before_block_node(self.current_coordinate);
         let indicator = self.consume_byte_as_token(T![-]);
 
         if self
@@ -177,6 +207,7 @@ impl<'src> YamlLexer<'src> {
     /// at the current indentation.
     fn consume_explicit_mapping_key(&mut self, current: u8) -> VecDeque<LexToken> {
         debug_assert!(matches!(current, b'?' | b':'));
+        self.report_tab_indentation_before_block_node(self.current_coordinate);
         let indicator = if current == b'?' {
             self.consume_byte_as_token(T![?])
         } else {
@@ -198,34 +229,24 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
-    /// Consume and disambiguate a YAML value to determine whether it opens a block
+    /// Consumes and disambiguates a YAML value to determine whether it opens a block
     /// mapping entry, with or without properties, or just a standalone flow value.
+    ///
+    /// When the value opens a mapping, `key_properties_start` partitions
+    /// `properties`: preceding tokens belong to the mapping, while the remaining
+    /// property tokens belong to its key.
     fn consume_potential_mapping_start(
         &mut self,
         current: u8,
         properties: VecDeque<LexToken>,
+        key_properties_start: usize,
         start_coordinate: TextCoordinate,
     ) -> VecDeque<LexToken> {
         debug_assert!(maybe_at_mapping_start(current, self.peek_byte()));
 
-        // When the properties sit on lines of their own above the key, they
-        // belong to the mapping rather than the key, and the mapping's
-        // indentation is set by the key's column, not theirs:
-        //
-        // ```yaml
-        // key: &anchor
-        //   a: 1
-        // ```
         let key_coordinate = self.current_coordinate;
-        let same_line = start_coordinate.offset - start_coordinate.column
-            == key_coordinate.offset - key_coordinate.column;
-        let scope_coordinate = if same_line {
-            start_coordinate
-        } else {
-            key_coordinate
-        };
-
         let mut tokens = properties;
+        let properties_end = tokens.len();
         let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
         let key_end = self.current_coordinate;
         tokens.append(&mut potential_mapping_keys);
@@ -235,15 +256,63 @@ impl<'src> YamlLexer<'src> {
         let mut trivia = self.consume_trivia(true);
         tokens.append(&mut trivia);
 
+        let mapping_start_coordinate = tokens
+            .get(key_properties_start)
+            .map_or(key_coordinate, |token| token.start);
+        let parent_mapping_border = self.scopes.last().and_then(|scope| match scope {
+            BlockScope::Map(border) => Some(*border),
+            BlockScope::Sequence(_) => None,
+        });
+        let invalid_property_range = parent_mapping_border.and_then(|border| {
+            tokens
+                .iter()
+                .enumerate()
+                .skip(key_properties_start)
+                .take(properties_end.saturating_sub(key_properties_start))
+                .find(|(index, token)| {
+                    matches!(token.kind, ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL)
+                        && token.start.column <= border
+                        && key_coordinate.column > border
+                        && tokens
+                            .iter()
+                            .take(properties_end)
+                            .skip(index + 1)
+                            .any(|token| token.kind == NEWLINE)
+                })
+                .map(|(_, property)| property.text_range())
+        });
+        if let Some(range) = invalid_property_range {
+            self.report_unindented_property(range);
+        }
+        let scope_coordinate = tokens
+            .iter()
+            .skip(key_properties_start)
+            .take(properties_end.saturating_sub(key_properties_start))
+            .filter(|token| matches!(token.kind, ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL))
+            .fold(key_coordinate, |coordinate, token| {
+                if token.start.column < coordinate.column {
+                    token.start
+                } else {
+                    coordinate
+                }
+            });
+        let is_mapping = self.is_at_mapping_indicator();
+        if is_mapping {
+            self.report_tab_indentation_before_block_node(mapping_start_coordinate);
+        }
+
         if self
             .scopes
             .last()
             .is_none_or(|scope| scope.indent(scope_coordinate))
         {
-            if self.is_at_mapping_indicator() {
+            if is_mapping {
                 self.report_multiline_implicit_key(key_coordinate, key_end);
                 let indicator = self.consume_byte_as_token(T![:]);
-                tokens.push_front(LexToken::pseudo(MAPPING_START, start_coordinate));
+                tokens.insert(
+                    key_properties_start,
+                    LexToken::pseudo(MAPPING_START, mapping_start_coordinate),
+                );
                 tokens.push_back(indicator);
                 self.scopes
                     .push(BlockScope::new_mapping_scope(scope_coordinate));
@@ -252,7 +321,7 @@ impl<'src> YamlLexer<'src> {
                 tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
-        } else if self.is_at_mapping_indicator() {
+        } else if is_mapping {
             self.report_multiline_implicit_key(key_coordinate, key_end);
             // At a valid mapping key, lex the `:` so that the lexer wouldn't confuse it with a
             // standalone `:` token, which indicate the start of an empty mapping key
@@ -353,6 +422,9 @@ impl<'src> YamlLexer<'src> {
     fn lex_block_content(&mut self, required_indent: Option<usize>) -> LexToken {
         debug_assert!(self.current_byte().is_none_or(is_break));
         let start = self.current_coordinate;
+        if required_indent.is_none() {
+            self.report_over_indented_leading_empty_line();
+        }
 
         while let Some(current) = self.current_byte() {
             if !self.current_char_is_yaml_printable() {
@@ -362,6 +434,7 @@ impl<'src> YamlLexer<'src> {
 
             if is_break(current) {
                 let might_be_token_end = self.current_coordinate;
+                self.report_tab_only_block_scalar_indentation(required_indent);
                 if !self.is_scalar_continuation(required_indent) {
                     return LexToken::new(BLOCK_CONTENT_LITERAL, start, might_be_token_end);
                 }
@@ -454,6 +527,16 @@ impl<'src> YamlLexer<'src> {
                 collection_tokens.push_back(self.consume_unexpected_token());
                 continue;
             }
+            if self.is_at_directive_end() || self.is_at_doc_end() {
+                let position = self.text_position();
+                self.diagnostics.push(
+                    ParseDiagnostic::new(
+                        "Document markers are not allowed inside flow collections.",
+                        position..position + TextSize::from(3),
+                    )
+                    .with_hint("Move this marker outside the surrounding collection."),
+                );
+            }
 
             if is_break(current) {
                 let start = self.current_coordinate;
@@ -479,7 +562,7 @@ impl<'src> YamlLexer<'src> {
             }
             let token = match (current, self.peek_byte()) {
                 (c, _) if is_space(c) => self.consume_whitespace_token(),
-                (b'#', _) => self.consume_comment(),
+                (b'#', _) if self.is_at_comment() => self.consume_comment(),
                 (b':', _) if just_lexed_json_key => {
                     just_lexed_json_key = false;
                     self.consume_byte_as_token(T![:])
@@ -613,6 +696,7 @@ impl<'src> YamlLexer<'src> {
                 Some(c) if is_break(c) => {
                     let might_be_token_end = self.current_coordinate;
                     if !self.is_scalar_continuation(None) {
+                        self.report_missing_closing_quote('"', start);
                         break might_be_token_end;
                     }
                 }
@@ -621,11 +705,7 @@ impl<'src> YamlLexer<'src> {
                 }
                 Some(_) => self.advance_char_unchecked(),
                 None => {
-                    let err = ParseDiagnostic::new(
-                        "Missing closing `\"` quote",
-                        self.text_position()..self.text_position(),
-                    );
-                    self.diagnostics.push(err);
+                    self.report_missing_closing_quote('"', start);
                     break self.current_coordinate;
                 }
             }
@@ -655,6 +735,7 @@ impl<'src> YamlLexer<'src> {
                 Some(current) if is_break(current) => {
                     let might_be_token_end = self.current_coordinate;
                     if !self.is_scalar_continuation(None) {
+                        self.report_missing_closing_quote('\'', start);
                         break might_be_token_end;
                     }
                 }
@@ -663,16 +744,23 @@ impl<'src> YamlLexer<'src> {
                 }
                 Some(_) => self.advance_char_unchecked(),
                 None => {
-                    let err = ParseDiagnostic::new(
-                        "Missing closing `'` quote",
-                        self.text_position()..self.text_position(),
-                    );
-                    self.diagnostics.push(err);
+                    self.report_missing_closing_quote('\'', start);
                     break self.current_coordinate;
                 }
             }
         };
         LexToken::new(SINGLE_QUOTED_LITERAL, start, token_end)
+    }
+
+    fn report_missing_closing_quote(&mut self, quote: char, start: TextCoordinate) {
+        let position = self.text_position();
+        self.diagnostics.push(
+            ParseDiagnostic::new(
+                format!("Missing closing `{quote}` quote"),
+                TextRange::new(start.into(), position),
+            )
+            .with_hint(format!("Add a closing `{quote}` quote.")),
+        );
     }
 
     fn is_at_directive(&self) -> bool {
@@ -686,6 +774,10 @@ impl<'src> YamlLexer<'src> {
             if is_break(current) || self.is_at_directive_trailing_trivia() {
                 break;
             }
+            if current == b'#' {
+                self.consume_unexpected_character();
+                continue;
+            }
             if self.current_char_is_yaml_printable() {
                 self.advance_char_unchecked();
             } else {
@@ -698,7 +790,7 @@ impl<'src> YamlLexer<'src> {
 
     fn is_at_directive_trailing_trivia(&self) -> bool {
         match self.current_byte() {
-            Some(b'#') => self.prev_byte().is_none_or(is_blank),
+            Some(b'#') => self.is_at_comment(),
             Some(current) if is_space(current) => {
                 let mut offset = 0;
                 while self.byte_at(offset).is_some_and(is_space) {
@@ -743,6 +835,7 @@ impl<'src> YamlLexer<'src> {
             && self.current_byte().is_some_and(is_dot)
             && self.peek_byte().is_some_and(is_dot)
             && self.byte_at(2).is_some_and(is_dot)
+            && self.byte_at(3).is_none_or(is_blank)
     }
 
     fn consume_doc_end(&mut self) -> VecDeque<LexToken> {
@@ -778,7 +871,7 @@ impl<'src> YamlLexer<'src> {
                     break;
                 }
                 trivia.push_back(self.consume_newline_token());
-            } else if current == b'#' {
+            } else if current == b'#' && self.is_at_comment() {
                 trivia.push_back(self.consume_comment());
             } else {
                 break;
@@ -845,7 +938,8 @@ impl<'src> YamlLexer<'src> {
     }
 
     fn consume_whitespace_token(&mut self) -> LexToken {
-        self.consume_whitespace_token_with_tab_policy(false, None)
+        let required_indent = self.scopes.last().map(|scope| scope.border() + 1);
+        self.consume_whitespace_token_with_tab_policy(required_indent.is_some(), required_indent)
     }
 
     fn consume_scalar_continuation_whitespace_token(
@@ -863,14 +957,22 @@ impl<'src> YamlLexer<'src> {
         debug_assert!(self.current_byte().is_some_and(is_space));
         let start = self.current_coordinate;
         self.consume_whitespaces();
+        let tab_separates_root_flow = self.scopes.is_empty()
+            && self
+                .current_byte()
+                .is_some_and(is_flow_collection_indicator);
 
         if start.column == 0
+            && self.current_byte().is_some_and(|byte| !is_break(byte))
             && let Some(relative_offset) = self
                 .source
                 .get(start.offset..self.current_coordinate.offset)
                 .and_then(|text| text.bytes().position(|byte| byte == b'\t'))
-            && (!allow_tab_after_space
-                || required_indent.map_or(relative_offset == 0, |indent| relative_offset < indent))
+            && ((!allow_tab_after_space && !tab_separates_root_flow)
+                || required_indent
+                    .map_or(!self.scopes.is_empty() && relative_offset == 0, |indent| {
+                        relative_offset < indent
+                    }))
             && let Ok(offset) = TextSize::try_from(start.offset + relative_offset)
         {
             self.diagnostics.push(ParseDiagnostic::new(
@@ -887,6 +989,10 @@ impl<'src> YamlLexer<'src> {
         let start = self.current_coordinate;
         self.consume_newline();
         LexToken::new(NEWLINE, start, self.current_coordinate)
+    }
+
+    fn is_at_comment(&self) -> bool {
+        self.current_byte() == Some(b'#') && self.prev_byte().is_none_or(is_blank)
     }
 
     fn consume_comment(&mut self) -> LexToken {
@@ -911,20 +1017,34 @@ impl<'src> YamlLexer<'src> {
         let start_coordinate = self.current_coordinate;
         let mut start_column = self.current_coordinate.column;
         let mut properties = VecDeque::new();
+        let mut key_properties_start = None;
+        let mut current_line_start = 0;
+        let mut seen_anchor = false;
+        let mut seen_tag = false;
+        let mut anchor_before_line = false;
+        let mut tag_before_line = false;
 
         // Lex all properties until we find a non-property
         while let Some(current) = self.current_byte() {
             match current {
                 b'&' => {
+                    if key_properties_start.is_none() && anchor_before_line {
+                        key_properties_start = Some(current_line_start);
+                    }
+                    seen_anchor = true;
                     start_column = start_column.min(self.current_coordinate.column);
                     properties.push_back(self.consume_anchor_property());
                 }
                 b'!' => {
+                    if key_properties_start.is_none() && tag_before_line {
+                        key_properties_start = Some(current_line_start);
+                    }
+                    seen_tag = true;
                     start_column = start_column.min(self.current_coordinate.column);
                     properties.push_back(self.consume_tag_property());
                 }
                 c if is_space(c) => properties.push_back(self.consume_whitespace_token()),
-                b'#' => properties.push_back(self.consume_comment()),
+                b'#' if self.is_at_comment() => properties.push_back(self.consume_comment()),
                 c if is_break(c) => {
                     // Check if we would breach parent scope before consuming trivia
                     let start = self.current_coordinate;
@@ -939,6 +1059,9 @@ impl<'src> YamlLexer<'src> {
                         break;
                     } else {
                         properties.append(&mut trivia);
+                        current_line_start = properties.len();
+                        anchor_before_line = seen_anchor;
+                        tag_before_line = seen_tag;
                     }
                 }
                 _ => break,
@@ -951,6 +1074,20 @@ impl<'src> YamlLexer<'src> {
             properties.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             return properties;
         };
+
+        let parent_mapping_border = self.scopes.last().and_then(|scope| match scope {
+            BlockScope::Map(border) => Some(*border),
+            BlockScope::Sequence(_) => None,
+        });
+        if current == b'-'
+            && parent_mapping_border.is_some_and(|border| start_coordinate.column <= border)
+            && let Some(range) = properties
+                .iter()
+                .find(|token| matches!(token.kind, ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL))
+                .map(LexToken::text_range)
+        {
+            self.report_unindented_property(range);
+        }
 
         // Property list terminated by a newline that breaches the enclosing block, which means an
         // empty plain node.
@@ -965,7 +1102,12 @@ impl<'src> YamlLexer<'src> {
         if maybe_at_mapping_start(current, self.peek_byte()) {
             if self.current_coordinate.column >= start_column {
                 // properties of flow collection/scalar that could be a mapping key
-                return self.consume_potential_mapping_start(current, properties, start_coordinate);
+                return self.consume_potential_mapping_start(
+                    current,
+                    properties,
+                    key_properties_start.unwrap_or(0),
+                    start_coordinate,
+                );
             }
 
             // The value can be on the line below its properties:
@@ -996,6 +1138,13 @@ impl<'src> YamlLexer<'src> {
             return tokens;
         }
         properties
+    }
+
+    fn report_unindented_property(&mut self, range: TextRange) {
+        self.diagnostics.push(
+            ParseDiagnostic::new("This anchor or tag is not indented enough.", range)
+                .with_hint("Indent it at least one space more than the key above."),
+        );
     }
 
     fn consume_alias_node(&mut self) -> LexToken {
@@ -1115,6 +1264,20 @@ impl<'src> YamlLexer<'src> {
             _ => {}
         }
 
+        if self
+            .current_byte()
+            .is_some_and(|byte| matches!(byte, b'[' | b'{'))
+        {
+            let position = self.text_position();
+            self.diagnostics.push(
+                ParseDiagnostic::new(
+                    "A tag must be separated from the following collection.",
+                    position..position + TextSize::from(1),
+                )
+                .with_hint("Add a space after the tag."),
+            );
+        }
+
         LexToken::new(TAG_PROPERTY_LITERAL, start, self.current_coordinate)
     }
 
@@ -1197,6 +1360,132 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
+    fn report_tab_indentation_before_block_node(&mut self, coordinate: TextCoordinate) {
+        let line_start = coordinate.offset.saturating_sub(coordinate.column);
+        let Some(prefix) = self.source.get(line_start..coordinate.offset) else {
+            return;
+        };
+        let Some(relative_offset) = prefix.bytes().position(|byte| byte == b'\t') else {
+            return;
+        };
+        if !prefix[..relative_offset]
+            .bytes()
+            .any(|byte| !is_space(byte))
+        {
+            return;
+        }
+        let Ok(offset) = TextSize::try_from(line_start + relative_offset) else {
+            return;
+        };
+        self.diagnostics.push(ParseDiagnostic::new(
+            "Tabs are not allowed for indentation in YAML.",
+            offset..offset + TextSize::from(1),
+        ));
+    }
+
+    fn report_tab_only_block_scalar_indentation(&mut self, required_indent: Option<usize>) {
+        debug_assert!(self.current_byte().is_some_and(is_break));
+        let break_len =
+            usize::from(self.current_byte() == Some(b'\r') && self.peek_byte() == Some(b'\n')) + 1;
+        let mut offset = break_len;
+        let mut tab_column = None;
+        while let Some(byte) = self.byte_at(offset).filter(|byte| is_space(*byte)) {
+            if byte == b'\t' && tab_column.is_none() {
+                tab_column = Some(offset - break_len);
+            }
+            offset += 1;
+        }
+        let Some(tab_column) = tab_column else {
+            return;
+        };
+        if self.byte_at(offset).is_some_and(|byte| !is_break(byte)) {
+            return;
+        }
+        let required_indent = required_indent
+            .or_else(|| self.scopes.last().map(|scope| scope.border() + 1))
+            .unwrap_or_default();
+        if tab_column >= required_indent {
+            return;
+        }
+        let Ok(offset) =
+            TextSize::try_from(self.current_coordinate.offset + break_len + tab_column)
+        else {
+            return;
+        };
+        self.diagnostics.push(ParseDiagnostic::new(
+            "Tabs are not allowed for indentation in YAML.",
+            offset..offset + TextSize::from(1),
+        ));
+    }
+
+    fn report_over_indented_leading_empty_line(&mut self) {
+        let base_offset = self.current_coordinate.offset;
+        let Some(remaining) = self.source.get(base_offset..) else {
+            return;
+        };
+        let bytes = remaining.as_bytes();
+        let mut offset = 0;
+        match bytes.get(offset).copied() {
+            Some(b'\r') => {
+                offset += 1;
+                if bytes.get(offset) == Some(&b'\n') {
+                    offset += 1;
+                }
+            }
+            Some(b'\n') => offset += 1,
+            _ => return,
+        }
+
+        let mut most_indented_empty_line = None;
+        loop {
+            let line_start = offset;
+            while bytes.get(offset) == Some(&b' ') {
+                offset += 1;
+            }
+            let indentation = offset - line_start;
+
+            match bytes.get(offset).copied() {
+                Some(current) if is_break(current) => {
+                    if most_indented_empty_line
+                        .is_none_or(|(_, previous_indentation)| indentation > previous_indentation)
+                    {
+                        most_indented_empty_line = Some((line_start, indentation));
+                    }
+                    offset += 1;
+                    if current == b'\r' && bytes.get(offset) == Some(&b'\n') {
+                        offset += 1;
+                    }
+                }
+                Some(_) => {
+                    let Some((line_start, empty_line_indentation)) = most_indented_empty_line
+                    else {
+                        return;
+                    };
+                    if empty_line_indentation <= indentation {
+                        return;
+                    }
+                    let Ok(start) = TextSize::try_from(base_offset + line_start) else {
+                        return;
+                    };
+                    let Ok(length) = TextSize::try_from(empty_line_indentation) else {
+                        return;
+                    };
+                    self.diagnostics.push(
+                        ParseDiagnostic::new(
+                            "This empty line is more indented than the first non-empty line.",
+                            TextRange::at(start, length),
+                        )
+                        .with_hint(
+                            "Reduce this line's indentation to match the first non-empty line.",
+                        ),
+                    );
+                    return;
+                }
+                None => return,
+            }
+        }
+    }
+
     fn current_char_is_yaml_printable(&self) -> bool {
         is_yaml_printable(self.current_char_unchecked())
     }
@@ -1223,8 +1512,8 @@ impl<'src> YamlLexer<'src> {
 
         match self.current_byte() {
             Some(
-                b'0' | b'a' | b'b' | b't' | b'n' | b'v' | b'f' | b'r' | b'e' | b' ' | b'"' | b'/'
-                | b'\\' | b'N' | b'_' | b'L' | b'P',
+                b'0' | b'a' | b'b' | b't' | b'\t' | b'n' | b'v' | b'f' | b'r' | b'e' | b' ' | b'"'
+                | b'/' | b'\\' | b'N' | b'_' | b'L' | b'P',
             ) => self.advance(1),
             Some(b'x') => {
                 self.advance(1);
