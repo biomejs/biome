@@ -1,0 +1,33 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+
+<div set:html={html}></div>
+<div set:text={text}></div>
+<div>child content</div>
+<div>{expression}</div>
+<div><span>nested element</span></div>
+
+<div></div>
+<div>   </div>
+<div>
+    <!-- comment -->
+</div>
+<div set:html={html}>   </div>
+<div set:text={text}>
+    <!-- comment -->
+</div>
+<script set:html={html}>   </script>
+<style set:text={text}>
+
+</style>
+
+<Component set:html={html} />
+<Component set:text={text} />
+<Component />
+
+```
