@@ -78,6 +78,7 @@ impl<L: Language> CommitChange<L> {
         )
     }
 
+    /// Reports whether both changes insert identical elements into the same parent slot.
     fn is_duplicate_insertion(&self, other: &Self) -> bool {
         self.is_insertion
             && other.is_insertion
@@ -214,8 +215,23 @@ where
     /// changes are applied together in a single [`Self::commit`] call.
     /// Non-overlapping changes combine naturally. If two changes target the
     /// same slot of the same parent, the existing last-write-wins semantics
-    /// apply. Identical insertions at the same slot are kept only once.
+    /// apply.
     pub fn merge(&mut self, other: Self) {
+        debug_assert!(
+            self.root == other.root,
+            "Cannot merge mutations from different trees"
+        );
+        self.changes.extend(other.changes);
+    }
+
+    /// Merge mutations produced by separate analyzer actions.
+    ///
+    /// Action mutations need additional ordering and trivia handling because
+    /// they are collected independently and applied together during fix-all.
+    /// This keeps identical list insertions from being repeated, coalesces
+    /// header cleanup with replacements, and preserves the order in which
+    /// actions were collected.
+    pub fn merge_actions(&mut self, other: Self) {
         debug_assert!(
             self.root == other.root,
             "Cannot merge mutations from different trees"
@@ -292,6 +308,7 @@ where
             }));
     }
 
+    /// Removes leading trivia from the first token of a node or from a token element.
     fn remove_leading_trivia(element: SyntaxElement<L>) -> SyntaxElement<L> {
         match element {
             SyntaxElement::Node(node) => node
@@ -421,6 +438,7 @@ where
         self.insert_element_internal(parent, slot_index, new_element, true);
     }
 
+    /// Records a list insertion together with its slot, merge order, and header-transfer state.
     fn insert_element_internal(
         &mut self,
         parent: SyntaxNode<L>,
@@ -612,6 +630,7 @@ where
         self.push_change_internal(prev_element, next_element, false);
     }
 
+    /// Records a leading-trivia removal that can be coalesced with a later replacement.
     fn push_header_cleanup_change(
         &mut self,
         prev_element: SyntaxElement<L>,
@@ -620,6 +639,7 @@ where
         self.push_change_internal(prev_element, next_element, true);
     }
 
+    /// Records a replacement or removal and preserves the metadata needed to merge it safely.
     fn push_change_internal(
         &mut self,
         prev_element: SyntaxElement<L>,
@@ -1146,7 +1166,7 @@ pub mod test {
         let source = before.syntax().text_with_trivia().to_string();
         let mut second = before.begin();
         second.replace_node(a, c);
-        first.merge(second);
+        first.merge_actions(second);
 
         let (after, text_edit) = first.commit_with_text_range_and_edit(true);
         assert_eq!(expected_debug, format!("{after:#?}"));
@@ -1191,7 +1211,7 @@ pub mod test {
             0,
             literal_with_header("B", "// second\n").into_syntax().into(),
         );
-        first.merge(second);
+        first.merge_actions(second);
 
         let output = first.commit().to_string();
         assert_eq!(output.matches("// first\n").count(), 1);

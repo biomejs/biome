@@ -1,15 +1,11 @@
-use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsLiteralExpression, AnyJsPropertyModifier,
-    JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember,
-    JsPropertyClassMember, JsPropertyObjectMember, JsRegexLiteralExpression,
-    JsSetterClassMember, JsSetterObjectMember, JsSyntaxNode, JsVariableDeclarator,
-};
 use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsPropertyModifier, JsPropertyClassMember,
+    JsRegexLiteralExpression,
+};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_top_level_regex::UseTopLevelRegexOptions;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -20,7 +16,7 @@ use crate::{
     utils::module_constant::{
         collision_free_module_constant_name_with_facts, extract_module_constant,
         extract_module_constant_with_reserved_names, is_module_constant_extractable_with_facts,
-        module_constant_facts, module_constant_insertion_slot,
+        module_constant_facts, module_constant_insertion_slot, module_constant_regex_name,
     },
 };
 
@@ -100,6 +96,7 @@ impl Rule for UseTopLevelRegex {
         )
     }
 
+    /// Builds an extraction action, or returns `None` when coordinated extraction cannot proceed.
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let regex = ctx.query().clone();
         let root = ctx.root();
@@ -109,13 +106,7 @@ impl Rule for UseTopLevelRegex {
             AnyJsLiteralExpression::JsRegexLiteralExpression(regex.clone()),
         );
         let (mutation, name) = if reserved_names.is_empty() && transfer_header {
-            extract_module_constant(
-                &root,
-                ctx.model(),
-                regex.syntax(),
-                value,
-                &candidate_name,
-            )?
+            extract_module_constant(&root, ctx.model(), regex.syntax(), value, &candidate_name)?
         } else {
             extract_module_constant_with_reserved_names(
                 &root,
@@ -147,8 +138,11 @@ fn is_actionable_regex(regex: &JsRegexLiteralExpression) -> bool {
         return false;
     }
 
-    !regex.syntax().ancestors().skip(1).all(|node| {
-        match AnyJsControlFlowRoot::try_cast(node) {
+    !regex
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .all(|node| match AnyJsControlFlowRoot::try_cast(node) {
             Ok(node) => {
                 matches!(
                     node,
@@ -167,10 +161,12 @@ fn is_actionable_regex(regex: &JsRegexLiteralExpression) -> bool {
                     true
                 }
             }
-        }
-    })
+        })
 }
 
+/// Finds the current regex's name and extraction details while scanning regexes in source order.
+/// Identical literals reuse a name; earlier distinct literals reserve the names they select.
+/// Returns `None` when the current regex is not eligible for module-constant extraction.
 fn coordinated_extraction(
     root: &biome_js_syntax::AnyJsRoot,
     model: &SemanticModel,
@@ -205,7 +201,12 @@ fn coordinated_extraction(
             continue;
         }
 
-        let candidate_name = regex_constant_name(&regex);
+        let pattern = regex
+            .decompose()
+            .ok()
+            .map(|(pattern, _)| pattern.text().to_string())
+            .unwrap_or_default();
+        let candidate_name = module_constant_regex_name(regex.syntax(), &pattern);
         let name = collision_free_module_constant_name_with_facts(
             model,
             regex.syntax(),
@@ -224,135 +225,4 @@ fn coordinated_extraction(
     }
 
     None
-}
-
-fn regex_constant_name(regex: &JsRegexLiteralExpression) -> String {
-    for ancestor in regex.syntax().ancestors().skip(1) {
-        if let Some(declarator) = JsVariableDeclarator::cast(ancestor.clone())
-            && let Some(name) = declarator
-                .id()
-                .ok()
-                .and_then(|pattern| pattern.as_any_js_binding().cloned())
-                .and_then(|binding| binding_name(&binding))
-            && let Some(name) = normalize_name_component(&name, true)
-        {
-            return format!("{name}_REGEX");
-        }
-
-        if let Some(function) = AnyJsFunction::cast(ancestor.clone())
-            && let Some(name) = function_name(&function)
-            && let Some(name) = normalize_name_component(&name, true)
-        {
-            return format!("{name}_REGEX");
-        }
-
-        if let Some(name) = method_name(&ancestor)
-            && let Some(name) = normalize_name_component(&name, true)
-        {
-            return format!("{name}_REGEX");
-        }
-
-        if let Some(name) = property_name(&ancestor)
-            && let Some(name) = normalize_name_component(&name, true)
-        {
-            return format!("{name}_REGEX");
-        }
-    }
-
-    // A context-free literal uses its pattern as a stable fallback name.
-    let pattern = regex
-        .decompose()
-        .ok()
-        .map(|(pattern, _)| pattern.text().to_string())
-        .and_then(|pattern| normalize_name_component(&pattern, false));
-    pattern.map_or_else(
-        || "REGEX".to_string(),
-        |pattern| format!("REGEX_{pattern}"),
-    )
-}
-
-fn binding_name(binding: &AnyJsBinding) -> Option<String> {
-    binding
-        .as_js_identifier_binding()?
-        .name_token()
-        .ok()
-        .map(|token| token.text_trimmed().to_string())
-}
-
-fn function_name(function: &AnyJsFunction) -> Option<String> {
-    let binding = match function {
-        AnyJsFunction::JsFunctionDeclaration(function) => function.id().ok(),
-        AnyJsFunction::JsFunctionExportDefaultDeclaration(function) => function.id(),
-        AnyJsFunction::JsFunctionExpression(function) => function.id(),
-        AnyJsFunction::JsArrowFunctionExpression(_) => None,
-    }?;
-    binding_name(&binding)
-}
-
-fn method_name(node: &JsSyntaxNode) -> Option<String> {
-    if let Some(method) = JsMethodObjectMember::cast(node.clone()) {
-        return method.name().ok()?.name().map(|name| name.to_string());
-    }
-    if let Some(method) = JsGetterObjectMember::cast(node.clone()) {
-        return method.name().ok()?.name().map(|name| name.to_string());
-    }
-    if let Some(method) = JsSetterObjectMember::cast(node.clone()) {
-        return method.name().ok()?.name().map(|name| name.to_string());
-    }
-    if let Some(method) = JsMethodClassMember::cast(node.clone()) {
-        return method.name().ok()?.name().map(|name| name.text().to_string());
-    }
-    if let Some(method) = JsGetterClassMember::cast(node.clone()) {
-        return method.name().ok()?.name().map(|name| name.text().to_string());
-    }
-    if let Some(method) = JsSetterClassMember::cast(node.clone()) {
-        return method.name().ok()?.name().map(|name| name.text().to_string());
-    }
-    None
-}
-
-fn property_name(node: &JsSyntaxNode) -> Option<String> {
-    if let Some(property) = JsPropertyObjectMember::cast(node.clone()) {
-        return property.name().ok()?.name().map(|name| name.to_string());
-    }
-    if let Some(property) = JsPropertyClassMember::cast(node.clone()) {
-        return property.name().ok()?.name().map(|name| name.text().to_string());
-    }
-    None
-}
-
-fn normalize_name_component(text: &str, ensure_identifier_start: bool) -> Option<String> {
-    let mut normalized = String::new();
-    let mut previous_is_lowercase = false;
-
-    for character in text.chars() {
-        if character.is_ascii_alphanumeric() {
-            if character.is_ascii_uppercase() && previous_is_lowercase {
-                normalized.push('_');
-            }
-            normalized.push(character.to_ascii_uppercase());
-            previous_is_lowercase = character.is_ascii_lowercase();
-        } else {
-            if !normalized.ends_with('_') {
-                normalized.push('_');
-            }
-            previous_is_lowercase = false;
-        }
-    }
-
-    let normalized = normalized.trim_matches('_');
-    if normalized.is_empty() {
-        return None;
-    }
-
-    if ensure_identifier_start
-        && normalized
-            .as_bytes()
-            .first()
-            .is_some_and(|character| character.is_ascii_digit())
-    {
-        Some(format!("NUMBER_{normalized}"))
-    } else {
-        Some(normalized.to_string())
-    }
 }
