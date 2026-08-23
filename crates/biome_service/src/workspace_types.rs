@@ -172,13 +172,9 @@ fn instance_type<'a>(
             });
 
             // Don't use `additionalProperties: false` here.
-            let additional_properties = schema.get("additionalProperties").and_then(|v| {
-                if v.as_bool() == Some(false) {
-                    None
-                } else {
-                    Some(v)
-                }
-            });
+            let additional_properties = schema
+                .get("additionalProperties")
+                .filter(|&v| v.as_bool() != Some(false));
 
             // If `additionalProperties` is not empty, add a mapped or record type.
             let additional_properties_type = additional_properties.map(|add_props| {
