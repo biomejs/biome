@@ -265,15 +265,13 @@ fn is_logical_identity(node: AnyJsExpression, operator: JsLogicalOperator) -> bo
 
                 let is_left_logical_identify = node
                     .left()
-                    .ok()
-                    .is_some_and(|left| is_logical_identity(left, operator));
+                    .is_ok_and(|left| is_logical_identity(left, operator));
                 if is_left_logical_identify {
                     return true;
                 }
 
                 node.right()
-                    .ok()
-                    .is_some_and(|right| is_logical_identity(right, operator))
+                    .is_ok_and(|right| is_logical_identity(right, operator))
             } else {
                 false
             }

@@ -91,21 +91,14 @@ fn hash_node<H: std::hash::Hasher>(node: &TailwindSyntaxNode, state: &mut H) {
 fn candidate_matches(full: &TwFullCandidate, base: &str, value: &str) -> bool {
     match full.candidate().ok() {
         Some(AnyTwCandidate::TwFunctionalCandidate(func)) => {
-            func.base_token()
-                .ok()
-                .is_some_and(|t| t.text_trimmed() == base)
+            func.base_token().is_ok_and(|t| t.text_trimmed() == base)
                 && func
                     .value()
-                    .ok()
-                    .is_some_and(|v| v.syntax().text_trimmed() == value)
+                    .is_ok_and(|v| v.syntax().text_trimmed() == value)
         }
         Some(AnyTwCandidate::TwStaticCandidate(st)) => {
             // Static candidates have no value part; match when `value` is empty.
-            value.is_empty()
-                && st
-                    .base_token()
-                    .ok()
-                    .is_some_and(|t| t.text_trimmed() == base)
+            value.is_empty() && st.base_token().is_ok_and(|t| t.text_trimmed() == base)
         }
         _ => false,
     }

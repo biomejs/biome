@@ -3023,7 +3023,7 @@ fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
     };
 
     reference_type.type_arguments().is_none()
-        && reference_type.name().ok().is_some_and(|name| {
+        && reference_type.name().is_ok_and(|name| {
             name.as_js_reference_identifier()
                 .and_then(|identifier| identifier.value_token().ok())
                 .is_some_and(|token| token.text_trimmed() == "const")
