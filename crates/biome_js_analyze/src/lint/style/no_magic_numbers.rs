@@ -2,21 +2,19 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsLiteralExpression, AnyJsMemberExpression,
-    AnyJsRoot, AnyTsType, JsArrayAssignmentPatternElement, JsAssignmentExpression,
-    JsAssignmentOperator,
-    JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
-    JsComputedMemberAssignment, JsComputedMemberExpression, JsFormalParameter, JsInitializerClause,
-    JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty, JsParenthesizedExpression,
-    JsPropertyClassMember, JsPropertyObjectMember, JsStaticMemberAssignment, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsRoot, AnyTsType, JsArrayAssignmentPatternElement,
+    JsAssignmentExpression, JsAssignmentOperator, JsBigintLiteralExpression, JsBinaryExpression,
+    JsBinaryOperator, JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
+    JsFormalParameter, JsInitializerClause, JsNumberLiteralExpression,
+    JsObjectBindingPatternShorthandProperty, JsParenthesizedExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
     JsxExpressionAttributeValue, JsxExpressionChild, TsAsExpression, TsEnumMemberList,
     TsIndexedAccessType, TsNonNullAssertionExpression, TsNumberLiteralType, TsPredicateReturnType,
     TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAnnotation, TsTypeAssertionExpression,
     TsUnionTypeVariantList,
 };
-use biome_js_semantic::SemanticModel;
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -27,7 +25,7 @@ use crate::{
     utils::module_constant::{
         collision_free_module_constant_name_with_facts, extract_module_constant,
         extract_module_constant_with_reserved_names, is_module_constant_extractable_with_facts,
-        module_constant_facts, module_constant_insertion_slot,
+        module_constant_facts, module_constant_insertion_slot, module_constant_numeric_name,
     },
 };
 
@@ -108,6 +106,7 @@ impl Rule for NoMagicNumbers {
         )
     }
 
+    /// Builds an unsafe action that extracts the actionable literal into a collision-free constant.
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let numeric_literal = AnyJsNumericLiteral::cast(ctx.query().syntax().clone())?;
         if !is_actionable_numeric_literal(&numeric_literal) {
@@ -157,6 +156,8 @@ impl Rule for NoMagicNumbers {
     }
 }
 
+/// Coordinates constant names and insertion metadata for the current literal with other extractable
+/// literals in the file.
 fn coordinated_extraction(
     root: &AnyJsRoot,
     model: &SemanticModel,
@@ -191,7 +192,8 @@ fn coordinated_extraction(
             continue;
         }
 
-        let candidate_name = numeric_constant_name(&numeric_literal);
+        let literal_text = numeric_literal.syntax().text_trimmed().to_string();
+        let candidate_name = module_constant_numeric_name(numeric_literal.syntax(), &literal_text);
         let name = collision_free_module_constant_name_with_facts(
             model,
             numeric_literal.syntax(),
@@ -219,171 +221,6 @@ declare_node_union! {
 
 declare_node_union! {
     pub JsOrTsNumericLiteral = AnyJsNumericLiteral | TsNumberLiteralType
-}
-
-/// Builds a stable uppercase name from the syntax surrounding a runtime number.
-fn numeric_constant_name(numeric_literal: &AnyJsNumericLiteral) -> String {
-    let literal_text = match numeric_literal {
-        AnyJsNumericLiteral::JsNumberLiteralExpression(literal) => literal
-            .value_token()
-            .ok()
-            .map(|token| token.text_trimmed().to_string()),
-        AnyJsNumericLiteral::JsBigintLiteralExpression(literal) => literal
-            .value_token()
-            .ok()
-            .map(|token| token.text_trimmed().to_string()),
-    }
-    .unwrap_or_else(|| "NUMBER".to_string());
-
-    let mut variable = None;
-    let mut property = None;
-    let mut function = None;
-    let mut call = None;
-
-    for ancestor in numeric_literal.syntax().ancestors().skip(1) {
-        if variable.is_none()
-            && let Some(declarator) = JsVariableDeclarator::cast(ancestor.clone())
-        {
-            variable = declarator
-                .id()
-                .ok()
-                .and_then(|pattern| pattern.as_any_js_binding().cloned())
-                .and_then(|binding| binding_name(&binding));
-        }
-
-        if property.is_none() {
-            property = property_name(&ancestor);
-        }
-
-        if function.is_none()
-            && let Some(enclosing_function) = AnyJsFunction::cast(ancestor.clone())
-        {
-            function = function_name(&enclosing_function);
-        }
-
-        if call.is_none()
-            && let Some(call_expression) = JsCallExpression::cast(ancestor.clone())
-        {
-            call = call_expression
-                .callee()
-                .ok()
-                .and_then(|callee| callee.get_callee_member_name())
-                .map(|token| token.text_trimmed().to_string());
-        }
-
-        if variable.is_some() && property.is_some() && function.is_some() && call.is_some() {
-            break;
-        }
-    }
-
-    let mut parts = Vec::new();
-    for context in [variable, property, function, call].into_iter().flatten() {
-        if let Some(normalized) = normalize_name_component(&context, true)
-            && !parts.contains(&normalized)
-        {
-            parts.push(normalized);
-        }
-    }
-
-    let value =
-        normalize_name_component(&literal_text, false).unwrap_or_else(|| "NUMBER".to_string());
-    if parts.is_empty() {
-        format!("NUMBER_{value}")
-    } else {
-        parts.push(value);
-        parts.join("_")
-    }
-}
-
-fn binding_name(binding: &AnyJsBinding) -> Option<String> {
-    binding
-        .as_js_identifier_binding()?
-        .name_token()
-        .ok()
-        .map(|token| token.text_trimmed().to_string())
-}
-
-fn function_name(function: &AnyJsFunction) -> Option<String> {
-    let binding = match function {
-        AnyJsFunction::JsFunctionDeclaration(function) => function.id().ok(),
-        AnyJsFunction::JsFunctionExportDefaultDeclaration(function) => function.id(),
-        AnyJsFunction::JsFunctionExpression(function) => function.id(),
-        AnyJsFunction::JsArrowFunctionExpression(_) => None,
-    }?;
-    binding_name(&binding)
-}
-
-fn property_name(node: &JsSyntaxNode) -> Option<String> {
-    if let Some(assignment) = JsAssignmentExpression::cast(node.clone()) {
-        return property_name(&assignment.left().ok()?.into_syntax());
-    }
-    if let Some(property) = JsPropertyObjectMember::cast(node.clone()) {
-        return property
-            .name()
-            .ok()?
-            .name()
-            .map(|name| name.to_string());
-    }
-    if let Some(property) = JsPropertyClassMember::cast(node.clone()) {
-        return property.name().ok()?.name().map(|name| name.text().to_string());
-    }
-    if let Some(member) = AnyJsMemberExpression::cast(node.clone()) {
-        return member.member_name().map(|name| name.text().to_string());
-    }
-    if let Some(member) = JsStaticMemberAssignment::cast(node.clone()) {
-        return member
-            .member()
-            .ok()?
-            .as_js_name()?
-            .value_token()
-            .ok()
-            .map(|token| token.text_trimmed().to_string());
-    }
-    if let Some(member) = JsComputedMemberAssignment::cast(node.clone()) {
-        return member
-            .member()
-            .ok()?
-            .as_static_value()
-            .map(|value| value.text().to_string());
-    }
-    None
-}
-
-fn normalize_name_component(text: &str, ensure_identifier_start: bool) -> Option<String> {
-    let mut normalized = String::new();
-    let mut previous_is_lowercase = false;
-
-    for character in text.chars() {
-        if character.is_ascii_alphanumeric() {
-            if character.is_ascii_uppercase() && previous_is_lowercase {
-                normalized.push('_');
-            }
-            normalized.push(character.to_ascii_uppercase());
-            previous_is_lowercase = character.is_ascii_lowercase();
-        } else {
-            if !normalized.ends_with('_') {
-                normalized.push('_');
-            }
-            previous_is_lowercase = false;
-        }
-    }
-
-    let normalized = normalized.trim_matches('_');
-    if normalized.is_empty() {
-        return None;
-    }
-
-    // Numeric context names need a prefix before they can participate in a binding name.
-    if ensure_identifier_start
-        && normalized
-        .as_bytes()
-        .first()
-        .is_some_and(|character| character.is_ascii_digit())
-    {
-        Some(format!("NUMBER_{normalized}"))
-    } else {
-        Some(normalized.to_string())
-    }
 }
 
 /// Checks if the given `numeric_literal` is not a magic number.
