@@ -17,3 +17,12 @@
 > ```
 > code block
 > ```
+
+> A line
+> another line
+> best:
+>
+> ```js
+> var re = /../g;
+> x();
+> ```

@@ -26,6 +26,15 @@ info: markdown/blockquote_code_block.md
 > code block
 > ```
 
+> A line
+> another line
+> best:
+>
+> ```js
+> var re = /../g;
+> x();
+> ```
+
 ```
 
 
@@ -50,6 +59,15 @@ info: markdown/blockquote_code_block.md
 >
 > ```
 > code block
+> ```
+
+> A line
+> another line
+> best:
+>
+> ```js
+> var re = /../g;
+> x();
 > ```
 
 ```
