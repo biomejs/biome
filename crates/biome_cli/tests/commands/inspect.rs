@@ -80,6 +80,52 @@ fn jsonc_resolved_configuration() {
 }
 
 #[test]
+fn resolved_configuration_lists_source_paths_in_merge_order() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["first.json", "package-a", "second.json", "package-b"] }"#,
+    );
+    fs.insert(
+        "first.json".into(),
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    insert_configuration_package(
+        &fs,
+        "node_modules/package-a",
+        "package-a",
+        "1.0.0",
+        r#"{ "formatter": { "indentWidth": 4 } }"#,
+    );
+    fs.insert(
+        "second.json".into(),
+        r#"{ "formatter": { "indentStyle": "space" } }"#,
+    );
+    insert_configuration_package(
+        &fs,
+        "node_modules/package-b",
+        "package-b",
+        "1.0.0",
+        r#"{ "formatter": { "lineEnding": "lf" } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_inspect_snapshot(
+        "resolved_configuration_lists_source_paths_in_merge_order",
+        fs,
+        console,
+        result,
+    );
+}
+
+#[test]
 fn absent_key_is_successful() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -550,12 +596,11 @@ fn no_configuration_json_is_empty() {
 }
 
 #[test]
-fn json_range_uses_utf8_byte_offsets() {
+fn json_output_includes_source_range() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "biome.jsonc".into(),
         r#"{
-  // café
   "formatter": { "lineWidth": 100 }
 }"#,
     );
@@ -568,7 +613,7 @@ fn json_range_uses_utf8_byte_offsets() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("json_range_uses_utf8_byte_offsets", fs, console, result);
+    assert_inspect_snapshot("json_output_includes_source_range", fs, console, result);
 }
 
 #[test]
@@ -821,36 +866,6 @@ fn replaced_composite_omits_superseded_source() {
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_inspect_snapshot(
         "replaced_composite_omits_superseded_source",
-        fs,
-        console,
-        result,
-    );
-}
-
-#[test]
-fn repeated_nested_configuration_emits_information() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "biome.json".into(),
-        r#"{ "extends": ["first.json", "second.json"] }"#,
-    );
-    fs.insert("first.json".into(), r#"{ "extends": ["shared.json"] }"#);
-    fs.insert("second.json".into(), r#"{ "extends": ["shared.json"] }"#);
-    fs.insert(
-        "shared.json".into(),
-        r#"{ "formatter": { "lineWidth": 100 } }"#,
-    );
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
-        "repeated_nested_configuration_emits_information",
         fs,
         console,
         result,

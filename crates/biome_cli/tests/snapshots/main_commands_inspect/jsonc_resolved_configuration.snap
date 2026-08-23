@@ -26,6 +26,9 @@ biome.jsonc configuration ━━━━━━━━━━━━━━━━━━
 
   i Resolved configuration from biome.jsonc.
   
+  Configuration files used (merge order):
+    - biome.jsonc
+  
   {
     "formatter": {
       "lineWidth": 100

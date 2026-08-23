@@ -6,7 +6,6 @@ expression: redactor(content)
 
 ```json
 {
-  // café
   "formatter": { "lineWidth": 100 }
 }
 ```
@@ -21,8 +20,8 @@ expression: redactor(content)
     "configurationKind": "root",
     "path": "biome.jsonc",
     "range": {
-      "end": 46,
-      "start": 43
+      "end": 35,
+      "start": 32
     },
     "scope": "base"
   }

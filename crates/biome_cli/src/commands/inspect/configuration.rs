@@ -47,6 +47,10 @@ impl<'source> ConfigurationInspector<'source> {
         &self.serialized_configuration
     }
 
+    pub(super) fn configuration_paths(&self) -> impl Iterator<Item = &Utf8Path> {
+        self.files.files.iter().map(|file| file.path)
+    }
+
     pub(super) fn has_overrides(&self) -> bool {
         self.configuration.overrides.is_some()
     }

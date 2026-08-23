@@ -181,8 +181,13 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
             return Ok(());
         }
 
-        let diagnostic =
-            InspectionDiagnostic::resolved(configuration_path, output, inspector.has_overrides());
+        let configuration_paths = inspector.configuration_paths().collect::<Vec<_>>();
+        let diagnostic = InspectionDiagnostic::resolved(
+            configuration_path,
+            &configuration_paths,
+            output,
+            inspector.has_overrides(),
+        );
         session
             .app
             .console
@@ -246,10 +251,24 @@ struct InspectionDiagnostic {
 }
 
 impl InspectionDiagnostic {
-    fn resolved(path: Option<&Utf8Path>, output: String, has_overrides: bool) -> Self {
+    fn resolved(
+        path: Option<&Utf8Path>,
+        configuration_paths: &[&Utf8Path],
+        output: String,
+        has_overrides: bool,
+    ) -> Self {
         let path_text =
             path.map_or_else(|| "default configuration".to_string(), Utf8Path::to_string);
-        let mut advice = vec![AdviceLine::Plain(markup! {{output}}.to_owned())];
+        let mut advice = Vec::new();
+        if !configuration_paths.is_empty() {
+            let mut paths = String::from("Configuration files used (merge order):");
+            for path in configuration_paths {
+                paths.push_str("\n  - ");
+                paths.push_str(path.as_str());
+            }
+            advice.push(AdviceLine::Plain(markup! {{paths}}.to_owned()));
+        }
+        advice.push(AdviceLine::Plain(markup! {{output}}.to_owned()));
         if has_overrides {
             advice.push(AdviceLine::Info(
                 markup! { "Overrides are included but were not evaluated because no "<Emphasis>"--path"</Emphasis>" was provided." }.to_owned(),

@@ -606,7 +606,6 @@ const MAX_EXTENDS_DEPTH: usize = 10;
 struct ConfigurationExtendsLoader<'a> {
     fs: &'a dyn FsWithResolverProxy,
     diagnostics: &'a mut Vec<Error>,
-    visited_paths: FxHashMap<Utf8PathBuf, ConfigurationReference>,
     package_resolutions: FxHashMap<String, PackageResolution>,
 }
 
@@ -615,24 +614,20 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         Self {
             fs,
             diagnostics,
-            visited_paths: FxHashMap::default(),
             package_resolutions: FxHashMap::default(),
         }
     }
 
     /// Returns extended inputs in dependency-first merge order.
     ///
-    /// Repeated resolved paths are reported and ignored. Multiple versions of an extended package
-    /// or an eleventh level are reported as errors and aren't loaded.
+    /// Multiple versions of an extended package or an eleventh level are reported as errors and
+    /// aren't loaded.
     fn load(
         mut self,
         root: &Configuration,
         root_file_path: &Utf8Path,
         root_external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<ExtendedConfiguration>, WorkspaceError> {
-        self.visited_paths
-            .insert(normalize_path(root_file_path), ConfigurationReference::Root);
-
         let mut pending_configurations = vec![PendingConfiguration::root(
             root,
             root_file_path.to_path_buf(),
@@ -653,10 +648,6 @@ impl<'a> ConfigurationExtendsLoader<'a> {
 
             let resolved = self.resolve_extended_configuration(pending, specifier)?;
 
-            if let Some(first) = self.visited_paths.get(&resolved.file_path).cloned() {
-                self.report_duplicate(first, resolved);
-                continue;
-            }
             if let Some(first) = self.conflicting_package_resolution(&resolved) {
                 self.report_conflict(first, resolved);
                 continue;
@@ -674,7 +665,7 @@ impl<'a> ConfigurationExtendsLoader<'a> {
                 continue;
             }
 
-            self.register_resolution(&resolved);
+            self.register_package_resolution(&resolved);
             let mut loaded = self.load_resolved_configuration(resolved)?;
             self.diagnostics.append(&mut loaded.diagnostics);
             pending_configurations.push(PendingConfiguration::extended(
@@ -685,23 +676,6 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         }
 
         Ok(extended_configurations)
-    }
-
-    fn report_duplicate(
-        &mut self,
-        first: ConfigurationReference,
-        resolved: ResolvedExtendedConfiguration,
-    ) {
-        self.diagnostics.push(
-            DuplicateExtendedConfiguration {
-                path: resolved.file_path.to_string(),
-                advice: DuplicateExtendedConfigurationAdvice {
-                    first,
-                    repeated: resolved.reference,
-                },
-            }
-            .into(),
-        );
     }
 
     fn report_conflict(
@@ -731,9 +705,7 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         (first.version() != resolved.package_version()).then(|| first.clone())
     }
 
-    fn register_resolution(&mut self, resolved: &ResolvedExtendedConfiguration) {
-        self.visited_paths
-            .insert(resolved.file_path.clone(), resolved.reference.clone());
+    fn register_package_resolution(&mut self, resolved: &ResolvedExtendedConfiguration) {
         if let Some(identity) = resolved.package_identity() {
             self.package_resolutions
                 .entry(identity.to_string())
@@ -788,9 +760,8 @@ impl<'a> ConfigurationExtendsLoader<'a> {
             .filter(|package| package.matches_specifier(&specifier));
 
         Ok(ResolvedExtendedConfiguration {
-            reference: ConfigurationReference::Extended {
+            reference: ConfigurationReference {
                 from: pending.file_path.clone(),
-                specifier: specifier.clone(),
             },
             specifier,
             file_path,
@@ -1044,12 +1015,8 @@ impl ResolvedPackage {
 }
 
 #[derive(Clone, Debug)]
-enum ConfigurationReference {
-    Root,
-    Extended {
-        from: Utf8PathBuf,
-        specifier: String,
-    },
+struct ConfigurationReference {
+    from: Utf8PathBuf,
 }
 
 #[derive(Clone, Debug)]
@@ -1074,59 +1041,6 @@ impl From<&ResolvedExtendedConfiguration> for PackageResolution {
             package: resolved.package.clone(),
             reference: resolved.reference.clone(),
         }
-    }
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "configuration",
-    severity = Information,
-    message(
-        message("The extended configuration "<Emphasis>{self.path}</Emphasis>" was already loaded."),
-        description = "The extended configuration {path} was already loaded."
-    )
-)]
-struct DuplicateExtendedConfiguration {
-    #[location(resource)]
-    path: String,
-    #[advice]
-    advice: DuplicateExtendedConfigurationAdvice,
-}
-
-#[derive(Debug)]
-struct DuplicateExtendedConfigurationAdvice {
-    first: ConfigurationReference,
-    repeated: ConfigurationReference,
-}
-
-impl Advices for DuplicateExtendedConfigurationAdvice {
-    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        match &self.first {
-            ConfigurationReference::Root => visitor.record_log(
-                LogCategory::Info,
-                &markup! { "The first occurrence is the root configuration." },
-            )?,
-            ConfigurationReference::Extended { from, specifier } => visitor.record_log(
-                LogCategory::Info,
-                &markup! {
-                    "The first occurrence is referenced from "<Emphasis>{from.as_str()}</Emphasis>
-                    " using "<Emphasis>{specifier}</Emphasis>"."
-                },
-            )?,
-        }
-        if let ConfigurationReference::Extended { from, specifier } = &self.repeated {
-            visitor.record_log(
-                LogCategory::Info,
-                &markup! {
-                    "It is referenced again from "<Emphasis>{from.as_str()}</Emphasis>
-                    " using "<Emphasis>{specifier}</Emphasis>"."
-                },
-            )?;
-        }
-        visitor.record_log(
-            LogCategory::Info,
-            &markup! { "Biome keeps the first occurrence and ignores this reference." },
-        )
     }
 }
 
@@ -1205,10 +1119,7 @@ impl PackageResolution {
 
 impl ConfigurationReference {
     fn origin(&self) -> &str {
-        match self {
-            Self::Root => "the root configuration",
-            Self::Extended { from, .. } => from.as_str(),
-        }
+        self.from.as_str()
     }
 }
 
@@ -2015,7 +1926,7 @@ mod test {
     }
 
     #[test]
-    fn should_ignore_a_repeated_identical_extended_configuration() {
+    fn should_load_a_repeated_identical_extended_configuration() {
         let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/project/biome.json"),
@@ -2051,22 +1962,16 @@ mod test {
             [
                 Utf8PathBuf::from("/project/shared.json"),
                 Utf8PathBuf::from("/project/first.json"),
+                Utf8PathBuf::from("/project/shared.json"),
                 Utf8PathBuf::from("/project/second.json"),
             ]
         );
-        assert_eq!(
-            loaded
-                .diagnostics
-                .iter()
-                .filter(|diagnostic| diagnostic.severity() == Severity::Information)
-                .count(),
-            1
-        );
+        assert!(loaded.diagnostics.is_empty());
         assert!(!loaded.has_errors());
     }
 
     #[test]
-    fn should_stop_an_extends_cycle_at_the_first_repeated_configuration() {
+    fn should_reject_an_extends_cycle_at_the_depth_limit() {
         let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/project/biome.json"),
@@ -2083,16 +1988,16 @@ mod test {
         )
         .expect("valid configuration");
 
-        assert_eq!(loaded.source.extended_configurations.as_slice().len(), 1);
+        assert_eq!(loaded.source.extended_configurations.as_slice().len(), 10);
         assert_eq!(
             loaded
                 .diagnostics
                 .iter()
-                .filter(|diagnostic| diagnostic.severity() == Severity::Information)
+                .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count(),
             1
         );
-        assert!(!loaded.has_errors());
+        assert!(loaded.has_errors());
     }
 
     #[test]
