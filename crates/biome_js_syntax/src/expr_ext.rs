@@ -1042,7 +1042,11 @@ impl AnyJsExpression {
     ///
     /// A valid test.each pattern must:
     /// - Start with a valid test pattern (see [`contains_a_test_pattern`])
-    /// - End with `.each` or `.for`
+    /// - End with `.each`, `.for`, or `.prop`
+    ///
+    /// `.prop` is [`@fast-check/vitest`](https://github.com/dubzzz/fast-check/tree/main/packages/vitest)'s
+    /// property-based-testing counterpart to `.each`: it also takes a table
+    /// (of arbitraries) and is itself called with the test name and callback.
     ///
     /// ## Examples
     ///
@@ -1052,6 +1056,7 @@ impl AnyJsExpression {
     /// - `test.only.each`
     /// - `describe.skip.each`
     /// - `it.concurrent.each`
+    /// - `test.prop`
     ///
     /// [`contains_a_test_pattern`]:  crate::AnyJsExpression::contains_a_test_pattern
     ///
@@ -1071,7 +1076,7 @@ impl AnyJsExpression {
                     .ok()
                     .map(|token| token.token_text_trimmed())
                 {
-                    return matches!(token.text(), "each" | "for");
+                    return matches!(token.text(), "each" | "for" | "prop");
                 }
 
                 false
