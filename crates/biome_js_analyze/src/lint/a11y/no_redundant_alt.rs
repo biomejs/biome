@@ -142,8 +142,7 @@ fn template_contains_redundant_alt(expr: &JsTemplateExpression) -> bool {
         .any(|template_element| match template_element {
             AnyJsTemplateElement::JsTemplateChunkElement(node) => node
                 .template_chunk_token()
-                .ok()
-                .is_some_and(|token| is_redundant_alt(token.text_trimmed())),
+                .is_ok_and(|token| is_redundant_alt(token.text_trimmed())),
             AnyJsTemplateElement::JsTemplateElement(_) => false,
         })
 }

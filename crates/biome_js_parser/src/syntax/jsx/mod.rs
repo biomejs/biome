@@ -230,7 +230,12 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         //   <
         //   /
         // >;
-        p.bump_with_context(T![>], JsLexContext::JsxChild { astro: Astro.is_supported(p) });
+        p.bump_with_context(
+            T![>],
+            JsLexContext::JsxChild {
+                astro: Astro.is_supported(p),
+            },
+        );
 
         return Some(OpeningElement::Fragment(
             m.complete(p, JSX_OPENING_FRAGMENT),
@@ -302,7 +307,7 @@ fn astro_raw_text_element(
     name: Option<&CompletedMarker>,
     saw_is_raw: bool,
 ) -> Option<JsxRawTextElement> {
-    if !is_astro(p) || !p.at(T![>]) {
+    if !Astro.is_supported(p) || !p.at(T![>]) {
         return None;
     }
     let name = name?;
@@ -661,7 +666,7 @@ impl ParseNodeList for JsxAttributeList {
             parse_jsx_attribute(p)
         };
         if !self.saw_astro_is_raw
-            && is_astro(p)
+            && Astro.is_supported(p)
             && let Present(attribute) = &parsed
         {
             let text = p.text(attribute.range(p));
@@ -800,7 +805,12 @@ fn parse_jsx_attribute_initializer_clause(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T![=], JsLexContext::JsxAttributeValue { astro: Astro.is_supported(p) });
+    p.bump_with_context(
+        T![=],
+        JsLexContext::JsxAttributeValue {
+            astro: Astro.is_supported(p),
+        },
+    );
 
     // test_err jsx jsx_element_attribute_missing_value
     // function f() {
