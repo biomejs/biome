@@ -7,7 +7,7 @@ use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
 
-use crate::JsSyntaxFeature::TypeScript;
+use crate::JsSyntaxFeature::{Astro, TypeScript};
 use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
@@ -79,10 +79,12 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
 }
 
 /// Adjacent siblings are an implicit fragment in Astro but invalid in JSX.
+#[inline]
 fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
-    is_astro(p) && is_at_jsx_tag_start(p)
+    Astro.is_supported(p) && is_at_jsx_tag_start(p)
 }
 
+#[inline]
 fn is_at_jsx_tag_start(p: &mut JsParser) -> bool {
     p.at(T![<])
         && (p.nth_at(1, T![>])
@@ -90,16 +92,35 @@ fn is_at_jsx_tag_start(p: &mut JsParser) -> bool {
             || is_nth_at_metavariable(p, 1))
 }
 
-/// The opening and closing fragments carry no tokens: the source has none.
+struct AstroImplicitFragmentChildren;
+
+impl ParseNodeList for AstroImplicitFragmentChildren {
+    type Kind = JsSyntaxKind;
+    type Parser<'source> = JsParser<'source>;
+    const LIST_KIND: Self::Kind = JsSyntaxKind::JSX_CHILD_LIST;
+
+    fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
+        parse_any_jsx_tag(p, true)
+    }
+
+    fn is_at_list_end(&self, p: &mut JsParser) -> bool {
+        !is_at_jsx_tag_start(p)
+    }
+
+    fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(JsSyntaxKind::JS_BOGUS, token_set![T![<], T![>]]),
+            jsx_expected_children,
+        )
+    }
+}
+
 fn parse_astro_implicit_fragment(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();
     let fragment = p.start();
 
-    let children = p.start();
-    while is_at_jsx_tag_start(p) {
-        parse_any_jsx_tag(p, true).ok();
-    }
-    children.complete(p, JSX_CHILD_LIST);
+    AstroImplicitFragmentChildren.parse_list(p);
 
     fragment.complete(p, ASTRO_IMPLICIT_FRAGMENT);
     Present(m.complete(p, JSX_TAG_EXPRESSION))
@@ -231,13 +252,10 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
     }
 }
 
-fn is_astro(p: &JsParser) -> bool {
-    p.source_type.as_embedding_kind().is_astro()
-}
-
 /// Unclosed `<br>` is valid in Astro templates but not in JSX, hence the gate.
+#[inline]
 fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> bool {
-    if !is_astro(p) || !p.at(T![>]) {
+    if !Astro.is_supported(p) || !p.at(T![>]) {
         return false;
     }
     name.is_some_and(|name| is_void_element(p.text(name.range(p))))
