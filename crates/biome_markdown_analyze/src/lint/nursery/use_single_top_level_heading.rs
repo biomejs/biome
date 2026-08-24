@@ -9,10 +9,8 @@ use biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOp
 declare_lint_rule! {
     /// Enforce that a Markdown document has a single top-level heading.
     ///
-    /// A Markdown document should have a single top-level heading (level 1 by default) that
-    /// acts as the document's title. Subsequent headings should use lower levels (h2, h3, etc).
-    /// Multiple top-level headings break document outlines, tables of contents, and the
-    /// heading structure produced when the file is converted to HTML.
+    /// A Markdown document should have a single top-level heading that
+    /// acts as the document's title. By default, level 1. Subsequent headings should use lower levels (h2, h3, etc).
     ///
     /// The rule only looks at headings that are direct children of the document. A heading
     /// nested in a blockquote or in a list item is ignored entirely: it never counts as the
