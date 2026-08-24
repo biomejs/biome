@@ -187,7 +187,7 @@ fn vue_directive_name_matches_reference_name(directive_name: &str, reference_nam
                 let Some(expected) = reference_chars.next() else {
                     return false;
                 };
-                let ok = if capitalize_next {
+                let ok = if capitalize_next && c.is_ascii_alphabetic() {
                     expected.is_ascii_uppercase() && expected.eq_ignore_ascii_case(&c)
                 } else {
                     expected == c
@@ -387,36 +387,50 @@ mod tests {
     }
 
     #[test]
-    fn is_vue_directive_reference_used_finds_custom_vue_directive() {
+    fn is_vue_directive_reference_used_finds_custom_directive() {
         let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
+        let path = parse_vue_template_source(
+            &db,
+            r#"<template><div v-highlight /><div v-click-outside /><div v-require-2fa /><div v-weird-_but-valid /></template>"#,
+        );
 
         assert!(is_vue_directive_reference_used(
             &db,
             InternedReference::new(&db, path.clone(), token_text("vHighlight")),
         ));
-    }
-
-    #[test]
-    fn is_vue_directive_reference_used_finds_multi_segment_custom_directive() {
-        let db = TestDb::new();
-        let path =
-            parse_vue_template_source(&db, r#"<template><div v-click-outside /></template>"#);
-
         assert!(is_vue_directive_reference_used(
             &db,
             InternedReference::new(&db, path.clone(), token_text("vClickOutside")),
         ));
+        assert!(is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vRequire2fa")),
+        ));
+        assert!(is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vWeird_butValid")),
+        ));
     }
 
     #[test]
-    fn is_vue_directive_reference_used_ignores_builtin_vue_directives() {
+    fn is_vue_directive_reference_used_ignores_builtin_directive() {
         let db = TestDb::new();
         let path = parse_vue_template_source(&db, r#"<template><div v-cloak /></template>"#);
 
         assert!(!is_vue_directive_reference_used(
             &db,
             InternedReference::new(&db, path.clone(), token_text("vCloak")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_ignores_mismatched_name() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
+
+        assert!(!is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vSomethingElse")),
         ));
     }
 
@@ -439,17 +453,6 @@ mod tests {
         assert!(!is_vue_directive_reference_used(
             &db,
             InternedReference::new(&db, path.clone(), token_text("vFooBar")),
-        ));
-    }
-
-    #[test]
-    fn is_vue_directive_reference_used_ignores_mismatched_name() {
-        let db = TestDb::new();
-        let path = parse_vue_template_source(&db, r#"<template><div v-highlight /></template>"#);
-
-        assert!(!is_vue_directive_reference_used(
-            &db,
-            InternedReference::new(&db, path.clone(), token_text("vSomethingElse")),
         ));
     }
 
