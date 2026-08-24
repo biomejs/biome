@@ -19,14 +19,12 @@ use serde::Serialize;
 use serde_json::Value;
 use std::{borrow::Cow, io, sync::Arc};
 
-#[cfg(any(test, all(debug_assertions, windows)))]
 fn display_path(path: &Utf8Path) -> Cow<'_, str> {
-    Cow::Owned(path.as_str().replace('\\', "/"))
-}
-
-#[cfg(not(any(test, all(debug_assertions, windows))))]
-fn display_path(path: &Utf8Path) -> Cow<'_, str> {
-    Cow::Borrowed(path.as_str())
+    if cfg!(any(test, all(debug_assertions, windows))) {
+        Cow::Owned(path.as_str().replace('\\', "/"))
+    } else {
+        Cow::Borrowed(path.as_str())
+    }
 }
 
 /// Dispatches an `inspect` subcommand without mutating the workspace or configuration files.
@@ -387,9 +385,8 @@ impl InspectionDiagnostic {
                     markup! { "This value is provided by the root configuration." }.to_owned(),
                 )),
                 ConfigurationKind::Extend { .. } => {
-                    let root_path = root_path
-                        .map(display_path)
-                        .unwrap_or(Cow::Borrowed("the root configuration"));
+                    let root_path =
+                        root_path.map_or(Cow::Borrowed("the root configuration"), display_path);
                     let source_path = display_path(source.path);
                     advice.push(AdviceLine::Info(
                         markup! {
