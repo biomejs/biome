@@ -171,8 +171,18 @@ fn vue_directive_name_matches_reference_name(directive_name: &str, reference_nam
     let mut capitalize_next = false;
     loop {
         match directive_chars.next() {
-            Some('-') => capitalize_next = true,
-            None => return reference_chars.next().is_none(),
+            // A dangling `-` never resolves into a match.
+            None => return !capitalize_next && reference_chars.next().is_none(),
+            // The first `-` in a run starts a new word. A second consecutive
+            // `-` means `directive_name` contains a literal hyphen, which a
+            // JS identifier (`reference_name`) can never contain so no match
+            // is possible.
+            Some('-') => {
+                if capitalize_next {
+                    return false;
+                }
+                capitalize_next = true;
+            }
             Some(c) => {
                 let Some(expected) = reference_chars.next() else {
                     return false;
@@ -388,6 +398,18 @@ mod tests {
     }
 
     #[test]
+    fn is_vue_directive_reference_used_finds_multi_segment_custom_directive() {
+        let db = TestDb::new();
+        let path =
+            parse_vue_template_source(&db, r#"<template><div v-click-outside /></template>"#);
+
+        assert!(is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vClickOutside")),
+        ));
+    }
+
+    #[test]
     fn is_vue_directive_reference_used_ignores_builtin_vue_directives() {
         let db = TestDb::new();
         let path = parse_vue_template_source(&db, r#"<template><div v-cloak /></template>"#);
@@ -399,14 +421,24 @@ mod tests {
     }
 
     #[test]
-    fn is_vue_directive_reference_used_finds_multi_segment_custom_directive() {
+    fn is_vue_directive_reference_used_ignores_trailing_hyphen() {
         let db = TestDb::new();
-        let path =
-            parse_vue_template_source(&db, r#"<template><div v-click-outside /></template>"#);
+        let path = parse_vue_template_source(&db, r#"<template><div v-foo- /></template>"#);
 
-        assert!(is_vue_directive_reference_used(
+        assert!(!is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vClickOutside")),
+            InternedReference::new(&db, path.clone(), token_text("vFoo")),
+        ));
+    }
+
+    #[test]
+    fn is_vue_directive_reference_used_ignores_consecutive_hyphens() {
+        let db = TestDb::new();
+        let path = parse_vue_template_source(&db, r#"<template><div v-foo--bar /></template>"#);
+
+        assert!(!is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("vFooBar")),
         ));
     }
 
