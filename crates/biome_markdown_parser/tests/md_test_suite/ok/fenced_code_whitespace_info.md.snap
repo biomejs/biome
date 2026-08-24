@@ -30,6 +30,7 @@ code
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -118,7 +119,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..103
   0: (empty)
-  1: MD_BLOCK_LIST@0..103
+  1: (empty)
+  2: MD_BLOCK_LIST@0..103
     0: MD_FENCED_CODE_BLOCK@0..18
       0: MD_INDENT_TOKEN_LIST@0..0
       1: TRIPLE_BACKTICK@0..3 "```" [] []
@@ -173,6 +175,6 @@ MdRoot {
       5: TRIPLE_TILDE@99..102 "~~~" [] []
     10: MD_NEWLINE@102..103
       0: NEWLINE@102..103 "\n" [] []
-  2: EOF@103..103 "" [] []
+  3: EOF@103..103 "" [] []
 
 ```
