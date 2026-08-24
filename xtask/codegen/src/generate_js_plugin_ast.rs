@@ -61,9 +61,7 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
 
                     quote! { Self::wrap_token(#value) }
                 }
-                Field::Node {
-                    ty, optional: _, ..
-                } if ast.is_list(ty) => {
+                Field::Node { ty, .. } if ast.is_list(ty) => {
                     let list = if ast
                         .lists
                         .get(ty)

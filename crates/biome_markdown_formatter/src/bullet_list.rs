@@ -61,6 +61,7 @@ impl BulletListPrinter {
     /// lists separate after formatting. Without this, two separate lists can be
     /// printed in a way that Markdown parses back as one list.
     pub(crate) fn new(node: &MdBulletList, list_sibling_index: usize) -> Self {
+        let keep_pre_marker = should_keep_pre_marker(node);
         let marker_plan = ListMarkerPlan::from_list(node, list_sibling_index);
 
         Self {
@@ -71,6 +72,7 @@ impl BulletListPrinter {
                     node: item,
                     unordered_marker: marker_plan.unordered_marker,
                     target_ordered_marker: marker_plan.ordered_marker_for_index(index),
+                    keep_pre_marker,
                 })
                 .collect(),
         }
@@ -195,43 +197,47 @@ pub(crate) struct ListBullet {
     /// This includes both the number and the delimiter. It is `None` for
     /// unordered lists.
     target_ordered_marker: Option<TargetMarker>,
+    /// Whether to preserve the indentation before the marker.
+    ///
+    /// Every bullet in a parsed list shares the same containing list item and
+    /// nesting state, so the formatter computes this once for the whole list.
+    keep_pre_marker: bool,
 }
 
-impl ListBullet {
-    /// Checks whether the indentation before the marker needs to be kept.
-    ///
-    /// This indentation needs to be kept when the bullet item is followed by a
-    /// blank line and an indented code block.
-    ///
-    /// ```md
-    ///  -    one
-    ///
-    ///      two
-    /// ```
-    ///
-    /// Source: <https://spec.commonmark.org/dingus/?text=%20-%20%20%20%20one%0A%0A%20%20%20%20%20two%0A>
-    fn keep_pre_marker(&self) -> bool {
-        self.node
+fn is_nested(list: &MdBulletList) -> bool {
+    list.syntax()
+        .ancestors()
+        .any(|ancestor| MdBullet::can_cast(ancestor.kind()))
+}
+
+/// Checks whether the indentation before the marker needs to be kept.
+///
+/// Nested lists discard this indentation. A top-level list keeps it when the
+/// bullet item is followed by a blank line and an indented code block.
+///
+/// ```md
+///  -    one
+///
+///      two
+/// ```
+///
+/// Source: <https://spec.commonmark.org/dingus/?text=%20-%20%20%20%20one%0A%0A%20%20%20%20%20two%0A>
+fn should_keep_pre_marker(list: &MdBulletList) -> bool {
+    !is_nested(list)
+        && list
             .syntax()
             .ancestors()
-            .find(|a| MdBulletListItem::can_cast(a.kind()) || MdOrderedListItem::can_cast(a.kind()))
+            .find(|ancestor| {
+                MdBulletListItem::can_cast(ancestor.kind())
+                    || MdOrderedListItem::can_cast(ancestor.kind())
+            })
             .is_some_and(|list_item| {
                 list_item
                     .siblings(Direction::Next)
-                    // We skip 1 because usually the next sibling is a MdNewline
+                    // Sibling iteration begins with `list_item` itself.
                     .skip(1)
-                    .any(|s| MdIndentCodeBlock::can_cast(s.kind()))
+                    .any(|sibling| MdIndentCodeBlock::can_cast(sibling.kind()))
             })
-    }
-
-    fn is_nested(&self) -> bool {
-        self.node
-            .syntax()
-            .ancestors()
-            .filter(|ancestor| MdBullet::can_cast(ancestor.kind()))
-            .nth(1)
-            .is_some()
-    }
 }
 
 impl Format<MarkdownFormatContext> for ListBullet {
@@ -261,7 +267,7 @@ impl Format<MarkdownFormatContext> for ListBullet {
             .map_or_else(|| marker.text_trimmed().len(), |target| target.width());
 
         let source_pre_marker_width = indent_width(&prefix.pre_marker_indent())?;
-        let keep_pre_marker = self.keep_pre_marker() && !self.is_nested();
+        let keep_pre_marker = self.keep_pre_marker;
         let pre_marker_width = if keep_pre_marker {
             source_pre_marker_width
         } else {

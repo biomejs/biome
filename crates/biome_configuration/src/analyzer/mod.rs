@@ -30,7 +30,7 @@ pub enum RuleConfiguration<T: Default + Merge> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
@@ -139,7 +139,7 @@ impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
@@ -307,7 +307,7 @@ pub enum RuleAssistConfiguration<T: Default> {
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -1236,7 +1236,7 @@ where
 
 impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

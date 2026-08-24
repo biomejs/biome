@@ -222,17 +222,19 @@ mod tests {
     }
 
     fn load_test_plugin_from_source(
+        path: &str,
         source: &str,
         includes: Option<&[NormalizedGlob]>,
     ) -> AnalyzerJsPlugin {
         let fs = MemoryFileSystem::default();
-        fs.insert("/plugin.js".into(), source);
+        fs.insert(path.into(), source);
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        AnalyzerJsPlugin::load(fs, "/plugin.js".into(), includes).unwrap()
+        AnalyzerJsPlugin::load(fs, path.into(), includes).unwrap()
     }
 
     fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
         load_test_plugin_from_source(
+            "/plugin.js",
             r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
@@ -278,6 +280,7 @@ mod tests {
     #[test]
     fn passes_the_matched_node_to_run() {
         let plugin = load_test_plugin_from_source(
+            "/plugin.js",
             r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
@@ -319,6 +322,7 @@ mod tests {
     #[test]
     fn queries_the_kinds_declared_by_the_rules() {
         let plugin = load_test_plugin_from_source(
+            "/plugin.js",
             r#"import { ast, defineRule } from "@biomejs/plugin-api";
             export const rule1 = defineRule({
                 query: ast("JS_VARIABLE_STATEMENT", "JS_CALL_EXPRESSION"),
@@ -407,7 +411,7 @@ mod tests {
             JsParserOptions::default(),
         );
 
-        let plugin = load_test_plugin_from_source(source, None);
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
 
         snap_diagnostics(
@@ -442,7 +446,7 @@ mod tests {
             JsParserOptions::default(),
         );
 
-        let plugin = load_test_plugin_from_source(source, None);
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
         let content_rendered: String = parse
             .syntax()
             .descendants()
@@ -457,6 +461,60 @@ mod tests {
             .collect();
 
         snap_diagnostics("dispatches_nodes_to_the_matching_rules", content_rendered);
+    }
+
+    /// Plugins can be written in TypeScript: the types are erased before the module is
+    /// evaluated by the engine.
+    #[test]
+    fn evaluate_typescript_plugin() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.ts",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            import type { AnyJsRoot, Severity } from "@biomejs/plugin-api";
+            export const useMyPlugin = defineRule({
+                query: ast("JS_MODULE"),
+                run(root: AnyJsRoot): void {
+                    registerDiagnostic(root, "information" satisfies Severity, "Hello, TypeScript!");
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "let foo;",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+
+        let [entry] = result.entries.as_slice() else {
+            panic!("expected a single diagnostic, got {result:?}");
+        };
+        assert_eq!(
+            PrintDescription(&entry.diagnostic).to_string(),
+            "Hello, TypeScript!"
+        );
+    }
+
+    /// TypeScript syntax that generates runtime code can't be erased, so loading fails instead
+    /// of silently evaluating broken code.
+    #[test]
+    fn reject_typescript_plugin_with_unerasable_syntax() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/plugin.ts".into(),
+            r#"enum Severity { Information }
+            export default function useMyPlugin() {}"#,
+        );
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let error = AnalyzerJsPlugin::load(fs, "/plugin.ts".into(), None)
+            .expect_err("`enum` can't be erased");
+
+        snap_diagnostics(
+            "reject_typescript_plugin_with_unerasable_syntax",
+            print_diagnostic_to_string(&Error::from(error)),
+        );
     }
 
     #[test]

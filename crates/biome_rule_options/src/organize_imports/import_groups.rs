@@ -104,7 +104,7 @@ impl ImportGroup {
 }
 impl Deserializable for ImportGroup {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -177,7 +177,7 @@ impl GroupMatcher {
 }
 impl Deserializable for GroupMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -234,7 +234,7 @@ impl NegatableImportKindMatcher {
 }
 impl biome_deserialize::Deserializable for NegatableImportKindMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -356,7 +356,7 @@ pub enum SourcesMatcher {
 }
 impl Deserializable for SourcesMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -410,7 +410,7 @@ impl SourceMatcher {
 }
 impl biome_deserialize::Deserializable for SourceMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {

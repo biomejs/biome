@@ -1,15 +1,16 @@
 use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVisitor};
-use crate::html_module_info::{HtmlEmbeddedContent, HtmlImport, HtmlModuleInfo};
+use crate::html_module_info::{HtmlImport, HtmlModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector};
+use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
-use biome_languages::CssFileSource;
 use biome_languages::css::EmbeddingStyleApplicability;
+use biome_languages::{CssFileSource, LanguageDb};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -32,9 +33,8 @@ const HTML_SUPPORTED_EXTENSION_ALIASES: &[&str] = &[
 ];
 
 pub(crate) struct HtmlModuleVisitor<'a> {
-    html_root: HtmlRoot,
-    /// All embedded content blocks (CSS and JS) extracted from this HTML-like file.
-    embedded_content: &'a [HtmlEmbeddedContent],
+    db: &'a dyn LanguageDb,
+    parsed_source: ParsedSource,
     file_path: Utf8PathBuf,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
@@ -42,15 +42,15 @@ pub(crate) struct HtmlModuleVisitor<'a> {
 
 impl<'a> HtmlModuleVisitor<'a> {
     pub(crate) fn new(
-        html_root: HtmlRoot,
-        embedded_content: &'a [HtmlEmbeddedContent],
+        db: &'a dyn LanguageDb,
+        parsed_source: ParsedSource,
         file_path: Utf8PathBuf,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy<'a>,
     ) -> Self {
         Self {
-            html_root,
-            embedded_content,
+            db,
+            parsed_source,
             file_path,
             directory,
             fs_proxy,
@@ -58,6 +58,7 @@ impl<'a> HtmlModuleVisitor<'a> {
     }
 
     pub(crate) fn visit(self) -> HtmlModuleInfo {
+        let html_root = self.parsed_source.parsed(self.db).tree::<HtmlRoot>();
         let mut style_classes = IndexSet::default();
         let mut referenced_classes = Vec::new();
         let mut imported_stylesheets = Vec::new();
@@ -66,7 +67,7 @@ impl<'a> HtmlModuleVisitor<'a> {
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
         // normal elements parse as HtmlElement. Both must be handled.
-        for event in self.html_root.syntax().preorder() {
+        for event in html_root.syntax().preorder() {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
@@ -81,27 +82,27 @@ impl<'a> HtmlModuleVisitor<'a> {
             }
         }
 
-        // Dispatch each embedded content block to the appropriate collector.
-        // Embedded AST roots exclude the parser's base offset, so collected ranges are shifted
-        // into the host document here.
-        for content in self.embedded_content {
-            match content {
-                // CSS block: collect class definitions (with applicability scoping).
-                HtmlEmbeddedContent::Css(css_root, file_source, content_offset) => {
-                    collect_css_classes(css_root, &mut style_classes, file_source, *content_offset);
-                    let css_info =
-                        CssModuleVisitor::new(css_root.clone(), self.directory, self.fs_proxy)
-                            .visit();
-                    imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
-                        range: import.range + *content_offset,
-                        resolved_path: import.resolved_path.clone(),
-                        applicability: file_source.embedding_applicability(),
-                    }));
-                }
-                // JS block: collect import paths for upward traversal.
-                HtmlEmbeddedContent::Js(js_root, content_offset) => {
-                    self.collect_js_imports(js_root, *content_offset, &mut import_paths);
-                }
+        for snippet in self.parsed_source.snippets(self.db) {
+            let Some(file_source) = self
+                .db
+                .source_from_index(snippet.document_source_index(self.db))
+            else {
+                continue;
+            };
+            let content_offset = snippet.content_offset(self.db);
+            if let Some(file_source) = file_source.to_css_file_source() {
+                let css_root = snippet.parsed(self.db).tree::<AnyCssRoot>();
+                collect_css_classes(&css_root, &mut style_classes, &file_source, content_offset);
+                let css_info =
+                    CssModuleVisitor::new(css_root, self.directory, self.fs_proxy).visit();
+                imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
+                    range: import.range + content_offset,
+                    resolved_path: import.resolved_path.clone(),
+                    applicability: file_source.embedding_applicability(),
+                }));
+            } else if file_source.to_js_file_source().is_some() {
+                let js_root = snippet.parsed(self.db).tree::<AnyJsRoot>();
+                self.collect_js_imports(&js_root, content_offset, &mut import_paths);
             }
         }
 
@@ -128,6 +129,9 @@ impl<'a> HtmlModuleVisitor<'a> {
             if let Some(any_source) = AnyJsImportLike::cast_ref(&node) {
                 match any_source {
                     AnyJsImportLike::JsModuleSource(source) => {
+                        if source.imports_only_types() {
+                            continue;
+                        }
                         let Some(specifier) = source.inner_string_text().ok() else {
                             continue;
                         };

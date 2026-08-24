@@ -736,7 +736,11 @@ fn is_parenthesized_arrow_function_expression_impl(
                 // Rest parameter '(...a' is certainly not a parenthesized expression
                 T![...] => IsParenthesizedArrowFunctionExpression::True,
                 // '([ ...', '({ ... } can either be a parenthesized object or array expression or a destructing parameter
-                T!['['] | T!['{'] => IsParenthesizedArrowFunctionExpression::Unknown,
+                T!['['] | T!['{'] => match token_after_parenthesized_group(p, n) {
+                    T![=>] => IsParenthesizedArrowFunctionExpression::True,
+                    T![:] => IsParenthesizedArrowFunctionExpression::Unknown,
+                    _ => IsParenthesizedArrowFunctionExpression::False,
+                },
 
                 // '(@' can be a decorator or a parenthesized arrow function
                 T![@] => IsParenthesizedArrowFunctionExpression::Unknown,
@@ -902,7 +906,7 @@ fn is_arrow_function_with_single_parameter(p: &mut JsParser) -> bool {
     }
 }
 
-// True if the `(...)` group at the current position is immediately followed by `=>`.
+// Returns the token after the `(...)` group at `start_offset`.
 //
 // Used to tell destructured arrow params apart from a parenthesized expression:
 //   ({ a, b }) =>   // followed by `=>` — these are params
@@ -910,21 +914,21 @@ fn is_arrow_function_with_single_parameter(p: &mut JsParser) -> bool {
 //
 // Tracks how many `(` are open at once so the first `)` that closes the outermost
 // paren is the one checked for `=>`. Without this, `(a: () => T) =>` would stop
-// at the inner `)` and return false.
-fn is_paren_group_followed_by_fat_arrow(p: &mut JsParser) -> bool {
-    debug_assert!(p.at(T!['(']));
+// at the inner `)` and return the wrong token.
+fn token_after_parenthesized_group(p: &mut JsParser, start_offset: usize) -> JsSyntaxKind {
+    debug_assert!(p.nth_at(start_offset, T!['(']));
     let mut depth: u32 = 0;
-    let mut offset: usize = 0;
+    let mut offset = start_offset;
     loop {
         match p.nth(offset) {
             T!['('] => depth += 1,
             T![')'] => {
                 depth -= 1;
                 if depth == 0 {
-                    return p.nth_at(offset + 1, T![=>]);
+                    return p.nth(offset + 1);
                 }
             }
-            EOF => return false,
+            EOF => return EOF,
             _ => {}
         }
         offset += 1;
@@ -968,7 +972,7 @@ fn parse_arrow_body(
             if context.is_in_conditional_consequent()
                 && matches!(p.cur(), T!['('])
                 && matches!(p.nth(1), T!['{'] | T!['['])
-                && !is_paren_group_followed_by_fat_arrow(p)
+                && token_after_parenthesized_group(p, 0) != T![=>]
             {
                 parse_assignment_expression_or_higher_no_arrow(p, body_context)
             } else {

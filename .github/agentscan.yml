@@ -1,0 +1,30 @@
+version: 1
+scan:
+  issues: false
+allowed-users:
+  - dyc3
+trusted-author-associations:
+  - owner
+  - member
+honeypot: true
+messages:
+  honeypot-first-time: |-
+    ```
+    A maintainer will take a look as soon as they can. In the meantime, please make sure that:
+    ```
+
+    ```
+    - the description follows our PR template
+    - any related issues are linked
+    - existing tests still pass
+    ```
+  honeypot: |-
+    ```
+    A maintainer will take a look as soon as they can. In the meantime, please make sure that:
+    ```
+
+    ```
+    - the description follows our PR template
+    - any related issues are linked
+    - existing tests still pass
+    ```

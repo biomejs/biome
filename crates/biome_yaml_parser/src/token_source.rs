@@ -37,6 +37,10 @@ impl<'source> YamlTokenSource<'source> {
         self.lexer.kind_after_properties()
     }
 
+    pub(crate) fn collection_content_has_preceding_line_break(&mut self) -> bool {
+        self.lexer.collection_content_has_preceding_line_break()
+    }
+
     fn next_non_trivia_token(&mut self, first_token: bool) {
         let mut trailing = !first_token;
         self.preceding_line_break = false;

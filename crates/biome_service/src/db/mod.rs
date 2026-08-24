@@ -925,6 +925,8 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse};
     #[cfg(feature = "lang_js")]
     use biome_js_syntax::JsLanguage;
+    #[cfg(feature = "module_graph")]
+    use biome_languages::HtmlFileSource;
     #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
     #[cfg(feature = "module_graph")]
@@ -1082,18 +1084,20 @@ mod tests {
     }
 
     #[cfg(feature = "module_graph")]
-    fn test_module(db: &WorkspaceDb, path: &str) -> ModuleInfo {
+    fn test_module(db: &mut WorkspaceDb, path: &str) -> ModuleInfo {
         let path = BiomePath::new(path);
         let fs = MemoryFileSystem::default();
-        let root = parse_html("", HtmlParserOptions::default()).tree();
+        let source_index = db.insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
+        let parsed = parse_html("", HtmlParserOptions::default());
+        db.replace_file(path.as_path(), parsed.into(), source_index, vec![]);
         let (module, _, _) = resolve_html_module(
-            root,
-            &[],
+            db,
             &path,
             &fs,
             &ProjectLayout::default(),
             &PathInfoCache::default(),
-        );
+        )
+        .expect("the parsed HTML source was just inserted");
         ModuleInfo::new(
             db,
             path.as_path().to_path_buf(),
@@ -2014,7 +2018,7 @@ mod tests {
         let armed = Arc::new(AtomicBool::new(false));
         let mut db = module_write_test_db(barrier.clone(), armed.clone());
         let path = Utf8PathBuf::from("inserted.html");
-        let module = test_module(&db, path.as_str());
+        let module = test_module(&mut db, path.as_str());
         let old_generation = db.module_graph_generation();
         let reader_db = db.clone();
         armed.store(true, Ordering::Release);
@@ -2048,7 +2052,7 @@ mod tests {
         let armed = Arc::new(AtomicBool::new(false));
         let mut db = module_write_test_db(barrier.clone(), armed.clone());
         let path = Utf8PathBuf::from("removed.html");
-        let module = test_module(&db, path.as_str());
+        let module = test_module(&mut db, path.as_str());
         db.insert_module(path.clone(), module);
         let old_generation = db.module_graph_generation();
         let reader_db = db.clone();
@@ -2087,9 +2091,9 @@ mod tests {
         let root = Utf8PathBuf::from("root/a.html");
         let nested = Utf8PathBuf::from("root/nested/b.html");
         let outside = Utf8PathBuf::from("other/c.html");
-        let root_module = test_module(&db, root.as_str());
-        let nested_module = test_module(&db, nested.as_str());
-        let outside_module = test_module(&db, outside.as_str());
+        let root_module = test_module(&mut db, root.as_str());
+        let nested_module = test_module(&mut db, nested.as_str());
+        let outside_module = test_module(&mut db, outside.as_str());
         db.insert_module(root.clone(), root_module);
         db.insert_module(nested.clone(), nested_module);
         db.insert_module(outside.clone(), outside_module);

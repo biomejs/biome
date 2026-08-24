@@ -505,7 +505,7 @@ name = "biome_deserialize_macros"
 version = "0.6.0"
 dependencies = [
  "biome_string_case",
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -550,7 +550,7 @@ dependencies = [
 name = "biome_diagnostics_macros"
 version = "0.5.7"
 dependencies = [
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -879,6 +879,9 @@ dependencies = [
  "biome_aria",
  "biome_aria_metadata",
  "biome_console",
+ "biome_css_parser",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -1004,6 +1007,9 @@ dependencies = [
  "biome_aria_metadata",
  "biome_console",
  "biome_control_flow",
+ "biome_css_parser",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_db",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -1144,14 +1150,17 @@ version = "0.0.1"
 dependencies = [
  "biome_analyze",
  "biome_diagnostics",
+ "biome_js_parser",
  "biome_js_syntax",
+ "biome_js_transform",
+ "biome_languages",
  "biome_resolver",
  "biome_rowan",
  "biome_text_size",
  "boa_engine",
  "camino",
- "getrandom 0.3.2",
  "rustc-hash 2.1.3",
+ "web-time",
 ]
 
 [[package]]
@@ -1189,6 +1198,7 @@ dependencies = [
  "enumflags2",
  "schemars",
  "serde",
+ "smallvec",
 ]
 
 [[package]]
@@ -1234,7 +1244,7 @@ dependencies = [
 name = "biome_js_type_info_macros"
 version = "0.0.1"
 dependencies = [
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -1499,6 +1509,7 @@ dependencies = [
  "schemars",
  "serde",
  "similar-asserts",
+ "smallvec",
  "tests_macros",
 ]
 
@@ -1547,7 +1558,7 @@ name = "biome_markup"
 version = "0.5.7"
 dependencies = [
  "biome_console",
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
 ]
@@ -1603,6 +1614,7 @@ dependencies = [
  "biome_json_value",
  "biome_languages",
  "biome_package",
+ "biome_parser",
  "biome_project_layout",
  "biome_resolver",
  "biome_rowan",
@@ -2241,6 +2253,7 @@ dependencies = [
  "futures-channel",
  "futures-concurrency",
  "futures-lite",
+ "getrandom 0.3.4",
  "hashbrown 0.16.1",
  "icu_normalizer 2.0.0",
  "indexmap",
@@ -2265,6 +2278,7 @@ dependencies = [
  "thin-vec",
  "thiserror 2.0.17",
  "time",
+ "web-time",
  "xsum",
 ]
 
@@ -2647,7 +2661,7 @@ version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "faf9468729b8cbcea668e36183cb69d317348c2e08e994829fb56ebfdfbaac34"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2887,9 +2901,9 @@ dependencies = [
 
 [[package]]
 name = "defmt"
-version = "1.1.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6e524506490a1953d237cb87b1cfc1e46f88c18f10a22dfe0f507dc6bfc7f7f"
+checksum = "e2953bfe4f93bbd20cc71198842756f77d161884c99ebbabc41d80231ded88d1"
 dependencies = [
  "bitflags 1.3.2",
  "defmt-macros",
@@ -2897,12 +2911,11 @@ dependencies = [
 
 [[package]]
 name = "defmt-macros"
-version = "1.1.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0a27770e9c8f719a79d8b638281f4d828f77d8fd61e0bd94451b9b85e576a0b"
+checksum = "bad9c72e7ca2137e0dc3813245a0d282fd6daad32fd800af018306a9169b5fe8"
 dependencies = [
  "defmt-parser",
- "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -2981,7 +2994,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3426,21 +3439,21 @@ dependencies = [
  "cfg-if",
  "js-sys",
  "libc",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "wasm-bindgen",
 ]
 
 [[package]]
 name = "getrandom"
-version = "0.3.2"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73fea8450eea4bac3940448fb7ae50d91f034f941199fcd9d909a5a07aa455f0"
+checksum = "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd"
 dependencies = [
  "cfg-if",
  "js-sys",
  "libc",
  "r-efi 5.2.0",
- "wasi 0.14.2+wasi-0.2.4",
+ "wasip2",
  "wasm-bindgen",
 ]
 
@@ -4124,7 +4137,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
 dependencies = [
  "hermit-abi",
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4440,7 +4453,7 @@ checksum = "50b7e5b27aa02a74bac8c3f23f448f8d87ff11f92d3aac1a6ed369ee08cc56c1"
 dependencies = [
  "libc",
  "log",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "windows-sys 0.61.2",
 ]
 
@@ -4624,9 +4637,9 @@ checksum = "d211803b9b6b570f68772237e415a029d5a50c65d382910b879fb19d3271f94d"
 
 [[package]]
 name = "papaya"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "997ee03cd38c01469a7046643714f0ad28880bcb9e6679ff0666e24817ca19b7"
+checksum = "da2442474a9404698c42509b8967f437249dbc7b50493e83020333d3943ec0ae"
 dependencies = [
  "equivalent",
  "seize",
@@ -4900,25 +4913,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "proc-macro-error-attr2"
-version = "2.0.0"
+name = "proc-macro-error-attr3"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96de42df36bb9bba5542fe9f1a054b8cc87e172759a1868aa05c1f3acc89dfc5"
+checksum = "b0084e6206a967a2dad822180626b2f6b07a3b379325e8f1ec0438e33a469ba7"
 dependencies = [
  "proc-macro2",
  "quote",
 ]
 
 [[package]]
-name = "proc-macro-error2"
-version = "2.0.1"
+name = "proc-macro-error3"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11ec05c52be0a07b08061f7dd003e7d7092e0472bc731b4af7bb1ef876109802"
+checksum = "0cf066225f2373bc711684792b69bdeac0356019b007e721090c24d92d5d5a50"
 dependencies = [
- "proc-macro-error-attr2",
+ "proc-macro-error-attr3",
  "proc-macro2",
  "quote",
- "syn 2.0.106",
 ]
 
 [[package]]
@@ -5031,7 +5043,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fcb935c5bec503c2f0e306bdd3e58bb9029dcb14fa8d9ac76e3a5256ac0763e"
 dependencies = [
  "bytes",
- "getrandom 0.3.2",
+ "getrandom 0.3.4",
  "lru-slab",
  "rand 0.9.3",
  "ring",
@@ -5152,7 +5164,7 @@ version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99d9a13982dcf210057a8a78572b2217b667c3beacbf3a0d8b454f6f82837d38"
 dependencies = [
- "getrandom 0.3.2",
+ "getrandom 0.3.4",
 ]
 
 [[package]]
@@ -6002,7 +6014,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
 dependencies = [
  "libc",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6151,10 +6163,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d31c77bdf42a745371d260a26ca7163f1e0924b64afa0b688e61b5a9fa02f16"
 dependencies = [
  "fastrand",
- "getrandom 0.3.2",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6173,7 +6185,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "230a1b821ccbd75b185820a1f1ff7b14d21da1e442e22c0863ea5f08771a8874"
 dependencies = [
  "rustix",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6183,7 +6195,7 @@ dependencies = [
  "biome_string_case",
  "case",
  "globwalk",
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -6272,6 +6284,7 @@ checksum = "743bd48c283afc0388f9b8827b976905fb217ad9e647fae3a379a9283c4def2c"
 dependencies = [
  "deranged",
  "itoa",
+ "js-sys",
  "libc",
  "num-conv",
  "num_threads",
@@ -6777,11 +6790,11 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "uuid"
-version = "1.18.1"
+version = "1.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f87b8aa10b915a06587d0dec516c282ff295b475d94abf425d62b57710070a2"
+checksum = "2cefc03fd367c0c6d4305de1b312cf00248c4114f4a0418ce6a6af769e3b0bd9"
 dependencies = [
- "getrandom 0.3.2",
+ "getrandom 0.4.2",
  "js-sys",
  "wasm-bindgen",
 ]
@@ -6837,15 +6850,6 @@ name = "wasi"
 version = "0.11.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
-
-[[package]]
-name = "wasi"
-version = "0.14.2+wasi-0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9683f9a5a998d873c0d21fcbe3c083009670149a8fab228644b8bd36b2c48cb3"
-dependencies = [
- "wit-bindgen-rt",
-]
 
 [[package]]
 name = "wasip2"
@@ -7498,15 +7502,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wit-bindgen-rt"
-version = "0.39.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f42320e61fe2cfd34354ecb597f86f413484a798ba44a8ca1165c58d42da6c1"
-dependencies = [
- "bitflags 2.9.3",
-]
-
-[[package]]
 name = "wit-bindgen-rust"
 version = "0.51.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7669,6 +7664,8 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
  "camino",
  "colored",
  "indicatif 0.18.4",

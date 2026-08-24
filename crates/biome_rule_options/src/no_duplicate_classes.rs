@@ -61,7 +61,7 @@ impl schemars::JsonSchema for NoDuplicateClassesOptions {
 
 impl Deserializable for NoDuplicateClassesOptions {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

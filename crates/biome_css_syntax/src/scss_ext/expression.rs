@@ -81,8 +81,7 @@ pub fn is_scss_expression_starting_with_interpolation(expression: &AnyScssExpres
             .is_some_and(|item| is_scss_expression_item_starting_with_interpolation(&item)),
         AnyScssExpression::ScssBinaryExpression(binary) => binary
             .left()
-            .ok()
-            .is_some_and(|left| is_scss_expression_starting_with_interpolation(&left)),
+            .is_ok_and(|left| is_scss_expression_starting_with_interpolation(&left)),
         _ => false,
     }
 }
@@ -103,12 +102,10 @@ pub fn is_scss_expression_ending_with_interpolation(expression: &AnyScssExpressi
             .is_some_and(|item| is_scss_expression_item_ending_with_interpolation(&item)),
         AnyScssExpression::ScssBinaryExpression(binary) => binary
             .right()
-            .ok()
-            .is_some_and(|right| is_scss_expression_ending_with_interpolation(&right)),
+            .is_ok_and(|right| is_scss_expression_ending_with_interpolation(&right)),
         AnyScssExpression::ScssUnaryExpression(unary) => unary
             .expression()
-            .ok()
-            .is_some_and(|expression| is_scss_expression_ending_with_interpolation(&expression)),
+            .is_ok_and(|expression| is_scss_expression_ending_with_interpolation(&expression)),
         _ => false,
     }
 }
@@ -142,8 +139,7 @@ fn is_scss_expression_item_starting_with_interpolation(item: &AnyScssExpressionI
         AnyScssExpressionItem::ScssInterpolation(_) => true,
         AnyScssExpressionItem::ScssBinaryExpression(binary) => binary
             .left()
-            .ok()
-            .is_some_and(|left| is_scss_expression_starting_with_interpolation(&left)),
+            .is_ok_and(|left| is_scss_expression_starting_with_interpolation(&left)),
         _ => false,
     }
 }
@@ -153,12 +149,10 @@ fn is_scss_expression_item_ending_with_interpolation(item: &AnyScssExpressionIte
         AnyScssExpressionItem::ScssInterpolation(_) => true,
         AnyScssExpressionItem::ScssBinaryExpression(binary) => binary
             .right()
-            .ok()
-            .is_some_and(|right| is_scss_expression_ending_with_interpolation(&right)),
+            .is_ok_and(|right| is_scss_expression_ending_with_interpolation(&right)),
         AnyScssExpressionItem::ScssUnaryExpression(unary) => unary
             .expression()
-            .ok()
-            .is_some_and(|expression| is_scss_expression_ending_with_interpolation(&expression)),
+            .is_ok_and(|expression| is_scss_expression_ending_with_interpolation(&expression)),
         _ => false,
     }
 }

@@ -938,6 +938,269 @@ fn test_expression_promise_queries_follow_imported_interface_members() {
 }
 
 #[test]
+fn test_expression_promise_queries_follow_new_class_instance_members() {
+    const SOURCE: &str = r#"
+        import type { Noise } from "./noise.ts";
+        import { Tracer } from "./tracer.ts";
+        import * as tracing from "./tracer.ts";
+        declare const request: Noise;
+        const tracer = new Tracer();
+        tracer.putAnnotation("Label", request.label);
+        tracer.returnsPromise(request.label);
+        const qualifiedTracer = new tracing.Tracer();
+        qualifiedTracer.putAnnotation("Qualified", request.label);
+
+        function traceLocally() {
+            class LocalTracer {
+                putAnnotation(_value: string): void {}
+                async returnsPromise(_value: string): Promise<void> {}
+            }
+            const localTracer = new LocalTracer();
+            localTracer.putAnnotation(request.label);
+            localTracer.returnsPromise(request.label);
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        "export interface Noise { label: string; }",
+    );
+    fs.insert(
+        "/src/tracer.ts".into(),
+        r#"
+            export class Tracer {
+                putAnnotation(_key: string, _value: string): void {}
+                async returnsPromise(_value: string): Promise<void> {}
+            }
+        "#,
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/noise.ts", "/src/tracer.ts", "/src/index.ts"],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let tracer_module = db
+        .module_for_path(Utf8Path::new("/src/tracer.ts"))
+        .expect("tracer module must exist");
+    let void_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "tracer.putAnnotation(\"Label\", request.label)",
+        ),
+    );
+    let promise_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "tracer.returnsPromise(request.label)"),
+    );
+    let callback_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "tracer.returnsPromise"),
+    );
+    let qualified_void_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "qualifiedTracer.putAnnotation(\"Qualified\", request.label)",
+        ),
+    );
+    let local_void_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "localTracer.putAnnotation(request.label)",
+        ),
+    );
+    let local_promise_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "localTracer.returnsPromise(request.label)",
+        ),
+    );
+    let noise = LocalTypeInput::new(
+        &db,
+        noise_module,
+        local_type_id_by_name(&db, noise_module, "Noise"),
+    );
+
+    db.clear_salsa_events();
+    assert_eq!(
+        infer_expression_is_promise(&db, void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, promise_expression),
+        TypeInferenceClassification::Match
+    );
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, callback_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, qualified_void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, qualified_void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, local_void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, local_promise_expression),
+        TypeInferenceClassification::Match
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, void_expression, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, promise_expression, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, callback_expression, &events);
+    assert_function_query_was_not_run(
+        &db,
+        infer_expression_type,
+        qualified_void_expression,
+        &events,
+    );
+    assert_function_query_was_not_run(&db, infer_expression_type, local_void_expression, &events);
+    assert_function_query_was_not_run(
+        &db,
+        infer_expression_type,
+        local_promise_expression,
+        &events,
+    );
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, noise_module, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, tracer_module, &events);
+}
+
+#[test]
+fn test_expression_promise_query_keeps_constructor_dependent_members_indeterminate() {
+    const SOURCE: &str = r#"
+        import * as factoryNamespace from "./factory.ts";
+
+        class Box<T extends object> {
+            constructor(readonly value: T) {}
+            get(): T { return this.value; }
+        }
+        const box = new Box(Promise.resolve());
+        box.get();
+
+        declare const Factory: {
+            new (): { task(): Promise<void> };
+            task(): void;
+        };
+        const instance = new Factory();
+        instance.task();
+
+        class Actual {
+            static async run(): Promise<void> {}
+            run(): void {}
+        }
+        class Registry { Ctor = Actual; }
+        const registry = new Registry();
+        const actual = new registry.Ctor();
+        actual.run();
+
+        interface RegistryShape { Ctor: typeof Actual; }
+        declare const typedRegistry: RegistryShape;
+        const typedActual = new typedRegistry.Ctor();
+        typedActual.run();
+
+        class ThisRegistry {
+            Ctor = Actual;
+            create() {
+                const thisActual = new this.Ctor();
+                thisActual.run();
+            }
+        }
+
+        class Handler {
+            run(_value: string): void;
+            run(_value: number): Promise<void>;
+            run(_value: string | number): void | Promise<void> {}
+        }
+        const handler = new Handler();
+        handler.run(1);
+
+        class PrivateHandler {
+            #run(_value: string): void;
+            #run(_value: number): Promise<void>;
+            #run(_value: string | number): void | Promise<void> {}
+            static test() {
+                const privateHandler = new PrivateHandler();
+                privateHandler.#run("text");
+            }
+        }
+
+        const namespaceValue = new factoryNamespace();
+        namespaceValue.Client.send();
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/factory.ts".into(),
+        "export class Client { async send(): Promise<void> {} }",
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/factory.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for expression in [
+        "box.get()",
+        "instance.task()",
+        "actual.run()",
+        "typedActual.run()",
+        "thisActual.run()",
+        "handler.run(1)",
+        "privateHandler.#run(\"text\")",
+        "namespaceValue.Client.send()",
+    ] {
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, SOURCE, expression),
+        );
+        assert_eq!(
+            infer_expression_is_promise(&db, input),
+            TypeInferenceClassification::Indeterminate,
+            "{expression}"
+        );
+    }
+}
+
+#[test]
 fn test_expression_promise_queries_match_unknown_node_builtin_imports() {
     const SOURCE: &str = r#"
         import fs from "node:fs/promises";

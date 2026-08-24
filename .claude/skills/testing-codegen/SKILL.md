@@ -1,428 +1,111 @@
 ---
 name: testing-codegen
-description: Guide for testing workflows and code generation commands in Biome. Use when running snapshot tests for lint rules, managing insta snapshots, or regenerating analyzer/parser/formatter code after changes.
+description: Use this skill when selecting or running Biome test fixtures, quick tests, `insta` snapshot workflows, expectation comments, orphan checks, or required code generators. Do not use for subsystem implementation design.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
-## Purpose
+# Testing and Code Generation
 
-Use this skill for testing and code generation. Covers snapshot testing with
-`insta` and code generation commands.
+Choose the narrowest test that exercises the changed behavior, then broaden only when shared infrastructure or integration risk justifies it.
 
-## Prerequisites
+## Test Selection
 
-1. Install required tools: `just install-tools` (installs `cargo-insta`)
-2. Install pnpm: `curl -fsSL https://get.pnpm.io/install.sh | sh -` in repo root
-3. Understand which changes require code generation
+| Change | Start with |
+| --- | --- |
+| Lint rule | `just test-lintrule <ruleName>` |
+| One crate | `cargo test -p <crate>` or the crate's focused test target |
+| Parser or formatter investigation | `just qt <package>` |
+| CLI migration | focused `biome_cli` migration tests |
+| Documentation code | `just test-doc` |
 
-## Common Workflows
+Use `-- --show-output` or `--nocapture` only when the test's diagnostic output is needed.
 
-### Run Tests
+Quick tests are scratch space for inspecting CST, formatter IR, or one analyzer query. Persistent behavior belongs in the subsystem's normal fixture directory before finishing.
 
-```shell
-# Run all tests
-cargo test
+## Snapshot Workflow
 
-# Run tests for specific crate
-cd crates/biome_js_analyze
-cargo test
-
-# Run specific test
-cargo test quick_test
-
-# Show test output (for dbg! macros)
-cargo test quick_test -- --show-output
-
-# Run tests with just (uses CI test runner)
-just test
-
-# Test specific crate with just
-just test-crate biome_cli
-```
-
-### Quick Test for Rules
-
-Fast iteration during development:
-
-```rust
-// In crates/biome_js_analyze/tests/quick_test.rs
-// Modify the quick_test function:
-
-const SOURCE: &str = r#"
-const x = 1;
-var y = 2;
-"#;
-
-let rule_filter = RuleFilter::Rule("nursery", "noVar");
-```
-
-Run:
+Run the focused test to produce snapshots, then review every changed section:
 
 ```shell
-just qt biome_js_analyze
-```
-
-### Quick Test for Parser Development
-
-**IMPORTANT:** Use this instead of building full Biome binary for syntax inspection - it's much faster!
-
-For inspecting AST structure when implementing parsers or working with embedded languages:
-
-```rust
-// In crates/biome_html_parser/tests/quick_test.rs
-// Modify the quick_test function:
-
-#[test]
-pub fn quick_test() {
-  let code = r#"<button on:click={handleClick}>Click</button>"#;
-
-  let source_type = HtmlFileSource::svelte();
-  let options = HtmlParserOptions::from(&source_type);
-  let root = parse_html(code, options);
-  let syntax = root.syntax();
-
-  dbg!(&syntax, root.diagnostics(), root.has_errors());
-}
-```
-
-Run:
-
-```shell
-just qt biome_html_parser
-```
-
-The `dbg!` output shows the full AST tree structure, helping you understand:
-
-- How directives/attributes are parsed (e.g., `HtmlAttribute` vs `SvelteBindDirective`)
-- Whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
-- Token ranges and offsets needed for proper snippet creation
-- Node hierarchy and parent-child relationships
-
-### Snapshot Testing with Insta
-
-Run tests and generate snapshots:
-
-```shell
-cargo test
-```
-
-Review generated/changed snapshots:
-
-```shell
-# Interactive review (recommended)
 cargo insta review
-
-# Accept all changes
-cargo insta accept
-
-# Reject all changes
-cargo insta reject
-
-# Review for specific test
-cargo insta review --test-runner nextest
 ```
 
-Snapshot commands:
+Use `cargo insta accept` or `cargo insta reject` only after inspecting the pending changes. A passing snapshot test proves output matches the checked-in snapshot, not that the snapshot describes correct behavior.
 
-- `a` - accept snapshot
-- `r` - reject snapshot
-- `s` - skip snapshot
-- `q` - quit
+### Orphaned Snapshots
 
-### Pruning Orphaned Snapshots
-
-When tests are removed or renamed, their old snapshot files become orphaned. **Never delete snapshot files manually with `rm`** — always use insta's built-in pruning:
+Do not delete suspected orphan snapshots manually. Deletion is safe only after running the complete workspace snapshot suite without package, target, or test filters:
 
 ```shell
-# Delete unreferenced snapshots after a successful test run
-cargo insta test --unreferenced delete -p <crate_name>
-
-# Or scoped to specific tests
-cargo insta test --unreferenced delete -p biome_cli --test main -- "handle_vue"
+cargo insta test --workspace --unreferenced delete
 ```
 
-This runs the tests first, then deletes any `.snap` files that no test references. It is the only safe way to clean up snapshots — manual `rm` risks deleting snapshots that are still needed or creating git conflicts.
+For a scoped run, use `--unreferenced warn` or `--unreferenced reject`; incomplete test selection cannot prove that a snapshot is orphaned. Inspect every deletion from a complete run.
 
-### Test Lint Rules
+## Analyzer Fixtures
 
-```shell
-# Test specific rule by name
-just test-lintrule noVar
+Place rule fixtures under the language analyzer's current `tests/specs/<group>/<rule>/` hierarchy. The directory group must match the rule declaration.
 
-# Run from analyzer crate
-cd crates/biome_js_analyze
-cargo test
+Use focused source files for parser-dependent cases. Use `.jsonc` arrays when multiple independent script snippets share the same configuration and module semantics are not required. Use `options.json` in a subdirectory when tests need different rule configuration.
+
+### Diagnostic Expectation Comments
+
+The test utilities recognize these marker texts in source comments:
+
+```text
+should generate diagnostics
+should not generate diagnostics
 ```
 
-### Create Test Files
+Current enforcement:
 
-**Single file tests** - Place in `tests/specs/{group}/{rule}/` under the appropriate `*_analyze` crate for the language:
+- a filename containing `valid` but not `invalid` must contain one of the expectation markers;
+- when either marker is present, actual diagnostics must match it;
+- an `invalid` or neutral filename without a marker is accepted, but adding the correct marker makes intent explicit;
+- `.snap`, `.json`, `.jsonc`, and `.md` are exempt from the mandatory valid-file marker check;
+- HTML-family workspace fixtures are checked from raw file content and should use a top-level HTML comment.
 
-```
-tests/specs/nursery/noVar/
-├── invalid.js           # Code that should generate diagnostics
-├── valid.js             # Code that should not generate diagnostics
-└── options.json         # Optional: rule configuration
-```
+Put the marker at the top of a primary fixture. Sidecar files with neutral names do not need a marker unless they are independently analyzed as cases.
 
-**File and folder naming conventions (IMPORTANT):**
+## Parser Fixtures
 
-- Use `valid` or `invalid` in file names or parent folder names to indicate expected behaviour.
-- Files/folders with `valid` in the name (but not `invalid`) are expected to produce **no diagnostics**.
-- Files/folders with `invalid` in the name are expected to produce **diagnostics**.
-- When testing cases inside a folder, prefix the name of folder using `valid`/`invalid` e.g. `validResolutionReact`/`invalidResolutionReact`
+Use the parser crate's established `ok/` and `error/` directories. A recovery regression should include valid syntax after the malformed construct to prove the parser resumes at the intended boundary.
 
-```
-tests/specs/nursery/noShadow/
-├── invalid.js                     # should generate diagnostics
-├── valid.js                       # should not generate diagnostics
-├── validResolutionReact/
-└───── file.js              # should generate diagnostics
-   └── file2.js             # should not generate diagnostics
-```
+Use `just qt <parser-package>` to inspect a CST during development; do not leave the quick test as the only regression coverage.
 
-**Multiple test cases** - Use `.jsonc` files with arrays:
+## Formatter Fixtures
 
-```jsonc
-// tests/specs/nursery/noVar/invalid.jsonc
-[
-  "var x = 1;",
-  "var y = 2; var z = 3;",
-  "for (var i = 0; i < 10; i++) {}"
-]
-```
+Use internal specs for behavior introduced or fixed by the change. External Prettier snapshots record comparison results but do not replace focused internal coverage.
 
-**Test-specific options** - Create `options.json`:
+The formatter harness performs its idempotency reformat during one test invocation for eligible files. Inspect both formatted output and any IR shown for a mismatch.
 
-```json
-{
-  "linter": {
-    "rules": {
-      "nursery": {
-        "noVar": {
-          "level": "error",
-          "options": {
-            "someOption": "value"
-          }
-        }
-      }
-    }
-  }
-}
-```
+## Required Code Generation
 
-### Top-Level Comment Convention (REQUIRED)
+| Changed source | Command |
+| --- | --- |
+| `.ungram` grammar | `just gen-grammar <lang>` |
+| Formatter source | `just gen-formatter <lang>` |
+| Lint rule or assist | `just gen-rules` and `just gen-configuration` |
+| Bindings needed locally | `just gen-bindings` |
 
-Every test spec file **must** begin with a top-level comment declaring whether it expects diagnostics. The test runner
-(`assert_diagnostics_expectation_comment` in `biome_test_utils`) enforces this and panics if the rules are violated.
+Root `AGENTS.md` is canonical for which artifacts must be committed and which full outputs CI Autofix may provide.
 
-Write the marker text using whatever comment syntax the language under test supports.
-For languages that do not support comments at all, rely on the file/folder naming convention (`valid`/`invalid`) instead.
+Do not run `just ready` in a dirty working tree: the recipe checks for a clean diff before and after its full verification sequence. Use the focused commands required by the current task, then `just f` and `just l`.
 
-**For files whose name contains "valid" (but not "invalid"):**
+## Completion Checklist
 
-The comment is **mandatory** — the test panics if it is absent.
-
-**For files whose name contains "invalid" (or other names):**
-
-The comment is strongly recommended and is also enforced when present: if the comment says
-`should generate diagnostics` but no diagnostics appear, the test panics.
-
-**Rules enforced by the test runner:**
-
-| File name contains        | Comment present?                  | Behaviour                          |
-|---------------------------|-----------------------------------|------------------------------------|
-| "valid" (not "invalid")   | `should not generate diagnostics` | Passes if no diagnostics           |
-| "valid" (not "invalid")   | `should generate diagnostics`     | Passes if diagnostics present      |
-| "valid" (not "invalid")   | absent                            | **PANIC** — comment is mandatory   |
-| "invalid" or neutral name | `should not generate diagnostics` | Passes if no diagnostics           |
-| "invalid" or neutral name | `should generate diagnostics`     | Passes if diagnostics present      |
-| "invalid" or neutral name | absent                            | No enforcement (but add it anyway) |
-
-**Important details:**
-
-- The comment is found by scanning the entire file's leading trivia — it does not have to be literally the first token, but putting it at the very top (line 1) is the established convention.
-- Fixture/support files (e.g. `foo.js`, `bar.ts`) that don't contain "valid" or "invalid" in their name do **not** require a comment, since they are not considered "valid test files" by the runner.
-- Files excluded from comment enforcement regardless of name: `.snap`, `.json`, `.jsonc`.
-
-**HTML-ish files (`.vue`, `.svelte`, `.astro`, `.html`):**
-
-These files are analyzed via the workspace-based test path (`analyze_with_workspace` in `biome_test_utils`), which
-checks the expectation comment by scanning the **raw file content** (not the parsed AST trivia). Use an HTML comment
-at the very top of the file:
-
-```vue
-<!-- should not generate diagnostics -->
-<script setup lang="ts">
-const x = 1;
-</script>
-<template>{{ x }}</template>
-```
-
-```vue
-<!-- should generate diagnostics -->
-<script>
-debugger;
-</script>
-```
-
-The same rules apply: valid files **must** have the comment, invalid files **should** have it.
-Do not place the comment inside `<script>` — put it at the top level of the file as an HTML comment.
-
-### Code Generation Commands
-
-**After modifying analyzers/lint rules (during development):**
-
-```shell
-just gen-rules          # Updates rule registrations in *_analyze crates
-just gen-configuration  # Updates configuration schemas
-```
-
-These lightweight commands generate enough code to compile and test without errors.
-
-**Full analyzer codegen (optional — CI autofix handles this):**
-
-```shell
-just gen-analyzer
-```
-
-This is a composite command that runs `gen-rules`, `gen-configuration`, `gen-migrate`, `gen-bindings`, `lint-rules`, and `format`. You typically don't need to run this locally — the CI autofix job does it automatically when you open a PR.
-
-**After modifying grammar (.ungram files):**
-
-```shell
-# Specific language
-just gen-grammar html
-
-# Multiple languages
-just gen-grammar html css
-
-# All languages
-just gen-grammar
-```
-
-**After modifying formatters:**
-
-```shell
-just gen-formatter html
-```
-
-**After modifying configuration:**
-
-```shell
-just gen-bindings
-```
-
-Generates TypeScript types and JSON schema.
-
-**Full codegen (rarely needed):**
-
-```shell
-just gen-all
-```
-
-**Before committing:**
-
-```shell
-just ready
-```
-
-Runs full codegen + format + lint (takes time).
-
-Or run individually:
-
-```shell
-just f  # Format Rust and TOML
-just l  # Lint code
-```
-
-### Run Doctests
-
-Test code examples in documentation comments:
-
-```shell
-just test-doc
-```
-
-### Debugging Tests
-
-Use `dbg!()` macro in Rust code:
-
-```rust
-fn some_function() -> &'static str {
-  let some_variable = "debug_value";
-  dbg!(&some_variable);  // Prints during test
-  some_variable
-}
-```
-
-Run with output:
-
-```shell
-cargo test test_name -- --show-output
-```
-
-## Tips
-
-- **Snapshot organization**: Group by feature/rule in separate directories
-- **Test both valid and invalid**: Create both `valid.js` and `invalid.js` files
-- **Options per folder**: `options.json` applies to all tests in that folder
-- **`.jsonc` arrays**: Use for multiple quick test cases in script context (no imports/exports)
-- **Code generation order**: Grammar → Analyzer → Formatter → Bindings
-- **CI compatibility**: Use `just` commands when possible (matches CI)
-- **Snapshot review**: Always review snapshots carefully - don't blindly accept
-- **Test performance**: Use `#[ignore]` for slow tests, run with `cargo test -- --ignored`
-- **Parser inspection**: Use `just qt <package>` to run quick_test and inspect AST, NOT full Biome builds (much faster)
-
-For general Biome development tips (string extraction, borrow checker patterns, legacy syntax),
-see the [biome-developer](../biome-developer/SKILL.md) skill.
-
-## Common Test Patterns
-
-```rust
-// Snapshot test in rule file
-#[test]
-fn test_rule() {
-  assert_lint_rule! {
-        noVar,
-        invalid => [
-            "var x = 1;",
-            "var y = 2;",
-        ],
-        valid => [
-            "const x = 1;",
-            "let y = 2;",
-        ]
-    }
-}
-
-// Quick test pattern
-#[test]
-#[ignore]  // Uncomment when using
-fn quick_test() {
-  const SOURCE: &str = r#"
-        var x = 1;
-    "#;
-
-  let rule_filter = RuleFilter::Rule("nursery", "noVar");
-  // Test runs with this configuration
-}
-```
-
-## Code Generation Dependencies
-
-| When you modify...         | Run during dev...                         | Full (optional, CI does this) |
-|----------------------------|-------------------------------------------|-------------------------------|
-| `.ungram` grammar files    | `just gen-grammar <lang>`                 | —                             |
-| Lint rules in `*_analyze`  | `just gen-rules && just gen-configuration`| `just gen-analyzer`           |
-| Formatter in `*_formatter` | `just gen-formatter <lang>`               | —                             |
-| Configuration types        | `just gen-bindings`                       | —                             |
-| Before committing          | `just f && just l`                        | —                             |
-| Full rebuild               | —                                         | `just gen-all` (slow)         |
+- A code change has focused persistent coverage.
+- A bug fixture fails without the fix.
+- Snapshot contents were inspected.
+- Expectation comments match fixture intent.
+- Orphan snapshots were pruned through `insta`.
+- Required generated artifacts are present.
+- Narrow tests pass before broader checks run.
 
 ## References
 
-- Main testing guide: `CONTRIBUTING.md` § Testing
-- Insta documentation: https://insta.rs
-- Analyzer testing: `crates/biome_analyze/CONTRIBUTING.md` § Testing
-- Changeset guide: `../changeset/SKILL.md`
+- Main test guide: `CONTRIBUTING.md#testing`
+- Analyzer guide: `crates/biome_analyze/CONTRIBUTING.md`
+- Expectation enforcement: `crates/biome_test_utils/src/lib.rs`
+- Formatter harness: `crates/biome_formatter_test/src/spec.rs`
+- Generator recipes: `justfile`

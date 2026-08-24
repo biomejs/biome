@@ -79,10 +79,9 @@ impl Rule for NoFlatMapIdentity {
                         }
                         biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
                             if p.items().len() == 1 {
-                                if let Some(param) = p.items().into_iter().next() {
+                                {
+                                    let param = p.items().into_iter().next()?;
                                     param.ok()?.to_trimmed_string()
-                                } else {
-                                    return None;
                                 }
                             } else {
                                 return None;

@@ -19,6 +19,7 @@ biome_markdown_syntax    = { workspace = true }
 biome_rowan              = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
+smallvec                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }

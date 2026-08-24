@@ -3,6 +3,12 @@
 use crate::analyzer::DomainSelector;
 use biome_analyze::{Rule, RuleFilter};
 use std::sync::LazyLock;
+static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
+        RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
+    ]
+});
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noDrizzleDeleteWithoutWhere"),
@@ -48,6 +54,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
+        RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
         RuleFilter::Rule("suspicious", "noImportCycles"),
     ]
@@ -110,8 +117,13 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
-static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
-    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap")]);
+static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
+        RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
+        RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
+    ]
+});
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
@@ -163,12 +175,32 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noVueReservedKeys"),
         RuleFilter::Rule("correctness", "noVueReservedProps"),
         RuleFilter::Rule("correctness", "noVueSetupPropsReactivityLoss"),
+        RuleFilter::Rule("correctness", "noVueVIfWithVFor"),
+        RuleFilter::Rule("correctness", "useVueVForKey"),
+        RuleFilter::Rule("correctness", "useVueValidTemplateRoot"),
+        RuleFilter::Rule("correctness", "useVueValidVBind"),
+        RuleFilter::Rule("correctness", "useVueValidVCloak"),
+        RuleFilter::Rule("correctness", "useVueValidVElse"),
+        RuleFilter::Rule("correctness", "useVueValidVElseIf"),
+        RuleFilter::Rule("correctness", "useVueValidVHtml"),
+        RuleFilter::Rule("correctness", "useVueValidVIf"),
+        RuleFilter::Rule("correctness", "useVueValidVOn"),
+        RuleFilter::Rule("correctness", "useVueValidVOnce"),
+        RuleFilter::Rule("correctness", "useVueValidVPre"),
+        RuleFilter::Rule("correctness", "useVueValidVText"),
         RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
+        RuleFilter::Rule("nursery", "noVueVOnNumberValues"),
+        RuleFilter::Rule("nursery", "useScopedStyles"),
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("nursery", "useVueNextTickPromise"),
+        RuleFilter::Rule("nursery", "useVueValidVFor"),
+        RuleFilter::Rule("performance", "useVueVapor"),
         RuleFilter::Rule("style", "noVueOptionsApi"),
+        RuleFilter::Rule("style", "useVueConsistentVBindStyle"),
+        RuleFilter::Rule("style", "useVueConsistentVOnStyle"),
         RuleFilter::Rule("style", "useVueDefineMacrosOrder"),
+        RuleFilter::Rule("style", "useVueHyphenatedAttributes"),
         RuleFilter::Rule("style", "useVueMultiWordComponentNames"),
         RuleFilter::Rule("suspicious", "noVueArrowFuncInWatch"),
     ]
@@ -176,6 +208,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 impl DomainSelector {
     pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
         match self.0 {
+            "astro" => ASTRO_FILTERS.clone(),
             "drizzle" => DRIZZLE_FILTERS.clone(),
             "next" => NEXT_FILTERS.clone(),
             "playwright" => PLAYWRIGHT_FILTERS.clone(),
@@ -198,6 +231,7 @@ impl DomainSelector {
         R: Rule,
     {
         match self.0 {
+            "astro" => ASTRO_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "drizzle" => DRIZZLE_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule::<R>()),
