@@ -548,7 +548,8 @@ fn suggested_fix_if_unused(
         // Bindings under catch are never ok to be unused
         AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
 
-        // Type parameters are never ok to be unused unless they are declared in an ambient context
+        // Type parameters are only ok to be unused in ambient contexts or implemented overload
+        // signatures.
         node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
             if is_in_ambient_context(node.syntax())
                 || is_implemented_overload_type_parameter(model, node.syntax())
