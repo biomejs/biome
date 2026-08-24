@@ -214,7 +214,7 @@ pub(crate) fn module_constant_member_name(node: &JsSyntaxNode) -> Option<String>
 /// Converts text into an uppercase identifier component.
 pub(crate) fn normalize_module_constant_name_component(
     text: &str,
-    ensure_identifier_start: bool,
+    digit_prefix: Option<&str>,
 ) -> Option<String> {
     let mut normalized = String::new();
     let mut previous_is_lowercase = false;
@@ -239,14 +239,13 @@ pub(crate) fn normalize_module_constant_name_component(
         return None;
     }
 
-    // Numeric context names need a prefix before they can participate in a binding name.
-    if ensure_identifier_start
+    if let Some(prefix) = digit_prefix
         && normalized
             .as_bytes()
             .first()
             .is_some_and(|character| character.is_ascii_digit())
     {
-        Some(format!("NUMBER_{normalized}"))
+        Some(format!("{prefix}{normalized}"))
     } else {
         Some(normalized.to_string())
     }
@@ -284,14 +283,15 @@ pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: 
 
     let mut parts = Vec::new();
     for context in [variable, property, function, call].into_iter().flatten() {
-        if let Some(normalized) = normalize_module_constant_name_component(&context, true)
+        if let Some(normalized) =
+            normalize_module_constant_name_component(&context, Some("NUMBER_"))
             && !parts.contains(&normalized)
         {
             parts.push(normalized);
         }
     }
 
-    let value = normalize_module_constant_name_component(literal_text, false)
+    let value = normalize_module_constant_name_component(literal_text, None)
         .unwrap_or_else(|| "NUMBER".to_string());
     if parts.is_empty() {
         format!("NUMBER_{value}")
@@ -310,19 +310,20 @@ pub(crate) fn module_constant_regex_name(target: &JsSyntaxNode, pattern: &str) -
                 | ModuleConstantNameKind::Function
                 | ModuleConstantNameKind::Method
                 | ModuleConstantNameKind::Property
-        ) && let Some(name) = normalize_module_constant_name_component(&candidate.name, true)
+        ) && let Some(name) =
+            normalize_module_constant_name_component(&candidate.name, Some("_"))
         {
             return format!("{name}_REGEX");
         }
     }
 
-    let pattern = normalize_module_constant_name_component(pattern, false);
+    let pattern = normalize_module_constant_name_component(pattern, None);
     pattern.map_or_else(|| "REGEX".to_string(), |pattern| format!("REGEX_{pattern}"))
 }
 
 thread_local! {
-    // Rule actions for one file share this bounded cache; replacing the entry keeps memory use
-    // independent of the number of files analyzed on a worker thread.
+    // This bounded cache retains the last analyzed root and its facts for the worker thread's
+    // lifetime; replacing the entry keeps memory use independent of the number of files analyzed.
     static MODULE_CONSTANT_FACTS: RefCell<Option<CachedModuleConstantFacts>> = const { RefCell::new(None) };
 }
 
@@ -336,10 +337,7 @@ pub(crate) fn module_constant_facts(
     let root_syntax = root.syntax();
     MODULE_CONSTANT_FACTS.with(|cache| {
         let mut cache = cache.borrow_mut();
-        if let Some(cached) = cache
-            .as_ref()
-            .filter(|cached| cached.root == root_syntax.clone())
-        {
+        if let Some(cached) = cache.as_ref().filter(|cached| cached.root.eq(root_syntax)) {
             return cached.facts.clone();
         }
 
@@ -366,7 +364,7 @@ pub(crate) fn extract_module_constant(
     value: AnyJsExpression,
     candidate_name: &str,
 ) -> Option<(BatchMutation<JsLanguage>, String)> {
-    extract_module_constant_with_reserved_names(
+    extract_module_constant_impl(
         root,
         model,
         target,
@@ -380,9 +378,34 @@ pub(crate) fn extract_module_constant(
 /// Builds a constant-extraction mutation while excluding names already reserved by sibling fixes.
 ///
 /// The mutation replaces the target, inserts a `const` declaration at the earliest safe slot, and
-/// optionally transfers file-header trivia to that declaration. It returns `None` for unsupported
-/// roots, unsafe dynamic scopes, ambiguous header trivia, or unavailable insertion points.
+/// optionally transfers file-header trivia to that declaration. If header trivia is ambiguous, it
+/// remains attached to the original first item and the declaration is inserted without transfer.
+/// It returns `None` for unsupported roots, unsafe dynamic scopes, or unavailable insertion points.
 pub(crate) fn extract_module_constant_with_reserved_names(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+    target: &JsSyntaxNode,
+    value: AnyJsExpression,
+    candidate_name: &str,
+    reserved_names: &FxHashSet<String>,
+    transfer_header: bool,
+) -> Option<(BatchMutation<JsLanguage>, String)> {
+    if reserved_names.is_empty() && transfer_header {
+        return extract_module_constant(root, model, target, value, candidate_name);
+    }
+
+    extract_module_constant_impl(
+        root,
+        model,
+        target,
+        value,
+        candidate_name,
+        reserved_names,
+        transfer_header,
+    )
+}
+
+fn extract_module_constant_impl(
     root: &AnyJsRoot,
     model: &SemanticModel,
     target: &JsSyntaxNode,
@@ -409,7 +432,13 @@ pub(crate) fn extract_module_constant_with_reserved_names(
         reserved_names,
     );
     let insertion_slot = insertion_slot(&list, top_level_item.index())?;
-    let first_token = if insertion_slot == 0 && transfer_header {
+    let header_trivia = if insertion_slot == 0 && transfer_header {
+        split_header_trivia(&list)
+    } else {
+        None
+    };
+    let transfer_header = header_trivia.is_some();
+    let first_token = if transfer_header {
         Some(list.first_token()?)
     } else {
         None
@@ -425,11 +454,6 @@ pub(crate) fn extract_module_constant_with_reserved_names(
     let replacement = preserve_target_trivia(target, replacement, !target_starts_with_first_token)?;
     let line_ending = source_line_ending(&list);
     let value = trim_expression_trivia(value)?;
-    let header_trivia = if insertion_slot == 0 && transfer_header {
-        Some(split_header_trivia(&list)?)
-    } else {
-        None
-    };
     let declaration = make_declaration(
         &name,
         value,
@@ -863,14 +887,9 @@ fn source_line_ending(list: &JsSyntaxNode) -> &'static str {
 
 /// Returns the line-ending represented by a newline trivia piece.
 fn line_ending_from_newline(text: &str) -> Option<&'static str> {
-    match text {
-        "\r\n" => Some("\r\n"),
-        "\r" => Some("\r"),
-        "\n" => Some("\n"),
-        "\u{2028}" => Some("\u{2028}"),
-        "\u{2029}" => Some("\u{2029}"),
-        _ => None,
-    }
+    ["\r\n", "\r", "\n", "\u{2028}", "\u{2029}"]
+        .into_iter()
+        .find(|line_ending| *line_ending == text)
 }
 
 #[cfg(test)]
@@ -1295,7 +1314,7 @@ function read(input) {
     }
 
     #[test]
-    fn rejects_attached_first_item_documentation() {
+    fn preserves_attached_first_item_documentation() {
         let parsed = parse(
             r#"/** Documentation for before. */
 const before = 0;
@@ -1314,14 +1333,16 @@ function read(input) {
             .expect("expected a regex literal");
         let value = AnyJsExpression::cast(target.syntax().clone()).expect("regex expression");
 
-        assert!(
+        let (mutation, _) =
             extract_module_constant(&parsed.tree(), &model, target.syntax(), value, "REGEX")
-                .is_none()
-        );
+                .expect("expected a module-level extraction");
+        let output = mutation.commit().to_string();
+
+        assert!(output.starts_with("const REGEX = /x/;\n/** Documentation for before. */"));
     }
 
     #[test]
-    fn rejects_later_comment_blocks_after_header_separator() {
+    fn preserves_later_comment_blocks_after_header_separator() {
         let parsed = parse(
             r#"/** File header. */
 
@@ -1342,10 +1363,12 @@ function read(input) {
             .expect("expected a regex literal");
         let value = AnyJsExpression::cast(target.syntax().clone()).expect("regex expression");
 
-        assert!(
+        let (mutation, _) =
             extract_module_constant(&parsed.tree(), &model, target.syntax(), value, "REGEX")
-                .is_none()
-        );
+                .expect("expected a module-level extraction");
+        let output = mutation.commit().to_string();
+
+        assert!(output.starts_with("const REGEX = /x/;\n/** File header. */\n\n/** Documentation"));
     }
 
     #[test]
