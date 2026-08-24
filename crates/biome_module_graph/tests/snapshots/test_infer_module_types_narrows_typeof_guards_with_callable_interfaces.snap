@@ -1,0 +1,252 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+interface AsyncFn {
+	(): Promise<void>;
+	tag: string;
+}
+
+export function guarded(f: AsyncFn | (() => void) | null) {
+	if (typeof f === "function") {
+		f;
+	}
+	if (typeof f === "object") {
+		f;
+	}
+}
+
+class Service {
+	run(): void {}
+}
+
+export function classValue(c: typeof Service | number) {
+	if (typeof c === "function") {
+		c;
+	}
+}
+
+interface Ctor {
+	new (): { a: number };
+}
+
+export function constructSignature(k: Ctor | number) {
+	if (typeof k === "function") {
+		k;
+	}
+	if (typeof k === "object") {
+		k;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding AsyncFn "AsyncFn" => interface "AsyncFn" {
+  extends: []
+  type_args: []
+  members: [
+    ():
+      sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<void>
+      }
+    ,
+    "tag": string
+  ]
+}
+
+Binding guarded "guarded" => sync Function "guarded" {
+  accepts: {
+    params: [
+      required f: instanceof AsyncFn
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+      | null
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding f "f" =>
+  instanceof AsyncFn
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+  | null
+
+Expression "typeof f" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof f === \"function\"" => boolean
+
+Expression "f" =>
+  instanceof AsyncFn
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+  | null
+
+Expression "\"function\"" => string: function
+
+Expression "f" =>
+  interface "AsyncFn" {
+    extends: []
+    type_args: []
+    members: [
+      ():
+        sync Function {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: instanceof Promise<void>
+        }
+      ,
+      "tag": string
+    ]
+  }
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof f" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof f === \"object\"" => boolean
+
+Expression "f" =>
+  instanceof AsyncFn
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+  | null
+
+Expression "\"object\"" => string: object
+
+Expression "f" => null
+
+Binding Service "Service" => class "Service" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding classValue "classValue" => sync Function "classValue" {
+  accepts: {
+    params: [
+      required c: typeof Service | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding c "c" => typeof Service | number
+
+Expression "typeof c" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof c === \"function\"" => boolean
+
+Expression "c" => typeof Service | number
+
+Expression "\"function\"" => string: function
+
+Expression "c" => class "Service" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Ctor "Ctor" => interface "Ctor" {
+  extends: []
+  type_args: []
+  members: [
+    constructor:
+      constructor {
+        params: []
+        type_args: []
+        returns: Object {
+          prototype: No prototype
+          members: ["a": number]
+        }
+      }
+  ]
+}
+
+Binding constructSignature "constructSignature" => sync Function "constructSignature" {
+  accepts: {
+    params: [
+      required k: instanceof Ctor | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding k "k" => instanceof Ctor | number
+
+Expression "typeof k" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof k === \"function\"" => boolean
+
+Expression "k" => instanceof Ctor | number
+
+Expression "\"function\"" => string: function
+
+Expression "k" => interface "Ctor" {
+  extends: []
+  type_args: []
+  members: [
+    constructor:
+      constructor {
+        params: []
+        type_args: []
+        returns: Object {
+          prototype: No prototype
+          members: ["a": number]
+        }
+      }
+  ]
+}
+
+Expression "typeof k" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof k === \"object\"" => boolean
+
+Expression "k" => instanceof Ctor | number
+
+Expression "\"object\"" => string: object
+
+Expression "k" => never
+```

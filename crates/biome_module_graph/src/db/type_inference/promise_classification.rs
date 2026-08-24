@@ -759,6 +759,7 @@ fn classify_expression(
                         | TypeofExpression::IterableValueOf(_)
                         | TypeofExpression::LogicalAnd(_)
                         | TypeofExpression::LogicalOr(_)
+                        | TypeofExpression::Narrowed(_)
                         | TypeofExpression::New(_)
                         | TypeofExpression::NullishCoalescing(_)
                         | TypeofExpression::Super(_)

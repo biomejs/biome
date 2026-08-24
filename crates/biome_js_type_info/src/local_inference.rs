@@ -19,16 +19,16 @@ use biome_js_syntax::{
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
     JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
     JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsFunctionExpression, JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding,
+    JsIfStatement, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
+    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
+    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
+    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInstantiationExpression,
+    TsInterfaceDeclaration, TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
@@ -47,9 +47,10 @@ use crate::{
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
     TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNarrowedExpression,
+    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
+    TypeofTag, TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression,
+    TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -563,7 +564,7 @@ impl TypeData {
             }
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
-                .map(|name| Self::from_js_reference_identifier(scope_id, &name))
+                .map(|name| Self::from_js_reference_identifier(collector, scope_id, &name))
                 .unwrap_or_default(),
             AnyJsExpression::JsImportCallExpression(_expr) => {
                 Self::reference(GLOBAL_INSTANCEOF_PROMISE_ID)
@@ -1187,12 +1188,29 @@ impl TypeData {
         }))
     }
 
-    pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
-        id.name().map_or(Self::unknown(), |name| match name.text() {
+    pub fn from_js_reference_identifier(
+        resolver: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        id: &JsReferenceIdentifier,
+    ) -> Self {
+        let Ok(name) = id.name() else {
+            return Self::unknown();
+        };
+        match name.text() {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
-            _ => Self::reference(TypeReference::from_name(scope_id, name)),
-        })
+            _ => {
+                let tag = typeof_guard_narrowed_tag(resolver, id);
+                let reference = TypeReference::from_name(scope_id, name);
+                match tag {
+                    Some(tag) => Self::from(TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                        ty: reference,
+                        tag,
+                    })),
+                    None => Self::reference(reference),
+                }
+            }
+        }
     }
 
     pub fn from_js_unary_expression(
@@ -3154,4 +3172,181 @@ fn apply_deep_const_reference(
 #[inline]
 fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
+}
+
+/// Returns the `typeof` tag to which a reference is narrowed when it appears
+/// inside the consequent of an `if (typeof x === "<tag>")` guard.
+///
+/// This is a purely syntactic check, scoped to the enclosing function. A
+/// guard whose consequent declares or assigns a binding with the same name
+/// is ignored, since it no longer says anything about that binding.
+///
+/// Guards can nest on the same name:
+///
+/// ```js
+/// if (typeof x === "string") {
+///   if (typeof x === "string") {
+///     x; // both guards agree: narrowed to "string"
+///   }
+///   if (typeof x === "number") {
+///     x; // guards disagree: a value can't be both, so we don't narrow
+///   }
+/// }
+/// ```
+fn typeof_guard_narrowed_tag(
+    resolver: &mut dyn RawTypeCollector,
+    id: &JsReferenceIdentifier,
+) -> Option<TypeofTag> {
+    let name_token = id.name().ok()?;
+    let name = name_token.text();
+    let mut child = id.syntax().clone();
+    let mut found = None;
+    for ancestor in id.syntax().ancestors().skip(1) {
+        if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor) {
+            if if_stmt
+                .consequent()
+                .is_ok_and(|consequent| consequent.syntax() == &child)
+                && let Some(tag) = typeof_guard_tag(&if_stmt, name)
+                && !narrowing_invalidated_within(resolver, &child, &name_token)
+            {
+                match found {
+                    None => found = Some(tag),
+                    Some(existing) if existing == tag => {}
+                    Some(_) => return None,
+                }
+            }
+        } else if is_narrowing_boundary(&ancestor) {
+            break;
+        }
+        child = ancestor;
+    }
+    found
+}
+
+/// Returns the tag of a `typeof <name> === "<tag>"` test of the given `if`
+/// statement, if it has one.
+///
+/// Handles both operand orders, and treats `==` like `===`.
+fn typeof_guard_tag(if_stmt: &JsIfStatement, name: &str) -> Option<TypeofTag> {
+    let test = if_stmt.test().ok()?.omit_parentheses();
+    let binary = test.as_js_binary_expression()?;
+    if !matches!(
+        binary.operator().ok()?,
+        JsBinaryOperator::StrictEquality | JsBinaryOperator::Equality
+    ) {
+        return None;
+    }
+
+    let left = binary.left().ok()?.omit_parentheses();
+    let right = binary.right().ok()?.omit_parentheses();
+    if is_typeof_of(&left, name) {
+        typeof_tag_from_literal(&right)
+    } else if is_typeof_of(&right, name) {
+        typeof_tag_from_literal(&left)
+    } else {
+        None
+    }
+}
+
+/// Returns whether `expr` is a `typeof` expression over a reference with the
+/// given `name`.
+fn is_typeof_of(expr: &AnyJsExpression, name: &str) -> bool {
+    let AnyJsExpression::JsUnaryExpression(unary) = expr else {
+        return false;
+    };
+    if !matches!(unary.operator(), Ok(JsUnaryOperator::Typeof)) {
+        return false;
+    }
+    unary
+        .argument()
+        .ok()
+        .map(AnyJsExpression::omit_parentheses)
+        .as_ref()
+        .and_then(AnyJsExpression::as_js_identifier_expression)
+        .and_then(|identifier| identifier.name().ok())
+        .and_then(|reference| reference.name().ok())
+        .is_some_and(|reference_name| reference_name.text() == name)
+}
+
+fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
+    let literal = expr
+        .as_any_js_literal_expression()?
+        .as_js_string_literal_expression()?;
+    TypeofTag::from_literal(literal.inner_string_text().ok()?.text())
+}
+
+/// Returns whether `name` is invalidated as a narrowing target somewhere
+/// inside `node`: either a `JsIdentifierBinding` named `name` is declared
+/// there, or `name` is assigned to (written) within `node`.
+///
+/// The scan is deliberately coarse: a write anywhere in `node` invalidates
+/// every reference in it, even ones that precede the write. It also keys on
+/// syntax kind rather than on scopes, so `enum name {}` counts (its id is a
+/// `JsIdentifierBinding`) while `namespace name {}` does not (its name is a
+/// `TsIdentifierBinding`). Neither outcome is observable: a reference under
+/// such a declaration resolves to it, not to the guarded binding.
+///
+/// `typeof_guard_narrowed_tag` calls this once per reference identifier
+/// inside a guarded consequent, so a branch with many references would
+/// otherwise re-scan the same subtree repeatedly. When `resolver` provides a
+/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
+/// the result is memoized there for the lifetime of that cache.
+fn narrowing_invalidated_within(
+    resolver: &mut dyn RawTypeCollector,
+    node: &JsSyntaxNode,
+    name_token: &TokenText,
+) -> bool {
+    let name = name_token.text();
+    let key = (node.clone(), Text::from(name_token.clone()));
+
+    if let Some(cache) = resolver.narrowing_invalidation_cache()
+        && let Some(&cached) = cache.get(&key)
+    {
+        return cached;
+    }
+
+    let invalidated = node.descendants().any(|descendant| {
+        let name_token = if let Some(binding) = JsIdentifierBinding::cast_ref(&descendant) {
+            binding.name_token()
+        } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&descendant) {
+            assignment.name_token()
+        } else {
+            return false;
+        };
+        name_token.is_ok_and(|token| token.text_trimmed() == name)
+    });
+
+    if let Some(cache) = resolver.narrowing_invalidation_cache() {
+        cache.insert(key, invalidated);
+    }
+
+    invalidated
+}
+
+/// Returns whether `node` is a boundary that `typeof` narrowing must not
+/// reach into. A guard only vouches for the value at the time its test runs,
+/// so it says nothing about code whose execution is deferred:
+///
+/// - function-like scopes ([`biome_js_syntax::is_function_boundary`]):
+///   functions, methods, constructors, getters, setters, and static
+///   initialization blocks;
+/// - class property members, whose initializers run when the class is
+///   instantiated:
+///
+/// ```js
+/// if (typeof x === "number") {
+///   return class { p = x }; // `p` is initialized later, `x` may have changed
+/// }
+/// ```
+///
+/// A `static` field is evaluated with the class expression itself, so
+/// narrowing it would be correct. We treat the whole class body as one
+/// boundary anyway, rather than deciding per member.
+fn is_narrowing_boundary(node: &JsSyntaxNode) -> bool {
+    biome_js_syntax::is_function_boundary(node.kind())
+        || matches!(
+            node.kind(),
+            JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
+                | JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
+        )
 }
