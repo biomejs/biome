@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: assignmentNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function alwaysTruthyAfterAssignment(x: string | undefined) {
+	x = "on";
+	// `x` is narrowed to `"on"` here, so this condition is always truthy.
+	if (x) {
+		x;
+	}
+}
+
+function alwaysFalsyAfterAssignment(x: string | undefined) {
+	x = undefined;
+	// `x` is narrowed to `undefined` here, so this condition is always falsy.
+	if (x) {
+		x;
+	}
+}
+
+```
+
+# Diagnostics
+```
+assignmentNarrowingInvalid.ts:6:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    4 │ 	x = "on";
+    5 │ 	// `x` is narrowed to `"on"` here, so this condition is always truthy.
+  > 6 │ 	if (x) {
+      │ 	    ^
+    7 │ 		x;
+    8 │ 	}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+assignmentNarrowingInvalid.ts:14:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    12 │ 	x = undefined;
+    13 │ 	// `x` is narrowed to `undefined` here, so this condition is always falsy.
+  > 14 │ 	if (x) {
+       │ 	    ^
+    15 │ 		x;
+    16 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```

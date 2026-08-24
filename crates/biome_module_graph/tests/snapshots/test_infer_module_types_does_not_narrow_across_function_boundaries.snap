@@ -1,0 +1,280 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function closureOverGuarded(x: number | (() => void)) {
+	if (typeof x === "function") {
+		x;
+		const callback = () => {
+			x;
+		};
+		callback;
+	}
+}
+
+export function nestedParameterShadowsName(x: number | (() => void)) {
+	if (typeof x === "function") {
+		function inner(x: string | boolean) {
+			x;
+		}
+		inner;
+	}
+}
+
+export function classFieldInitializer(x: number | (() => void)) {
+	if (typeof x === "function") {
+		x;
+		return class {
+			field = x;
+			static staticField = x;
+		};
+	}
+	return null;
+}
+```
+
+## Inferred types
+
+```
+Binding closureOverGuarded "closureOverGuarded" => sync Function "closureOverGuarded" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "\"function\"" => string: function
+
+Expression "x" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding callback "callback" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "() => { x; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "callback" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding nestedParameterShadowsName "nestedParameterShadowsName" => sync Function "nestedParameterShadowsName" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "\"function\"" => string: function
+
+Binding inner "inner" => sync Function "inner" {
+  accepts: {
+    params: [
+      required x: string | boolean
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => string | boolean
+
+Expression "x" => string | boolean
+
+Expression "inner" => sync Function "inner" {
+  accepts: {
+    params: [
+      required x: string | boolean
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding classFieldInitializer "classFieldInitializer" => sync Function "classFieldInitializer" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: class {
+    extends: none
+    implements: []
+    type_args: []
+  }
+  | null
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "\"function\"" => string: function
+
+Expression "x" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "class { field = x; static staticField = x; }" => class {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "null" => null
+```

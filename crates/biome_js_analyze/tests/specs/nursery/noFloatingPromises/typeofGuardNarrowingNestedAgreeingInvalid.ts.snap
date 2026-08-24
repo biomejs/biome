@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowingNestedAgreeingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+// Repeating the same `typeof` check keeps `x` narrowed to the
+// promise-returning function rather than resetting to its declared type.
+function nestedAgreeingGuards(x: number | (() => Promise<void>)) {
+	if (typeof x === "function") {
+		if (typeof x === "function") {
+			x();
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+typeofGuardNarrowingNestedAgreeingInvalid.ts:8:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     6 │ 	if (typeof x === "function") {
+     7 │ 		if (typeof x === "function") {
+   > 8 │ 			x();
+       │ 			^^^^
+     9 │ 		}
+    10 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

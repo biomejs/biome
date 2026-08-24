@@ -292,25 +292,6 @@ function functionWithParams({ option }: Params) {
 ```
 
 ```
-13_invalid.ts:25:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
-  
-    23 │ let foo: Foo;
-    24 │ foo && Promise.reject("logical operator bypass");
-  > 25 │ foo || Promise.reject("logical operator bypass");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ 
-    27 │ class C {}
-  
-  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 13_invalid.ts:29:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.

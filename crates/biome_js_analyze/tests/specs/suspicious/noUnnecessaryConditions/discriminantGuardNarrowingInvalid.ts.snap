@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: discriminantGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Flagged =
+	| { kind: "on"; flag: 1 }
+	| { kind: "off"; flag: 0 };
+
+function alwaysTruthyAfterGuard(x: Flagged) {
+	if (x.kind === "on") {
+		// `x.flag` is narrowed to `1` here, so this condition is always
+		// truthy.
+		if (x.flag) {
+			x;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+discriminantGuardNarrowingInvalid.ts:11:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+     9 │ 		// `x.flag` is narrowed to `1` here, so this condition is always
+    10 │ 		// truthy.
+  > 11 │ 		if (x.flag) {
+       │ 		    ^^^^^^
+    12 │ 			x;
+    13 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

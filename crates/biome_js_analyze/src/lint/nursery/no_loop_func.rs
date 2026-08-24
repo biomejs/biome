@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsForInitializer, AnyJsVariableDeclaration, JsArrowFunctionExpression, JsCallExpression,
     JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionDeclaration,
     JsFunctionExpression, JsSyntaxKind, JsVariableKind, JsWhileStatement,
-    binding_ext::AnyJsBindingDeclaration,
+    binding_ext::AnyJsBindingDeclaration, is_function_boundary,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextSize, TokenText, declare_node_union};
 use biome_rule_options::no_loop_func::NoLoopFuncOptions;
@@ -253,7 +253,7 @@ fn get_containing_loop_node(
             }
         } else {
             match parent.kind() {
-                kind if crate::ast_utils::is_function_boundary(kind) => {
+                kind if is_function_boundary(kind) => {
                     if let Some(function) = AnySkippableIife::cast(parent.clone())
                         && is_skippable_iife_syntax(&function, model)
                     {

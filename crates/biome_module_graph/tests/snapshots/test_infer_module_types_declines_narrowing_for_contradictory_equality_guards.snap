@@ -1,0 +1,102 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 570
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function stringEquals(x: "a" | "b" | "c") {
+	if (x === "a") {
+		if (x === "b") {
+			x;
+		}
+	}
+}
+
+type Choice = { kind: "left"; left: string } | { kind: "right"; right: number };
+
+export function memberEquals(s: Choice) {
+	if (s.kind === "left") {
+		if (s.kind === "right") {
+			s;
+		}
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding stringEquals "stringEquals" => sync Function "stringEquals" {
+  accepts: {
+    params: [
+      required x: string: a | string: b | string: c
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => string: a | string: b | string: c
+
+Expression "x" => string: a | string: b | string: c
+
+Expression "x === \"a\"" => boolean
+
+Expression "\"a\"" => string: a
+
+Expression "x" => string: a
+
+Expression "x === \"b\"" => boolean
+
+Expression "\"b\"" => string: b
+
+Expression "x" => string: a | string: b | string: c
+
+Binding Choice "Choice" =>
+  Object {
+    prototype: No prototype
+    members: ["kind": string: left, "left": string]
+  }
+  | Object {
+    prototype: No prototype
+    members: ["kind": string: right, "right": number]
+  }
+
+Binding memberEquals "memberEquals" => sync Function "memberEquals" {
+  accepts: {
+    params: [
+      required s: instanceof Choice
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding s "s" => instanceof Choice
+
+Expression "s" => instanceof Choice
+
+Expression "s.kind" => string: left | string: right
+
+Expression "s.kind === \"left\"" => boolean
+
+Expression "\"left\"" => string: left
+
+Expression "s" => Object {
+  prototype: No prototype
+  members: ["kind": string: left, "left": string]
+}
+
+Expression "s.kind" => string: left
+
+Expression "s.kind === \"right\"" => boolean
+
+Expression "\"right\"" => string: right
+
+Expression "s" => instanceof Choice
+```

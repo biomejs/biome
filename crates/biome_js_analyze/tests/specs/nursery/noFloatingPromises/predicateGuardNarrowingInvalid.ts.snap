@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: predicateGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Task = { run: () => Promise<void> };
+
+function isTask(value: unknown): value is Task {
+	return typeof value === "object" && value !== null && "run" in value;
+}
+
+function guardedCall(value: unknown) {
+	if (isTask(value)) {
+		// `value` is narrowed to `Task` here, so the call floats.
+		value.run();
+	}
+}
+
+```
+
+# Diagnostics
+```
+predicateGuardNarrowingInvalid.ts:12:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    10 │ 	if (isTask(value)) {
+    11 │ 		// `value` is narrowed to `Task` here, so the call floats.
+  > 12 │ 		value.run();
+       │ 		^^^^^^^^^^^^
+    13 │ 	}
+    14 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

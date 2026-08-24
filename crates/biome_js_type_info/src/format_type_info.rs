@@ -2,9 +2,10 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
-    RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind,
-    TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
+    MergedReference, NamedFunctionParameter, NarrowingPredicate, Object, ObjectLiteral,
+    PatternFunctionParameter, RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofAwaitExpression,
+    TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -540,6 +541,66 @@ impl Format<FormatTypeContext> for TypeofExpression {
                         soft_line_break_or_space(),
                         &expr.right
                     ])]]
+                )
+            }
+            Self::Narrowed(expr) => {
+                let predicate = format_with(|f| match &expr.predicate {
+                    NarrowingPredicate::Assigned(assigned) => {
+                        write!(f, [&format_args![token("assigned"), space(), assigned]])
+                    }
+                    NarrowingPredicate::Falsy => write!(f, [token("falsy")]),
+                    NarrowingPredicate::InstanceOf(guard) => {
+                        write!(f, [&format_args![token("instanceof"), space(), guard]])
+                    }
+                    NarrowingPredicate::MemberEquals(predicate) => write!(
+                        f,
+                        [&format_args![
+                            token("."),
+                            text(predicate.member.text(), None),
+                            token(" == \""),
+                            text(predicate.value.text(), None),
+                            token("\"")
+                        ]]
+                    ),
+                    NarrowingPredicate::PredicateCall(predicate) => write!(
+                        f,
+                        [&format_args![
+                            token("predicate"),
+                            space(),
+                            &predicate.callee,
+                            token("["),
+                            text(&predicate.argument_index.to_string(), None),
+                            token("]")
+                        ]]
+                    ),
+                    NarrowingPredicate::StringEquals(value) => write!(
+                        f,
+                        [&format_args![
+                            token("== \""),
+                            text(value.text(), None),
+                            token("\"")
+                        ]]
+                    ),
+                    NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
+                    NarrowingPredicate::Typeof(tag) => write!(
+                        f,
+                        [&format_args![
+                            token("typeof == \""),
+                            text(tag.as_str(), None),
+                            token("\"")
+                        ]]
+                    ),
+                });
+                write!(
+                    f,
+                    [&format_args![
+                        token("Narrowed("),
+                        predicate,
+                        token(","),
+                        space(),
+                        &expr.ty,
+                        token(")")
+                    ]]
                 )
             }
             Self::New(expr) => {

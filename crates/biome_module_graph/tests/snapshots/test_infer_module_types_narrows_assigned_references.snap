@@ -1,0 +1,601 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function assigned(x: number | (() => Promise<void>)) {
+	x = async () => {};
+	x;
+}
+
+export function nearestWins(y: string | number | undefined) {
+	y = "first";
+	y = 1;
+	y;
+}
+
+export function conditionalWrite(z: string | undefined, flag: boolean) {
+	z = "on";
+	if (flag) {
+		z = undefined;
+	}
+	z;
+}
+
+export function closureWrite(a: string | undefined) {
+	a = "on";
+	const reset = () => {
+		a = undefined;
+	};
+	reset();
+	a;
+}
+
+export function closureBeforeAssignment(f: string | undefined) {
+	const reset = () => {
+		f = undefined;
+	};
+	f = "on";
+	reset();
+	f;
+}
+
+export function insideClosure(b: string | undefined) {
+	b = "on";
+	return () => {
+		b;
+	};
+}
+
+export function compoundWrite(c: number | undefined) {
+	c = 1;
+	c += 1;
+	c;
+}
+
+export function nestedBlockWrite(q: string | undefined) {
+	q = "on";
+	{
+		q = undefined;
+	}
+	q;
+}
+
+export function loopTest(e: string | undefined) {
+	e = "on";
+	for (; e; ) {
+		e = undefined;
+	}
+}
+
+export function reassignedInGuard(m: number | string) {
+	if (typeof m === "string") {
+		m = 7;
+		m;
+	}
+}
+
+export function selfReference(n: number | undefined) {
+	n = 1;
+	n = n;
+	n;
+}
+
+export function unresolvedRhs(w: string | undefined) {
+	w = missing;
+	w;
+}
+
+export function destructured(p: string | undefined, arr: [string]) {
+	p = "on";
+	[p] = arr;
+	p;
+}
+
+export function scanPast(v: string | undefined, log: (value: string) => void) {
+	v = "on";
+	log(v);
+	v;
+}
+
+export function caseAssignment(t: string | undefined, choice: string) {
+	switch (choice) {
+		case "set":
+			t = "on";
+			t;
+			break;
+	}
+}
+
+export function updateWrite(j: number | undefined) {
+	j = 1;
+	j++;
+	j;
+}
+```
+
+## Inferred types
+
+```
+Binding assigned "assigned" => sync Function "assigned" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<void>
+      }
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<void>
+  }
+
+Expression "x = async () => {}" => unknown
+
+Expression "async () => {}" => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Expression "x" => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Binding nearestWins "nearestWins" => sync Function "nearestWins" {
+  accepts: {
+    params: [
+      required y: string | number | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => string | number | undefined
+
+Expression "y = \"first\"" => unknown
+
+Expression "\"first\"" => string: first
+
+Expression "y = 1" => unknown
+
+Expression "1" => number: 1
+
+Expression "y" => number: 1
+
+Binding conditionalWrite "conditionalWrite" => sync Function "conditionalWrite" {
+  accepts: {
+    params: [
+      required z: string | undefined
+      required flag: boolean
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding z "z" => string | undefined
+
+Binding flag "flag" => boolean
+
+Expression "z = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "flag" => boolean
+
+Expression "z = undefined" => unknown
+
+Expression "undefined" => undefined
+
+Expression "z" => string | undefined
+
+Binding closureWrite "closureWrite" => sync Function "closureWrite" {
+  accepts: {
+    params: [
+      required a: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding a "a" => string | undefined
+
+Expression "a = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Binding reset "reset" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "() => { a = undefined; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "a = undefined" => unknown
+
+Expression "undefined" => undefined
+
+Expression "reset" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "reset()" => void
+
+Expression "a" => string | undefined
+
+Binding closureBeforeAssignment "closureBeforeAssignment" => sync Function "closureBeforeAssignment" {
+  accepts: {
+    params: [
+      required f: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding f "f" => string | undefined
+
+Binding reset "reset" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "() => { f = undefined; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "f = undefined" => unknown
+
+Expression "undefined" => undefined
+
+Expression "f = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "reset" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "reset()" => void
+
+Expression "f" => string: on
+
+Binding insideClosure "insideClosure" => sync Function "insideClosure" {
+  accepts: {
+    params: [
+      required b: string | undefined
+    ]
+    type_args: []
+  }
+  returns: sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+}
+
+Binding b "b" => string | undefined
+
+Expression "b = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "() => { b; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "b" => string | undefined
+
+Binding compoundWrite "compoundWrite" => sync Function "compoundWrite" {
+  accepts: {
+    params: [
+      required c: number | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding c "c" => number | undefined
+
+Expression "c = 1" => unknown
+
+Expression "1" => number: 1
+
+Expression "c += 1" => unknown
+
+Expression "1" => number: 1
+
+Expression "c" => number | undefined
+
+Binding nestedBlockWrite "nestedBlockWrite" => sync Function "nestedBlockWrite" {
+  accepts: {
+    params: [
+      required q: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding q "q" => string | undefined
+
+Expression "q = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "q = undefined" => unknown
+
+Expression "undefined" => undefined
+
+Expression "q" => string | undefined
+
+Binding loopTest "loopTest" => sync Function "loopTest" {
+  accepts: {
+    params: [
+      required e: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding e "e" => string | undefined
+
+Expression "e = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "e" => string | undefined
+
+Expression "e = undefined" => unknown
+
+Expression "undefined" => undefined
+
+Binding reassignedInGuard "reassignedInGuard" => sync Function "reassignedInGuard" {
+  accepts: {
+    params: [
+      required m: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding m "m" => number | string
+
+Expression "typeof m" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof m === \"string\"" => boolean
+
+Expression "m" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "m = 7" => unknown
+
+Expression "7" => number: 7
+
+Expression "m" => number: 7
+
+Binding selfReference "selfReference" => sync Function "selfReference" {
+  accepts: {
+    params: [
+      required n: number | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding n "n" => number | undefined
+
+Expression "n = 1" => unknown
+
+Expression "1" => number: 1
+
+Expression "n = n" => unknown
+
+Expression "n" => number | undefined
+
+Expression "n" => number | undefined
+
+Binding unresolvedRhs "unresolvedRhs" => sync Function "unresolvedRhs" {
+  accepts: {
+    params: [
+      required w: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding w "w" => string | undefined
+
+Expression "w = missing" => unknown
+
+Expression "missing" => unknown
+
+Expression "w" => string | undefined
+
+Binding destructured "destructured" => sync Function "destructured" {
+  accepts: {
+    params: [
+      required p: string | undefined
+      required arr: [string]
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding p "p" => string | undefined
+
+Binding arr "arr" => [string]
+
+Expression "p = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "[p] = arr" => unknown
+
+Expression "arr" => [string]
+
+Expression "p" => string | undefined
+
+Binding scanPast "scanPast" => sync Function "scanPast" {
+  accepts: {
+    params: [
+      required v: string | undefined
+      required log: sync Function {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding v "v" => string | undefined
+
+Binding log "log" => sync Function {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding value "value" => string
+
+Expression "v = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "log" => sync Function {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "log(v)" => void
+
+Expression "v" => string: on
+
+Expression "v" => string: on
+
+Binding caseAssignment "caseAssignment" => sync Function "caseAssignment" {
+  accepts: {
+    params: [
+      required t: string | undefined
+      required choice: string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding t "t" => string | undefined
+
+Binding choice "choice" => string
+
+Expression "choice" => string
+
+Expression "\"set\"" => string: set
+
+Expression "t = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "t" => string: on
+
+Binding updateWrite "updateWrite" => sync Function "updateWrite" {
+  accepts: {
+    params: [
+      required j: number | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding j "j" => number | undefined
+
+Expression "j = 1" => unknown
+
+Expression "1" => number: 1
+
+Expression "j++" => number
+
+Expression "j" => number | undefined
+```

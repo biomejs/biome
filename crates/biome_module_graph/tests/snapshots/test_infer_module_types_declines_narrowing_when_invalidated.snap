@@ -1,0 +1,292 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function reassigned(x: number | string) {
+	if (typeof x === "string") {
+		x = 0;
+		x;
+	}
+}
+
+export function compoundAssigned(x: number | string) {
+	if (typeof x === "string") {
+		x += "!";
+		x;
+	}
+}
+
+// Without a case that does narrow, this snapshot would look the same
+// whether narrowing worked or was removed entirely.
+export function notInvalidated(x: number | string) {
+	if (typeof x === "string") {
+		x;
+	}
+}
+
+export function shadowed(x: number | string) {
+	if (typeof x === "string") {
+		const x: boolean = true;
+		x;
+	}
+}
+
+// A write to one name must not invalidate another name guarded in the same
+// nesting, which is what the per-name invalidation cache keys on.
+export function oneNameInvalidatedNotTheOther(
+	a: number | string,
+	b: number | string,
+) {
+	if (typeof a === "string") {
+		if (typeof b === "string") {
+			a = 0;
+			a;
+			b;
+		}
+	}
+}
+
+// The scan is flow-insensitive, so a write that cannot reach the reference
+// still invalidates it. TypeScript narrows both of these.
+export function writeAfterUse(x: number | string) {
+	if (typeof x === "string") {
+		x;
+		x = 0;
+	}
+}
+
+export function writeInNestedClosure(x: number | string) {
+	if (typeof x === "string") {
+		x;
+		const later = () => {
+			x = 0;
+		};
+		later;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding reassigned "reassigned" => sync Function "reassigned" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x = 0" => unknown
+
+Expression "0" => number: 0
+
+Expression "x" => number: 0
+
+Binding compoundAssigned "compoundAssigned" => sync Function "compoundAssigned" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x += \"!\"" => unknown
+
+Expression "\"!\"" => string: !
+
+Expression "x" => number | string
+
+Binding notInvalidated "notInvalidated" => sync Function "notInvalidated" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => string
+
+Binding shadowed "shadowed" => sync Function "shadowed" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Binding x "x" => instanceof boolean
+
+Expression "true" => bool: true
+
+Expression "x" => instanceof boolean
+
+Binding oneNameInvalidatedNotTheOther "oneNameInvalidatedNotTheOther" => sync Function "oneNameInvalidatedNotTheOther" {
+  accepts: {
+    params: [
+      required a: number | string
+      required b: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding a "a" => number | string
+
+Binding b "b" => number | string
+
+Expression "typeof a" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof a === \"string\"" => boolean
+
+Expression "a" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "typeof b" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof b === \"string\"" => boolean
+
+Expression "b" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "a = 0" => unknown
+
+Expression "0" => number: 0
+
+Expression "a" => number: 0
+
+Expression "b" => string
+
+Binding writeAfterUse "writeAfterUse" => sync Function "writeAfterUse" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => number | string
+
+Expression "x = 0" => unknown
+
+Expression "0" => number: 0
+
+Binding writeInNestedClosure "writeInNestedClosure" => sync Function "writeInNestedClosure" {
+  accepts: {
+    params: [
+      required x: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"string\"" => boolean
+
+Expression "x" => number | string
+
+Expression "\"string\"" => string: string
+
+Expression "x" => number | string
+
+Binding later "later" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "() => { x = 0; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "x = 0" => unknown
+
+Expression "0" => number: 0
+
+Expression "later" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+```

@@ -8,6 +8,7 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind,
+    is_function_boundary,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
 
@@ -482,7 +483,7 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
                 }
                 break;
             }
-            _ if crate::ast_utils::is_function_boundary(node.kind()) => {
+            _ if is_function_boundary(node.kind()) => {
                 break;
             }
             _ => {}
@@ -528,7 +529,7 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
         }
 
         // Stop at function boundaries
-        if crate::ast_utils::is_function_boundary(node.kind()) {
+        if is_function_boundary(node.kind()) {
             break;
         }
 
