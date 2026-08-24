@@ -212,6 +212,7 @@ impl Default for WorkspaceDb {
 /// runs. This type is what makes that possible.
 #[derive(Clone)]
 pub struct WorkspaceDbData {
+    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -237,6 +238,11 @@ impl WorkspaceDbData {
         self.projects.pin().remove(&project_key);
     }
 
+    /// Removes the parsed source cached for `path`.
+    pub fn remove_file(&self, path: &Utf8Path) {
+        self.files.pin().remove(path);
+    }
+
     /// Checks whether the module data contains `path` without making Salsa
     /// track the read operation.
     ///
@@ -258,9 +264,19 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
-    /// Removes all modules that start with the given path. That's usually used
-    /// when removing a library or a folder from the project.
+    /// Removes all files and modules that start with the given path. That's
+    /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
+        let files = self.files.pin();
+        let to_remove: Vec<Utf8PathBuf> = files
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            files.remove(&p);
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let modules = self.modules.pin();
@@ -273,8 +289,6 @@ impl WorkspaceDbData {
                 modules.remove(&p);
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 }
 
@@ -305,6 +319,7 @@ impl WorkspaceDb {
     /// its clones.
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -409,6 +424,15 @@ impl WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 
+    /// Returns the number of cached parsed sources.
+    ///
+    /// Only used by tests to check that eviction empties the collection,
+    /// rather than only the specific paths a test looks up.
+    #[cfg(test)]
+    pub(crate) fn parsed_sources_len(&self) -> usize {
+        self.files.pin().len()
+    }
+
     /// Returns a [Rc] to itself, cast to [ModuleDb]. This is used to send the service
     /// to the analyzer.
     #[cfg(feature = "module_graph")]
@@ -490,6 +514,18 @@ impl WorkspaceDb {
     }
 
     pub fn unload_path(&mut self, path: &Utf8Path) {
+        {
+            let files = self.files.pin();
+            let to_remove: Vec<Utf8PathBuf> = files
+                .keys()
+                .filter(|p| p.starts_with(path))
+                .cloned()
+                .collect();
+            for p in to_remove {
+                files.remove(&p);
+            }
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let to_remove = self
@@ -508,8 +544,6 @@ impl WorkspaceDb {
                 });
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 
     // #region Project operations
@@ -753,6 +787,7 @@ impl Default for SharedWorkspaceDb {
 impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -890,6 +925,8 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse};
     #[cfg(feature = "lang_js")]
     use biome_js_syntax::JsLanguage;
+    #[cfg(feature = "module_graph")]
+    use biome_languages::HtmlFileSource;
     #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
     #[cfg(feature = "module_graph")]
@@ -1047,18 +1084,20 @@ mod tests {
     }
 
     #[cfg(feature = "module_graph")]
-    fn test_module(db: &WorkspaceDb, path: &str) -> ModuleInfo {
+    fn test_module(db: &mut WorkspaceDb, path: &str) -> ModuleInfo {
         let path = BiomePath::new(path);
         let fs = MemoryFileSystem::default();
-        let root = parse_html("", HtmlParserOptions::default()).tree();
+        let source_index = db.insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
+        let parsed = parse_html("", HtmlParserOptions::default());
+        db.replace_file(path.as_path(), parsed.into(), source_index, vec![]);
         let (module, _, _) = resolve_html_module(
-            root,
-            &[],
+            db,
             &path,
             &fs,
             &ProjectLayout::default(),
             &PathInfoCache::default(),
-        );
+        )
+        .expect("the parsed HTML source was just inserted");
         ModuleInfo::new(
             db,
             path.as_path().to_path_buf(),
@@ -1979,7 +2018,7 @@ mod tests {
         let armed = Arc::new(AtomicBool::new(false));
         let mut db = module_write_test_db(barrier.clone(), armed.clone());
         let path = Utf8PathBuf::from("inserted.html");
-        let module = test_module(&db, path.as_str());
+        let module = test_module(&mut db, path.as_str());
         let old_generation = db.module_graph_generation();
         let reader_db = db.clone();
         armed.store(true, Ordering::Release);
@@ -2013,7 +2052,7 @@ mod tests {
         let armed = Arc::new(AtomicBool::new(false));
         let mut db = module_write_test_db(barrier.clone(), armed.clone());
         let path = Utf8PathBuf::from("removed.html");
-        let module = test_module(&db, path.as_str());
+        let module = test_module(&mut db, path.as_str());
         db.insert_module(path.clone(), module);
         let old_generation = db.module_graph_generation();
         let reader_db = db.clone();
@@ -2052,9 +2091,9 @@ mod tests {
         let root = Utf8PathBuf::from("root/a.html");
         let nested = Utf8PathBuf::from("root/nested/b.html");
         let outside = Utf8PathBuf::from("other/c.html");
-        let root_module = test_module(&db, root.as_str());
-        let nested_module = test_module(&db, nested.as_str());
-        let outside_module = test_module(&db, outside.as_str());
+        let root_module = test_module(&mut db, root.as_str());
+        let nested_module = test_module(&mut db, nested.as_str());
+        let outside_module = test_module(&mut db, outside.as_str());
         db.insert_module(root.clone(), root_module);
         db.insert_module(nested.clone(), nested_module);
         db.insert_module(outside.clone(), outside_module);

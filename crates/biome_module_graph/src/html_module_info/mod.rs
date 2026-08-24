@@ -2,12 +2,10 @@ mod visitor;
 
 use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
-use biome_css_syntax::{AnyCssRoot, TextRange};
-use biome_js_syntax::AnyJsRoot;
-use biome_languages::CssFileSource;
+use biome_css_syntax::TextRange;
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{TextSize, TokenText};
+use biome_rowan::TokenText;
 use camino::Utf8Path;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
@@ -16,29 +14,6 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 pub(crate) use visitor::HtmlModuleVisitor;
-
-/// A single embedded content block extracted from an HTML-like file
-/// (`*.html`, `*.vue`, `*.astro`, `*.svelte`).
-///
-/// This is passed to [`ModuleGraph::update_graph_for_html_paths`] so the
-/// module graph can track both CSS class definitions and JS static imports
-/// without the caller needing to know how they are processed internally.
-///
-/// The caller (workspace server or test helper) is responsible for:
-/// - Resolving `file_source_index → CssFileSource` for CSS blocks.
-/// - Providing already-parsed `AnyCssRoot` / `AnyJsRoot` syntax trees.
-///
-/// The module graph is responsible for all downstream logic (class collection,
-/// import resolution, upward traversal).
-pub enum HtmlEmbeddedContent {
-    /// A `<style>` block with its resolved CSS source and content offset
-    /// within the parent document.
-    ///
-    /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
-    Css(AnyCssRoot, CssFileSource, TextSize),
-    /// A `<script>` block parsed as JS/TS with its content offset within the parent document.
-    Js(AnyJsRoot, TextSize),
-}
 
 /// Information restricted to a single HTML module in the [ModuleGraph].
 ///

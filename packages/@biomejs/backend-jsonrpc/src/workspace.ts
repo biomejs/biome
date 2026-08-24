@@ -2358,6 +2358,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow the use of Astro's set:html directive.
+See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
+	 */
+	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
+	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
@@ -2577,6 +2582,11 @@ See https://biomejs.dev/linter/rules/no-top-level-literals
 See https://biomejs.dev/linter/rules/no-undeclared-classes 
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
+	* Reports custom properties used with var() that have no visible declaration.
+See https://biomejs.dev/linter/rules/no-undeclared-custom-properties 
+	 */
+	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
 	/**
 	* Disallow unnecessary template expressions.
 See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
@@ -3475,7 +3485,7 @@ See https://biomejs.dev/linter/rules/use-vue-define-macros-order
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
 	/**
-	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+	* Disallow uppercase letters in Vue template attribute names.
 See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
 	 */
 	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
@@ -4701,6 +4711,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroSetHtmlDirectiveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroSetHtmlDirectiveOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -4833,6 +4846,9 @@ export type NoTopLevelLiteralsConfiguration =
 export type NoUndeclaredClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredClassesOptions;
+export type NoUndeclaredCustomPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredCustomPropertiesOptions;
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
@@ -6578,6 +6594,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroSetHtmlDirectiveOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroSetHtmlDirectiveOptions;
+}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
@@ -6763,6 +6783,10 @@ export interface RuleWithNoTopLevelLiteralsOptions {
 export interface RuleWithNoUndeclaredClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredClassesOptions;
+}
+export interface RuleWithNoUndeclaredCustomPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredCustomPropertiesOptions;
 }
 export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	fix?: FixKind;
@@ -8420,6 +8444,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -8543,6 +8568,7 @@ export type NoTopLevelLiteralsOptions = {};
  * Options for the `noUndeclaredClasses` rule.
  */
 export type NoUndeclaredClassesOptions = {};
+export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
@@ -9150,11 +9176,11 @@ export interface UseVueDefineMacrosOrderOptions {
 }
 export interface UseVueHyphenatedAttributesOptions {
 	/**
-	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 * List of attribute names to ignore when checking for uppercase letters.
 	 */
 	ignore?: string[];
 	/**
-	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 * List of HTML tags whose attributes should not be checked for uppercase letters.
 	 */
 	ignoreTags?: string[];
 }
@@ -9947,6 +9973,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9994,6 +10021,7 @@ export type Category =
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
+	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
@@ -10322,6 +10350,7 @@ export type Category =
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
 	| "syntax/correctness/noDuplicatePrivateClassMembers"
+	| "transformations/stripTypes"
 	| "files/missingHandler"
 	| "format"
 	| "check"

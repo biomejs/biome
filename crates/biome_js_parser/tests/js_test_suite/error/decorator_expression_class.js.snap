@@ -23,7 +23,7 @@ JsModule {
     items: JsModuleItemList [
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         LET_KW@0..4 "let" [] [Whitespace(" ")],
                         JsBogus {
@@ -83,7 +83,7 @@ JsModule {
         },
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         LET_KW@28..33 "let" [Newline("\n")] [Whitespace(" ")],
                         JsBogus {
@@ -218,7 +218,7 @@ JsModule {
   2: JS_DIRECTIVE_LIST@0..0
   3: JS_MODULE_ITEM_LIST@0..101
     0: JS_BOGUS_STATEMENT@0..28
-      0: JS_BOGUS@0..27
+      0: JS_BOGUS_VARIABLE_DECLARATION@0..27
         0: LET_KW@0..4 "let" [] [Whitespace(" ")]
         1: JS_BOGUS@4..27
           0: JS_BOGUS@4..27
@@ -252,7 +252,7 @@ JsModule {
                   3: R_CURLY@26..27 "}" [] []
       1: SEMICOLON@27..28 ";" [] []
     1: JS_BOGUS_STATEMENT@28..69
-      0: JS_BOGUS@28..69
+      0: JS_BOGUS_VARIABLE_DECLARATION@28..69
         0: LET_KW@28..33 "let" [Newline("\n")] [Whitespace(" ")]
         1: JS_BOGUS@33..69
           0: JS_BOGUS@33..69

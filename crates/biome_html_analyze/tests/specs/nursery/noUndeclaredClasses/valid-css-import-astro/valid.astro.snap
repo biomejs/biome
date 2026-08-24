@@ -4,10 +4,10 @@ expression: valid.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 import "./styles.css";
 ---
+<!-- should not generate diagnostics -->
 
 <!-- class:list: all defined -->
 <div class:list={["card", "hero"]}>class:list</div>

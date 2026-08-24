@@ -16,6 +16,7 @@ pub struct SemanticModelBuilder {
     all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
+    root_declarations: Vec<CssModelDeclarationData>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     at_property_rules: Vec<CssPropertyAtRuleData>,
     at_property_by_range: FxHashMap<TextRange, usize>,
@@ -34,6 +35,7 @@ impl SemanticModelBuilder {
             root,
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
+            root_declarations: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
             at_property_rules: Vec::new(),
@@ -53,24 +55,20 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index());
-                if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
-                    if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                    ) {
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                    } else {
-                        return Some(rule);
-                    }
+                let rule = self.all_rules.get(parent_id.index())?;
+                let typed_node = rule.node.to_node(self.root.syntax());
+                if matches!(
+                    typed_node,
+                    AnyRuleStart::CssMediaAtRule(_)
+                        | AnyRuleStart::CssScopeAtRule(_)
+                        | AnyRuleStart::CssSupportsAtRule(_)
+                ) {
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
                 } else {
-                    return None;
+                    return Some(rule);
                 }
             } else {
                 return None;
@@ -88,32 +86,28 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index());
-                if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
-                    if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                    ) {
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                    } else {
-                        if current_index == index {
-                            return Some(rule);
-                        }
-
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                        current_index += 1;
-                    }
+                let rule = self.all_rules.get(parent_id.index())?;
+                let typed_node = rule.node.to_node(self.root.syntax());
+                if matches!(
+                    typed_node,
+                    AnyRuleStart::CssMediaAtRule(_)
+                        | AnyRuleStart::CssScopeAtRule(_)
+                        | AnyRuleStart::CssSupportsAtRule(_)
+                ) {
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
                 } else {
-                    return None;
+                    if current_index == index {
+                        return Some(rule);
+                    }
+
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
+                    current_index += 1;
                 }
             } else {
                 return None;
@@ -126,6 +120,7 @@ impl SemanticModelBuilder {
             root: self.root.syntax().as_send().expect("To be a root node"),
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
+            root_declarations: self.root_declarations,
             global_custom_variables: self.global_custom_variables,
             at_property_rules: self.at_property_rules,
             at_property_by_range: self.at_property_by_range,
@@ -236,28 +231,27 @@ impl SemanticModelBuilder {
                 let is_global_var =
                     self.is_in_root_selector && property.syntax().text_trimmed().starts_with("--");
 
-                if let Some(&current_rule_id) = self.current_rule_stack.last()
-                    && let Ok(property_name) = property.value()
-                {
+                if let Ok(property_name) = property.value() {
+                    let declaration = CssModelDeclarationData {
+                        declaration: AstPtr::new(&node),
+                        property: AstPtr::new(&property),
+                        value,
+                        property_name: property_name.clone(),
+                    };
                     if is_global_var {
                         let variable = self
                             .global_custom_variables
                             .entry(property_name.clone())
                             .or_default();
-                        variable.root = Some(CssModelDeclarationData {
-                            declaration: AstPtr::new(&node),
-                            property: AstPtr::new(&property),
-                            value: value.clone(),
-                            property_name: property_name.clone(),
-                        });
+                        variable.root = Some(declaration.clone());
                     }
-                    let current_rule = &mut self.all_rules[current_rule_id.index()];
-                    current_rule.declarations.push(CssModelDeclarationData {
-                        declaration: AstPtr::new(&node),
-                        property: AstPtr::new(&property),
-                        value,
-                        property_name,
-                    });
+                    if let Some(&current_rule_id) = self.current_rule_stack.last() {
+                        self.all_rules[current_rule_id.index()]
+                            .declarations
+                            .push(declaration);
+                    } else if self.root.as_css_declaration_snippet_root().is_some() {
+                        self.root_declarations.push(declaration);
+                    }
                 }
             }
             SemanticEvent::RootSelectorStart => {

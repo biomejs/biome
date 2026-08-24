@@ -64,15 +64,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Install cargo-audit
+      - name: Install cargo-deny
         uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
         if: matrix.code-target == 'linux-x64-musl'
         with:
-          tool: cargo-audit
+          tool: cargo-deny
 
       - name: Audit crates.io dependencies
         if: matrix.code-target == 'linux-x64-musl'
-        run: cargo audit
+        run: cargo deny check bans advisories
 
       # Build the CLI binary
       - name: Build binaries
@@ -119,7 +119,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.96.1-bullseye@sha256:21d112adb6ab370d39eef8f861f10b42342419b9569e7a05dac15e19eb65a3b4
+      image: rust:1.98.0-bullseye@sha256:97cc99038824c3cee60ae9d0f75e0171ae0ae8b80786d26d0e7d21956f8d0164
 
     steps:
       - name: Checkout repository

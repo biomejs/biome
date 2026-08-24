@@ -4,7 +4,7 @@
 <div someAttr="x"></div>
 <div SomeAttr="x"></div>
 <div SOME_ATTR="x"></div>
-<div some_attr="x"></div>
+<Panel pt:header:dataTestId="testId" />
 
 <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
 <div v-bind:fooBar="true"></div>

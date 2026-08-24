@@ -1327,17 +1327,31 @@ impl JsExpressionStatementBuilder {
         ))
     }
 }
-pub fn js_expression_template_root(
-    expression: AnyJsExpression,
+pub fn js_expression_template_root(eof_token: SyntaxToken) -> JsExpressionTemplateRootBuilder {
+    JsExpressionTemplateRootBuilder {
+        eof_token,
+        expression: None,
+    }
+}
+pub struct JsExpressionTemplateRootBuilder {
     eof_token: SyntaxToken,
-) -> JsExpressionTemplateRoot {
-    JsExpressionTemplateRoot::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
-        [
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+    expression: Option<AnyJsExpression>,
+}
+impl JsExpressionTemplateRootBuilder {
+    pub fn with_expression(mut self, expression: AnyJsExpression) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+    pub fn build(self) -> JsExpressionTemplateRoot {
+        JsExpressionTemplateRoot::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
+            [
+                self.expression
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn js_extends_clause(
     extends_token: SyntaxToken,
@@ -3393,7 +3407,7 @@ pub fn js_super_expression(super_token: SyntaxToken) -> JsSuperExpression {
     ))
 }
 pub fn js_svelte_declaration_root(
-    declaration: JsVariableDeclaration,
+    declaration: AnyJsSvelteDeclaration,
     eof_token: SyntaxToken,
 ) -> JsSvelteDeclarationRootBuilder {
     JsSvelteDeclarationRootBuilder {
@@ -3403,7 +3417,7 @@ pub fn js_svelte_declaration_root(
     }
 }
 pub struct JsSvelteDeclarationRootBuilder {
-    declaration: JsVariableDeclaration,
+    declaration: AnyJsSvelteDeclaration,
     eof_token: SyntaxToken,
     semicolon_token: Option<SyntaxToken>,
 }
@@ -7579,6 +7593,16 @@ where
 {
     JsBogusStatement::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_BOGUS_STATEMENT,
+        slots,
+    ))
+}
+pub fn js_bogus_variable_declaration<I>(slots: I) -> JsBogusVariableDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    JsBogusVariableDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_BOGUS_VARIABLE_DECLARATION,
         slots,
     ))
 }

@@ -1,4 +1,7 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares CSS values that can span multiple tokens."
+)]
 
 use crate::fonts::{
     CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
@@ -70,7 +73,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same(), RuleSource::EslintCss("font-family-fallbacks").inspired()],
     }
 }
 
@@ -237,6 +240,6 @@ fn is_last_value_css_variable(properties: &CssGenericComponentValueList) -> bool
             AnyCssGenericComponentValue::AnyCssValue(_) => Some(v),
             AnyCssGenericComponentValue::CssGenericDelimiter(_) => None,
         })
-        .last()
+        .next_back()
         .is_some_and(|v| is_css_variable(&v.to_trimmed_text().text().to_ascii_lowercase_cow()))
 }

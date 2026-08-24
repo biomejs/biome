@@ -1,0 +1,8 @@
+<!-- should generate diagnostics -->
+<div style="--sibling: red"></div>
+<p style="color: var(--sibling)"></p>
+<p style="color: var(--missing)"></p>
+<section style="--ancestor: blue">
+	<span style="color: var(--ancestor)"></span>
+</section>
+<img style="--self: green; color: var(--self)" />

@@ -4,12 +4,12 @@ expression: index.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 export const prerender = true;
 
 import Playground from './file.svelte';
 ---
+<!-- should not generate diagnostics -->
 
 <!doctype html>
 <html lang="en">

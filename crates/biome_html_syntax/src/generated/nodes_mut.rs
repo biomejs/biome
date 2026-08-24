@@ -157,6 +157,26 @@ impl AstroClientDirective {
         )
     }
 }
+impl AstroClosingFragment {
+    pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_slash_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl AstroDefineDirective {
     pub fn with_define_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -199,6 +219,26 @@ impl AstroEmbeddedContent {
         )
     }
 }
+impl AstroFragment {
+    pub fn with_opening_fragment(self, element: AstroOpeningFragment) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_children(self, element: HtmlElementList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_closing_fragment(self, element: AstroClosingFragment) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl AstroFrontmatterElement {
     pub fn with_l_fence_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -230,6 +270,20 @@ impl AstroIsDirective {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl AstroOpeningFragment {
+    pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }
@@ -652,11 +706,11 @@ impl HtmlSingleTextExpression {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_expression(self, element: HtmlTextExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_expression(self, element: Option<HtmlTextExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

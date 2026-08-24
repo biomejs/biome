@@ -2,11 +2,11 @@ use crate::css_module_info::CssClassReference;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
-    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName,
-    AnyJsxAttributeValue, AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause,
-    JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
-    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
+    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName, AnyJsxAttributeValue,
+    AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause, JsExportNamedFromClause,
+    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
+    TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_resolver::{ResolveOptions, resolve};
@@ -130,25 +130,8 @@ impl<'a> JsModuleVisitor<'a> {
         match node {
             AnyJsImportLike::JsModuleSource(source) => {
                 // TODO: support defer or source imports
-                let phase = if let Some(clause) = source.parent::<AnyJsImportClause>() {
-                    match clause {
-                        AnyJsImportClause::JsImportDefaultClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        AnyJsImportClause::JsImportNamedClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        AnyJsImportClause::JsImportNamespaceClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        _ => JsImportPhase::Default,
-                    }
+                let phase = if source.imports_only_types() {
+                    JsImportPhase::Type
                 } else {
                     JsImportPhase::Default
                 };

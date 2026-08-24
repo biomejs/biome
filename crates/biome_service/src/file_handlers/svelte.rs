@@ -87,7 +87,7 @@ impl SvelteFileHandler {
                         }),
                 )
             })
-            .map_or(JsFileSource::js_module(), |fs| fs)
+            .unwrap_or(JsFileSource::js_module())
     }
 }
 

@@ -13,6 +13,9 @@ on:
       - 'crates/biome_markdown_factory/**'
       - 'crates/biome_markdown_parser/**'
       - 'crates/biome_markdown_syntax/**'
+      - 'crates/biome_yaml_factory/**'
+      - 'crates/biome_yaml_parser/**'
+      - 'crates/biome_yaml_syntax/**'
       - 'crates/biome_rowan/**'
       - 'xtask/**'
 

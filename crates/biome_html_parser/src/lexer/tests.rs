@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use super::{HtmlLexer, TextSize};
+use super::{HtmlLexer, HtmlLexerOptions, TextSize};
 use crate::token_source::{HtmlFramework, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{self, *};
 use biome_parser::lexer::Lexer;
@@ -48,7 +48,15 @@ fn losslessness(string: String) -> bool {
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = HtmlLexer::from_str($src);
+        let framework = match $context {
+            HtmlLexContext::Regular { framework } | HtmlLexContext::InsideTag { framework } => {
+                framework
+            }
+            // The context carries no framework, so infer the one that produces it.
+            HtmlLexContext::InsideTagWithDirectives { svelte: true } => HtmlFramework::Svelte,
+            _ => HtmlFramework::Plain,
+        };
+        let mut lexer = HtmlLexer::from_str($src).with_options(HtmlLexerOptions { framework });
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -372,7 +380,7 @@ fn cdata_full() {
 #[test]
 fn svelte_openings() {
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{@debug}",
         SV_CURLY_AT: 2,
         DEBUG_KW: 5,
@@ -380,7 +388,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{/debug}",
         SV_CURLY_SLASH: 2,
         DEBUG_KW: 5,
@@ -388,7 +396,7 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{:debug}",
         SV_CURLY_COLON: 2,
         DEBUG_KW: 5,
@@ -396,11 +404,21 @@ fn svelte_openings() {
     }
 
     assert_lex! {
-        HtmlLexContext::default(),
+        HtmlLexContext::Regular { framework: HtmlFramework::Svelte },
         "{#debug}",
         SV_CURLY_HASH: 2,
         DEBUG_KW: 5,
         R_CURLY: 1
+    }
+}
+
+#[test]
+fn svelte_openings_are_not_lexed_outside_svelte() {
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Astro },
+        "{/debug}",
+        L_CURLY: 1,
+        HTML_LITERAL: 7,
     }
 }
 

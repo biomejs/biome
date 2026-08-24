@@ -14,10 +14,38 @@ use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::TrailingCommas;
+use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
+
+#[cfg(feature = "plugins")]
+#[test]
+fn close_project_removes_descendant_plugin_caches() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let plugin_caches = workspace.server.plugin_caches.pin();
+    plugin_caches.insert(Utf8PathBuf::from("/project"), PluginCache::default());
+    plugin_caches.insert(
+        Utf8PathBuf::from("/project/packages/nested"),
+        PluginCache::default(),
+    );
+    plugin_caches.insert(
+        Utf8PathBuf::from("/project-sibling"),
+        PluginCache::default(),
+    );
+    drop(plugin_caches);
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+
+    let plugin_caches = workspace.server.plugin_caches.pin();
+    assert!(!plugin_caches.contains_key(Utf8Path::new("/project")));
+    assert!(!plugin_caches.contains_key(Utf8Path::new("/project/packages/nested")));
+    assert!(plugin_caches.contains_key(Utf8Path::new("/project-sibling")));
+}
 
 fn assert_settings_query_routes(db_state: DbState) {
     const PATH: &str = "/project/file.js";
@@ -499,6 +527,107 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
             })
             .unwrap(),
         SOURCE
+    );
+}
+
+/// Closing a file evicts its own cached parsed source through
+/// `DbState::remove_file`, and closing a project evicts the cached parsed
+/// sources of the files still open under its root through
+/// `DbState::unload_path`. Neither operation touches parsed sources that
+/// belong to a different project.
+#[test]
+fn close_file_and_close_project_evict_cached_parsed_sources() {
+    const PATH_A: &str = "/project/file_a.js";
+    const PATH_B: &str = "/project/nested/file_b.js";
+    const OTHER_PATH: &str = "/other/file_c.js";
+    const SOURCE: &str = "let a = 1;";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH_A), SOURCE.as_bytes());
+    fs.insert(Utf8PathBuf::from(PATH_B), SOURCE.as_bytes());
+    fs.insert(Utf8PathBuf::from(OTHER_PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let other_project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/other"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+
+    for (key, path) in [
+        (project_key, PATH_A),
+        (project_key, PATH_B),
+        (other_project_key, OTHER_PATH),
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key: key,
+                path: BiomePath::new(path),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        3,
+        "opening all three files must add three entries to the parsed source cache"
+    );
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH_A),
+        })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_A))
+            .is_none(),
+        "closing a file must evict its cached parsed source"
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_B))
+            .is_some(),
+        "closing a file must not evict the cached parsed source of a file that is still open"
+    );
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        2,
+        "closing a file must remove only its own entry from the parsed source cache"
+    );
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_B))
+            .is_none(),
+        "closing a project must evict cached parsed sources still open under its root"
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(OTHER_PATH))
+            .is_some(),
+        "closing a project must not evict cached parsed sources outside its root"
+    );
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        1,
+        "closing a project must remove only the entries under its root from the parsed source cache"
     );
 }
 
@@ -1597,6 +1726,75 @@ const Bar = styled(Component)`
     	color: red;
     `;
     ");
+}
+
+#[test]
+fn stores_string_jsx_style_attributes_as_css_snippets() {
+    const FILE_PATH: &str = "/project/file.jsx";
+    const FILE_CONTENT: &str = r#"const Valid = <div style="color: red" />;
+const Component = <Component style="color: orange" />;
+const Namespaced = <div css:style="color: purple" />;
+const Malformed = <. style="color: black" />;
+const Expression = <div style={"color: blue"} />;
+const Object = <div style={{ color: "green" }} />;
+const Empty = <div style />;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let db = workspace.get_db();
+    let snippets = workspace.get_snippets(Utf8Path::new(FILE_PATH));
+    let style_snippets = snippets
+        .iter()
+        .filter(|snippet| {
+            db.source_from_index(snippet.document_source_index(&db))
+                .and_then(|source| source.to_css_file_source())
+                .is_some_and(|source| {
+                    matches!(
+                        source.as_embedding_kind(),
+                        CssEmbeddingKind::HtmlStyleAttribute
+                    )
+                })
+        })
+        .collect::<Vec<_>>();
+
+    assert_eq!(style_snippets.len(), 1);
+    assert_eq!(
+        style_snippets[0]
+            .parsed(&db)
+            .clone()
+            .embedded_syntax::<CssLanguage>()
+            .text_with_trivia()
+            .to_string(),
+        "color: red"
+    );
 }
 
 #[test]
@@ -3935,5 +4133,92 @@ const x = 1;
     assert!(
         result.is_none_or(|definition| definition.matches.is_empty()),
         "cursor before an embedded script should not resolve to any definition"
+    );
+}
+
+#[test]
+#[cfg(feature = "js_plugin")]
+fn typescript_plugin_reports_diagnostics_through_the_workspace() {
+    use biome_plugin_loader::{PluginConfiguration, Plugins};
+
+    const PLUGIN_PATH: &str = "/project/plugin.ts";
+    const PLUGIN_SOURCE: &str = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+import type { AnyJsRoot, Severity } from "@biomejs/plugin-api";
+
+export const noTopLevelVar = defineRule({
+    query: ast("JS_MODULE"),
+    run(root: AnyJsRoot): void {
+        for (const item of root.items) {
+            if (
+                item.kind === "JS_VARIABLE_STATEMENT" &&
+                item.declaration?.kindToken === "var"
+            ) {
+                registerDiagnostic(
+                    item,
+                    "warning" satisfies Severity,
+                    "Use let or const instead of a top-level var declaration.",
+                );
+            }
+        }
+    },
+});"#;
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = "var foo: number = 1;\nexport const bar: string = `${foo}`;\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PLUGIN_PATH), PLUGIN_SOURCE);
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "plugin.ts".to_string(),
+                )])),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            categories: RuleCategories::default(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.parse_errors, 0);
+
+    let diagnostics = format!("{:?}", result.diagnostics);
+    assert!(
+        diagnostics.contains("top-level var declaration"),
+        "Expected a diagnostic from the TypeScript plugin, got: {diagnostics}"
     );
 }

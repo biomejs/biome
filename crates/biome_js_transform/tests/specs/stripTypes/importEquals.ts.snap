@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: importEquals.ts
+---
+# Input
+```ts
+// should generate diagnostics
+import foo = require("foo");
+
+```
+
+# Diagnostics
+```
+importEquals.ts:2:1 transformations/stripTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i import = declarations cannot be stripped because they generate runtime code.
+  
+    1 │ // should generate diagnostics
+  > 2 │ import foo = require("foo");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Only type syntax that can be erased is supported. Rewrite this using JavaScript syntax.
+  
+
+```

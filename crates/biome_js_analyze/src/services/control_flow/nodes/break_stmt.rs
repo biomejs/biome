@@ -46,11 +46,10 @@ impl NodeVisitor for BreakVisitor {
                 } else if let Some(visitor) = state.try_downcast::<SwitchVisitor>(*type_id, *index)
                 {
                     (visitor.label.as_ref(), visitor.break_block)
-                } else if let Some(visitor) = state.try_downcast::<BlockVisitor>(*type_id, *index) {
+                } else {
+                    let visitor = state.try_downcast::<BlockVisitor>(*type_id, *index)?;
                     let (label, block) = visitor.break_block.as_ref()?;
                     (Some(label), *block)
-                } else {
-                    return None;
                 };
 
                 match (block_label, &label) {

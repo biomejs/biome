@@ -2522,8 +2522,8 @@ impl JsExpressionTemplateRoot {
             eof_token: self.eof_token(),
         }
     }
-    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn expression(&self) -> Option<AnyJsExpression> {
+        support::node(&self.syntax, 0usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2539,7 +2539,7 @@ impl Serialize for JsExpressionTemplateRoot {
 }
 #[derive(Serialize)]
 pub struct JsExpressionTemplateRootFields {
-    pub expression: SyntaxResult<AnyJsExpression>,
+    pub expression: Option<AnyJsExpression>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -6494,7 +6494,7 @@ impl JsSvelteDeclarationRoot {
             eof_token: self.eof_token(),
         }
     }
-    pub fn declaration(&self) -> SyntaxResult<JsVariableDeclaration> {
+    pub fn declaration(&self) -> SyntaxResult<AnyJsSvelteDeclaration> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
@@ -6514,7 +6514,7 @@ impl Serialize for JsSvelteDeclarationRoot {
 }
 #[derive(Serialize)]
 pub struct JsSvelteDeclarationRootFields {
-    pub declaration: SyntaxResult<JsVariableDeclaration>,
+    pub declaration: SyntaxResult<AnyJsSvelteDeclaration>,
     pub semicolon_token: Option<SyntaxToken>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
@@ -15626,6 +15626,25 @@ impl AnyJsStatement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsSvelteDeclaration {
+    JsBogusVariableDeclaration(JsBogusVariableDeclaration),
+    JsVariableDeclaration(JsVariableDeclaration),
+}
+impl AnyJsSvelteDeclaration {
+    pub fn as_js_bogus_variable_declaration(&self) -> Option<&JsBogusVariableDeclaration> {
+        match &self {
+            Self::JsBogusVariableDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_variable_declaration(&self) -> Option<&JsVariableDeclaration> {
+        match &self {
+            Self::JsVariableDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsSwitchClause {
     JsCaseClause(JsCaseClause),
     JsDefaultClause(JsDefaultClause),
@@ -19625,7 +19644,10 @@ impl std::fmt::Debug for JsExpressionTemplateRoot {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("JsExpressionTemplateRoot")
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
         } else {
@@ -37814,6 +37836,73 @@ impl From<AnyJsStatement> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsBogusVariableDeclaration> for AnyJsSvelteDeclaration {
+    fn from(node: JsBogusVariableDeclaration) -> Self {
+        Self::JsBogusVariableDeclaration(node)
+    }
+}
+impl From<JsVariableDeclaration> for AnyJsSvelteDeclaration {
+    fn from(node: JsVariableDeclaration) -> Self {
+        Self::JsVariableDeclaration(node)
+    }
+}
+impl AstNode for AnyJsSvelteDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsBogusVariableDeclaration::KIND_SET.union(JsVariableDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            JS_BOGUS_VARIABLE_DECLARATION | JS_VARIABLE_DECLARATION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_BOGUS_VARIABLE_DECLARATION => {
+                Self::JsBogusVariableDeclaration(JsBogusVariableDeclaration { syntax })
+            }
+            JS_VARIABLE_DECLARATION => {
+                Self::JsVariableDeclaration(JsVariableDeclaration { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsBogusVariableDeclaration(it) => it.syntax(),
+            Self::JsVariableDeclaration(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsBogusVariableDeclaration(it) => it.into_syntax(),
+            Self::JsVariableDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsSvelteDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsBogusVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsSvelteDeclaration> for SyntaxNode {
+    fn from(n: AnyJsSvelteDeclaration) -> Self {
+        match n {
+            AnyJsSvelteDeclaration::JsBogusVariableDeclaration(it) => it.into_syntax(),
+            AnyJsSvelteDeclaration::JsVariableDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsSvelteDeclaration> for SyntaxElement {
+    fn from(n: AnyJsSvelteDeclaration) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsCaseClause> for AnyJsSwitchClause {
     fn from(node: JsCaseClause) -> Self {
         Self::JsCaseClause(node)
@@ -40763,6 +40852,11 @@ impl std::fmt::Display for AnyJsStatement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsSvelteDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsSwitchClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42893,6 +42987,62 @@ impl From<JsBogusStatement> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct JsBogusVariableDeclaration {
+    syntax: SyntaxNode,
+}
+impl JsBogusVariableDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for JsBogusVariableDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_BOGUS_VARIABLE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_BOGUS_VARIABLE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsBogusVariableDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsBogusVariableDeclaration")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<JsBogusVariableDeclaration> for SyntaxNode {
+    fn from(n: JsBogusVariableDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<JsBogusVariableDeclaration> for SyntaxElement {
+    fn from(n: JsBogusVariableDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct TsBogusType {
     syntax: SyntaxNode,
 }
@@ -42948,7 +43098,7 @@ impl From<TsBogusType> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusStatement | TsBogusType }
+biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusStatement | JsBogusVariableDeclaration | TsBogusType }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct JsArrayAssignmentPatternElementList {
     syntax_list: SyntaxList,

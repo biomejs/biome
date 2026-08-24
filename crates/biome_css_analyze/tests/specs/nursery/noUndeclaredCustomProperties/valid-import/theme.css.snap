@@ -1,0 +1,13 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: theme.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+.theme {
+	--theme-color: blue;
+}
+
+```

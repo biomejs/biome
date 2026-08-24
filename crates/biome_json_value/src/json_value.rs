@@ -91,7 +91,7 @@ impl JsonValue {
 
 impl biome_deserialize::Deserializable for JsonValue {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

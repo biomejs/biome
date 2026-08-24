@@ -1345,6 +1345,23 @@ impl<'src> MarkdownLexer<'src> {
             }
         }
 
+        if matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            let whitespace_start = self.position;
+            let mut whitespace_end = whitespace_start;
+            while whitespace_end < self.end
+                && matches!(self.source.as_bytes()[whitespace_end], b' ' | b'\t')
+            {
+                whitespace_end += 1;
+            }
+
+            if self.is_at_atx_closing_sequence_at(whitespace_end) {
+                // This may repeat the scan that ended the preceding text token. Caching the
+                // boundary in lexer state could remove the second pass if profiles justify it.
+                self.advance(whitespace_end - whitespace_start);
+                return MD_TEXTUAL_LITERAL;
+            }
+        }
+
         // Consume at least one character - ensures progress to avoid infinite loops
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
@@ -1374,25 +1391,46 @@ impl<'src> MarkdownLexer<'src> {
                     if matches!(context, MarkdownLexContext::LinkDefinition) {
                         // In link definition context, whitespace ends the text token
                         break;
-                    } else if byte == b' ' {
-                        if self.is_at_trailing_hash_closing_whitespace() {
+                    } else if matches!(byte, b' ' | b'\t') {
+                        let whitespace_start = self.position;
+                        let mut whitespace_end = whitespace_start;
+                        while whitespace_end < self.end
+                            && matches!(self.source.as_bytes()[whitespace_end], b' ' | b'\t')
+                        {
+                            whitespace_end += 1;
+                        }
+
+                        if self.is_at_atx_closing_sequence_at(whitespace_end) {
                             break;
                         }
+
                         // Look ahead to check if this could be the start of a hard line break
                         // (2+ spaces followed by newline). Skip this check in HeadingContent
                         // context: headings don't produce hard breaks (§4.2), so trailing
                         // spaces should stay as ordinary text for the parser to handle.
                         if !matches!(context, MarkdownLexContext::HeadingContent)
-                            && self.is_potential_hard_line_break()
+                            && (whitespace_end == self.end
+                                || matches!(
+                                    self.source.as_bytes()[whitespace_end],
+                                    b'\n' | b'\r'
+                                ))
                         {
-                            break;
+                            let mut trailing_spaces_start = whitespace_end;
+                            while trailing_spaces_start > whitespace_start
+                                && self.source.as_bytes()[trailing_spaces_start - 1] == b' '
+                            {
+                                trailing_spaces_start -= 1;
+                            }
+
+                            if whitespace_end - trailing_spaces_start
+                                >= MIN_HARD_BREAK_TRAILING_SPACES
+                            {
+                                self.advance(trailing_spaces_start - whitespace_start);
+                                break;
+                            }
                         }
-                        self.advance(1);
-                    } else if byte == b'\t' {
-                        if self.is_at_trailing_hash_closing_whitespace() {
-                            break;
-                        }
-                        self.advance(1);
+
+                        self.advance(whitespace_end - whitespace_start);
                     } else {
                         // Stop at newlines (\n, \r)
                         break;
@@ -1515,53 +1553,6 @@ impl<'src> MarkdownLexer<'src> {
         matches!(bytes[pos], b' ' | b'\t' | b'\n' | b'\r')
     }
 
-    /// Returns true if the current whitespace is the start of a closing ATX hash sequence.
-    ///
-    /// Pattern: spaces/tabs + one or more `#` + optional spaces/tabs + newline/EOF.
-    fn is_at_trailing_hash_closing_whitespace(&self) -> bool {
-        let mut i = self.position;
-        let bytes = self.source.as_bytes();
-        let len = self.end;
-
-        let mut saw_ws = false;
-        while i < len {
-            let b = bytes[i];
-            if b == b' ' || b == b'\t' {
-                saw_ws = true;
-                i += 1;
-            } else {
-                break;
-            }
-        }
-
-        if !saw_ws {
-            return false;
-        }
-
-        if i >= len || bytes[i] != b'#' {
-            return false;
-        }
-
-        while i < len && bytes[i] == b'#' {
-            i += 1;
-        }
-
-        while i < len {
-            let b = bytes[i];
-            if b == b' ' || b == b'\t' {
-                i += 1;
-            } else {
-                break;
-            }
-        }
-
-        if i >= len {
-            return true;
-        }
-
-        matches!(bytes[i], b'\n' | b'\r')
-    }
-
     /// Returns true if a `#` at the current position can be heading syntax:
     /// it opens a heading at the start of a line (§4.2) or closes one at the
     /// end. Anywhere else `#` is plain text.
@@ -1633,20 +1624,25 @@ impl<'src> MarkdownLexer<'src> {
     /// `## title ##` (§4.2). Only space and tab count as padding here;
     /// any other character makes the hashes plain text.
     fn is_at_atx_closing_sequence(&self) -> bool {
-        if self.current_byte() != Some(b'#') {
+        self.is_at_atx_closing_sequence_at(self.position)
+    }
+
+    fn is_at_atx_closing_sequence_at(&self, position: usize) -> bool {
+        let bytes = self.source.as_bytes();
+        if position >= self.end || bytes[position] != b'#' {
             return false;
         }
 
-        let mut offset = 0;
-        while let Some(b'#') = self.byte_at(offset) {
-            offset += 1;
+        let mut position = position;
+        while position < self.end && bytes[position] == b'#' {
+            position += 1;
         }
 
-        while matches!(self.byte_at(offset), Some(byte) if is_space_or_tab_byte(byte)) {
-            offset += 1;
+        while position < self.end && is_space_or_tab_byte(bytes[position]) {
+            position += 1;
         }
 
-        matches!(self.byte_at(offset), None | Some(b'\n' | b'\r'))
+        position == self.end || matches!(bytes[position], b'\n' | b'\r')
     }
 
     /// Check if current position starts a potential hard line break pattern.

@@ -200,6 +200,7 @@ define_categories! {
     "lint/correctness/useVueValidVPre": "https://biomejs.dev/linter/rules/use-vue-valid-v-pre",
     "lint/correctness/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
+    "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
@@ -247,6 +248,7 @@ define_categories! {
     "lint/nursery/noTailwindArbitraryValue": "https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
+    "lint/nursery/noUndeclaredCustomProperties": "https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
     "lint/nursery/noUnnecessaryTemplateExpression": "https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUnsafeTypeAssertion": "https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
@@ -580,6 +582,9 @@ define_categories! {
     "syntax/correctness/noInitializerWithDefinite",
     "syntax/correctness/noDuplicatePrivateClassMembers",
     // end syntax rules
+
+    // transformation categories
+    "transformations/stripTypes",
 
     // General categories
     "files/missingHandler",

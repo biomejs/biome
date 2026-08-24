@@ -11,6 +11,7 @@ pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
 pub mod cast_ext;
+pub mod class_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
@@ -111,12 +112,14 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
                 | JS_BOGUS_IMPORT_ASSERTION_ENTRY
                 | JS_BOGUS_NAMED_IMPORT_SPECIFIER
                 | JS_BOGUS_ASSIGNMENT
+                | JS_BOGUS_VARIABLE_DECLARATION
                 | TS_BOGUS_TYPE
         )
     }
 
     fn to_bogus(&self) -> Self {
         match self {
+            kind if JsVariableDeclaration::can_cast(*kind) => JS_BOGUS_VARIABLE_DECLARATION,
             kind if AnyJsModuleItem::can_cast(*kind) => JS_BOGUS_STATEMENT,
             kind if AnyJsExpression::can_cast(*kind) => JS_BOGUS_EXPRESSION,
             kind if AnyJsBinding::can_cast(*kind) => JS_BOGUS_BINDING,

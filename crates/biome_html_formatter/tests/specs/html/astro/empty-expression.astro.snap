@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/empty-expression.astro
+---
+
+# Input
+
+```astro
+---
+const x = 1;
+---
+<div>{}</div>
+<div>{ }</div>
+<div>{x}</div>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const x = 1;
+---
+
+<div>{}</div>
+<div>{}</div>
+<div>{x}</div>
+
+```

@@ -192,9 +192,7 @@ impl ControlFlowStatement {
             if let Some(label) = &label
                 && let Some(parent) = node.parent().and_then(JsLabeledStatement::cast)
                 && parent
-                    .label_token()
-                    .ok()
-                    .is_some_and(|it| it.text_trimmed() == label.text_trimmed())
+                    .label_token().is_ok_and(|it| it.text_trimmed() == label.text_trimmed())
             {
                 is_label_inside_finally = true;
             }
