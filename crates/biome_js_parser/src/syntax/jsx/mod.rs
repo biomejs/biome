@@ -116,6 +116,7 @@ impl ParseNodeList for AstroImplicitFragmentChildren {
     }
 }
 
+#[inline]
 fn parse_astro_implicit_fragment(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();
     let fragment = p.start();
