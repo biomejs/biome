@@ -10,6 +10,7 @@ use serde_json::Value;
 ///
 /// A numeric segment indexes an array only when the preceding value is an array. The same segment
 /// remains an object property when the preceding value is an object.
+#[derive(Clone)]
 pub(super) struct ConfigurationKey {
     text: String,
     segments: Vec<String>,
@@ -67,13 +68,87 @@ impl ConfigurationKey {
         Self { text, segments }
     }
 
-    pub(super) fn has_non_null_scalar_ancestor_in(&self, value: &Value) -> bool {
-        (1..self.segments.len()).rev().any(|segment_count| {
-            self.value_in_prefix(value, segment_count)
-                .is_some_and(|value| {
-                    !matches!(value, Value::Array(_) | Value::Object(_)) && !value.is_null()
-                })
-        })
+    pub(super) fn is_declared_in(&self, value: &Value) -> bool {
+        self.value_in(value)
+            .or_else(|| self.rule_group_shorthand_in(value))
+            .is_some_and(|value| !value.is_null())
+    }
+
+    pub(super) fn source_in_override(&self, value: &Value) -> Option<Self> {
+        if self.is_declared_in(value) {
+            return Some(self.clone());
+        }
+        let [language, section, property] = self.segments.as_slice() else {
+            return None;
+        };
+        if !matches!(
+            language.as_str(),
+            "javascript" | "json" | "css" | "graphql" | "grit" | "html"
+        ) || !matches!(
+            (section.as_str(), property.as_str()),
+            ("formatter", _) | ("linter" | "assist", "enabled")
+        ) {
+            return None;
+        }
+        let source = Self {
+            text: format!("{section}.{property}"),
+            segments: vec![section.clone(), property.clone()],
+        };
+        source.is_declared_in(value).then_some(source)
+    }
+
+    pub(super) fn append_array_index_in(&self, value: &Value) -> Option<(usize, usize)> {
+        let mut value = value;
+        for (position, segment) in self.segments.iter().enumerate() {
+            match value {
+                Value::Object(object) => value = object.get(segment)?,
+                Value::Array(array) => {
+                    let index = segment.parse::<usize>().ok()?;
+                    if !self.is_append_array(position) || array.get(index).is_none() {
+                        return None;
+                    }
+                    return Some((position, index));
+                }
+                _ => return None,
+            }
+        }
+        None
+    }
+
+    pub(super) fn array_before_index<'a>(
+        &self,
+        value: &'a Value,
+        index_position: usize,
+    ) -> Option<&'a [Value]> {
+        self.value_in_prefix(value, index_position)
+            .and_then(Value::as_array)
+            .map(Vec::as_slice)
+    }
+
+    pub(super) fn with_index(&self, position: usize, index: usize) -> Self {
+        let mut segments = self.segments.clone();
+        *segments
+            .get_mut(position)
+            .expect("the indexed segment should exist") = index.to_string();
+        Self {
+            text: segments.join("."),
+            segments,
+        }
+    }
+
+    fn is_append_array(&self, index_position: usize) -> bool {
+        let path = &self.segments[..index_position];
+        matches!(path, [property] if matches!(property.as_str(), "overrides" | "plugins"))
+            || matches!(
+                path,
+                [section, property]
+                    if property == "includes"
+                        && matches!(
+                            section.as_str(),
+                            "files" | "formatter" | "linter" | "assist"
+                        )
+            )
+            || matches!(path, [section, property] if section == "files" && property == "experimentalScannerIgnores")
     }
 
     fn value_in_prefix<'a>(&self, value: &'a Value, segment_count: usize) -> Option<&'a Value> {
@@ -138,6 +213,35 @@ mod tests {
             key.value_in_configuration(&configuration)
                 .expect("serializable configuration"),
             Some(Value::String("error".to_string()))
+        );
+    }
+
+    #[test]
+    fn only_rule_group_shorthand_uses_a_scalar_ancestor() {
+        let value = serde_json::json!({
+            "formatter": { "lineWidth": 100 },
+            "linter": { "rules": { "suspicious": "error" } }
+        });
+        let unknown_formatter_key =
+            ConfigurationKey::parse("formatter.lineWidth.extra".to_string())
+                .expect("valid configuration key");
+        let shorthand_rule =
+            ConfigurationKey::parse("linter.rules.suspicious.noDebugger".to_string())
+                .expect("valid configuration key");
+
+        assert!(!unknown_formatter_key.is_declared_in(&value));
+        assert!(shorthand_rule.is_declared_in(&value));
+    }
+
+    #[test]
+    fn maps_language_fallbacks_to_the_global_override_key() {
+        let key = ConfigurationKey::parse("javascript.formatter.lineWidth".to_string())
+            .expect("valid configuration key");
+        let value = serde_json::json!({ "formatter": { "lineWidth": 100 } });
+
+        assert_eq!(
+            key.source_in_override(&value).map(|source| source.text),
+            Some("formatter.lineWidth".to_string())
         );
     }
 }

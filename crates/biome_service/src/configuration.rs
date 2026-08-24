@@ -59,7 +59,7 @@ use std::sync::Arc;
 use tracing::instrument;
 
 fn display_path(path: &Utf8Path) -> Cow<'_, str> {
-    if cfg!(any(test, all(debug_assertions, windows))) {
+    if cfg!(any(test, windows)) {
         Cow::Owned(path.as_str().replace('\\', "/"))
     } else {
         Cow::Borrowed(path.as_str())
@@ -666,7 +666,7 @@ impl<'a> ConfigurationExtendsLoader<'a> {
             if depth > MAX_EXTENDS_DEPTH {
                 self.diagnostics.push(
                     ExtendsDepthLimit {
-                        path: pending.file_path.to_string(),
+                        path: display_path(&pending.file_path).into_owned(),
                         specifier: resolved.specifier.clone().into(),
                     }
                     .into(),
@@ -695,7 +695,7 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         self.diagnostics.push(
             MultipleExtendedConfigurationVersions {
                 specifier: resolved.identity().to_string(),
-                path: resolved.file_path.to_string(),
+                path: display_path(&resolved.file_path).into_owned(),
                 advice: MultipleExtendedConfigurationVersionsAdvice {
                     first,
                     conflicting: PackageResolution::from(&resolved),

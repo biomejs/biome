@@ -2,6 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Implemented the ability to load extended configurations from parents, grandparents and so on. The resolution is limited to a depth level of ten.
-
-In other words, configuration files that are shipped as npm packages can now extend other configuration files (local or other npm packages).
+Configuration files can now recursively extend local files and npm package configurations up to ten levels. Every repeated reference participates in the merge, while resolving multiple versions of one extended package produces an error.

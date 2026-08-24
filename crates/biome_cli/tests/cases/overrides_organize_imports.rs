@@ -58,3 +58,55 @@ fn does_handle_included_file_and_disable_organize_imports() {
         result,
     ));
 }
+
+#[test]
+fn does_handle_javascript_assist_override() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "includes": ["test.js", "special/**"]
+  },
+  "overrides": [{
+    "includes": ["special/**"],
+    "javascript": { "assist": { "enabled": false } }
+  }]
+}
+"#,
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), UNORGANIZED.as_bytes());
+
+    let test2 = Utf8Path::new("special/test2.js");
+    fs.insert(test2.into(), UNORGANIZED.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--formatter-enabled=false",
+                "--linter-enabled=false",
+                test.as_str(),
+                test2.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_handle_javascript_assist_override",
+        fs,
+        console,
+        result,
+    ));
+}

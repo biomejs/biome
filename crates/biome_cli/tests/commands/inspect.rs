@@ -148,6 +148,47 @@ fn absent_key_is_successful() {
 }
 
 #[test]
+fn absent_child_of_override_scalar_has_no_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "formatter.lineWidth.extra",
+                "--path=file.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "absent_child_of_override_scalar_has_no_source",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn extended_value_reports_resolved_path() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -488,6 +529,52 @@ fn later_matching_override_uses_runtime_root_fallback() {
 }
 
 #[test]
+fn equal_runtime_root_fallback_reports_root_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "formatter": { "formatWithErrors": false },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "formatWithErrors": false }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "formatter.formatWithErrors",
+                "--path=file.test.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "equal_runtime_root_fallback_reports_root_source",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn later_matching_override_resets_unsafe_parameter_decorators() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -528,6 +615,136 @@ fn later_matching_override_resets_unsafe_parameter_decorators() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "later_matching_override_resets_unsafe_parameter_decorators",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn javascript_assist_override_matches_runtime() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "assist": { "enabled": true } },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "javascript": { "assist": { "enabled": false } }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "javascript.assist.enabled",
+                "--path=file.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "javascript_assist_override_matches_runtime",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn later_global_override_replaces_language_value() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "formatter": { "lineWidth": 120 } },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "formatter": { "lineWidth": 100 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "javascript.formatter.lineWidth",
+                "--path=file.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "later_global_override_replaces_language_value",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn runtime_ignored_override_keeps_base_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": {
+    "resolver": { "experimentalPnpmCatalogs": false }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "javascript": {
+        "resolver": { "experimentalPnpmCatalogs": true }
+      }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "javascript.resolver.experimentalPnpmCatalogs",
+                "--path=file.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "runtime_ignored_override_keeps_base_source",
         fs,
         console,
         result,
@@ -816,6 +1033,122 @@ fn matching_override_appends_plugins() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "matching_override_appends_plugins",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn indexed_base_plugin_keeps_base_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "plugins": ["base.grit"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "plugins": ["override.grit"]
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "plugins.0",
+                "--path=file.test.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "indexed_base_plugin_keeps_base_source",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn indexed_override_plugin_uses_local_source_index() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "plugins": ["base.grit"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "plugins": ["override.grit"]
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "plugins.1",
+                "--path=file.test.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "indexed_override_plugin_uses_local_source_index",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn indexed_extended_array_value_uses_local_source_index() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "extends": ["base.json"],
+  "files": { "includes": ["tests/**"] }
+}"#,
+    );
+    fs.insert(
+        "base.json".into(),
+        r#"{ "files": { "includes": ["src/**"] } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "files.includes.1", "--json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "indexed_extended_array_value_uses_local_source_index",
         fs,
         console,
         result,

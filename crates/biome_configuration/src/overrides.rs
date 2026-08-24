@@ -93,10 +93,10 @@ pub struct OverridePattern {
 impl OverridePattern {
     /// Applies the configuration values of this override to an existing configuration.
     ///
-    /// Matching is handled by the caller. `includes` is therefore excluded, while language globals
-    /// replace the inherited set and plugin lists retain their append-merge behavior. Fields that
-    /// runtime override settings inherit per pattern are reset to `base_configuration` when the
-    /// override omits them.
+    /// Matching is handled by the caller. `includes` and fields that runtime settings don't apply
+    /// per file are excluded, while JavaScript globals replace the inherited set and plugin lists
+    /// retain their append-merge behavior. Fields that runtime override settings inherit per
+    /// pattern are reset to `base_configuration` when the override omits them.
     pub fn apply_to_configuration(
         &self,
         configuration: &mut Configuration,
@@ -111,24 +111,296 @@ impl OverridePattern {
             #[cfg(feature = "lang_css")]
             mut css,
             #[cfg(feature = "lang_graphql")]
-            graphql,
-            grit,
+            mut graphql,
+            mut grit,
             #[cfg(feature = "lang_html")]
-            html,
-            formatter,
-            linter,
-            assist,
+            mut html,
+            mut formatter,
+            mut linter,
+            mut assist,
             files,
             #[cfg(feature = "plugins")]
             plugins,
         } = self.clone();
 
         #[cfg(feature = "lang_js")]
+        if let Some(javascript) = javascript.as_mut() {
+            javascript.resolver = None;
+            javascript.experimental_embedded_snippets_enabled = None;
+            if let Some(parser) = javascript.parser.as_mut() {
+                parser.grit_metavariables = None;
+                parser.jsx_everywhere = None;
+            }
+            if javascript
+                .parser
+                .as_ref()
+                .is_some_and(|parser| parser.unsafe_parameter_decorators_enabled.is_none())
+            {
+                javascript.parser = None;
+            }
+        }
+        #[cfg(feature = "lang_css")]
+        if let Some(css) = css.as_mut() {
+            css.globals = None;
+        }
+        #[cfg(feature = "lang_html")]
+        if let Some(html) = html.as_mut() {
+            html.experimental_full_support_enabled = None;
+        }
+
+        if let Some(formatter) = formatter.as_mut() {
+            formatter.enabled = formatter.enabled.or_else(|| {
+                base_configuration
+                    .formatter
+                    .as_ref()
+                    .and_then(|formatter| formatter.enabled)
+            });
+        }
+        if let Some(linter) = linter.as_mut() {
+            linter.enabled = linter.enabled.or_else(|| {
+                base_configuration
+                    .linter
+                    .as_ref()
+                    .and_then(|linter| linter.enabled)
+            });
+        }
+        if let Some(assist) = assist.as_mut() {
+            assist.enabled = assist.enabled.or_else(|| {
+                base_configuration
+                    .assist
+                    .as_ref()
+                    .and_then(|assist| assist.enabled)
+            });
+        }
+
+        #[cfg(feature = "lang_js")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = javascript
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.trailing_commas = formatter.trailing_commas.or(global.trailing_commas);
+            formatter.bracket_spacing = formatter.bracket_spacing.or(global.bracket_spacing);
+            formatter.delimiter_spacing = formatter.delimiter_spacing.or(global.delimiter_spacing);
+            formatter.expand = formatter.expand.or(global.expand);
+            formatter.attribute_position =
+                formatter.attribute_position.or(global.attribute_position);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+        #[cfg(feature = "lang_json")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = json
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.expand = formatter.expand.or(global.expand);
+            formatter.bracket_spacing = formatter.bracket_spacing.or(global.bracket_spacing);
+            formatter.delimiter_spacing = formatter.delimiter_spacing.or(global.delimiter_spacing);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+        #[cfg(feature = "lang_css")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = css
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.delimiter_spacing = formatter.delimiter_spacing.or(global.delimiter_spacing);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+        #[cfg(feature = "lang_graphql")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = graphql
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.bracket_spacing = formatter.bracket_spacing.or(global.bracket_spacing);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+        if let Some(global) = formatter.as_ref() {
+            let formatter = grit
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+        #[cfg(feature = "lang_html")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = html
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.bracket_same_line = formatter.bracket_same_line.or(global.bracket_same_line);
+            formatter.attribute_position =
+                formatter.attribute_position.or(global.attribute_position);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+
+        if let Some(global) = linter.as_ref() {
+            #[cfg(feature = "lang_js")]
+            {
+                let linter = javascript
+                    .get_or_insert_with(Default::default)
+                    .linter
+                    .get_or_insert_with(Default::default);
+                linter.enabled = linter
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_json")]
+            {
+                let linter = json
+                    .get_or_insert_with(Default::default)
+                    .linter
+                    .get_or_insert_with(Default::default);
+                linter.enabled = linter
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_css")]
+            {
+                let linter = css
+                    .get_or_insert_with(Default::default)
+                    .linter
+                    .get_or_insert_with(Default::default);
+                linter.enabled = linter
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_graphql")]
+            {
+                let linter = graphql
+                    .get_or_insert_with(Default::default)
+                    .linter
+                    .get_or_insert_with(Default::default);
+                linter.enabled = linter
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            let grit_linter = grit
+                .get_or_insert_with(Default::default)
+                .linter
+                .get_or_insert_with(Default::default);
+            grit_linter.enabled = grit_linter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            #[cfg(feature = "lang_html")]
+            {
+                let linter = html
+                    .get_or_insert_with(Default::default)
+                    .linter
+                    .get_or_insert_with(Default::default);
+                linter.enabled = linter
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+        }
+
+        if let Some(global) = assist.as_ref() {
+            #[cfg(feature = "lang_js")]
+            {
+                let assist = javascript
+                    .get_or_insert_with(Default::default)
+                    .assist
+                    .get_or_insert_with(Default::default);
+                assist.enabled = assist
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_json")]
+            {
+                let assist = json
+                    .get_or_insert_with(Default::default)
+                    .assist
+                    .get_or_insert_with(Default::default);
+                assist.enabled = assist
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_css")]
+            {
+                let assist = css
+                    .get_or_insert_with(Default::default)
+                    .assist
+                    .get_or_insert_with(Default::default);
+                assist.enabled = assist
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_graphql")]
+            {
+                let assist = graphql
+                    .get_or_insert_with(Default::default)
+                    .assist
+                    .get_or_insert_with(Default::default);
+                assist.enabled = assist
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            let grit_assist = grit
+                .get_or_insert_with(Default::default)
+                .assist
+                .get_or_insert_with(Default::default);
+            grit_assist.enabled = grit_assist
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            #[cfg(feature = "lang_html")]
+            {
+                let assist = html
+                    .get_or_insert_with(Default::default)
+                    .assist
+                    .get_or_insert_with(Default::default);
+                assist.enabled = assist
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+        }
+
+        #[cfg(feature = "lang_js")]
         let javascript_globals = javascript
             .as_ref()
             .and_then(|javascript| javascript.globals.clone());
-        #[cfg(feature = "lang_css")]
-        let css_globals = css.as_ref().and_then(|css| css.globals.clone());
 
         #[cfg(feature = "lang_js")]
         {
@@ -209,27 +481,8 @@ impl OverridePattern {
             }
         }
 
-        #[cfg(feature = "lang_js")]
-        if let Some(trailing_commas) = formatter
-            .as_ref()
-            .and_then(|formatter| formatter.trailing_commas)
-        {
-            let javascript_formatter = javascript
-                .get_or_insert_with(Default::default)
-                .formatter
-                .get_or_insert_with(Default::default);
-            if javascript_formatter.trailing_commas.is_none() {
-                javascript_formatter.trailing_commas = Some(trailing_commas);
-            }
-        }
-
         let formatter = formatter.map(|formatter| FormatterConfiguration {
-            enabled: formatter.enabled.or_else(|| {
-                base_configuration
-                    .formatter
-                    .as_ref()
-                    .and_then(|formatter| formatter.enabled)
-            }),
+            enabled: formatter.enabled,
             format_with_errors: formatter.format_with_errors.or_else(|| {
                 base_configuration
                     .formatter
@@ -249,23 +502,13 @@ impl OverridePattern {
             ..FormatterConfiguration::default()
         });
         let linter = linter.map(|linter| LinterConfiguration {
-            enabled: linter.enabled.or_else(|| {
-                base_configuration
-                    .linter
-                    .as_ref()
-                    .and_then(|linter| linter.enabled)
-            }),
+            enabled: linter.enabled,
             rules: linter.rules,
             domains: linter.domains,
             ..LinterConfiguration::default()
         });
         let assist = assist.map(|assist| AssistConfiguration {
-            enabled: assist.enabled.or_else(|| {
-                base_configuration
-                    .assist
-                    .as_ref()
-                    .and_then(|assist| assist.enabled)
-            }),
+            enabled: assist.enabled,
             actions: assist.actions,
             ..AssistConfiguration::default()
         });
@@ -299,13 +542,6 @@ impl OverridePattern {
         if let Some(globals) = javascript_globals {
             configuration
                 .javascript
-                .get_or_insert_with(Default::default)
-                .globals = Some(globals);
-        }
-        #[cfg(feature = "lang_css")]
-        if let Some(globals) = css_globals {
-            configuration
-                .css
                 .get_or_insert_with(Default::default)
                 .globals = Some(globals);
         }

@@ -2386,6 +2386,9 @@ fn to_javascript_language_settings(
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;
 
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;
     language_setting.parser.parse_class_parameter_decorators = parser
@@ -2500,6 +2503,15 @@ fn to_html_language_settings(
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();
+
+    let parser = conf.parser.take().unwrap_or_default();
+    language_setting.parser = parser.into();
+
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter = linter.into();
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist = assist.into();
 
     language_setting
 }

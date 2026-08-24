@@ -20,7 +20,7 @@ use serde_json::Value;
 use std::{borrow::Cow, io, sync::Arc};
 
 fn display_path(path: &Utf8Path) -> Cow<'_, str> {
-    if cfg!(any(test, all(debug_assertions, windows))) {
+    if cfg!(any(test, windows)) {
         Cow::Owned(path.as_str().replace('\\', "/"))
     } else {
         Cow::Borrowed(path.as_str())

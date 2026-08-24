@@ -82,7 +82,7 @@ impl<'source> ConfigurationInspector<'source> {
             let previous_value = value.clone();
             pattern.apply_to_configuration(&mut effective_configuration, &self.configuration);
             value = key.value_in_configuration(&effective_configuration)?;
-            let Some(source) = self.files.override_source(
+            let Some(mut source) = self.files.override_source(
                 &self.serialized_configuration,
                 key,
                 override_index,
@@ -90,7 +90,12 @@ impl<'source> ConfigurationInspector<'source> {
             ) else {
                 continue;
             };
-            if previous_value != value && !source.declares_key {
+            let pattern_value = effective_pattern_value(pattern, &self.configuration, key)?;
+            source.declares_key &= pattern_value.is_some();
+            let base_value = key.value_in_configuration(&self.configuration)?;
+            let inherits_base_value =
+                !source.declares_key && pattern_value.is_some() && pattern_value == base_value;
+            if inherits_base_value || previous_value != value && !source.declares_key {
                 sources = if value.is_some() {
                     self.files.base_sources(&self.configuration, key)?
                 } else {
@@ -105,7 +110,18 @@ impl<'source> ConfigurationInspector<'source> {
             }
         }
 
-        if value
+        if value.is_some()
+            && let Some(source) = self.files.indexed_source(
+                override_patterns,
+                matching_overrides,
+                &self.serialized_configuration,
+                &effective_configuration,
+                key,
+                matched_path,
+            )?
+        {
+            sources = vec![source];
+        } else if value
             .as_ref()
             .is_some_and(|value| !JsonValueExt::is_scalar(value))
         {
@@ -113,6 +129,7 @@ impl<'source> ConfigurationInspector<'source> {
                 override_patterns,
                 matching_overrides,
                 &self.serialized_configuration,
+                &self.configuration,
                 key,
                 matched_path,
             )?;
@@ -266,10 +283,11 @@ impl<'source> InspectedConfigurationFiles<'source> {
             if override_index < first_index + override_count {
                 let local_index = override_index - first_index;
                 let key_prefix = format!("overrides.{local_index}");
-                let includes = configuration
+                let pattern = configuration
                     .get("overrides")
                     .and_then(Value::as_array)
-                    .and_then(|overrides| overrides.get(override_index))
+                    .and_then(|overrides| overrides.get(override_index));
+                let includes = pattern
                     .and_then(|pattern| pattern.get("includes"))
                     .and_then(Value::as_array)
                     .map(|patterns| {
@@ -279,14 +297,17 @@ impl<'source> InspectedConfigurationFiles<'source> {
                             .map(str::to_string)
                             .collect()
                     });
-                return Some(file.source_reference(
+                let source_key = pattern.and_then(|pattern| key.source_in_override(pattern));
+                let mut source = file.source_reference(
                     Some(&key_prefix),
-                    key,
+                    source_key.as_ref().unwrap_or(key),
                     SourceScope::Override,
                     Some(override_index),
                     includes,
                     matched_path.map(str::to_string),
-                ));
+                );
+                source.declares_key &= source_key.is_some();
+                return Some(source);
             }
             first_index += override_count;
         }
@@ -298,6 +319,7 @@ impl<'source> InspectedConfigurationFiles<'source> {
         override_patterns: &[OverridePattern],
         matching_overrides: &[usize],
         configuration: &Value,
+        base_configuration: &Configuration,
         key: &ConfigurationKey,
         matched_path: Option<&str>,
     ) -> Result<Vec<SourceReference<'inspection>>, WorkspaceError> {
@@ -341,10 +363,21 @@ impl<'source> InspectedConfigurationFiles<'source> {
         }
 
         if sources.is_empty() {
-            if let Some(&override_index) = matching_overrides.iter().rev().find(|&&index| {
-                self.override_source(configuration, key, index, matched_path)
-                    .is_some_and(|source| source.declares_key)
-            }) {
+            let mut last_declaring_override = None;
+            for &override_index in matching_overrides.iter().rev() {
+                let Some(pattern) = override_patterns.get(override_index) else {
+                    continue;
+                };
+                if effective_pattern_value(pattern, base_configuration, key)?.is_some()
+                    && self
+                        .override_source(configuration, key, override_index, matched_path)
+                        .is_some_and(|source| source.declares_key)
+                {
+                    last_declaring_override = Some(override_index);
+                    break;
+                }
+            }
+            if let Some(override_index) = last_declaring_override {
                 if let Some(source) =
                     self.override_source(configuration, key, override_index, matched_path)
                 {
@@ -361,6 +394,81 @@ impl<'source> InspectedConfigurationFiles<'source> {
         }
 
         Ok(sources)
+    }
+
+    fn indexed_source<'inspection>(
+        &'inspection self,
+        override_patterns: &[OverridePattern],
+        matching_overrides: &[usize],
+        serialized_configuration: &Value,
+        effective_configuration: &Configuration,
+        key: &ConfigurationKey,
+        matched_path: Option<&str>,
+    ) -> Result<Option<SourceReference<'inspection>>, WorkspaceError> {
+        let serialized_effective_configuration = serde_json::to_value(effective_configuration)
+            .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
+        let Some((index_position, target_index)) =
+            key.append_array_index_in(&serialized_effective_configuration)
+        else {
+            return Ok(None);
+        };
+
+        let mut configuration = Configuration::default();
+        let mut previous_array = Vec::new();
+        let mut source = None;
+        for file in &self.files {
+            file.merge_into(&mut configuration, key);
+            let next_array = serialized_array(&configuration, key, index_position)?;
+            if !next_array.starts_with(&previous_array) {
+                return Ok(None);
+            }
+            if target_index >= previous_array.len() && target_index < next_array.len() {
+                let local_key = key.with_index(index_position, target_index - previous_array.len());
+                if file.declares_key(None, &local_key) {
+                    source = Some(file.source_reference(
+                        None,
+                        &local_key,
+                        SourceScope::Base,
+                        None,
+                        None,
+                        None,
+                    ));
+                }
+            }
+            previous_array = next_array;
+        }
+
+        let base_configuration = configuration.clone();
+        for &override_index in matching_overrides {
+            let Some(pattern) = override_patterns.get(override_index) else {
+                continue;
+            };
+            pattern.apply_to_configuration(&mut configuration, &base_configuration);
+            let next_array = serialized_array(&configuration, key, index_position)?;
+            if !next_array.starts_with(&previous_array) {
+                return Ok(None);
+            }
+            if target_index >= previous_array.len() && target_index < next_array.len() {
+                let local_key = key.with_index(index_position, target_index - previous_array.len());
+                source = self
+                    .override_source(
+                        serialized_configuration,
+                        &local_key,
+                        override_index,
+                        matched_path,
+                    )
+                    .filter(|source| source.declares_key);
+            }
+            previous_array = next_array;
+        }
+
+        let effective_array = key
+            .array_before_index(&serialized_effective_configuration, index_position)
+            .unwrap_or_default();
+        if previous_array != effective_array {
+            return Ok(None);
+        }
+        Ok(source)
     }
 
     fn replay_effective_configuration(
@@ -480,11 +588,7 @@ impl<'source> InspectedConfigurationFile<'source> {
     }
 
     fn declares_key(&self, prefix: Option<&str>, key: &ConfigurationKey) -> bool {
-        let full_key = key.with_prefix(prefix);
-        if let Some(value) = full_key.value_in(&self.value) {
-            return !value.is_null();
-        }
-        full_key.has_non_null_scalar_ancestor_in(&self.value)
+        key.with_prefix(prefix).is_declared_in(&self.value)
     }
 
     fn source_reference<'inspection>(
@@ -574,6 +678,29 @@ impl JsonValueExt for Value {
     fn is_scalar(&self) -> bool {
         !matches!(self, Self::Array(_) | Self::Object(_))
     }
+}
+
+fn effective_pattern_value(
+    pattern: &OverridePattern,
+    base_configuration: &Configuration,
+    key: &ConfigurationKey,
+) -> Result<Option<Value>, WorkspaceError> {
+    let mut configuration = Configuration::default();
+    pattern.apply_to_configuration(&mut configuration, base_configuration);
+    key.value_in_configuration(&configuration)
+}
+
+fn serialized_array(
+    configuration: &Configuration,
+    key: &ConfigurationKey,
+    index_position: usize,
+) -> Result<Vec<Value>, WorkspaceError> {
+    let serialized = serde_json::to_value(configuration)
+        .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
+    Ok(key
+        .array_before_index(&serialized, index_position)
+        .unwrap_or_default()
+        .to_vec())
 }
 
 /// Identifies whether a value comes from a base configuration or a matching override.
