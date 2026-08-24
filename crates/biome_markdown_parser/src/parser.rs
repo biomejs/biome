@@ -910,10 +910,14 @@ impl<'source> MarkdownParser<'source> {
     /// but not appear as explicit CST nodes. The token is removed from the
     /// event stream and attached as `Whitespace` trivia on the next real token.
     pub fn consume_as_whitespace_trivia(&mut self) {
-        self.source_mut().skip_as_trivia_of_kind_with_context(
-            TriviaPieceKind::Whitespace,
-            MarkdownLexContext::Regular,
-        );
+        self.consume_as_whitespace_trivia_with_context(MarkdownLexContext::Regular);
+    }
+
+    /// Consume the current token as `Whitespace` trivia and lex the next token
+    /// in `context`.
+    pub fn consume_as_whitespace_trivia_with_context(&mut self, context: MarkdownLexContext) {
+        self.source_mut()
+            .skip_as_trivia_of_kind_with_context(TriviaPieceKind::Whitespace, context);
     }
 
     /// Returns true if inline content should stop parsing.

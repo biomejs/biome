@@ -19,10 +19,10 @@
 //!
 //! # Info String
 //!
-//! The opening fence may be followed by an info string (language identifier)
-//! that can be used for syntax highlighting.
+//! The opening fence may be followed by an info string. Its first word can be
+//! used for syntax highlighting.
 
-use crate::lexer::MarkdownReLexContext;
+use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
 use crate::parser::MarkdownParser;
 use crate::syntax::quote::try_bump_quote_marker;
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
@@ -220,28 +220,23 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     Present(m.complete(p, MD_FENCED_CODE_BLOCK))
 }
 
-/// Parse the code name list (language info string).
+/// Parse the code name list (opening-fence info string).
 /// Grammar: MdCodeNameList = MdTextual*
 ///
-/// The language name is on the same line as the opening fence.
-/// If the opening fence ends at a newline or EOF, the code block has no language.
+/// The info string is limited to the opening fence's physical line.
 fn parse_code_name_list(p: &mut MarkdownParser) {
-    // Relexing
     p.re_lex(MarkdownReLexContext::CodeInfoString);
 
     let m = p.start();
 
     skip_info_string_whitespace(p);
 
-    // The info string ends at the physical end of the opening-fence line.
     if p.at(NEWLINE) || p.at(T![EOF]) {
         m.complete(p, MD_CODE_NAME_LIST);
         return;
     }
 
-    // Parse language identifiers until we hit end of line
     while !p.at(NEWLINE) && !p.at(T![EOF]) {
-        // Parse each token as textual content
         let text_m = p.start();
         bump_info_string_content(p);
         text_m.complete(p, MD_TEXTUAL);
@@ -252,44 +247,37 @@ fn parse_code_name_list(p: &mut MarkdownParser) {
     m.complete(p, MD_CODE_NAME_LIST);
 }
 
-/// Move a run of spaces and tabs at the current position into the trivia list.
+/// Move leading info-string spaces and tabs into whitespace trivia.
 ///
-/// CommonMark §4.5 trims the info string of leading and trailing whitespace, so
-/// neither run may reach `MdCodeNameList`. Each pass re-lexes in the info-string
-/// context first, which stops only at the end of the line: bumping a token
-/// reverts the lexer to the regular context, where the remainder of an info
-/// string splits on construct characters and a run of trailing spaces can even
-/// swallow the line's newline as a hard line break.
+/// Boundary whitespace stays in trivia to preserve the source while remaining
+/// outside `MdCodeNameList`. The next token is lexed in the code-info-string
+/// context so trailing spaces cannot consume the physical-line newline as a
+/// hard line break.
 fn skip_info_string_whitespace(p: &mut MarkdownParser) {
-    loop {
-        p.re_lex(MarkdownReLexContext::CodeInfoString);
-
-        if !p.at(MD_TEXTUAL_LITERAL) {
-            return;
-        }
-
-        // Spaces and tabs are one byte each, so the trimmed length is also the
-        // run's byte offset into the token.
-        let text = p.cur_text();
-        let whitespace_len = text.len() - text.trim_start_matches([' ', '\t']).len();
-        if whitespace_len == 0 {
-            return;
-        }
-
-        if whitespace_len < text.len() {
-            let end = p.cur_range().start() + TextSize::from(whitespace_len as u32);
-            p.re_lex_span(end, MD_TEXTUAL_LITERAL);
-        }
-
-        p.consume_as_whitespace_trivia();
+    if !p.at(MD_TEXTUAL_LITERAL) {
+        return;
     }
+
+    let text = p.cur_text();
+    let whitespace_len = text.len() - text.trim_start_matches([' ', '\t']).len();
+    if whitespace_len == 0 {
+        return;
+    }
+
+    if whitespace_len < text.len() {
+        let end = p.cur_range().start() + TextSize::from(whitespace_len as u32);
+        p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+    }
+
+    p.consume_as_whitespace_trivia_with_context(MarkdownLexContext::CodeInfoString);
 }
 
-/// Bump the info string's content, leaving a trailing run of spaces and tabs
+/// Bump the info string's content, leaving trailing spaces and tabs
 /// behind for [`skip_info_string_whitespace`] to move into the trivia list.
 ///
-/// Callers must run [`skip_info_string_whitespace`] first, so the token starts
-/// with a non-whitespace character and the narrowed span is never empty.
+/// The current token must start with non-whitespace content; leading boundary
+/// whitespace is moved into trivia before this helper is called. Advancing in
+/// the code-info-string context keeps the physical-line newline separate.
 fn bump_info_string_content(p: &mut MarkdownParser) {
     let text = p.cur_text();
     let content_len = text.trim_end_matches([' ', '\t']).len();
@@ -299,7 +287,7 @@ fn bump_info_string_content(p: &mut MarkdownParser) {
         p.re_lex_span(end, MD_TEXTUAL_LITERAL);
     }
 
-    p.bump_remap(MD_TEXTUAL_LITERAL);
+    p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeInfoString);
 }
 
 /// Parse the code content until we find a closing fence.

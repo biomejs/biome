@@ -105,7 +105,7 @@ impl Rule for UseFencedCodeLanguage {
         let block = ctx.query();
         let options = ctx.options();
 
-        // The lexer consumes the whole info string through the newline as one literal, so
+        // Code-info-string lexing preserves the non-boundary info string as one literal, so
         // `code_list` contains one item that must be split into the language and metadata.
         let Some(item) = block.code_list().iter().next() else {
             return vec![FencedCodeLanguageIssue::Missing].into_boxed_slice();
