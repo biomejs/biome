@@ -698,7 +698,7 @@ fn plugins_in_child_config_with_extends_root() {
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     }
 }"#,
@@ -756,7 +756,7 @@ fn plugins_from_root_config_work_in_child_config_extends_root() {
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     }
 }"#,
@@ -782,7 +782,7 @@ fn plugins_from_root_config_work_in_child_config_extends_root() {
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     }
 }"#,

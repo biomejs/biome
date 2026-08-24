@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "javascript": {
+        "parser": { "unsafeParameterDecoratorsEnabled": true }
+      }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "javascript.parser.unsafeParameterDecoratorsEnabled",
+  "value": null,
+  "source": null
+}
+```

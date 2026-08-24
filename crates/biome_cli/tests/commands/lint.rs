@@ -1863,7 +1863,7 @@ fn should_apply_correct_file_source() {
         r#"{
     	"linter": {
     		"rules": {
-    			"recommended": true,
+    			"preset": "recommended",
     			"correctness": {
     				"noUndeclaredVariables": "error"
     			}
@@ -1965,7 +1965,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessSwitchCase": "off"
       }
@@ -2139,7 +2139,7 @@ fn should_pass_if_there_are_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -2188,7 +2188,7 @@ fn does_error_with_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -4388,7 +4388,7 @@ fn should_not_choke_on_recursive_function_call() {
         r#"{
     "linter": {
         "rules": {
-            "recommended": true,
+            "preset": "recommended",
         },
         "domains": {
             "next": "all",

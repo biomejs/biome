@@ -71,8 +71,8 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Text,
-    TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Merge,
+    Text, TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
@@ -112,7 +112,7 @@ use std::fmt::Debug;
 use std::iter::FusedIterator;
 use std::slice::Iter;
 use std::str::FromStr;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 use vcs::VcsClientKind;
 
 pub const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
@@ -840,17 +840,35 @@ impl ConfigurationPathHint {
 
 #[derive(Clone, Debug, Default)]
 pub struct ConfigurationSource {
-    /// It contains [Configuration] and the folder where it was found.
-    pub source: Option<(Configuration, Option<Utf8PathBuf>)>,
+    /// The directory used to resolve paths in the configuration.
+    pub directory_path: Option<Utf8PathBuf>,
 
-    /// It contains possible extended configuration. If the configuration comes from a npm module,
-    ///  its URL will be its specifier e.g. `org/core`
+    /// The root configuration source.
+    pub root: Option<ConfigurationSourceEntry>,
+
+    /// The extended configuration files in merge order.
     pub extended_configurations: ExtendedConfigurations,
 }
 
 impl ConfigurationSource {
-    pub fn as_configuration(&self) -> Option<&Configuration> {
-        self.source.as_ref().map(|(config, _)| config)
+    /// Resolves the configuration inputs using the same order as `extends`.
+    pub fn resolve(&self) -> Configuration {
+        let mut root = self
+            .root
+            .as_ref()
+            .and_then(|root| root.configuration.clone())
+            .unwrap_or_default();
+        let mut configuration = Configuration::default();
+        let mut has_extends = false;
+        for extended in self.extended_configurations() {
+            configuration.merge_with(extended.clone());
+            has_extends = true;
+        }
+        if has_extends {
+            root.root = Some(root.is_root().into());
+        }
+        configuration.merge_with(root);
+        configuration
     }
 
     pub fn extended_configurations(&self) -> ExtendedConfigurationIterator<'_> {
@@ -860,15 +878,39 @@ impl ConfigurationSource {
     }
 }
 
+/// One unmerged input in a configuration source graph.
+#[derive(Clone, Debug)]
+pub struct ConfigurationSourceEntry {
+    /// The configuration deserialized from this input before merging.
+    pub configuration: Option<Configuration>,
+
+    /// The resolved path when this input came from a file.
+    pub file_path: Option<Utf8PathBuf>,
+
+    /// The exact text used to deserialize the configuration file.
+    pub file_source: Option<Arc<str>>,
+}
+
+/// An extended configuration file and the specifier that resolved to it.
+#[derive(Clone, Debug)]
+pub struct ExtendedConfiguration {
+    /// The value declared in the root configuration's `extends` field.
+    pub specifier: Option<String>,
+
+    /// The unmerged extended configuration.
+    pub source: ConfigurationSourceEntry,
+}
+
 pub struct ExtendedConfigurationIterator<'a> {
-    inner: Iter<'a, (Utf8PathBuf, Configuration)>,
+    inner: Iter<'a, ExtendedConfiguration>,
 }
 
 impl<'a> Iterator for ExtendedConfigurationIterator<'a> {
     type Item = &'a Configuration;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next().map(|(_, config)| config)
+        self.inner
+            .find_map(|extended| extended.source.configuration.as_ref())
     }
 }
 
@@ -876,12 +918,29 @@ impl FusedIterator for ExtendedConfigurationIterator<'_> {}
 
 impl DoubleEndedIterator for ExtendedConfigurationIterator<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner.next_back().map(|(_, config)| config)
+        while let Some(extended) = self.inner.next_back() {
+            if let Some(configuration) = extended.source.configuration.as_ref() {
+                return Some(configuration);
+            }
+        }
+        None
     }
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct ExtendedConfigurations(Vec<(Utf8PathBuf, Configuration)>);
+pub struct ExtendedConfigurations(Vec<ExtendedConfiguration>);
+
+impl ExtendedConfigurations {
+    pub fn as_slice(&self) -> &[ExtendedConfiguration] {
+        &self.0
+    }
+}
+
+impl From<Vec<ExtendedConfiguration>> for ExtendedConfigurations {
+    fn from(value: Vec<ExtendedConfiguration>) -> Self {
+        Self(value)
+    }
+}
 
 impl<Path> From<Vec<(Path, Configuration)>> for ExtendedConfigurations
 where
@@ -891,25 +950,22 @@ where
         Self(
             value
                 .into_iter()
-                .map(|(path, config)| (path.into(), config))
+                .map(|(path, configuration)| ExtendedConfiguration {
+                    specifier: None,
+                    source: ConfigurationSourceEntry {
+                        configuration: Some(configuration),
+                        file_path: Some(path.into()),
+                        file_source: None,
+                    },
+                })
                 .collect(),
         )
     }
 }
 
 impl ConfigurationSource {
-    pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref().map(|source| {
-            let (config, _) = source.clone();
-            config
-        })
-    }
-
     pub fn source_path(&self) -> Option<Utf8PathBuf> {
-        self.source.as_ref().and_then(|source| {
-            let (_, path) = source.clone();
-            path.map(|p| p.as_path().to_path_buf())
-        })
+        self.directory_path.clone()
     }
 }
 
@@ -917,6 +973,21 @@ impl ExtendedConfigurationProvider for ConfigurationSource {
     fn any_extended_starts_with_catch_all(&self) -> bool {
         self.extended_configurations().any(|c| {
             c.files
+                .as_ref()
+                .and_then(|files| files.includes.as_deref())
+                .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
+        })
+    }
+}
+
+impl ExtendedConfigurationProvider for ExtendedConfigurations {
+    fn any_extended_starts_with_catch_all(&self) -> bool {
+        ExtendedConfigurationIterator {
+            inner: self.0.iter(),
+        }
+        .any(|configuration| {
+            configuration
+                .files
                 .as_ref()
                 .and_then(|files| files.includes.as_deref())
                 .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))

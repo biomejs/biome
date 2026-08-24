@@ -48,6 +48,7 @@ pub(crate) mod daemon;
 pub(crate) mod explain;
 pub(crate) mod format;
 pub(crate) mod init;
+pub(crate) mod inspect;
 pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
@@ -527,6 +528,15 @@ pub enum BiomeCommand {
         #[bpaf(long("jsonc"), switch)]
         bool,
     ),
+    /// Inspects Biome state without modifying files.
+    #[bpaf(command)]
+    Inspect {
+        #[bpaf(external, hide_usage)]
+        cli_options: CliOptions,
+
+        #[bpaf(external(inspect_sub_command))]
+        sub_command: InspectSubCommand,
+    },
     /// Ensures that the Biome daemon server is running, then forwards Language Server Protocol messages between the daemon server and standard input and output.
     #[bpaf(command("lsp-proxy"))]
     LspProxy {
@@ -666,6 +676,25 @@ pub enum MigrateSubCommand {
     },
 }
 
+#[derive(Debug, Bpaf, Clone)]
+pub enum InspectSubCommand {
+    /// Shows the final, resolved configuration, including `extends` and matching `overrides`.
+    #[bpaf(command)]
+    Config {
+        /// Evaluates matching overrides for this file path.
+        #[bpaf(long("path"), argument("PATH"), optional)]
+        path: Option<String>,
+
+        /// When provided, the output is emitted in JSON format.
+        #[bpaf(long("json"), switch)]
+        json: bool,
+
+        /// A dotted configuration key, such as `formatter.lineWidth`.
+        #[bpaf(positional("KEY"), optional)]
+        key: Option<String>,
+    },
+}
+
 impl MigrateSubCommand {
     pub const fn is_prettier(&self) -> bool {
         matches!(self, Self::Prettier)
@@ -681,6 +710,7 @@ impl BiomeCommand {
             | Self::Lint { cli_options, .. }
             | Self::Ci { cli_options, .. }
             | Self::Format { cli_options, .. }
+            | Self::Inspect { cli_options, .. }
             | Self::Migrate { cli_options, .. }
             | Self::Search { cli_options, .. } => Some(cli_options),
             Self::LspProxy { .. }
@@ -711,6 +741,7 @@ impl BiomeCommand {
             | Self::Start { .. }
             | Self::Stop
             | Self::Init(_)
+            | Self::Inspect { .. }
             | Self::Explain { .. }
             | Self::RunServer { .. }
             | Self::Clean { .. }
@@ -800,9 +831,7 @@ fn is_github_actions() -> bool {
     std::env::var("GITHUB_ACTIONS").is_ok_and(|v| v == "true")
 }
 
-/// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
-///
-/// If it contains [errors](Severity::Error) or higher, it returns an error.
+/// Prints configuration diagnostics and reports an error when loading produced an error.
 pub(crate) fn validate_configuration_diagnostics(
     loaded_configuration: &LoadedConfiguration,
     console: &mut dyn Console,
@@ -810,17 +839,17 @@ pub(crate) fn validate_configuration_diagnostics(
 ) -> Result<(), CliDiagnostic> {
     let diagnostics = loaded_configuration.as_diagnostics_iter();
 
-    // We want to print the diagnostics only if there are errors. Other diagnostics such as
-    // information/warnings will be printed during the traversal
-    if loaded_configuration.has_errors() {
-        for diagnostic in diagnostics {
-            if diagnostic.tags().is_verbose() && verbose {
+    for diagnostic in diagnostics {
+        if diagnostic.tags().is_verbose() {
+            if verbose {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
             }
+        } else {
+            console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
         }
+    }
 
+    if loaded_configuration.has_errors() {
         return Err(CliDiagnostic::workspace_error(
             BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
@@ -981,6 +1010,29 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn configuration_diagnostics_require_verbose_flag() {
+        let loaded_configuration = LoadedConfiguration {
+            diagnostics: vec![
+                biome_service::diagnostics::ProtectedFile {
+                    file_path: "package-lock.json".to_string(),
+                    verbose_advice: biome_service::diagnostics::ProtectedFileAdvice,
+                }
+                .into(),
+            ],
+            ..LoadedConfiguration::default()
+        };
+        let mut console = biome_console::BufferConsole::default();
+
+        validate_configuration_diagnostics(&loaded_configuration, &mut console, false)
+            .expect("an informational diagnostic should not fail validation");
+        assert!(console.out_buffer.is_empty());
+
+        validate_configuration_diagnostics(&loaded_configuration, &mut console, true)
+            .expect("an informational diagnostic should not fail validation");
+        assert_eq!(console.out_buffer.len(), 1);
+    }
 
     #[test]
     fn incompatible_arguments() {

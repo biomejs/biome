@@ -15,7 +15,7 @@ expression: content
         "noAutofocus": "off"
       },
       "complexity": {
-        "recommended": true
+        "preset": "recommended"
       },
       "suspicious": {
         "noCommentText": {

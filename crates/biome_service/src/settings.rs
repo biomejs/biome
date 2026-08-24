@@ -7,7 +7,7 @@ pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
 
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
-use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerOptions, AnalyzerRules, ExtendedConfigurationProvider};
 #[cfg(feature = "lang_css")]
 use biome_configuration::CssConfiguration;
 #[cfg(feature = "lang_js")]
@@ -26,11 +26,11 @@ use biome_configuration::javascript::{
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, ConfigurationSource, DEFAULT_SCANNER_IGNORE_ENTRIES,
-    ExtendedConfigurations, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, ConfigurationSource, ConfigurationSourceEntry,
+    DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 #[cfg(feature = "lang_css")]
 use biome_css_formatter::context::CssFormatOptions;
@@ -84,6 +84,8 @@ use std::sync::{Arc, RwLock};
 pub struct Settings {
     /// The configuration that originated this setting if applicable.
     source: Option<Arc<ConfigurationSource>>,
+
+    configuration_provider: Option<Arc<dyn ExtendedConfigurationProvider>>,
 
     pub(crate) module_graph_resolution_kind: ModuleGraphResolutionKind,
 
@@ -157,13 +159,7 @@ impl Settings {
 
     pub(crate) fn with_inline_configuration(&self, configuration: Configuration) -> Self {
         let mut settings = self.clone();
-        let workspace_directory = self.source.as_ref().and_then(|source| {
-            source
-                .as_ref()
-                .source
-                .as_ref()
-                .and_then(|source| source.1.clone())
-        });
+        let workspace_directory = self.source_path();
 
         // TODO handle error
         let _ = settings.merge_with_configuration(configuration, workspace_directory, vec![]);
@@ -197,15 +193,11 @@ impl Settings {
     }
 
     pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref()?.source()
+        self.source.as_ref().map(|source| source.resolve())
     }
 
     pub fn source_path(&self) -> Option<Utf8PathBuf> {
         self.source.as_ref()?.source_path()
-    }
-
-    pub fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
-        self.source.clone()
     }
 
     /// Merges the [Configuration] into the settings.
@@ -216,12 +208,40 @@ impl Settings {
         working_directory: Option<Utf8PathBuf>,
         extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     ) -> Result<(), WorkspaceError> {
+        let extended_configurations = ExtendedConfigurations::from(extended_configurations);
+        self.configuration_provider = Some(Arc::new(extended_configurations));
         self.source = Some(Arc::new(ConfigurationSource {
-            source: Some((configuration.clone(), working_directory.clone())),
-            extended_configurations: ExtendedConfigurations::from(extended_configurations),
+            directory_path: working_directory.clone(),
+            root: Some(ConfigurationSourceEntry {
+                configuration: Some(configuration.clone()),
+                file_path: None,
+                file_source: None,
+            }),
+            extended_configurations: ExtendedConfigurations::default(),
         }));
+        self.apply_configuration(configuration, working_directory)
+    }
 
-        // formatter part§
+    /// Merges a configuration and retains the files used to resolve it.
+    #[tracing::instrument(level = "debug", skip_all)]
+    pub fn merge_with_configuration_source(
+        &mut self,
+        source: impl Into<Arc<ConfigurationSource>>,
+    ) -> Result<(), WorkspaceError> {
+        let source = source.into();
+        let configuration = source.resolve();
+        let working_directory = source.directory_path.clone();
+        self.configuration_provider = Some(source.clone());
+        self.source = Some(source);
+        self.apply_configuration(configuration, working_directory)
+    }
+
+    fn apply_configuration(
+        &mut self,
+        configuration: Configuration,
+        working_directory: Option<Utf8PathBuf>,
+    ) -> Result<(), WorkspaceError> {
+        // formatter part
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_format_settings(
                 working_directory
@@ -695,8 +715,8 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
         self.features().contains(EditorFeature::GotoDefinition)
     }
 
-    pub(crate) fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
-        self.as_ref().source.clone()
+    pub(crate) fn configuration_provider(&self) -> Option<Arc<dyn ExtendedConfigurationProvider>> {
+        self.as_ref().configuration_provider.clone()
     }
 
     fn effective_settings(&self) -> &Settings {
@@ -1590,9 +1610,7 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
 
 impl Settings {
     pub fn matching_override_indices(&self, path: &Utf8Path) -> Box<[usize]> {
-        self.override_settings
-            .matching_indices(path)
-            .into_boxed_slice()
+        self.override_settings.matching_indices(path).collect()
     }
 
     /// Whether the formatter should format with parsing errors, for this file path
@@ -1641,14 +1659,15 @@ pub struct OverrideSettings {
 }
 
 impl OverrideSettings {
-    fn matching_indices(&self, path: &Utf8Path) -> Vec<usize> {
+    /// Returns the declaration indices of overrides matching `path`.
+    pub fn matching_indices<'a>(&'a self, path: &'a Utf8Path) -> impl Iterator<Item = usize> + 'a {
         self.patterns
             .iter()
             .enumerate()
             .filter_map(|(index, pattern)| pattern.is_file_included(path).then_some(index))
-            .collect()
     }
 
+    /// It scans the current override rules and return the formatting options that of the first override is matched
     #[cfg(feature = "lang_js")]
     pub(crate) fn override_js_format_options_by_indices(
         &self,
@@ -1823,7 +1842,7 @@ impl OverrideSettings {
         path: &Utf8Path,
         analyzer_rules: AnalyzerRules,
     ) -> AnalyzerRules {
-        let indices = self.matching_indices(path);
+        let indices = self.matching_indices(path).collect::<Vec<_>>();
         self.override_analyzer_rules_by_indices(&indices, analyzer_rules)
     }
 
@@ -2367,6 +2386,9 @@ fn to_javascript_language_settings(
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;
 
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
+
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;
     language_setting.parser.parse_class_parameter_decorators = parser
@@ -2481,6 +2503,15 @@ fn to_html_language_settings(
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();
+
+    let parser = conf.parser.take().unwrap_or_default();
+    language_setting.parser = parser.into();
+
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter = linter.into();
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist = assist.into();
 
     language_setting
 }

@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["package-b", "package-c"] }
+```
+
+## `node_modules/package-b/biome.json`
+
+```json
+{ "extends": ["biome-config-vodoo"] }
+```
+
+## `node_modules/package-b/node_modules/biome-config-vodoo/biome.json`
+
+```json
+{ "formatter": { "lineWidth": 90 } }
+```
+
+## `node_modules/package-c/biome.json`
+
+```json
+{ "extends": ["biome-config-vodoo"] }
+```
+
+## `node_modules/package-c/node_modules/biome-config-vodoo/biome.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+## `node_modules/package-b/node_modules/biome-config-vodoo/package.json`
+
+```json
+{ "name": "biome-config-vodoo", "version": "0.2.0", "main": "biome.json" }
+```
+
+## `node_modules/package-b/package.json`
+
+```json
+{ "name": "package-b", "version": "1.0.0", "main": "biome.json" }
+```
+
+## `node_modules/package-c/node_modules/biome-config-vodoo/package.json`
+
+```json
+{ "name": "biome-config-vodoo", "version": "0.5.0", "main": "biome.json" }
+```
+
+## `node_modules/package-c/package.json`
+
+```json
+{ "name": "package-c", "version": "1.0.0", "main": "biome.json" }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+node_modules/package-c/node_modules/biome-config-vodoo/biome.json configuration ━━━━━━━━━━━━━━━━━━━━
+
+  × Biome resolved multiple versions of biome-config-vodoo.
+  
+  i This is an error for Biome because it doesn't know which version to use. Extended configurations are applied in order, and a fixed configuration could be overridden by one that is bugged.
+  
+  i The first reference from node_modules/package-b/biome.json resolves to node_modules/package-b/node_modules/biome-config-vodoo/biome.json from biome-config-vodoo@0.2.0.
+  
+  i The conflicting reference from node_modules/package-c/biome.json resolves to node_modules/package-c/node_modules/biome-config-vodoo/biome.json from biome-config-vodoo@0.5.0.
+  
+  i Biome can't determine which configuration should be used.
+  
+
+```

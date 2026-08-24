@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/biome"] }
+```
+
+## `node_modules/@shared/config/biome.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": {
+    "./biome": "./biome.json"
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth",
+  "value": 100,
+  "source": {
+    "configurationKind": "extend",
+    "path": "node_modules/@shared/config/biome.json",
+    "range": {
+      "end": 33,
+      "start": 30
+    },
+    "scope": "base",
+    "specifier": "@shared/config/biome"
+  }
+}
+```
