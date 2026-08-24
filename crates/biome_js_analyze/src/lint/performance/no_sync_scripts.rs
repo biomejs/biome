@@ -76,7 +76,7 @@ fn validate_attributes(list: &JsxAttributeList) -> Option<()> {
     if list.find_by_name("src").is_none()
         || list.find_by_name("type").is_some_and(|attribute| {
             attribute.initializer().is_some_and(|initializer| {
-                initializer.value().ok().is_some_and(|value| {
+                initializer.value().is_ok_and(|value| {
                     value.as_jsx_string().is_some_and(|jsx_string| {
                         jsx_string
                             .inner_string_text()

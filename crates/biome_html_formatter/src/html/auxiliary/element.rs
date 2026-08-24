@@ -201,23 +201,20 @@ impl FormatHtmlElement {
             .is_some_and(|tok| tok.has_leading_whitespace_or_newline())
             || opening_element
                 .r_angle_token()
-                .ok()
-                .is_some_and(|tok| tok.has_trailing_whitespace());
+                .is_ok_and(|tok| tok.has_trailing_whitespace());
         let content_has_trailing_whitespace = children
             .syntax()
             .last_token()
             .is_some_and(|tok| tok.has_trailing_whitespace())
             || closing_element
                 .l_angle_token()
-                .ok()
-                .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
+                .is_ok_and(|tok| tok.has_leading_whitespace_or_newline());
 
         // Check if there is a newline between the opening tag and the first child.
         // This is distinct from `content_has_leading_whitespace` which also matches spaces.
         let content_has_leading_newline = opening_element
             .r_angle_token()
-            .ok()
-            .is_some_and(|tok| tok.trailing_trivia().pieces().any(|p| p.is_newline()))
+            .is_ok_and(|tok| tok.trailing_trivia().pieces().any(|p| p.is_newline()))
             || children
                 .syntax()
                 .first_token()

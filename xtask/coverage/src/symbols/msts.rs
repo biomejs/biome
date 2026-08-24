@@ -130,7 +130,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             debug_text.push_str("expected: ");
 
             if let Some(symbol) = expected {
-                write!(debug_text, "[{}]", &symbol.name).unwrap();
+                write!(debug_text, "[{}]", symbol.name).unwrap();
             }
 
             debug_text.push_str(" - actual: ");

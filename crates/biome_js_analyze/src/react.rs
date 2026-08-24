@@ -64,10 +64,9 @@ impl ReactCreateElementCall {
             // React.createElement() should not be processed
             if !arguments.is_empty() {
                 let mut iter = arguments.iter();
-                let first_argument = if let Some(first_argument) = iter.next() {
+                let first_argument = {
+                    let first_argument = iter.next()?;
                     first_argument.ok()?
-                } else {
-                    return None;
                 };
                 let second_argument =
                     iter.next()

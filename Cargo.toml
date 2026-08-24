@@ -143,7 +143,7 @@ papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
 prettyplease                 = "0.2.37"
-proc-macro-error2            = { version = "2.0.1", default-features = false }
+proc-macro-error3            = { version = "3.1.0", default-features = false }
 proc-macro2                  = "1.0.107"
 quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
@@ -203,7 +203,6 @@ filter_map_next                   = "warn"
 flat_map_option                   = "warn"
 float_cmp_const                   = "warn"
 fn_params_excessive_bools         = "warn"
-from_iter_instead_of_collect      = "warn"
 get_unwrap                        = "warn"
 implicit_clone                    = "warn"
 implicit_hasher                   = "warn"

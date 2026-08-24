@@ -55,24 +55,20 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index());
-                if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
-                    if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                    ) {
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                    } else {
-                        return Some(rule);
-                    }
+                let rule = self.all_rules.get(parent_id.index())?;
+                let typed_node = rule.node.to_node(self.root.syntax());
+                if matches!(
+                    typed_node,
+                    AnyRuleStart::CssMediaAtRule(_)
+                        | AnyRuleStart::CssScopeAtRule(_)
+                        | AnyRuleStart::CssSupportsAtRule(_)
+                ) {
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
                 } else {
-                    return None;
+                    return Some(rule);
                 }
             } else {
                 return None;
@@ -90,32 +86,28 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index());
-                if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
-                    if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                    ) {
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                    } else {
-                        if current_index == index {
-                            return Some(rule);
-                        }
-
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                        current_index += 1;
-                    }
+                let rule = self.all_rules.get(parent_id.index())?;
+                let typed_node = rule.node.to_node(self.root.syntax());
+                if matches!(
+                    typed_node,
+                    AnyRuleStart::CssMediaAtRule(_)
+                        | AnyRuleStart::CssScopeAtRule(_)
+                        | AnyRuleStart::CssSupportsAtRule(_)
+                ) {
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
                 } else {
-                    return None;
+                    if current_index == index {
+                        return Some(rule);
+                    }
+
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
+                    current_index += 1;
                 }
             } else {
                 return None;

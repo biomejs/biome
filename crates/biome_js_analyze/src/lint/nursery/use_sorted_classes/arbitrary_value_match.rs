@@ -273,13 +273,9 @@ fn single_value(list: &CssGenericComponentValueList) -> Option<AnyCssValue> {
 fn identifier_matches(value: &AnyCssValue, mut predicate: impl FnMut(&str) -> bool) -> bool {
     match value {
         AnyCssValue::CssIdentifier(ident) => ident
-            .ident_token()
-            .ok()
-            .is_some_and(|token| predicate(token.text_trimmed())),
+            .ident_token().is_ok_and(|token| predicate(token.text_trimmed())),
         AnyCssValue::CssDashedIdentifier(ident) => ident
-            .ident_token()
-            .ok()
-            .is_some_and(|token| predicate(token.text_trimmed())),
+            .ident_token().is_ok_and(|token| predicate(token.text_trimmed())),
         _ => false,
     }
 }
