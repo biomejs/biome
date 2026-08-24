@@ -20,7 +20,7 @@ jobs:
   changesets:
     name: Release
     outputs:
-      hasChangesets: ${{ steps.changesets-action.outputs.hasChangesets }}
+      hasChangesets: ${{ steps.changesets-action.outputs.has-changesets }}
     runs-on: depot-ubuntu-24.04-arm-small
     permissions:
       contents: write
@@ -62,11 +62,11 @@ jobs:
 
       - name: Create Release Pull Request
         id: changesets-action
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
         with:
-          version: pnpm run version
-          commit: "ci: release"
-          title: "ci: release"
+          version-script: pnpm run version
+          commit-message: "ci: release"
+          pr-title: "ci: release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
