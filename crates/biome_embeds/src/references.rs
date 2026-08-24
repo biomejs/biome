@@ -152,10 +152,13 @@ pub fn is_vue_directive_reference_used(
         })
 }
 
-/// Returns `true` if `reference_name` starts with `v` followed by an uppercase letter,
-/// which is the naming convention for Vue custom directives (e.g. `vHighlight`).
+/// Returns `true` if `reference_name` starts with `v` followed by an uppercase letter
+/// or digit, which is the naming convention for Vue custom directives (e.g. `vHighlight`).
 fn is_potential_vue_directive_reference(reference_name: &str) -> bool {
-    matches!(reference_name.as_bytes(), [b'v', b'A'..=b'Z', ..])
+    matches!(
+        reference_name.as_bytes(),
+        [b'v', b'A'..=b'Z' | b'0'..=b'9', ..]
+    )
 }
 
 /// Returns `true` if `directive_name` starts with `v-` and its camelCase
@@ -391,7 +394,7 @@ mod tests {
         let db = TestDb::new();
         let path = parse_vue_template_source(
             &db,
-            r#"<template><div v-highlight /><div v-click-outside /><div v-require-2fa /><div v-weird-_but-valid /></template>"#,
+            r#"<template><div v-highlight /><div v-click-outside /><div v-require-2fa /><div v-2fa-forbidden /><div v-weird-_but-valid /></template>"#,
         );
 
         assert!(is_vue_directive_reference_used(
@@ -405,6 +408,10 @@ mod tests {
         assert!(is_vue_directive_reference_used(
             &db,
             InternedReference::new(&db, path.clone(), token_text("vRequire2fa")),
+        ));
+        assert!(is_vue_directive_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("v2faForbidden")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
