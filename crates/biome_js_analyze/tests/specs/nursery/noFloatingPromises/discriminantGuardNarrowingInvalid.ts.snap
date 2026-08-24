@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: discriminantGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Task =
+	| { kind: "sync" }
+	| { kind: "async"; run: () => Promise<void> };
+
+function guardedCall(task: Task) {
+	if (task.kind === "async") {
+		// `task` is narrowed to the async variant here, so the call floats.
+		task.run();
+	}
+}
+
+```
+
+# Diagnostics
+```
+discriminantGuardNarrowingInvalid.ts:10:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     8 │ 	if (task.kind === "async") {
+     9 │ 		// `task` is narrowed to the async variant here, so the call floats.
+  > 10 │ 		task.run();
+       │ 		^^^^^^^^^^^
+    11 │ 	}
+    12 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

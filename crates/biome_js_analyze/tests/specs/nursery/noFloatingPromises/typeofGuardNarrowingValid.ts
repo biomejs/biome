@@ -1,0 +1,34 @@
+/* should not generate diagnostics */
+
+// Without narrowing, `x` keeps its declared type here and is reported as a
+// floating promise, which is a false positive.
+function narrowedToNumber(x: number | Promise<void>) {
+	if (typeof x === "number") {
+		x;
+	}
+}
+
+// The cases below stay quiet with or without narrowing. They exist to catch
+// narrowing producing a promise type where there is none, not to prove that
+// narrowing happens -- the inferred types themselves are pinned by
+// `biome_module_graph/tests/spec_tests/narrowing.test.rs`.
+
+async function handled(x: number | (() => Promise<void>)) {
+	if (typeof x === "function") {
+		await x();
+	}
+}
+
+// Narrowing to a callable must not add a promise the signature doesn't have.
+function syncCallable(x: number | (() => void)) {
+	if (typeof x === "function") {
+		x();
+	}
+}
+
+// Narrowing `unknown` must not invent a promise-returning type.
+function fromUnknown(x: unknown) {
+	if (typeof x === "function") {
+		x();
+	}
+}

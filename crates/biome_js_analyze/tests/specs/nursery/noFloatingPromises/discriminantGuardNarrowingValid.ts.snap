@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: discriminantGuardNarrowingValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+type Value =
+	| { kind: "promise"; payload: Promise<void> }
+	| { kind: "plain"; payload: number };
+
+// `value` is narrowed to the plain variant, so its payload cannot be a
+// promise.
+function narrowedToPlain(value: Value) {
+	if (value.kind === "plain") {
+		value.payload;
+	}
+}
+
+```

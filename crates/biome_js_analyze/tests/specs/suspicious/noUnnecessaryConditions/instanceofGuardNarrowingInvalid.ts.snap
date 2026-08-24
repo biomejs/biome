@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: instanceofGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+class Foo {
+	a = 1;
+}
+
+function alwaysTruthyAfterGuard(x: number | Foo) {
+	if (x instanceof Foo) {
+		// `x` is narrowed to a `Foo` instance here, so this condition is
+		// always truthy.
+		if (x) {
+			x.a;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+instanceofGuardNarrowingInvalid.ts:11:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+     9 │ 		// `x` is narrowed to a `Foo` instance here, so this condition is
+    10 │ 		// always truthy.
+  > 11 │ 		if (x) {
+       │ 		    ^
+    12 │ 			x.a;
+    13 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

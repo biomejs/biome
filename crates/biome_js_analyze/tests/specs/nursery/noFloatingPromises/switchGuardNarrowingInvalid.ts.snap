@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: switchGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Value =
+	| { kind: "promise"; payload: Promise<void> }
+	| { kind: "plain"; payload: number };
+
+function guardedCase(value: Value) {
+	switch (value.kind) {
+		case "promise":
+			// `value` is narrowed to the promise variant here, so the bare
+			// member statement floats.
+			value.payload;
+			break;
+	}
+}
+
+function groupedCases(value: Value) {
+	switch (value.kind) {
+		case "promise":
+		case "plain":
+			// Reachable with both variants; narrowing must not apply, so the
+			// promise variant keeps the diagnostic.
+			value.payload;
+			break;
+	}
+}
+
+function fallthroughCase(value: Value) {
+	switch (value.kind) {
+		case "promise":
+			console.log("promise");
+		case "plain":
+			// Reachable by falling through from the promise case; narrowing
+			// must not apply.
+			value.payload;
+			break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+switchGuardNarrowingInvalid.ts:12:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    10 │ 			// `value` is narrowed to the promise variant here, so the bare
+    11 │ 			// member statement floats.
+  > 12 │ 			value.payload;
+       │ 			^^^^^^^^^^^^^^
+    13 │ 			break;
+    14 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+switchGuardNarrowingInvalid.ts:23:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    21 │ 			// Reachable with both variants; narrowing must not apply, so the
+    22 │ 			// promise variant keeps the diagnostic.
+  > 23 │ 			value.payload;
+       │ 			^^^^^^^^^^^^^^
+    24 │ 			break;
+    25 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+switchGuardNarrowingInvalid.ts:35:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    33 │ 			// Reachable by falling through from the promise case; narrowing
+    34 │ 			// must not apply.
+  > 35 │ 			value.payload;
+       │ 			^^^^^^^^^^^^^^
+    36 │ 			break;
+    37 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
