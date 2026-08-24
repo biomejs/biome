@@ -20,6 +20,41 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroImplicitFragment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroImplicitFragment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroImplicitFragmentFields {
+        AstroImplicitFragmentFields {
+            children: self.children(),
+        }
+    }
+    pub fn children(&self) -> JsxChildList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for AstroImplicitFragment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroImplicitFragmentFields {
+    pub children: JsxChildList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAccessorModifier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7984,8 +8019,8 @@ impl JsxSelfClosingElement {
     pub fn attributes(&self) -> JsxAttributeList {
         support::list(&self.syntax, 3usize)
     }
-    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn slash_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
@@ -8005,7 +8040,7 @@ pub struct JsxSelfClosingElementFields {
     pub name: SyntaxResult<AnyJsxElementName>,
     pub type_arguments: Option<TsTypeArguments>,
     pub attributes: JsxAttributeList,
-    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: Option<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15901,11 +15936,18 @@ impl AnyJsxObjectName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxTag {
+    AstroImplicitFragment(AstroImplicitFragment),
     JsxElement(JsxElement),
     JsxFragment(JsxFragment),
     JsxSelfClosingElement(JsxSelfClosingElement),
 }
 impl AnyJsxTag {
+    pub fn as_astro_implicit_fragment(&self) -> Option<&AstroImplicitFragment> {
+        match &self {
+            Self::AstroImplicitFragment(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_jsx_element(&self) -> Option<&JsxElement> {
         match &self {
             Self::JsxElement(item) => Some(item),
@@ -16690,6 +16732,53 @@ impl AnyTsVariableAnnotation {
             Self::TsTypeAnnotation(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for AstroImplicitFragment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_IMPLICIT_FRAGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_IMPLICIT_FRAGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroImplicitFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroImplicitFragment")
+                .field("children", &self.children())
+                .finish()
+        } else {
+            f.debug_struct("AstroImplicitFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroImplicitFragment> for SyntaxNode {
+    fn from(n: AstroImplicitFragment) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroImplicitFragment> for SyntaxElement {
+    fn from(n: AstroImplicitFragment) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for JsAccessorModifier {
@@ -26039,7 +26128,7 @@ impl std::fmt::Debug for JsxSelfClosingElement {
                 .field("attributes", &self.attributes())
                 .field(
                     "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
+                    &support::DebugOptionalElement(self.slash_token()),
                 )
                 .field(
                     "r_angle_token",
@@ -38610,6 +38699,11 @@ impl From<AnyJsxObjectName> for SyntaxElement {
         node.into()
     }
 }
+impl From<AstroImplicitFragment> for AnyJsxTag {
+    fn from(node: AstroImplicitFragment) -> Self {
+        Self::AstroImplicitFragment(node)
+    }
+}
 impl From<JsxElement> for AnyJsxTag {
     fn from(node: JsxElement) -> Self {
         Self::JsxElement(node)
@@ -38627,14 +38721,21 @@ impl From<JsxSelfClosingElement> for AnyJsxTag {
 }
 impl AstNode for AnyJsxTag {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsxElement::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AstroImplicitFragment::KIND_SET
+        .union(JsxElement::KIND_SET)
         .union(JsxFragment::KIND_SET)
         .union(JsxSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JSX_ELEMENT | JSX_FRAGMENT | JSX_SELF_CLOSING_ELEMENT)
+        matches!(
+            kind,
+            ASTRO_IMPLICIT_FRAGMENT | JSX_ELEMENT | JSX_FRAGMENT | JSX_SELF_CLOSING_ELEMENT
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            ASTRO_IMPLICIT_FRAGMENT => {
+                Self::AstroImplicitFragment(AstroImplicitFragment { syntax })
+            }
             JSX_ELEMENT => Self::JsxElement(JsxElement { syntax }),
             JSX_FRAGMENT => Self::JsxFragment(JsxFragment { syntax }),
             JSX_SELF_CLOSING_ELEMENT => {
@@ -38646,6 +38747,7 @@ impl AstNode for AnyJsxTag {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::AstroImplicitFragment(it) => it.syntax(),
             Self::JsxElement(it) => it.syntax(),
             Self::JsxFragment(it) => it.syntax(),
             Self::JsxSelfClosingElement(it) => it.syntax(),
@@ -38653,6 +38755,7 @@ impl AstNode for AnyJsxTag {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::AstroImplicitFragment(it) => it.into_syntax(),
             Self::JsxElement(it) => it.into_syntax(),
             Self::JsxFragment(it) => it.into_syntax(),
             Self::JsxSelfClosingElement(it) => it.into_syntax(),
@@ -38662,6 +38765,7 @@ impl AstNode for AnyJsxTag {
 impl std::fmt::Debug for AnyJsxTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AstroImplicitFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxElement(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
@@ -38671,6 +38775,7 @@ impl std::fmt::Debug for AnyJsxTag {
 impl From<AnyJsxTag> for SyntaxNode {
     fn from(n: AnyJsxTag) -> Self {
         match n {
+            AnyJsxTag::AstroImplicitFragment(it) => it.into_syntax(),
             AnyJsxTag::JsxElement(it) => it.into_syntax(),
             AnyJsxTag::JsxFragment(it) => it.into_syntax(),
             AnyJsxTag::JsxSelfClosingElement(it) => it.into_syntax(),
@@ -41003,6 +41108,11 @@ impl std::fmt::Display for AnyTsTypePredicateParameterName {
     }
 }
 impl std::fmt::Display for AnyTsVariableAnnotation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroImplicitFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

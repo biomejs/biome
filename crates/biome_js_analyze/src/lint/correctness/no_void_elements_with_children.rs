@@ -233,9 +233,9 @@ impl Rule for NoVoidElementsWithChildren {
                         opening_element.l_angle_token().ok()?,
                         opening_element.name().ok()?,
                         new_attribute_list,
-                        closing_element.slash_token().ok()?,
                         opening_element.r_angle_token().ok()?,
                     )
+                    .with_slash_token(closing_element.slash_token().ok()?)
                     .build();
                     mutation.replace_element(
                         element.clone().into_syntax().into(),

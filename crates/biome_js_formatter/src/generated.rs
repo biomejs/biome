@@ -6,6 +6,44 @@ use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, IntoFormat, JsFormatContext, JsFormatter,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+impl FormatRule<biome_js_syntax::AstroImplicitFragment>
+    for crate::astro::auxiliary::implicit_fragment::FormatAstroImplicitFragment
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::AstroImplicitFragment,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::AstroImplicitFragment>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::AstroImplicitFragment {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AstroImplicitFragment,
+        crate::astro::auxiliary::implicit_fragment::FormatAstroImplicitFragment,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::astro::auxiliary::implicit_fragment::FormatAstroImplicitFragment::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AstroImplicitFragment {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AstroImplicitFragment,
+        crate::astro::auxiliary::implicit_fragment::FormatAstroImplicitFragment,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::astro::auxiliary::implicit_fragment::FormatAstroImplicitFragment::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsAccessorModifier>
     for crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier
 {

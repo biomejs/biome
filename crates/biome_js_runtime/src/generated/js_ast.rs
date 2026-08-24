@@ -11,6 +11,17 @@ impl JsAstNode {
         let mut prototype =
             ObjectInitializer::with_native_data_and_proto(OrdinaryObject, base_prototype, context);
         match kind {
+            JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT => {
+                register_js_ast_fields!(
+                    prototype,
+                    JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
+                    AstroImplicitFragment,
+                    ("children", |node, context| Self::wrap_node_list(
+                        node.children(),
+                        context
+                    )),
+                );
+            }
             JsSyntaxKind::JS_ACCESSOR_MODIFIER => {
                 register_js_ast_fields!(
                     prototype,
@@ -3185,7 +3196,7 @@ impl JsAstNode {
                         context
                     )),
                     ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token().ok()
+                        node.slash_token()
                     )),
                     ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
@@ -5351,6 +5362,7 @@ impl JsAstNode {
     #[doc = r#" e.g. `"JS_CALL_EXPRESSION"`."#]
     pub(crate) fn syntax_kind_from_ast_name(name: &str) -> Option<JsSyntaxKind> {
         Some(match name {
+            "ASTRO_IMPLICIT_FRAGMENT" => JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
             "JS_ACCESSOR_MODIFIER" => JsSyntaxKind::JS_ACCESSOR_MODIFIER,
             "JS_ARRAY_ASSIGNMENT_PATTERN" => JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN,
             "JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT" => {

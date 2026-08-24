@@ -47,7 +47,7 @@ impl AnyJsxTag {
     pub fn name(&self) -> Option<AnyJsxElementName> {
         match self {
             Self::JsxElement(element) => element.opening_element().ok()?.name().ok(),
-            Self::JsxFragment(_) => None,
+            Self::JsxFragment(_) | Self::AstroImplicitFragment(_) => None,
             Self::JsxSelfClosingElement(element) => element.name().ok(),
         }
     }
@@ -55,7 +55,7 @@ impl AnyJsxTag {
     pub fn attributes(&self) -> Option<JsxAttributeList> {
         match self {
             Self::JsxElement(element) => Some(element.opening_element().ok()?.attributes()),
-            Self::JsxFragment(_) => None,
+            Self::JsxFragment(_) | Self::AstroImplicitFragment(_) => None,
             Self::JsxSelfClosingElement(element) => Some(element.attributes()),
         }
     }
@@ -206,9 +206,8 @@ impl JsxSelfClosingElement {
     ///         jsx_name(ident("Test"))
     ///     ),
     ///     attributes,
-    ///     token(T![/]),
     ///     token(T![>]),
-    /// ).build();
+    /// ).with_slash_token(token(T![/])).build();
     ///
     /// assert!(opening_element.find_attribute_by_name("div").is_some());
     /// assert!(opening_element.find_attribute_by_name("img").is_some());
@@ -256,9 +255,8 @@ impl JsxSelfClosingElement {
     ///         jsx_name(ident("Test"))
     ///     ),
     ///     attributes,
-    ///     token(T![/]),
     ///     token(T![>]),
-    /// ).build();
+    /// ).with_slash_token(token(T![/])).build();
     ///
     /// let div = opening_element.find_attribute_by_name("div").unwrap();
     /// assert!(opening_element.has_trailing_spread_prop(&div));
@@ -619,9 +617,8 @@ impl AnyJsxElement {
     ///           jsx_name(ident("button"))
     ///       ),
     ///       attributes,
-    ///       token(T![/]),
     ///       token(T![>]),
-    ///   ).build()
+    ///   ).with_slash_token(token(T![/])).build()
     /// );
     ///
     /// assert!(jsx_element.get_attribute_inner_string_text("unknown").is_none());
@@ -775,4 +772,21 @@ impl AnyJsxChild {
             _ => true,
         })
     }
+}
+
+/// HTML elements that never have a closing tag.
+///
+/// Deliberately excludes the legacy `keygen` and `menuitem`, which Astro requires
+/// a closing tag for.
+///
+/// <https://html.spec.whatwg.org/multipage/syntax.html#void-elements>
+const VOID_ELEMENTS: [&str; 14] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
+];
+
+/// Whether `name` is an HTML void element, matched case-sensitively against the
+/// lowercase spec names. A PascalCase component never matches.
+pub fn is_void_element(name: &str) -> bool {
+    VOID_ELEMENTS.contains(&name)
 }

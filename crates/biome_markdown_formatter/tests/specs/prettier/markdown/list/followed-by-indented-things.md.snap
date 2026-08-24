@@ -148,7 +148,7 @@ info: markdown/list/followed-by-indented-things.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,101 +1,98 @@
+@@ -1,43 +1,42 @@
 -- foo
 -
 +-    foo
@@ -174,10 +174,10 @@ info: markdown/list/followed-by-indented-things.md
  ---
  
 -- foo
-+ -  foo
++-  foo
  
 -      indented code block in bullet
-+        indented code block in bullet
++       indented code block in bullet
  
  ---
  
@@ -205,27 +205,23 @@ info: markdown/list/followed-by-indented-things.md
  
  ---
  
--1.  foo
-+  1.  foo
- 
--        indented code block in numbered item
-+          indented code block in numbered item
+@@ -46,56 +45,54 @@
+         indented code block in numbered item
  
  ---
- 
+-
 -- [ ] foo
+ 
 +-    [] foo
  
--
      top level indented code block
  
  ---
  
 -- [ ] foo
-+   - [] foo
++- [] foo
  
--      indented code block in checkbox item
-+         indented code block in checkbox item
+       indented code block in checkbox item
  
  ---
  
@@ -297,23 +293,23 @@ info: markdown/list/followed-by-indented-things.md
  ---
  
 -- item 1
-+   -    item 1
-+        > quote
- 
+-
 -  > quote
 -
 -  text
--
++   -    item 1
++        > quote
+ 
 +        text
  
      top level indented code block
  
  ---
--
+ 
 -- item 1
 -  - item 1-1
 -  - item 1-2
- 
+-
 -
 -      indented code block
 -
@@ -354,9 +350,9 @@ info: markdown/list/followed-by-indented-things.md
 
 ---
 
- -  foo
+-  foo
 
-        indented code block in bullet
+       indented code block in bullet
 
 ---
 
@@ -378,9 +374,9 @@ info: markdown/list/followed-by-indented-things.md
 
 ---
 
-  1.  foo
+1.  foo
 
-          indented code block in numbered item
+        indented code block in numbered item
 
 ---
 
@@ -390,9 +386,9 @@ info: markdown/list/followed-by-indented-things.md
 
 ---
 
-   - [] foo
+- [] foo
 
-         indented code block in checkbox item
+      indented code block in checkbox item
 
 ---
 

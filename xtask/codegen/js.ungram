@@ -2328,14 +2328,21 @@ AnyJsxTag =
 	JsxElement
 	| JsxSelfClosingElement
 	| JsxFragment
+	| AstroImplicitFragment
 
-// <a />
+// {cond && <a /> <b />}
+//           ^^^^^^^^^^
+AstroImplicitFragment =
+	children: JsxChildList
+
+// <a />, or <br> in Astro
+// ^^^^^      ^^^^
 JsxSelfClosingElement =
 	'<'
 	name: AnyJsxElementName
 	type_arguments: TsTypeArguments?
 	attributes: JsxAttributeList
-	'/'
+	'/'?
 	'>'
 
 JsxElement =
