@@ -1659,6 +1659,63 @@ const items = ['a', 'b'];
     );
 }
 
+/// Astro compiles `.astro` as TSX throughout, so an attribute expression accepts
+/// the same TypeScript and JSX syntax as a text expression does.
+#[test]
+fn astro_attribute_expression_accepts_tsx() {
+    const FILE_CONTENT: &str = r#"---
+import Icon from './Icon.astro';
+const total = 1;
+---
+<Icon count={total as number} on={(e: Event) => e} icon={<Icon />} />
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.astro"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.astro"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.astro"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for TSX syntax in an Astro attribute expression, got: {:#?}",
+        result.diagnostics
+    );
+}
+
 #[test]
 fn format_js_with_embedded_css() {
     const FILE_PATH: &str = "/project/file.js";
