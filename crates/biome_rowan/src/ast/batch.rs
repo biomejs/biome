@@ -828,11 +828,12 @@ where
                 if with_text_range_and_edit {
                     let mut text_modifications = modifications.clone();
                     text_modifications.sort_by(|left, right| {
-                        if left.0 == right.0 && left.3 && right.3 {
-                            left.4.cmp(&right.4)
-                        } else {
-                            cmp::Ordering::Equal
-                        }
+                        right.0.cmp(&left.0).then_with(|| match (left.3, right.3) {
+                            (false, true) => cmp::Ordering::Less,
+                            (true, false) => cmp::Ordering::Greater,
+                            (true, true) => left.4.cmp(&right.4),
+                            (false, false) => right.4.cmp(&left.4),
+                        })
                     });
                     for (new_node_slot, new_node, is_from_action, is_insertion, _) in
                         &text_modifications
