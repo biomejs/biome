@@ -71,8 +71,8 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Text,
-    TextRange, Merge,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Merge,
+    Text, TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
