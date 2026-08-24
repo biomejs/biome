@@ -72,7 +72,7 @@ use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
     DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Text,
-    TextRange,
+    TextRange, Merge,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;

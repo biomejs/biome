@@ -242,9 +242,9 @@ impl Deserializable for serde_json::Value {
                     let Some(value) = value else {
                         continue;
                     };
-                    let deserialized = ctx.with_index(index, value.range(), |ctx| {
-                        Deserializable::deserialize(ctx, &value, "")
-                    });
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
                     if let Some(value) = deserialized {
                         result.push(value);
                     }

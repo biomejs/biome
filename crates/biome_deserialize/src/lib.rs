@@ -107,22 +107,6 @@ pub trait DeserializationContext {
 
     /// Exits the array element most recently passed to [`Self::enter_index`].
     fn exit_index(&mut self) {}
-
-    /// Runs `operation` between [`Self::enter_index`] and [`Self::exit_index`].
-    fn with_index<T>(
-        &mut self,
-        index: usize,
-        range: TextRange,
-        operation: impl FnOnce(&mut Self) -> T,
-    ) -> T
-    where
-        Self: Sized,
-    {
-        self.enter_index(index, range);
-        let result = operation(self);
-        self.exit_index();
-        result
-    }
 }
 
 /// Default implementation for [DeserializationContext].

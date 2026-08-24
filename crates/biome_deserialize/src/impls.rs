@@ -519,9 +519,10 @@ impl<T: Deserializable> Deserializable for Vec<T> {
                     let Some(value) = value else {
                         continue;
                     };
-                    if let Some(value) = ctx.with_index(index, value.range(), |ctx| {
-                        Deserializable::deserialize(ctx, &value, "")
-                    }) {
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
                         result.push(value);
                     }
                 }
@@ -565,9 +566,10 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
                     let Some(value) = value else {
                         continue;
                     };
-                    if let Some(value) = ctx.with_index(index, value.range(), |ctx| {
-                        Deserializable::deserialize(ctx, &value, "")
-                    }) {
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
                         result.push(value);
                     }
                 }
@@ -602,9 +604,10 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
                     let Some(value) = value else {
                         continue;
                     };
-                    if let Some(value) = ctx.with_index(index, value.range(), |ctx| {
-                        Deserializable::deserialize(ctx, &value, "")
-                    }) {
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
                         result.insert(value);
                     }
                 }
@@ -637,9 +640,10 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
                     let Some(value) = value else {
                         continue;
                     };
-                    if let Some(value) = ctx.with_index(index, value.range(), |ctx| {
-                        Deserializable::deserialize(ctx, &value, "")
-                    }) {
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
                         result.insert(value);
                     }
                 }
@@ -673,9 +677,10 @@ impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
                     let Some(value) = value else {
                         continue;
                     };
-                    if let Some(value) = ctx.with_index(index, value.range(), |ctx| {
-                        Deserializable::deserialize(ctx, &value, "")
-                    }) {
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
                         result.insert(value);
                     }
                 }

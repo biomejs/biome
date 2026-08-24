@@ -49,6 +49,7 @@ use biome_resolver::{
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::{FxHashMap, FxHashSet};
+use std::borrow::Cow;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
@@ -56,6 +57,14 @@ use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::Arc;
 use tracing::instrument;
+
+fn display_path(path: &Utf8Path) -> Cow<'_, str> {
+    if cfg!(any(test, all(debug_assertions, windows))) {
+        Cow::Owned(path.as_str().replace('\\', "/"))
+    } else {
+        Cow::Borrowed(path.as_str())
+    }
+}
 
 /// Information regarding the configuration inputs that were found.
 #[derive(Default, Debug)]
@@ -1083,6 +1092,8 @@ impl Advices for MultipleExtendedConfigurationVersionsAdvice {
 
 impl PackageResolution {
     fn record_resolution(&self, visitor: &mut dyn Visit, label: &str) -> std::io::Result<()> {
+        let origin = self.reference.origin();
+        let file_path = display_path(&self.file_path);
         match &self.package {
             Some(ResolvedPackage {
                 name: Some(name),
@@ -1090,8 +1101,8 @@ impl PackageResolution {
             }) => visitor.record_log(
                 LogCategory::Info,
                 &markup! {
-                    {label}" from "{self.reference.origin()}" resolves to "
-                    <Emphasis>{self.file_path.as_str()}</Emphasis>" from "
+                    {label}" from "{origin}" resolves to "
+                    <Emphasis>{file_path}</Emphasis>" from "
                     <Emphasis>{name}"@"{version}</Emphasis>"."
                 },
             ),
@@ -1101,16 +1112,16 @@ impl PackageResolution {
             }) => visitor.record_log(
                 LogCategory::Info,
                 &markup! {
-                    {label}" from "{self.reference.origin()}" resolves to "
-                    <Emphasis>{self.file_path.as_str()}</Emphasis>" from package version "
+                    {label}" from "{origin}" resolves to "
+                    <Emphasis>{file_path}</Emphasis>" from package version "
                     <Emphasis>{version}</Emphasis>"."
                 },
             ),
             _ => visitor.record_log(
                 LogCategory::Info,
                 &markup! {
-                    {label}" from "{self.reference.origin()}" resolves to "
-                    <Emphasis>{self.file_path.as_str()}</Emphasis>"."
+                    {label}" from "{origin}" resolves to "
+                    <Emphasis>{file_path}</Emphasis>"."
                 },
             ),
         }
@@ -1118,8 +1129,8 @@ impl PackageResolution {
 }
 
 impl ConfigurationReference {
-    fn origin(&self) -> &str {
-        self.from.as_str()
+    fn origin(&self) -> Cow<'_, str> {
+        display_path(&self.from)
     }
 }
 
