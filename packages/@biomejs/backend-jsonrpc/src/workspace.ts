@@ -2358,6 +2358,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow conflicting content sources on Astro elements.
+See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives 
+	 */
+	noAstroConflictingSetDirectives?: NoAstroConflictingSetDirectivesConfiguration;
+	/**
 	* Disallow the use of Astro's set:html directive.
 See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
 	 */
@@ -4706,6 +4711,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroConflictingSetDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroConflictingSetDirectivesOptions;
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
@@ -6586,6 +6594,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroConflictingSetDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroConflictingSetDirectivesOptions;
+}
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
@@ -8432,6 +8444,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -9955,6 +9968,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
