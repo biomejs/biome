@@ -6,7 +6,7 @@ use biome_html_syntax::{
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
     AnySvelteDirective, AnySvelteEachName, AnyVueDirective, AnyVueDirectiveArgument,
     AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlElement,
-    HtmlRoot, HtmlSelfClosingElement, VueVForIdentifierBinding, VueVForValue,
+    HtmlRoot, HtmlSelfClosingElement, VueDirective, VueVForIdentifierBinding, VueVForValue,
 };
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
@@ -1281,6 +1281,10 @@ impl EmbeddedReferencesBuilder {
             {
                 directive.arg()?
             }
+            AnyVueDirective::VueDirective(directive) if !directive.is_builtin() => {
+                self.register_vue_custom_directive(directive);
+                return None;
+            }
             _ => return None,
         };
 
@@ -1295,6 +1299,13 @@ impl EmbeddedReferencesBuilder {
             AnyVueDirectiveArgument::VueStaticArgument(arg) => arg.name_token().ok()?,
             _ => return None,
         };
+
+        self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
+        Some(())
+    }
+
+    fn register_vue_custom_directive(&mut self, directive: &VueDirective) -> Option<()> {
+        let token = directive.name_token().ok()?;
 
         self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
         Some(())

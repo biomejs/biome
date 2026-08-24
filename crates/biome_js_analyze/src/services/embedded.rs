@@ -4,7 +4,7 @@ use biome_embeds::bindings::{
 };
 use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
-    is_value_reference_used,
+    is_value_reference_used, is_vue_directive_reference_used,
 };
 use biome_languages::LanguageDb;
 use biome_rowan::TokenText;
@@ -64,6 +64,18 @@ impl EmbeddedService {
     /// See also: https://svelte.dev/docs/svelte/stores
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
         is_svelte_store_reference_used(
+            self.db.as_ref(),
+            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+        )
+    }
+
+    /// Vue custom directives are a special case. The template spells them in
+    /// kebab-case (e.g. `v-highlight`), while the JS binding they refer to is
+    /// spelled in camelCase (e.g. `vHighlight`).
+    ///
+    /// See also: https://vuejs.org/guide/reusability/custom-directives.html
+    pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
+        is_vue_directive_reference_used(
             self.db.as_ref(),
             InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
         )

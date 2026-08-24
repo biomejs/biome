@@ -292,7 +292,9 @@ impl Rule for NoUnusedVariables {
             || matches!(
                 file_source.as_embedding_kind(),
                 JsEmbeddingKind::Svelte { .. }
-            ) && embedded.is_svelte_store_used(binding_token_text);
+            ) && embedded.is_svelte_store_used(binding_token_text.clone())
+            || matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
+                && embedded.is_vue_directive_used(binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
