@@ -132,20 +132,24 @@ impl OverridePattern {
 
         #[cfg(feature = "lang_js")]
         {
-            let base_parser = base_configuration
+            let base_unsafe_parameter_decorators_enabled = base_configuration
                 .javascript
                 .as_ref()
-                .and_then(|javascript| javascript.parser.as_ref());
-            if let Some(base_value) =
-                base_parser.and_then(|parser| parser.unsafe_parameter_decorators_enabled)
+                .and_then(|javascript| javascript.parser.as_ref())
+                .and_then(|parser| parser.unsafe_parameter_decorators_enabled);
+            if base_unsafe_parameter_decorators_enabled.is_some()
+                || configuration
+                    .javascript
+                    .as_ref()
+                    .and_then(|javascript| javascript.parser.as_ref())
+                    .is_some()
             {
-                let parser = javascript
+                configuration
+                    .javascript
                     .get_or_insert_with(Default::default)
                     .parser
-                    .get_or_insert_with(Default::default);
-                parser.unsafe_parameter_decorators_enabled = parser
-                    .unsafe_parameter_decorators_enabled
-                    .or(Some(base_value));
+                    .get_or_insert_with(Default::default)
+                    .unsafe_parameter_decorators_enabled = base_unsafe_parameter_decorators_enabled;
             }
             if let Some(base_value) = base_configuration
                 .javascript
@@ -667,6 +671,36 @@ mod tests {
                 .and_then(|css| css.parser)
                 .and_then(|parser| parser.css_modules),
             Some(true.into())
+        );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn clears_unsafe_parameter_decorators_without_a_base_fallback() {
+        use crate::{JsConfiguration, javascript::JsParserConfiguration};
+
+        let base_configuration = Configuration::default();
+        let mut configuration = base_configuration.clone();
+        let first_pattern = OverridePattern {
+            javascript: Some(JsConfiguration {
+                parser: Some(JsParserConfiguration {
+                    unsafe_parameter_decorators_enabled: Some(true.into()),
+                    ..JsParserConfiguration::default()
+                }),
+                ..JsConfiguration::default()
+            }),
+            ..OverridePattern::default()
+        };
+
+        first_pattern.apply_to_configuration(&mut configuration, &base_configuration);
+        OverridePattern::default().apply_to_configuration(&mut configuration, &base_configuration);
+
+        assert_eq!(
+            configuration
+                .javascript
+                .and_then(|javascript| javascript.parser)
+                .and_then(|parser| parser.unsafe_parameter_decorators_enabled),
+            None
         );
     }
 }

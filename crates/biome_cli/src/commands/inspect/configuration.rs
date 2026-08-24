@@ -1,6 +1,6 @@
 //! Resolves retained configuration inputs and traces effective values to their declarations.
 
-use super::key::ConfigurationKey;
+use super::{display_path, key::ConfigurationKey};
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, ConfigurationSourceEntry, OverridePattern,
 };
@@ -617,7 +617,10 @@ impl SourceReference<'_> {
                 .to_string(),
             ),
         );
-        result.insert("path".to_string(), Value::String(self.path.to_string()));
+        result.insert(
+            "path".to_string(),
+            Value::String(display_path(self.path).into_owned()),
+        );
         if let Some(range) = self.range {
             result.insert(
                 "range".to_string(),

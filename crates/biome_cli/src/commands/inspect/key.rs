@@ -19,8 +19,8 @@ impl ConfigurationKey {
     pub(super) fn parse(text: String) -> Result<Self, CliDiagnostic> {
         let segments = text.split('.').map(str::to_string).collect::<Vec<_>>();
         if segments.is_empty() || segments.iter().any(String::is_empty) {
-            return Err(CliDiagnostic::incompatible_end_configuration(
-                "Configuration keys must be non-empty dot-separated property names. For example formatter.lineWidth",
+            return Err(CliDiagnostic::parse_error(
+                "Configuration keys must be non-empty dot-separated property names. For example, formatter.lineWidth.",
             ));
         }
         Ok(Self { text, segments })

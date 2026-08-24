@@ -1,26 +1,10 @@
 use crate::{
     run_cli,
-    snap_test::{SnapshotPayload, assert_cli_snapshot_with_redactor},
+    snap_test::{SnapshotPayload, assert_cli_snapshot},
 };
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-
-fn assert_inspect_snapshot(
-    test_name: &str,
-    fs: MemoryFileSystem,
-    console: BufferConsole,
-    result: Result<(), biome_cli::CliDiagnostic>,
-) {
-    assert_cli_snapshot_with_redactor(
-        SnapshotPayload::new(module_path!(), test_name, fs, console, result),
-        normalize_inspect_snapshot_paths,
-    );
-}
-
-fn normalize_inspect_snapshot_paths(content: String) -> String {
-    content.replace("\\\\", "/").replace('\\', "/")
-}
 
 #[test]
 fn root_value_uses_diagnostic_output() {
@@ -46,7 +30,13 @@ fn root_value_uses_diagnostic_output() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("root_value_uses_diagnostic_output", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "root_value_uses_diagnostic_output",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -76,7 +66,13 @@ fn jsonc_resolved_configuration() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("jsonc_resolved_configuration", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "jsonc_resolved_configuration",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -117,12 +113,13 @@ fn resolved_configuration_lists_source_paths_in_merge_order() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "resolved_configuration_lists_source_paths_in_merge_order",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -141,7 +138,13 @@ fn absent_key_is_successful() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("absent_key_is_successful", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "absent_key_is_successful",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -168,7 +171,13 @@ fn extended_value_reports_resolved_path() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("extended_value_reports_resolved_path", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extended_value_reports_resolved_path",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -200,12 +209,13 @@ fn package_extended_value_reports_specifier() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "package_extended_value_reports_specifier",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -231,7 +241,13 @@ fn composite_value_reports_contributors() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("composite_value_reports_contributors", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "composite_value_reports_contributors",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -257,12 +273,13 @@ fn composite_value_diagnostic_identifies_contributors() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "composite_value_diagnostic_identifies_contributors",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -293,12 +310,13 @@ fn composite_value_diagnostic_shows_three_extended_sources() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "composite_value_diagnostic_shows_three_extended_sources",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -324,12 +342,13 @@ fn identical_composite_declarations_report_the_last_source() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "identical_composite_declarations_report_the_last_source",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -356,12 +375,13 @@ fn identical_override_composite_reports_the_override_source() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "identical_override_composite_reports_the_override_source",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -412,7 +432,13 @@ fn last_matching_override_wins() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("last_matching_override_wins", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "last_matching_override_wins",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -452,12 +478,60 @@ fn later_matching_override_uses_runtime_root_fallback() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "later_matching_override_uses_runtime_root_fallback",
         fs,
         console,
         result,
+    ));
+}
+
+#[test]
+fn later_matching_override_resets_unsafe_parameter_decorators() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "javascript": {
+        "parser": { "unsafeParameterDecoratorsEnabled": true }
+      }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}"#,
     );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "javascript.parser.unsafeParameterDecoratorsEnabled",
+                "--path=file.test.js",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "later_matching_override_resets_unsafe_parameter_decorators",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -493,12 +567,13 @@ fn non_matching_override_keeps_base_value() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "non_matching_override_keeps_base_value",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -513,7 +588,34 @@ fn path_requires_key() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("path_requires_key", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "path_requires_key",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn malformed_key_is_an_invalid_argument() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter..lineWidth"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "malformed_key_is_an_invalid_argument",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -532,7 +634,13 @@ fn malformed_configuration_is_an_error() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("malformed_configuration_is_an_error", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "malformed_configuration_is_an_error",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -552,12 +660,13 @@ fn malformed_extended_configuration_uses_extended_path() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "malformed_extended_configuration_uses_extended_path",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -572,12 +681,13 @@ fn missing_explicit_configuration_is_an_error() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "missing_explicit_configuration_is_an_error",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -592,7 +702,13 @@ fn no_configuration_json_is_empty() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("no_configuration_json_is_empty", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_configuration_json_is_empty",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -613,7 +729,13 @@ fn json_output_includes_source_range() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("json_output_includes_source_range", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "json_output_includes_source_range",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -649,12 +771,13 @@ fn matching_extended_override_keeps_source_axes() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "matching_extended_override_keeps_source_axes",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -690,7 +813,13 @@ fn matching_override_appends_plugins() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot("matching_override_appends_plugins", fs, console, result);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "matching_override_appends_plugins",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -732,12 +861,13 @@ fn typed_merge_preserves_extended_shorthand_origin() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "typed_merge_preserves_extended_shorthand_origin",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -779,12 +909,13 @@ fn matching_override_preserves_group_shorthand() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "matching_override_preserves_group_shorthand",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -810,12 +941,13 @@ fn null_value_does_not_replace_extended_provenance() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "null_value_does_not_replace_extended_provenance",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -864,12 +996,13 @@ fn replaced_composite_omits_superseded_source() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "replaced_composite_omits_superseded_source",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 #[test]
@@ -916,12 +1049,13 @@ fn conflicting_nested_package_versions_block_inspection() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-    assert_inspect_snapshot(
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
         "conflicting_nested_package_versions_block_inspection",
         fs,
         console,
         result,
-    );
+    ));
 }
 
 fn insert_configuration_package(
@@ -936,20 +1070,4 @@ fn insert_configuration_package(
         format!(r#"{{ "name": "{name}", "version": "{version}", "main": "biome.json" }}"#),
     );
     fs.insert(format!("{directory}/biome.json").into(), configuration);
-}
-
-#[test]
-fn normalizes_windows_paths_in_inspect_snapshots() {
-    let content = r#"{
-  "path": "node_modules\\@shared\\config\\biome.json"
-}
-node_modules\package-b\biome.json configuration"#;
-
-    assert_eq!(
-        normalize_inspect_snapshot_paths(content.to_string()),
-        r#"{
-  "path": "node_modules/@shared/config/biome.json"
-}
-node_modules/package-b/biome.json configuration"#
-    );
 }

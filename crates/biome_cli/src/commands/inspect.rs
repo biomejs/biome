@@ -17,7 +17,17 @@ use biome_service::{WorkspaceError, configuration::load_configuration, settings:
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 use serde_json::Value;
-use std::{io, sync::Arc};
+use std::{borrow::Cow, io, sync::Arc};
+
+#[cfg(any(test, all(debug_assertions, windows)))]
+fn display_path(path: &Utf8Path) -> Cow<'_, str> {
+    Cow::Owned(path.as_str().replace('\\', "/"))
+}
+
+#[cfg(not(any(test, all(debug_assertions, windows))))]
+fn display_path(path: &Utf8Path) -> Cow<'_, str> {
+    Cow::Borrowed(path.as_str())
+}
 
 /// Dispatches an `inspect` subcommand without mutating the workspace or configuration files.
 pub(crate) fn inspect(
@@ -120,13 +130,13 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
                 working_directory.join(path)
             }
         });
-        let display_path = matched_path.as_deref().map(|path| {
-            configuration_source
+        let matched_path_display = matched_path.as_deref().map(|path| {
+            let path = configuration_source
                 .directory_path
                 .as_deref()
                 .and_then(|directory| path.strip_prefix(directory).ok())
-                .unwrap_or(path)
-                .to_string()
+                .unwrap_or(path);
+            display_path(path).into_owned()
         });
         let matching_overrides = matched_path.as_deref().map_or_else(Vec::new, |path| {
             settings
@@ -135,7 +145,7 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
                 .collect::<Vec<_>>()
         });
         let inspection =
-            inspector.inspect_key(&key, &matching_overrides, display_path.as_deref())?;
+            inspector.inspect_key(&key, &matching_overrides, matched_path_display.as_deref())?;
 
         if json {
             let output = InspectionJson {
@@ -257,14 +267,16 @@ impl InspectionDiagnostic {
         output: String,
         has_overrides: bool,
     ) -> Self {
-        let path_text =
-            path.map_or_else(|| "default configuration".to_string(), Utf8Path::to_string);
+        let path_text = path.map_or_else(
+            || "default configuration".to_string(),
+            |path| display_path(path).into_owned(),
+        );
         let mut advice = Vec::new();
         if !configuration_paths.is_empty() {
             let mut paths = String::from("Configuration files used (merge order):");
             for path in configuration_paths {
                 paths.push_str("\n  - ");
-                paths.push_str(path.as_str());
+                paths.push_str(&display_path(path));
             }
             advice.push(AdviceLine::Plain(markup! {{paths}}.to_owned()));
         }
@@ -277,7 +289,7 @@ impl InspectionDiagnostic {
         Self {
             message: markup! { "Resolved configuration from "<Emphasis>{path_text}</Emphasis>"." }
                 .to_owned(),
-            path: path.map(Utf8Path::to_string),
+            path: path.map(|path| display_path(path).into_owned()),
             span: None,
             source_code: None,
             advice: InspectionAdvice(advice),
@@ -309,7 +321,7 @@ impl InspectionDiagnostic {
         let location = if sources.len() == 1 {
             sources.first().map(|source| {
                 (
-                    source.path.to_string(),
+                    display_path(source.path).into_owned(),
                     source.range,
                     source.source.to_string(),
                 )
@@ -355,7 +367,7 @@ impl InspectionDiagnostic {
             for source in sources {
                 advice.push(Self::composite_source_advice(source));
                 advice.push(AdviceLine::Frame {
-                    path: source.path.to_string(),
+                    path: display_path(source.path).into_owned(),
                     span: source.range,
                     source_code: source.source.to_string(),
                 });
@@ -375,10 +387,13 @@ impl InspectionDiagnostic {
                     markup! { "This value is provided by the root configuration." }.to_owned(),
                 )),
                 ConfigurationKind::Extend { .. } => {
-                    let root_path = root_path.map_or("the root configuration", Utf8Path::as_str);
+                    let root_path = root_path
+                        .map(display_path)
+                        .unwrap_or(Cow::Borrowed("the root configuration"));
+                    let source_path = display_path(source.path);
                     advice.push(AdviceLine::Info(
                         markup! {
-                            "This value comes from "<Emphasis>{source.path.as_str()}</Emphasis>
+                            "This value comes from "<Emphasis>{source_path}</Emphasis>
                             ", extended by "<Emphasis>{root_path}</Emphasis>"."
                         }
                         .to_owned(),
@@ -408,7 +423,7 @@ impl InspectionDiagnostic {
 
     /// Introduces one merged-value code frame with its configuration path and scope.
     fn composite_source_advice(source: &SourceReference) -> AdviceLine {
-        let path = source.path.as_str();
+        let path = display_path(source.path);
         let index = source.override_index.unwrap_or_default();
         let text = match (source.scope, source.kind) {
             (SourceScope::Base, ConfigurationKind::Root) => markup! {

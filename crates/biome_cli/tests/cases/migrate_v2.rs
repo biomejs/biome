@@ -32,7 +32,7 @@ fn should_successfully_migrate_knip() {
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
+      "recommended": true,
       "correctness": {
         "noUnusedVariables": "error",
         "noUnusedImports": "error"
@@ -187,7 +187,7 @@ fn should_successfully_migrate_ariakit() {
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
+      "recommended": true,
       "security": {
         "noDangerouslySetInnerHtml": "off"
       },
@@ -555,7 +555,7 @@ fn should_migrate_aws_config() {
   },
   "linter": {
     "rules": {
-      "preset": "recommended",
+      "recommended": true,
       "complexity": {
         "noForEach": "off"
       },
@@ -611,15 +611,15 @@ fn should_migrate_nested_config() {
     let mut console = BufferConsole::default();
     fs.create_file(
         "biome.json",
-        r#"{ "linter": { "rules": { "preset": "recommended" } } }"#,
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
     );
     fs.create_file(
         "foo/biome.json",
-        r#"{ "linter": { "rules": { "preset": "recommended" } } }"#,
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
     );
     fs.create_file(
         "bar/biome.json",
-        r#"{ "linter": { "rules": { "preset": "recommended" } } }"#,
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
     );
 
     let result = run_cli_with_dyn_fs(

@@ -1052,7 +1052,7 @@ impl From<&ResolvedExtendedConfiguration> for PackageResolution {
         message("Biome resolved multiple versions of "<Emphasis>{self.specifier}</Emphasis>"."),
         description = "Biome resolved multiple versions of {specifier}."
     ),
-    advice = "This is an error for Biome because it doesn't know which version to use. Extended configurations are applied in order, and a fixed configuraton could be overridden by one that is bugged."
+    advice = "This is an error for Biome because it doesn't know which version to use. Extended configurations are applied in order, and a fixed configuration could be overridden by one that is bugged."
 )]
 struct MultipleExtendedConfigurationVersions {
     specifier: String,
