@@ -523,11 +523,15 @@ pub enum BiomeCommand {
 
     /// Creates a default Biome configuration file in the current working directory.
     #[bpaf(command)]
-    Init(
+    Init {
         /// Creates `biome.jsonc` instead of `biome.json`.
         #[bpaf(long("jsonc"), switch)]
-        bool,
-    ),
+        jsonc: bool,
+
+        /// Enables Git VCS integration and respects Git ignore files.
+        #[bpaf(long("git"), switch)]
+        git: bool,
+    },
     /// Inspects Biome state without modifying files.
     #[bpaf(command)]
     Inspect {
@@ -717,7 +721,7 @@ impl BiomeCommand {
             | Self::Upgrade
             | Self::Start { .. }
             | Self::Stop
-            | Self::Init(_)
+            | Self::Init { .. }
             | Self::Explain { .. }
             | Self::RunServer { .. }
             | Self::Clean { .. }
@@ -740,7 +744,7 @@ impl BiomeCommand {
             | Self::LspProxy { .. }
             | Self::Start { .. }
             | Self::Stop
-            | Self::Init(_)
+            | Self::Init { .. }
             | Self::Inspect { .. }
             | Self::Explain { .. }
             | Self::RunServer { .. }
