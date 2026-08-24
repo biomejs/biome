@@ -1300,6 +1300,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noUnmodifiedLoopCondition",
+        TypeId::of::<
+            biome_rule_options::no_unmodified_loop_condition::NoUnmodifiedLoopConditionOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noUnnecessaryConditions",
         TypeId::of::<biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions>(
