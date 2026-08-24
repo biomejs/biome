@@ -215,8 +215,6 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
                     if let Some(list_item) = block.as_any_list_item() {
                         joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                     } else if block.is_fenced_block() {
-                        // Reset indent so repeated formatting does not keep
-                        // nesting the fenced block under the blockquote align.
                         joiner.entry(&dedent_to_root(&block.format()));
                     } else {
                         joiner.entry(&block.format());
