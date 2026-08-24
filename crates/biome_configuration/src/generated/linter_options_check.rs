@@ -693,6 +693,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("correctness", "noInvalidDirectionInLinearGradient", TypeId::of::<biome_rule_options::no_invalid_direction_in_linear_gradient::NoInvalidDirectionInLinearGradientOptions>()));
     result.push((
+        "nursery",
+        "noInvalidFileInputAccept",
+        TypeId::of::<
+            biome_rule_options::no_invalid_file_input_accept::NoInvalidFileInputAcceptOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noInvalidGridAreas",
         TypeId::of::<biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions>(),
