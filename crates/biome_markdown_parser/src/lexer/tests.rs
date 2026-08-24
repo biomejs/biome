@@ -422,6 +422,39 @@ fn hard_line_break_many_trailing_spaces() {
 }
 
 #[test]
+fn textual_long_whitespace() {
+    let source = format!("left{}right", " ".repeat(4096));
+
+    assert_lex! {
+        source.as_str(),
+        MD_TEXTUAL_LITERAL:4105,
+    }
+}
+
+#[test]
+fn closing_hashes_after_mixed_whitespace() {
+    assert_lex! {
+        MarkdownLexContext::HeadingContent,
+        "heading \t ##\n",
+        MD_TEXTUAL_LITERAL:7,
+        MD_TEXTUAL_LITERAL:3,
+        HASH:1,
+        HASH:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn hard_line_break_after_tab() {
+    assert_lex! {
+        "text\t  \nmore",
+        MD_TEXTUAL_LITERAL:5,
+        MD_HARD_LINE_LITERAL:3,
+        MD_TEXTUAL_LITERAL:4,
+    }
+}
+
+#[test]
 fn hard_line_break_backslash_newline() {
     // Backslash followed by newline is a hard line break
     assert_lex! {

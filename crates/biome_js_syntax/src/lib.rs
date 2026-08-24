@@ -11,6 +11,7 @@ pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
 pub mod cast_ext;
+pub mod class_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;

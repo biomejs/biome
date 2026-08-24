@@ -51,6 +51,48 @@ fn lints_dom_style_attributes_as_css() {
 }
 
 #[test]
+fn lints_dom_style_attributes_as_css_in_jsx() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{ "javascript": { "experimentalEmbeddedSnippetsEnabled": true } }"#.as_bytes(),
+    );
+
+    let file = Utf8Path::new("index.jsx");
+    fs.insert(
+        file.into(),
+        r#"<>
+    <div style="colr: blue"></div>
+    <div style="colr: blue"/>
+    <my-element style="colr: blue"></my-element>
+    <div css:style="colr: blue"/>
+    <Component style="colr: blue"></Component>
+</>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lints_dom_style_attributes_as_css_in_jsx",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_not_lint_component_style_props_as_css() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();

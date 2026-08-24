@@ -3,7 +3,9 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlAttribute, SVG_EXCLUSIVE_ELEMENTS, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::{
+    AnyHtmlAttribute, SVG_EXCLUSIVE_TAG_NAMES, element_ext::AnyHtmlTagElement,
+};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, TokenText};
 use biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions;
@@ -12,17 +14,16 @@ use biome_string_case::Case;
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
-    /// Enforce hyphenated (kebab-case) attribute names in Vue templates.
+    /// Disallow uppercase letters in Vue template attribute names.
     ///
     /// Vue style guide recommends using hyphenated attribute (and prop) names in templates to
     /// keep them consistent and distinguish them from JavaScript identifiers written in camelCase/PascalCase.
     ///
-    /// This rule flags attributes that are detected as camelCase, PascalCase, CONSTANT_CASE, snake_case
-    /// or that contain any uppercase ASCII letter. It uses Biome's internal `Case::identify` helper.
+    /// Like the upstream ESLint rule, this rule flags attribute names that contain uppercase letters.
+    /// It doesn't require exact kebab-case, so punctuation such as colons and underscores is allowed.
     ///
     /// Allowed:
-    /// - kebab-case attributes (e.g. `data-test-id`)
-    /// - pure lowercase single word attributes (e.g. `class`, `id`)
+    /// - names without uppercase letters (e.g. `data-test-id`, `pt:header:id`, `some_attr`)
     ///
     /// ## Examples
     ///
@@ -42,6 +43,7 @@ declare_lint_rule! {
     /// <div data-test-id="x"></div>
     /// <div class="foo"></div>
     /// <MyComp :some-prop="x" />
+    /// <MyComp pt:header:data-test-id="x" />
     /// ```
     ///
     /// ## Options
@@ -50,7 +52,7 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of attribute names that should be ignored by the rule (they won't be required to be hyphenated).
+    /// A list of attribute names that should be exempt from the uppercase-letter check.
     /// Use this when you have a fixed set of camelCase / PascalCase prop names you intentionally allow.
     ///
     /// ```json,options
@@ -69,8 +71,8 @@ declare_lint_rule! {
     ///
     /// ### `ignoreTags`
     ///
-    /// A list of tag names whose attributes should be skipped entirely.
-    /// This is useful for third-party or internal components that deliberately expose non‑hyphenated prop names.
+    /// A list of tag names whose attributes should be exempt from the uppercase-letter check.
+    /// This is useful for third-party or internal components that deliberately expose camelCase or PascalCase prop names.
     ///
     /// ```json,options
     /// {
@@ -134,7 +136,7 @@ impl Rule for UseVueHyphenatedAttributes {
             {
                 continue;
             }
-            if !is_hyphenated(attr_name.text()) {
+            if contains_uppercase(attr_name.text()) {
                 violations.push(attribute.clone());
             }
         }
@@ -162,7 +164,16 @@ impl Rule for UseVueHyphenatedAttributes {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
         let name = extract_attribute_name(state)?;
-        let suggested = Case::Kebab.convert(name.text());
+        let name = name.text();
+
+        // In Vue, colons can be meaningful parts of plain attribute names, such as PrimeVue
+        // pass-through attributes. `Case::Kebab.convert` would replace them with hyphens, so
+        // don't offer a fix that could change the attribute's meaning.
+        if name.contains(':') {
+            return None;
+        }
+
+        let suggested = Case::Kebab.convert(name);
 
         // Start a batch mutation
         let mut mutation = biome_rowan::BatchMutationExt::begin(ctx.root());
@@ -273,17 +284,15 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
     None
 }
 
-fn is_hyphenated(name: &str) -> bool {
-    // Treat pure lowercase and kebab-case as valid.
-    matches!(Case::identify(name, true), Case::Kebab | Case::Lower)
+fn contains_uppercase(name: &str) -> bool {
+    // Don't use `Case::identify`: it classifies names by their exact case shape, while the
+    // upstream rule's default "always" mode only checks for uppercase letters. Punctuation is
+    // therefore neutral rather than evidence that the rule should report an attribute.
+    name.chars().any(char::is_uppercase)
 }
 
 fn is_svg_element(element: &AnyHtmlTagElement) -> bool {
-    let Some(tag_name) = element.tag_name() else {
-        return false;
-    };
-
-    SVG_EXCLUSIVE_ELEMENTS
-        .binary_search(&tag_name.text())
-        .is_ok()
+    element
+        .tag_name_kind()
+        .is_some_and(|kind| SVG_EXCLUSIVE_TAG_NAMES.contains(kind))
 }

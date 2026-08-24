@@ -1,0 +1,32 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_component_style.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<Component style="--native-property: red; color: var(--component-prop)" />
+<div style="color: var(--native-property)"></div>
+
+```
+
+# Diagnostics
+```
+invalid_component_style.astro:3:24 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --native-property is not defined.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <Component style="--native-property: red; color: var(--component-prop)" />
+  > 3 │ <div style="color: var(--native-property)"></div>
+      │                        ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
+  
+  i Define the custom property in an available stylesheet, rename it or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

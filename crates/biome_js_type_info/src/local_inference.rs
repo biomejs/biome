@@ -1457,7 +1457,8 @@ impl TypeData {
         let parent = decl.syntax().parent()?;
         let (is_awaited, ty) = if JsForInStatement::can_cast(parent.kind()) {
             (false, Self::string())
-        } else if let Some(for_of) = JsForOfStatement::cast(parent) {
+        } else {
+            let for_of = JsForOfStatement::cast(parent)?;
             let ty = Self::from(TypeofExpression::IterableValueOf(
                 TypeofIterableValueOfExpression {
                     ty: TypeReference::from_any_js_expression(
@@ -1468,8 +1469,6 @@ impl TypeData {
                 },
             ));
             (for_of.await_token().is_some(), ty)
-        } else {
-            return None;
         };
 
         let declarator = decl.declarator().ok()?;
@@ -3023,7 +3022,7 @@ fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
     };
 
     reference_type.type_arguments().is_none()
-        && reference_type.name().ok().is_some_and(|name| {
+        && reference_type.name().is_ok_and(|name| {
             name.as_js_reference_identifier()
                 .and_then(|identifier| identifier.value_token().ok())
                 .is_some_and(|token| token.text_trimmed() == "const")

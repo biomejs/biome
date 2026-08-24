@@ -162,12 +162,12 @@ impl Rule for NoShoutyConstants {
                 AnyJsExpression::JsIdentifierExpression(node),
                 AnyJsExpression::AnyJsLiteralExpression(literal),
             );
-        } else if let Some(node) = state
+        } else {
+            let node = state
             .reference
             .syntax()
             .parent()?
-            .cast::<JsShorthandPropertyObjectMember>()
-        {
+            .cast::<JsShorthandPropertyObjectMember>()?;
             // for replacing JsShorthandPropertyObjectMember
             let new_element = js_property_object_member(
                 AnyJsObjectMemberName::JsLiteralMemberName(js_literal_member_name(
@@ -186,8 +186,6 @@ impl Rule for NoShoutyConstants {
             );
 
             batch.replace_element(node.into_syntax().into(), new_element.into_syntax().into());
-        } else {
-            return None;
         }
 
         Some(JsRuleAction::new(

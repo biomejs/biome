@@ -797,9 +797,7 @@ fn is_github_actions() -> bool {
         return false;
     }
     // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
-    std::env::var("GITHUB_ACTIONS")
-        .ok()
-        .is_some_and(|v| v == "true")
+    std::env::var("GITHUB_ACTIONS").is_ok_and(|v| v == "true")
 }
 
 /// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.

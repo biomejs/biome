@@ -30,7 +30,7 @@ impl FromStr for MaxSize {
 
 impl Deserializable for MaxSize {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

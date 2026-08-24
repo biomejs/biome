@@ -6,8 +6,7 @@ use crate::syntax::css_modules::{
 use crate::syntax::parse_error::expected_selector;
 use crate::syntax::selector::{SelectorList, eat_or_recover_selector_function_close_token};
 use crate::syntax::{CssSyntaxFeatures, parse_regular_identifier};
-use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::T;
+use biome_css_syntax::{CssSyntaxKind::*, T, decode_css_identifier};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -18,7 +17,12 @@ use biome_parser::{Parser, SyntaxFeature, token_set};
 /// This function determines if the parser is currently positioned at the start of a `:local` or `:global`.
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
-    p.at_ts(CSS_MODULES_SCOPE_SET) && p.nth_at(1, T!['('])
+    (p.at_ts(CSS_MODULES_SCOPE_SET)
+        || matches!(
+            decode_css_identifier(p.cur_text()).as_ref(),
+            "local" | "global"
+        ))
+        && p.nth_at(1, T!['('])
 }
 
 #[inline]

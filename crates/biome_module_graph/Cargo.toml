@@ -73,6 +73,7 @@ biome_js_formatter   = { path = "../biome_js_formatter" }
 biome_js_parser      = { path = "../biome_js_parser" }
 biome_json_parser    = { path = "../biome_json_parser" }
 biome_json_value     = { path = "../biome_json_value" }
+biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["html_embeds", "testing"] }
 divan                = { package = "codspeed-divan-compat", version = "=5.0.1" }
 insta                = { workspace = true }

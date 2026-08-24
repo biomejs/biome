@@ -12,18 +12,22 @@ categories.workspace = true
 publish              = true
 
 [dependencies]
-biome_analyze     = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_js_syntax   = { workspace = true }
-biome_resolver    = { workspace = true }
-biome_rowan       = { workspace = true }
-biome_text_size   = { workspace = true }
-boa_engine        = { workspace = true }
-camino            = { workspace = true }
-rustc-hash        = { workspace = true }
+biome_analyze      = { workspace = true }
+biome_diagnostics  = { workspace = true }
+biome_js_parser    = { workspace = true }
+biome_js_syntax    = { workspace = true }
+biome_js_transform = { workspace = true }
+biome_languages    = { workspace = true, features = ["lang_js"] }
+biome_resolver     = { workspace = true }
+biome_rowan        = { workspace = true }
+biome_text_size    = { workspace = true }
+boa_engine         = { workspace = true }
+camino             = { workspace = true }
+rustc-hash         = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-getrandom = { version = "0.3.2", features = ["wasm_js"] }
+boa_engine = { workspace = true, features = ["js"] }
+web-time   = { workspace = true }
 
 [lints]
 workspace = true

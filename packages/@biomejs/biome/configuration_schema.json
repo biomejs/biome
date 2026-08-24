@@ -3096,6 +3096,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroSetHtmlDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroSetHtmlDirectiveOptions" }
+			]
+		},
+		"NoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5774,6 +5784,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredCustomPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredCustomPropertiesOptions" }
+			]
+		},
+		"NoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6707,6 +6727,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroSetHtmlDirective": {
+					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroSetHtmlDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBaseToString": {
 					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
@@ -7012,6 +7039,13 @@
 					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUndeclaredCustomProperties": {
+					"description": "Reports custom properties used with var() that have no visible declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8197,6 +8231,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroSetHtmlDirectiveOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10484,6 +10527,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredCustomPropertiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14028,7 +14080,7 @@
 					]
 				},
 				"useVueHyphenatedAttributes": {
-					"description": "Enforce hyphenated (kebab-case) attribute names in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
+					"description": "Disallow uppercase letters in Vue template attribute names.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueHyphenatedAttributesConfiguration" },
 						{ "type": "null" }
@@ -17186,14 +17238,14 @@
 			"type": "object",
 			"properties": {
 				"ignore": {
-					"description": "List of attribute names to ignore when checking for hyphenated attributes.",
+					"description": "List of attribute names to ignore when checking for uppercase letters.",
 					"type": ["array", "null"],
 					"default": null,
 					"items": { "type": "string" },
 					"uniqueItems": true
 				},
 				"ignoreTags": {
-					"description": "List of HTML tags to ignore when checking for hyphenated attributes.",
+					"description": "List of HTML tags whose attributes should not be checked for uppercase letters.",
 					"type": ["array", "null"],
 					"default": null,
 					"items": { "type": "string" },

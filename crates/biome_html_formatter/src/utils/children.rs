@@ -22,7 +22,7 @@ use crate::{
     utils::metadata::get_element_css_display,
 };
 
-pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
+pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = *b" \n\t\r";
 
 /// Meaningful HTML text is defined to be text that has either non-whitespace
 /// characters, or does not contain a newline. Whitespace is defined as ASCII

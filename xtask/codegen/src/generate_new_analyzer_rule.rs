@@ -698,7 +698,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         rule_folder.display(),
         Case::Snake.convert(rule_name)
     );
-    std::fs::write(file_name.clone(), code).unwrap_or_else(|_| panic!("To write {}", &file_name));
+    std::fs::write(file_name.clone(), code).unwrap_or_else(|_| panic!("To write {}", file_name));
 
     let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
     let mut categories = std::fs::read_to_string(categories_path).unwrap();
