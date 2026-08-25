@@ -1,5 +1,5 @@
 ---
-@biomejs/biome: patch
+"@biomejs/biome": patch
 ---
 
-Fixed [`useValidAnchor`](https://biomejs.dev/linter/rules/use-valid-anchor/) so Astro JSX shorthand attributes like `<a {href}>` inside expressions are treated as a valid `href`.
+Fixed [#11496](https://github.com/biomejs/biome/issues/11496): [`useValidAnchor`](https://biomejs.dev/linter/rules/use-valid-anchor/) now treats Astro JSX shorthand attributes like `<a {href}>` as a valid `href`.
