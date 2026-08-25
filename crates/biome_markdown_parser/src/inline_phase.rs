@@ -45,7 +45,14 @@ pub(crate) fn parse_deferred_inlines(
     let mut replacements = Vec::new();
 
     for deferred in &output.deferred_inlines {
-        if deferred.definitions_len() == output.link_reference_definitions.len() {
+        let Some(should_reparse) = should_reparse_deferred_inline(
+            source,
+            deferred,
+            output.link_reference_definitions.len(),
+        ) else {
+            return false;
+        };
+        if !should_reparse {
             continue;
         }
 
@@ -63,6 +70,11 @@ pub(crate) fn parse_deferred_inlines(
             deferred.source_range(),
             fragment,
         ));
+    }
+
+    if replacements.is_empty() {
+        output.deferred_inlines.clear();
+        return true;
     }
 
     let mut events = Vec::with_capacity(output.events.len());
@@ -106,6 +118,21 @@ pub(crate) fn parse_deferred_inlines(
     output.deferred_inlines.clear();
 
     true
+}
+
+#[inline]
+fn should_reparse_deferred_inline(
+    source: &str,
+    deferred: &DeferredInline,
+    definitions_len: usize,
+) -> Option<bool> {
+    if deferred.definitions_len() == definitions_len {
+        return Some(false);
+    }
+
+    let range = deferred.source_range();
+    let source = source.get(usize::from(range.start())..usize::from(range.end()))?;
+    Some(source.as_bytes().contains(&b'['))
 }
 
 fn validate_deferred_inlines(source: &str, output: &MarkdownParserOutput) -> bool {

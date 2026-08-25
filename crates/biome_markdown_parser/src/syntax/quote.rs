@@ -344,8 +344,7 @@ impl QuoteBlockList {
 
         if !self.first_line && !p.at(NEWLINE) && (p.at_line_start() || p.has_preceding_line_break())
         {
-            if has_quote_prefix(p, self.depth) {
-                consume_quote_prefix(p, self.depth);
+            if consume_quote_prefix(p, self.depth) {
                 relex_after_quote_prefix_consumed(p);
                 self.line_started_with_prefix = true;
             } else {
@@ -658,12 +657,10 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
         return false;
     }
 
-    if !has_quote_prefix(p, depth) {
-        return false;
-    }
-
     let continues_code_block = p.lookahead(|p| {
-        consume_quote_prefix(p, depth);
+        if !consume_quote_prefix(p, depth) {
+            return false;
+        }
 
         // Blank lines (consecutive newlines) are allowed in indented code.
         if p.at(NEWLINE) {
@@ -725,20 +722,32 @@ pub(crate) fn has_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
 }
 
 pub(crate) fn consume_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
-    if depth == 0 || !has_quote_prefix(p, depth) {
+    if depth == 0 {
         return false;
     }
 
-    consume_quote_prefix_impl(p, depth, true)
+    let checkpoint = p.checkpoint();
+    if consume_quote_prefix_impl(p, depth, true) {
+        true
+    } else {
+        p.rewind(checkpoint);
+        false
+    }
 }
 
 /// Consume quote prefix tokens without updating virtual line start.
 pub(crate) fn consume_quote_prefix_without_virtual(p: &mut MarkdownParser, depth: usize) -> bool {
-    if depth == 0 || !has_quote_prefix(p, depth) {
+    if depth == 0 {
         return false;
     }
 
-    consume_quote_prefix_impl(p, depth, false)
+    let checkpoint = p.checkpoint();
+    if consume_quote_prefix_impl(p, depth, false) {
+        true
+    } else {
+        p.rewind(checkpoint);
+        false
+    }
 }
 
 fn consume_quote_prefix_impl(

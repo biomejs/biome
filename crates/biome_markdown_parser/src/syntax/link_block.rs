@@ -27,7 +27,6 @@ use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
-use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
     LinkDestinationKind, MAX_BLOCK_PREFIX_INDENT, MAX_LINK_DESTINATION_PAREN_DEPTH,
     ParenDepthResult, ends_with_unescaped_close, get_title_close_char, is_space_or_tab_token,
@@ -45,27 +44,24 @@ const MAX_LABEL_LENGTH: usize = 999;
 /// We use token-based lookahead to verify the pattern: `[label]: destination`
 /// where label doesn't contain unescaped `]` or `[`, and is followed by `:`.
 pub(crate) fn at_link_block(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        // Must be at line start (or start of input)
-        if !p.at_line_start() && !p.at_start_of_input() {
-            return false;
-        }
+    p.lookahead(|p| at_link_block_start_impl(p) && is_valid_link_definition_lookahead(p))
+}
 
-        // Check for up to 3 spaces of indentation (more means indented code block)
-        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
-            return false;
-        }
+pub(crate) fn at_link_block_start(p: &mut MarkdownParser) -> bool {
+    p.lookahead(at_link_block_start_impl)
+}
 
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+fn at_link_block_start_impl(p: &mut MarkdownParser) -> bool {
+    if !p.at_line_start() && !p.at_start_of_input() {
+        return false;
+    }
 
-        // Must start with `[`
-        if !p.at(L_BRACK) {
-            return false;
-        }
+    if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
+        return false;
+    }
 
-        // Use token-based lookahead to verify this is a valid link reference definition
-        is_valid_link_definition_lookahead(p)
-    })
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.at(L_BRACK)
 }
 
 /// Token-based lookahead to verify a link reference definition.
@@ -81,9 +77,8 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     p.bump_any();
 
     // Parse label: consume tokens until ] or invalid state
-    // Also collect the label text for normalization check.
     let mut label_len = 0;
-    let mut label_text = String::new();
+    let mut has_non_whitespace = false;
     loop {
         if p.at(EOF) {
             return false;
@@ -99,7 +94,7 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
         }
 
         let text = p.cur_text();
-        label_text.push_str(text);
+        has_non_whitespace |= text.chars().any(|c| !c.is_whitespace());
 
         // Check for escape sequences
         if text.starts_with('\\') && text.len() > 1 {
@@ -114,14 +109,8 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
         p.bump_any();
     }
 
-    // Label must be non-empty
-    if label_len == 0 {
-        return false;
-    }
-
-    // Label must also be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
-    let normalized = normalize_reference_label(&label_text);
-    if normalized.is_empty() {
+    // Label must be non-empty after normalization (e.g., `[\n ]` normalizes to empty).
+    if label_len == 0 || !has_non_whitespace {
         return false;
     }
 

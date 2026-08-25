@@ -52,7 +52,7 @@ use frontmatter::parse_frontmatter;
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
 use inline::EmphasisContext;
-use link_block::{at_link_block, parse_link_block};
+use link_block::{at_link_block_start, parse_link_block};
 use list::{
     at_bullet_list_item, at_order_list_item, at_sibling_list_marker,
     marker_followed_by_whitespace_or_eol, parse_bullet_list_item, parse_order_list_item,
@@ -373,7 +373,7 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         }
     } else if at_html_block(p) {
         parse_html_block(p)
-    } else if at_link_block(p) {
+    } else if at_link_block_start(p) {
         // Try to parse as link reference definition
         // Use try_parse to fall back to paragraph if not a valid definition
         let link_result = try_parse(p, |p| {
@@ -1067,10 +1067,9 @@ fn is_quote_blank_line_from_current(p: &mut MarkdownParser, quote_depth: usize) 
         if is_quote_only_blank_line_from_source(p, quote_depth) {
             return true;
         }
-        if !has_quote_prefix(p, quote_depth) {
+        if !consume_quote_prefix_without_virtual(p, quote_depth) {
             return false;
         }
-        consume_quote_prefix_without_virtual(p, quote_depth);
         while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
             p.bump(MD_TEXTUAL_LITERAL);
         }
@@ -1387,7 +1386,7 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
     let m = p.start();
     let prev_emphasis_context = set_inline_emphasis_context(p);
     let quote_depth = p.state().block_quote_depth;
-    if quote_depth > 0 && p.at_line_start() && has_quote_prefix(p, quote_depth) {
+    if quote_depth > 0 && p.at_line_start() {
         consume_quote_prefix(p, quote_depth);
     }
     let inline_start: usize = p.cur_range().start().into();

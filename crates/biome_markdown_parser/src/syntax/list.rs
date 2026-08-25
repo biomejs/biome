@@ -44,7 +44,7 @@ use crate::lexer::MarkdownReLexContext;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
 use crate::syntax::header::parse_header;
 use crate::syntax::html_block::{at_html_block, parse_html_block};
-use crate::syntax::link_block::{at_link_block, parse_link_block};
+use crate::syntax::link_block::{at_link_block, at_link_block_start, parse_link_block};
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
@@ -2164,8 +2164,7 @@ fn parse_first_line_blocks(
     }
 
     // Link reference definition
-    let link_block_start =
-        p.lookahead(|p| with_virtual_line_start(p, p.cur_range().start(), at_link_block));
+    let link_block_start = with_virtual_line_start(p, p.cur_range().start(), at_link_block_start);
 
     if link_block_start {
         let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_link_block);
