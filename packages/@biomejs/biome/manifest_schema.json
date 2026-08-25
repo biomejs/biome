@@ -1,18 +1,21 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "PluginManifest",
-	"description": "Declares the Grit rules provided by a plugin package or directory.",
+	"title": "BiomeManifest",
+	"description": "Declares the rules and configurations provided by a Biome package.",
 	"type": "object",
 	"properties": {
 		"$schema": {
 			"description": "An optional JSON Schema reference used by editors.",
 			"type": ["string", "null"]
 		},
-		"rules": {
-			"description": "Normalized paths to Grit rules, relative to the manifest directory.",
+		"configs": {
+			"description": "Named configurations and selected configurations from other packages.",
 			"type": "array",
-			"items": { "type": "string" },
-			"minItems": 1
+			"items": { "$ref": "#/$defs/ManifestEntry" }
+		},
+		"plugins": {
+			"description": "Named plugin rules and presets provided by the package.",
+			"anyOf": [{ "$ref": "#/$defs/ManifestPlugins" }, { "type": "null" }]
 		},
 		"version": {
 			"description": "The manifest format version.",
@@ -24,5 +27,47 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["version", "rules"]
+	"required": ["version"],
+	"$defs": {
+		"ManifestEntry": {
+			"description": "A selected package export or a map from public names to package-relative files.",
+			"anyOf": [
+				{
+					"description": "A named export selected from an installed package.",
+					"type": "string"
+				},
+				{
+					"description": "Public names mapped to package-relative files.",
+					"type": "object",
+					"additionalProperties": { "type": "string" }
+				}
+			]
+		},
+		"ManifestPlugins": {
+			"description": "Named lint rules and groups of rules provided by a Biome package.",
+			"type": "object",
+			"properties": {
+				"presets": {
+					"description": "Named groups of rules that can be loaded together.",
+					"anyOf": [{ "$ref": "#/$defs/ManifestPresets" }, { "type": "null" }]
+				},
+				"rules": {
+					"description": "Named rules and selected rules or presets from other packages.",
+					"type": "array",
+					"items": { "$ref": "#/$defs/ManifestEntry" },
+					"minItems": 1
+				}
+			},
+			"additionalProperties": false
+		},
+		"ManifestPresets": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "array",
+				"items": { "type": "string" },
+				"minItems": 1
+			},
+			"minProperties": 1
+		}
+	}
 }
