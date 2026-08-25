@@ -54,8 +54,7 @@
 				"rules": {
 					"description": "Named rules and selected rules or presets from other packages.",
 					"type": "array",
-					"items": { "$ref": "#/$defs/ManifestEntry" },
-					"minItems": 1
+					"items": { "$ref": "#/$defs/ManifestEntry" }
 				}
 			},
 			"additionalProperties": false
