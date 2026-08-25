@@ -1027,6 +1027,10 @@ struct DebugTypeCollector {
 
 #[cfg(feature = "type_inference")]
 impl RawTypeCollector for DebugTypeCollector {
+    fn narrowing_enabled(&self) -> bool {
+        biome_module_graph::TYPE_NARROWING_ENABLED
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }
@@ -1823,4 +1827,25 @@ fn search(
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let any_parse = parsed.any_parse(&workspace_db);
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
+}
+
+#[cfg(test)]
+#[cfg(feature = "module_graph")]
+mod tests {
+    /// This crate declares `type_narrowing` for the aggregate feature sets, but
+    /// the flag itself lives in the module graph. This pins the forwarding
+    /// between the two.
+    ///
+    /// Only one direction is asserted: another crate in the same build may
+    /// enable the module graph's feature on its own, and Cargo's feature
+    /// unification then turns the flag on here as well.
+    #[test]
+    fn type_narrowing_feature_reaches_the_module_graph() {
+        // `panic!` instead of `assert!` here: clippy's assertions_on_constants
+        // lint fires on a bare `assert!` over this compile-time-known bool, but
+        // not on an equivalent `if`/`panic!`.
+        if cfg!(feature = "type_narrowing") && !biome_module_graph::TYPE_NARROWING_ENABLED {
+            panic!("type_narrowing is enabled here but not in biome_module_graph");
+        }
+    }
 }

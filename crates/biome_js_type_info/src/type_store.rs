@@ -112,6 +112,17 @@ pub trait RawTypeCollector {
         expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData>;
 
+    /// Returns whether guard-based narrowing should be applied while
+    /// collecting types.
+    ///
+    /// Narrowing is still under development, so the collector that feeds the
+    /// module graph decides at construction time whether to enable it.
+    /// Collectors that do not opt in observe the same types as before
+    /// narrowing existed.
+    fn narrowing_enabled(&self) -> bool {
+        false
+    }
+
     fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
         let TypeReference::Resolved(RawTypeId::Local(id)) = ty else {
             return None;

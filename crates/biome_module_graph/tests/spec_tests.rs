@@ -64,6 +64,9 @@ mod intersections;
 mod js_doc;
 #[path = "spec_tests/module_resolution.test.rs"]
 mod module_resolution;
+// Narrowing is compiled in only behind the `type_narrowing` feature, so its
+// specs need `cargo test -p biome_module_graph --features type_narrowing`.
+#[cfg(feature = "type_narrowing")]
 #[path = "spec_tests/narrowing.test.rs"]
 mod narrowing;
 #[path = "spec_tests/normalization.test.rs"]

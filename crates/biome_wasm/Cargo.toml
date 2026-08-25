@@ -50,7 +50,14 @@ lang_md                      = ["biome_service/lang_md"]
 lang_scss                    = ["biome_service/lang_scss"]
 lang_yaml                    = ["biome_service/lang_yaml"]
 report_scss_exclusive_syntax = ["biome_service/report_scss_exclusive_syntax"]
-unstable                     = ["lang_md", "lang_scss", "lang_yaml", "report_scss_exclusive_syntax"]
+type_narrowing               = ["biome_service/type_narrowing"]
+unstable                     = [
+  "lang_md",
+  "lang_scss",
+  "lang_yaml",
+  "report_scss_exclusive_syntax",
+  "type_narrowing"
+]
 
 [lints]
 workspace = true

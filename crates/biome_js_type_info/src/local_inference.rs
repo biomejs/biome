@@ -1200,7 +1200,11 @@ impl TypeData {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let tag = typeof_guard_narrowed_tag(resolver, id);
+                let tag = if resolver.narrowing_enabled() {
+                    typeof_guard_narrowed_tag(resolver, id)
+                } else {
+                    None
+                };
                 let reference = TypeReference::from_name(scope_id, name);
                 match tag {
                     Some(tag) => Self::from(TypeofExpression::Narrowed(TypeofNarrowedExpression {

@@ -231,6 +231,7 @@ stable                       = [
 testing                      = []
 # TODO does it needs lang_js ? to verify
 type_inference               = ["dep:biome_js_type_info", "lang_js", "module_graph"]
+type_narrowing               = ["biome_module_graph/type_narrowing", "type_inference"]
 
 [lints]
 workspace = true
