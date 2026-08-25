@@ -69,6 +69,22 @@ declare_lint_rule! {
     /// arr.some(x => x > 1);
     /// ```
     ///
+    /// ```ts
+    /// const arr = [1, 2, 3];
+    /// // includes() compares with SameValueZero, so it matches a NaN that
+    /// // `x === NaN` never does
+    /// arr.some(x => x === NaN);
+    /// ```
+    ///
+    /// ```ts
+    /// const arr = [1, 2, 3];
+    /// let n = 0;
+    /// const gen = () => ++n;
+    /// // some() runs its callback once per element while includes() evaluates
+    /// // its argument once, so a search value with side effects is left alone
+    /// arr.some(x => x === gen());
+    /// ```
+    ///
     pub UseIncludes {
         version: "2.5.0",
         name: "useIncludes",
