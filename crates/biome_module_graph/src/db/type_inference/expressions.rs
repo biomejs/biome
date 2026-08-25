@@ -2270,7 +2270,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 ConditionalSubset::Falsy
                 | ConditionalSubset::Truthy
                 | ConditionalSubset::NonNullish => {
-                    if ctx.instance_excluded_from_subset(target, subset) {
+                    // Classifying an instance by its target's truthiness is
+                    // part of narrowing, so it only applies when narrowing is
+                    // compiled in.
+                    if crate::TYPE_NARROWING_ENABLED
+                        && ctx.instance_excluded_from_subset(target, subset)
+                    {
                         FilterAction::Stripped
                     } else {
                         FilterAction::Retained
