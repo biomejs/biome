@@ -1,5 +1,6 @@
 use crate::globals::is_js_global;
 
+use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -61,7 +62,15 @@ impl Rule for NoGlobalAssign {
         if !ctx.model().is_unresolved_reference(assignment) {
             return None;
         }
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
         let token = assignment.name_token().ok()?;
+
+        if embedded.contains_binding(token.token_text_trimmed()) {
+            return None;
+        }
+
         is_js_global(token.text_trimmed()).then(|| token.text_trimmed_range())
     }
 
