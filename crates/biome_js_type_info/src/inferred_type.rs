@@ -190,6 +190,24 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns `true` when every variant of this type is an array instance or a
+    /// tuple.
+    ///
+    /// Unlike [`Self::is_all_string_array_or_tuple`], strings are rejected:
+    /// `Array#some()` does not exist on strings, so a string receiver cannot be
+    /// rewritten to `String#includes()` through the `some()` form.
+    pub fn is_all_array_or_tuple(self) -> bool {
+        self.try_all_variants_match(|data| {
+            matches!(data, TypeData::Tuple(_))
+                || matches!(
+                    data,
+                    TypeData::InstanceOf(instance)
+                        if instance.ty(self.db).is_array_class(self.db)
+                )
+        })
+        .unwrap_or(false)
+    }
+
     pub fn is_regexp_literal_without_global_flag(self) -> bool {
         matches!(
         self.data,

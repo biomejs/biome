@@ -10,7 +10,6 @@ use biome_js_syntax::{
     JsFunctionBody, JsFunctionExpression, JsIdentifierBinding, JsParameters, JsReferenceIdentifier,
     T,
 };
-use biome_js_type_info::{ResolvedTypeData, Type, TypeData};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
@@ -345,9 +344,10 @@ fn detect_some_pattern(
     // receiver may be parenthesized (`(arr).some(...)`), so unwrap it before
     // resolving its type.
     let object = member.object().ok()?.omit_parentheses();
-    if !all_type_variants_match(&ctx.type_of_expression(&object), |current, raw| {
-        current.is_array_of(|_| true) || matches!(raw, TypeData::Tuple(_))
-    }) {
+    if !ctx
+        .type_of_expression(&object)
+        .is_some_and(|ty| ty.is_all_array_or_tuple())
+    {
         return None;
     }
 
@@ -642,37 +642,3 @@ fn ensure_known_includes_type(ctx: &RuleContext<UseIncludes>, call: &JsCallExpre
         .is_some_and(|ty| ty.is_all_string_array_or_tuple())
 }
 
-fn all_type_variants_match(ty: &Type, mut predicate: impl FnMut(&Type, &TypeData) -> bool) -> bool {
-    let mut saw_variant = false;
-    let mut pending = vec![ty.clone()];
-
-    while let Some(current) = pending.pop() {
-        if current.is_union() {
-            let mut variants = current.flattened_union_variants().peekable();
-            if variants.peek().is_none() {
-                return false;
-            }
-            saw_variant = true;
-            pending.extend(variants);
-            continue;
-        }
-
-        let Some(raw) = current.resolved_data().map(ResolvedTypeData::as_raw_data) else {
-            return false;
-        };
-
-        match raw {
-            TypeData::Generic(generic) if generic.constraint.is_known() => {
-                let Some(constraint) = current.resolve(&generic.constraint) else {
-                    return false;
-                };
-                pending.push(constraint);
-            }
-            TypeData::Generic(_) => return false,
-            _ if predicate(&current, raw) => saw_variant = true,
-            _ => return false,
-        }
-    }
-
-    saw_variant
-}
