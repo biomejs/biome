@@ -89,7 +89,7 @@ pub fn resolve_package_root(
             Err(error) => return Err(error),
         };
 
-        let package_path = node_modules_path.join(package_name);
+        let package_path = join_package_name(&node_modules_path, package_name);
         let package_path = match fs.path_info(&package_path) {
             Ok(PathInfo::Directory) => package_path,
             Ok(PathInfo::Symlink {
@@ -104,6 +104,14 @@ pub fn resolve_package_root(
     }
 
     Err(ResolveError::NotFound)
+}
+
+fn join_package_name(base_path: &Utf8Path, package_name: &str) -> Utf8PathBuf {
+    let mut path = base_path.to_path_buf();
+    for component in package_name.split('/') {
+        path.push(component);
+    }
+    path
 }
 
 /// Returns whether an installed package defines an exact or pattern export for `subpath`.
@@ -669,7 +677,7 @@ fn resolve_dependency(
     let (package_name, subpath) = parse_package_specifier(specifier)?;
 
     for type_root in options.type_roots.explicit_roots() {
-        let package_path = base_dir.join(type_root).join(package_name);
+        let package_path = join_package_name(&base_dir.join(type_root), package_name);
         match resolve_package_path(&package_path, subpath, fs, options) {
             Ok(path) => return Ok(path),
             Err(ResolveError::NotFound) => { /* continue */ }
@@ -709,12 +717,7 @@ fn resolve_dependency(
         };
 
         if options.resolve_types_in_node_modules() {
-            let package_path = {
-                let mut path = node_module_path.to_path_buf();
-                path.push("@types");
-                path.push(package_name);
-                path
-            };
+            let package_path = join_package_name(&node_module_path.join("@types"), package_name);
 
             match resolve_package_path(&package_path, subpath, fs, options) {
                 Ok(path) => return Ok(path),
@@ -723,7 +726,8 @@ fn resolve_dependency(
             }
         }
 
-        match resolve_package_path(&node_module_path.join(package_name), subpath, fs, options) {
+        let package_path = join_package_name(&node_module_path, package_name);
+        match resolve_package_path(&package_path, subpath, fs, options) {
             Ok(path) => return Ok(path),
             Err(ResolveError::NotFound) => { /* continue */ }
             Err(error) => return Err(error),

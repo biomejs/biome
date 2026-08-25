@@ -2144,6 +2144,7 @@ mod configuration_harness {
 
 #[cfg(test)]
 mod test {
+    #[cfg(unix)]
     use super::ConfigurationExtendsLoader;
     use crate::{WorkspaceError, configuration::load_configuration};
     use biome_configuration::{
