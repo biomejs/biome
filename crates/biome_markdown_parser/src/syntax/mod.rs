@@ -81,6 +81,13 @@ pub(crate) fn is_space_or_tab_token(p: &MarkdownParser) -> bool {
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
+#[inline]
+pub(crate) fn first_non_indent_byte(p: &MarkdownParser) -> Option<u8> {
+    p.source_after_current()
+        .bytes()
+        .find(|byte| !matches!(*byte, b' ' | b'\t'))
+}
+
 /// Get the closing delimiter for a CommonMark link title (§4.7, §6.3).
 ///
 /// A link title appears after the destination in link reference definitions
@@ -316,118 +323,125 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
 
     let parsed = if allow_indent_code_block && at_indent_code_block(p) {
         parse_indent_code_block(p)
-    } else if at_fenced_code_block(p) {
-        parse_fenced_code_block(p)
-    } else if line_starts_with_fence(p) {
-        parse_fenced_code_block_force(p)
-    } else if at_thematic_break_block(p) {
-        let break_block = try_parse(p, |p| {
-            let break_block = parse_thematic_break_block(p);
-            if break_block.is_absent() {
-                return Err(());
-            }
-            Ok(break_block)
-        });
-        if let Ok(parsed) = break_block {
-            parsed
-        } else {
-            parse_paragraph(p)
-        }
-    } else if at_header(p) {
-        match parse_header(p) {
-            Present(header) => Present(header),
-            Absent => parse_paragraph(p),
-        }
-    } else if at_quote(p) {
-        parse_quote(p)
-    } else if at_bullet_list_item(p) {
-        parse_bullet_list_item(p)
-    } else if at_order_list_item(p) || at_order_list_item_textual(p) {
-        // After a link reference definition with no intervening blank line,
-        // CommonMark treats the next line as paragraph continuation unless it
-        // begins a paragraph-interrupting block. Ordered lists with a starting
-        // number other than 1 cannot interrupt a paragraph (§5.2), so fall
-        // back to paragraph parsing.
-        if p.state().link_reference_definition_continuation
-            && p.state().list_nesting_depth == 0
-            && !is_ordered_list_starts_with_one(p)
-        {
-            parse_paragraph(p)
-        } else {
-            let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
-                p.set_force_ordered_list_marker(true);
-                p.force_relex_regular();
-                true
-            } else {
-                false
-            };
-            let parsed = parse_order_list_item(p);
-            if forced {
-                p.set_force_ordered_list_marker(false);
-            }
-            if parsed.is_absent() {
-                parse_paragraph(p)
-            } else {
-                parsed
-            }
-        }
-    } else if at_html_block(p) {
-        parse_html_block(p)
-    } else if at_link_block_start(p) {
-        // Try to parse as link reference definition
-        // Use try_parse to fall back to paragraph if not a valid definition
-        let link_result = try_parse(p, |p| {
-            let link = parse_link_block(p);
-            if link.is_absent() {
-                return Err(());
-            }
-            Ok(link)
-        });
-        if let Ok(parsed) = link_result {
-            p.state_mut().link_reference_definition_continuation = true;
-            if link_reference_definition_before_dash_thematic_break(p) {
-                Present(parse_empty_paragraph(p))
-            } else {
-                parsed
-            }
-        } else {
-            parse_paragraph(p)
-        }
-    } else if at_block_interrupt(p) {
-        // We see a block interrupt but didn't match a concrete block above.
-        // This can happen when list item indentation is still active.
-        if at_bullet_list_item_at_any_indent(p) {
-            let prev_required = p.state().list_item_required_indent;
-            let prev_virtual = p.state().virtual_line_start;
-            p.state_mut().list_item_required_indent = 0;
-            p.state_mut().virtual_line_start = Some(p.cur_range().start());
-            let parsed = parse_bullet_list_item(p);
-            p.state_mut().list_item_required_indent = prev_required;
-            p.state_mut().virtual_line_start = prev_virtual;
-            if parsed.is_present() {
-                parsed
-            } else {
-                parse_paragraph(p)
-            }
-        } else if at_order_list_item_at_any_indent(p) {
-            let prev_required = p.state().list_item_required_indent;
-            let prev_virtual = p.state().virtual_line_start;
-            p.state_mut().list_item_required_indent = 0;
-            p.state_mut().virtual_line_start = Some(p.cur_range().start());
-            let parsed = parse_order_list_item(p);
-            p.state_mut().list_item_required_indent = prev_required;
-            p.state_mut().virtual_line_start = prev_virtual;
-            if parsed.is_present() {
-                parsed
-            } else {
-                parse_paragraph(p)
-            }
-        } else {
-            parse_paragraph(p)
-        }
     } else {
-        // Default fallback: parse as paragraph
-        parse_paragraph(p)
+        let block_start_byte = first_non_indent_byte(p);
+
+        if matches!(block_start_byte, Some(b'`' | b'~')) && at_fenced_code_block(p) {
+            parse_fenced_code_block(p)
+        } else if matches!(block_start_byte, Some(b'`' | b'~')) && line_starts_with_fence(p) {
+            parse_fenced_code_block_force(p)
+        } else if matches!(block_start_byte, Some(b'-' | b'*' | b'_')) && at_thematic_break_block(p)
+        {
+            let break_block = try_parse(p, |p| {
+                let break_block = parse_thematic_break_block(p);
+                if break_block.is_absent() {
+                    return Err(());
+                }
+                Ok(break_block)
+            });
+            if let Ok(parsed) = break_block {
+                parsed
+            } else {
+                parse_paragraph(p)
+            }
+        } else if matches!(block_start_byte, Some(b'#')) && at_header(p) {
+            match parse_header(p) {
+                Present(header) => Present(header),
+                Absent => parse_paragraph(p),
+            }
+        } else if matches!(block_start_byte, Some(b'>')) && at_quote(p) {
+            parse_quote(p)
+        } else if matches!(block_start_byte, Some(b'-' | b'*' | b'+')) && at_bullet_list_item(p) {
+            parse_bullet_list_item(p)
+        } else if matches!(block_start_byte, Some(b'0'..=b'9'))
+            && (at_order_list_item(p) || at_order_list_item_textual(p))
+        {
+            // After a link reference definition with no intervening blank line,
+            // CommonMark treats the next line as paragraph continuation unless it
+            // begins a paragraph-interrupting block. Ordered lists with a starting
+            // number other than 1 cannot interrupt a paragraph (§5.2), so fall
+            // back to paragraph parsing.
+            if p.state().link_reference_definition_continuation
+                && p.state().list_nesting_depth == 0
+                && !is_ordered_list_starts_with_one(p)
+            {
+                parse_paragraph(p)
+            } else {
+                let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
+                    p.set_force_ordered_list_marker(true);
+                    p.force_relex_regular();
+                    true
+                } else {
+                    false
+                };
+                let parsed = parse_order_list_item(p);
+                if forced {
+                    p.set_force_ordered_list_marker(false);
+                }
+                if parsed.is_absent() {
+                    parse_paragraph(p)
+                } else {
+                    parsed
+                }
+            }
+        } else if matches!(block_start_byte, Some(b'<')) && at_html_block(p) {
+            parse_html_block(p)
+        } else if matches!(block_start_byte, Some(b'[')) && at_link_block_start(p) {
+            // Try to parse as link reference definition
+            // Use try_parse to fall back to paragraph if not a valid definition
+            let link_result = try_parse(p, |p| {
+                let link = parse_link_block(p);
+                if link.is_absent() {
+                    return Err(());
+                }
+                Ok(link)
+            });
+            if let Ok(parsed) = link_result {
+                p.state_mut().link_reference_definition_continuation = true;
+                if link_reference_definition_before_dash_thematic_break(p) {
+                    Present(parse_empty_paragraph(p))
+                } else {
+                    parsed
+                }
+            } else {
+                parse_paragraph(p)
+            }
+        } else if at_block_interrupt(p) {
+            // We see a block interrupt but didn't match a concrete block above.
+            // This can happen when list item indentation is still active.
+            if at_bullet_list_item_at_any_indent(p) {
+                let prev_required = p.state().list_item_required_indent;
+                let prev_virtual = p.state().virtual_line_start;
+                p.state_mut().list_item_required_indent = 0;
+                p.state_mut().virtual_line_start = Some(p.cur_range().start());
+                let parsed = parse_bullet_list_item(p);
+                p.state_mut().list_item_required_indent = prev_required;
+                p.state_mut().virtual_line_start = prev_virtual;
+                if parsed.is_present() {
+                    parsed
+                } else {
+                    parse_paragraph(p)
+                }
+            } else if at_order_list_item_at_any_indent(p) {
+                let prev_required = p.state().list_item_required_indent;
+                let prev_virtual = p.state().virtual_line_start;
+                p.state_mut().list_item_required_indent = 0;
+                p.state_mut().virtual_line_start = Some(p.cur_range().start());
+                let parsed = parse_order_list_item(p);
+                p.state_mut().list_item_required_indent = prev_required;
+                p.state_mut().virtual_line_start = prev_virtual;
+                if parsed.is_present() {
+                    parsed
+                } else {
+                    parse_paragraph(p)
+                }
+            } else {
+                parse_paragraph(p)
+            }
+        } else {
+            // Default fallback: parse as paragraph
+            parse_paragraph(p)
+        }
     };
 
     if start == p.cur_range().start() {
@@ -1835,6 +1849,10 @@ fn consume_partial_quote_prefix_lookahead(p: &mut MarkdownParser, depth: usize) 
 /// - Bullet lists can interrupt paragraphs if item has content OR marker is followed by blank line
 /// - Ordered lists can interrupt paragraphs ONLY if starting with `1` AND not empty
 pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
+    let Some(byte) = block_interrupt_candidate(p) else {
+        return false;
+    };
+
     // Per CommonMark, lines indented 4+ spaces cannot start block constructs
     // that interrupt paragraphs - they would be indented code blocks.
     // Tabs count as 4 spaces per CommonMark §2.2.
@@ -1859,26 +1877,20 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
         return false;
     }
 
-    if !can_start_block_interrupt(p) {
-        return false;
-    }
-
-    at_unindented_block_interrupt(p)
+    at_unindented_block_interrupt(p, byte)
 }
 
 #[inline]
-fn can_start_block_interrupt(p: &MarkdownParser) -> bool {
+fn block_interrupt_candidate(p: &MarkdownParser) -> Option<u8> {
+    let byte = first_non_indent_byte(p)?;
+    is_block_interrupt_start_byte(byte).then_some(byte)
+}
+
+#[inline]
+fn is_block_interrupt_start_byte(byte: u8) -> bool {
     use biome_unicode_table::{
         Dispatch::{DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
         lookup_byte,
-    };
-
-    let Some(byte) = p
-        .source_after_current()
-        .bytes()
-        .find(|byte| !matches!(*byte, b' ' | b'\t'))
-    else {
-        return false;
     };
 
     match lookup_byte(byte) {
@@ -1888,56 +1900,34 @@ fn can_start_block_interrupt(p: &MarkdownParser) -> bool {
     }
 }
 
-fn at_unindented_block_interrupt(p: &mut MarkdownParser) -> bool {
-    // ATX heading: # at line start (must have space/tab after per CommonMark §4.2)
-    // Use checkpoint to look ahead and verify it's a valid heading
-    if at_header(p) {
-        return is_valid_atx_heading_start(p);
-    }
-
-    // Fenced code block (``` or ~~~) - lexer already ensures line start
-    if at_fenced_code_block(p) {
+fn at_unindented_block_interrupt(p: &mut MarkdownParser, byte: u8) -> bool {
+    if matches!(byte, b'-' | b'*' | b'_') && at_thematic_break_block(p) {
         return true;
     }
 
-    // Block quote (>)
-    if at_quote(p) {
-        return true;
-    }
-
-    // Thematic break (---, ***, ___) - lexer already ensures line start
-    if at_thematic_break_block(p) {
-        return true;
-    }
-
-    // Bullet list item (-, *, +)
-    // Per CommonMark §5.2: bullet lists can interrupt paragraphs only if the
-    // item has content (non-empty). Empty markers cannot interrupt paragraphs.
-    // When inside a list, we also need to check for list items at ANY indent
-    // (not just at the current context's indent) because a less-indented list
-    // marker would end the current list item and start a sibling/parent item.
-    if at_bullet_list_item(p) || at_bullet_list_item_at_any_indent(p) {
+    if matches!(byte, b'-' | b'*' | b'+')
+        && (at_bullet_list_item(p) || at_bullet_list_item_at_any_indent(p))
+    {
         let in_list = p.state().list_nesting_depth > 0;
         if in_list || can_bullet_interrupt_paragraph(p) {
             return true;
         }
     }
 
-    // Ordered markers may interrupt paragraphs only when they start with `1`
-    // and are non-empty (§5.2). In list context, a marker physically before
-    // required_indent is a sibling/parent boundary and is allowed.
-    if (at_order_list_item(p) || at_order_list_item_at_any_indent(p))
+    if byte.is_ascii_digit()
+        && (at_order_list_item(p) || at_order_list_item_at_any_indent(p))
         && can_ordered_marker_interrupt_paragraph(p)
     {
         return true;
     }
 
-    // HTML block (type 7 does not interrupt paragraphs)
-    if at_html_block_interrupt(p) {
-        return true;
+    match byte {
+        b'#' => at_header(p) && is_valid_atx_heading_start(p),
+        b'`' | b'~' => at_fenced_code_block(p),
+        b'>' => at_quote(p),
+        b'<' => at_html_block_interrupt(p),
+        _ => false,
     }
-
-    false
 }
 
 /// Check if the current token looks like a list marker when lexed as textual content.

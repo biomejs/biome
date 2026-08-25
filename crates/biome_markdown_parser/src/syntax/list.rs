@@ -55,8 +55,8 @@ use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS,
     MIN_FENCE_RUN_LENGTH, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES, at_block_interrupt,
-    at_indent_code_block, is_ordered_list_starts_with_one, is_paragraph_like, is_whitespace_only,
-    parse_empty_paragraph,
+    at_indent_code_block, first_non_indent_byte, is_ordered_list_starts_with_one,
+    is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
@@ -2122,16 +2122,18 @@ fn parse_first_line_blocks(
         return LoopAction::FallThrough;
     }
 
-    // Fenced code block
-    let fenced_code_start = p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
-        if p.at(TRIPLE_BACKTICK) || p.at(TRIPLE_TILDE) {
-            return true;
-        }
-        (p.at(BACKTICK) || p.at(TILDE)) && p.cur_text().len() >= MIN_FENCE_RUN_LENGTH
-    });
+    let block_start_byte = first_non_indent_byte(p);
+
+    let fenced_code_start = matches!(block_start_byte, Some(b'`' | b'~'))
+        && p.lookahead(|p| {
+            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            if p.at(TRIPLE_BACKTICK) || p.at(TRIPLE_TILDE) {
+                return true;
+            }
+            (p.at(BACKTICK) || p.at(TILDE)) && p.cur_text().len() >= MIN_FENCE_RUN_LENGTH
+        });
 
     if fenced_code_start {
         let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_fenced_code_block);
@@ -2141,9 +2143,8 @@ fn parse_first_line_blocks(
         }
     }
 
-    // HTML block
-    let html_block_start =
-        p.lookahead(|p| with_virtual_line_start(p, p.cur_range().start(), at_html_block));
+    let html_block_start = matches!(block_start_byte, Some(b'<'))
+        && p.lookahead(|p| with_virtual_line_start(p, p.cur_range().start(), at_html_block));
 
     if html_block_start {
         let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_html_block);
@@ -2153,18 +2154,16 @@ fn parse_first_line_blocks(
         }
     }
 
-    // ATX heading
-    if parse_first_line_atx_heading(p, state) {
+    if matches!(block_start_byte, Some(b'#')) && parse_first_line_atx_heading(p, state) {
         return LoopAction::Continue;
     }
 
-    // Blockquote
-    if parse_first_line_blockquote(p, state) {
+    if matches!(block_start_byte, Some(b'>')) && parse_first_line_blockquote(p, state) {
         return LoopAction::Continue;
     }
 
-    // Link reference definition
-    let link_block_start = with_virtual_line_start(p, p.cur_range().start(), at_link_block_start);
+    let link_block_start = matches!(block_start_byte, Some(b'['))
+        && with_virtual_line_start(p, p.cur_range().start(), at_link_block_start);
 
     if link_block_start {
         let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_link_block);
@@ -2180,55 +2179,59 @@ fn parse_first_line_blocks(
         }
     }
 
-    // Thematic break (check BEFORE nested list markers per CommonMark §4.1)
-    let is_thematic_break = p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
-        if p.at(MD_THEMATIC_BREAK_LITERAL) {
-            return true;
-        }
-        is_thematic_break_pattern(p)
-    });
+    let is_thematic_break = matches!(block_start_byte, Some(b'-' | b'*' | b'_'))
+        && p.lookahead(|p| {
+            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            if p.at(MD_THEMATIC_BREAK_LITERAL) {
+                return true;
+            }
+            is_thematic_break_pattern(p)
+        });
 
     if is_thematic_break && parse_thematic_break_block(p).is_present() {
         state.record_first_line_block();
         return LoopAction::Continue;
     }
 
-    // Nested list
-    let nested_marker = p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
+    let nested_marker = if matches!(block_start_byte, Some(b'-' | b'*' | b'+' | b'0'..=b'9')) {
+        p.lookahead(|p| {
+            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
 
-        if p.at(MD_ORDERED_LIST_MARKER) {
-            p.bump(MD_ORDERED_LIST_MARKER);
-            return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Ordered);
-        }
+            if p.at(MD_ORDERED_LIST_MARKER) {
+                p.bump(MD_ORDERED_LIST_MARKER);
+                return marker_followed_by_whitespace_or_eol(p)
+                    .then_some(NestedListMarker::Ordered);
+            }
 
-        if p.at(MD_SETEXT_UNDERLINE_LITERAL) && is_single_dash_setext_marker(p.cur_text()) {
-            p.bump(MD_SETEXT_UNDERLINE_LITERAL);
-            return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Bullet);
-        }
+            if p.at(MD_SETEXT_UNDERLINE_LITERAL) && is_single_dash_setext_marker(p.cur_text()) {
+                p.bump(MD_SETEXT_UNDERLINE_LITERAL);
+                return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Bullet);
+            }
 
-        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
-            p.bump(p.cur());
-            return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Bullet);
-        }
+            if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+                p.bump(p.cur());
+                return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Bullet);
+            }
 
-        if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-            return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Bullet);
-        }
+            if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+                return marker_followed_by_whitespace_or_eol(p).then_some(NestedListMarker::Bullet);
+            }
 
-        if p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-            return Some(NestedListMarker::Ordered);
-        }
+            if p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+                return Some(NestedListMarker::Ordered);
+            }
 
+            None
+        })
+    } else {
         None
-    });
+    };
 
     if let Some(nested_marker) = nested_marker {
         let prev_virtual = p.state().virtual_line_start;
