@@ -16,6 +16,15 @@ mod path_info_cache;
 mod traverse;
 pub mod type_inference;
 
+/// Whether flow-sensitive type narrowing is compiled into this build.
+///
+/// Narrowing is still under development, so it is gated behind the
+/// `type_narrowing` Cargo feature and stays off in the builds shipped by the
+/// CLI, the LSP and WASM. This is the only place where the feature is read:
+/// everything downstream, including `biome_js_type_info`, takes it as a plain
+/// runtime flag.
+pub const TYPE_NARROWING_ENABLED: bool = cfg!(feature = "type_narrowing");
+
 pub use biome_js_type_info::{
     ImportSymbol,
     resolved::{InferredLocalTypeId, InferredModuleKey},
@@ -55,3 +64,14 @@ pub use module_graph::{
     resolve_js_module_with_inference_mode,
 };
 pub use path_info_cache::PathInfoCache;
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn type_narrowing_follows_its_feature() {
+        assert_eq!(
+            super::TYPE_NARROWING_ENABLED,
+            cfg!(feature = "type_narrowing")
+        );
+    }
+}
