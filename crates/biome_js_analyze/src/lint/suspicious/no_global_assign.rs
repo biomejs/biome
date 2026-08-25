@@ -7,6 +7,7 @@ use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rul
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsIdentifierAssignment, TextRange};
+use biome_languages::JsFileSource;
 use biome_rule_options::no_global_assign::NoGlobalAssignOptions;
 
 declare_lint_rule! {
@@ -62,13 +63,22 @@ impl Rule for NoGlobalAssign {
         if !ctx.model().is_unresolved_reference(assignment) {
             return None;
         }
-        let embedded = ctx
-            .get_service::<EmbeddedService>()
-            .expect("embedded service");
         let token = assignment.name_token().ok()?;
 
-        if embedded.contains_binding(token.token_text_trimmed()) {
-            return None;
+        // Only trust a same-named binding declared elsewhere in the document's
+        // embeds (e.g. a Vue `<script setup>` top-level binding) when this
+        // reference itself lives in a non-source embed (e.g. a template
+        // expression). Source embeds (`<script>`, `<script setup>`) have their
+        // own binding resolution and aren't necessarily able to see each
+        // other's bindings (e.g. plain `<script>` can't see `<script setup>`
+        // locals), so trusting it there would hide genuine global assignments.
+        if !ctx.source_type::<JsFileSource>().is_embedded_source() {
+            let embedded = ctx
+                .get_service::<EmbeddedService>()
+                .expect("embedded service");
+            if embedded.contains_binding(token.token_text_trimmed()) {
+                return None;
+            }
         }
 
         is_js_global(token.text_trimmed()).then(|| token.text_trimmed_range())

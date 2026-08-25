@@ -1,3 +1,4 @@
+<!-- should generate diagnostics -->
 <script setup>
 </script>
 
