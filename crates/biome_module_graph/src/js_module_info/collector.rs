@@ -57,6 +57,9 @@ pub(super) struct JsModuleInfoCollector {
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, TypeId>,
 
+    /// Whether guard-based narrowing is applied during this collector's pass.
+    narrowing_enabled: bool,
+
     /// Memoizes guard-narrowing invalidation checks, scoped to this
     /// collector's single pass over the module.
     narrowing_invalidation_cache: FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>,
@@ -149,6 +152,7 @@ impl JsModuleInfoCollector {
             function_parameters: FxHashMap::default(),
             variable_declarations: FxHashMap::default(),
             parsed_expressions: FxHashMap::default(),
+            narrowing_enabled: crate::TYPE_NARROWING_ENABLED,
             narrowing_invalidation_cache: FxHashMap::default(),
             import_paths: ImportPathMap::default(),
             exports: Vec::new(),
@@ -828,6 +832,10 @@ impl JsModuleInfoCollector {
 }
 
 impl RawTypeCollector for JsModuleInfoCollector {
+    fn narrowing_enabled(&self) -> bool {
+        self.narrowing_enabled
+    }
+
     fn narrowing_invalidation_cache(
         &mut self,
     ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>> {

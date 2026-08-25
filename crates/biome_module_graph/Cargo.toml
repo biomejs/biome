@@ -91,6 +91,9 @@ mimalloc = { workspace = true }
 [features]
 schema = ["dep:schemars"]
 serde  = ["dep:serde"]
+# Flow-sensitive type narrowing. Still under development, so it is off by
+# default and not part of the features shipped by the CLI, the LSP and WASM.
+type_narrowing = []
 
 [lints]
 workspace = true

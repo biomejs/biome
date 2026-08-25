@@ -1205,7 +1205,11 @@ impl TypeData {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let predicate = guard_narrowing_predicate(resolver, scope_id, id);
+                let predicate = if resolver.narrowing_enabled() {
+                    guard_narrowing_predicate(resolver, scope_id, id)
+                } else {
+                    None
+                };
                 let reference = TypeReference::from_name(scope_id, name);
                 match predicate {
                     Some(predicate) => {

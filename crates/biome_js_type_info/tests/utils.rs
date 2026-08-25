@@ -98,6 +98,12 @@ pub struct TestTypeCollector {
 }
 
 impl RawTypeCollector for TestTypeCollector {
+    /// These tests exercise the narrowing algorithms directly, so they always
+    /// opt in regardless of how the shipped builds are configured.
+    fn narrowing_enabled(&self) -> bool {
+        true
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }
