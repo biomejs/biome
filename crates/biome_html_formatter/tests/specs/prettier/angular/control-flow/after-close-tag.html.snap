@@ -1,0 +1,94 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/after-close-tag.html
+---
+
+# Input
+
+```html
+<ion-list class="timeline" appScrollItem>
+  @for (let item of items; index as i; trackBy: trackByFn) {
+    <app-tweet-item></app-tweet-item>@if (
+      areaId &&
+      canTweet
+    ) {
+      <ion-item class="recommend-trust-up" lines="full"></ion-item>
+    }
+  }
+</ion-list>
+
+<ng-container *ngIf="
+      areaId &&
+      canTweet
+">
+<ion-item class="recommend-trust-up" lines="full"></ion-item>
+</ng-container>
+
+
+@if (
+      areaId &&
+      canTweet
+    ) {
+      <ion-item class="recommend-trust-up" lines="full"></ion-item>
+    }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,18 @@
+ <ion-list class="timeline" appScrollItem>
+   @for (let item of items; index as i; trackBy: trackByFn) {
+-    <app-tweet-item></app-tweet-item>
+-    @if (areaId && canTweet) {
+-      <ion-item class="recommend-trust-up" lines="full"></ion-item>
+-    }
+-  }
++  <app-tweet-item></app-tweet-item>@if ( areaId && canTweet ) {
++  <ion-item class="recommend-trust-up" lines="full"></ion-item>
++  } }
+ </ion-list>
+ 
+-<ng-container *ngIf="areaId && canTweet">
++<ng-container
++  *ngIf="
++      areaId &&
++      canTweet
++"
++>
+   <ion-item class="recommend-trust-up" lines="full"></ion-item>
+ </ng-container>
+-
+-@if (areaId && canTweet) {
+-  <ion-item class="recommend-trust-up" lines="full"></ion-item>
++@if ( areaId && canTweet ) {
++<ion-item class="recommend-trust-up" lines="full"></ion-item>
+ }
+```
+
+# Output
+
+```html
+<ion-list class="timeline" appScrollItem>
+  @for (let item of items; index as i; trackBy: trackByFn) {
+  <app-tweet-item></app-tweet-item>@if ( areaId && canTweet ) {
+  <ion-item class="recommend-trust-up" lines="full"></ion-item>
+  } }
+</ion-list>
+
+<ng-container
+  *ngIf="
+      areaId &&
+      canTweet
+"
+>
+  <ion-item class="recommend-trust-up" lines="full"></ion-item>
+</ng-container>
+@if ( areaId && canTweet ) {
+<ion-item class="recommend-trust-up" lines="full"></ion-item>
+}
+```
