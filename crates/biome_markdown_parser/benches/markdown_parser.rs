@@ -57,12 +57,51 @@ fn load_fixtures() -> Vec<(String, String, String)> {
         }
     }
 
+    cases.extend(generated_fixtures());
+
     assert!(
         !cases.is_empty(),
         "no markdown benchmark fixtures found in {fixtures_root:?}"
     );
     cases.sort_unstable_by(|left, right| left.0.cmp(&right.0).then_with(|| left.1.cmp(&right.1)));
     cases
+}
+
+fn generated_fixtures() -> Vec<(String, String, String)> {
+    let mut late_definitions = String::with_capacity(32 * 1024);
+    for _ in 0..1024 {
+        late_definitions.push_str("plain paragraph without links\n\n");
+    }
+    late_definitions.push_str("[link][ref]\n\n[ref]: /url\n");
+
+    let emphasis = "***emphasis*** ".repeat(4096);
+    let malformed_autolinks = "<invalid".repeat(8192);
+    let html_block = format!("<script>\n{}</script>\n", "const value = 1;\n".repeat(4096));
+    let indented_code_blank_run = format!("    start\n{}    end\n", "\n".repeat(512));
+
+    vec![
+        (
+            "generated".to_string(),
+            "late-definitions.md".to_string(),
+            late_definitions,
+        ),
+        ("generated".to_string(), "emphasis.md".to_string(), emphasis),
+        (
+            "generated".to_string(),
+            "malformed-autolinks.md".to_string(),
+            malformed_autolinks,
+        ),
+        (
+            "generated".to_string(),
+            "html-block.md".to_string(),
+            html_block,
+        ),
+        (
+            "generated".to_string(),
+            "indented-code-blank-run.md".to_string(),
+            indented_code_blank_run,
+        ),
+    ]
 }
 
 fn bench_parser(criterion: &mut Criterion) {
