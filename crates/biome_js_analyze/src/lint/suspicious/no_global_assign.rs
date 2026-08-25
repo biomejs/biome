@@ -65,13 +65,10 @@ impl Rule for NoGlobalAssign {
         }
         let token = assignment.name_token().ok()?;
 
-        // Only trust a same-named binding declared elsewhere in the document's
-        // embeds (e.g. a Vue `<script setup>` top-level binding) when this
-        // reference itself lives in a non-source embed (e.g. a template
-        // expression). Source embeds (`<script>`, `<script setup>`) have their
-        // own binding resolution and aren't necessarily able to see each
-        // other's bindings (e.g. plain `<script>` can't see `<script setup>`
-        // locals), so trusting it there would hide genuine global assignments.
+        // Only trust a cross-embed binding from non-source embeds like template
+        // expressions. Source embeds (e.g. Vue's `<script>` and `<script setup>`)
+        // don't necessarily see each other's bindings, so trusting it there
+        // would hide genuine global assignments.
         if !ctx.source_type::<JsFileSource>().is_embedded_source() {
             let embedded = ctx
                 .get_service::<EmbeddedService>()
