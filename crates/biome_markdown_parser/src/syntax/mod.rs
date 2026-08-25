@@ -1859,6 +1859,36 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
         return false;
     }
 
+    if !can_start_block_interrupt(p) {
+        return false;
+    }
+
+    at_unindented_block_interrupt(p)
+}
+
+#[inline]
+fn can_start_block_interrupt(p: &MarkdownParser) -> bool {
+    use biome_unicode_table::{
+        Dispatch::{DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
+        lookup_byte,
+    };
+
+    let Some(byte) = p
+        .source_after_current()
+        .bytes()
+        .find(|byte| !matches!(*byte, b' ' | b'\t'))
+    else {
+        return false;
+    };
+
+    match lookup_byte(byte) {
+        HAS | TPL | TLD | MOR | LSS | MIN | MUL | PLS | ZER | DIG => true,
+        IDT => byte == b'_',
+        _ => false,
+    }
+}
+
+fn at_unindented_block_interrupt(p: &mut MarkdownParser) -> bool {
     // ATX heading: # at line start (must have space/tab after per CommonMark §4.2)
     // Use checkpoint to look ahead and verify it's a valid heading
     if at_header(p) {

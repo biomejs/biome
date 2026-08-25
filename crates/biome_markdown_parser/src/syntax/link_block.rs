@@ -43,14 +43,17 @@ const MAX_LABEL_LENGTH: usize = 999;
 ///
 /// We use token-based lookahead to verify the pattern: `[label]: destination`
 /// where label doesn't contain unescaped `]` or `[`, and is followed by `:`.
+#[inline]
 pub(crate) fn at_link_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| at_link_block_start_impl(p) && is_valid_link_definition_lookahead(p))
 }
 
+#[inline]
 pub(crate) fn at_link_block_start(p: &mut MarkdownParser) -> bool {
     p.lookahead(at_link_block_start_impl)
 }
 
+#[inline]
 fn at_link_block_start_impl(p: &mut MarkdownParser) -> bool {
     if !p.at_line_start() && !p.at_start_of_input() {
         return false;
@@ -190,11 +193,13 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
 }
 
 /// Skip whitespace tokens (spaces/tabs) in lookahead.
+#[inline]
 fn skip_whitespace_tokens(p: &mut MarkdownParser) {
     skip_whitespace_tokens_tracked(p);
 }
 
 /// Skip whitespace tokens (spaces/tabs) in lookahead and return whether any were skipped.
+#[inline]
 fn skip_whitespace_tokens_tracked(p: &mut MarkdownParser) -> bool {
     let mut skipped = false;
     while !p.at(EOF) && !p.at(NEWLINE) && is_space_or_tab_token(p) {
@@ -207,6 +212,7 @@ fn skip_whitespace_tokens_tracked(p: &mut MarkdownParser) -> bool {
 /// Check if at a title start token.
 /// Text-based checks cover both L_PAREN tokens (LinkDefinition context)
 /// and plain-text tokens starting with `(` (Regular context).
+#[inline]
 fn at_title_start(p: &MarkdownParser) -> bool {
     let text = p.cur_text();
     text.starts_with('"') || text.starts_with('\'') || text.starts_with('(')
