@@ -1,11 +1,13 @@
 use crate::globals::is_js_global;
 
+use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsIdentifierAssignment, TextRange};
+use biome_languages::JsFileSource;
 use biome_rule_options::no_global_assign::NoGlobalAssignOptions;
 
 declare_lint_rule! {
@@ -62,6 +64,20 @@ impl Rule for NoGlobalAssign {
             return None;
         }
         let token = assignment.name_token().ok()?;
+
+        // Only trust a cross-embed binding from non-source embeds like template
+        // expressions. Source embeds (e.g. Vue's `<script>` and `<script setup>`)
+        // don't necessarily see each other's bindings, so trusting it there
+        // would hide genuine global assignments.
+        if !ctx.source_type::<JsFileSource>().is_embedded_source() {
+            let embedded = ctx
+                .get_service::<EmbeddedService>()
+                .expect("embedded service");
+            if embedded.contains_binding(token.token_text_trimmed()) {
+                return None;
+            }
+        }
+
         is_js_global(token.text_trimmed()).then(|| token.text_trimmed_range())
     }
 
