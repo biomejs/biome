@@ -120,6 +120,7 @@ pub(crate) fn parse_deferred_inlines(
     true
 }
 
+#[inline]
 fn should_reparse_deferred_inline(
     source: &str,
     deferred: &DeferredInline,

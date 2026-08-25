@@ -781,6 +781,7 @@ impl<'src> MarkdownLexer<'src> {
             .then_some(position - start)
     }
 
+    #[inline]
     fn find_frontmatter_fence(&self, start: usize) -> Option<usize> {
         let source = self.source.as_bytes();
         let mut position = start;

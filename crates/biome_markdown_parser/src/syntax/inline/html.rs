@@ -545,6 +545,7 @@ fn is_email_autolink(text: &str) -> bool {
     true
 }
 
+#[inline]
 fn autolink_content(source: &str) -> Option<&str> {
     let bytes = source.as_bytes();
     if bytes.first() != Some(&b'<') {
