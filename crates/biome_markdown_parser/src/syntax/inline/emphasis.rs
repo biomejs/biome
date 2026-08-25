@@ -507,31 +507,24 @@ impl EmphasisContext {
         expect_strong: bool,
     ) -> Option<OpenerMatch<'_>> {
         let token_end = token_start + token_len;
-        let mut best: Option<OpenerMatch<'_>> = None;
+        let first_match = self
+            .matches
+            .partition_point(|m| m.opener_start + self.base_offset < token_start);
 
-        for m in &self.matches {
-            // Filter by expected emphasis type
-            if m.is_strong != expect_strong {
-                continue;
-            }
-
+        for m in &self.matches[first_match..] {
             let abs_opener = m.opener_start + self.base_offset;
-            if abs_opener >= token_start && abs_opener < token_end {
-                let candidate = OpenerMatch {
+            if abs_opener >= token_end {
+                break;
+            }
+            if m.is_strong == expect_strong {
+                return Some(OpenerMatch {
                     matched: m,
                     prefix_len: abs_opener - token_start,
-                };
-                // Pick the earliest match (smallest prefix_len)
-                if best
-                    .as_ref()
-                    .is_none_or(|b| candidate.prefix_len < b.prefix_len)
-                {
-                    best = Some(candidate);
-                }
+                });
             }
         }
 
-        best
+        None
     }
 }
 

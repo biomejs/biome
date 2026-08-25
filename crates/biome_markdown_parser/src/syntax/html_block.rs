@@ -372,15 +372,10 @@ fn advance_until_terminator(
     terminator: &str,
     case_insensitive: bool,
 ) -> TextSize {
-    let mut line = String::new();
     let mut end = p.cur_range().start();
 
     while !p.at(EOF) {
         if p.at(NEWLINE) {
-            if line_contains(&line, terminator, case_insensitive) {
-                break;
-            }
-            line.clear();
             p.bump_any();
             // Check container boundary after consuming newline
             if at_container_boundary(p) {
@@ -392,9 +387,12 @@ fn advance_until_terminator(
 
         // Content is literal text: consume the whole rest of the line at once.
         p.re_lex(MarkdownReLexContext::CodeInfoString);
-        line.push_str(p.cur_text());
+        let has_terminator = line_contains(p.cur_text(), terminator, case_insensitive);
         p.bump_any();
         end = p.cur_range().start();
+        if has_terminator {
+            break;
+        }
     }
 
     end
@@ -426,8 +424,7 @@ fn line_contains(line: &str, needle: &str, case_insensitive: bool) -> bool {
 
 fn skip_container_prefixes(p: &mut MarkdownParser) {
     let quote_depth = p.state().block_quote_depth;
-    if quote_depth > 0 && has_quote_prefix(p, quote_depth) {
-        consume_quote_prefix_without_virtual(p, quote_depth);
+    if quote_depth > 0 && consume_quote_prefix_without_virtual(p, quote_depth) {
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
     }
 

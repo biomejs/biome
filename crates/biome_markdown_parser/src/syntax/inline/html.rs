@@ -545,6 +545,19 @@ fn is_email_autolink(text: &str) -> bool {
     true
 }
 
+fn autolink_content(source: &str) -> Option<&str> {
+    let bytes = source.as_bytes();
+    if bytes.first() != Some(&b'<') {
+        return None;
+    }
+
+    let after_open = &source[1..];
+    let close_pos = after_open
+        .bytes()
+        .position(|byte| matches!(byte, b'>' | b'\n' | b'\r' | b'<'))?;
+    (after_open.as_bytes()[close_pos] == b'>').then_some(&after_open[..close_pos])
+}
+
 /// Parse an autolink (`<https://example.com>` or `<user@example.com>`).
 ///
 /// Grammar: MdAutolink = '<' value: MdInlineItemList '>'
@@ -558,16 +571,10 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let content_len = {
         let source = p.source_after_current();
-        let after_open = &source[1..];
-        let close_pos = match after_open.find('>') {
-            Some(pos) => pos,
-            None => return Absent,
+        let Some(content) = autolink_content(source) else {
+            return Absent;
         };
-        let content = &after_open[..close_pos];
-        if content.contains('\n')
-            || content.contains('\r')
-            || (!is_uri_autolink(content) && !is_email_autolink(content))
-        {
+        if !is_uri_autolink(content) && !is_email_autolink(content) {
             return Absent;
         }
         content.len()

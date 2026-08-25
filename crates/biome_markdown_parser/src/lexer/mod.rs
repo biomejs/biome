@@ -12,6 +12,7 @@ use biome_parser::lexer::{
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::{is_unicode_punctuation, lookup_byte};
+use std::cell::Cell;
 
 use crate::syntax::{
     MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
@@ -120,6 +121,7 @@ pub(crate) struct MarkdownLexer<'src> {
     /// position and the token kind, set by the parser after measuring the
     /// span.
     relex_span: Option<(usize, MarkdownSyntaxKind)>,
+    frontmatter_fence: Cell<Option<(usize, usize)>>,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -272,6 +274,7 @@ impl<'src> MarkdownLexer<'src> {
             diagnostics: vec![],
             force_ordered_list_marker: false,
             relex_span: None,
+            frontmatter_fence: Cell::new(None),
         }
     }
 
@@ -284,7 +287,18 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     pub fn has_frontmatter_closing_fence(&self) -> bool {
-        self.find_frontmatter_fence(self.position).is_some()
+        if self
+            .frontmatter_fence
+            .get()
+            .is_some_and(|(start, _)| start == self.position)
+        {
+            return true;
+        }
+
+        let fence = self.find_frontmatter_fence(self.position);
+        self.frontmatter_fence
+            .set(fence.map(|fence| (self.position, fence)));
+        fence.is_some()
     }
 
     /// Sets the target for the next [MarkdownReLexContext::Span] re-lex.
@@ -742,7 +756,11 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         self.position = self
-            .find_frontmatter_fence(self.position)
+            .frontmatter_fence
+            .take()
+            .map(|(_, fence)| fence)
+            .filter(|fence| *fence >= self.position)
+            .or_else(|| self.find_frontmatter_fence(self.position))
             .unwrap_or(self.end);
         MD_FRONTMATTER_LITERAL
     }
