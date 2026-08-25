@@ -67,8 +67,7 @@ jobs:
           version-script: pnpm run version
           commit-message: "ci: release"
           pr-title: "ci: release"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
   version:
