@@ -229,102 +229,306 @@ fn extends_config_ok_from_npm_package_with_condition_names() {
 }
 
 #[test]
-fn extends_config_with_object_syntax_plugin_from_npm_package() {
-    let mut fs = TemporaryFs::new("extends_config_with_object_syntax_plugin_from_npm_package");
+fn extends_config_ok_from_biome_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
 
-    fs.create_file("biome.json", r#"{ "extends": ["@shared/config/biome"] }"#);
-
-    fs.create_file(
-        "node_modules/@shared/config/biome.jsonc",
-        r#"{ "root": false, "plugins": [{ "path": "./grit/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }"#,
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
     );
-    fs.create_file(
-        "node_modules/@shared/config/package.json",
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
         r#"{
     "name": "@shared/config",
     "exports": {
-        "./biome": "./biome.jsonc"
+        "biome": "./biome-manifest.json",
+        "default": "./index.js"
     }
 }"#,
     );
-    fs.create_file(
-        "node_modules/@shared/config/grit/no-object-assign.grit",
-        r#"`$fn($args)` where {
-    $fn <: `Object.assign`,
-    register_diagnostic(
-        span = $fn,
-        message = "Prefer object spread instead of Object.assign()",
-        severity = "warn"
-    )
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
 }"#,
     );
-    fs.create_file("test.js", "const merged = Object.assign({}, a, b);\n");
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"console.log("string");"#);
 
-    let mut console = BufferConsole::default();
-    let result = run_cli_with_dyn_fs(
-        Box::new(fs.create_os()),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", &format!("{}/test.js", fs.cli_path())].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
+    assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "extends_config_with_object_syntax_plugin_from_npm_package",
-        fs.create_mem(),
+        "extends_config_ok_from_biome_manifest",
+        fs,
         console,
         result,
     ));
 }
 
 #[test]
-fn extended_config_resolves_plugin_package_from_config() {
-    let mut fs = TemporaryFs::new("extended_config_resolves_plugin_package_from_config");
-
-    fs.create_file("biome.json", r#"{ "extends": ["@shared/config/biome"] }"#);
-    fs.create_file(
-        "node_modules/@shared/config/biome.jsonc",
-        r#"{
-    "root": false,
-    "plugins": [{ "path": "@shared/plugin", "resolutionKind": "config" }]
-}"#,
-    );
-    fs.create_file(
-        "node_modules/@shared/config/package.json",
-        r#"{
-    "name": "@shared/config",
-    "exports": { "./biome": "./biome.jsonc" }
-}"#,
-    );
-    fs.create_file(
-        "node_modules/@shared/config/node_modules/@shared/plugin/package.json",
-        r#"{ "name": "@shared/plugin" }"#,
-    );
-    fs.create_file(
-        "node_modules/@shared/config/node_modules/@shared/plugin/biome-manifest.json",
-        r#"{ "version": 1, "rules": ["rules/noAssign.grit"] }"#,
-    );
-    fs.create_file(
-        "node_modules/@shared/config/node_modules/@shared/plugin/rules/noAssign.grit",
-        r#"`Object.assign($args)` where {
-    register_diagnostic(
-        span = $args,
-        message = "Prefer object spread instead of Object.assign()"
-    )
-}"#,
-    );
-    fs.create_file("test.js", "Object.assign({}, value);\n");
-
+fn extends_rejects_bare_biome_manifest_package() {
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let result = run_cli_with_dyn_fs(
-        Box::new(fs.create_os()),
+
+    fs.insert("biome.json".into(), r#"{ "extends": ["@org/config"] }"#);
+    fs.insert(
+        "node_modules/@org/config/package.json".into(),
+        r#"{
+    "name": "@org/config",
+    "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/config/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}"#,
+    );
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), "const value = 1;\n");
+
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", &format!("{}/test.js", fs.cli_path())].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
+    assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "extended_config_resolves_plugin_package_from_config",
-        fs.create_mem(),
+        "extends_rejects_bare_biome_manifest_package",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_multiple_configs_from_biome_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+    "extends": [
+        "@shared/config/configs/format",
+        "@shared/config/configs/lint"
+    ]
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+    "name": "@shared/config",
+    "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": [
+        { "format": "./format.json" },
+        "shared-config/configs/lint"
+    ]
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/format.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    fs.insert(
+        "node_modules/shared-config/package.json".into(),
+        r#"{
+    "name": "shared-config",
+    "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/shared-config/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": [{ "lint": "./lint.json" }]
+}"#,
+    );
+    fs.insert(
+        "node_modules/shared-config/lint.json".into(),
+        r#"{ "linter": { "rules": { "suspicious": { "noDebugger": "error" } } } }"#,
+    );
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"debugger; console.log("string");"#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_multiple_configs_from_biome_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_rebinds_imported_config_from_biome_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@org/wrapper/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@org/wrapper/package.json".into(),
+        r#"{
+    "name": "@org/wrapper",
+    "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/wrapper/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": ["@org/source/configs/recommended"]
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/source/package.json".into(),
+        r#"{
+    "name": "@org/source",
+    "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/source/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/source/recommended.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"console.log("string");"#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_rebinds_imported_config_from_biome_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_preserves_package_exports_under_configs() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+    "name": "@shared/config",
+    "exports": {
+        "./configs/recommended": "./recommended.json"
+    }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"console.log("string");"#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_preserves_package_exports_under_configs",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_rejects_deep_manifest_config_imports() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["config-0/configs/recommended"] }"#,
+    );
+    for index in 0..=11 {
+        let package = format!("config-{index}");
+        let package_dir = format!("node_modules/{package}");
+        fs.insert(
+            format!("{package_dir}/package.json").into(),
+            format!(r#"{{ "name": "{package}" }}"#),
+        );
+        let configs = if index == 11 {
+            r#"[{ "recommended": "./recommended.json" }]"#.to_string()
+        } else {
+            format!(r#"["config-{}/configs/recommended"]"#, index + 1)
+        };
+        fs.insert(
+            format!("{package_dir}/biome-manifest.json").into(),
+            format!(r#"{{ "version": 1, "configs": {configs} }}"#),
+        );
+    }
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), "const value = 1;\n");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_rejects_deep_manifest_config_imports",
+        fs,
         console,
         result,
     ));

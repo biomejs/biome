@@ -4612,7 +4612,10 @@ fn lint_plugin_manifest_rejects_empty_rules() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = "biome-manifest.json";
-    fs.insert(file_path.into(), br#"{ "version": 1, "rules": [] }"#);
+    fs.insert(
+        file_path.into(),
+        br#"{ "version": 1, "plugins": { "rules": [], "presets": { "recommended": ["one"] } } }"#,
+    );
 
     let (fs, result) =
         run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
@@ -4634,10 +4637,10 @@ fn lint_package_plugin_with_distinct_includes() {
     fs.insert(
         "biome.json".into(),
         br#"{
-    "plugins": [{ "path": "plugin", "includes": ["**/src/**"] }],
+    "plugins": [{ "path": "plugin/noAssign", "includes": ["**/src/**"] }],
     "overrides": [{
         "includes": ["tests/**"],
-        "plugins": [{ "path": "plugin", "includes": ["**/tests/**"] }]
+        "plugins": [{ "path": "plugin/noAssign", "includes": ["**/tests/**"] }]
     }]
 }"#,
     );
@@ -4647,7 +4650,7 @@ fn lint_package_plugin_with_distinct_includes() {
     );
     fs.insert(
         "node_modules/plugin/biome-manifest.json".into(),
-        br#"{ "version": 1, "rules": ["rules/noAssign.grit"] }"#,
+        br#"{ "version": 1, "plugins": { "rules": [{ "noAssign": "rules/noAssign.grit" }], "presets": { "recommended": ["noAssign"] } } }"#,
     );
     fs.insert(
         "node_modules/plugin/rules/noAssign.grit".into(),

@@ -34,7 +34,6 @@ use biome_formatter::{
     BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
     LineWidth, Printed, TrailingNewline,
 };
-#[cfg(feature = "plugins")]
 use biome_fs::ManifestName;
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{JsonAnalyzeServices, analyze};
@@ -43,8 +42,7 @@ use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
-#[cfg(feature = "plugins")]
-use biome_plugin_loader::PluginManifest;
+use biome_manifest::BiomeManifest;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -700,9 +698,8 @@ fn lint(params: LintParams) -> LintResults {
 
     // if we're parsing the `biome-manifest.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
-    #[cfg(feature = "plugins")]
     if ManifestName::is_manifest_file(params.path.as_path()) {
-        let deserialized = deserialize_from_json_ast::<PluginManifest>(&root, "");
+        let deserialized = deserialize_from_json_ast::<BiomeManifest>(&root, "");
         diagnostics.extend(
             deserialized
                 .into_diagnostics()

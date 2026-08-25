@@ -1454,6 +1454,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_manifest"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_fs",
+ "biome_json_parser",
+ "biome_resolver",
+ "biome_rowan",
+ "camino",
+ "insta",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_markdown_analyze"
 version = "0.1.0"
 dependencies = [
@@ -1707,6 +1725,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_manifest",
  "biome_parser",
  "biome_resolver",
  "biome_rowan",
@@ -1901,6 +1920,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_manifest",
  "biome_markdown_analyze",
  "biome_markdown_formatter",
  "biome_markdown_parser",
@@ -7629,9 +7649,9 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_manifest",
  "biome_markdown_analyze",
  "biome_markdown_syntax",
- "biome_plugin_loader",
  "biome_rowan",
  "biome_service",
  "biome_string_case",

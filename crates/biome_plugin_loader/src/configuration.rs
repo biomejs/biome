@@ -5,7 +5,8 @@ use biome_deserialize_macros::{Deserializable, Merge};
 use biome_fs::normalize_path;
 use biome_glob::NormalizedGlob;
 use biome_resolver::{
-    FsWithResolverProxy, ResolveError, is_relative_specifier, resolve_package_root,
+    FsWithResolverProxy, ResolveError, is_relative_specifier, package_specifier_parts,
+    resolve_package_root,
 };
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
@@ -50,7 +51,7 @@ impl Plugins {
                     if let Some(package_name) =
                         normalize_plugin_reference(fs, &mut opts.path, base_dir, resolve_package)?
                     {
-                        opts.resolved_package_name = Some(package_name);
+                        opts.resolved_package_specifier = Some(package_name);
                     }
                 }
             }
@@ -84,7 +85,7 @@ impl Plugins {
             if let Some(package_name) =
                 normalize_plugin_reference(fs, &mut opts.path, base_dir, true)?
             {
-                opts.resolved_package_name = Some(package_name);
+                opts.resolved_package_specifier = Some(package_name);
             }
         }
         Ok(())
@@ -119,8 +120,8 @@ impl Plugins {
 /// Relative filesystem references are joined to `base_dir`, then `.` and `..`
 /// components are lexically collapsed without resolving symbolic links. Package
 /// specifiers remain unchanged unless `resolve_package` is set, in which case
-/// `plugin_path` is replaced with the installed package root and the original
-/// package name is returned.
+/// `plugin_path` is replaced with the package's Biome manifest and the original
+/// package specifier is returned.
 ///
 /// # Errors
 ///
@@ -133,13 +134,14 @@ fn normalize_plugin_reference(
 ) -> Result<Option<String>, crate::PluginDiagnostic> {
     if is_package_plugin_specifier(fs, plugin_path, base_dir) {
         if resolve_package {
-            let package_name = plugin_path.clone();
-            *plugin_path = resolve_package_root(plugin_path, base_dir, fs)
-                .map_err(|error| {
+            let package_specifier = plugin_path.clone();
+            let (package_name, _) =
+                package_specifier_parts(&package_specifier).map_err(|error| {
                     crate::PluginDiagnostic::cant_resolve_package(plugin_path, base_dir, error)
-                })?
-                .into_string();
-            return Ok(Some(package_name));
+                })?;
+            *plugin_path =
+                crate::resolve_package_manifest(fs, base_dir, package_name)?.into_string();
+            return Ok(Some(package_specifier));
         }
     } else if let Some(normalized_path) = normalize_plugin_path(plugin_path, base_dir) {
         *plugin_path = normalized_path;
@@ -173,10 +175,14 @@ pub(crate) fn is_package_plugin_specifier(
         return false;
     }
 
+    let Ok((package_name, _)) = package_specifier_parts(plugin_path) else {
+        return false;
+    };
+
     if matches!(path.extension(), Some("grit" | "js" | "mjs")) {
         return !matches!(
-            resolve_package_root(plugin_path, base_dir, fs),
-            Err(ResolveError::NotFound | ResolveError::InvalidPackageSpecifier)
+            resolve_package_root(package_name, base_dir, fs),
+            Err(ResolveError::NotFound)
         );
     }
 
@@ -255,10 +261,10 @@ impl PluginConfiguration {
         }
     }
 
-    pub fn resolved_package_name(&self) -> Option<&str> {
+    pub fn resolved_package_specifier(&self) -> Option<&str> {
         match self {
             Self::Path(_) => None,
-            Self::PathWithOptions(opts) => opts.resolved_package_name.as_deref(),
+            Self::PathWithOptions(opts) => opts.resolved_package_specifier.as_deref(),
         }
     }
 
@@ -275,7 +281,7 @@ impl PartialEq for PluginConfiguration {
         self.path() == other.path()
             && self.includes() == other.includes()
             && self.resolution_kind() == other.resolution_kind()
-            && self.resolved_package_name() == other.resolved_package_name()
+            && self.resolved_package_specifier() == other.resolved_package_specifier()
     }
 }
 
@@ -286,7 +292,7 @@ impl Hash for PluginConfiguration {
         self.path().hash(state);
         self.includes().hash(state);
         self.resolution_kind().hash(state);
-        self.resolved_package_name().hash(state);
+        self.resolved_package_specifier().hash(state);
     }
 }
 
@@ -328,21 +334,21 @@ pub struct PluginWithOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolution_kind: Option<PluginResolvePath>,
 
-    /// Package name captured when config-relative resolution replaces `path`
-    /// with an absolute package root.
+    /// Package specifier captured when config-relative resolution replaces `path`
+    /// with an absolute Biome manifest path.
     ///
     /// Configuration loading may resolve the package before `UpdateSettingsParams`
     /// crosses the workspace transport. Retaining the original specifier lets the
     /// server namespace package rules after `path` has become absolute.
     #[deserializable(skip)]
     #[serde(
-        rename = "__resolvedPackageName",
+        rename = "__resolvedPackageSpecifier",
         default,
         skip_serializing_if = "Option::is_none"
     )]
     #[cfg_attr(feature = "schema", schemars(skip))]
     #[doc(hidden)]
-    pub resolved_package_name: Option<String>,
+    pub resolved_package_specifier: Option<String>,
 }
 
 #[derive(
@@ -409,7 +415,7 @@ mod tests {
                 path: "./my-plugin.grit".into(),
                 includes: Some(vec!["src/**/*.ts".parse().unwrap()]),
                 resolution_kind: None,
-                resolved_package_name: None,
+                resolved_package_specifier: None,
             },
         )]);
 
@@ -433,19 +439,19 @@ mod tests {
                 path: "./default-plugin.grit".into(),
                 includes: None,
                 resolution_kind: None,
-                resolved_package_name: None,
+                resolved_package_specifier: None,
             }),
             PluginConfiguration::PathWithOptions(PluginWithOptions {
                 path: "./other/../other/object-plugin.grit".into(),
                 includes: None,
                 resolution_kind: Some(PluginResolvePath::Config),
-                resolved_package_name: None,
+                resolved_package_specifier: None,
             }),
             PluginConfiguration::PathWithOptions(PluginWithOptions {
                 path: "./project-plugin.grit".into(),
                 includes: None,
                 resolution_kind: Some(PluginResolvePath::Project),
-                resolved_package_name: None,
+                resolved_package_specifier: None,
             }),
         ]);
 
@@ -481,7 +487,13 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "plugin/biome-manifest.json".into(),
-            r#"{ "version": 1, "rules": ["rules/1.grit"] }"#,
+            r#"{
+                "version": 1,
+                "plugins": {
+                    "rules": [{ "one": "rules/1.grit" }],
+                    "presets": { "recommended": ["one"] }
+                }
+            }"#,
         );
         fs.insert(
             "/project/node_modules/plugin/package.json".into(),
@@ -502,7 +514,13 @@ mod tests {
         let plugin_path = base_dir.join("my-plugin");
         fs.insert(
             plugin_path.join("biome-manifest.json"),
-            r#"{ "version": 1, "rules": ["rules/1.grit"] }"#,
+            r#"{
+                "version": 1,
+                "plugins": {
+                    "rules": [{ "one": "rules/1.grit" }],
+                    "presets": { "recommended": ["one"] }
+                }
+            }"#,
         );
         let mut plugins = Plugins(vec![PluginConfiguration::Path("my-plugin".into())]);
 
@@ -515,17 +533,28 @@ mod tests {
     fn normalize_config_relative_package_specifiers() {
         let fs = MemoryFileSystem::default();
         let base_dir = normalize_path(Utf8Path::new("/config"));
-        let package_root = base_dir.join("node_modules/@scope/plugin");
+        let package_root = normalize_path(&base_dir.join("node_modules/@scope/plugin"));
         fs.insert(
             package_root.join("package.json"),
             r#"{ "name": "@scope/plugin" }"#,
         );
+        let manifest_path = package_root.join("biome-manifest.json");
+        fs.insert(
+            manifest_path.clone(),
+            r#"{
+                "version": 1,
+                "plugins": {
+                    "rules": [{ "one": "rules/1.grit" }],
+                    "presets": { "recommended": ["one"] }
+                }
+            }"#,
+        );
         let mut plugins = Plugins(vec![PluginConfiguration::PathWithOptions(
             PluginWithOptions {
-                path: "@scope/plugin".into(),
+                path: "@scope/plugin/one".into(),
                 includes: None,
                 resolution_kind: Some(PluginResolvePath::Config),
-                resolved_package_name: None,
+                resolved_package_specifier: None,
             },
         )]);
 
@@ -533,12 +562,18 @@ mod tests {
             .normalize_object_relative_paths(&fs, &base_dir)
             .unwrap();
 
-        assert_eq!(plugins.0[0].path(), package_root.as_str());
-        assert_eq!(plugins.0[0].resolved_package_name(), Some("@scope/plugin"));
+        assert_eq!(plugins.0[0].path(), manifest_path.as_str());
+        assert_eq!(
+            plugins.0[0].resolved_package_specifier(),
+            Some("@scope/plugin/one")
+        );
 
         let plugins: Plugins = serde_json::from_str(&serde_json::to_string(&plugins).unwrap())
             .expect("plugin configuration should survive workspace transport");
-        assert_eq!(plugins.0[0].resolved_package_name(), Some("@scope/plugin"));
+        assert_eq!(
+            plugins.0[0].resolved_package_specifier(),
+            Some("@scope/plugin/one")
+        );
     }
 
     #[test]

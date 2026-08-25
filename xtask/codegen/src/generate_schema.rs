@@ -2,7 +2,7 @@ use crate::update;
 use biome_configuration::Configuration;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_plugin_loader::PluginManifest;
+use biome_manifest::BiomeManifest;
 use schemars::{Schema, schema_for};
 use serde_json::{Map, Value, to_string};
 use xtask_glue::*;
@@ -16,13 +16,22 @@ pub fn generate_schema_as_string() -> Result<String> {
 
 /// Returns the plugin manifest schema as a string.
 pub fn generate_manifest_schema_as_string() -> Result<String> {
-    let mut schema = schema_for!(PluginManifest);
-    if let Some(properties) = schema.get_mut("properties").and_then(Value::as_object_mut) {
-        if let Some(version) = properties.get_mut("version").and_then(Value::as_object_mut) {
-            version.insert("const".into(), Value::from(1));
-        }
-        if let Some(rules) = properties.get_mut("rules").and_then(Value::as_object_mut) {
+    let mut schema = schema_for!(BiomeManifest);
+    if let Some(properties) = schema.get_mut("properties").and_then(Value::as_object_mut)
+        && let Some(version) = properties.get_mut("version").and_then(Value::as_object_mut)
+    {
+        version.insert("const".into(), Value::from(1));
+    }
+    for definitions in ["$defs", "definitions"] {
+        if let Some(rules) = schema
+            .get_mut(definitions)
+            .and_then(|definitions| definitions.get_mut("ManifestPlugins"))
+            .and_then(|plugins| plugins.get_mut("properties"))
+            .and_then(|properties| properties.get_mut("rules"))
+            .and_then(Value::as_object_mut)
+        {
             rules.insert("minItems".into(), Value::from(1));
+            break;
         }
     }
 

@@ -3421,7 +3421,7 @@ fn check_plugin_from_package_manifest() {
     fs.insert(
         Utf8PathBuf::from("biome.json"),
         br#"{
-    "plugins": ["@scope/biome-plugin"],
+    "plugins": ["@scope/biome-plugin/noAssign"],
     "formatter": { "enabled": false }
 }"#,
     );
@@ -3436,7 +3436,10 @@ fn check_plugin_from_package_manifest() {
         Utf8PathBuf::from("node_modules/@scope/biome-plugin/biome-manifest.json"),
         br#"{
     "version": 1,
-    "rules": ["rules/noAssign.grit"]
+    "plugins": {
+        "rules": [{ "noAssign": "rules/noAssign.grit" }],
+        "presets": { "recommended": ["noAssign"] }
+    }
 }"#,
     );
     fs.insert(

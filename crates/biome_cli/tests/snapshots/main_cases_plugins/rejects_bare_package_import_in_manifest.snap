@@ -5,7 +5,10 @@ expression: redactor(content)
 ## `biome-manifest.json`
 
 ```json
-{ "version": 1, "plugins": { "rules": [], "presets": { "recommended": ["one"] } } }
+{
+    "version": 1,
+    "plugins": { "rules": ["@shared/rules"] }
+}
 ```
 
 # Termination Message
@@ -24,10 +27,14 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 biome-manifest.json:1:1 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The Biome manifest must contain at least one rule or configuration.
+  × @shared/rules must select a named rule or preset from a package.
   
-  > 1 │ { "version": 1, "plugins": { "rules": [], "presets": { "recommended": ["one"] } } }
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 1 │ {
+      │ ^
+  > 2 │     "version": 1,
+  > 3 │     "plugins": { "rules": ["@shared/rules"] }
+  > 4 │ }
+      │ ^
   
 
 ```

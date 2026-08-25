@@ -21,7 +21,7 @@ pub enum PluginDiagnostic {
     /// Error compiling the plugin
     Compile(CompileDiagnostic),
 
-    /// Error thrown when deserializing a plugin manifest, such as:
+    /// Error thrown when deserializing a Biome manifest, such as:
     /// - syntax error
     /// - incorrect fields
     /// - incorrect values
@@ -99,7 +99,7 @@ impl PluginDiagnostic {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the plugin manifest from "
+                   "Failed to resolve the Biome manifest from "
                    <Emphasis>{path.to_string()}</Emphasis>
                 }
                 .to_owned(),
@@ -236,11 +236,10 @@ pub struct NotLoaded {
 
 #[cfg(test)]
 mod test {
-    use crate::plugin_manifest::PluginManifest;
-
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_json_parser::JsonParserOptions;
+    use biome_manifest::BiomeManifest;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -254,9 +253,14 @@ mod test {
 
     #[test]
     fn deserialization_error() {
-        let content = r#"{ "rules": ["rules/1.grit"] }"#;
+        let content = r#"{
+            "plugins": {
+                "rules": [{ "one": "rules/1.grit" }],
+                "presets": { "recommended": ["one"] }
+            }
+        }"#;
         let result =
-            deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "");
+            deserialize_from_json_str::<BiomeManifest>(content, JsonParserOptions::default(), "");
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
@@ -268,12 +272,13 @@ mod test {
     fn deserialization_quick_check() {
         let content = r#"{
     "version": 1,
-    "rules": [
-        "./rules/my-rule.grit"
-    ]
+    "plugins": {
+        "rules": [{ "myRule": "./rules/my-rule.grit" }],
+        "presets": { "recommended": ["myRule"] }
+    }
 }"#;
         let _result =
-            deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "")
+            deserialize_from_json_str::<BiomeManifest>(content, JsonParserOptions::default(), "")
                 .into_deserialized()
                 .unwrap_or_default();
     }

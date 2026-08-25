@@ -6,7 +6,7 @@ expression: redactor(content)
 
 ```json
 {
-  "plugins": ["@scope/biome-plugin"],
+  "plugins": ["@scope/biome-plugin/noAssign"],
   "formatter": { "enabled": false }
 }
 ```
@@ -22,7 +22,10 @@ Object.assign({});
 ```json
 {
     "version": 1,
-    "rules": ["rules/noAssign.grit"]
+    "plugins": {
+        "rules": [{ "noAssign": "rules/noAssign.grit" }],
+        "presets": { "recommended": ["noAssign"] }
+    }
 }
 ```
 

@@ -47,33 +47,6 @@ fn close_project_removes_descendant_plugin_caches() {
     assert!(plugin_caches.contains_key(Utf8Path::new("/project-sibling")));
 }
 
-#[cfg(feature = "plugins")]
-#[test]
-fn close_project_removes_descendant_plugin_caches() {
-    let (workspace, project_key) =
-        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
-    let plugin_caches = workspace.server.plugin_caches.pin();
-    plugin_caches.insert(Utf8PathBuf::from("/project"), PluginCache::default());
-    plugin_caches.insert(
-        Utf8PathBuf::from("/project/packages/nested"),
-        PluginCache::default(),
-    );
-    plugin_caches.insert(
-        Utf8PathBuf::from("/project-sibling"),
-        PluginCache::default(),
-    );
-    drop(plugin_caches);
-
-    workspace
-        .close_project(CloseProjectParams { project_key })
-        .unwrap();
-
-    let plugin_caches = workspace.server.plugin_caches.pin();
-    assert!(!plugin_caches.contains_key(Utf8Path::new("/project")));
-    assert!(!plugin_caches.contains_key(Utf8Path::new("/project/packages/nested")));
-    assert!(plugin_caches.contains_key(Utf8Path::new("/project-sibling")));
-}
-
 fn assert_settings_query_routes(db_state: DbState) {
     const PATH: &str = "/project/file.js";
     const SOURCE: &str = "knownGlobal; const value={foo:\"bar\"};";

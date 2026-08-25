@@ -26,6 +26,7 @@ biome_js_syntax          = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_js"] }
+biome_manifest           = { workspace = true }
 biome_parser             = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
@@ -54,7 +55,7 @@ windows = { workspace = true, features = ["Win32_System_Threading"], optional = 
 [features]
 default   = []
 js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
-schema    = ["biome_glob/schema", "dep:schemars"]
+schema    = ["biome_glob/schema", "biome_manifest/schema", "dep:schemars"]
 
 [lints]
 workspace = true

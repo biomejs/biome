@@ -1661,12 +1661,12 @@ impl WorkspaceServerWithDb<'_> {
         for plugin_config in plugins.iter() {
             let plugin_path = plugin_config.path();
             let includes = plugin_config.includes();
-            match BiomePlugin::load_with_package_name(
+            match BiomePlugin::load_with_package_specifier(
                 self.fs.clone(),
                 plugin_path,
                 base_path,
                 includes,
-                plugin_config.resolved_package_name(),
+                plugin_config.resolved_package_specifier(),
             ) {
                 Ok((plugin, _)) => {
                     plugin_cache.insert_plugin(plugin_config, plugin);

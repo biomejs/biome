@@ -29,26 +29,16 @@ biome-manifest.json:1:1 deserialize ━━━━━━━━━━━━━━�
   > 1 │ {}
       │ ^^
   
-  i Required keys
-  
-  - version
-  - rules
-  
 
 ```
 
 ```block
 biome-manifest.json:1:1 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The key `rules` is missing.
+  × The Biome manifest must contain at least one rule or configuration.
   
   > 1 │ {}
       │ ^^
-  
-  i Required keys
-  
-  - version
-  - rules
   
 
 ```

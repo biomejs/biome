@@ -278,6 +278,53 @@ fn test_resolve_dependency() {
 }
 
 #[test]
+fn test_package_names() {
+    for name in ["package", "package.grit", "@scope/package"] {
+        assert!(is_package_name(name), "expected {name} to be valid");
+    }
+    for name in [
+        "",
+        ".",
+        "..",
+        "package/",
+        "package/subpath",
+        "@scope",
+        "@scope/",
+        "@scope/.",
+        "@scope/..",
+        "@scope/package/subpath",
+    ] {
+        assert!(!is_package_name(name), "expected {name} to be invalid");
+    }
+}
+
+#[test]
+fn test_package_specifier_parts() {
+    assert_eq!(
+        package_specifier_parts("package/rule"),
+        Ok(("package", "rule"))
+    );
+    assert_eq!(
+        package_specifier_parts("@scope/package/presets/recommended"),
+        Ok(("@scope/package", "presets/recommended"))
+    );
+    assert_eq!(package_specifier_parts("package"), Ok(("package", "")));
+    for specifier in [
+        "./package/rule",
+        "@scope",
+        "@scope//rule",
+        "package/../rule",
+        "package//rule",
+        "package/rule/",
+    ] {
+        assert!(
+            package_specifier_parts(specifier).is_err(),
+            "expected {specifier} to be invalid"
+        );
+    }
+}
+
+#[test]
 fn test_resolve_package_root() {
     let base_dir = get_fixtures_path("resolver_cases_2");
     let fs = OsFileSystem::new(base_dir.clone());
@@ -1011,5 +1058,23 @@ fn test_resolve_exports_pattern_specificity() {
         ),
         Err(ResolveError::NotFound),
         "null target should block resolution",
+    );
+
+    assert!(
+        package_has_exported_subpath(
+            "@kcconfigs/biome",
+            "features/private-internal/secret",
+            &base_dir,
+            &fs,
+        )
+        .unwrap()
+    );
+    assert!(package_has_exported_subpath("@kcconfigs/biome", "missing", &base_dir, &fs).unwrap());
+
+    let other_base = get_fixtures_path("resolver_cases_7");
+    let other_fs = OsFileSystem::new(other_base.clone());
+    assert!(
+        !package_has_exported_subpath("bar", "configs/recommended", &other_base, &other_fs)
+            .unwrap()
     );
 }

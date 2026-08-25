@@ -6,11 +6,11 @@ expression: redactor(content)
 
 ```json
 {
-  "plugins": [{ "path": "plugin", "includes": ["**/src/**"] }],
+  "plugins": [{ "path": "plugin/noAssign", "includes": ["**/src/**"] }],
   "overrides": [
     {
       "includes": ["tests/**"],
-      "plugins": [{ "path": "plugin", "includes": ["**/tests/**"] }]
+      "plugins": [{ "path": "plugin/noAssign", "includes": ["**/tests/**"] }]
     }
   ]
 }
@@ -19,7 +19,7 @@ expression: redactor(content)
 ## `node_modules/plugin/biome-manifest.json`
 
 ```json
-{ "version": 1, "rules": ["rules/noAssign.grit"] }
+{ "version": 1, "plugins": { "rules": [{ "noAssign": "rules/noAssign.grit" }], "presets": { "recommended": ["noAssign"] } } }
 ```
 
 ## `node_modules/plugin/package.json`

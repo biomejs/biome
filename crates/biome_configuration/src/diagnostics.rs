@@ -345,6 +345,12 @@ impl CantResolve {
         }
     }
 
+    pub fn with_message(mut self, message: impl Display) -> Self {
+        self.message = MessageAndDescription::from(markup! {{message}}.to_owned());
+        self.source = None;
+        self
+    }
+
     pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages

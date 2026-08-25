@@ -45,7 +45,7 @@ impl ConfigName {
     }
 }
 
-/// File names recognized as Biome plugin manifests.
+/// File names recognized as Biome manifests.
 pub struct ManifestName;
 
 impl ManifestName {

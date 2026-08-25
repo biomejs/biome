@@ -735,7 +735,13 @@ fn package_plugins_are_loaded_from_manifests() {
         Utf8PathBuf::from("/project/node_modules/@scope/plugin/biome-manifest.json"),
         br#"{
     "version": 1,
-    "rules": ["rules/noAssign.grit", "rules/noKeys.grit"]
+    "plugins": {
+        "rules": [{
+            "noAssign": "rules/noAssign.grit",
+            "noKeys": "rules/noKeys.grit"
+        }],
+        "presets": { "recommended": ["noAssign", "noKeys"] }
+    }
 }"#,
     );
     fs.insert(
@@ -767,9 +773,9 @@ fn package_plugins_are_loaded_from_manifests() {
             project_key,
             configuration: Configuration {
                 plugins: Some(Plugins(vec![
-                    PluginConfiguration::Path("@scope/plugin".to_string()),
+                    PluginConfiguration::Path("@scope/plugin/presets/recommended".to_string()),
                     PluginConfiguration::PathWithOptions(PluginWithOptions {
-                        path: "@scope/plugin".to_string(),
+                        path: "@scope/plugin/presets/recommended".to_string(),
                         ..Default::default()
                     }),
                 ])),
@@ -820,7 +826,13 @@ fn package_plugins_use_package_qualified_suppressions() {
     );
     fs.insert(
         Utf8PathBuf::from("/project/node_modules/@scope/first-plugin/biome-manifest.json"),
-        br#"{ "version": 1, "rules": ["rules/noAssign.grit"] }"#,
+        br#"{
+            "version": 1,
+            "plugins": {
+                "rules": [{ "noAssign": "rules/noAssign.grit" }],
+                "presets": { "recommended": ["noAssign"] }
+            }
+        }"#,
     );
     fs.insert(
         Utf8PathBuf::from("/project/node_modules/@scope/first-plugin/rules/noAssign.grit"),
@@ -834,7 +846,13 @@ fn package_plugins_use_package_qualified_suppressions() {
     );
     fs.insert(
         Utf8PathBuf::from("/project/node_modules/second-plugin/biome-manifest.json"),
-        br#"{ "version": 1, "rules": ["rules/noAssign.grit"] }"#,
+        br#"{
+            "version": 1,
+            "plugins": {
+                "rules": [{ "noAssign": "rules/noAssign.grit" }],
+                "presets": { "recommended": ["noAssign"] }
+            }
+        }"#,
     );
     fs.insert(
         Utf8PathBuf::from("/project/node_modules/second-plugin/rules/noAssign.grit"),
@@ -860,8 +878,8 @@ Object.assign({});"#,
             project_key,
             configuration: Configuration {
                 plugins: Some(Plugins(vec![
-                    PluginConfiguration::Path("@scope/first-plugin".to_string()),
-                    PluginConfiguration::Path("second-plugin".to_string()),
+                    PluginConfiguration::Path("@scope/first-plugin/noAssign".to_string()),
+                    PluginConfiguration::Path("second-plugin/noAssign".to_string()),
                 ])),
                 ..Default::default()
             },
@@ -952,7 +970,13 @@ fn failed_plugin_updates_preserve_loaded_plugins() {
     );
     fs.insert(
         Utf8PathBuf::from("/project/node_modules/broken-plugin/biome-manifest.json"),
-        br#"{ "version": 1, "rules": ["rules/missing.grit"] }"#,
+        br#"{
+            "version": 1,
+            "plugins": {
+                "rules": [{ "missing": "rules/missing.grit" }],
+                "presets": { "recommended": ["missing"] }
+            }
+        }"#,
     );
     fs.insert(Utf8PathBuf::from("/project/a.ts"), b"Object.assign({});");
 
@@ -982,7 +1006,7 @@ fn failed_plugin_updates_preserve_loaded_plugins() {
         project_key,
         configuration: Configuration {
             plugins: Some(Plugins(vec![PluginConfiguration::Path(
-                "broken-plugin".to_string(),
+                "broken-plugin/missing".to_string(),
             )])),
             ..Default::default()
         },
@@ -1363,7 +1387,7 @@ fn correctly_scope_plugin_with_includes() {
                             biome_glob::NormalizedGlob::from_str("!**/*.test.ts").unwrap(),
                         ]),
                         resolution_kind: None,
-                        resolved_package_name: None,
+                        resolved_package_specifier: None,
                     },
                 )])),
                 ..Default::default()
