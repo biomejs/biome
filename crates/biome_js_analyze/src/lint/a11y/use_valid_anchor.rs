@@ -155,6 +155,10 @@ impl Rule for UseValidAnchor {
         let name = node.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "a" {
+            if node.has_shorthand_attribute("href") {
+                return None;
+            }
+
             let anchor_attribute = node.find_attribute_by_name("href");
             let on_click_attribute = node.find_attribute_by_name("onClick");
 
