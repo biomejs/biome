@@ -12,9 +12,7 @@ use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::WorkspaceError;
-use biome_service::configuration::{
-    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
-};
+use biome_service::configuration::{ProjectScanComputer, load_configuration, load_editorconfig};
 use biome_service::db::DbState;
 use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::file_handlers::astro::AstroFileHandler;
@@ -1232,8 +1230,7 @@ impl Session {
             };
         if !loaded_configuration.loaded_location.is_in_project() {
             let config_path = loaded_configuration
-                .file_path
-                .as_ref()
+                .file_path()
                 .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
             let working_directory = match &base_path {
                 ConfigurationPathHint::FromLsp(path)
@@ -1273,11 +1270,10 @@ impl Session {
         info!("Configuration loaded successfully from disk.");
         info!("Update workspace settings.");
 
-        let LoadedConfiguration {
-            configuration: fs_configuration,
-            directory_path: configuration_path,
-            ..
-        } = loaded_configuration;
+        let fs_configuration = loaded_configuration.resolved_configuration();
+        let configuration_path = loaded_configuration
+            .directory_path()
+            .map(Utf8Path::to_path_buf);
 
         if configuration_path.is_none() && self.requires_configuration() {
             return ConfigurationStatus::Missing;

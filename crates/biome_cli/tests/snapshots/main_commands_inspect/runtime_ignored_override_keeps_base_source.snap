@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "resolver": { "experimentalPnpmCatalogs": false }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "javascript": {
+        "resolver": { "experimentalPnpmCatalogs": true }
+      }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "javascript.resolver.experimentalPnpmCatalogs",
+  "value": false,
+  "source": {
+    "configurationKind": "root",
+    "path": "biome.json",
+    "range": {
+      "end": 71,
+      "start": 66
+    },
+    "scope": "base"
+  }
+}
+```

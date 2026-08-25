@@ -390,7 +390,10 @@ fn generate_deserializable_struct(
             quote! {
                 #key => {
                     #mark_seen
-                    match Deserializable::deserialize(ctx, &value, &key_text)#validate {
+                    ctx.enter_property(key_text.text(), key.range(), value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, &key_text)#validate;
+                    ctx.exit_property();
+                    match deserialized {
                         Some(value) => {
                             #deprecation_notice
                             result.#field_ident = value;
@@ -448,7 +451,10 @@ fn generate_deserializable_struct(
         quote! {
             unknown_key => {
                 let key_text = Text::deserialize(ctx, &key, "")?;
-                if let Some(value) = Deserializable::deserialize(ctx, &value, key_text.text()) {
+                ctx.enter_property(key_text.text(), key.range(), value.range());
+                let deserialized = Deserializable::deserialize(ctx, &value, key_text.text());
+                ctx.exit_property();
+                if let Some(value) = deserialized {
                     std::iter::Extend::extend(&mut result.#rest_field, [(key_text, value)]);
                 }
             }

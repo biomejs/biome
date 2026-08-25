@@ -8,7 +8,7 @@ expression: redactor(content)
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noClassAssign": "warn"
       }

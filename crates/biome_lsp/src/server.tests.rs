@@ -1761,6 +1761,83 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_diagnostics_for_htm_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "html": {
+            "linter": { "enabled": true }
+        }
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let invalid_html = r#"<div scope="col"></div>"#;
+    server
+        // VS Code assigns the `html` language identifier to `.htm` files.
+        .open_named_document(invalid_html, uri!("document.htm"), "html")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.htm"),
+                version: Some(0),
+                diagnostics: vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 5,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 16,
+                        },
+                    },
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: Some(NumberOrString::String(String::from(
+                        "lint/a11y/noHeaderScope"
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: "https://biomejs.dev/linter/rules/no-header-scope".parse()?
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from(
+                        "Avoid using the scope attribute on elements other than th elements.",
+                    ),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics_for_svg_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{

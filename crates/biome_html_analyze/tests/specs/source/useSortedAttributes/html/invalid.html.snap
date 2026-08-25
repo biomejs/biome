@@ -1,0 +1,56 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<input id="name" name="name" type="text" />
+<input checked name="" id="" type="checkbox">
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input id="name" name="name" type="text" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <input checked name="" id="" type="checkbox">
+    4 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <input·id="name"·name="name"·type="text"·/>
+      2 │ + <input·type="text"·id="name"·name="name"·/>
+    3 3 │   <input checked name="" id="" type="checkbox">
+    4 4 │   
+  
+
+```
+
+```
+invalid.html:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input id="name" name="name" type="text" />
+  > 3 │ <input checked name="" id="" type="checkbox">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <input id="name" name="name" type="text" />
+    3   │ - <input·checked·name=""·id=""·type="checkbox">
+      3 │ + <input·type="checkbox"·id=""·checked·name=""·>
+    4 4 │   
+  
+
+```

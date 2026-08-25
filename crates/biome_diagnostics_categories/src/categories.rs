@@ -607,6 +607,7 @@ define_categories! {
     "reporter/parse",
     "reporter/format",
     "reporter/violations",
+    "reporter/profiler",
     // parse categories
     "parse",
 

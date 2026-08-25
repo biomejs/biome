@@ -20,7 +20,7 @@
 
 mod display;
 
-pub use display::DisplayTypeInferenceProfile;
+pub use display::TypeInferenceProfileDiagnostic;
 
 use std::cell::{Cell, RefCell};
 use std::cmp;
@@ -132,10 +132,6 @@ impl RequestMetadata {
             id: R::ID,
             label: R::LABEL,
         }
-    }
-
-    const fn id(self) -> &'static str {
-        self.id
     }
 
     const fn label(self) -> &'static str {
@@ -1014,32 +1010,5 @@ impl TypeInferenceProfileSnapshot {
                 .then_with(|| left.root.cmp(&right.root))
                 .then_with(|| left.trigger.cmp(&right.trigger))
         });
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::time::Duration;
-
-    use super::{BreadthMetric, DurationMetric};
-
-    #[test]
-    fn duration_and_breadth_metrics_exclude_aborted_work() {
-        let mut duration = DurationMetric::default();
-        duration.record_completed(Duration::from_millis(1));
-        duration.record_aborted();
-        duration.record_completed(Duration::from_millis(3));
-        assert_eq!(duration.completed, 2);
-        assert_eq!(duration.aborted, 1);
-        assert_eq!(duration.min(), Duration::from_millis(1));
-        assert_eq!(duration.average(), Duration::from_millis(2));
-        assert_eq!(duration.max, Duration::from_millis(3));
-
-        let mut breadth = BreadthMetric::default();
-        breadth.record(2);
-        breadth.record(4);
-        assert_eq!(breadth.min, 2);
-        assert_eq!(breadth.average(), 3.0);
-        assert_eq!(breadth.max, 4);
     }
 }

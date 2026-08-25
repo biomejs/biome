@@ -9,17 +9,20 @@ use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
-use biome_configuration::{BiomeDiagnostic, ConfigurationPathHint, push_to_analyzer_rules};
-use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
+use biome_configuration::{
+    BiomeDiagnostic, Configuration, ConfigurationPathHint, ConfigurationSource,
+    ConfigurationSourceEntry, ExtendedConfiguration, ExtendedConfigurations, VERSION,
+    push_to_analyzer_assist, push_to_analyzer_rules,
+};
 use biome_console::markup;
 #[cfg(feature = "lang_css")]
 use biome_css_analyze::METADATA as css_lint_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
+use biome_deserialize::Deserialized;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::{DiagnosticExt, Error, Severity};
-use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
+use biome_diagnostics::{Advices, Diagnostic, DiagnosticExt, Error, LogCategory, Severity, Visit};
+use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions, normalize_path};
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 #[cfg(feature = "lang_graphql")]
@@ -40,33 +43,36 @@ use biome_json_syntax::JsonLanguage;
 use biome_markdown_analyze::METADATA as md_lint_metadata;
 #[cfg(feature = "lang_md")]
 use biome_markdown_syntax::MarkdownLanguage;
-use biome_resolver::{FsWithResolverProxy, ResolveOptions, is_relative_specifier, resolve};
+use biome_resolver::{
+    FsWithResolverProxy, PathInfo, ResolveOptions, is_relative_specifier, resolve,
+};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
+use std::borrow::Cow;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::str::FromStr;
+use std::sync::Arc;
 use tracing::instrument;
 
-/// Information regarding the configuration that was found.
-///
-/// This contains the expanded configuration including default values where no
-/// configuration was present.
+fn display_path(path: &Utf8Path) -> Cow<'_, str> {
+    if cfg!(any(test, windows)) {
+        Cow::Owned(path.as_str().replace('\\', "/"))
+    } else {
+        Cow::Borrowed(path.as_str())
+    }
+}
+
+/// Information regarding the configuration inputs that were found.
 #[derive(Default, Debug)]
 pub struct LoadedConfiguration {
-    /// If present, the path of the directory where it was found
-    pub directory_path: Option<Utf8PathBuf>,
-    /// If present, the path of the file where it was found
-    pub file_path: Option<Utf8PathBuf>,
-    /// The Deserialized configuration
-    pub configuration: Configuration,
-    /// All diagnostics that were emitted during parsing and deserialization
+    /// The unmerged root and extended configuration inputs.
+    pub source: ConfigurationSource,
+    /// All diagnostics emitted while loading and resolving the configuration.
     pub diagnostics: Vec<Error>,
-    /// The list of possible extended configuration files
-    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     /// Where the configuration was loaded from.
     pub loaded_location: LoadedLocation,
 }
@@ -89,7 +95,7 @@ impl LoadedLocation {
 }
 
 impl LoadedConfiguration {
-    /// It consumes the payload, applies and extends and returns the final, extended configuration.
+    /// Consumes a payload and loads its extended configuration inputs.
     pub fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &dyn FsWithResolverProxy,
@@ -103,21 +109,23 @@ impl LoadedConfiguration {
             configuration_file_path,
             deserialized,
             loaded_location,
+            source,
         } = value;
-        let (partial_configuration, mut diagnostics) = deserialized.consume();
-
-        let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
-
-        let configuration = match partial_configuration {
-            Some(mut partial_configuration) => {
-                extended_configurations.extend(partial_configuration.apply_extends(
-                    fs,
-                    &configuration_file_path,
-                    &external_resolution_base_path,
-                    &mut diagnostics,
-                )?);
-                partial_configuration.migrate_deprecated_fields();
-
+        let source: Arc<str> = source.into();
+        let (partial_configuration, diagnostics) = deserialized.consume();
+        let mut diagnostics = diagnostics
+            .into_iter()
+            .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
+            .collect::<Vec<_>>();
+        let mut partial_configuration = partial_configuration;
+        let extended_configurations = match partial_configuration.as_mut() {
+            Some(partial_configuration) => {
+                let extended_configurations = ConfigurationExtendsLoader::new(fs, &mut diagnostics)
+                    .load(
+                        partial_configuration,
+                        &configuration_file_path,
+                        &external_resolution_base_path,
+                    )?;
                 // Normalize plugin paths relative to the configuration file directory so
                 // merged configurations (e.g. nested configs extending from root) can
                 // still load plugins defined in other configuration files.
@@ -137,32 +145,56 @@ impl LoadedConfiguration {
                         }
                     }
                 }
-                partial_configuration
+                extended_configurations
             }
-            None => Configuration::default(),
+            None => Vec::new(),
         };
 
+        let directory_path = configuration_file_path.parent().map(Utf8PathBuf::from);
+
         Ok(Self {
-            configuration,
-            diagnostics: diagnostics
-                .into_iter()
-                .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
-                .collect(),
-            directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
-            file_path: Some(configuration_file_path),
-            extended_configurations,
+            source: ConfigurationSource {
+                directory_path,
+                root: Some(ConfigurationSourceEntry {
+                    configuration: partial_configuration,
+                    file_path: Some(configuration_file_path),
+                    file_source: Some(source),
+                }),
+                extended_configurations: ExtendedConfigurations::from(extended_configurations),
+            },
+            diagnostics,
             loaded_location,
         })
     }
 
+    /// Resolves the loaded configuration inputs.
+    pub fn resolved_configuration(&self) -> Configuration {
+        self.source.resolve()
+    }
+
+    /// Returns the extended configurations with their resolved file paths.
+    pub fn extended_configurations(&self) -> Vec<(Utf8PathBuf, Configuration)> {
+        self.source
+            .extended_configurations
+            .as_slice()
+            .iter()
+            .filter_map(|extended| {
+                Some((
+                    extended.source.file_path.clone()?,
+                    extended.source.configuration.clone()?,
+                ))
+            })
+            .collect()
+    }
+
     /// Return the path of the **directory** where the configuration is
     pub fn directory_path(&self) -> Option<&Utf8Path> {
-        self.directory_path.as_deref()
+        self.source.directory_path.as_deref()
     }
 
     /// Return the path of the **file** where the configuration is
     pub fn file_path(&self) -> Option<&Utf8Path> {
-        self.file_path.as_deref()
+        self.source.root.as_ref()?.file_path.as_deref()
     }
 
     /// Whether they are errors emitted. Error are [Severity::Error] or greater.
@@ -228,6 +260,8 @@ pub struct ConfigurationPayload {
     pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
     pub external_resolution_base_path: Utf8PathBuf,
+    /// The exact source text used to deserialize the configuration.
+    pub source: String,
 
     pub loaded_location: LoadedLocation,
 }
@@ -344,6 +378,7 @@ pub fn read_config(
         deserialized: deserialized.unwrap(),
         configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
+        source: auto_search_result.content,
         loaded_location,
     }))
 }
@@ -376,6 +411,7 @@ fn load_user_config(
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
+            source: content,
             loaded_location,
         }))
     } else {
@@ -414,6 +450,7 @@ fn load_user_config(
             deserialized,
             configuration_file_path: result.file_path.to_path_buf(),
             external_resolution_base_path,
+            source: content,
             loaded_location,
         }))
     }
@@ -572,254 +609,565 @@ pub(crate) fn to_analyzer_rules_by_indices(
         .override_analyzer_rules_by_indices(override_indices, analyzer_rules)
 }
 
-pub trait ConfigurationExt {
-    fn apply_extends(
-        &mut self,
-        fs: &dyn FsWithResolverProxy,
-        file_path: &Utf8Path,
-        external_resolution_base_path: &Utf8Path,
-        diagnostics: &mut Vec<Error>,
-    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError>;
+const MAX_EXTENDS_DEPTH: usize = 10;
 
-    fn deserialize_extends(
-        &mut self,
-        fs: &dyn FsWithResolverProxy,
-        relative_resolution_base_path: &Utf8Path,
-        external_resolution_base_path: &Utf8Path,
-    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
-
-    fn migrate_deprecated_fields(&mut self);
+/// Loads a configuration's complete `extends` graph in dependency-first merge order.
+struct ConfigurationExtendsLoader<'a> {
+    fs: &'a dyn FsWithResolverProxy,
+    diagnostics: &'a mut Vec<Error>,
+    package_resolutions: FxHashMap<String, PackageResolution>,
 }
 
-impl ConfigurationExt for Configuration {
-    /// Mutates the configuration so that any fields that have not been
-    /// configured explicitly are filled in with their values from configs
-    /// listed in the `extends` field.
-    ///
-    /// The `extends` configs are applied from left to right.
-    ///
-    /// If a configuration can't be resolved from the file system, the operation
-    /// will fail.
-    ///
-    /// `file_path` is the path to the configuration file and is used for
-    /// resolving relative paths in the `extends` field.
-    ///
-    /// `external_resolution_base_path` is used for resolving non-relative
-    /// `extends` entries.
-    fn apply_extends(
-        &mut self,
-        fs: &dyn FsWithResolverProxy,
-        file_path: &Utf8Path,
-        external_resolution_base_path: &Utf8Path,
-        diagnostics: &mut Vec<Error>,
-    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError> {
-        let deserialized = self.deserialize_extends(
+impl<'a> ConfigurationExtendsLoader<'a> {
+    fn new(fs: &'a dyn FsWithResolverProxy, diagnostics: &'a mut Vec<Error>) -> Self {
+        Self {
             fs,
-            file_path.parent().expect("file path should have a parent"),
-            external_resolution_base_path,
-        )?;
-        let (configurations, errors): (Vec<_>, Vec<_>) =
-            deserialized.into_iter().map(Deserialized::consume).unzip();
-
-        let configuration_list = configurations
-            .iter()
-            .flatten()
-            .cloned()
-            .map(|c| (file_path.to_path_buf(), c))
-            .collect::<Vec<_>>();
-
-        let extended_configuration = configurations.into_iter().flatten().reduce(
-            |mut previous_configuration, current_configuration| {
-                previous_configuration.merge_with(current_configuration);
-                previous_configuration
-            },
-        );
-        if let Some(mut extended_configuration) = extended_configuration {
-            // Make sure our root value is set explicitly, so it cannot be set
-            // by configs we extend.
-            self.root = Some(self.is_root().into());
-
-            // We swap them to avoid having to clone `self.configuration` to merge it.
-            std::mem::swap(self, &mut extended_configuration);
-            self.merge_with(extended_configuration)
+            diagnostics,
+            package_resolutions: FxHashMap::default(),
         }
-
-        diagnostics.extend(
-            errors
-                .into_iter()
-                .flatten()
-                .map(|diagnostic| diagnostic.with_file_path(file_path.to_string()))
-                .collect::<Vec<_>>(),
-        );
-
-        Ok(configuration_list)
     }
 
-    /// Deserializes all the configuration files that were specified in the
-    /// `extends` field.
-    fn deserialize_extends(
+    /// Returns extended inputs in dependency-first merge order.
+    ///
+    /// Multiple versions of an extended package or an eleventh level are reported as errors and
+    /// aren't loaded.
+    fn load(
+        mut self,
+        root: &Configuration,
+        root_file_path: &Utf8Path,
+        root_external_resolution_base_path: &Utf8Path,
+    ) -> Result<Vec<ExtendedConfiguration>, WorkspaceError> {
+        let mut pending_configurations = vec![PendingConfiguration::root(
+            root,
+            root_file_path.to_path_buf(),
+            root_external_resolution_base_path.to_path_buf(),
+        )];
+        let mut extended_configurations = Vec::new();
+
+        while let Some(pending) = pending_configurations.last_mut() {
+            let Some(specifier) = pending.next_specifier() else {
+                let completed = pending_configurations
+                    .pop()
+                    .expect("the pending configuration should exist");
+                if let Some(configuration) = completed.configuration {
+                    extended_configurations.push(configuration);
+                }
+                continue;
+            };
+
+            let resolved = self.resolve_extended_configuration(pending, specifier)?;
+
+            if let Some(first) = self.conflicting_package_resolution(&resolved) {
+                self.report_conflict(first, resolved);
+                continue;
+            }
+
+            let depth = pending.depth + 1;
+            if depth > MAX_EXTENDS_DEPTH {
+                self.diagnostics.push(
+                    ExtendsDepthLimit {
+                        path: display_path(&pending.file_path).into_owned(),
+                        specifier: resolved.specifier.clone().into(),
+                    }
+                    .into(),
+                );
+                continue;
+            }
+
+            self.register_package_resolution(&resolved);
+            let mut loaded = self.load_resolved_configuration(resolved)?;
+            self.diagnostics.append(&mut loaded.diagnostics);
+            pending_configurations.push(PendingConfiguration::extended(
+                loaded,
+                depth,
+                root_external_resolution_base_path,
+            ));
+        }
+
+        Ok(extended_configurations)
+    }
+
+    fn report_conflict(
         &mut self,
-        fs: &dyn FsWithResolverProxy,
-        relative_resolution_base_path: &Utf8Path,
-        external_resolution_base_path: &Utf8Path,
-    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
-        let Some(extends) = &self.extends else {
-            return Ok(Vec::new());
+        first: PackageResolution,
+        resolved: ResolvedExtendedConfiguration,
+    ) {
+        self.diagnostics.push(
+            MultipleExtendedConfigurationVersions {
+                specifier: resolved.identity().to_string(),
+                path: display_path(&resolved.file_path).into_owned(),
+                advice: MultipleExtendedConfigurationVersionsAdvice {
+                    first,
+                    conflicting: PackageResolution::from(&resolved),
+                },
+            }
+            .into(),
+        );
+    }
+
+    fn conflicting_package_resolution(
+        &self,
+        resolved: &ResolvedExtendedConfiguration,
+    ) -> Option<PackageResolution> {
+        let identity = resolved.package_identity()?;
+        let first = self.package_resolutions.get(identity)?;
+        (first.version() != resolved.package_version()).then(|| first.clone())
+    }
+
+    fn register_package_resolution(&mut self, resolved: &ResolvedExtendedConfiguration) {
+        if let Some(identity) = resolved.package_identity() {
+            self.package_resolutions
+                .entry(identity.to_string())
+                .or_insert_with(|| PackageResolution::from(resolved));
+        }
+    }
+
+    fn resolve_extended_configuration(
+        &self,
+        pending: &PendingConfiguration,
+        specifier: String,
+    ) -> Result<ResolvedExtendedConfiguration, WorkspaceError> {
+        const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
+            .with_assume_relative()
+            .with_condition_names(&["biome", "default"]);
+
+        let file_path = if is_relative_specifier(&specifier) {
+            normalize_path(&pending.relative_resolution_base_path.join(&specifier))
+        } else {
+            resolve(
+                &specifier,
+                &pending.external_resolution_base_path,
+                self.fs,
+                &RESOLVE_OPTIONS,
+            )
+            .map_err(|error| {
+                CantResolve::new(Utf8PathBuf::from(&specifier), error).with_verbose_advice(
+                    markup! {
+                        "Biome tried to resolve the configuration file \""<Emphasis>{
+                            &specifier
+                        }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
+                            pending.external_resolution_base_path.to_string()
+                        }</Emphasis>"\" as the base path."
+                    },
+                )
+            })?
         };
 
-        let mut deserialized_configurations = vec![];
-        if let Some(extends) = extends.as_list() {
-            for extend_entry in extends.iter() {
-                let extend_configuration_file_path = if is_relative_specifier(extend_entry.as_ref())
-                {
-                    relative_resolution_base_path.join(extend_entry.as_ref())
-                } else {
-                    const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
-                        .with_assume_relative()
-                        .with_condition_names(&["biome", "default"]);
+        let file_path = match self.fs.path_info(&file_path) {
+            Ok(PathInfo::Symlink {
+                canonicalized_target,
+            }) => canonicalized_target,
+            _ => normalize_path(&file_path),
+        };
+        let package = file_path
+            .parent()
+            .and_then(|parent| self.fs.find_package_json(parent).ok())
+            .map(|(_, manifest)| ResolvedPackage {
+                name: manifest.name.map(String::from),
+                version: manifest.version.map(String::from),
+            })
+            .filter(|package| package.matches_specifier(&specifier));
 
-                    resolve(
-                        extend_entry.as_ref(),
-                        external_resolution_base_path,
-                        fs,
-                        &RESOLVE_OPTIONS,
-                    )
-                    .map_err(|error| {
-                        CantResolve::new(Utf8PathBuf::from(extend_entry), error)
-                            .with_verbose_advice(markup! {
-                                "Biome tried to resolve the configuration file \""<Emphasis>{
-                                    extend_entry
-                                }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
-                                    external_resolution_base_path.to_string()
-                                }</Emphasis>"\" as the base path."
-                            })
-                    })?
-                };
+        Ok(ResolvedExtendedConfiguration {
+            reference: ConfigurationReference {
+                from: pending.file_path.clone(),
+            },
+            specifier,
+            file_path,
+            package,
+        })
+    }
 
-                let mut file = fs
-                    .open_with_options(
-                        extend_configuration_file_path.as_path(),
-                        OpenOptions::default().read(true),
-                    )
-                    .map_err(|err| {
-                        CantLoadExtendFile::new(
-                            extend_configuration_file_path.to_string(),
-                            err.to_string(),
-                        )
+    /// Reads and deserializes a resolved extended configuration.
+    ///
+    /// File access failures are returned as workspace errors. Deserialization failures are retained
+    /// in the returned diagnostics and produce a loaded input without a typed configuration.
+    fn load_resolved_configuration(
+        &self,
+        resolved: ResolvedExtendedConfiguration,
+    ) -> Result<LoadedExtendedConfiguration, WorkspaceError> {
+        let source = self.read_configuration_source(&resolved.file_path)?;
+        let deserialized = deserialize_from_json_str::<Configuration>(
+            source.as_str(),
+            match resolved.file_path.extension() {
+                Some("json") => JsonParserOptions::default(),
+                _ => JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+            },
+            "",
+        );
+        let (mut configuration, diagnostics) = deserialized.consume();
+        if let Some(configuration) = configuration.as_mut() {
+            Self::normalize_plugins(
+                configuration,
+                &resolved.file_path,
+                resolved.file_path.parent().unwrap_or(Utf8Path::new("")),
+            );
+        }
+        let diagnostics = diagnostics
+            .into_iter()
+            .map(|diagnostic| diagnostic.with_file_path(resolved.file_path.to_string()))
+            .collect();
+
+        Ok(LoadedExtendedConfiguration {
+            specifier: resolved.specifier,
+            file_path: resolved.file_path,
+            source: source.into(),
+            configuration,
+            diagnostics,
+        })
+    }
+
+    fn read_configuration_source(&self, file_path: &Utf8Path) -> Result<String, WorkspaceError> {
+        let mut file =
+            self.fs
+                .open_with_options(file_path, OpenOptions::default().read(true))
+                .map_err(|err| {
+                    CantLoadExtendFile::new(file_path.to_string(), err.to_string())
                         .with_verbose_advice(markup! {
                             "Biome tried to load the configuration file \""<Emphasis>{
-                                extend_configuration_file_path.to_string()
-                            }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
-                                external_resolution_base_path.to_string()
-                            }</Emphasis>"\" as the base path."
+                                file_path.to_string()
+                            }</Emphasis>"\" from \"extends\"."
                         })
-                    })?;
-
-                let mut content = String::new();
-                file.read_to_string(&mut content).map_err(|err| {
-                    CantLoadExtendFile::new(
-                        extend_configuration_file_path.to_string(),
-                        err.to_string(),
-                    )
-                    .with_verbose_advice(markup! {
-                        "It's possible that the file was created with a "
-                        "different user/group. Make sure you have the rights "
-                        "to read the file."
-                    })
                 })?;
-                let deserialized = deserialize_from_json_str::<Self>(
-                    content.as_str(),
-                    match extend_configuration_file_path.extension() {
-                        Some("json") => JsonParserOptions::default(),
-                        _ => JsonParserOptions::default()
-                            .with_allow_comments()
-                            .with_allow_trailing_commas(),
-                    },
-                    "",
-                );
-                deserialized_configurations.push(deserialized)
-            }
-        }
-        Ok(deserialized_configurations)
+
+        let mut source = String::new();
+        file.read_to_string(&mut source).map_err(|err| {
+            CantLoadExtendFile::new(file_path.to_string(), err.to_string()).with_verbose_advice(
+                markup! {
+                    "It's possible that the file was created with a "
+                    "different user/group. Make sure you have the rights "
+                    "to read the file."
+                },
+            )
+        })?;
+        Ok(source)
     }
 
-    /// Checks for the presence of deprecated fields and updates the
-    /// configuration to apply them to the new schema.
-    fn migrate_deprecated_fields(&mut self) {}
+    #[cfg(feature = "plugins")]
+    fn normalize_plugins(
+        configuration: &mut Configuration,
+        file_path: &Utf8Path,
+        fallback_resolution_base_path: &Utf8Path,
+    ) {
+        let config_dir = file_path.parent().unwrap_or(fallback_resolution_base_path);
+        if let Some(plugins) = configuration.plugins.as_mut() {
+            plugins.normalize_object_relative_paths(config_dir);
+        }
+        if let Some(overrides) = configuration.overrides.as_mut() {
+            for pattern in overrides.0.iter_mut() {
+                if let Some(plugins) = pattern.plugins.as_mut() {
+                    plugins.normalize_object_relative_paths(config_dir);
+                }
+            }
+        }
+    }
+
+    #[cfg(not(feature = "plugins"))]
+    fn normalize_plugins(
+        _configuration: &mut Configuration,
+        _file_path: &Utf8Path,
+        _fallback_resolution_base_path: &Utf8Path,
+    ) {
+    }
 }
 
-#[cfg(test)]
-mod test {
-    use crate::{WorkspaceError, configuration::load_configuration};
-    use biome_configuration::{
-        BiomeDiagnostic, ConfigurationPathHint, diagnostics::ConfigurationDiagnostic,
-    };
-    use biome_fs::MemoryFileSystem;
-    use camino::Utf8PathBuf;
+/// A configuration waiting for its nested extended configurations to be processed.
+///
+/// The loader retains each configuration until all of its `extends` entries have been processed,
+/// then emits it after its dependencies. The root configuration participates in traversal but is
+/// not emitted as an extended configuration.
+struct PendingConfiguration {
+    /// The extended configuration emitted after its dependencies, or `None` for the root.
+    configuration: Option<ExtendedConfiguration>,
+    /// The resolved path used as the origin of nested references and diagnostics.
+    file_path: Utf8PathBuf,
+    /// The directory used to resolve relative `extends` specifiers.
+    relative_resolution_base_path: Utf8PathBuf,
+    /// The directory used to resolve package and other non-relative `extends` specifiers.
+    external_resolution_base_path: Utf8PathBuf,
+    /// The declared `extends` specifiers in source order.
+    specifiers: Vec<String>,
+    /// The index of the next specifier to process.
+    next_specifier: usize,
+    /// The number of extended configuration edges from the root.
+    depth: usize,
+}
 
-    #[test]
-    fn should_not_load_a_configuration_yml() {
-        let fs = MemoryFileSystem::default();
-        fs.insert(Utf8PathBuf::from("biome.yml"), "content".to_string());
-        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("biome.yml"));
-
-        let result = load_configuration(&fs, path_hint);
-
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn should_skip_non_root_configuration() {
-        let fs = MemoryFileSystem::default();
-        fs.insert(
-            Utf8PathBuf::from("/biome.json"),
-            r#"{ "linter": { "enabled": false } }"#.to_string(),
-        );
-        fs.insert(
-            Utf8PathBuf::from("/nested/biome.json"),
-            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
-        );
-        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/nested"));
-
-        match load_configuration(&fs, path_hint) {
-            Ok(loaded) => {
-                assert!(
-                    loaded
-                        .configuration
-                        .linter
-                        .is_some_and(|linter| !linter.is_enabled())
-                );
-            }
-            Err(err) => {
-                panic!("Config loading failed: {err}");
-            }
+impl PendingConfiguration {
+    fn root(
+        configuration: &Configuration,
+        file_path: Utf8PathBuf,
+        external_resolution_base_path: Utf8PathBuf,
+    ) -> Self {
+        let relative_resolution_base_path = file_path
+            .parent()
+            .unwrap_or(&external_resolution_base_path)
+            .to_path_buf();
+        Self {
+            configuration: None,
+            file_path,
+            relative_resolution_base_path,
+            external_resolution_base_path,
+            specifiers: Self::specifiers(configuration),
+            next_specifier: 0,
+            depth: 0,
         }
     }
 
-    #[test]
-    fn should_refuse_user_provided_non_root_configuration() {
-        let fs = MemoryFileSystem::default();
-        fs.insert(
-            Utf8PathBuf::from("/biome.json"),
-            r#"{ "linter": { "enabled": false } }"#.to_string(),
-        );
-        fs.insert(
-            Utf8PathBuf::from("/nested/biome.json"),
-            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
-        );
-        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("/nested"));
+    fn extended(
+        loaded: LoadedExtendedConfiguration,
+        depth: usize,
+        fallback_resolution_base_path: &Utf8Path,
+    ) -> Self {
+        let specifiers = loaded
+            .configuration
+            .as_ref()
+            .map_or_else(Vec::new, Self::specifiers);
+        let resolution_base_path = loaded
+            .file_path
+            .parent()
+            .unwrap_or(fallback_resolution_base_path)
+            .to_path_buf();
+        let file_path = loaded.file_path;
+        let configuration = Some(ExtendedConfiguration {
+            specifier: Some(loaded.specifier),
+            source: ConfigurationSourceEntry {
+                configuration: loaded.configuration,
+                file_path: Some(file_path.clone()),
+                file_source: Some(loaded.source),
+            },
+        });
 
-        match load_configuration(&fs, path_hint) {
-            Ok(_) => panic!("Config loading should have failed"),
-            Err(err) => {
-                assert!(matches!(
-                    err,
-                    WorkspaceError::Configuration(ConfigurationDiagnostic::Biome(
-                        BiomeDiagnostic::NonRootConfiguration(_)
-                    ))
-                ));
-            }
+        Self {
+            configuration,
+            file_path,
+            relative_resolution_base_path: resolution_base_path.clone(),
+            external_resolution_base_path: resolution_base_path,
+            specifiers,
+            next_specifier: 0,
+            depth,
         }
+    }
+
+    fn specifiers(configuration: &Configuration) -> Vec<String> {
+        configuration
+            .extends
+            .as_ref()
+            .and_then(|extends| extends.as_list())
+            .map(|extends| extends.iter().map(|entry| entry.to_string()).collect())
+            .unwrap_or_default()
+    }
+
+    fn next_specifier(&mut self) -> Option<String> {
+        let specifier = self.specifiers.get(self.next_specifier)?.clone();
+        self.next_specifier += 1;
+        Some(specifier)
+    }
+}
+
+struct ResolvedExtendedConfiguration {
+    specifier: String,
+    file_path: Utf8PathBuf,
+    package: Option<ResolvedPackage>,
+    reference: ConfigurationReference,
+}
+
+impl ResolvedExtendedConfiguration {
+    fn identity(&self) -> &str {
+        self.package_identity()
+            .unwrap_or_else(|| self.file_path.as_str())
+    }
+
+    fn package_identity(&self) -> Option<&str> {
+        self.package
+            .as_ref()
+            .and_then(|package| package.name.as_deref())
+    }
+
+    fn package_version(&self) -> Option<&str> {
+        self.package
+            .as_ref()
+            .and_then(|package| package.version.as_deref())
+    }
+}
+
+/// A resolved and readable extended configuration file.
+///
+/// The path and source identify the loaded file independently of typed deserialization.
+/// [`Self::configuration`] is `None` when deserialization could not produce a configuration, and
+/// [`Self::diagnostics`] describes the failure.
+struct LoadedExtendedConfiguration {
+    specifier: String,
+    file_path: Utf8PathBuf,
+    source: Arc<str>,
+    configuration: Option<Configuration>,
+    diagnostics: Vec<Error>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ResolvedPackage {
+    name: Option<String>,
+    version: Option<String>,
+}
+
+impl ResolvedPackage {
+    fn matches_specifier(&self, specifier: &str) -> bool {
+        self.name.as_deref().is_some_and(|name| {
+            specifier == name
+                || specifier
+                    .strip_prefix(name)
+                    .is_some_and(|subpath| subpath.starts_with('/'))
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+struct ConfigurationReference {
+    from: Utf8PathBuf,
+}
+
+#[derive(Clone, Debug)]
+struct PackageResolution {
+    file_path: Utf8PathBuf,
+    package: Option<ResolvedPackage>,
+    reference: ConfigurationReference,
+}
+
+impl PackageResolution {
+    fn version(&self) -> Option<&str> {
+        self.package
+            .as_ref()
+            .and_then(|package| package.version.as_deref())
+    }
+}
+
+impl From<&ResolvedExtendedConfiguration> for PackageResolution {
+    fn from(resolved: &ResolvedExtendedConfiguration) -> Self {
+        Self {
+            file_path: resolved.file_path.clone(),
+            package: resolved.package.clone(),
+            reference: resolved.reference.clone(),
+        }
+    }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("Biome resolved multiple versions of "<Emphasis>{self.specifier}</Emphasis>"."),
+        description = "Biome resolved multiple versions of {specifier}."
+    ),
+    advice = "This is an error for Biome because it doesn't know which version to use. Extended configurations are applied in order, and a fixed configuration could be overridden by one that is bugged."
+)]
+struct MultipleExtendedConfigurationVersions {
+    specifier: String,
+    #[location(resource)]
+    path: String,
+    #[advice]
+    advice: MultipleExtendedConfigurationVersionsAdvice,
+}
+
+#[derive(Debug)]
+struct MultipleExtendedConfigurationVersionsAdvice {
+    first: PackageResolution,
+    conflicting: PackageResolution,
+}
+
+impl Advices for MultipleExtendedConfigurationVersionsAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        self.first
+            .record_resolution(visitor, "The first reference")?;
+        self.conflicting
+            .record_resolution(visitor, "The conflicting reference")?;
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! { "Biome can't determine which configuration should be used." },
+        )
+    }
+}
+
+impl PackageResolution {
+    fn record_resolution(&self, visitor: &mut dyn Visit, label: &str) -> std::io::Result<()> {
+        let origin = self.reference.origin();
+        let file_path = display_path(&self.file_path);
+        match &self.package {
+            Some(ResolvedPackage {
+                name: Some(name),
+                version: Some(version),
+            }) => visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    {label}" from "{origin}" resolves to "
+                    <Emphasis>{file_path}</Emphasis>" from "
+                    <Emphasis>{name}"@"{version}</Emphasis>"."
+                },
+            ),
+            Some(ResolvedPackage {
+                version: Some(version),
+                ..
+            }) => visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    {label}" from "{origin}" resolves to "
+                    <Emphasis>{file_path}</Emphasis>" from package version "
+                    <Emphasis>{version}</Emphasis>"."
+                },
+            ),
+            _ => visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    {label}" from "{origin}" resolves to "
+                    <Emphasis>{file_path}</Emphasis>"."
+                },
+            ),
+        }
+    }
+}
+
+impl ConfigurationReference {
+    fn origin(&self) -> Cow<'_, str> {
+        display_path(&self.from)
+    }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("The configuration extends chain exceeds the limit of "<Emphasis>{MAX_EXTENDS_DEPTH}</Emphasis>" levels."),
+        description = "The configuration extends chain exceeds the limit of 10 levels."
+    ),
+    advice = "Reduce the number of nested extended configurations."
+)]
+struct ExtendsDepthLimit {
+    #[location(resource)]
+    path: String,
+    #[advice]
+    specifier: ExtendsDepthSpecifier,
+}
+
+#[derive(Debug)]
+struct ExtendsDepthSpecifier(String);
+
+impl From<String> for ExtendsDepthSpecifier {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl Advices for ExtendsDepthSpecifier {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "The configuration at the limit extends "<Emphasis>{self.0.as_str()}</Emphasis>"."
+            },
+        )
     }
 }
 
@@ -1333,6 +1681,473 @@ mod configuration_harness {
                  Each rule's `type Options` must match the canonical options type \
                  generated from its name. Check for copy-paste errors.",
                 mismatches.join("\n")
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{WorkspaceError, configuration::load_configuration};
+    use biome_configuration::{
+        BiomeDiagnostic, ConfigurationPathHint, diagnostics::ConfigurationDiagnostic,
+    };
+    use biome_diagnostics::Severity;
+    use biome_fs::MemoryFileSystem;
+    use camino::Utf8PathBuf;
+
+    #[test]
+    fn should_not_load_a_configuration_yml() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("biome.yml"), "content".to_string());
+        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("biome.yml"));
+
+        let result = load_configuration(&fs, path_hint);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn should_skip_non_root_configuration() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/nested/biome.json"),
+            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
+        );
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/nested"));
+
+        match load_configuration(&fs, path_hint) {
+            Ok(loaded) => {
+                assert!(
+                    loaded
+                        .resolved_configuration()
+                        .linter
+                        .is_some_and(|linter| !linter.is_enabled())
+                );
+            }
+            Err(err) => {
+                panic!("Config loading failed: {err}");
+            }
+        }
+    }
+
+    #[test]
+    fn should_refuse_user_provided_non_root_configuration() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/nested/biome.json"),
+            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
+        );
+        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("/nested"));
+
+        match load_configuration(&fs, path_hint) {
+            Ok(_) => panic!("Config loading should have failed"),
+            Err(err) => {
+                assert!(matches!(
+                    err,
+                    WorkspaceError::Configuration(ConfigurationDiagnostic::Biome(
+                        BiomeDiagnostic::NonRootConfiguration(_)
+                    ))
+                ));
+            }
+        }
+    }
+
+    #[test]
+    fn should_preserve_unmerged_configuration_sources() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            r#"{ "extends": ["./first.json", "./second.json"] }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/first.json"),
+            r#"{ "formatter": { "lineWidth": 100 } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/second.json"),
+            r#"{ "formatter": { "indentWidth": 4 } }"#.to_string(),
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromUser(Utf8PathBuf::from("/project/biome.json")),
+        )
+        .expect("valid configuration");
+
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .filter_map(|extended| extended.source.file_path.as_deref())
+                .collect::<Vec<_>>(),
+            [
+                Utf8PathBuf::from("/project/first.json"),
+                Utf8PathBuf::from("/project/second.json"),
+            ]
+        );
+        assert_eq!(
+            loaded
+                .source
+                .root
+                .as_ref()
+                .and_then(|root| root.file_source.as_deref()),
+            Some(r#"{ "extends": ["./first.json", "./second.json"] }"#)
+        );
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .map(|extended| (
+                    extended.specifier.as_deref(),
+                    extended.source.file_source.as_deref()
+                ))
+                .collect::<Vec<_>>(),
+            [
+                (
+                    Some("./first.json"),
+                    Some(r#"{ "formatter": { "lineWidth": 100 } }"#)
+                ),
+                (
+                    Some("./second.json"),
+                    Some(r#"{ "formatter": { "indentWidth": 4 } }"#)
+                ),
+            ]
+        );
+        assert_eq!(
+            loaded
+                .source
+                .root
+                .as_ref()
+                .and_then(|root| root.configuration.as_ref())
+                .and_then(|configuration| configuration.formatter.as_ref()),
+            None
+        );
+        assert_eq!(
+            loaded
+                .resolved_configuration()
+                .formatter
+                .and_then(|formatter| formatter.line_width)
+                .map(u16::from),
+            Some(100)
+        );
+    }
+
+    #[test]
+    fn should_load_nested_extends_in_dependency_first_order() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            r#"{ "extends": ["./first.json", "./sibling.json"] }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/first.json"),
+            r#"{ "extends": ["./base.json"], "formatter": { "indentWidth": 4 } }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/base.json"),
+            r#"{ "formatter": { "lineWidth": 90 } }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/sibling.json"),
+            r#"{ "formatter": { "lineWidth": 100 } }"#,
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("valid configuration");
+
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .filter_map(|extended| extended.source.file_path.as_deref())
+                .collect::<Vec<_>>(),
+            [
+                Utf8PathBuf::from("/project/base.json"),
+                Utf8PathBuf::from("/project/first.json"),
+                Utf8PathBuf::from("/project/sibling.json"),
+            ]
+        );
+        let formatter = loaded
+            .resolved_configuration()
+            .formatter
+            .expect("formatter configuration");
+        assert_eq!(formatter.line_width.map(u16::from), Some(100));
+        assert_eq!(formatter.indent_width.map(|width| width.value()), Some(4));
+        assert!(!loaded.has_errors());
+    }
+
+    #[test]
+    fn should_load_ten_nested_extends_levels() {
+        let fs = MemoryFileSystem::default();
+        insert_extends_chain(&fs, 10);
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("valid configuration");
+
+        assert_eq!(loaded.source.extended_configurations.as_slice().len(), 10);
+        assert!(!loaded.has_errors());
+    }
+
+    #[test]
+    fn should_reject_an_eleventh_nested_extends_level() {
+        let fs = MemoryFileSystem::default();
+        insert_extends_chain(&fs, 10);
+        fs.insert(
+            Utf8PathBuf::from("/project/level-10.json"),
+            r#"{ "extends": ["./level-11.json"] }"#,
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("configuration loading result");
+
+        assert_eq!(loaded.source.extended_configurations.as_slice().len(), 10);
+        assert!(loaded.has_errors());
+        assert_eq!(
+            loaded
+                .diagnostics
+                .iter()
+                .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn should_load_a_repeated_identical_extended_configuration() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            r#"{ "extends": ["./first.json", "./second.json"] }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/first.json"),
+            r#"{ "extends": ["./shared.json"] }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/second.json"),
+            r#"{ "extends": ["./shared.json"] }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/shared.json"),
+            r#"{ "formatter": { "lineWidth": 90 } }"#,
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("valid configuration");
+
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .filter_map(|extended| extended.source.file_path.as_deref())
+                .collect::<Vec<_>>(),
+            [
+                Utf8PathBuf::from("/project/shared.json"),
+                Utf8PathBuf::from("/project/first.json"),
+                Utf8PathBuf::from("/project/shared.json"),
+                Utf8PathBuf::from("/project/second.json"),
+            ]
+        );
+        assert!(loaded.diagnostics.is_empty());
+        assert!(!loaded.has_errors());
+    }
+
+    #[test]
+    fn should_reject_an_extends_cycle_at_the_depth_limit() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            r#"{ "extends": ["./shared.json"] }"#,
+        );
+        fs.insert(
+            Utf8PathBuf::from("/project/shared.json"),
+            r#"{ "extends": ["./biome.json"], "formatter": { "lineWidth": 90 } }"#,
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("valid configuration");
+
+        assert_eq!(loaded.source.extended_configurations.as_slice().len(), 10);
+        assert_eq!(
+            loaded
+                .diagnostics
+                .iter()
+                .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+                .count(),
+            1
+        );
+        assert!(loaded.has_errors());
+    }
+
+    #[test]
+    fn should_reject_one_package_specifier_resolving_to_different_versions() {
+        let fs = MemoryFileSystem::default();
+        insert_nested_package_graph(
+            &fs,
+            ("1.0.0", r#"{ "formatter": { "lineWidth": 90 } }"#),
+            ("2.0.0", r#"{ "formatter": { "lineWidth": 100 } }"#),
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("configuration loading result");
+
+        assert!(loaded.has_errors());
+        assert_eq!(
+            loaded
+                .diagnostics
+                .iter()
+                .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+                .count(),
+            1
+        );
+        assert_eq!(
+            loaded
+                .source
+                .extended_configurations
+                .as_slice()
+                .iter()
+                .filter_map(|extended| extended.source.file_path.as_deref())
+                .collect::<Vec<_>>(),
+            [
+                Utf8PathBuf::from(
+                    "/project/node_modules/package-a/node_modules/shared-config/biome.json"
+                ),
+                Utf8PathBuf::from("/project/node_modules/package-a/biome.json"),
+                Utf8PathBuf::from("/project/node_modules/package-b/biome.json"),
+            ]
+        );
+    }
+
+    #[test]
+    fn should_load_one_package_version_from_different_paths() {
+        let fs = MemoryFileSystem::default();
+        insert_nested_package_graph(
+            &fs,
+            ("1.0.0", r#"{ "formatter": { "lineWidth": 90 } }"#),
+            ("1.0.0", r#"{ "formatter": { "lineWidth": 100 } }"#),
+        );
+
+        let loaded = load_configuration(
+            &fs,
+            ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/project")),
+        )
+        .expect("valid configuration");
+
+        assert!(!loaded.has_errors());
+        assert_eq!(loaded.source.extended_configurations.as_slice().len(), 4);
+        assert_eq!(
+            loaded
+                .resolved_configuration()
+                .formatter
+                .and_then(|formatter| formatter.line_width)
+                .map(u16::from),
+            Some(100)
+        );
+    }
+
+    fn insert_extends_chain(fs: &MemoryFileSystem, levels: usize) {
+        let root_extends = if levels == 0 {
+            String::new()
+        } else {
+            r#""extends": ["./level-1.json"]"#.to_string()
+        };
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            format!("{{ {root_extends} }}"),
+        );
+        for level in 1..=levels {
+            let source = if level == levels {
+                r#"{ "formatter": { "lineWidth": 90 } }"#.to_string()
+            } else {
+                format!(r#"{{ "extends": ["./level-{}.json"] }}"#, level + 1)
+            };
+            fs.insert(
+                Utf8PathBuf::from(format!("/project/level-{level}.json")),
+                source,
+            );
+        }
+    }
+
+    fn insert_configuration_package(
+        fs: &MemoryFileSystem,
+        directory: &str,
+        name: &str,
+        version: &str,
+        configuration: &str,
+    ) {
+        fs.insert(
+            Utf8PathBuf::from(format!("{directory}/package.json")),
+            format!(r#"{{ "name": "{name}", "version": "{version}", "main": "biome.json" }}"#),
+        );
+        fs.insert(
+            Utf8PathBuf::from(format!("{directory}/biome.json")),
+            configuration,
+        );
+    }
+
+    fn insert_nested_package_graph(
+        fs: &MemoryFileSystem,
+        package_a_configuration: (&str, &str),
+        package_b_configuration: (&str, &str),
+    ) {
+        fs.insert(
+            Utf8PathBuf::from("/project/biome.json"),
+            r#"{ "extends": ["package-a", "package-b"] }"#,
+        );
+        for parent in ["package-a", "package-b"] {
+            insert_configuration_package(
+                fs,
+                &format!("/project/node_modules/{parent}"),
+                parent,
+                "1.0.0",
+                r#"{ "extends": ["shared-config"] }"#,
+            );
+        }
+        for (parent, (version, configuration)) in [
+            ("package-a", package_a_configuration),
+            ("package-b", package_b_configuration),
+        ] {
+            insert_configuration_package(
+                fs,
+                &format!("/project/node_modules/{parent}/node_modules/shared-config"),
+                "shared-config",
+                version,
+                configuration,
             );
         }
     }

@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "error"
+      }
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:5:23 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key linter.rules.suspicious.noDebugger has the value error.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "noDebugger": "error"
+      │                       ^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i This value is provided by the root configuration.
+  
+
+```
