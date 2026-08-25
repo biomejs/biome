@@ -1210,7 +1210,7 @@ impl<'db> InferredType<'db> {
         }
     }
 
-    fn conditional_type(self) -> ConditionalType {
+    pub fn conditional_type(self) -> ConditionalType {
         let mut conditional = ConditionalType::Unknown;
         let mut seen = FxHashSet::default();
         let mut pending = vec![self.data];
@@ -1615,8 +1615,8 @@ where
 mod tests {
     use super::*;
     use crate::interned_types::{
-        InternedIntersection, InternedLiteral, InternedObject, InternedUnion, TypeMember,
-        TypeMemberKind,
+        ConditionalType, InternedIntersection, InternedLiteral, InternedObject, InternedUnion,
+        TypeMember, TypeMemberKind,
     };
 
     #[salsa::db]
@@ -1685,6 +1685,25 @@ mod tests {
 
         assert!(array.is_always_truthy());
         assert!(array.is_non_nullish());
+    }
+
+    #[test]
+    fn conditional_type_classifies_inferred_values() {
+        let db = TestDb::default();
+        let array = InferredType::new(
+            &db,
+            TypeData::array_instance(&db, Box::new([TypeData::String])),
+        );
+
+        assert!(matches!(array.conditional_type(), ConditionalType::Truthy));
+        assert!(matches!(
+            InferredType::new(&db, TypeData::String).conditional_type(),
+            ConditionalType::NonNullish
+        ));
+        assert!(matches!(
+            InferredType::new(&db, TypeData::Null).conditional_type(),
+            ConditionalType::Nullish
+        ));
     }
 
     #[test]
