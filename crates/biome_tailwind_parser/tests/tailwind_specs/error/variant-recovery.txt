@@ -1,0 +1,8 @@
+flex hover:% block
+flex aria-[checked]:% block
+flex group-hover/[menu]:% block
+flex hover: block
+flex ! block
+flex - block
+flex hover:! block
+flex hover:- block

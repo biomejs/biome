@@ -1,0 +1,108 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+flex p- block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..5 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    TW_BASE@5..6 "p" [] [],
+                    DASH@6..8 "-" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@8..13 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..14
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..13
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..5
+        0: TW_BASE@0..5 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@5..8
+      0: TW_VARIANT_LIST@5..5
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@5..8
+        0: TW_BASE@5..6 "p" [] []
+        1: DASH@6..8 "-" [] [Whitespace(" ")]
+      4: (empty)
+    2: TW_FULL_CANDIDATE@8..13
+      0: TW_VARIANT_LIST@8..8
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@8..13
+        0: TW_BASE@8..13 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@13..14 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+bogus-candidate-between-candidates.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'p-'.
+  
+  > 1 │ flex p- block
+      │      ^^
+    2 │ 
+  
+  i Expected a candidate here.
+  
+  > 1 │ flex p- block
+      │      ^^
+    2 │ 
+  
+```

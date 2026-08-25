@@ -1,0 +1,674 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+flex hover:% block
+flex aria-[checked]:% block
+flex group-hover/[menu]:% block
+flex hover: block
+flex ! block
+flex - block
+flex hover:! block
+flex hover:- block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..5 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@5..10 "hover" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@10..11 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    PERCENT@11..13 "%" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@13..18 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@18..24 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@24..28 "aria" [] [],
+                        },
+                        DASH@28..29 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@29..30 "[" [] [],
+                            value_token: TW_SELECTOR@30..37 "checked" [] [],
+                            r_brack_token: R_BRACKET@37..38 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@38..39 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    PERCENT@39..41 "%" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@41..46 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@46..52 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@52..57 "group" [] [],
+                        },
+                        DASH@57..58 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@58..63 "hover" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: TwModifier {
+                        slash_token: SLASH@63..64 "/" [] [],
+                        value: TwArbitraryValue {
+                            l_brack_token: L_BRACKET@64..65 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    ident_token: IDENT@65..69 "menu" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@69..70 "]" [] [],
+                        },
+                    },
+                },
+                COLON@70..71 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    PERCENT@71..73 "%" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@73..78 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@78..84 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwBogusCandidate {
+            items: [
+                TW_BASE@84..89 "hover" [] [],
+                COLON@89..91 ":" [] [Whitespace(" ")],
+            ],
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@91..96 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@96..102 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwBogusCandidate {
+            items: [
+                BANG@102..104 "!" [] [Whitespace(" ")],
+            ],
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@104..109 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@109..115 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwBogusCandidate {
+            items: [
+                DASH@115..117 "-" [] [Whitespace(" ")],
+            ],
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@117..122 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@122..128 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwBogusCandidate {
+            items: [
+                TW_BASE@128..133 "hover" [] [],
+                COLON@133..134 ":" [] [],
+                BANG@134..136 "!" [] [Whitespace(" ")],
+            ],
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@136..141 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@141..147 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwBogusCandidate {
+            items: [
+                TW_BASE@147..152 "hover" [] [],
+                COLON@152..153 ":" [] [],
+                DASH@153..155 "-" [] [Whitespace(" ")],
+            ],
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@155..160 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@160..161 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..161
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..160
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..5
+        0: TW_BASE@0..5 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@5..13
+      0: TW_VARIANT_LIST@5..11
+        0: TW_VARIANT_EXPRESSION@5..10
+          0: TW_VARIANT_SEGMENT_LIST@5..10
+            0: TW_NAMED_VARIANT_SEGMENT@5..10
+              0: TW_VARIANT_SEGMENT@5..10 "hover" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@10..11 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@11..13
+        0: PERCENT@11..13 "%" [] [Whitespace(" ")]
+      4: (empty)
+    2: TW_FULL_CANDIDATE@13..18
+      0: TW_VARIANT_LIST@13..13
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@13..18
+        0: TW_BASE@13..18 "block" [] []
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@18..24
+      0: TW_VARIANT_LIST@18..18
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@18..24
+        0: TW_BASE@18..24 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@24..41
+      0: TW_VARIANT_LIST@24..39
+        0: TW_VARIANT_EXPRESSION@24..38
+          0: TW_VARIANT_SEGMENT_LIST@24..38
+            0: TW_NAMED_VARIANT_SEGMENT@24..28
+              0: TW_VARIANT_SEGMENT@24..28 "aria" [] []
+            1: DASH@28..29 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@29..38
+              0: L_BRACKET@29..30 "[" [] []
+              1: TW_SELECTOR@30..37 "checked" [] []
+              2: R_BRACKET@37..38 "]" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@38..39 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@39..41
+        0: PERCENT@39..41 "%" [] [Whitespace(" ")]
+      4: (empty)
+    5: TW_FULL_CANDIDATE@41..46
+      0: TW_VARIANT_LIST@41..41
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@41..46
+        0: TW_BASE@41..46 "block" [] []
+        1: (empty)
+      4: (empty)
+    6: TW_FULL_CANDIDATE@46..52
+      0: TW_VARIANT_LIST@46..46
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@46..52
+        0: TW_BASE@46..52 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    7: TW_FULL_CANDIDATE@52..73
+      0: TW_VARIANT_LIST@52..71
+        0: TW_VARIANT_EXPRESSION@52..70
+          0: TW_VARIANT_SEGMENT_LIST@52..63
+            0: TW_NAMED_VARIANT_SEGMENT@52..57
+              0: TW_VARIANT_SEGMENT@52..57 "group" [] []
+            1: DASH@57..58 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@58..63
+              0: TW_VARIANT_SEGMENT@58..63 "hover" [] []
+          1: (empty)
+          2: TW_MODIFIER@63..70
+            0: SLASH@63..64 "/" [] []
+            1: TW_ARBITRARY_VALUE@64..70
+              0: L_BRACKET@64..65 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@65..69
+                0: CSS_IDENTIFIER@65..69
+                  0: IDENT@65..69 "menu" [] []
+              2: R_BRACKET@69..70 "]" [] []
+        1: COLON@70..71 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@71..73
+        0: PERCENT@71..73 "%" [] [Whitespace(" ")]
+      4: (empty)
+    8: TW_FULL_CANDIDATE@73..78
+      0: TW_VARIANT_LIST@73..73
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@73..78
+        0: TW_BASE@73..78 "block" [] []
+        1: (empty)
+      4: (empty)
+    9: TW_FULL_CANDIDATE@78..84
+      0: TW_VARIANT_LIST@78..78
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@78..84
+        0: TW_BASE@78..84 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    10: TW_BOGUS_CANDIDATE@84..91
+      0: TW_BASE@84..89 "hover" [] []
+      1: COLON@89..91 ":" [] [Whitespace(" ")]
+    11: TW_FULL_CANDIDATE@91..96
+      0: TW_VARIANT_LIST@91..91
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@91..96
+        0: TW_BASE@91..96 "block" [] []
+        1: (empty)
+      4: (empty)
+    12: TW_FULL_CANDIDATE@96..102
+      0: TW_VARIANT_LIST@96..96
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@96..102
+        0: TW_BASE@96..102 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    13: TW_BOGUS_CANDIDATE@102..104
+      0: BANG@102..104 "!" [] [Whitespace(" ")]
+    14: TW_FULL_CANDIDATE@104..109
+      0: TW_VARIANT_LIST@104..104
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@104..109
+        0: TW_BASE@104..109 "block" [] []
+        1: (empty)
+      4: (empty)
+    15: TW_FULL_CANDIDATE@109..115
+      0: TW_VARIANT_LIST@109..109
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@109..115
+        0: TW_BASE@109..115 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    16: TW_BOGUS_CANDIDATE@115..117
+      0: DASH@115..117 "-" [] [Whitespace(" ")]
+    17: TW_FULL_CANDIDATE@117..122
+      0: TW_VARIANT_LIST@117..117
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@117..122
+        0: TW_BASE@117..122 "block" [] []
+        1: (empty)
+      4: (empty)
+    18: TW_FULL_CANDIDATE@122..128
+      0: TW_VARIANT_LIST@122..122
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@122..128
+        0: TW_BASE@122..128 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    19: TW_BOGUS_CANDIDATE@128..136
+      0: TW_BASE@128..133 "hover" [] []
+      1: COLON@133..134 ":" [] []
+      2: BANG@134..136 "!" [] [Whitespace(" ")]
+    20: TW_FULL_CANDIDATE@136..141
+      0: TW_VARIANT_LIST@136..136
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@136..141
+        0: TW_BASE@136..141 "block" [] []
+        1: (empty)
+      4: (empty)
+    21: TW_FULL_CANDIDATE@141..147
+      0: TW_VARIANT_LIST@141..141
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@141..147
+        0: TW_BASE@141..147 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    22: TW_BOGUS_CANDIDATE@147..155
+      0: TW_BASE@147..152 "hover" [] []
+      1: COLON@152..153 ":" [] []
+      2: DASH@153..155 "-" [] [Whitespace(" ")]
+    23: TW_FULL_CANDIDATE@155..160
+      0: TW_VARIANT_LIST@155..155
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@155..160
+        0: TW_BASE@155..160 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@160..161 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+variant-recovery.txt:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '%'.
+  
+  > 1 │ flex hover:% block
+      │            ^
+    2 │ flex aria-[checked]:% block
+    3 │ flex group-hover/[menu]:% block
+  
+  i Expected a candidate here.
+  
+  > 1 │ flex hover:% block
+      │            ^
+    2 │ flex aria-[checked]:% block
+    3 │ flex group-hover/[menu]:% block
+  
+variant-recovery.txt:2:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '%'.
+  
+    1 │ flex hover:% block
+  > 2 │ flex aria-[checked]:% block
+      │                     ^
+    3 │ flex group-hover/[menu]:% block
+    4 │ flex hover: block
+  
+  i Expected a candidate here.
+  
+    1 │ flex hover:% block
+  > 2 │ flex aria-[checked]:% block
+      │                     ^
+    3 │ flex group-hover/[menu]:% block
+    4 │ flex hover: block
+  
+variant-recovery.txt:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '%'.
+  
+    1 │ flex hover:% block
+    2 │ flex aria-[checked]:% block
+  > 3 │ flex group-hover/[menu]:% block
+      │                         ^
+    4 │ flex hover: block
+    5 │ flex ! block
+  
+  i Expected a candidate here.
+  
+    1 │ flex hover:% block
+    2 │ flex aria-[checked]:% block
+  > 3 │ flex group-hover/[menu]:% block
+      │                         ^
+    4 │ flex hover: block
+    5 │ flex ! block
+  
+variant-recovery.txt:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'hover:'.
+  
+    2 │ flex aria-[checked]:% block
+    3 │ flex group-hover/[menu]:% block
+  > 4 │ flex hover: block
+      │      ^^^^^^
+    5 │ flex ! block
+    6 │ flex - block
+  
+  i Expected a candidate here.
+  
+    2 │ flex aria-[checked]:% block
+    3 │ flex group-hover/[menu]:% block
+  > 4 │ flex hover: block
+      │      ^^^^^^
+    5 │ flex ! block
+    6 │ flex - block
+  
+variant-recovery.txt:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '!'.
+  
+    3 │ flex group-hover/[menu]:% block
+    4 │ flex hover: block
+  > 5 │ flex ! block
+      │      ^
+    6 │ flex - block
+    7 │ flex hover:! block
+  
+  i Expected a candidate here.
+  
+    3 │ flex group-hover/[menu]:% block
+    4 │ flex hover: block
+  > 5 │ flex ! block
+      │      ^
+    6 │ flex - block
+    7 │ flex hover:! block
+  
+variant-recovery.txt:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '-'.
+  
+    4 │ flex hover: block
+    5 │ flex ! block
+  > 6 │ flex - block
+      │      ^
+    7 │ flex hover:! block
+    8 │ flex hover:- block
+  
+  i Expected a candidate here.
+  
+    4 │ flex hover: block
+    5 │ flex ! block
+  > 6 │ flex - block
+      │      ^
+    7 │ flex hover:! block
+    8 │ flex hover:- block
+  
+variant-recovery.txt:7:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'hover:!'.
+  
+    5 │ flex ! block
+    6 │ flex - block
+  > 7 │ flex hover:! block
+      │      ^^^^^^^
+    8 │ flex hover:- block
+    9 │ 
+  
+  i Expected a candidate here.
+  
+    5 │ flex ! block
+    6 │ flex - block
+  > 7 │ flex hover:! block
+      │      ^^^^^^^
+    8 │ flex hover:- block
+    9 │ 
+  
+variant-recovery.txt:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'hover:-'.
+  
+    6 │ flex - block
+    7 │ flex hover:! block
+  > 8 │ flex hover:- block
+      │      ^^^^^^^
+    9 │ 
+  
+  i Expected a candidate here.
+  
+    6 │ flex - block
+    7 │ flex hover:! block
+  > 8 │ flex hover:- block
+      │      ^^^^^^^
+    9 │ 
+  
+```

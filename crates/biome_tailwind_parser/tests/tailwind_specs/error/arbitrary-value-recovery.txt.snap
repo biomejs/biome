@@ -1,0 +1,457 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+flex text-[ block
+flex text-[#ff0000 block
+flex w-[calc(100%_-) block
+flex bg-[url(/img/mountains.jpg block
+flex w-[foo[bar block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..5 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@5..9 "text" [] [],
+                minus_token: DASH@9..10 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@10..12 "[" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@12..17 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@17..23 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@23..27 "text" [] [],
+                minus_token: DASH@27..28 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@28..29 "[" [] [],
+                        TW_SELECTOR@29..37 "#ff0000" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@37..42 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@42..48 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@48..49 "w" [] [],
+                minus_token: DASH@49..50 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@50..51 "[" [] [],
+                        TW_SELECTOR@51..64 "calc(100%_-)" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@64..69 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@69..75 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@75..77 "bg" [] [],
+                minus_token: DASH@77..78 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@78..79 "[" [] [],
+                        TW_SELECTOR@79..102 "url(/img/mountains.jpg" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@102..107 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@107..113 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@113..114 "w" [] [],
+                minus_token: DASH@114..115 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@115..116 "[" [] [],
+                        TW_SELECTOR@116..124 "foo[bar" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@124..129 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@129..130 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..130
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..129
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..5
+        0: TW_BASE@0..5 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@5..12
+      0: TW_VARIANT_LIST@5..5
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@5..12
+        0: TW_BASE@5..9 "text" [] []
+        1: DASH@9..10 "-" [] []
+        2: TW_BOGUS_VALUE@10..12
+          0: L_BRACKET@10..12 "[" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@12..17
+      0: TW_VARIANT_LIST@12..12
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@12..17
+        0: TW_BASE@12..17 "block" [] []
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@17..23
+      0: TW_VARIANT_LIST@17..17
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@17..23
+        0: TW_BASE@17..23 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@23..37
+      0: TW_VARIANT_LIST@23..23
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@23..37
+        0: TW_BASE@23..27 "text" [] []
+        1: DASH@27..28 "-" [] []
+        2: TW_BOGUS_VALUE@28..37
+          0: L_BRACKET@28..29 "[" [] []
+          1: TW_SELECTOR@29..37 "#ff0000" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    5: TW_FULL_CANDIDATE@37..42
+      0: TW_VARIANT_LIST@37..37
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@37..42
+        0: TW_BASE@37..42 "block" [] []
+        1: (empty)
+      4: (empty)
+    6: TW_FULL_CANDIDATE@42..48
+      0: TW_VARIANT_LIST@42..42
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@42..48
+        0: TW_BASE@42..48 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    7: TW_FULL_CANDIDATE@48..64
+      0: TW_VARIANT_LIST@48..48
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@48..64
+        0: TW_BASE@48..49 "w" [] []
+        1: DASH@49..50 "-" [] []
+        2: TW_BOGUS_VALUE@50..64
+          0: L_BRACKET@50..51 "[" [] []
+          1: TW_SELECTOR@51..64 "calc(100%_-)" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    8: TW_FULL_CANDIDATE@64..69
+      0: TW_VARIANT_LIST@64..64
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@64..69
+        0: TW_BASE@64..69 "block" [] []
+        1: (empty)
+      4: (empty)
+    9: TW_FULL_CANDIDATE@69..75
+      0: TW_VARIANT_LIST@69..69
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@69..75
+        0: TW_BASE@69..75 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    10: TW_FULL_CANDIDATE@75..102
+      0: TW_VARIANT_LIST@75..75
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@75..102
+        0: TW_BASE@75..77 "bg" [] []
+        1: DASH@77..78 "-" [] []
+        2: TW_BOGUS_VALUE@78..102
+          0: L_BRACKET@78..79 "[" [] []
+          1: TW_SELECTOR@79..102 "url(/img/mountains.jpg" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    11: TW_FULL_CANDIDATE@102..107
+      0: TW_VARIANT_LIST@102..102
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@102..107
+        0: TW_BASE@102..107 "block" [] []
+        1: (empty)
+      4: (empty)
+    12: TW_FULL_CANDIDATE@107..113
+      0: TW_VARIANT_LIST@107..107
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@107..113
+        0: TW_BASE@107..113 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    13: TW_FULL_CANDIDATE@113..124
+      0: TW_VARIANT_LIST@113..113
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@113..124
+        0: TW_BASE@113..114 "w" [] []
+        1: DASH@114..115 "-" [] []
+        2: TW_BOGUS_VALUE@115..124
+          0: L_BRACKET@115..116 "[" [] []
+          1: TW_SELECTOR@116..124 "foo[bar" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    14: TW_FULL_CANDIDATE@124..129
+      0: TW_VARIANT_LIST@124..124
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@124..129
+        0: TW_BASE@124..129 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@129..130 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+arbitrary-value-recovery.txt:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '['.
+  
+  > 1 │ flex text-[ block
+      │           ^
+    2 │ flex text-[#ff0000 block
+    3 │ flex w-[calc(100%_-) block
+  
+  i Expected a value here.
+  
+  > 1 │ flex text-[ block
+      │           ^
+    2 │ flex text-[#ff0000 block
+    3 │ flex w-[calc(100%_-) block
+  
+arbitrary-value-recovery.txt:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[#ff0000'.
+  
+    1 │ flex text-[ block
+  > 2 │ flex text-[#ff0000 block
+      │           ^^^^^^^^
+    3 │ flex w-[calc(100%_-) block
+    4 │ flex bg-[url(/img/mountains.jpg block
+  
+  i Expected a value here.
+  
+    1 │ flex text-[ block
+  > 2 │ flex text-[#ff0000 block
+      │           ^^^^^^^^
+    3 │ flex w-[calc(100%_-) block
+    4 │ flex bg-[url(/img/mountains.jpg block
+  
+arbitrary-value-recovery.txt:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[calc(100%_-)'.
+  
+    1 │ flex text-[ block
+    2 │ flex text-[#ff0000 block
+  > 3 │ flex w-[calc(100%_-) block
+      │        ^^^^^^^^^^^^^
+    4 │ flex bg-[url(/img/mountains.jpg block
+    5 │ flex w-[foo[bar block
+  
+  i Expected a value here.
+  
+    1 │ flex text-[ block
+    2 │ flex text-[#ff0000 block
+  > 3 │ flex w-[calc(100%_-) block
+      │        ^^^^^^^^^^^^^
+    4 │ flex bg-[url(/img/mountains.jpg block
+    5 │ flex w-[foo[bar block
+  
+arbitrary-value-recovery.txt:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[url(/img/mountains.jpg'.
+  
+    2 │ flex text-[#ff0000 block
+    3 │ flex w-[calc(100%_-) block
+  > 4 │ flex bg-[url(/img/mountains.jpg block
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ flex w-[foo[bar block
+    6 │ 
+  
+  i Expected a value here.
+  
+    2 │ flex text-[#ff0000 block
+    3 │ flex w-[calc(100%_-) block
+  > 4 │ flex bg-[url(/img/mountains.jpg block
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ flex w-[foo[bar block
+    6 │ 
+  
+arbitrary-value-recovery.txt:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[foo[bar'.
+  
+    3 │ flex w-[calc(100%_-) block
+    4 │ flex bg-[url(/img/mountains.jpg block
+  > 5 │ flex w-[foo[bar block
+      │        ^^^^^^^^
+    6 │ 
+  
+  i Expected a value here.
+  
+    3 │ flex w-[calc(100%_-) block
+    4 │ flex bg-[url(/img/mountains.jpg block
+  > 5 │ flex w-[foo[bar block
+      │        ^^^^^^^^
+    6 │ 
+  
+```

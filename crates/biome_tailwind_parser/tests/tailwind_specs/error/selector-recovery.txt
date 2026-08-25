@@ -1,0 +1,5 @@
+flex [&_p block
+flex has-[>svg block
+flex hover:[&_p block
+flex [@supports(display:grid) block
+flex [&_[foo block

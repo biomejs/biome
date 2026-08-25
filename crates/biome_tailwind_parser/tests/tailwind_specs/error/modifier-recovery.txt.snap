@@ -1,0 +1,582 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-green-500/ flex
+flex bg-green-500/ block
+flex bg-red-500 /50 block
+flex [color:red] /25 block
+flex bg-green-500/[color:red block
+flex bg-green-500/(--opacity block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    TW_BASE@0..2 "bg" [] [],
+                    DASH@2..3 "-" [] [],
+                    TwNamedValue {
+                        value_token: TW_VALUE@3..12 "green-500" [] [],
+                    },
+                    SLASH@12..14 "/" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@14..18 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@18..24 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    TW_BASE@24..26 "bg" [] [],
+                    DASH@26..27 "-" [] [],
+                    TwNamedValue {
+                        value_token: TW_VALUE@27..36 "green-500" [] [],
+                    },
+                    SLASH@36..38 "/" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@38..43 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@43..49 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@49..51 "bg" [] [],
+                minus_token: DASH@51..52 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@52..60 "red-500" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    SLASH@60..61 "/" [] [],
+                    TW_NUMBER@61..64 "50" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@64..69 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@69..75 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwArbitraryCandidate {
+                l_brack_token: L_BRACKET@75..76 "[" [] [],
+                property_token: TW_PROPERTY@76..81 "color" [] [],
+                colon_token: COLON@81..82 ":" [] [],
+                value: CssGenericComponentValueList [
+                    CssIdentifier {
+                        ident_token: IDENT@82..85 "red" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACKET@85..87 "]" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    SLASH@87..88 "/" [] [],
+                    TW_NUMBER@88..91 "25" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@91..96 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@96..102 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@102..104 "bg" [] [],
+                minus_token: DASH@104..105 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@105..114 "green-500" [] [],
+                },
+                modifier: TwBogusModifier {
+                    items: [
+                        SLASH@114..115 "/" [] [],
+                        TwBogusModifier {
+                            items: [
+                                L_BRACKET@115..116 "[" [] [],
+                                TW_SELECTOR@116..126 "color:red" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@126..131 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@131..137 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@137..139 "bg" [] [],
+                minus_token: DASH@139..140 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@140..149 "green-500" [] [],
+                },
+                modifier: TwBogusModifier {
+                    items: [
+                        SLASH@149..150 "/" [] [],
+                        TwBogusModifier {
+                            items: [
+                                L_PAREN@150..151 "(" [] [],
+                                TW_VALUE@151..161 "--opacity" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@161..166 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@166..167 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..167
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..166
+    0: TW_FULL_CANDIDATE@0..14
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@0..14
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_NAMED_VALUE@3..12
+          0: TW_VALUE@3..12 "green-500" [] []
+        3: SLASH@12..14 "/" [] [Whitespace(" ")]
+      4: (empty)
+    1: TW_FULL_CANDIDATE@14..18
+      0: TW_VARIANT_LIST@14..14
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@14..18
+        0: TW_BASE@14..18 "flex" [] []
+        1: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@18..24
+      0: TW_VARIANT_LIST@18..18
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@18..24
+        0: TW_BASE@18..24 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@24..38
+      0: TW_VARIANT_LIST@24..24
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@24..38
+        0: TW_BASE@24..26 "bg" [] []
+        1: DASH@26..27 "-" [] []
+        2: TW_NAMED_VALUE@27..36
+          0: TW_VALUE@27..36 "green-500" [] []
+        3: SLASH@36..38 "/" [] [Whitespace(" ")]
+      4: (empty)
+    4: TW_FULL_CANDIDATE@38..43
+      0: TW_VARIANT_LIST@38..38
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@38..43
+        0: TW_BASE@38..43 "block" [] []
+        1: (empty)
+      4: (empty)
+    5: TW_FULL_CANDIDATE@43..49
+      0: TW_VARIANT_LIST@43..43
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@43..49
+        0: TW_BASE@43..49 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    6: TW_FULL_CANDIDATE@49..60
+      0: TW_VARIANT_LIST@49..49
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@49..60
+        0: TW_BASE@49..51 "bg" [] []
+        1: DASH@51..52 "-" [] []
+        2: TW_NAMED_VALUE@52..60
+          0: TW_VALUE@52..60 "red-500" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    7: TW_FULL_CANDIDATE@60..64
+      0: TW_VARIANT_LIST@60..60
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@60..64
+        0: SLASH@60..61 "/" [] []
+        1: TW_NUMBER@61..64 "50" [] [Whitespace(" ")]
+      4: (empty)
+    8: TW_FULL_CANDIDATE@64..69
+      0: TW_VARIANT_LIST@64..64
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@64..69
+        0: TW_BASE@64..69 "block" [] []
+        1: (empty)
+      4: (empty)
+    9: TW_FULL_CANDIDATE@69..75
+      0: TW_VARIANT_LIST@69..69
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@69..75
+        0: TW_BASE@69..75 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    10: TW_FULL_CANDIDATE@75..87
+      0: TW_VARIANT_LIST@75..75
+      1: (empty)
+      2: (empty)
+      3: TW_ARBITRARY_CANDIDATE@75..87
+        0: L_BRACKET@75..76 "[" [] []
+        1: TW_PROPERTY@76..81 "color" [] []
+        2: COLON@81..82 ":" [] []
+        3: CSS_GENERIC_COMPONENT_VALUE_LIST@82..85
+          0: CSS_IDENTIFIER@82..85
+            0: IDENT@82..85 "red" [] []
+        4: R_BRACKET@85..87 "]" [] [Whitespace(" ")]
+        5: (empty)
+      4: (empty)
+    11: TW_FULL_CANDIDATE@87..91
+      0: TW_VARIANT_LIST@87..87
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@87..91
+        0: SLASH@87..88 "/" [] []
+        1: TW_NUMBER@88..91 "25" [] [Whitespace(" ")]
+      4: (empty)
+    12: TW_FULL_CANDIDATE@91..96
+      0: TW_VARIANT_LIST@91..91
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@91..96
+        0: TW_BASE@91..96 "block" [] []
+        1: (empty)
+      4: (empty)
+    13: TW_FULL_CANDIDATE@96..102
+      0: TW_VARIANT_LIST@96..96
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@96..102
+        0: TW_BASE@96..102 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    14: TW_FULL_CANDIDATE@102..126
+      0: TW_VARIANT_LIST@102..102
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@102..126
+        0: TW_BASE@102..104 "bg" [] []
+        1: DASH@104..105 "-" [] []
+        2: TW_NAMED_VALUE@105..114
+          0: TW_VALUE@105..114 "green-500" [] []
+        3: TW_BOGUS_MODIFIER@114..126
+          0: SLASH@114..115 "/" [] []
+          1: TW_BOGUS_MODIFIER@115..126
+            0: L_BRACKET@115..116 "[" [] []
+            1: TW_SELECTOR@116..126 "color:red" [] [Whitespace(" ")]
+      4: (empty)
+    15: TW_FULL_CANDIDATE@126..131
+      0: TW_VARIANT_LIST@126..126
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@126..131
+        0: TW_BASE@126..131 "block" [] []
+        1: (empty)
+      4: (empty)
+    16: TW_FULL_CANDIDATE@131..137
+      0: TW_VARIANT_LIST@131..131
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@131..137
+        0: TW_BASE@131..137 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    17: TW_FULL_CANDIDATE@137..161
+      0: TW_VARIANT_LIST@137..137
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@137..161
+        0: TW_BASE@137..139 "bg" [] []
+        1: DASH@139..140 "-" [] []
+        2: TW_NAMED_VALUE@140..149
+          0: TW_VALUE@140..149 "green-500" [] []
+        3: TW_BOGUS_MODIFIER@149..161
+          0: SLASH@149..150 "/" [] []
+          1: TW_BOGUS_MODIFIER@150..161
+            0: L_PAREN@150..151 "(" [] []
+            1: TW_VALUE@151..161 "--opacity" [] [Whitespace(" ")]
+      4: (empty)
+    18: TW_FULL_CANDIDATE@161..166
+      0: TW_VARIANT_LIST@161..161
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@161..166
+        0: TW_BASE@161..166 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@166..167 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+modifier-recovery.txt:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found 'flex'.
+  
+  > 1 │ bg-green-500/ flex
+      │               ^^^^
+    2 │ flex bg-green-500/ block
+    3 │ flex bg-red-500 /50 block
+  
+  i Expected a value here.
+  
+  > 1 │ bg-green-500/ flex
+      │               ^^^^
+    2 │ flex bg-green-500/ block
+    3 │ flex bg-red-500 /50 block
+  
+modifier-recovery.txt:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found 'block'.
+  
+    1 │ bg-green-500/ flex
+  > 2 │ flex bg-green-500/ block
+      │                    ^^^^^
+    3 │ flex bg-red-500 /50 block
+    4 │ flex [color:red] /25 block
+  
+  i Expected a value here.
+  
+    1 │ bg-green-500/ flex
+  > 2 │ flex bg-green-500/ block
+      │                    ^^^^^
+    3 │ flex bg-red-500 /50 block
+    4 │ flex [color:red] /25 block
+  
+modifier-recovery.txt:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '/50'.
+  
+    1 │ bg-green-500/ flex
+    2 │ flex bg-green-500/ block
+  > 3 │ flex bg-red-500 /50 block
+      │                 ^^^
+    4 │ flex [color:red] /25 block
+    5 │ flex bg-green-500/[color:red block
+  
+  i Expected a candidate here.
+  
+    1 │ bg-green-500/ flex
+    2 │ flex bg-green-500/ block
+  > 3 │ flex bg-red-500 /50 block
+      │                 ^^^
+    4 │ flex [color:red] /25 block
+    5 │ flex bg-green-500/[color:red block
+  
+modifier-recovery.txt:4:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '/25'.
+  
+    2 │ flex bg-green-500/ block
+    3 │ flex bg-red-500 /50 block
+  > 4 │ flex [color:red] /25 block
+      │                  ^^^
+    5 │ flex bg-green-500/[color:red block
+    6 │ flex bg-green-500/(--opacity block
+  
+  i Expected a candidate here.
+  
+    2 │ flex bg-green-500/ block
+    3 │ flex bg-red-500 /50 block
+  > 4 │ flex [color:red] /25 block
+      │                  ^^^
+    5 │ flex bg-green-500/[color:red block
+    6 │ flex bg-green-500/(--opacity block
+  
+modifier-recovery.txt:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[color:red'.
+  
+    3 │ flex bg-red-500 /50 block
+    4 │ flex [color:red] /25 block
+  > 5 │ flex bg-green-500/[color:red block
+      │                   ^^^^^^^^^^
+    6 │ flex bg-green-500/(--opacity block
+    7 │ 
+  
+  i Expected a value here.
+  
+    3 │ flex bg-red-500 /50 block
+    4 │ flex [color:red] /25 block
+  > 5 │ flex bg-green-500/[color:red block
+      │                   ^^^^^^^^^^
+    6 │ flex bg-green-500/(--opacity block
+    7 │ 
+  
+modifier-recovery.txt:6:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '(--opacity'.
+  
+    4 │ flex [color:red] /25 block
+    5 │ flex bg-green-500/[color:red block
+  > 6 │ flex bg-green-500/(--opacity block
+      │                   ^^^^^^^^^^
+    7 │ 
+  
+  i Expected a value here.
+  
+    4 │ flex [color:red] /25 block
+    5 │ flex bg-green-500/[color:red block
+  > 6 │ flex bg-green-500/(--opacity block
+      │                   ^^^^^^^^^^
+    7 │ 
+  
+```

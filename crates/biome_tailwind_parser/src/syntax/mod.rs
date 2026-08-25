@@ -52,7 +52,9 @@ impl ParseNodeList for CandidateList {
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
-                .enable_recovery_on_line_break(),
+                .enable_recovery_on_line_break()
+                .enable_recovery_on_whitespace()
+                .allow_recovery_after_trivia(),
             expected_candidate,
         )
     }
@@ -61,6 +63,7 @@ impl ParseNodeList for CandidateList {
 fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
+    let variants_start = p.source().position();
 
     if class_chunk_has_colon(p) {
         VariantList.parse_list(p);
@@ -71,14 +74,29 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         let variants = p.start();
         variants.complete(p, TW_VARIANT_LIST);
     }
+    if p.source().position() != variants_start && p.has_preceding_whitespace() {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
 
     // Tailwind's legacy important spelling puts the `!` right before the
     // utility, after the variants and before the sign (`hover:!flex`,
     // `!-m-4`).
     let legacy_important = p.eat(T![!]);
+    if legacy_important && p.has_preceding_whitespace() {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
 
     if p.at(T![-]) {
         p.bump_with_context(T![-], TailwindLexContext::SawNegative);
+        if p.has_preceding_whitespace() {
+            m.abandon(p);
+            p.rewind(checkpoint);
+            return Absent;
+        }
     }
 
     let candidate = parse_arbitrary_candidate(p)
@@ -86,7 +104,9 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
-                .enable_recovery_on_line_break(),
+                .enable_recovery_on_line_break()
+                .enable_recovery_on_whitespace()
+                .allow_recovery_after_trivia(),
             expected_candidate,
         );
 
@@ -162,7 +182,8 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
     match parse_value(p).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]])
-            .enable_recovery_on_line_break(),
+            .enable_recovery_on_line_break()
+            .enable_recovery_on_whitespace(),
         expected_value,
     ) {
         Ok(_) => {}
@@ -180,7 +201,7 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         return Absent;
     }
 
-    if p.at(T![/]) {
+    if p.at(T![/]) && !p.source().had_trivia_before() {
         parse_modifier(p).or_add_diagnostic(p, expected_modifier);
         if p.at(T![:]) {
             // A `:` after the modifier means this was a (malformed)
@@ -226,7 +247,7 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.at(T![/]) {
+    if !p.at(T![/]) || p.source().had_trivia_before() {
         return Present(m.complete(p, TW_ARBITRARY_CANDIDATE));
     }
 
@@ -268,7 +289,8 @@ pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     }
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, NEWLINE, T![!]]),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, NEWLINE, T![!]])
+            .enable_recovery_on_whitespace(),
         expected_value,
     ) {
         Ok(_) => {}

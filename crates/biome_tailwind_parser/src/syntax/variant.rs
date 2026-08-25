@@ -40,7 +40,8 @@ impl ParseSeparatedList for VariantList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_VARIANT, token_set![WHITESPACE, T![:]]),
+            &ParseRecoveryTokenSet::new(TW_BOGUS_VARIANT, token_set![WHITESPACE, T![:]])
+                .enable_recovery_on_whitespace(),
             expected_variant,
         )
     }

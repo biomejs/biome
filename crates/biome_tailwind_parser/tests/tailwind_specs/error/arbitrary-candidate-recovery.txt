@@ -1,0 +1,4 @@
+flex [:red] block
+flex [color:] block
+flex [color:red block
+flex [color:var(--color-gray-950) block

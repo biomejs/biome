@@ -54,6 +54,8 @@ pub struct ParseRecoveryTokenSet<K: SyntaxKind> {
     node_kind: K,
     recovery_set: TokenSet<K>,
     line_break: bool,
+    whitespace: bool,
+    allow_recovery_after_trivia: bool,
 }
 
 impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
@@ -63,12 +65,36 @@ impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
             node_kind,
             recovery_set,
             line_break: false,
+            whitespace: false,
+            allow_recovery_after_trivia: false,
         }
     }
 
-    /// Enable recovery on line breaks
+    /// Enables recovery on line breaks.
     pub fn enable_recovery_on_line_break(mut self) -> Self {
         self.line_break = true;
+        self
+    }
+
+    /// Enables recovery on whitespace.
+    pub fn enable_recovery_on_whitespace(mut self) -> Self {
+        self.whitespace = true;
+        self
+    }
+
+    /// Allows recovery to consume the current token when it is preceded by trivia configured as
+    /// a recovery boundary.
+    ///
+    /// By default, [`Self::recover`] returns [`RecoveryError::AlreadyRecovered`] when the current
+    /// token has a preceding line break or whitespace and recovery on that trivia is enabled. This
+    /// prevents recovery from crossing the boundary before the next valid construct.
+    ///
+    /// Enable this option when the trivia separates list elements and the current token is known to
+    /// start a malformed element. Recovery consumes that first token, then honors all configured
+    /// token and trivia boundaries. This option does not allow recovery to consume a current token
+    /// that belongs to the recovery token set.
+    pub fn allow_recovery_after_trivia(mut self) -> Self {
+        self.allow_recovery_after_trivia = true;
         self
     }
 
@@ -76,7 +102,8 @@ impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
     // or the passed in `parse_*` rule was able to successfully parse an element.
 
     /// Tries to recover by parsing all tokens into an `Bogus*` node until the parser finds any token
-    /// specified in the recovery set, the EOF, or a line break (depending on configuration).
+    /// specified in the recovery set, the EOF, a line break, or whitespace, depending on the
+    /// configuration.
     /// Returns `Ok(bogus_node)` if recovery was successful, and `Err(RecoveryError::Eof)` if the parser
     /// is at the end of the file (before starting recovery).
     pub fn recover<P>(&self, p: &mut P) -> RecoveryResult
@@ -87,7 +114,9 @@ impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
             return Err(RecoveryError::Eof);
         }
 
-        if self.is_at_recovered(p) {
+        let starts_after_trivia = self.is_at_recovery_trivia(p);
+        if p.at_ts(self.recovery_set) || (starts_after_trivia && !self.allow_recovery_after_trivia)
+        {
             return Err(RecoveryError::AlreadyRecovered);
         }
 
@@ -96,6 +125,10 @@ impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
         }
 
         let m = p.start();
+
+        if starts_after_trivia {
+            p.bump_any();
+        }
 
         while !(self.is_at_recovered(p) || p.at(P::Kind::EOF)) {
             p.bump_any();
@@ -109,7 +142,16 @@ impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
     where
         P: Parser<Kind = K>,
     {
-        p.at_ts(self.recovery_set) || (self.line_break && p.has_preceding_line_break())
+        p.at_ts(self.recovery_set) || self.is_at_recovery_trivia(p)
+    }
+
+    #[inline]
+    fn is_at_recovery_trivia<P>(&self, p: &P) -> bool
+    where
+        P: Parser<Kind = K>,
+    {
+        (self.line_break && p.has_preceding_line_break())
+            || (self.whitespace && p.has_preceding_whitespace())
     }
 }
 

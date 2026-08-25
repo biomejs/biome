@@ -1,0 +1,165 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+? flex block
+flex ? block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    ERROR_TOKEN@0..2 "?" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@2..7 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@7..12 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@12..18 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    ERROR_TOKEN@18..20 "?" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@20..25 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..26
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..25
+    0: TW_FULL_CANDIDATE@0..2
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@0..2
+        0: ERROR_TOKEN@0..2 "?" [] [Whitespace(" ")]
+      4: (empty)
+    1: TW_FULL_CANDIDATE@2..7
+      0: TW_VARIANT_LIST@2..2
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@2..7
+        0: TW_BASE@2..7 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@7..12
+      0: TW_VARIANT_LIST@7..7
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@7..12
+        0: TW_BASE@7..12 "block" [] []
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@12..18
+      0: TW_VARIANT_LIST@12..12
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@12..18
+        0: TW_BASE@12..18 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@18..20
+      0: TW_VARIANT_LIST@18..18
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@18..20
+        0: ERROR_TOKEN@18..20 "?" [] [Whitespace(" ")]
+      4: (empty)
+    5: TW_FULL_CANDIDATE@20..25
+      0: TW_VARIANT_LIST@20..20
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@20..25
+        0: TW_BASE@20..25 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@25..26 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+bogus-candidate-recovery.txt:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `?`
+  
+  > 1 │ ? flex block
+      │ ^
+    2 │ flex ? block
+    3 │ 
+  
+bogus-candidate-recovery.txt:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `?`
+  
+    1 │ ? flex block
+  > 2 │ flex ? block
+      │      ^
+    3 │ 
+  
+```

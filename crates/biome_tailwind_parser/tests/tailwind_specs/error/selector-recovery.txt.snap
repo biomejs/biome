@@ -1,0 +1,441 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+flex [&_p block
+flex has-[>svg block
+flex hover:[&_p block
+flex [@supports(display:grid) block
+flex [&_[foo block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..5 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    L_BRACKET@5..6 "[" [] [],
+                    TW_SELECTOR@6..10 "&_p" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@10..15 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@15..21 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@21..24 "has" [] [],
+                minus_token: DASH@24..25 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@25..26 "[" [] [],
+                        TW_SELECTOR@26..31 ">svg" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@31..36 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@36..42 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@42..47 "hover" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@47..48 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    L_BRACKET@48..49 "[" [] [],
+                    TW_SELECTOR@49..53 "&_p" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@53..58 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@58..64 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    L_BRACKET@64..65 "[" [] [],
+                    TW_SELECTOR@65..89 "@supports(display:grid)" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@89..94 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@94..100 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwBogusCandidate {
+                items: [
+                    L_BRACKET@100..101 "[" [] [],
+                    TW_SELECTOR@101..108 "&_[foo" [] [Whitespace(" ")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@108..113 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..114
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..113
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..5
+        0: TW_BASE@0..5 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@5..10
+      0: TW_VARIANT_LIST@5..5
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@5..10
+        0: L_BRACKET@5..6 "[" [] []
+        1: TW_SELECTOR@6..10 "&_p" [] [Whitespace(" ")]
+      4: (empty)
+    2: TW_FULL_CANDIDATE@10..15
+      0: TW_VARIANT_LIST@10..10
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@10..15
+        0: TW_BASE@10..15 "block" [] []
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@15..21
+      0: TW_VARIANT_LIST@15..15
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@15..21
+        0: TW_BASE@15..21 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@21..31
+      0: TW_VARIANT_LIST@21..21
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@21..31
+        0: TW_BASE@21..24 "has" [] []
+        1: DASH@24..25 "-" [] []
+        2: TW_BOGUS_VALUE@25..31
+          0: L_BRACKET@25..26 "[" [] []
+          1: TW_SELECTOR@26..31 ">svg" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    5: TW_FULL_CANDIDATE@31..36
+      0: TW_VARIANT_LIST@31..31
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@31..36
+        0: TW_BASE@31..36 "block" [] []
+        1: (empty)
+      4: (empty)
+    6: TW_FULL_CANDIDATE@36..42
+      0: TW_VARIANT_LIST@36..36
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@36..42
+        0: TW_BASE@36..42 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    7: TW_FULL_CANDIDATE@42..53
+      0: TW_VARIANT_LIST@42..48
+        0: TW_VARIANT_EXPRESSION@42..47
+          0: TW_VARIANT_SEGMENT_LIST@42..47
+            0: TW_NAMED_VARIANT_SEGMENT@42..47
+              0: TW_VARIANT_SEGMENT@42..47 "hover" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@47..48 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@48..53
+        0: L_BRACKET@48..49 "[" [] []
+        1: TW_SELECTOR@49..53 "&_p" [] [Whitespace(" ")]
+      4: (empty)
+    8: TW_FULL_CANDIDATE@53..58
+      0: TW_VARIANT_LIST@53..53
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@53..58
+        0: TW_BASE@53..58 "block" [] []
+        1: (empty)
+      4: (empty)
+    9: TW_FULL_CANDIDATE@58..64
+      0: TW_VARIANT_LIST@58..58
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@58..64
+        0: TW_BASE@58..64 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    10: TW_FULL_CANDIDATE@64..89
+      0: TW_VARIANT_LIST@64..64
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@64..89
+        0: L_BRACKET@64..65 "[" [] []
+        1: TW_SELECTOR@65..89 "@supports(display:grid)" [] [Whitespace(" ")]
+      4: (empty)
+    11: TW_FULL_CANDIDATE@89..94
+      0: TW_VARIANT_LIST@89..89
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@89..94
+        0: TW_BASE@89..94 "block" [] []
+        1: (empty)
+      4: (empty)
+    12: TW_FULL_CANDIDATE@94..100
+      0: TW_VARIANT_LIST@94..94
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@94..100
+        0: TW_BASE@94..100 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    13: TW_FULL_CANDIDATE@100..108
+      0: TW_VARIANT_LIST@100..100
+      1: (empty)
+      2: (empty)
+      3: TW_BOGUS_CANDIDATE@100..108
+        0: L_BRACKET@100..101 "[" [] []
+        1: TW_SELECTOR@101..108 "&_[foo" [] [Whitespace(" ")]
+      4: (empty)
+    14: TW_FULL_CANDIDATE@108..113
+      0: TW_VARIANT_LIST@108..108
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@108..113
+        0: TW_BASE@108..113 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@113..114 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+selector-recovery.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '[&_p'.
+  
+  > 1 │ flex [&_p block
+      │      ^^^^
+    2 │ flex has-[>svg block
+    3 │ flex hover:[&_p block
+  
+  i Expected a candidate here.
+  
+  > 1 │ flex [&_p block
+      │      ^^^^
+    2 │ flex has-[>svg block
+    3 │ flex hover:[&_p block
+  
+selector-recovery.txt:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[>svg'.
+  
+    1 │ flex [&_p block
+  > 2 │ flex has-[>svg block
+      │          ^^^^^
+    3 │ flex hover:[&_p block
+    4 │ flex [@supports(display:grid) block
+  
+  i Expected a value here.
+  
+    1 │ flex [&_p block
+  > 2 │ flex has-[>svg block
+      │          ^^^^^
+    3 │ flex hover:[&_p block
+    4 │ flex [@supports(display:grid) block
+  
+selector-recovery.txt:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '[&_p'.
+  
+    1 │ flex [&_p block
+    2 │ flex has-[>svg block
+  > 3 │ flex hover:[&_p block
+      │            ^^^^
+    4 │ flex [@supports(display:grid) block
+    5 │ flex [&_[foo block
+  
+  i Expected a candidate here.
+  
+    1 │ flex [&_p block
+    2 │ flex has-[>svg block
+  > 3 │ flex hover:[&_p block
+      │            ^^^^
+    4 │ flex [@supports(display:grid) block
+    5 │ flex [&_[foo block
+  
+selector-recovery.txt:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '[@supports(display:grid)'.
+  
+    2 │ flex has-[>svg block
+    3 │ flex hover:[&_p block
+  > 4 │ flex [@supports(display:grid) block
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ flex [&_[foo block
+    6 │ 
+  
+  i Expected a candidate here.
+  
+    2 │ flex has-[>svg block
+    3 │ flex hover:[&_p block
+  > 4 │ flex [@supports(display:grid) block
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ flex [&_[foo block
+    6 │ 
+  
+selector-recovery.txt:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found '[&_[foo'.
+  
+    3 │ flex hover:[&_p block
+    4 │ flex [@supports(display:grid) block
+  > 5 │ flex [&_[foo block
+      │      ^^^^^^^
+    6 │ 
+  
+  i Expected a candidate here.
+  
+    3 │ flex hover:[&_p block
+    4 │ flex [@supports(display:grid) block
+  > 5 │ flex [&_[foo block
+      │      ^^^^^^^
+    6 │ 
+  
+```

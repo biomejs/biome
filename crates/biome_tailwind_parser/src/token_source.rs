@@ -140,6 +140,10 @@ impl TokenSource for TailwindTokenSource<'_> {
         self.lexer.has_preceding_line_break()
     }
 
+    fn has_preceding_whitespace(&self) -> bool {
+        self.lexer.has_preceding_whitespace()
+    }
+
     fn bump(&mut self) {
         self.bump_with_context(TailwindLexContext::Regular)
     }

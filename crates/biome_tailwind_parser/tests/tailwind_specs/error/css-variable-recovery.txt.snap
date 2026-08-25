@@ -1,0 +1,285 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+flex text-( block
+flex text-(--my-color block
+flex supports-(--condition block
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@0..5 "flex" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@5..9 "text" [] [],
+                minus_token: DASH@9..10 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_PAREN@10..12 "(" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@12..17 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@17..23 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@23..27 "text" [] [],
+                minus_token: DASH@27..28 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_PAREN@28..29 "(" [] [],
+                        TW_VALUE@29..40 "--my-color" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@40..45 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@45..51 "flex" [Newline("\n")] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@51..59 "supports" [] [],
+                minus_token: DASH@59..60 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_PAREN@60..61 "(" [] [],
+                        TW_VALUE@61..73 "--condition" [] [Whitespace(" ")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@73..78 "block" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..79
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..78
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@0..5
+        0: TW_BASE@0..5 "flex" [] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    1: TW_FULL_CANDIDATE@5..12
+      0: TW_VARIANT_LIST@5..5
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@5..12
+        0: TW_BASE@5..9 "text" [] []
+        1: DASH@9..10 "-" [] []
+        2: TW_BOGUS_VALUE@10..12
+          0: L_PAREN@10..12 "(" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    2: TW_FULL_CANDIDATE@12..17
+      0: TW_VARIANT_LIST@12..12
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@12..17
+        0: TW_BASE@12..17 "block" [] []
+        1: (empty)
+      4: (empty)
+    3: TW_FULL_CANDIDATE@17..23
+      0: TW_VARIANT_LIST@17..17
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@17..23
+        0: TW_BASE@17..23 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    4: TW_FULL_CANDIDATE@23..40
+      0: TW_VARIANT_LIST@23..23
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@23..40
+        0: TW_BASE@23..27 "text" [] []
+        1: DASH@27..28 "-" [] []
+        2: TW_BOGUS_VALUE@28..40
+          0: L_PAREN@28..29 "(" [] []
+          1: TW_VALUE@29..40 "--my-color" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    5: TW_FULL_CANDIDATE@40..45
+      0: TW_VARIANT_LIST@40..40
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@40..45
+        0: TW_BASE@40..45 "block" [] []
+        1: (empty)
+      4: (empty)
+    6: TW_FULL_CANDIDATE@45..51
+      0: TW_VARIANT_LIST@45..45
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@45..51
+        0: TW_BASE@45..51 "flex" [Newline("\n")] [Whitespace(" ")]
+        1: (empty)
+      4: (empty)
+    7: TW_FULL_CANDIDATE@51..73
+      0: TW_VARIANT_LIST@51..51
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@51..73
+        0: TW_BASE@51..59 "supports" [] []
+        1: DASH@59..60 "-" [] []
+        2: TW_BOGUS_VALUE@60..73
+          0: L_PAREN@60..61 "(" [] []
+          1: TW_VALUE@61..73 "--condition" [] [Whitespace(" ")]
+        3: (empty)
+      4: (empty)
+    8: TW_FULL_CANDIDATE@73..78
+      0: TW_VARIANT_LIST@73..73
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@73..78
+        0: TW_BASE@73..78 "block" [] []
+        1: (empty)
+      4: (empty)
+  2: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+css-variable-recovery.txt:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '('.
+  
+  > 1 │ flex text-( block
+      │           ^
+    2 │ flex text-(--my-color block
+    3 │ flex supports-(--condition block
+  
+  i Expected a value here.
+  
+  > 1 │ flex text-( block
+      │           ^
+    2 │ flex text-(--my-color block
+    3 │ flex supports-(--condition block
+  
+css-variable-recovery.txt:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '(--my-color'.
+  
+    1 │ flex text-( block
+  > 2 │ flex text-(--my-color block
+      │           ^^^^^^^^^^^
+    3 │ flex supports-(--condition block
+    4 │ 
+  
+  i Expected a value here.
+  
+    1 │ flex text-( block
+  > 2 │ flex text-(--my-color block
+      │           ^^^^^^^^^^^
+    3 │ flex supports-(--condition block
+    4 │ 
+  
+css-variable-recovery.txt:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '(--condition'.
+  
+    1 │ flex text-( block
+    2 │ flex text-(--my-color block
+  > 3 │ flex supports-(--condition block
+      │               ^^^^^^^^^^^^
+    4 │ 
+  
+  i Expected a value here.
+  
+    1 │ flex text-( block
+    2 │ flex text-(--my-color block
+  > 3 │ flex supports-(--condition block
+      │               ^^^^^^^^^^^^
+    4 │ 
+  
+```

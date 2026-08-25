@@ -20,8 +20,8 @@ pub(crate) struct TailwindLexer<'src> {
     current_start: TextSize,
     diagnostics: Vec<ParseDiagnostic>,
     current_flags: TokenFlags,
-    preceding_line_break: bool,
     after_newline: bool,
+    after_whitespace: bool,
     unicode_bom_length: usize,
 }
 
@@ -34,8 +34,8 @@ impl<'src> TailwindLexer<'src> {
             current_start: TextSize::default(),
             diagnostics: Vec::new(),
             current_flags: TokenFlags::empty(),
-            preceding_line_break: false,
             after_newline: false,
+            after_whitespace: false,
             unicode_bom_length: 0,
         }
     }
@@ -521,7 +521,7 @@ impl<'src> TailwindLexer<'src> {
                 bracket_depth += 1;
             } else if dispatched == BTC && bracket_depth > 0 {
                 bracket_depth -= 1;
-            } else if (dispatched == looking_for || dispatched == WHS) && bracket_depth == 0 {
+            } else if dispatched == WHS || (dispatched == looking_for && bracket_depth == 0) {
                 break;
             }
             let char = self.current_char_unchecked();
@@ -582,6 +582,9 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
         self.current_start = TextSize::from(self.position as u32);
         self.current_flags = TokenFlags::empty();
+        let current_is_source_whitespace = self
+            .current_byte()
+            .is_some_and(|byte| lookup_byte(byte) == WHS);
 
         let kind = if self.is_eof() {
             EOF
@@ -610,17 +613,29 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
 
         self.current_flags
             .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
+        self.current_flags
+            .set(TokenFlags::PRECEDING_WHITESPACE, self.after_whitespace);
         self.current_kind = kind;
 
         if !kind.is_trivia() {
             self.after_newline = false;
+            self.after_whitespace = false;
+        } else if kind == Self::NEWLINE {
+            self.after_newline = true;
+            self.after_whitespace = true;
+        } else if kind == Self::WHITESPACE && current_is_source_whitespace {
+            self.after_whitespace = true;
         }
 
         kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
-        self.preceding_line_break
+        self.current_flags.has_preceding_line_break()
+    }
+
+    fn has_preceding_whitespace(&self) -> bool {
+        self.current_flags.has_preceding_whitespace()
     }
 
     fn has_unicode_escape(&self) -> bool {
@@ -634,7 +649,7 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             current_flags,
             current_kind,
             after_line_break,
-            after_whitespace: _,
+            after_whitespace,
             unicode_bom_length,
             diagnostics_pos,
         } = checkpoint;
@@ -646,6 +661,7 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
         self.current_start = current_start;
         self.current_flags = current_flags;
         self.after_newline = after_line_break;
+        self.after_whitespace = after_whitespace;
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
     }
@@ -680,7 +696,7 @@ impl<'src> LexerWithCheckpoint<'src> for TailwindLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.after_newline,
-            after_whitespace: false,
+            after_whitespace: self.after_whitespace,
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }

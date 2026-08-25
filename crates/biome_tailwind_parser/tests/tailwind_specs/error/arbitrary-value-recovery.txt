@@ -1,0 +1,5 @@
+flex text-[ block
+flex text-[#ff0000 block
+flex w-[calc(100%_-) block
+flex bg-[url(/img/mountains.jpg block
+flex w-[foo[bar block

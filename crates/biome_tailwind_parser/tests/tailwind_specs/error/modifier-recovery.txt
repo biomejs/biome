@@ -1,0 +1,6 @@
+bg-green-500/ flex
+flex bg-green-500/ block
+flex bg-red-500 /50 block
+flex [color:red] /25 block
+flex bg-green-500/[color:red block
+flex bg-green-500/(--opacity block
