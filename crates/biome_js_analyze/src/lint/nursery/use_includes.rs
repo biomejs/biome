@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
     JsFunctionBody, JsFunctionExpression, JsIdentifierBinding, JsParameters, JsReferenceIdentifier,
-    T,
+    JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, declare_node_union};
 
@@ -214,7 +214,8 @@ impl Rule for UseIncludes {
                     ctx.metadata().applicability(),
                     match kind {
                         CheckKind::Includes => {
-                            markup! { "Use "<Emphasis>"includes()"</Emphasis>" instead." }.to_owned()
+                            markup! { "Use "<Emphasis>"includes()"</Emphasis>" instead." }
+                                .to_owned()
                         }
                         CheckKind::NotIncludes => {
                             markup! { "Use "<Emphasis>"!includes()"</Emphasis>" instead." }
@@ -225,11 +226,12 @@ impl Rule for UseIncludes {
                 ))
             }
             UseIncludesState::Some { call, search } => {
-                let search = search.clone().with_leading_trivia_pieces([])?.with_trailing_trivia_pieces([])?;
-                let includes_call = make_includes_call(
-                    call,
-                    biome_js_syntax::AnyJsCallArgument::AnyJsExpression(search),
-                )?;
+                let search = search
+                    .clone()
+                    .with_leading_trivia_pieces([])?
+                    .with_trailing_trivia_pieces([])?;
+                let includes_call =
+                    make_includes_call(call, AnyJsCallArgument::AnyJsExpression(search))?;
 
                 mutation.replace_node(
                     AnyJsExpression::JsCallExpression(call.clone()),
@@ -375,7 +377,9 @@ fn arrow_param_and_comparison(
     };
     let comparison = match arrow.body().ok()? {
         AnyJsFunctionBody::AnyJsExpression(expr) => as_strict_equality(&expr)?,
-        AnyJsFunctionBody::JsFunctionBody(body) => as_strict_equality(&single_return_value(&body)?)?,
+        AnyJsFunctionBody::JsFunctionBody(body) => {
+            as_strict_equality(&single_return_value(&body)?)?
+        }
     };
     Some((param, comparison))
 }
@@ -403,7 +407,9 @@ fn single_identifier_parameter(params: &JsParameters) -> Option<JsIdentifierBind
         return None;
     }
     let param = items.iter().next()?.ok()?;
-    let formal = param.as_any_js_formal_parameter()?.as_js_formal_parameter()?;
+    let formal = param
+        .as_any_js_formal_parameter()?
+        .as_js_formal_parameter()?;
     if formal.initializer().is_some() {
         return None;
     }
@@ -471,7 +477,52 @@ fn comparison_search_value(
     if references_binding(ctx, &search, param) {
         return None;
     }
+    if !is_hoistable_search(&search) {
+        return None;
+    }
     Some(search)
+}
+
+/// Whether `search` can be lifted out of the `some()` callback and evaluated a
+/// single time as the argument of `includes()`.
+///
+/// `some()` evaluates its callback once per element, so a search expression that
+/// has side effects, or that yields a different value on each evaluation, is not
+/// interchangeable with one evaluation. For `const gen = () => ++n`,
+/// `[2, 1].some(x => x === gen())` is `false` while `[2, 1].includes(gen())` is
+/// `true`, and on an empty array the callback never runs at all while the
+/// argument of `includes()` is always evaluated. Only side-effect-free,
+/// stable expressions are accepted: literals, plain identifier references,
+/// `this`, and static member chains rooted at one of those.
+///
+/// `NaN` and `undefined` are rejected on top of that, because `includes()`
+/// compares with SameValueZero and reads a hole in a sparse array as
+/// `undefined`, neither of which `===` inside a callback does:
+/// `[NaN].some(x => x === NaN)` is `false` while `[NaN].includes(NaN)` is `true`,
+/// and `[1, , 3].some(x => x === undefined)` is `false` while
+/// `[1, , 3].includes(undefined)` is `true`.
+fn is_hoistable_search(expr: &AnyJsExpression) -> bool {
+    match expr.clone().omit_parentheses() {
+        AnyJsExpression::AnyJsLiteralExpression(_) => true,
+        AnyJsExpression::JsThisExpression(_) => true,
+        AnyJsExpression::JsIdentifierExpression(ident) => ident
+            .name()
+            .ok()
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|token| !matches!(token.text_trimmed(), "NaN" | "undefined")),
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let names_nan = member
+                .member()
+                .ok()
+                .and_then(|name| name.as_js_name()?.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "NaN");
+            !names_nan
+                && member
+                    .object()
+                    .is_ok_and(|object| is_hoistable_search(&object))
+        }
+        _ => false,
+    }
 }
 
 /// Whether `expr` is exactly a reference that resolves to the `param` binding.
@@ -606,7 +657,8 @@ fn is_negative_one(expr: &AnyJsExpression) -> bool {
         return false;
     };
     let is_minus = unary
-        .operator_token().is_ok_and(|t| t.kind() == biome_js_syntax::JsSyntaxKind::MINUS);
+        .operator_token()
+        .is_ok_and(|t| t.kind() == JsSyntaxKind::MINUS);
     if !is_minus {
         return false;
     }
@@ -631,7 +683,9 @@ fn as_number_literal(expr: &AnyJsExpression) -> Option<f64> {
 
 fn ensure_known_includes_type(ctx: &RuleContext<UseIncludes>, call: &JsCallExpression) -> bool {
     let callee = call.callee().ok();
-    let member = callee.as_ref().and_then(|c| c.as_js_static_member_expression());
+    let member = callee
+        .as_ref()
+        .and_then(|c| c.as_js_static_member_expression());
     let object = member.and_then(|m| m.object().ok());
 
     let Some(object) = object else {
@@ -641,4 +695,3 @@ fn ensure_known_includes_type(ctx: &RuleContext<UseIncludes>, call: &JsCallExpre
     ctx.type_of_expression(&object)
         .is_some_and(|ty| ty.is_all_string_array_or_tuple())
 }
-

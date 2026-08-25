@@ -57,10 +57,9 @@ arr.some(function (x) { return x === 1; });
 (arr).some(x => x === 1);
 (arr).indexOf(1) !== -1;
 
-// shadowing: the inner `x` is a different binding, so the search value does not
-// depend on the callback parameter — semantic resolution (not name matching)
-// correctly allows this to be rewritten
-arr.some(x => x === (function (x) { return x; })(1));
+// a static member access is stable and side-effect free, so it can be hoisted
+// out of the callback into the includes() argument
+arr.some(x => x === str.length);
 
 // parenthesized callee — the whole `arr.some` is wrapped
 (arr.some)(x => x === 1);
@@ -973,7 +972,7 @@ invalid.js:52:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   > 52 │ (arr).indexOf(1) !== -1;
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     53 │ 
-    54 │ // shadowing: the inner `x` is a different binding, so the search value does not
+    54 │ // a static member access is stable and side-effect free, so it can be hoisted
   
   i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
   
@@ -986,22 +985,22 @@ invalid.js:52:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
     52    │ - (arr).indexOf(1)·!==·-1;
        52 │ + (arr).includes(1);
     53 53 │   
-    54 54 │   // shadowing: the inner `x` is a different binding, so the search value does not
+    54 54 │   // a static member access is stable and side-effect free, so it can be hoisted
   
 
 ```
 
 ```
-invalid.js:57:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:56:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Using some() with an equality comparison to test for presence.
   
-    55 │ // depend on the callback parameter — semantic resolution (not name matching)
-    56 │ // correctly allows this to be rewritten
-  > 57 │ arr.some(x => x === (function (x) { return x; })(1));
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    58 │ 
-    59 │ // parenthesized callee — the whole `arr.some` is wrapped
+    54 │ // a static member access is stable and side-effect free, so it can be hoisted
+    55 │ // out of the callback into the includes() argument
+  > 56 │ arr.some(x => x === str.length);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ // parenthesized callee — the whole `arr.some` is wrapped
   
   i A callback that only checks equality is harder to read and less efficient than a direct membership test.
   
@@ -1009,25 +1008,25 @@ invalid.js:57:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Use includes() instead.
   
-    55 55 │   // depend on the callback parameter — semantic resolution (not name matching)
-    56 56 │   // correctly allows this to be rewritten
-    57    │ - arr.some(x·=>·x·===·(function·(x)·{·return·x;·})(1));
-       57 │ + arr.includes((function·(x)·{·return·x;·})(1));
-    58 58 │   
-    59 59 │   // parenthesized callee — the whole `arr.some` is wrapped
+    54 54 │   // a static member access is stable and side-effect free, so it can be hoisted
+    55 55 │   // out of the callback into the includes() argument
+    56    │ - arr.some(x·=>·x·===·str.length);
+       56 │ + arr.includes(str.length);
+    57 57 │   
+    58 58 │   // parenthesized callee — the whole `arr.some` is wrapped
   
 
 ```
 
 ```
-invalid.js:60:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:59:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Using some() with an equality comparison to test for presence.
   
-    59 │ // parenthesized callee — the whole `arr.some` is wrapped
-  > 60 │ (arr.some)(x => x === 1);
+    58 │ // parenthesized callee — the whole `arr.some` is wrapped
+  > 59 │ (arr.some)(x => x === 1);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    61 │ 
+    60 │ 
   
   i A callback that only checks equality is harder to read and less efficient than a direct membership test.
   
@@ -1035,11 +1034,11 @@ invalid.js:60:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Use includes() instead.
   
-    58 58 │   
-    59 59 │   // parenthesized callee — the whole `arr.some` is wrapped
-    60    │ - (arr.some)(x·=>·x·===·1);
-       60 │ + arr.includes(1);
-    61 61 │   
+    57 57 │   
+    58 58 │   // parenthesized callee — the whole `arr.some` is wrapped
+    59    │ - (arr.some)(x·=>·x·===·1);
+       59 │ + arr.includes(1);
+    60 60 │   
   
 
 ```

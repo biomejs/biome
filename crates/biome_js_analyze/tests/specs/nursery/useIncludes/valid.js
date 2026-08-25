@@ -44,3 +44,13 @@ arr.some(x => x === 1, thisArg);
 
 // some() is not defined on strings; presence checks on unknown types
 unknownValue.some(x => x === 1);
+
+// some() evaluates its callback once per element while includes() evaluates its
+// argument once, so the search value has to be side-effect free and stable
+arr.some(x => x === next());
+arr.some(x => x === (function (x) { return x; })(1));
+
+// includes() compares with SameValueZero and reads a hole in a sparse array as
+// undefined, so neither NaN nor undefined survives the rewrite
+arr.some(x => x === NaN);
+arr.some(x => x === undefined);
