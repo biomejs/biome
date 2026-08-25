@@ -733,6 +733,15 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         }
     }
 
+    /// Resolves one `extends` entry without reading or deserializing its configuration file.
+    ///
+    /// Relative entries use the declaring configuration as their base. Package entries use the
+    /// external resolution base and honor explicit `configs/*` exports before falling back to a
+    /// named export from a Biome manifest. Manifest exports retain the selected package identity
+    /// even when the exported file comes from another package.
+    ///
+    /// Returns an error for invalid manifest selectors, blocked or broken package exports, and
+    /// unresolved paths.
     fn resolve_extended_configuration(
         &self,
         pending: &PendingConfiguration,
@@ -769,56 +778,57 @@ impl<'a> ConfigurationExtendsLoader<'a> {
             },
             Err(_) => None,
         };
-        let (file_path, is_named_manifest_config) = if let Some((package, name)) = named_config {
-            let resolved = resolve(
-                &specifier,
-                &pending.external_resolution_base_path,
-                self.fs,
-                &RESOLVE_OPTIONS,
-            );
-            match resolved {
-                Ok(path) if !ManifestName::is_manifest_file(&path) => (path, false),
-                result => {
-                    let subpath = format!("configs/{name}");
-                    if package_has_exported_subpath(
-                        package,
-                        &subpath,
-                        &pending.external_resolution_base_path,
-                        self.fs,
-                    )
-                    .map_err(&cant_resolve)?
-                    {
-                        (result.map_err(&cant_resolve)?, false)
-                    } else {
-                        (
-                            self.resolve_named_manifest_config(
-                                package,
-                                name,
-                                &specifier,
-                                &pending.external_resolution_base_path,
-                            )?,
-                            true,
-                        )
-                    }
-                }
-            }
-        } else if is_relative_specifier(&specifier) {
-            (
-                normalize_path(&pending.relative_resolution_base_path.join(&specifier)),
-                false,
-            )
-        } else {
-            (
-                resolve(
+        let (file_path, is_named_manifest_config, selected_package) =
+            if let Some((package, name)) = named_config {
+                let resolved = resolve(
                     &specifier,
                     &pending.external_resolution_base_path,
                     self.fs,
                     &RESOLVE_OPTIONS,
+                );
+                match resolved {
+                    Ok(path) if !ManifestName::is_manifest_file(&path) => (path, false, None),
+                    result => {
+                        let subpath = format!("configs/{name}");
+                        if package_has_exported_subpath(
+                            package,
+                            &subpath,
+                            &pending.external_resolution_base_path,
+                            self.fs,
+                        )
+                        .map_err(&cant_resolve)?
+                        {
+                            (result.map_err(&cant_resolve)?, false, None)
+                        } else {
+                            let (path, package) = self.resolve_named_manifest_config(
+                                package,
+                                name,
+                                &specifier,
+                                &pending.external_resolution_base_path,
+                            )?;
+                            (path, true, package)
+                        }
+                    }
+                }
+            } else if is_relative_specifier(&specifier) {
+                (
+                    normalize_path(&pending.relative_resolution_base_path.join(&specifier)),
+                    false,
+                    None,
                 )
-                .map_err(cant_resolve)?,
-                false,
-            )
-        };
+            } else {
+                (
+                    resolve(
+                        &specifier,
+                        &pending.external_resolution_base_path,
+                        self.fs,
+                        &RESOLVE_OPTIONS,
+                    )
+                    .map_err(cant_resolve)?,
+                    false,
+                    None,
+                )
+            };
 
         let file_path = match self.fs.path_info(&file_path) {
             Ok(PathInfo::Symlink {
@@ -837,14 +847,16 @@ impl<'a> ConfigurationExtendsLoader<'a> {
             })
             .into());
         }
-        let package = file_path
-            .parent()
-            .and_then(|parent| self.fs.find_package_json(parent).ok())
-            .map(|(_, manifest)| ResolvedPackage {
-                name: manifest.name.map(String::from),
-                version: manifest.version.map(String::from),
-            })
-            .filter(|package| package.matches_specifier(&specifier));
+        let package = selected_package.or_else(|| {
+            file_path
+                .parent()
+                .and_then(|parent| self.fs.find_package_json(parent).ok())
+                .map(|(_, manifest)| ResolvedPackage {
+                    name: manifest.name.map(String::from),
+                    version: manifest.version.map(String::from),
+                })
+                .filter(|package| package.matches_specifier(&specifier))
+        });
 
         Ok(ResolvedExtendedConfiguration {
             reference: ConfigurationReference {
@@ -856,19 +868,32 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         })
     }
 
+    /// Resolves a named configuration exported by a package's Biome manifest.
+    ///
+    /// The returned path may point into another package when the selected package re-exports a
+    /// configuration. The accompanying package metadata always identifies the package selected by
+    /// the caller so version-conflict detection does not depend on the leaf file location.
     fn resolve_named_manifest_config(
         &self,
         package: &str,
         name: &str,
         specifier: &str,
         base_path: &Utf8Path,
-    ) -> Result<Utf8PathBuf, WorkspaceError> {
+    ) -> Result<(Utf8PathBuf, Option<ResolvedPackage>), WorkspaceError> {
         let manifest_path = self.resolve_package_biome_manifest(package, base_path)?;
+        let resolved_package = manifest_path
+            .parent()
+            .and_then(|parent| self.fs.find_package_json(parent).ok())
+            .map(|(_, manifest)| ResolvedPackage {
+                name: manifest.name.map(String::from),
+                version: manifest.version.map(String::from),
+            })
+            .filter(|resolved| resolved.matches_specifier(package));
         let manifest = BiomeManifest::load(self.fs, &manifest_path)?;
         let configs = self.collect_manifest_configs(&manifest_path, manifest.configs)?;
         Self::exported_config_key(&configs, name)
             .and_then(|key| configs.get(key))
-            .map(|config| config.path.clone())
+            .map(|config| (config.path.clone(), resolved_package))
             .ok_or_else(|| {
                 CantResolve::new(
                     Utf8PathBuf::from(specifier),
@@ -882,6 +907,15 @@ impl<'a> ConfigurationExtendsLoader<'a> {
             })
     }
 
+    /// Collects the configurations exported by a manifest and its selected package imports.
+    ///
+    /// Imports are traversed iteratively up to [`MAX_MANIFEST_IMPORT_DEPTH`]. Imported exports keep
+    /// their immediate source package in the internal key and expose their unqualified name at the
+    /// current package boundary. Active cycle edges are skipped while the active manifest continues
+    /// collecting its remaining entries.
+    ///
+    /// Returns an error for unresolved selections, duplicate public names, invalid local paths, or
+    /// imports beyond the depth limit.
     fn collect_manifest_configs(
         &self,
         manifest_path: &Utf8Path,
@@ -977,6 +1011,8 @@ impl<'a> ConfigurationExtendsLoader<'a> {
                     let imported_path =
                         self.resolve_package_biome_manifest(package, manifest_dir)?;
                     if !active_manifests.insert(imported_path.clone()) {
+                        // Skip only the cyclic edge. The active manifest continues collecting its
+                        // remaining entries in dependency-first order.
                         continue;
                     }
                     let imported = BiomeManifest::load(self.fs, &imported_path)?;
@@ -1025,6 +1061,11 @@ impl<'a> ConfigurationExtendsLoader<'a> {
         Ok(BTreeMap::new())
     }
 
+    /// Inserts a configuration after verifying both its internal key and public export name are
+    /// unique within the manifest.
+    ///
+    /// Imported configurations may have different source-qualified keys but still collide after
+    /// rebinding to the current package's public namespace.
     fn insert_named_config(
         configs: &mut BTreeMap<String, ManifestConfig>,
         manifest_path: &Utf8Path,
@@ -1119,35 +1160,64 @@ impl<'a> ConfigurationExtendsLoader<'a> {
             ResolveOptions::new().with_condition_names(&["biome", "default"]);
 
         let resolved = resolve(package, base_path, self.fs, &RESOLVE_OPTIONS);
-        if let Ok(path) = &resolved
-            && ManifestName::is_manifest_file(path)
-        {
-            return Ok(path.clone());
-        }
-
         let package_root = resolve_package_root(package, base_path, self.fs).map_err(|error| {
             CantResolve::new(Utf8PathBuf::from(package), error).with_verbose_advice(markup! {
                 "Biome tried to resolve the Biome manifest for "<Emphasis>{package}</Emphasis>"."
             })
         })?;
-        ManifestName::file_names()
+        if let Ok(path) = &resolved
+            && ManifestName::is_manifest_file(path)
+        {
+            Self::validate_package_manifest_path(self.fs, &package_root, path, package)?;
+            return Ok(path.clone());
+        }
+
+        let manifest_path = ManifestName::file_names()
             .iter()
             .map(|name| package_root.join(name))
             .find(|path| self.fs.path_is_file(path))
             .ok_or_else(|| {
                 CantResolve::new(
                     Utf8PathBuf::from(package),
-                    resolved
-                        .err()
-                        .unwrap_or(biome_resolver::ResolveError::NotFound),
+                    biome_resolver::ResolveError::NotFound,
                 )
-                .with_verbose_advice(markup! {
+                .with_message(markup! {
                     "Package "<Emphasis>{package}</Emphasis>
                     " must provide "<Emphasis>{ManifestName::biome_manifest_json()}</Emphasis>
                     " or "<Emphasis>{ManifestName::biome_manifest_jsonc()}</Emphasis>"."
                 })
-                .into()
+            })?;
+        Self::validate_package_manifest_path(self.fs, &package_root, &manifest_path, package)?;
+        Ok(manifest_path)
+    }
+
+    fn validate_package_manifest_path(
+        fs: &dyn FileSystem,
+        package_root: &Utf8Path,
+        manifest_path: &Utf8Path,
+        package: &str,
+    ) -> Result<(), WorkspaceError> {
+        let invalid_manifest = || {
+            CantResolve::new(
+                Utf8PathBuf::from(package),
+                biome_resolver::ResolveError::InvalidPackageSpecifier,
+            )
+            .with_message(markup! {
+                "The Biome manifest for "<Emphasis>{package}</Emphasis>
+                " must stay within the package directory and must not contain symbolic links."
             })
+        };
+        let relative_path = manifest_path
+            .strip_prefix(package_root)
+            .map_err(|_| invalid_manifest())?;
+        let mut candidate = package_root.to_path_buf();
+        for component in relative_path.components() {
+            candidate.push(component.as_str());
+            if fs.path_is_symlink(&candidate) {
+                return Err(invalid_manifest().into());
+            }
+        }
+        Ok(())
     }
 
     /// Reads and deserializes a resolved extended configuration.
@@ -1254,16 +1324,16 @@ impl<'a> ConfigurationExtendsLoader<'a> {
     }
 }
 
-/// A configuration waiting for its nested extended configurations to be processed.
-///
-/// The loader retains each configuration until all of its `extends` entries have been processed,
-/// then emits it after its dependencies. The root configuration participates in traversal but is
-/// not emitted as an extended configuration.
 struct ManifestConfig {
     path: Utf8PathBuf,
     export_name: String,
 }
 
+/// A configuration waiting for its nested extended configurations to be processed.
+///
+/// The loader retains each configuration until all of its `extends` entries have been processed,
+/// then emits it after its dependencies. The root configuration participates in traversal but is
+/// not emitted as an extended configuration.
 struct PendingConfiguration {
     /// The extended configuration emitted after its dependencies, or `None` for the root.
     configuration: Option<ExtendedConfiguration>,

@@ -22,19 +22,6 @@ pub fn generate_manifest_schema_as_string() -> Result<String> {
     {
         version.insert("const".into(), Value::from(1));
     }
-    for definitions in ["$defs", "definitions"] {
-        if let Some(rules) = schema
-            .get_mut(definitions)
-            .and_then(|definitions| definitions.get_mut("ManifestPlugins"))
-            .and_then(|plugins| plugins.get_mut("properties"))
-            .and_then(|properties| properties.get_mut("rules"))
-            .and_then(Value::as_object_mut)
-        {
-            rules.insert("minItems".into(), Value::from(1));
-            break;
-        }
-    }
-
     format_schema(schema)
 }
 

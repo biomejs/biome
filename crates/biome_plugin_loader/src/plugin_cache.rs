@@ -19,7 +19,11 @@ impl PluginCache {
         self.0.pin().insert(configuration.clone(), plugin);
     }
 
-    /// Returns the loaded and matched analyzer plugins, deduped
+    /// Returns analyzer plugins for the configured entries in declaration order.
+    ///
+    /// Repeated equivalent configurations are emitted once. Configurations that differ by options
+    /// remain distinct. Returns diagnostics instead of a partial result if any configured plugin is
+    /// absent from the cache.
     pub fn get_analyzer_plugins(
         &self,
         plugin_configs: &Plugins,

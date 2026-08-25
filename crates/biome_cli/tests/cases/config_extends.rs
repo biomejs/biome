@@ -6,6 +6,8 @@ use biome_formatter::LineWidth;
 use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
+#[cfg(unix)]
+use std::os::unix::fs::symlink;
 
 #[test]
 fn extends_config_ok_formatter_no_linter() {
@@ -443,6 +445,170 @@ fn extends_rebinds_imported_config_from_biome_manifest() {
         module_path!(),
         "extends_rebinds_imported_config_from_biome_manifest",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_reexported_config_rejects_package_version_conflicts() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["package-a", "package-b"] }"#,
+    );
+    for parent in ["package-a", "package-b"] {
+        fs.insert(
+            format!("node_modules/{parent}/package.json").into(),
+            format!(r#"{{ "name": "{parent}", "version": "1.0.0", "main": "biome.json" }}"#),
+        );
+        fs.insert(
+            format!("node_modules/{parent}/biome.json").into(),
+            r#"{ "extends": ["shared-config/configs/recommended"] }"#,
+        );
+    }
+    for (parent, version, line_width) in [("package-a", "1.0.0", 90), ("package-b", "2.0.0", 100)] {
+        let shared = format!("node_modules/{parent}/node_modules/shared-config");
+        fs.insert(
+            format!("{shared}/package.json").into(),
+            format!(r#"{{ "name": "shared-config", "version": "{version}" }}"#),
+        );
+        fs.insert(
+            format!("{shared}/biome-manifest.json").into(),
+            r#"{
+    "version": 1,
+    "configs": ["source-config/configs/recommended"]
+}"#,
+        );
+
+        let source = format!("{shared}/node_modules/source-config");
+        fs.insert(
+            format!("{source}/package.json").into(),
+            r#"{ "name": "source-config", "version": "1.0.0" }"#,
+        );
+        fs.insert(
+            format!("{source}/biome-manifest.json").into(),
+            r#"{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}"#,
+        );
+        fs.insert(
+            format!("{source}/recommended.json").into(),
+            format!(r#"{{ "formatter": {{ "lineWidth": {line_width} }} }}"#),
+        );
+    }
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), "const value = 1;\n");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_reexported_config_rejects_package_version_conflicts",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn extends_missing_imported_manifest_has_no_resolver_cause() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["wrapper/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/wrapper/package.json".into(),
+        r#"{ "name": "wrapper" }"#,
+    );
+    fs.insert(
+        "node_modules/wrapper/biome-manifest.json".into(),
+        r#"{
+    "version": 1,
+    "configs": ["source/configs/recommended"]
+}"#,
+    );
+    fs.insert(
+        "node_modules/source/package.json".into(),
+        r#"{ "name": "source", "main": "./index.js" }"#,
+    );
+    fs.insert("node_modules/source/index.js".into(), "export {};\n");
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), "const value = 1;\n");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_missing_imported_manifest_has_no_resolver_cause",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[cfg(unix)]
+#[test]
+fn extends_rejects_package_manifest_outside_package() {
+    let mut fs = TemporaryFs::new("extends_rejects_package_manifest_outside_package");
+
+    fs.create_file(
+        "biome.json",
+        r#"{ "extends": ["config/configs/recommended"] }"#,
+    );
+    fs.create_file(
+        "node_modules/config/package.json",
+        r#"{
+    "name": "config",
+    "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    let outside_manifest = fs.create_file(
+        "outside/biome-manifest.json",
+        r#"{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}"#,
+    );
+    fs.create_file(
+        "outside/recommended.json",
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    symlink(
+        outside_manifest,
+        fs.working_directory
+            .join("node_modules/config/biome-manifest.json"),
+    )
+    .unwrap();
+    fs.create_file("test.js", "const value = 1;\n");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", &format!("{}/test.js", fs.cli_path())].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_rejects_package_manifest_outside_package",
+        fs.create_mem(),
         console,
         result,
     ));

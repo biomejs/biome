@@ -205,6 +205,8 @@ impl BiomePlugin {
                     plugin = plugin.with_name(format!("{package_name}/{}", rule.export_name));
                 } else if let Some(name) = &rule.qualified_name {
                     plugin = plugin.with_name(name.clone());
+                } else {
+                    plugin = plugin.with_name(rule.export_name.clone());
                 }
                 Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
             })
@@ -491,13 +493,18 @@ fn resolve_package_manifest(
     if let Ok(path) = &resolved
         && ManifestName::is_manifest_file(path)
     {
+        let package_root = resolve_package_root(specifier, base_path, fs)
+            .map_err(|error| PluginDiagnostic::cant_resolve_package(specifier, base_path, error))?;
+        validate_package_manifest_path(fs, &package_root, path)?;
         return Ok(path.clone());
     }
 
     if is_package_name(specifier) {
         let package_root = resolve_package_root(specifier, base_path, fs)
             .map_err(|error| PluginDiagnostic::cant_resolve_package(specifier, base_path, error))?;
-        return find_biome_manifest(fs, &package_root);
+        let manifest_path = find_biome_manifest(fs, &package_root)?;
+        validate_package_manifest_path(fs, &package_root, &manifest_path)?;
+        return Ok(manifest_path);
     }
 
     match resolved {
@@ -514,6 +521,36 @@ fn resolve_package_manifest(
             specifier, base_path, error,
         )),
     }
+}
+
+fn validate_package_manifest_path(
+    fs: &dyn FsWithResolverProxy,
+    package_root: &Utf8Path,
+    manifest_path: &Utf8Path,
+) -> Result<(), PluginDiagnostic> {
+    let relative_path = manifest_path.strip_prefix(package_root).map_err(|_| {
+        PluginDiagnostic::invalid_manifest(
+            markup!(
+                "Biome manifest path "<Emphasis>{manifest_path.to_string()}</Emphasis>
+                " must stay within the package directory."
+            ),
+            None,
+        )
+    })?;
+    let mut candidate = package_root.to_path_buf();
+    for component in relative_path.components() {
+        candidate.push(component.as_str());
+        if fs.path_is_symlink(&candidate) {
+            return Err(PluginDiagnostic::invalid_manifest(
+                markup!(
+                    "Biome manifest path "<Emphasis>{manifest_path.to_string()}</Emphasis>
+                    " must not contain symbolic links."
+                ),
+                None,
+            ));
+        }
+    }
+    Ok(())
 }
 
 fn resolve_manifest_rule_path(
@@ -645,6 +682,8 @@ mod test {
             .expect("rule exports should not depend on file stems");
 
         assert_eq!(plugin.analyzer_plugins.len(), 2);
+        assert_eq!(plugin.analyzer_plugins[0].name(), "first");
+        assert_eq!(plugin.analyzer_plugins[1].name(), "second");
     }
 
     #[test]
