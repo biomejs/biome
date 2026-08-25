@@ -75,12 +75,10 @@ pub(crate) fn parse_inline_link(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_link_or_reference(p)
 }
 
-/// Parse image starting with `![` - dispatches to inline image or reference image.
+/// Parses an image as an inline image or a full, collapsed, or shortcut reference image.
 ///
-/// After parsing `![alt]`:
-/// - If followed by `(` → inline image `![alt](url)`
-/// - If followed by `[` → reference image `![alt][label]` or `![alt][]`
-/// - Otherwise → shortcut reference image `![alt]`
+/// `![alt](url)` produces an inline image. `![alt][label]`, `![alt][]`, and
+/// `![alt]` produce reference images.
 pub(crate) fn parse_image_or_reference(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_link_or_image(p, LinkParseKind::Image)
 }
@@ -391,15 +389,23 @@ fn abort_link_parse(
 // #endregion
 
 struct ReferenceLinkLookahead {
-    label_raw: String,
+    label_range: TextRange,
     is_shortcut: bool,
 }
 
 impl ReferenceLinkLookahead {
     fn is_defined(&self, p: &MarkdownParser) -> bool {
-        let normalized = normalize_reference_label(&self.label_raw);
+        let Some(label) = source_text_for_range(p.source().source_text(), self.label_range) else {
+            return false;
+        };
+        let normalized = normalize_reference_label(label);
         p.has_link_reference_definition(normalized.as_ref())
     }
+}
+
+#[inline]
+fn source_text_for_range(source: &str, range: TextRange) -> Option<&str> {
+    source.get(usize::from(range.start())..usize::from(range.end()))
 }
 
 fn lookahead_reference_link(p: &mut MarkdownParser) -> Option<ReferenceLinkLookahead> {
@@ -428,13 +434,7 @@ fn lookahead_reference_common(
 
         p.bump(L_BRACK);
 
-        let link_text = collect_link_text(p)?;
-
-        // Link text must be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
-        let normalized_link = normalize_reference_label(&link_text);
-        if normalized_link.is_empty() {
-            return None;
-        }
+        let link_range = collect_link_text(p)?;
 
         p.bump(R_BRACK);
 
@@ -445,30 +445,41 @@ fn lookahead_reference_common(
             return None;
         }
 
+        // Link text must be non-empty after normalization (e.g., `[\n ]` normalizes to empty)
+        if normalize_reference_label(source_text_for_range(p.source().source_text(), link_range)?)
+            .is_empty()
+        {
+            return None;
+        }
+
         if p.at(L_BRACK) {
             p.bump(L_BRACK);
-            let label_text = collect_label_text_simple(p);
-            if let Some(label_text) = label_text {
-                let label = if label_text.is_empty() {
-                    link_text.clone()
+            let label_range = collect_label_text_simple(p);
+            if let Some(label_range) = label_range {
+                let label_range = if label_range.is_empty() {
+                    link_range
                 } else {
                     // Explicit label must also normalize to non-empty
-                    let normalized_label = normalize_reference_label(&label_text);
-                    if normalized_label.is_empty() {
+                    if normalize_reference_label(source_text_for_range(
+                        p.source().source_text(),
+                        label_range,
+                    )?)
+                    .is_empty()
+                    {
                         return None;
                     }
-                    label_text
+                    label_range
                 };
                 p.bump(R_BRACK);
                 return Some(ReferenceLinkLookahead {
-                    label_raw: label,
+                    label_range,
                     is_shortcut: false,
                 });
             }
         }
 
         Some(ReferenceLinkLookahead {
-            label_raw: link_text,
+            label_range: link_range,
             is_shortcut: true,
         })
     })
@@ -483,8 +494,8 @@ fn lookahead_reference_common(
 ///
 /// We stop at the first R_BRACK token (unescaped `]`). Escaped brackets like `\]`
 /// are lexed as MD_TEXTUAL_LITERAL, not R_BRACK, so they're included in the label.
-fn collect_label_text_simple(p: &mut MarkdownParser) -> Option<String> {
-    let mut text = String::new();
+fn collect_label_text_simple(p: &mut MarkdownParser) -> Option<TextRange> {
+    let start = p.cur_range().start();
 
     loop {
         if p.at(T![EOF]) || p.at_inline_end() {
@@ -500,10 +511,9 @@ fn collect_label_text_simple(p: &mut MarkdownParser) -> Option<String> {
         // Note: Escaped brackets (`\]`) are lexed as MD_TEXTUAL_LITERAL,
         // not R_BRACK, so they're correctly included in the label text.
         if p.at(R_BRACK) {
-            return Some(text);
+            return Some(TextRange::new(start, p.cur_range().start()));
         }
 
-        text.push_str(p.cur_text());
         p.bump(p.cur());
     }
 }
@@ -511,8 +521,8 @@ fn collect_label_text_simple(p: &mut MarkdownParser) -> Option<String> {
 /// Collect text for link text (e.g., the `text` in `[text](url)` or `[text][label]`).
 /// Per CommonMark, link text CAN contain inline elements - code spans, autolinks, HTML.
 /// `]` inside these constructs does NOT close the link text.
-fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
-    let mut text = String::new();
+fn collect_link_text(p: &mut MarkdownParser) -> Option<TextRange> {
+    let start = p.cur_range().start();
     let mut bracket_depth = 0usize;
 
     loop {
@@ -529,7 +539,6 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
         // Per CommonMark, `]` inside code spans doesn't terminate link text.
         if p.at(BACKTICK) {
             let opening_count = p.cur_text().len();
-            text.push_str(p.cur_text());
             p.bump(p.cur());
 
             // Find matching closing backticks
@@ -539,12 +548,10 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
                     break; // Blank line terminates
                 }
                 if p.at(BACKTICK) && p.cur_text().len() == opening_count {
-                    text.push_str(p.cur_text());
                     p.bump(p.cur());
                     found_close = true;
                     break;
                 }
-                text.push_str(p.cur_text());
                 p.bump(p.cur());
             }
             if !found_close {
@@ -557,7 +564,6 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
         // Autolinks and inline HTML can contain `]` - skip them entirely.
         // Per CommonMark, `]` inside `<...>` constructs doesn't terminate link text.
         if p.at(L_ANGLE) {
-            text.push_str(p.cur_text());
             p.bump(p.cur());
 
             // Consume until `>` or newline
@@ -566,11 +572,9 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
                     // Newlines end autolinks/HTML tags
                     break;
                 }
-                text.push_str(p.cur_text());
                 p.bump(p.cur());
             }
             if p.at(R_ANGLE) {
-                text.push_str(p.cur_text());
                 p.bump(p.cur());
             }
             continue;
@@ -578,22 +582,19 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<String> {
 
         if p.at(L_BRACK) {
             bracket_depth += 1;
-            text.push_str(p.cur_text());
             p.bump(p.cur());
             continue;
         }
 
         if p.at(R_BRACK) {
             if bracket_depth == 0 {
-                return Some(text);
+                return Some(TextRange::new(start, p.cur_range().start()));
             }
             bracket_depth -= 1;
-            text.push_str(p.cur_text());
             p.bump(p.cur());
             continue;
         }
 
-        text.push_str(p.cur_text());
         p.bump(p.cur());
     }
 }
@@ -822,14 +823,4 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
 
         bump_textual_link_def(p);
     }
-}
-
-/// Parse inline image (`![alt](url)`).
-///
-/// Grammar: `MdInlineImage = '!' '[' alt: MdInlineItemList ']' '(' source: MdInlineItemList ')'`
-///
-/// Note: This is kept for backwards compatibility but `parse_image_or_reference`
-/// is the preferred entry point for image parsing.
-pub(crate) fn parse_inline_image(p: &mut MarkdownParser) -> ParsedSyntax {
-    parse_image_or_reference(p)
 }
