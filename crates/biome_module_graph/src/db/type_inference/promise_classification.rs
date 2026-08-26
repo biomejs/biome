@@ -25,7 +25,6 @@ use crate::db::queries::{
 use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
-use biome_js_syntax::{AnyJsClass, AnyJsClassMember};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
     TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
@@ -33,7 +32,7 @@ use biome_js_type_info::{
         ReturnType, TypeData as InferredTypeData, TypeSubstitution, TypeTransformResult,
     },
 };
-use biome_rowan::{AstNode, Text, TextRange};
+use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
 const MAX_PROMISE_CLASSIFICATION_STATES: usize = 1024;
@@ -61,40 +60,14 @@ enum MemberLookupMode {
     /// Selects instance members when the target is a class.
     Instance,
     /// Selects a constructed instance after consuming its value-side members.
-    Constructed {
-        remaining: usize,
-        binding_range: Option<TextRange>,
-    },
+    Constructed { remaining: usize },
 }
 
 impl MemberLookupMode {
     fn prepend_constructed_members(self, count: usize) -> Self {
         match self {
-            Self::Constructed { remaining, .. } => Self::Constructed {
+            Self::Constructed { remaining } => Self::Constructed {
                 remaining: remaining.saturating_add(count),
-                binding_range: None,
-            },
-            mode @ (Self::Value | Self::Instance) => mode,
-        }
-    }
-
-    fn with_class_binding(self, binding_range: TextRange) -> Self {
-        match self {
-            Self::Constructed { remaining: 0, .. } => Self::Constructed {
-                remaining: 0,
-                binding_range: Some(binding_range),
-            },
-            mode @ (Self::Value | Self::Instance | Self::Constructed { remaining: 1.., .. }) => {
-                mode
-            }
-        }
-    }
-
-    fn without_class_binding(self) -> Self {
-        match self {
-            Self::Constructed { remaining, .. } => Self::Constructed {
-                remaining,
-                binding_range: None,
             },
             mode @ (Self::Value | Self::Instance) => mode,
         }
@@ -102,20 +75,18 @@ impl MemberLookupMode {
 
     fn after_member(self) -> Self {
         match self {
-            Self::Value | Self::Instance | Self::Constructed { remaining: 0, .. } => Self::Value,
-            Self::Constructed { remaining, .. } => Self::Constructed {
+            Self::Value | Self::Instance | Self::Constructed { remaining: 0 } => Self::Value,
+            Self::Constructed { remaining } => Self::Constructed {
                 remaining: remaining - 1,
-                binding_range: None,
             },
         }
     }
 
     fn after_namespace_member(self) -> Option<Self> {
         match self {
-            Self::Constructed { remaining: 0, .. } => None,
-            Self::Constructed { remaining, .. } => Some(Self::Constructed {
+            Self::Constructed { remaining: 0 } => None,
+            Self::Constructed { remaining } => Some(Self::Constructed {
                 remaining: remaining - 1,
-                binding_range: None,
             }),
             mode @ (Self::Value | Self::Instance) => Some(mode),
         }
@@ -381,7 +352,7 @@ fn classify_expression(
                                         resolved_path: import.resolved_path.clone(),
                                         symbol: import.symbol.clone(),
                                     },
-                                    mode: mode.without_class_binding(),
+                                    mode,
                                     members: members.clone(),
                                     projection: state.projection,
                                 };
@@ -394,7 +365,7 @@ fn classify_expression(
                             break ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(reference.clone()),
-                                mode: mode.with_class_binding(binding_range),
+                                mode,
                                 members: members.clone(),
                                 projection: state.projection,
                             };
@@ -499,7 +470,7 @@ fn classify_expression(
                         resolved_path: import.resolved_path.clone(),
                         symbol: import.symbol.clone(),
                     },
-                    mode: state.mode.without_class_binding(),
+                    mode: state.mode,
                     members: state.members,
                     projection: state.projection,
                 },
@@ -511,24 +482,23 @@ fn classify_expression(
                 let Some(raw) = js_info.raw_types.get(type_id.index()) else {
                     return Indeterminate;
                 };
-                if matches!(
-                    state.mode,
-                    MemberLookupMode::Constructed { remaining: 0, .. }
-                ) && !(matches!(
-                    raw,
-                    RawTypeData::Class(_)
-                        | RawTypeData::Reference(_)
-                        | RawTypeData::TypeofType(_)
-                        | RawTypeData::TypeofValue(_)
-                ) || matches!(
-                    raw,
-                    RawTypeData::TypeofExpression(expression)
-                        if matches!(
-                            expression.as_ref(),
-                            TypeofExpression::StaticMember(_)
-                                | TypeofExpression::OptionalChainStaticMember(_)
-                        )
-                )) {
+                if matches!(state.mode, MemberLookupMode::Constructed { remaining: 0 })
+                    && !(matches!(
+                        raw,
+                        RawTypeData::Class(_)
+                            | RawTypeData::Reference(_)
+                            | RawTypeData::TypeofType(_)
+                            | RawTypeData::TypeofValue(_)
+                    ) || matches!(
+                        raw,
+                        RawTypeData::TypeofExpression(expression)
+                            if matches!(
+                                expression.as_ref(),
+                                TypeofExpression::StaticMember(_)
+                                    | TypeofExpression::OptionalChainStaticMember(_)
+                            )
+                    ))
+                {
                     return Indeterminate;
                 }
 
@@ -740,10 +710,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(expression.callee.clone()),
-                                mode: MemberLookupMode::Constructed {
-                                    remaining: 0,
-                                    binding_range: None,
-                                },
+                                mode: MemberLookupMode::Constructed { remaining: 0 },
                                 members: state.members,
                                 projection: state.projection,
                             }
@@ -858,10 +825,8 @@ fn classify_expression(
                         if matches!(state.projection, Projection::PromiseTarget) {
                             return DoesNotReturnPromise;
                         }
-                        if matches!(
-                            state.mode,
-                            MemberLookupMode::Constructed { remaining: 0, .. }
-                        ) && !class.type_parameters.is_empty()
+                        if matches!(state.mode, MemberLookupMode::Constructed { remaining: 0 })
+                            && !class.type_parameters.is_empty()
                         {
                             return Indeterminate;
                         }
@@ -874,36 +839,6 @@ fn classify_expression(
                         };
                         if member.is_getter() {
                             return Indeterminate;
-                        }
-                        if let MemberLookupMode::Constructed {
-                            remaining: 0,
-                            binding_range,
-                        } = state.mode
-                        {
-                            if class
-                                .members
-                                .iter()
-                                .filter(|candidate| {
-                                    candidate.has_name(name.text())
-                                        && candidate.is_static() == member.is_static()
-                                })
-                                .nth(1)
-                                .is_some()
-                            {
-                                return Indeterminate;
-                            }
-                            let Some(binding_range) = binding_range else {
-                                return Indeterminate;
-                            };
-                            let Some(false) = class_member_has_overload_signature(
-                                &js_info,
-                                type_id,
-                                binding_range,
-                                name,
-                                member.is_static(),
-                            ) else {
-                                return Indeterminate;
-                            };
                         }
                         ClassificationState {
                             module: state.module,
@@ -1153,7 +1088,7 @@ fn classify_expression(
                         ClassificationState {
                             module,
                             target: ClassificationTarget::Reference(reference.clone()),
-                            mode: state.mode.with_class_binding(*range),
+                            mode: state.mode,
                             members: state.members,
                             projection: state.projection,
                         }
@@ -1163,7 +1098,7 @@ fn classify_expression(
                         target: ClassificationTarget::Reference(TypeReference::Resolved(
                             RawTypeId::Local(*resolved),
                         )),
-                        mode: state.mode.without_class_binding(),
+                        mode: state.mode,
                         members: state.members,
                         projection: state.projection,
                     },
@@ -1173,7 +1108,7 @@ fn classify_expression(
                             resolved_path: reexport.import.resolved_path.clone(),
                             symbol: reexport.import.symbol.clone(),
                         },
-                        mode: state.mode.without_class_binding(),
+                        mode: state.mode,
                         members: state.members,
                         projection: state.projection,
                     },
@@ -1197,52 +1132,14 @@ fn find_own_member<'a>(
     members.iter().find(|member| {
         member.has_name(name.text())
             && mode.is_none_or(|mode| match mode {
-                MemberLookupMode::Value | MemberLookupMode::Constructed { remaining: 1.., .. } => {
+                MemberLookupMode::Value | MemberLookupMode::Constructed { remaining: 1.. } => {
                     member.is_static()
                 }
-                MemberLookupMode::Instance | MemberLookupMode::Constructed { remaining: 0, .. } => {
+                MemberLookupMode::Instance | MemberLookupMode::Constructed { remaining: 0 } => {
                     !member.is_static()
                 }
             })
     })
-}
-
-fn class_member_has_overload_signature(
-    js_info: &JsModuleInfo,
-    type_id: TypeId,
-    binding_range: TextRange,
-    name: &Text,
-    is_static: bool,
-) -> Option<bool> {
-    let binding = js_info.semantic_model.as_binding_by_range(binding_range)?;
-    let TypeReference::Resolved(resolved) = js_info.raw_binding_types.get(&binding_range)? else {
-        return None;
-    };
-    if resolved.level() != TypeResolverLevel::Thin || resolved.id().index() != type_id.index() {
-        return None;
-    }
-    let class = binding
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .find_map(AnyJsClass::cast)?;
-
-    for candidate in class.members() {
-        let AnyJsClassMember::TsMethodSignatureClassMember(signature) = &candidate else {
-            continue;
-        };
-        let signature_is_static = signature
-            .modifiers()
-            .into_iter()
-            .any(|modifier| modifier.as_js_static_modifier().is_some());
-        let candidate_name = signature.name().ok()?;
-        if signature_is_static == is_static
-            && candidate_name.class_member_name_matches(name.text())?
-        {
-            return Some(true);
-        }
-    }
-    Some(false)
 }
 
 fn sole_call_signature(members: &[TypeMember]) -> Result<Option<&TypeMember>, ()> {
