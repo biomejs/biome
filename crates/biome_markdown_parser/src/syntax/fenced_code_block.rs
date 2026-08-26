@@ -139,7 +139,9 @@ pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
         return false;
     }
     let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
-    let rest = &p.source_after_current()[indent.byte_count..];
+    let Some(rest) = p.source_after_current().get(indent.byte_count..) else {
+        return false;
+    };
     let Some((fence_char, fence_len)) = detect_fence(rest) else {
         return false;
     };

@@ -428,7 +428,7 @@ pub(crate) struct MarkdownParser<'source> {
     unresolved_reference_lookup_count: Cell<usize>,
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Default)]
 pub(crate) struct LineIndent {
     pub(crate) token_count: usize,
     pub(crate) byte_count: usize,

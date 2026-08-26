@@ -59,8 +59,8 @@ use inline::EmphasisContext;
 use link_block::{at_link_block_start, parse_link_block};
 use list::{
     at_bullet_list_item, at_order_list_item, at_sibling_list_marker,
-    marker_followed_by_whitespace_or_eol, marker_followed_by_whitespace_or_eol_at,
-    parse_bullet_list_item, parse_order_list_item, textual_starts_with_ordered_marker,
+    marker_followed_by_whitespace_or_eol, parse_bullet_list_item, parse_order_list_item,
+    textual_starts_with_ordered_marker,
 };
 use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
@@ -1170,6 +1170,9 @@ fn break_for_setext_after_inline_newline(
     if real_indent < required_indent {
         return false;
     }
+    if !source_line_is_setext_underline(p) {
+        return false;
+    }
 
     let indent = p.peek_line_indent(required_indent);
     let is_setext = at_setext_underline_after_indent(p, indent.token_count).is_some();
@@ -1199,15 +1202,21 @@ fn break_for_list_interrupt_after_inline_newline(
     }
 
     // Line sits at sibling/parent level. A list marker here ends the
-    // current paragraph (CommonMark §5.2). Tabs need the broad token-aware
-    // lookahead because `MD_TEXTUAL_LITERAL` can absorb the tab and any
-    // following marker; the non-tab path only needs to cover non-1 ordered
-    // siblings continuing an existing list.
+    // current paragraph (CommonMark §5.2). The tab path checks every marker
+    // kind because `MD_TEXTUAL_LITERAL` can absorb the tab and marker; the
+    // non-tab path only needs to cover non-1 ordered siblings.
     if indent < required_indent {
         if line_start_indent_contains_tab(p) {
-            return line_starts_with_list_marker_after_indent(p, indent);
+            return line_starts_with_list_marker_after_indent(p);
         }
-        return line_starts_with_nonone_ordered_marker_after_indent(p, indent);
+        return line_starts_with_nonone_ordered_marker_after_indent(p);
+    }
+
+    if indent <= required_indent.saturating_add(MAX_BLOCK_PREFIX_INDENT)
+        && (source_line_starts_with_bullet_marker(p)
+            || source_line_starts_with_nonempty_one_ordered_marker(p))
+    {
+        return true;
     }
 
     let skip = p.peek_line_indent(indent.min(required_indent)).token_count;
@@ -1234,70 +1243,69 @@ fn line_start_indent_contains_tab(p: &MarkdownParser) -> bool {
             .any(|c| c == '\t')
 }
 
-/// Lookahead: after skipping `indent` columns of leading whitespace, does
-/// the next token begin a non-1 ordered marker followed by whitespace/EOL?
+/// After leading whitespace, does the line begin a non-1 ordered marker
+/// followed by whitespace or EOL?
 /// Covers `parse_inline_item_list`'s blind spot (`textual_looks_like_list_marker`
 /// only matches `1.`/`1)` for ordered); `1.`/`1)` and bullets are left to the
 /// inline loop.
-fn line_starts_with_nonone_ordered_marker_after_indent(
-    p: &mut MarkdownParser,
-    indent: usize,
-) -> bool {
-    let n = p.peek_line_indent(indent).token_count;
-    if p.nth_at(n, MD_ORDERED_LIST_MARKER) {
-        if p.nth_text(n)
-            .is_some_and(|text| text == "1." || text == "1)")
-        {
-            return false;
-        }
-        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
-    }
-    if p.nth_at(n, MD_TEXTUAL_LITERAL)
-        && let Some(text) = p.nth_text(n)
-    {
-        if text
+fn line_starts_with_nonone_ordered_marker_after_indent(p: &MarkdownParser) -> bool {
+    let source = source_after_indent(p);
+    textual_starts_with_ordered_marker(source)
+        && !source
             .strip_prefix("1.")
-            .or_else(|| text.strip_prefix("1)"))
-            .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\n', '\r']))
-        {
-            return false;
-        }
-        return textual_starts_with_ordered_marker(text);
-    }
-    false
+            .or_else(|| source.strip_prefix("1)"))
+            .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t']))
 }
 
-/// Lookahead: after skipping `indent` columns of leading whitespace, is the next
-/// token a list marker (`-`, `*`, `+`, ordered) followed by whitespace or EOL?
-/// Handles raw marker tokens and markers still folded into `MD_TEXTUAL_LITERAL`
-/// / `MD_SETEXT_UNDERLINE_LITERAL`.
-fn line_starts_with_list_marker_after_indent(p: &mut MarkdownParser, indent: usize) -> bool {
-    let n = p.peek_line_indent(indent).token_count;
-    if p.nth_at(n, T![-]) || p.nth_at(n, T![*]) || p.nth_at(n, T![+]) {
-        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
-    }
-    if p.nth_at(n, MD_SETEXT_UNDERLINE_LITERAL) {
-        if !p
-            .nth_text(n)
-            .is_some_and(|text| text.trim_matches(|c| c == ' ' || c == '\t') == "-")
-        {
-            return false;
+/// After leading whitespace, does the line begin a list marker followed by
+/// whitespace or EOL?
+fn line_starts_with_list_marker_after_indent(p: &MarkdownParser) -> bool {
+    source_line_starts_with_bullet_marker(p)
+        || textual_starts_with_ordered_marker(source_after_indent(p))
+}
+
+fn source_after_indent<'a>(p: &'a MarkdownParser<'_>) -> &'a str {
+    p.source_after_current().trim_start_matches([' ', '\t'])
+}
+
+fn source_line_starts_with_bullet_marker(p: &MarkdownParser) -> bool {
+    let source = source_after_indent(p);
+    matches!(source.as_bytes().first(), Some(b'-' | b'*' | b'+'))
+        && source
+            .as_bytes()
+            .get(1)
+            .is_none_or(|byte| matches!(byte, b' ' | b'\t' | b'\r' | b'\n'))
+}
+
+fn source_line_starts_with_nonempty_one_ordered_marker(p: &MarkdownParser) -> bool {
+    let source = source_after_indent(p);
+    source
+        .strip_prefix("1.")
+        .or_else(|| source.strip_prefix("1)"))
+        .is_some_and(|rest| {
+            rest.starts_with([' ', '\t'])
+                && rest
+                    .bytes()
+                    .find(|byte| !matches!(byte, b' ' | b'\t'))
+                    .is_some_and(|byte| !matches!(byte, b'\r' | b'\n'))
+        })
+}
+
+fn source_line_is_setext_underline(p: &MarkdownParser) -> bool {
+    let source = source_after_indent(p);
+    let Some(marker @ (b'=' | b'-')) = source.as_bytes().first() else {
+        return false;
+    };
+    let mut trailing_whitespace = false;
+    for byte in source.as_bytes().iter().skip(1) {
+        match byte {
+            b'\r' | b'\n' => break,
+            b' ' | b'\t' => trailing_whitespace = true,
+            _ if byte == marker && !trailing_whitespace => {}
+            _ => return false,
         }
-        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
     }
-    if p.nth_at(n, MD_ORDERED_LIST_MARKER) {
-        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
-    }
-    if p.nth_at(n, MD_TEXTUAL_LITERAL)
-        && let Some(text) = p.nth_text(n)
-    {
-        return if matches!(text, "-" | "*" | "+") {
-            marker_followed_by_whitespace_or_eol_at(p, n + 1)
-        } else {
-            textual_starts_with_ordered_marker(text)
-        };
-    }
-    false
+    true
 }
 
 /// Per CommonMark §5.2, list-item continuations emit their required indent
@@ -1780,7 +1788,9 @@ fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
         return false;
     }
     let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
-    let rest = &p.source_after_current()[indent.byte_count..];
+    let Some(rest) = p.source_after_current().get(indent.byte_count..) else {
+        return false;
+    };
     let Some((fence_char, fence_len)) = fenced_code_block::detect_fence(rest) else {
         return false;
     };
