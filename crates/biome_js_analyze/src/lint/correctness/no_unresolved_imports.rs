@@ -120,6 +120,12 @@ impl Rule for NoUnresolvedImports {
                     return Vec::new();
                 }
 
+                // Bun built-ins (e.g. `bun:test`, `bun:ffi`) are also valid
+                // imports that cannot be resolved to a file path.
+                if specifier.text().starts_with("bun:") {
+                    return Vec::new();
+                }
+
                 if Utf8Path::new(&specifier)
                     .extension()
                     .is_some_and(|extension| !SUPPORTED_EXTENSIONS.contains(&extension))
