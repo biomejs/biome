@@ -562,10 +562,16 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
         folders.into_iter().map(Utf8Path::to_path_buf).collect()
     };
 
+    // Tracks paths already scheduled for indexing so densely-linked module
+    // graphs (e.g. GraphQL schemas or barrel files) are not re-opened once per
+    // incoming dependency edge, which would blow up combinatorially.
+    let visited: HashSet<Utf8PathBuf> = HashSet::default();
+
     rayon::scope(|s| {
         fn index_dependency<'a, W: WorkspaceScannerBridge>(
             s: &Scope<'a>,
             ctx: &'a ScanContext<'a, W>,
+            visited: &'a HashSet<Utf8PathBuf>,
             dependency_path: Utf8PathBuf,
         ) {
             let dependencies = open_file(ctx, BiomePath::new(dependency_path), ctx.trigger);
@@ -585,8 +591,8 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                         None,
                     )
                     .unwrap_or(true);
-                if !is_ignored {
-                    s.spawn(move |s| index_dependency(s, ctx, dependency_path));
+                if !is_ignored && visited.pin().insert(dependency_path.clone()) {
+                    s.spawn(move |s| index_dependency(s, ctx, visited, dependency_path));
                 }
             }
         }
@@ -602,8 +608,8 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                     None,
                 )
                 .unwrap_or(true);
-            if !is_ignored {
-                s.spawn(|s| index_dependency(s, ctx, dependency_path));
+            if !is_ignored && visited.pin().insert(dependency_path.clone()) {
+                s.spawn(|s| index_dependency(s, ctx, &visited, dependency_path));
             }
         }
     });
