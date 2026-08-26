@@ -212,7 +212,7 @@ impl JsEmbeddingKind {
             }
         )
     }
-    /// Astro's HTML-flavored leniencies stop at the template; frontmatter is strict TSX.
+    /// Astro's HTML-flavored leniencies stop at the template; frontmatter is plain TypeScript, without JSX.
     pub const fn is_astro_template(&self) -> bool {
         matches!(
             self,
