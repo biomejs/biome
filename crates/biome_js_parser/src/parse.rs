@@ -627,7 +627,7 @@ mod astro_frontmatter {
         JsFileSource::ts().with_embedding_kind(FRONTMATTER)
     }
 
-    /// Frontmatter is plain TS; only a JSX variant can observe the template gate.
+    /// A JSX variant must not re-enable JSX inside frontmatter, which is plain TS.
     fn jsx_frontmatter_source() -> JsFileSource {
         JsFileSource::tsx().with_embedding_kind(FRONTMATTER)
     }
@@ -639,14 +639,12 @@ mod astro_frontmatter {
 
     #[test]
     fn frontmatter_allows_type_assertions() {
-        let parse = parse(
-            "const a = <string>x;",
-            frontmatter_source(),
-            JsParserOptions::default(),
-        );
-        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
-        let tree = format!("{:#?}", parse.syntax());
-        assert!(tree.contains("TS_TYPE_ASSERTION_EXPRESSION"), "{tree}");
+        for source in [frontmatter_source(), jsx_frontmatter_source()] {
+            let parse = parse("const a = <string>x;", source, JsParserOptions::default());
+            assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+            let tree = format!("{:#?}", parse.syntax());
+            assert!(tree.contains("TS_TYPE_ASSERTION_EXPRESSION"), "{tree}");
+        }
     }
 
     #[test]
@@ -665,15 +663,8 @@ mod astro_frontmatter {
     }
 
     #[test]
-    fn script_children_stay_an_expression_child() {
-        let parse = parse(
-            "const el = <script>{code}</script>; const code = 1;",
-            jsx_frontmatter_source(),
-            JsParserOptions::default(),
-        );
-        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
-        let tree = format!("{:#?}", parse.syntax());
-        assert!(tree.contains("JSX_EXPRESSION_CHILD"), "{tree}");
-        assert!(!tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+    fn jsx_elements_are_rejected() {
+        assert_errors("const el = <script>{code}</script>; const code = 1;");
+        assert_errors("const el = <div>hi</div>;");
     }
 }
