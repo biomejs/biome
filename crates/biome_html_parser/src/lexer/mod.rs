@@ -2021,9 +2021,27 @@ enum JsContext {
     JsxTag {
         /// Whether the tag opened with `</`, which never has children.
         closing: bool,
+        /// The offset of the tag name, just past the `<` or `</`.
+        name_start: usize,
+        /// Whether the scan is inside an unquoted attribute value, where a `/`
+        /// is part of the value.
+        in_unquoted_value: bool,
     },
+    /// A type argument list on a JSX tag, between `<` and its `>`.
+    TypeArguments,
     /// The children of a JSX element, where quotes and braces are text.
     JsxChildren,
+}
+
+impl JsContext {
+    /// A tag whose name starts at `name_start`, before any attribute is seen.
+    const fn jsx_tag(closing: bool, name_start: usize) -> Self {
+        Self::JsxTag {
+            closing,
+            name_start,
+            in_unquoted_value: false,
+        }
+    }
 }
 
 /// The delimiter a [`JsScanner`] run stops at.
@@ -2086,6 +2104,15 @@ impl JsScanner {
         scanner.run(source, stop)
     }
 
+    fn set_in_unquoted_value(&mut self, value: bool) {
+        if let Some(JsContext::JsxTag {
+            in_unquoted_value, ..
+        }) = self.stack.last_mut()
+        {
+            *in_unquoted_value = value;
+        }
+    }
+
     fn run(&mut self, source: &[u8], stop: JsScanStop) -> usize {
         let mut position = 0;
 
@@ -2122,7 +2149,7 @@ impl JsScanner {
                     }
                     b'<' if self.jsx && jsx_element_starts(source, position) => {
                         self.entered_jsx = true;
-                        self.stack.push(JsContext::JsxTag { closing: false });
+                        self.stack.push(JsContext::jsx_tag(false, position + 1));
                         position += 1;
                     }
                     _ => position += 1,
@@ -2141,21 +2168,64 @@ impl JsScanner {
                     _ => position += 1,
                 },
 
-                Some(JsContext::JsxTag { closing }) => match byte {
+                Some(JsContext::JsxTag {
+                    closing,
+                    name_start,
+                    in_unquoted_value,
+                }) => match byte {
                     b'"' | b'\'' => position = skip_string(source, position + 1, byte),
+                    b'`' => {
+                        self.stack.push(JsContext::Template);
+                        position += 1;
+                    }
                     b'{' => {
                         self.stack.push(JsContext::Code(b'}'));
                         position += 1;
                     }
+                    b'=' => {
+                        let next = source.get(position + 1).copied();
+                        self.set_in_unquoted_value(starts_unquoted_value(next));
+                        position += 1;
+                    }
                     b'>' => {
                         self.stack.pop();
-                        if !closing && previous_non_whitespace(&source[..position]) != Some(b'/') {
+                        let self_closing = !in_unquoted_value
+                            && previous_non_whitespace(&source[..position]) == Some(b'/');
+                        if !closing
+                            && !self_closing
+                            && !is_void_element(tag_name(source, name_start))
+                        {
                             self.stack.push(JsContext::JsxChildren);
                         }
                         position += 1;
                     }
-                    // Neither byte fits in a JSX tag, so this was a type argument list.
-                    b',' | b'<' => {
+                    // A `,` cannot appear in a JSX tag, so this was a type parameter list.
+                    b',' => {
+                        self.stack.pop();
+                        position += 1;
+                    }
+                    b'<' => {
+                        self.stack.push(JsContext::TypeArguments);
+                        position += 1;
+                    }
+                    _ if in_unquoted_value && byte.is_ascii_whitespace() => {
+                        self.set_in_unquoted_value(false);
+                        position += 1;
+                    }
+                    _ => position += 1,
+                },
+
+                Some(JsContext::TypeArguments) => match byte {
+                    b'"' | b'\'' => position = skip_string(source, position + 1, byte),
+                    b'`' => {
+                        self.stack.push(JsContext::Template);
+                        position += 1;
+                    }
+                    b'<' => {
+                        self.stack.push(JsContext::TypeArguments);
+                        position += 1;
+                    }
+                    b'>' => {
                         self.stack.pop();
                         position += 1;
                     }
@@ -2170,11 +2240,11 @@ impl JsScanner {
                     b'<' => match source.get(position + 1) {
                         Some(b'/') => {
                             self.stack.pop();
-                            self.stack.push(JsContext::JsxTag { closing: true });
+                            self.stack.push(JsContext::jsx_tag(true, position + 2));
                             position += 2;
                         }
                         Some(&next) if starts_tag_name(next) => {
-                            self.stack.push(JsContext::JsxTag { closing: false });
+                            self.stack.push(JsContext::jsx_tag(false, position + 1));
                             position += 1;
                         }
                         _ => position += 1,
@@ -2278,6 +2348,48 @@ fn jsx_element_starts(source: &[u8], position: usize) -> bool {
 /// a fragment.
 fn starts_tag_name(byte: u8) -> bool {
     byte == b'>' || byte == b'_' || byte.is_ascii_alphabetic()
+}
+
+/// Returns the tag name starting at `position`, which is empty for a fragment.
+fn tag_name(source: &[u8], position: usize) -> &[u8] {
+    let name = source.get(position..).unwrap_or_default();
+    let length = name
+        .iter()
+        .position(|byte| !is_tag_name_byte(*byte))
+        .unwrap_or(name.len());
+
+    &name[..length]
+}
+
+/// Returns whether `name` is an HTML [void element](https://html.spec.whatwg.org/#void-elements),
+/// which never has children. Astro matches the spec names case-sensitively, so
+/// `<BR>` is a component rather than a line break.
+fn is_void_element(name: &[u8]) -> bool {
+    matches!(
+        name,
+        b"area"
+            | b"base"
+            | b"br"
+            | b"col"
+            | b"embed"
+            | b"hr"
+            | b"img"
+            | b"input"
+            | b"link"
+            | b"meta"
+            | b"param"
+            | b"source"
+            | b"track"
+            | b"wbr"
+    )
+}
+
+/// Returns whether `byte`, the one right after an `=` in a tag, opens an
+/// unquoted attribute value.
+fn starts_unquoted_value(byte: Option<u8>) -> bool {
+    byte.is_some_and(|byte| {
+        !matches!(byte, b'"' | b'\'' | b'`' | b'{') && !byte.is_ascii_whitespace()
+    })
 }
 
 /// Returns whether the code scanned so far ends where an expression may start.
@@ -2473,6 +2585,47 @@ mod js_scanner {
     #[test]
     fn a_self_closing_element_ends_the_expression() {
         let source = "<Icon />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_void_element_has_no_children() {
+        let source = "cond && <span>It's<br>ok</span>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "open && <label><input type=\"text\">don't</label>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    /// Astro matches the void element names case-sensitively.
+    #[test]
+    fn an_uppercase_void_name_is_a_component() {
+        let source = "x && <BR>it's</BR>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_slash_in_an_unquoted_value_does_not_close_the_tag() {
+        let source = "x && <div a=4/>it's</div>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_slash_after_an_unquoted_value_closes_the_tag() {
+        let source = "x && <div a=4 />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_template_attribute_value_may_contain_an_angle_bracket() {
+        let source = "x && <C a=`b > c` />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn type_arguments_do_not_end_a_tag() {
+        let source = "x && <List<string>>it's</List>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "x && <Table<Map<string, number>>>it's</Table>}";
         assert_eq!(expression(source), Some(source.len() - 1));
     }
 
