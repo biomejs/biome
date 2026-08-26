@@ -2225,6 +2225,8 @@ impl JsScanner {
                         self.stack.push(JsContext::TypeArguments);
                         position += 1;
                     }
+                    // The `>` of a function type's arrow does not close the list.
+                    b'=' if source.get(position + 1) == Some(&b'>') => position += 2,
                     b'>' => {
                         self.stack.pop();
                         position += 1;
@@ -2626,6 +2628,14 @@ mod js_scanner {
         let source = "x && <List<string>>it's</List>}";
         assert_eq!(expression(source), Some(source.len() - 1));
         let source = "x && <Table<Map<string, number>>>it's</Table>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_function_type_argument_does_not_end_the_list() {
+        let source = "x && <C<(x: A) => B>>don't</C>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "x && <C<() => B> />}";
         assert_eq!(expression(source), Some(source.len() - 1));
     }
 
