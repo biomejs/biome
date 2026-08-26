@@ -11,7 +11,7 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use std::ops::Range;
 use std::rc::Rc;
 
-use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
+use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
 use crate::syntax::TAB_STOP_SPACES;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
@@ -428,6 +428,12 @@ pub(crate) struct MarkdownParser<'source> {
     unresolved_reference_lookup_count: Cell<usize>,
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+pub(crate) struct LineIndent {
+    pub(crate) token_count: usize,
+    pub(crate) byte_count: usize,
+}
+
 impl<'source> MarkdownParser<'source> {
     pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
@@ -806,7 +812,7 @@ impl<'source> MarkdownParser<'source> {
     ///
     /// Uses position-based check rather than trivia_len, so it works correctly
     /// when NEWLINE becomes an explicit token (not trivia).
-    pub fn at_start_of_input(&self) -> bool {
+    pub fn is_at_start_of_input(&self) -> bool {
         self.source.at_start_of_input()
     }
 
@@ -818,8 +824,9 @@ impl<'source> MarkdownParser<'source> {
     ///
     /// Used for detecting block-level constructs that must start at line beginning
     /// (e.g., headers, list items, thematic breaks).
-    pub fn at_line_start(&self) -> bool {
-        self.at_start_of_input()
+    #[inline]
+    pub fn is_at_line_start(&self) -> bool {
+        self.is_at_start_of_input()
             || self.has_preceding_line_break()
             || self.source.at_line_start_with_whitespace()
             || self.state.virtual_line_start == Some(self.cur_range().start())
@@ -831,11 +838,9 @@ impl<'source> MarkdownParser<'source> {
 
     /// Emit an MdIndentTokenList for optional block prefix indentation at line start.
     ///
-    /// Like `skip_line_indent()` but emits real CST nodes (`MdIndentToken` /
-    /// `MdIndentTokenList`) instead of skipped trivia. Use this for non-lookahead,
-    /// non-error-recovery paths where the indent tokens should be visible in the tree.
+    /// Emits real CST nodes (`MdIndentToken` / `MdIndentTokenList`) for indentation.
     pub fn emit_line_indent(&mut self, max_indent: usize) -> bool {
-        if !self.at_line_start() {
+        if !self.is_at_line_start() {
             let list_m = self.start();
             list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
             return false;
@@ -853,7 +858,7 @@ impl<'source> MarkdownParser<'source> {
     /// is already a valid child (via `AnyMdInline`). Unlike `emit_line_indent()`,
     /// this does NOT wrap tokens in an `MdIndentTokenList`.
     pub fn emit_indent_tokens(&mut self, max_indent: usize) -> bool {
-        if !self.at_line_start() {
+        if !self.is_at_line_start() {
             return false;
         }
 
@@ -903,41 +908,57 @@ impl<'source> MarkdownParser<'source> {
         true
     }
 
-    /// Consume optional indentation whitespace at line start, up to `max_indent`
-    /// columns. Each whitespace token is consumed as `Whitespace` trivia
-    /// (attached to the next real token).
-    ///
-    /// This avoids producing `Skipped` trivia, which should be reserved for
-    /// error-recovery paths.
-    pub fn skip_line_indent(&mut self, max_indent: usize) -> bool {
-        if !self.at_line_start() {
-            return false;
+    /// Returns the indentation tokens at the current line start that fit within
+    /// `max_indent` columns without consuming them.
+    pub(crate) fn peek_line_indent(&mut self, max_indent: usize) -> LineIndent {
+        if !self.is_at_line_start() {
+            return LineIndent::default();
         }
 
-        let mut consumed = 0usize;
-        let mut did_skip = false;
+        let mut indent = LineIndent::default();
+        let mut consumed_columns = 0usize;
 
-        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
-            let text = self.cur_text();
-            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+        while self
+            .nth_at::<MarkdownLexer>(indent.token_count, MarkdownSyntaxKind::MD_TEXTUAL_LITERAL)
+        {
+            let Some(text) = self.nth_text(indent.token_count) else {
+                break;
+            };
+            if text.is_empty()
+                || text
+                    .as_bytes()
+                    .iter()
+                    .any(|byte| !matches!(byte, b' ' | b'\t'))
+            {
                 break;
             }
 
-            let indent = text
-                .chars()
-                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+            let columns = text
+                .as_bytes()
+                .iter()
+                .map(|byte| if *byte == b'\t' { TAB_STOP_SPACES } else { 1 })
                 .sum::<usize>();
 
-            if consumed + indent > max_indent {
+            if consumed_columns + columns > max_indent {
                 break;
             }
 
-            consumed += indent;
-            did_skip = true;
+            indent.token_count += 1;
+            indent.byte_count += text.len();
+            consumed_columns += columns;
+        }
+
+        indent
+    }
+
+    /// Consumes optional indentation at line start as whitespace trivia.
+    pub(crate) fn consume_line_indent_as_whitespace_trivia(&mut self, max_indent: usize) -> bool {
+        let indent = self.peek_line_indent(max_indent);
+        for _ in 0..indent.token_count {
             self.consume_as_whitespace_trivia();
         }
 
-        did_skip
+        indent.token_count > 0
     }
 
     /// Consume the current token as `Whitespace` trivia (not `Skipped`).

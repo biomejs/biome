@@ -43,13 +43,11 @@ const MAX_HEADER_HASHES: usize = 6;
 /// Check if we might be at an ATX header.
 /// We only check if the current token is a HASH - full validation happens in parse_header.
 pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if !p.at_line_start() && !p.at_start_of_input() {
-            return false;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        p.at(T![#])
-    })
+    if !p.is_at_line_start() {
+        return false;
+    }
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.nth_at(indent.token_count, T![#])
 }
 
 /// Parse an ATX header.

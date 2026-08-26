@@ -59,8 +59,8 @@ use inline::EmphasisContext;
 use link_block::{at_link_block_start, parse_link_block};
 use list::{
     at_bullet_list_item, at_order_list_item, at_sibling_list_marker,
-    marker_followed_by_whitespace_or_eol, parse_bullet_list_item, parse_order_list_item,
-    textual_starts_with_ordered_marker,
+    marker_followed_by_whitespace_or_eol, marker_followed_by_whitespace_or_eol_at,
+    parse_bullet_list_item, parse_order_list_item, textual_starts_with_ordered_marker,
 };
 use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
@@ -500,7 +500,7 @@ enum QuoteBreakKind {
 /// Uses `line_start_leading_indent()` to correctly handle indentation when NEWLINE
 /// tokens are explicit (not trivia).
 pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
-    if !p.at_line_start() {
+    if !p.is_at_line_start() {
         return false;
     }
 
@@ -555,7 +555,7 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
             continue;
         }
 
-        if p.at_line_start() {
+        if p.is_at_line_start() {
             if at_blank_line_start(p) {
                 if has_following_indented_code_line(p) {
                     consume_blank_line(p);
@@ -585,7 +585,7 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
 
 fn has_following_indented_code_line(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        while p.at_line_start() && at_blank_line_start(p) {
+        while p.is_at_line_start() && at_blank_line_start(p) {
             while p.at(MD_TEXTUAL_LITERAL) {
                 let text = p.cur_text();
                 if text == " " || text == "\t" {
@@ -651,7 +651,7 @@ fn consume_indent_prefix(p: &mut MarkdownParser, indent: usize) {
 
 /// Consume exactly `indent` columns of leading whitespace at line start.
 fn at_blank_line_start(p: &mut MarkdownParser) -> bool {
-    if !p.at_line_start() {
+    if !p.is_at_line_start() {
         return false;
     }
 
@@ -795,27 +795,34 @@ pub(crate) fn is_dash_only_thematic_break_text(text: &str) -> bool {
 /// whitespace, then checks for a setext underline token or a dash-only thematic
 /// break token. The returned byte count covers only the skipped whitespace.
 pub(crate) fn at_setext_underline_after_newline(p: &mut MarkdownParser) -> Option<usize> {
+    at_setext_underline_after_indent(p, 0)
+}
+
+fn at_setext_underline_after_indent(p: &mut MarkdownParser, mut n: usize) -> Option<usize> {
     let mut columns = 0;
     let mut bytes_consumed = 0;
     while columns < INDENT_CODE_BLOCK_SPACES
-        && p.at(MD_TEXTUAL_LITERAL)
-        && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+        && p.nth_at(n, MD_TEXTUAL_LITERAL)
+        && p.nth_text(n)
+            .is_some_and(|text| !text.as_bytes().iter().any(|b| !matches!(b, b' ' | b'\t')))
     {
-        for c in p.cur_text().chars() {
-            match c {
-                ' ' => columns += 1,
-                '\t' => columns += TAB_STOP_SPACES - (columns % TAB_STOP_SPACES),
+        let text = p.nth_text(n)?;
+        for byte in text.as_bytes() {
+            match byte {
+                b' ' => columns += 1,
+                b'\t' => columns += TAB_STOP_SPACES - (columns % TAB_STOP_SPACES),
                 _ => {}
             }
         }
-        bytes_consumed += p.cur_text().len();
-        p.bump(MD_TEXTUAL_LITERAL);
+        bytes_consumed += text.len();
+        n += 1;
     }
     if columns >= INDENT_CODE_BLOCK_SPACES {
         return None;
     }
-    let is_setext = p.at(MD_SETEXT_UNDERLINE_LITERAL)
-        || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break_text(p.cur_text()));
+    let is_setext = p.nth_at(n, MD_SETEXT_UNDERLINE_LITERAL)
+        || (p.nth_at(n, MD_THEMATIC_BREAK_LITERAL)
+            && p.nth_text(n).is_some_and(is_dash_only_thematic_break_text));
     if is_setext {
         Some(bytes_consumed)
     } else {
@@ -1164,10 +1171,8 @@ fn break_for_setext_after_inline_newline(
         return false;
     }
 
-    let is_setext = p.lookahead(|p| {
-        p.skip_line_indent(required_indent);
-        at_setext_underline_after_newline(p).is_some()
-    });
+    let indent = p.peek_line_indent(required_indent);
+    let is_setext = at_setext_underline_after_indent(p, indent.token_count).is_some();
     if is_setext {
         p.emit_indent_tokens(required_indent);
         p.emit_indent_tokens(INDENT_CODE_BLOCK_SPACES);
@@ -1205,9 +1210,11 @@ fn break_for_list_interrupt_after_inline_newline(
         return line_starts_with_nonone_ordered_marker_after_indent(p, indent);
     }
 
-    let skip = indent.min(required_indent);
+    let skip = p.peek_line_indent(indent.min(required_indent)).token_count;
     p.lookahead(|p| {
-        p.skip_line_indent(skip);
+        for _ in 0..skip {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
         let prev_required = p.state().list_item_required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
             p.state_mut().list_item_required_indent = 0;
@@ -1236,29 +1243,28 @@ fn line_starts_with_nonone_ordered_marker_after_indent(
     p: &mut MarkdownParser,
     indent: usize,
 ) -> bool {
-    p.lookahead(|p| {
-        p.skip_line_indent(indent);
-        if p.at(MD_ORDERED_LIST_MARKER) {
-            let text = p.cur_text();
-            if text == "1." || text == "1)" {
-                return false;
-            }
-            p.bump(MD_ORDERED_LIST_MARKER);
-            return marker_followed_by_whitespace_or_eol(p);
+    let n = p.peek_line_indent(indent).token_count;
+    if p.nth_at(n, MD_ORDERED_LIST_MARKER) {
+        if p.nth_text(n)
+            .is_some_and(|text| text == "1." || text == "1)")
+        {
+            return false;
         }
-        if p.at(MD_TEXTUAL_LITERAL) {
-            let text = p.cur_text();
-            if text
-                .strip_prefix("1.")
-                .or_else(|| text.strip_prefix("1)"))
-                .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\n', '\r']))
-            {
-                return false;
-            }
-            return textual_starts_with_ordered_marker(text);
+        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
+    }
+    if p.nth_at(n, MD_TEXTUAL_LITERAL)
+        && let Some(text) = p.nth_text(n)
+    {
+        if text
+            .strip_prefix("1.")
+            .or_else(|| text.strip_prefix("1)"))
+            .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\n', '\r']))
+        {
+            return false;
         }
-        false
-    })
+        return textual_starts_with_ordered_marker(text);
+    }
+    false
 }
 
 /// Lookahead: after skipping `indent` columns of leading whitespace, is the next
@@ -1266,42 +1272,32 @@ fn line_starts_with_nonone_ordered_marker_after_indent(
 /// Handles raw marker tokens and markers still folded into `MD_TEXTUAL_LITERAL`
 /// / `MD_SETEXT_UNDERLINE_LITERAL`.
 fn line_starts_with_list_marker_after_indent(p: &mut MarkdownParser, indent: usize) -> bool {
-    p.lookahead(|p| {
-        p.skip_line_indent(indent);
-
-        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
-            p.bump(p.cur());
-            return marker_followed_by_whitespace_or_eol(p);
-        }
-
-        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
-            let trimmed = p.cur_text().trim_matches(|c| c == ' ' || c == '\t');
-            if trimmed != "-" {
-                return false;
-            }
-            p.bump_remap(T![-]);
-            return marker_followed_by_whitespace_or_eol(p);
-        }
-
-        if p.at(MD_ORDERED_LIST_MARKER) {
-            p.bump(MD_ORDERED_LIST_MARKER);
-            return marker_followed_by_whitespace_or_eol(p);
-        }
-
-        if !p.at(MD_TEXTUAL_LITERAL) {
+    let n = p.peek_line_indent(indent).token_count;
+    if p.nth_at(n, T![-]) || p.nth_at(n, T![*]) || p.nth_at(n, T![+]) {
+        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
+    }
+    if p.nth_at(n, MD_SETEXT_UNDERLINE_LITERAL) {
+        if !p
+            .nth_text(n)
+            .is_some_and(|text| text.trim_matches(|c| c == ' ' || c == '\t') == "-")
+        {
             return false;
         }
-
-        let text = p.cur_text();
-        let marker_kind = match text {
-            "-" => T![-],
-            "*" => T![*],
-            "+" => T![+],
-            _ => return textual_starts_with_ordered_marker(text),
+        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
+    }
+    if p.nth_at(n, MD_ORDERED_LIST_MARKER) {
+        return marker_followed_by_whitespace_or_eol_at(p, n + 1);
+    }
+    if p.nth_at(n, MD_TEXTUAL_LITERAL)
+        && let Some(text) = p.nth_text(n)
+    {
+        return if matches!(text, "-" | "*" | "+") {
+            marker_followed_by_whitespace_or_eol_at(p, n + 1)
+        } else {
+            textual_starts_with_ordered_marker(text)
         };
-        p.bump_remap(marker_kind);
-        marker_followed_by_whitespace_or_eol(p)
-    })
+    }
+    false
 }
 
 /// Per CommonMark §5.2, list-item continuations emit their required indent
@@ -1408,7 +1404,7 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
     let m = p.start();
     let prev_emphasis_context = set_inline_emphasis_context(p);
     let quote_depth = p.state().block_quote_depth;
-    if quote_depth > 0 && p.at_line_start() {
+    if quote_depth > 0 && p.is_at_line_start() {
         consume_quote_prefix(p, quote_depth);
     }
     let inline_start: usize = p.cur_range().start().into();
@@ -1776,24 +1772,19 @@ fn scan_list_indent(p: &mut MarkdownParser, required_indent: usize) {
 // #endregion
 
 fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
-    if !p.at_line_start() {
+    if !p.is_at_line_start() {
         return false;
     }
 
-    p.lookahead(|p| {
-        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
-            return false;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        let rest = p.source_after_current();
-        let Some((fence_char, _len)) = fenced_code_block::detect_fence(rest) else {
-            return false;
-        };
-        if fence_char == '`' {
-            return !info_string_has_backtick(p);
-        }
-        true
-    })
+    if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
+        return false;
+    }
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    let rest = &p.source_after_current()[indent.byte_count..];
+    let Some((fence_char, fence_len)) = fenced_code_block::detect_fence(rest) else {
+        return false;
+    };
+    fence_char != '`' || !info_string_has_backtick(rest, fence_len)
 }
 
 fn consume_partial_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
@@ -2095,7 +2086,7 @@ pub(crate) fn is_ordered_list_starts_with_one(p: &mut MarkdownParser) -> bool {
 /// not just at the current context's indent level.
 fn at_bullet_list_item_at_any_indent(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        if !p.at_line_start() {
+        if !p.is_at_line_start() {
             return false;
         }
 
@@ -2135,7 +2126,7 @@ fn at_bullet_list_item_at_any_indent(p: &mut MarkdownParser) -> bool {
 /// context (like a list item) but need to detect list markers at any level.
 fn at_order_list_item_at_any_indent(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        if !p.at_line_start() {
+        if !p.is_at_line_start() {
             return false;
         }
 
@@ -2157,7 +2148,7 @@ fn at_order_list_item_at_any_indent(p: &mut MarkdownParser) -> bool {
 
 fn at_order_list_item_textual(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        if !p.at_line_start() {
+        if !p.is_at_line_start() {
             return false;
         }
 
@@ -2286,26 +2277,20 @@ pub(crate) fn is_whitespace_only(text: &str) -> bool {
 /// Check if we're at a valid ATX heading start (1-6 `#` followed by space or EOL).
 /// Uses lookahead to verify without consuming tokens.
 fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-        let mut hash_count = 0;
-        while hash_count < MAX_ATX_HEADING_LEVEL && p.eat(T![#]) {
-            hash_count += 1;
-        }
-
-        if hash_count == 0 || p.at(T![#]) {
-            return false;
-        }
-
-        // Check if followed by space, tab, or EOL/EOF per CommonMark §4.2
-        // In Markdown, whitespace is significant and included in token text.
-        let text = p.cur_text();
-        p.at(T![EOF])
-            || p.has_preceding_line_break()
-            || text.starts_with(' ')
-            || text.starts_with('\t')
-    })
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    let mut n = indent.token_count;
+    let mut hash_count = 0;
+    while hash_count < MAX_ATX_HEADING_LEVEL && p.nth_at(n, T![#]) {
+        hash_count += 1;
+        n += 1;
+    }
+    if hash_count == 0 || p.nth_at(n, T![#]) {
+        return false;
+    }
+    p.nth_at(n, T![EOF])
+        || p.has_nth_preceding_line_break(n)
+        || p.nth_text(n)
+            .is_some_and(|text| text.starts_with(' ') || text.starts_with('\t'))
 }
 
 /// Parse any inline element.

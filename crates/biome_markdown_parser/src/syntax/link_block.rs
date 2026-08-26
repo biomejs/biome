@@ -45,26 +45,36 @@ const MAX_LABEL_LENGTH: usize = 999;
 /// where label doesn't contain unescaped `]` or `[`, and is followed by `:`.
 #[inline]
 pub(crate) fn at_link_block(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| at_link_block_start_impl(p) && is_valid_link_definition_lookahead(p))
+    let Some(indent_tokens) = link_block_start_indent_tokens(p) else {
+        return false;
+    };
+
+    p.lookahead(|p| {
+        for _ in 0..indent_tokens {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        is_valid_link_definition_lookahead(p)
+    })
 }
 
 #[inline]
 pub(crate) fn at_link_block_start(p: &mut MarkdownParser) -> bool {
-    p.lookahead(at_link_block_start_impl)
+    link_block_start_indent_tokens(p).is_some()
 }
 
 #[inline]
-fn at_link_block_start_impl(p: &mut MarkdownParser) -> bool {
-    if !p.at_line_start() && !p.at_start_of_input() {
-        return false;
+fn link_block_start_indent_tokens(p: &mut MarkdownParser) -> Option<usize> {
+    if !p.is_at_line_start() {
+        return None;
     }
 
     if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
-        return false;
+        return None;
     }
 
-    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-    p.at(L_BRACK)
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.nth_at(indent.token_count, L_BRACK)
+        .then_some(indent.token_count)
 }
 
 /// Token-based lookahead to verify a link reference definition.

@@ -151,7 +151,7 @@ fn list_marker_base_indent(p: &MarkdownParser) -> usize {
 }
 
 fn list_item_within_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
-    if !p.at_line_start() {
+    if !p.is_at_line_start() {
         return false;
     }
 
@@ -191,7 +191,7 @@ pub(crate) fn at_sibling_list_marker(p: &mut MarkdownParser) -> bool {
         return false;
     }
     p.lookahead(|p| {
-        if !p.at_line_start() {
+        if !p.is_at_line_start() {
             return false;
         }
         let indent = p.line_start_leading_indent();
@@ -391,17 +391,21 @@ fn at_bullet_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usi
 }
 
 pub(crate) fn marker_followed_by_whitespace_or_eol(p: &mut MarkdownParser) -> bool {
-    if p.at(NEWLINE) || p.at(T![EOF]) {
+    marker_followed_by_whitespace_or_eol_at(p, 0)
+}
+
+pub(crate) fn marker_followed_by_whitespace_or_eol_at(p: &mut MarkdownParser, n: usize) -> bool {
+    if p.nth_at(n, NEWLINE) || p.nth_at(n, T![EOF]) {
         return true;
     }
 
-    // MD_HARD_LINE_LITERAL is spaces+newline — counts as whitespace after marker.
-    if p.at(MD_HARD_LINE_LITERAL) {
+    if p.nth_at(n, MD_HARD_LINE_LITERAL) {
         return true;
     }
 
-    if p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
+    if p.nth_at(n, MD_TEXTUAL_LITERAL)
+        && let Some(text) = p.nth_text(n)
+    {
         return text.starts_with(' ') || text.starts_with('\t');
     }
 
@@ -494,7 +498,7 @@ where
     let at_virtual_line_start = p.state().virtual_line_start == Some(p.cur_range().start());
     if quote_depth > 0
         && !at_virtual_line_start
-        && (p.at_line_start() || p.has_preceding_line_break())
+        && (p.is_at_line_start() || p.has_preceding_line_break())
         && !has_quote_prefix(p, quote_depth)
     {
         return true;
@@ -513,7 +517,7 @@ where
     // If at a blank line, look ahead to see if there's another list item.
     // Per CommonMark §5.3, blank lines between items make the list loose,
     // but don't end the list.
-    if p.at_line_start() && at_blank_line_start(p) {
+    if p.is_at_line_start() && at_blank_line_start(p) {
         return !has_item_after_blank_lines(p);
     }
 
@@ -587,7 +591,7 @@ impl ParseNodeList for BulletList {
 
         // Check blank line at line start with indent awareness BEFORE
         // delegating to is_at_list_end_common (which uses non-indent-aware check).
-        if p.at_line_start() && at_blank_line_start(p) {
+        if p.is_at_line_start() && at_blank_line_start(p) {
             let has_item = has_bullet_item_after_blank_lines_at_indent(p, marker_indent);
             if !has_item {
                 return true;
@@ -661,7 +665,7 @@ impl ParseNodeList for BulletList {
 
 fn current_bullet_marker(p: &mut MarkdownParser) -> Option<MarkdownSyntaxKind> {
     p.lookahead(|p| {
-        if !p.at_line_start() {
+        if !p.is_at_line_start() {
             return None;
         }
 
@@ -859,7 +863,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
 
     // Pre-marker indent: consume all whitespace before the marker.
     // The 0-3 column rule is enforced by at_bullet_list_item(); no cap needed here.
-    // In nested contexts, skip_line_indent() may leave more than 3 columns.
+    // Nested contexts may leave more than 3 columns before the marker.
     emit_indent_char_list(p, 0);
 
     // Bullet marker is 1 character (-, *, or +)
@@ -1042,7 +1046,7 @@ impl ParseNodeList for OrderedList {
         let marker_indent = self.marker_indent;
         let marker_delim = self.marker_delim;
 
-        if p.at_line_start() && at_blank_line_start(p) {
+        if p.is_at_line_start() && at_blank_line_start(p) {
             // Check if there's an ordered item after blank lines
             let has_item = has_ordered_item_after_blank_lines_at_indent(p, marker_indent);
             if has_item {
@@ -1117,7 +1121,7 @@ impl ParseNodeList for OrderedList {
 
 fn current_ordered_delim(p: &mut MarkdownParser) -> Option<char> {
     p.lookahead(|p| {
-        if !p.at_line_start() {
+        if !p.is_at_line_start() {
             return None;
         }
 
@@ -1202,7 +1206,7 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
 
     // Pre-marker indent: consume all whitespace before the marker.
     // The 0-3 column rule is enforced by at_order_list_item(); no cap needed here.
-    // In nested contexts, skip_line_indent() may leave more than 3 columns.
+    // Nested contexts may leave more than 3 columns before the marker.
     emit_indent_char_list(p, 0);
 
     // Ordered marker (variable width: "1." = 2, "10." = 3, etc.)
@@ -1645,7 +1649,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
 
     let newline_has_quote_prefix = quote_depth > 0
         && p.at(NEWLINE)
-        && (((p.at_line_start() || p.has_preceding_line_break())
+        && (((p.is_at_line_start() || p.has_preceding_line_break())
             && has_quote_prefix(p, quote_depth))
             || (state.last_block_was_link_reference
                 && p.lookahead(|p| {
@@ -1660,7 +1664,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
 
     // Phases 4-5 share a quote-prefix check.
     let line_has_quote_prefix = quote_depth > 0
-        && (p.at_line_start() || p.has_preceding_line_break())
+        && (p.is_at_line_start() || p.has_preceding_line_break())
         && (has_quote_prefix(p, quote_depth)
             || quote_only_line_indent_at_current(p, quote_depth).is_some());
 
@@ -1894,7 +1898,7 @@ fn blank_line_phase_after_prefix(
         return BlankLineOutcome::with_prefix(LoopAction::FallThrough, line_has_quote_prefix);
     }
 
-    if (p.at_line_start() || line_has_quote_prefix) && blank_line_after_prefix {
+    if (p.is_at_line_start() || line_has_quote_prefix) && blank_line_after_prefix {
         if line_has_quote_prefix
             && quote_only_line_indent_at_current(p, quote_depth).is_some()
             && let Some(next_indent) = next_quote_content_indent(p, quote_depth)
@@ -2051,7 +2055,7 @@ fn handle_first_line_marker_only(
         } else {
             p.bump(NEWLINE);
         }
-        if p.at_line_start() {
+        if p.is_at_line_start() {
             at_bullet_list_item_with_base_indent(p, state.marker_indent)
                 || at_order_list_item_with_base_indent(p, state.marker_indent)
         } else {
@@ -2653,7 +2657,7 @@ fn check_continuation_indent(
     line_started_with_quote_prefix: bool,
     prev_was_blank: bool,
 ) -> ContinuationResult {
-    if state.first_line || (!p.at_line_start() && !line_started_with_quote_prefix) {
+    if state.first_line || (!p.is_at_line_start() && !line_started_with_quote_prefix) {
         return ContinuationResult {
             action: LoopAction::FallThrough,
             restore: VirtualLineRestore::None,
@@ -3029,7 +3033,7 @@ fn parse_indent_code_block_in_list_first_line(p: &mut MarkdownParser) {
             continue;
         }
 
-        if p.at_line_start() && !at_indent_code_block(p) {
+        if p.is_at_line_start() && !at_indent_code_block(p) {
             if at_blank_line_start(p) {
                 if list_has_following_indented_code_line(p) {
                     consume_blank_line(p);
@@ -3051,7 +3055,7 @@ fn parse_indent_code_block_in_list_first_line(p: &mut MarkdownParser) {
 
 fn list_has_following_indented_code_line(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        while p.at_line_start() && at_blank_line_start(p) {
+        while p.is_at_line_start() && at_blank_line_start(p) {
             while p.at(MD_TEXTUAL_LITERAL) {
                 let text = p.cur_text();
                 if text == " " || text == "\t" {
@@ -3325,7 +3329,7 @@ fn classify_blank_line_in_quote(
 }
 
 fn at_blank_line_start(p: &mut MarkdownParser) -> bool {
-    if !p.at_line_start() {
+    if !p.is_at_line_start() {
         return false;
     }
 
