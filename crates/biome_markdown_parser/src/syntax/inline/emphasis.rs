@@ -235,7 +235,7 @@ fn extract_label_text(source: &str, start: usize, close_pos: usize) -> &str {
     }
 }
 
-fn collect_delimiter_runs(source: &str, reference_checker: impl Fn(&str) -> bool) -> Vec<DelimRun> {
+fn collect_delimiters(source: &str, reference_checker: impl Fn(&str) -> bool) -> Vec<DelimRun> {
     let mut runs = Vec::new();
     let bytes = source.as_bytes();
     let mut i = 0;
@@ -486,7 +486,14 @@ impl EmphasisContext {
         base_offset: usize,
         reference_checker: impl Fn(&str) -> bool,
     ) -> Self {
-        let mut runs = collect_delimiter_runs(source, reference_checker);
+        if !source.bytes().any(|byte| matches!(byte, b'*' | b'_')) {
+            return Self {
+                matches: Vec::new(),
+                base_offset,
+            };
+        }
+
+        let mut runs = collect_delimiters(source, reference_checker);
         let matches = match_delimiters(&mut runs);
         Self {
             matches,
@@ -689,4 +696,18 @@ fn inline_list_source_len_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind
         let end: usize = p.cur_range().start().into();
         end.saturating_sub(start)
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::EmphasisContext;
+
+    #[test]
+    fn skips_reference_lookups_without_emphasis_delimiters() {
+        let context = EmphasisContext::new("[shortcut]", 0, |_| {
+            panic!("reference lookup should be skipped")
+        });
+
+        assert!(context.matches.is_empty());
+    }
 }

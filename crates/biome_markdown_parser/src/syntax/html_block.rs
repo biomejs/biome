@@ -19,19 +19,11 @@ use biome_rowan::TextSize;
 
 /// Check if we're at an HTML block (line start, up to 3 spaces indent, then `<`).
 pub(crate) fn at_html_block(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if !p.at_line_start() && !p.at_start_of_input() {
-            return false;
-        }
+    if !p.is_at_line_start() || p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
+        return false;
+    }
 
-        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
-            return false;
-        }
-
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-        p.at(L_ANGLE) && is_html_like_content(p)
-    })
+    is_html_like_content(p)
 }
 
 /// Check if content after `<` looks like HTML (tag, comment, declaration, etc.).
@@ -250,25 +242,23 @@ const BLOCK_TAGS: &[&str] = &[
 
 /// Only block-level HTML and special constructs interrupt paragraphs.
 pub(crate) fn at_html_block_interrupt(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
-            return false;
-        }
+    if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
+        return false;
+    }
 
-        let Some(kind) = html_block_kind(p) else {
-            return false;
-        };
+    let Some(kind) = html_block_kind(p) else {
+        return false;
+    };
 
-        matches!(
-            kind,
-            HtmlBlockKind::Type1 { .. }
-                | HtmlBlockKind::Type2
-                | HtmlBlockKind::Type3
-                | HtmlBlockKind::Type4
-                | HtmlBlockKind::Type5
-                | HtmlBlockKind::Type6
-        )
-    })
+    matches!(
+        kind,
+        HtmlBlockKind::Type1 { .. }
+            | HtmlBlockKind::Type2
+            | HtmlBlockKind::Type3
+            | HtmlBlockKind::Type4
+            | HtmlBlockKind::Type5
+            | HtmlBlockKind::Type6
+    )
 }
 
 /// Parse HTML block as raw text until blank line.
@@ -335,7 +325,7 @@ fn advance_until_blank_line(p: &mut MarkdownParser) -> TextSize {
 
     while !p.at(EOF) {
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break;
             }
             // Consume the newline first, then check if the next line exits the container
@@ -437,7 +427,7 @@ fn skip_container_prefixes(p: &mut MarkdownParser) {
 
 fn at_container_boundary(p: &mut MarkdownParser) -> bool {
     let quote_depth = p.state().block_quote_depth;
-    if quote_depth > 0 && p.at_line_start() && !has_quote_prefix(p, quote_depth) {
+    if quote_depth > 0 && p.is_at_line_start() && !has_quote_prefix(p, quote_depth) {
         // Skip if at virtual line start — the quote prefix was already consumed
         // by the container parser that set this virtual start position.
         if p.state()
@@ -449,7 +439,7 @@ fn at_container_boundary(p: &mut MarkdownParser) -> bool {
     }
 
     let required_indent = p.state().list_item_required_indent;
-    if required_indent > 0 && p.at_line_start() {
+    if required_indent > 0 && p.is_at_line_start() {
         // Skip if at virtual line start — the list indent was already
         // consumed by check_continuation_indent.
         if p.state()

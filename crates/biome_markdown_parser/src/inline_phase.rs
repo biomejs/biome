@@ -130,9 +130,14 @@ fn should_reparse_deferred_inline(
         return Some(false);
     }
 
+    if !deferred.has_unresolved_reference_lookup() {
+        return Some(false);
+    }
+
     let range = deferred.source_range();
-    let source = source.get(usize::from(range.start())..usize::from(range.end()))?;
-    Some(source.as_bytes().contains(&b'['))
+    source
+        .get(usize::from(range.start())..usize::from(range.end()))
+        .map(|_| true)
 }
 
 fn validate_deferred_inlines(source: &str, output: &MarkdownParserOutput) -> bool {
@@ -359,7 +364,43 @@ mod tests {
             DeferredInlineFlavor::Paragraph,
             context(),
             0,
+            false,
         )
+    }
+
+    fn deferred_with_unresolved_reference_lookup(
+        event_range: Range<usize>,
+        source_range: TextRange,
+    ) -> DeferredInline {
+        DeferredInline::for_test(
+            event_range,
+            source_range,
+            DeferredInlineFlavor::Paragraph,
+            context(),
+            0,
+            true,
+        )
+    }
+
+    #[test]
+    fn reparses_only_after_an_unresolved_reference_lookup() {
+        let source = "[link](/url)";
+        let range = TextRange::new(0.into(), TextSize::from(source.len() as u32));
+        let no_lookup = deferred(0..3, range);
+        let unresolved_lookup = deferred_with_unresolved_reference_lookup(0..3, range);
+
+        assert_eq!(
+            should_reparse_deferred_inline(source, &no_lookup, 1),
+            Some(false)
+        );
+        assert_eq!(
+            should_reparse_deferred_inline(source, &unresolved_lookup, 0),
+            Some(false)
+        );
+        assert_eq!(
+            should_reparse_deferred_inline(source, &unresolved_lookup, 1),
+            Some(true)
+        );
     }
 
     #[test]

@@ -503,7 +503,7 @@ fn collect_label_text_simple(p: &mut MarkdownParser) -> Option<TextRange> {
         }
 
         // Blank lines terminate
-        if p.at(NEWLINE) && p.at_blank_line() {
+        if p.at(NEWLINE) && p.is_at_blank_line() {
             return None;
         }
 
@@ -531,7 +531,7 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<TextRange> {
         }
 
         // Per CommonMark, blank lines terminate link text
-        if p.at(NEWLINE) && p.at_blank_line() {
+        if p.at(NEWLINE) && p.is_at_blank_line() {
             return None;
         }
 
@@ -544,7 +544,7 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<TextRange> {
             // Find matching closing backticks
             let mut found_close = false;
             while !p.at(T![EOF]) && !p.at_inline_end() {
-                if p.at(NEWLINE) && p.at_blank_line() {
+                if p.at(NEWLINE) && p.is_at_blank_line() {
                     break; // Blank line terminates
                 }
                 if p.at(BACKTICK) && p.cur_text().len() == opening_count {
@@ -764,7 +764,7 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
         return DestinationScanResult::Invalid;
     }
     if p.at(NEWLINE) {
-        return if p.at_blank_line() {
+        return if p.is_at_blank_line() {
             DestinationScanResult::Invalid
         } else {
             DestinationScanResult::Valid
@@ -774,7 +774,7 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
 }
 
 fn is_title_separator_token(p: &MarkdownParser) -> bool {
-    is_space_or_tab_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
+    is_space_or_tab_token(p) || (p.at(NEWLINE) && !p.is_at_blank_line())
 }
 
 fn bump_link_def_separator(p: &mut MarkdownParser) {
@@ -805,7 +805,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
 
     loop {
         // Stop on EOF or blank line (titles cannot span blank lines per CommonMark)
-        if p.at(EOF) || p.at_blank_line() {
+        if p.at(EOF) || p.is_at_blank_line() {
             return;
         }
 
