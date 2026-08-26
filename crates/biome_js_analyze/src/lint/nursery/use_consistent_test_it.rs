@@ -5,7 +5,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, AnyJsName, JsCallExpression, JsLanguage, JsSyntaxToken, T};
+use biome_js_syntax::{
+    AnyJsCombinedSpecifier, AnyJsExpression, AnyJsImportClause, AnyJsModuleItem, AnyJsName,
+    AnyJsNamedImportSpecifier, AnyJsRoot, JsCallExpression, JsLanguage, JsSyntaxToken, T,
+};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, TextRange};
 use biome_rule_options::use_consistent_test_it::{TestFunctionKind, UseConsistentTestItOptions};
 
@@ -183,6 +186,14 @@ impl Rule for UseConsistentTestIt {
 
         // Get the base identifier name (it, test, xit, xtest, fit)
         let (base_name, base_token) = get_test_base_name(callee.clone())?;
+
+        // When the base identifier is an imported binding (e.g.
+        // `import { it } from 'vitest'`), the safe rename fix would only update
+        // the call site and leave the import specifier unchanged, producing a
+        // broken reference. Skip the diagnostic in that case.
+        if is_name_imported(base_name.as_str(), &ctx.root()) {
+            return None;
+        }
 
         let rename_kind = match (base_name, required_kind) {
             // `it` when `test` is required
@@ -447,4 +458,59 @@ fn is_within_describe(node: &JsCallExpression) -> bool {
             ancestor
                 .callee().is_ok_and(|callee| callee.contains_describe_call())
         })
+}
+
+/// Returns `true` if `name` is bound via a named `import` statement in the
+/// current file (e.g. `import { it } from 'vitest'`).
+///
+/// When the base identifier in a test call expression is an imported binding,
+/// the safe rename fix would update only the call site while leaving the
+/// import specifier unchanged, producing a broken reference. The rule skips
+/// such cases rather than offering a fix that breaks the code.
+fn is_name_imported(name: &str, root: &AnyJsRoot) -> bool {
+    let AnyJsRoot::JsModule(module) = root else {
+        return false; // Scripts cannot have ES import declarations.
+    };
+    for item in module.items() {
+        let AnyJsModuleItem::JsImport(import) = item else {
+            continue;
+        };
+        let Ok(clause) = import.import_clause() else {
+            continue;
+        };
+        // Extract the named specifiers list from whichever clause variant is present.
+        let named_specifiers = match clause {
+            AnyJsImportClause::JsImportNamedClause(c) => match c.named_specifiers() {
+                Ok(ns) => ns,
+                Err(_) => continue,
+            },
+            AnyJsImportClause::JsImportCombinedClause(c) => {
+                // `import defaultName, { named } from '...'`
+                let Ok(specifier) = c.specifier() else { continue };
+                match specifier {
+                    AnyJsCombinedSpecifier::JsNamedImportSpecifiers(ns) => ns,
+                    _ => continue,
+                }
+            }
+            _ => continue,
+        };
+        for spec in named_specifiers.specifiers() {
+            let Ok(spec) = spec else { continue };
+            let local_name = match &spec {
+                AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(s) => {
+                    s.local_name().ok()
+                }
+                AnyJsNamedImportSpecifier::JsNamedImportSpecifier(s) => s.local_name().ok(),
+                _ => None,
+            };
+            let Some(binding) = local_name else { continue };
+            let Some(ident) = binding.as_js_identifier_binding() else {
+                continue;
+            };
+            if ident.name_token().is_ok_and(|t| t.text_trimmed() == name) {
+                return true;
+            }
+        }
+    }
+    false
 }

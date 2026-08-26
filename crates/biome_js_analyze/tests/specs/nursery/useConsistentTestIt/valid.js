@@ -26,3 +26,11 @@ describe("suite", () => {
 [1, 2, 3].forEach(() => {
   it("foo", () => {});
 });
+
+// When test functions are imported bindings the rule must not fire, because the
+// safe rename fix cannot also update the import specifier (issue #11453).
+import { test } from "vitest";
+test("imported test should not be flagged", () => {});
+
+import { it as myIt } from "@jest/globals";
+myIt("aliased import should not be flagged", () => {});
