@@ -231,6 +231,10 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 
     fn normalise_text(&mut self, file_source: SourceFileKind) -> Cow<'token, str> {
+        if self.is_unquotable_jsx_string() {
+            return Cow::Borrowed(self.get_token().text_trimmed());
+        }
+
         let str_info = self
             .token
             .compute_string_information(self.chosen_quote_style);
@@ -344,6 +348,15 @@ impl<'token> LiteralStringNormaliser<'token> {
     /// Returns the string without its quotes.
     fn raw_content(&self) -> &'token str {
         strip_quotes(self.get_token().text_trimmed())
+    }
+
+    /// JSX has no escapes, so a value holding both quote kinds fits inside neither.
+    fn is_unquotable_jsx_string(&self) -> bool {
+        if self.get_token().kind() != JSX_STRING_LITERAL {
+            return false;
+        }
+        let content = self.raw_content();
+        content.contains('"') && content.contains('\'')
     }
 
     fn swap_quotes(

@@ -1157,6 +1157,28 @@ console.log(a);
     }
 
     #[test]
+    fn format_picks_a_quote_for_an_unquoted_astro_value_holding_one_quote_kind() {
+        for (src, expected) in [
+            ("cond && <div a=don't />", "a=\"don't\""),
+            ("cond && <div a=don\"t />", "a='don\"t'"),
+        ] {
+            let output = format_astro_template(src);
+            assert!(
+                output.contains(expected),
+                "expected {expected:?} in {output:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn format_leaves_an_unquoted_astro_value_holding_both_quotes_alone() {
+        let output = format_astro_template("cond && <div a=don't\"x />");
+
+        assert!(output.contains("a=don't\"x"), "{output:?}");
+        assert!(!output.contains('\\'), "value was escaped: {output:?}");
+    }
+
+    #[test]
     fn format_keeps_comment_between_implicit_fragment_siblings() {
         let output = format_astro_template("<p>a</p>\n/* c */ <div />");
 
