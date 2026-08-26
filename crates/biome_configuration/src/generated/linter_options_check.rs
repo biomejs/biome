@@ -1878,6 +1878,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_flat_map::UseFlatMapOptions>(),
     ));
     result.push((
+        "nursery",
+        "useFlatMathMinMax",
+        TypeId::of::<biome_rule_options::use_flat_math_min_max::UseFlatMathMinMaxOptions>(),
+    ));
+    result.push((
         "a11y",
         "useFocusableInteractive",
         TypeId::of::<biome_rule_options::use_focusable_interactive::UseFocusableInteractiveOptions>(

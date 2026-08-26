@@ -7211,6 +7211,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFlatMathMinMax": {
+					"description": "Prefer flat Math.min() and Math.max() calls over nested calls of the same method.\nSee https://biomejs.dev/linter/rules/use-flat-math-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseFlatMathMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIframeSandbox": {
 					"description": "Enforce the 'sandbox' attribute for 'iframe' elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
 					"anyOf": [
@@ -11814,6 +11821,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseFlatMathMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseFlatMathMinMaxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseFocusableInteractiveOptions": {
 			"type": "object",
 			"properties": {
@@ -15767,6 +15784,16 @@
 			]
 		},
 		"UseFlatMapOptions": { "type": "object", "additionalProperties": false },
+		"UseFlatMathMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseFlatMathMinMaxOptions" }
+			]
+		},
+		"UseFlatMathMinMaxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseFocusableInteractiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
