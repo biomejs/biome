@@ -600,6 +600,13 @@ mod astro_raw_and_comment_edges {
     }
 
     #[test]
+    fn quote_leading_attribute_names_leave_no_stale_diagnostics() {
+        let tree = assert_clean("x && <div 'a=1 />");
+        assert!(tree.contains("JSX_IDENT@10..12 \"'a\""), "{tree}");
+        assert_clean("x && <div \"b=2>text</div>");
+    }
+
+    #[test]
     fn bare_closing_brace_in_text_is_an_error() {
         let parse = parse(
             "x && <div>a } b</div>",

@@ -442,6 +442,15 @@ impl<'src> JsLexer<'src> {
         if self.position == start {
             self.current_kind
         } else {
+            // First-lex diagnostics are stale, e.g. a quote-leading name read as an unterminated string.
+            let token_start = self.current_start;
+            while self.diagnostics.last().is_some_and(|diagnostic| {
+                diagnostic
+                    .span()
+                    .is_some_and(|span| span.start() >= token_start)
+            }) {
+                self.diagnostics.pop();
+            }
             JSX_IDENT
         }
     }
