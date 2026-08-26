@@ -76,7 +76,7 @@ fn parse_inline_item_list_until_impl(
         // Per CommonMark, link text can span lines, but blank lines end the link.
         // Check for blank line (NEWLINE followed by NEWLINE or EOF after optional whitespace)
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break; // Blank line ends link text
             }
             // Single newline inside link text - consume and continue

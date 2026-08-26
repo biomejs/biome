@@ -335,7 +335,7 @@ fn advance_until_blank_line(p: &mut MarkdownParser) -> TextSize {
 
     while !p.at(EOF) {
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break;
             }
             // Consume the newline first, then check if the next line exits the container

@@ -380,7 +380,7 @@ impl QuoteBlockList {
 
     /// Check if lazy continuation should stop.
     fn should_stop_lazy_continuation(&self, p: &MarkdownParser) -> bool {
-        (p.at_blank_line() || has_empty_line_before(p) || self.last_block_was_paragraph)
+        (p.is_at_blank_line() || has_empty_line_before(p) || self.last_block_was_paragraph)
             && !self.line_started_with_prefix
     }
 
@@ -422,7 +422,7 @@ impl QuoteBlockList {
 }
 
 fn quote_link_reference_before_dash_thematic_break(p: &mut MarkdownParser, depth: usize) -> bool {
-    if !p.at(NEWLINE) || p.at_blank_line() {
+    if !p.at(NEWLINE) || p.is_at_blank_line() {
         return false;
     }
 

@@ -168,11 +168,11 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
         return;
     }
 
-    // Set up emphasis context for header content (single line only)
-    let prev_context = set_header_emphasis_context(p);
-
     // Parse content as a paragraph containing inline items
     let deferred = p.start_deferred_inline(DeferredInlineFlavor::AtxParagraph);
+
+    // Set up emphasis context for header content (single line only)
+    let prev_context = set_header_emphasis_context(p);
     let m = p.start();
     let inline_m = p.start();
 

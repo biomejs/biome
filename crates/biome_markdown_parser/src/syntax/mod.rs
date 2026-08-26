@@ -295,7 +295,7 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     // Handle standalone NEWLINE tokens as MdNewline nodes.
     // This prevents inter-block NEWLINEs from becoming "newline-only paragraphs".
     if p.at(NEWLINE) {
-        if p.at_blank_line() {
+        if p.is_at_blank_line() {
             p.state_mut().link_reference_definition_continuation = false;
         }
         let m = p.start();
@@ -749,7 +749,7 @@ pub(crate) fn parse_empty_paragraph(p: &mut MarkdownParser) -> CompletedMarker {
 }
 
 fn link_reference_definition_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
-    if !p.at(NEWLINE) || p.at_blank_line() {
+    if !p.at(NEWLINE) || p.is_at_blank_line() {
         return false;
     }
 
@@ -1320,7 +1320,7 @@ fn emit_inline_continuation_indent(p: &mut MarkdownParser, required_indent: usiz
 }
 
 fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNewlineAction {
-    if p.at_blank_line() {
+    if p.is_at_blank_line() {
         emit_inline_newline_as_text(p);
         return InlineNewlineAction::Break;
     }
@@ -1638,7 +1638,7 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
 /// Returns `true` if the scan should stop (paragraph boundary reached),
 /// `false` if scanning should continue to the next line.
 fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool) -> bool {
-    if p.at_blank_line() {
+    if p.is_at_blank_line() {
         p.bump(NEWLINE);
         return true;
     }

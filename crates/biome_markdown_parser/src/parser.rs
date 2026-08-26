@@ -241,6 +241,10 @@ pub(crate) struct DeferredInline {
     /// A smaller value than the final definition count means later definitions
     /// may change reference and emphasis parsing in this subtree.
     definitions_len: usize,
+    /// Whether parsing this subtree encountered an unresolved reference lookup.
+    ///
+    /// Later definitions can change this subtree only when this is true.
+    has_unresolved_reference_lookup: bool,
 }
 
 pub(crate) struct DeferredInlineStart {
@@ -249,6 +253,7 @@ pub(crate) struct DeferredInlineStart {
     flavor: DeferredInlineFlavor,
     context: InlineContainerContext,
     definitions_len: usize,
+    unresolved_reference_lookup_count: usize,
 }
 
 impl DeferredInline {
@@ -272,6 +277,10 @@ impl DeferredInline {
         self.definitions_len
     }
 
+    pub(crate) fn has_unresolved_reference_lookup(&self) -> bool {
+        self.has_unresolved_reference_lookup
+    }
+
     #[cfg(test)]
     pub(crate) fn for_test(
         event_range: Range<usize>,
@@ -279,6 +288,7 @@ impl DeferredInline {
         flavor: DeferredInlineFlavor,
         context: InlineContainerContext,
         definitions_len: usize,
+        has_unresolved_reference_lookup: bool,
     ) -> Self {
         Self {
             event_range,
@@ -286,6 +296,7 @@ impl DeferredInline {
             flavor,
             context,
             definitions_len,
+            has_unresolved_reference_lookup,
         }
     }
 }
@@ -410,6 +421,11 @@ pub(crate) struct MarkdownParser<'source> {
     /// the parser does not advance, so caching the last computed pair avoids
     /// repeated O(line-length) scans for the preceding newline.
     abs_col_cache: Cell<Option<(u32, usize)>>,
+    /// Counts missed reference lookups across parser checkpoints.
+    ///
+    /// Rollbacks must not discard an inline range's dependency on definitions
+    /// that appear later in the document.
+    unresolved_reference_lookup_count: Cell<usize>,
 }
 
 impl<'source> MarkdownParser<'source> {
@@ -421,6 +437,7 @@ impl<'source> MarkdownParser<'source> {
             known_link_reference_definitions: None,
             state: MarkdownParserState::default(),
             abs_col_cache: Cell::new(None),
+            unresolved_reference_lookup_count: Cell::new(0),
         }
     }
 
@@ -449,6 +466,7 @@ impl<'source> MarkdownParser<'source> {
             known_link_reference_definitions: Some(definitions),
             state,
             abs_col_cache: Cell::new(None),
+            unresolved_reference_lookup_count: Cell::new(0),
         })
     }
 
@@ -518,12 +536,23 @@ impl<'source> MarkdownParser<'source> {
 
     /// Returns true if a normalized label has a link reference definition.
     pub(crate) fn has_link_reference_definition(&self, label: &str) -> bool {
-        self.known_link_reference_definitions
+        let is_defined = self
+            .known_link_reference_definitions
             .is_some_and(|definitions| definitions.contains(self.source.source_text(), label))
             || self
                 .state
                 .link_reference_definitions
-                .contains(self.source.source_text(), label)
+                .contains(self.source.source_text(), label);
+
+        if !is_defined {
+            self.unresolved_reference_lookup_count.set(
+                self.unresolved_reference_lookup_count
+                    .get()
+                    .saturating_add(1),
+            );
+        }
+
+        is_defined
     }
 
     pub(crate) fn inline_container_context(&self) -> InlineContainerContext {
@@ -548,6 +577,7 @@ impl<'source> MarkdownParser<'source> {
             flavor,
             context: self.inline_container_context(),
             definitions_len: self.link_reference_definitions_len(),
+            unresolved_reference_lookup_count: self.unresolved_reference_lookup_count(),
         }
     }
 
@@ -568,7 +598,13 @@ impl<'source> MarkdownParser<'source> {
             flavor: start.flavor,
             context: start.context,
             definitions_len: start.definitions_len,
+            has_unresolved_reference_lookup: self.unresolved_reference_lookup_count()
+                > start.unresolved_reference_lookup_count,
         });
+    }
+
+    fn unresolved_reference_lookup_count(&self) -> usize {
+        self.unresolved_reference_lookup_count.get()
     }
 
     pub(crate) fn link_reference_definitions_len(&self) -> usize {
@@ -945,7 +981,8 @@ impl<'source> MarkdownParser<'source> {
     /// When this returns true, the parser should NOT consume the NEWLINE.
     /// Instead, the block-level parser should handle the paragraph boundary.
     /// The NEWLINE at a blank line marks the end of the current block.
-    pub fn at_blank_line(&self) -> bool {
+    #[inline]
+    pub fn is_at_blank_line(&self) -> bool {
         if !self.at(MarkdownSyntaxKind::NEWLINE) {
             return false;
         }
@@ -1101,6 +1138,7 @@ pub struct MarkdownParserCheckpoint {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::syntax::parse_document;
 
     #[test]
     fn rewind_removes_only_speculative_link_definitions() {
@@ -1121,5 +1159,39 @@ mod tests {
             parser.state.link_reference_definitions.ranges_by_hash.len(),
             1
         );
+    }
+
+    #[test]
+    fn rewind_preserves_unresolved_reference_lookups() {
+        let mut parser = MarkdownParser::new("", MarkdownParserOptions::default());
+        let checkpoint = parser.checkpoint();
+
+        assert!(!parser.has_link_reference_definition("missing"));
+        parser.rewind(checkpoint);
+
+        assert_eq!(parser.unresolved_reference_lookup_count(), 1);
+    }
+
+    #[test]
+    fn deferred_inlines_track_unresolved_reference_lookups() {
+        let mut direct_link = MarkdownParser::new(
+            "[link](/url)\n\n[ref]: /url\n",
+            MarkdownParserOptions::default(),
+        );
+        parse_document(&mut direct_link);
+        let direct_output = direct_link.finish();
+
+        assert_eq!(direct_output.deferred_inlines.len(), 1);
+        assert!(!direct_output.deferred_inlines[0].has_unresolved_reference_lookup());
+
+        let mut forward_reference = MarkdownParser::new(
+            "[link][ref]\n\n[ref]: /url\n",
+            MarkdownParserOptions::default(),
+        );
+        parse_document(&mut forward_reference);
+        let forward_output = forward_reference.finish();
+
+        assert_eq!(forward_output.deferred_inlines.len(), 1);
+        assert!(forward_output.deferred_inlines[0].has_unresolved_reference_lookup());
     }
 }

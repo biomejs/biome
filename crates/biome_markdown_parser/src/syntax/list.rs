@@ -1806,7 +1806,7 @@ fn blank_line_phase_non_quote_classify(
     state: &mut ListItemLoopState,
     newline_has_quote_prefix: bool,
 ) -> Option<BlankLineOutcome> {
-    if state.first_line || !p.at(NEWLINE) || p.at_blank_line() || newline_has_quote_prefix {
+    if state.first_line || !p.at(NEWLINE) || p.is_at_blank_line() || newline_has_quote_prefix {
         return None;
     }
 
@@ -2289,7 +2289,7 @@ fn parse_first_line_blocks(
 }
 
 fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
-    if !p.at(NEWLINE) || p.at_blank_line() {
+    if !p.at(NEWLINE) || p.is_at_blank_line() {
         return false;
     }
 
@@ -2853,7 +2853,7 @@ fn parse_continuation_block(
     parse_mode: ContinuationParseMode,
     restore: VirtualLineRestore,
 ) {
-    let is_blank_line = p.at_blank_line();
+    let is_blank_line = p.is_at_blank_line();
     if is_blank_line {
         // Don't record as blank if the blank line is actually the boundary
         // before a different-marker list (CommonMark §5.3). The blank line
@@ -2866,7 +2866,7 @@ fn parse_continuation_block(
                 let mi = state.marker_indent;
                 p.lookahead(|p| {
                     // Skip blank lines (including whitespace-only tokens between newlines)
-                    while p.at_blank_line() {
+                    while p.is_at_blank_line() {
                         p.bump(NEWLINE);
                         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                             p.bump(MD_TEXTUAL_LITERAL);
@@ -3335,7 +3335,7 @@ fn at_blank_line_start(p: &mut MarkdownParser) -> bool {
 fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         if p.at(NEWLINE) {
-            return p.at_blank_line();
+            return p.is_at_blank_line();
         }
         if p.at(T![EOF]) {
             return true;

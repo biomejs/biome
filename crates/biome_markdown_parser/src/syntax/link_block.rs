@@ -69,9 +69,9 @@ fn at_link_block_start_impl(p: &mut MarkdownParser) -> bool {
 
 /// Token-based lookahead to verify a link reference definition.
 ///
-/// This advances tokens to check: `[label]: destination [title]?`
-/// Returns true if the pattern is valid, false otherwise.
-/// Does NOT build nodes - just validates the structure.
+/// This validates the label, destination, and any same-line title because
+/// trailing same-line content determines whether the line is a definition.
+/// A title on the following line is validated while parsing the definition.
 fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     // Expect [
     if !p.at(L_BRACK) {
@@ -86,7 +86,7 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
         if p.at(EOF) {
             return false;
         }
-        if p.at(NEWLINE) && p.at_blank_line() {
+        if p.at(NEWLINE) && p.is_at_blank_line() {
             return false; // Blank line ends link definition
         }
         if p.at(R_BRACK) {
@@ -138,7 +138,7 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     // Per CommonMark §4.7, destination can be on the next line if there's a
     // single non-blank newline after the colon.
     if p.at(NEWLINE) {
-        if p.at_blank_line() {
+        if p.is_at_blank_line() {
             return false; // Blank line = no destination
         }
         // Single newline - allow destination on next line
@@ -147,7 +147,7 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     }
 
     // Destination is required (can be on same line or next line now)
-    if p.at(EOF) || p.at_blank_line() {
+    if p.at(EOF) || p.is_at_blank_line() {
         return false;
     }
 
@@ -164,18 +164,8 @@ fn is_valid_link_definition_lookahead(p: &mut MarkdownParser) -> bool {
     }
 
     if p.at(NEWLINE) {
-        // Check for title on next line (newline counts as separator)
-        p.bump_link_definition();
-        skip_whitespace_tokens(p);
-
-        if at_title_start(p) {
-            // If title looks valid, it's included in the definition.
-            // If title has trailing content, it's invalid - but the definition
-            // is still valid (destination-only). The invalid title line will
-            // be parsed as a paragraph. Per CommonMark §4.7.
-            let _ = skip_title_tokens(p); // Ignore result - definition is valid either way
-        }
-        // Destination-only is valid, or destination+valid_title is valid
+        // A definition can end at the destination. A following title is part
+        // of the definition only when the parser later confirms that it is valid.
         return true;
     }
 
@@ -366,7 +356,7 @@ fn skip_title_tokens(p: &mut MarkdownParser) -> bool {
         }
 
         // Titles can span lines, but blank line ends them
-        if p.at(NEWLINE) && p.at_blank_line() {
+        if p.at(NEWLINE) && p.is_at_blank_line() {
             return false;
         }
 
@@ -421,7 +411,7 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
             while is_space_or_tab_token(p) {
                 p.bump_link_definition();
             }
-            if p.at(NEWLINE) && !p.at_blank_line() {
+            if p.at(NEWLINE) && !p.is_at_blank_line() {
                 // Check if there's a title starter on next line
                 if !title_on_next_line(p) {
                     return false;
@@ -456,7 +446,7 @@ fn parse_link_label(p: &mut MarkdownParser) {
     let list = p.start();
 
     while !p.at(R_BRACK) && !p.at(EOF) {
-        if p.at(NEWLINE) && p.at_blank_line() {
+        if p.at(NEWLINE) && p.is_at_blank_line() {
             break;
         }
         bump_textual(p);
@@ -485,7 +475,7 @@ fn parse_link_destination(p: &mut MarkdownParser) {
     }
 
     // Per CommonMark §4.7, destination can be on the next line
-    if p.at(NEWLINE) && !p.at_blank_line() {
+    if p.at(NEWLINE) && !p.is_at_blank_line() {
         bump_textual_link_def(p);
         while is_space_or_tab_token(p) {
             bump_textual_link_def(p);
@@ -546,7 +536,7 @@ fn consume_trailing_destination_whitespace(p: &mut MarkdownParser) {
         }
 
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 return true;
             }
 
@@ -716,7 +706,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
         }
 
         // Stop at blank line
-        if p.at_blank_line() {
+        if p.is_at_blank_line() {
             break;
         }
 
