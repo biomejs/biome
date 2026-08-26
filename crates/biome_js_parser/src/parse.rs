@@ -613,21 +613,40 @@ mod astro_raw_and_comment_edges {
 }
 
 #[cfg(test)]
-mod astro_frontmatter_is_strict_tsx {
+mod astro_frontmatter {
     use super::*;
     use crate::JsParserOptions;
     use biome_languages::javascript::JsEmbeddingKind;
 
+    const FRONTMATTER: JsEmbeddingKind = JsEmbeddingKind::Astro {
+        frontmatter: true,
+        is_class_attribute: false,
+    };
+
     fn frontmatter_source() -> JsFileSource {
-        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
-            frontmatter: true,
-            is_class_attribute: false,
-        })
+        JsFileSource::ts().with_embedding_kind(FRONTMATTER)
+    }
+
+    /// Frontmatter is plain TS; only a JSX variant can observe the template gate.
+    fn jsx_frontmatter_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(FRONTMATTER)
     }
 
     fn assert_errors(body: &str) {
-        let parse = parse(body, frontmatter_source(), JsParserOptions::default());
+        let parse = parse(body, jsx_frontmatter_source(), JsParserOptions::default());
         assert!(parse.has_errors(), "{body:?} parsed without errors");
+    }
+
+    #[test]
+    fn frontmatter_allows_type_assertions() {
+        let parse = parse(
+            "const a = <string>x;",
+            frontmatter_source(),
+            JsParserOptions::default(),
+        );
+        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains("TS_TYPE_ASSERTION_EXPRESSION"), "{tree}");
     }
 
     #[test]
@@ -649,7 +668,7 @@ mod astro_frontmatter_is_strict_tsx {
     fn script_children_stay_an_expression_child() {
         let parse = parse(
             "const el = <script>{code}</script>; const code = 1;",
-            frontmatter_source(),
+            jsx_frontmatter_source(),
             JsParserOptions::default(),
         );
         assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
