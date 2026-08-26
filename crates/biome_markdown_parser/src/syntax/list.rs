@@ -38,6 +38,10 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_parser::prelude::{CompletedMarker, Marker, ParseDiagnostic, TokenSet};
 use biome_parser::{Parser, token_set};
+use biome_unicode_table::{
+    Dispatch::{BTO, DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
+    lookup_byte,
+};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
@@ -2123,8 +2127,11 @@ fn parse_first_line_blocks(
     }
 
     let block_start_byte = first_non_indent_byte(p);
+    let block_start_dispatch = block_start_byte.map(lookup_byte);
+    let block_start_is_underscore =
+        matches!(block_start_dispatch, Some(IDT)) && block_start_byte == Some(b'_');
 
-    let fenced_code_start = matches!(block_start_byte, Some(b'`' | b'~'))
+    let fenced_code_start = matches!(block_start_dispatch, Some(TPL | TLD))
         && p.lookahead(|p| {
             while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                 p.bump(MD_TEXTUAL_LITERAL);
@@ -2143,7 +2150,7 @@ fn parse_first_line_blocks(
         }
     }
 
-    let html_block_start = matches!(block_start_byte, Some(b'<'))
+    let html_block_start = matches!(block_start_dispatch, Some(LSS))
         && p.lookahead(|p| with_virtual_line_start(p, p.cur_range().start(), at_html_block));
 
     if html_block_start {
@@ -2154,15 +2161,15 @@ fn parse_first_line_blocks(
         }
     }
 
-    if matches!(block_start_byte, Some(b'#')) && parse_first_line_atx_heading(p, state) {
+    if matches!(block_start_dispatch, Some(HAS)) && parse_first_line_atx_heading(p, state) {
         return LoopAction::Continue;
     }
 
-    if matches!(block_start_byte, Some(b'>')) && parse_first_line_blockquote(p, state) {
+    if matches!(block_start_dispatch, Some(MOR)) && parse_first_line_blockquote(p, state) {
         return LoopAction::Continue;
     }
 
-    let link_block_start = matches!(block_start_byte, Some(b'['))
+    let link_block_start = matches!(block_start_dispatch, Some(BTO))
         && with_virtual_line_start(p, p.cur_range().start(), at_link_block_start);
 
     if link_block_start {
@@ -2179,7 +2186,8 @@ fn parse_first_line_blocks(
         }
     }
 
-    let is_thematic_break = matches!(block_start_byte, Some(b'-' | b'*' | b'_'))
+    let is_thematic_break = (matches!(block_start_dispatch, Some(MIN | MUL))
+        || block_start_is_underscore)
         && p.lookahead(|p| {
             while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                 p.bump(MD_TEXTUAL_LITERAL);
@@ -2195,7 +2203,7 @@ fn parse_first_line_blocks(
         return LoopAction::Continue;
     }
 
-    let nested_marker = if matches!(block_start_byte, Some(b'-' | b'*' | b'+' | b'0'..=b'9')) {
+    let nested_marker = if matches!(block_start_dispatch, Some(MIN | MUL | PLS | ZER | DIG)) {
         p.lookahead(|p| {
             while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                 p.bump(MD_TEXTUAL_LITERAL);

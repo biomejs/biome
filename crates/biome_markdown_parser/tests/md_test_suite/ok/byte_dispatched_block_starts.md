@@ -12,6 +12,8 @@ top tilde fence
 
 ***
 
+___
+
 - top bullet
 
 + top plus bullet
@@ -36,8 +38,12 @@ top tilde fence
 
 - ---
 
+- ___
+
 - - nested bullet
 
 - 1. nested ordered
 
 - plain text
+
+plain paragraph

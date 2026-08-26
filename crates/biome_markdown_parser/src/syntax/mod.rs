@@ -44,6 +44,10 @@ use biome_parser::{
     token_set,
 };
 use biome_rowan::TextSize;
+use biome_unicode_table::{
+    Dispatch::{self, BTO, DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
+    lookup_byte,
+};
 use fenced_code_block::{
     at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
     parse_fenced_code_block_force,
@@ -325,12 +329,16 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         parse_indent_code_block(p)
     } else {
         let block_start_byte = first_non_indent_byte(p);
+        let block_start_dispatch = block_start_byte.map(lookup_byte);
+        let block_start_is_underscore =
+            matches!(block_start_dispatch, Some(IDT)) && block_start_byte == Some(b'_');
 
-        if matches!(block_start_byte, Some(b'`' | b'~')) && at_fenced_code_block(p) {
+        if matches!(block_start_dispatch, Some(TPL | TLD)) && at_fenced_code_block(p) {
             parse_fenced_code_block(p)
-        } else if matches!(block_start_byte, Some(b'`' | b'~')) && line_starts_with_fence(p) {
+        } else if matches!(block_start_dispatch, Some(TPL | TLD)) && line_starts_with_fence(p) {
             parse_fenced_code_block_force(p)
-        } else if matches!(block_start_byte, Some(b'-' | b'*' | b'_')) && at_thematic_break_block(p)
+        } else if (matches!(block_start_dispatch, Some(MIN | MUL)) || block_start_is_underscore)
+            && at_thematic_break_block(p)
         {
             let break_block = try_parse(p, |p| {
                 let break_block = parse_thematic_break_block(p);
@@ -344,16 +352,16 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             } else {
                 parse_paragraph(p)
             }
-        } else if matches!(block_start_byte, Some(b'#')) && at_header(p) {
+        } else if matches!(block_start_dispatch, Some(HAS)) && at_header(p) {
             match parse_header(p) {
                 Present(header) => Present(header),
                 Absent => parse_paragraph(p),
             }
-        } else if matches!(block_start_byte, Some(b'>')) && at_quote(p) {
+        } else if matches!(block_start_dispatch, Some(MOR)) && at_quote(p) {
             parse_quote(p)
-        } else if matches!(block_start_byte, Some(b'-' | b'*' | b'+')) && at_bullet_list_item(p) {
+        } else if matches!(block_start_dispatch, Some(MIN | MUL | PLS)) && at_bullet_list_item(p) {
             parse_bullet_list_item(p)
-        } else if matches!(block_start_byte, Some(b'0'..=b'9'))
+        } else if matches!(block_start_dispatch, Some(ZER | DIG))
             && (at_order_list_item(p) || at_order_list_item_textual(p))
         {
             // After a link reference definition with no intervening blank line,
@@ -384,9 +392,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
                     parsed
                 }
             }
-        } else if matches!(block_start_byte, Some(b'<')) && at_html_block(p) {
+        } else if matches!(block_start_dispatch, Some(LSS)) && at_html_block(p) {
             parse_html_block(p)
-        } else if matches!(block_start_byte, Some(b'[')) && at_link_block_start(p) {
+        } else if matches!(block_start_dispatch, Some(BTO)) && at_link_block_start(p) {
             // Try to parse as link reference definition
             // Use try_parse to fall back to paragraph if not a valid definition
             let link_result = try_parse(p, |p| {
@@ -1848,8 +1856,9 @@ fn consume_partial_quote_prefix_lookahead(p: &mut MarkdownParser, depth: usize) 
 ///
 /// - Bullet lists can interrupt paragraphs if item has content OR marker is followed by blank line
 /// - Ordered lists can interrupt paragraphs ONLY if starting with `1` AND not empty
+#[inline]
 pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
-    let Some(byte) = block_interrupt_candidate(p) else {
+    let Some((byte, dispatch)) = block_interrupt_candidate(p) else {
         return false;
     };
 
@@ -1877,35 +1886,34 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
         return false;
     }
 
-    at_unindented_block_interrupt(p, byte)
+    at_unindented_block_interrupt(p, byte, dispatch)
 }
 
 #[inline]
-fn block_interrupt_candidate(p: &MarkdownParser) -> Option<u8> {
+fn block_interrupt_candidate(p: &MarkdownParser) -> Option<(u8, Dispatch)> {
     let byte = first_non_indent_byte(p)?;
-    is_block_interrupt_start_byte(byte).then_some(byte)
+    let dispatch = lookup_byte(byte);
+    is_block_interrupt_start_byte(byte, dispatch).then_some((byte, dispatch))
 }
 
 #[inline]
-fn is_block_interrupt_start_byte(byte: u8) -> bool {
-    use biome_unicode_table::{
-        Dispatch::{DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
-        lookup_byte,
-    };
-
-    match lookup_byte(byte) {
+fn is_block_interrupt_start_byte(byte: u8, dispatch: Dispatch) -> bool {
+    match dispatch {
         HAS | TPL | TLD | MOR | LSS | MIN | MUL | PLS | ZER | DIG => true,
         IDT => byte == b'_',
         _ => false,
     }
 }
 
-fn at_unindented_block_interrupt(p: &mut MarkdownParser, byte: u8) -> bool {
-    if matches!(byte, b'-' | b'*' | b'_') && at_thematic_break_block(p) {
+#[inline]
+fn at_unindented_block_interrupt(p: &mut MarkdownParser, byte: u8, dispatch: Dispatch) -> bool {
+    let thematic_break_start = matches!(dispatch, MIN | MUL) || (dispatch == IDT && byte == b'_');
+
+    if thematic_break_start && at_thematic_break_block(p) {
         return true;
     }
 
-    if matches!(byte, b'-' | b'*' | b'+')
+    if matches!(dispatch, MIN | MUL | PLS)
         && (at_bullet_list_item(p) || at_bullet_list_item_at_any_indent(p))
     {
         let in_list = p.state().list_nesting_depth > 0;
@@ -1914,18 +1922,18 @@ fn at_unindented_block_interrupt(p: &mut MarkdownParser, byte: u8) -> bool {
         }
     }
 
-    if byte.is_ascii_digit()
+    if matches!(dispatch, ZER | DIG)
         && (at_order_list_item(p) || at_order_list_item_at_any_indent(p))
         && can_ordered_marker_interrupt_paragraph(p)
     {
         return true;
     }
 
-    match byte {
-        b'#' => at_header(p) && is_valid_atx_heading_start(p),
-        b'`' | b'~' => at_fenced_code_block(p),
-        b'>' => at_quote(p),
-        b'<' => at_html_block_interrupt(p),
+    match dispatch {
+        HAS => at_header(p) && is_valid_atx_heading_start(p),
+        TPL | TLD => at_fenced_code_block(p),
+        MOR => at_quote(p),
+        LSS => at_html_block_interrupt(p),
         _ => false,
     }
 }
