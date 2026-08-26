@@ -141,7 +141,11 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
         NoVueRefAsOperandQuery::JsIdentifierExpression(ident_expr) => {
             let reference = ident_expr.name().ok()?;
             let binding = model.binding(&reference)?.tree();
-            let declarator = binding.declaration_as::<JsVariableDeclarator>()?;
+            let declaration = binding.declaration()?;
+            let declaration = declaration
+                .parent_binding_pattern_declaration()
+                .unwrap_or(declaration);
+            let declarator = JsVariableDeclarator::cast(declaration.into_syntax())?;
             let init_clause = declarator.initializer()?;
             let init_expr = init_clause.expression().ok()?;
             let call_expr = init_expr.as_js_call_expression()?;
@@ -237,7 +241,11 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
         }
         NoVueRefAsOperandQuery::JsIdentifierAssignment(ident_assignment) => {
             let binding = model.binding(ident_assignment)?.tree();
-            let declarator = binding.declaration_as::<JsVariableDeclarator>()?;
+            let declaration = binding.declaration()?;
+            let declaration = declaration
+                .parent_binding_pattern_declaration()
+                .unwrap_or(declaration);
+            let declarator = JsVariableDeclarator::cast(declaration.into_syntax())?;
             let init_clause = declarator.initializer()?;
             let init_expr = init_clause.expression().ok()?;
             let call_expr = init_expr.as_js_call_expression()?;
