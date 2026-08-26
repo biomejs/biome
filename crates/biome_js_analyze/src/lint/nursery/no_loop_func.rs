@@ -10,8 +10,7 @@ use biome_js_semantic::{
 use biome_js_syntax::{
     AnyJsForInitializer, AnyJsVariableDeclaration, JsArrowFunctionExpression, JsCallExpression,
     JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionDeclaration,
-    JsFunctionExpression, JsSyntaxKind, JsVariableKind, JsWhileStatement,
-    binding_ext::AnyJsBindingDeclaration,
+    JsFunctionExpression, JsSyntaxKind, JsVariableDeclarator, JsVariableKind, JsWhileStatement,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextSize, TokenText, declare_node_union};
 use biome_rule_options::no_loop_func::NoLoopFuncOptions;
@@ -377,15 +376,9 @@ fn is_safe_capture(loop_node: &AnyLoopStatement, capture: &Capture, model: &Sema
 /// Returns the variable declaration that created a binding, when the binding comes from a
 /// declaration the rule knows how to classify.
 fn binding_declaration(binding: &Binding) -> Option<AnyJsVariableDeclaration> {
-    let declaration = binding.tree().declaration()?;
-    let declaration = declaration
-        .parent_binding_pattern_declaration()
-        .unwrap_or(declaration);
-    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
-        return None;
-    };
-
-    declarator
+    binding
+        .tree()
+        .declaration_as::<JsVariableDeclarator>()?
         .syntax()
         .ancestors()
         .find_map(AnyJsVariableDeclaration::cast)

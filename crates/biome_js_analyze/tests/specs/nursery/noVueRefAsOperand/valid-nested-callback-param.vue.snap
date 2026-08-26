@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-nested-callback-param.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+import { computed } from 'vue'
+
+const result = computed(() => [{ label: 'a' }].find((item) => item.label === 'a'))
+</script>
+
+```

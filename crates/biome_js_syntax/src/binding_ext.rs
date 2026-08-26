@@ -5,16 +5,17 @@ use crate::{
     JsClassExpression, JsConstructorClassMember, JsConstructorParameterList,
     JsConstructorParameters, JsDefaultImportSpecifier, JsExport, JsFormalParameter,
     JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsIdentifierBinding, JsMethodClassMember, JsMethodObjectMember, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsObjectBindingPatternProperty, JsObjectBindingPatternRest,
-    JsObjectBindingPatternShorthandProperty, JsParameterList, JsParameters, JsRestParameter,
-    JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
-    TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
-    TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
-    TsEnumMember, TsExternalModuleDeclaration, TsFunctionType, TsIdentifierBinding,
-    TsImportEqualsDeclaration, TsIndexSignatureClassMember, TsIndexSignatureParameter, TsInferType,
-    TsInterfaceDeclaration, TsLiteralEnumMemberName, TsMappedType, TsMethodSignatureClassMember,
+    JsIdentifierBinding, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
+    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsObjectBindingPatternProperty,
+    JsObjectBindingPatternRest, JsObjectBindingPatternShorthandProperty, JsParameterList,
+    JsParameters, JsRestParameter, JsSetterClassMember, JsSetterObjectMember,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclarator, TsCallSignatureTypeMember, TsConstructSignatureTypeMember,
+    TsConstructorSignatureClassMember, TsConstructorType, TsDeclareFunctionDeclaration,
+    TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration, TsEnumMember,
+    TsExternalModuleDeclaration, TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration,
+    TsIndexSignatureClassMember, TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration,
+    TsLiteralEnumMemberName, TsMappedType, TsMethodSignatureClassMember,
     TsMethodSignatureTypeMember, TsModuleDeclaration, TsPropertyParameter,
     TsSetterSignatureClassMember, TsSetterSignatureTypeMember, TsTypeAliasDeclaration,
     TsTypeParameter, TsTypeParameterName,
@@ -325,6 +326,19 @@ impl AnyJsIdentifierBinding {
 
     pub fn declaration(&self) -> Option<AnyJsBindingDeclaration> {
         declaration(self.syntax().parent()?)
+    }
+
+    /// Returns the declaration of this binding as `T`, resolving past
+    /// destructuring first. Returns `None` if the declaration doesn't match `T`.
+    pub fn declaration_as<T>(&self) -> Option<T>
+    where
+        T: AstNode<Language = JsLanguage> + Into<AnyJsBindingDeclaration>,
+    {
+        let declaration = self.declaration()?;
+        let declaration = declaration
+            .parent_binding_pattern_declaration()
+            .unwrap_or(declaration);
+        T::cast(declaration.into_syntax())
     }
 
     pub fn is_under_pattern_binding(&self) -> Option<bool> {
