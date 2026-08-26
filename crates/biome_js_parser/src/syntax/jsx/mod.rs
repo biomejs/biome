@@ -777,7 +777,7 @@ fn parse_jsx_spread_attribute(p: &mut JsParser) -> ParsedSyntax {
 /// templates (the JSX-like body of an `.astro` file), so the check is gated
 /// on the JS source's embedding kind.
 fn is_at_jsx_shorthand_attribute(p: &mut JsParser) -> bool {
-    if !p.source_type.as_embedding_kind().is_astro() {
+    if !p.source_type.as_embedding_kind().is_astro_template() {
         return false;
     }
     // `{` followed by an identifier and a closing `}` — anything else

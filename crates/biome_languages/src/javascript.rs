@@ -212,6 +212,16 @@ impl JsEmbeddingKind {
             }
         )
     }
+    /// Astro's HTML-flavored leniencies stop at the template; frontmatter is strict TSX.
+    pub const fn is_astro_template(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                frontmatter: false,
+                ..
+            }
+        )
+    }
     pub const fn is_vue(&self) -> bool {
         matches!(self, Self::Vue { .. })
     }

@@ -427,6 +427,7 @@ impl<'src> JsLexer<'src> {
         }
     }
 
+    // Must run before any JSX_IDENT re-lex: `re_lex` drops a result whose kind already matches.
     fn re_lex_astro_jsx_attribute_name(&mut self) -> JsSyntaxKind {
         let start = self.position;
 

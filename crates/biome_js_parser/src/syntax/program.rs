@@ -123,7 +123,7 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
-    if p.source_type().as_embedding_kind().is_astro() {
+    if p.source_type().as_embedding_kind().is_astro_template() {
         skip_astro_html_comments(p);
     }
     let expr_marker = p.start();
@@ -133,7 +133,7 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
 
     // Astro renders a body that holds only comments as nothing, the way JSX does
     // for `{/* c */}` children.
-    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro();
+    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro_template();
 
     if !has_expression && is_empty_astro_body {
         expr_marker.abandon(p);

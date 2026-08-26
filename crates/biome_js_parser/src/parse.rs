@@ -598,4 +598,63 @@ mod astro_raw_and_comment_edges {
         let tree = assert_clean("<!-- lead --> <a></a>");
         assert!(tree.contains("<!-- lead -->"), "{tree}");
     }
+
+    #[test]
+    fn bare_closing_brace_in_text_is_an_error() {
+        let parse = parse(
+            "x && <div>a } b</div>",
+            astro_source(),
+            JsParserOptions::default(),
+        );
+        let diagnostics = format!("{:?}", parse.diagnostics());
+        assert!(diagnostics.contains("Did you mean"), "{diagnostics}");
+        assert!(diagnostics.contains("{'}'}"), "{diagnostics}");
+    }
+}
+
+#[cfg(test)]
+mod astro_frontmatter_is_strict_tsx {
+    use super::*;
+    use crate::JsParserOptions;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    fn frontmatter_source() -> JsFileSource {
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: true,
+            is_class_attribute: false,
+        })
+    }
+
+    fn assert_errors(body: &str) {
+        let parse = parse(body, frontmatter_source(), JsParserOptions::default());
+        assert!(parse.has_errors(), "{body:?} parsed without errors");
+    }
+
+    #[test]
+    fn unquoted_attribute_values_are_rejected() {
+        assert_errors("const el = <div class=foo />;");
+    }
+
+    #[test]
+    fn html_comments_are_rejected() {
+        assert_errors("const el = <div><!-- c --></div>;");
+    }
+
+    #[test]
+    fn adjacent_siblings_are_rejected() {
+        assert_errors("const a = <p>1</p> <p>2</p>;");
+    }
+
+    #[test]
+    fn script_children_stay_an_expression_child() {
+        let parse = parse(
+            "const el = <script>{code}</script>; const code = 1;",
+            frontmatter_source(),
+            JsParserOptions::default(),
+        );
+        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+        let tree = format!("{:#?}", parse.syntax());
+        assert!(tree.contains("JSX_EXPRESSION_CHILD"), "{tree}");
+        assert!(!tree.contains("JSX_TEXT_LITERAL"), "{tree}");
+    }
 }
