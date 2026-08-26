@@ -1212,7 +1212,8 @@ fn break_for_list_interrupt_after_inline_newline(
         return line_starts_with_nonone_ordered_marker_after_indent(p);
     }
 
-    if indent <= required_indent.saturating_add(MAX_BLOCK_PREFIX_INDENT)
+    if p.state().block_quote_depth == 0
+        && indent <= required_indent.saturating_add(MAX_BLOCK_PREFIX_INDENT)
         && (source_line_starts_with_bullet_marker(p)
             || source_line_starts_with_nonempty_one_ordered_marker(p))
     {
