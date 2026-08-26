@@ -2680,7 +2680,6 @@ mod js_scanner {
         assert_eq!(expression(source), Some(source.len() - 1));
     }
 
-    /// Astro's frontmatter is TypeScript, where `<` opens a type assertion.
     #[test]
     fn a_trailing_escape_does_not_scan_past_the_input() {
         let source = "`a\\";
@@ -2691,6 +2690,7 @@ mod js_scanner {
         );
     }
 
+    /// Astro's frontmatter is TypeScript, where `<` opens a type assertion.
     #[test]
     fn a_type_assertion_in_frontmatter_closes_the_fence() {
         assert_eq!(fence("const a = <string>x;\n---\n"), Some(21));
