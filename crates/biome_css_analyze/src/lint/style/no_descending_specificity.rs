@@ -195,9 +195,6 @@ fn find_descending_selector(
             continue;
         };
 
-        // `get_mut` rather than `get` + `insert`: the running maximum is
-        // updated in place, so a tail that keeps climbing is hashed once per
-        // selector instead of twice.
         if let Some(seen) = visited_selectors.get_mut(&tail_selector_str) {
             let (last_text_range, last_specificity) = *seen;
             let specificity = selector.specificity();
