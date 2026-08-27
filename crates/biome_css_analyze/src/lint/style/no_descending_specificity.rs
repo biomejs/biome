@@ -172,8 +172,12 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
 }
 
 /// This function traverses the CSS rules starting from the given rule and checks for selectors that have the same tail selector.
-/// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
+/// For each selector, it compares its specificity against the highest specificity seen so far among preceding selectors sharing that tail.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
+///
+/// `visited_selectors` therefore holds the running maximum per tail selector, not the first
+/// occurrence: a tail may appear any number of times, and only the highest preceding specificity
+/// can be overridden by a later one.
 fn find_descending_selector(
     root: &AnyCssRoot,
     rule: &CssSemanticRule,
@@ -195,13 +199,17 @@ fn find_descending_selector(
             continue;
         };
 
-        if let Some((last_text_range, last_specificity)) = visited_selectors.get(&tail_selector_str)
+        if let Some(&(last_text_range, last_specificity)) =
+            visited_selectors.get(&tail_selector_str)
         {
-            if last_specificity > &selector.specificity() {
+            let specificity = selector.specificity();
+            if last_specificity > specificity {
                 descending_selectors.push(DescendingSelector {
-                    high: (*last_text_range, *last_specificity),
-                    low: (selector.range(root), selector.specificity()),
+                    high: (last_text_range, last_specificity),
+                    low: (selector.range(root), specificity),
                 });
+            } else if specificity > last_specificity {
+                visited_selectors.insert(tail_selector_str, (selector.range(root), specificity));
             }
         } else {
             visited_selectors.insert(
