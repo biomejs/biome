@@ -148,7 +148,7 @@ impl Rule for NoReactStringRefs {
     }
 }
 
-fn is_string_template(template: &JsTemplateExpression) -> bool {
+fn is_non_empty_template(template: &JsTemplateExpression) -> bool {
     template.elements().into_iter().any(|element| {
         matches!(
             element,
@@ -158,7 +158,7 @@ fn is_string_template(template: &JsTemplateExpression) -> bool {
     })
 }
 
-/// Check if the attribute value is a string ref, which can be either a string literal or a template literal with only string chunks.
+/// A string literal or any template is a string ref, since templates evaluate to strings.
 fn is_string_ref_value(value: &AnyJsxAttributeValue) -> bool {
     match value {
         AnyJsxAttributeValue::AnyJsxTag(_) => false,
@@ -169,12 +169,12 @@ fn is_string_ref_value(value: &AnyJsxAttributeValue) -> bool {
                     literal.as_js_string_literal_expression().is_some()
                 }
                 Some(AnyJsExpression::JsTemplateExpression(template)) => {
-                    is_string_template(&template)
+                    is_non_empty_template(&template)
                 }
                 _ => false,
             }
         }
-        AnyJsxAttributeValue::JsTemplateExpression(template) => is_string_template(template),
+        AnyJsxAttributeValue::JsTemplateExpression(template) => is_non_empty_template(template),
     }
 }
 
