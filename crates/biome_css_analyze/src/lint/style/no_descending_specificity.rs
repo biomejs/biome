@@ -195,9 +195,11 @@ fn find_descending_selector(
             continue;
         };
 
-        if let Some(&(last_text_range, last_specificity)) =
-            visited_selectors.get(&tail_selector_str)
-        {
+        // `get_mut` rather than `get` + `insert`: the running maximum is
+        // updated in place, so a tail that keeps climbing is hashed once per
+        // selector instead of twice.
+        if let Some(seen) = visited_selectors.get_mut(&tail_selector_str) {
+            let (last_text_range, last_specificity) = *seen;
             let specificity = selector.specificity();
             if last_specificity > specificity {
                 descending_selectors.push(DescendingSelector {
@@ -205,7 +207,7 @@ fn find_descending_selector(
                     low: (selector.range(root), specificity),
                 });
             } else if specificity > last_specificity {
-                visited_selectors.insert(tail_selector_str, (selector.range(root), specificity));
+                *seen = (selector.range(root), specificity);
             }
         } else {
             visited_selectors.insert(
