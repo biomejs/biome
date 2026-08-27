@@ -4924,38 +4924,45 @@ async fn should_apply_changed_configuration_after_unchanged_reload() -> Result<(
     let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
     let reader = tokio::spawn(client_handler(stream, sink, sender));
 
-    server.initialize().await?;
+    // Declare `window.workDoneProgress` support, so every project scan is
+    // observable through a `$/progress` "begin" notification.
+    server.initialize_with_work_done_progress().await?;
     server.initialized().await?;
 
     server.open_document("a == b;\n").await?;
 
-    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
-    let Some(ServerNotification::PublishDiagnostics(result)) = notification else {
-        panic!("expected diagnostics for the initial configuration");
-    };
+    let (notification, scans) = wait_for_notification_counting_scans(&mut receiver, |n| {
+        matches!(n, ServerNotification::PublishDiagnostics(params) if !params.diagnostics.is_empty())
+    })
+    .await;
     assert!(
-        !result.diagnostics.is_empty(),
+        notification.is_some(),
         "the strict configuration should report noDoubleEquals"
     );
+    assert_eq!(scans, 1, "the initial configuration load should scan once");
 
     sleep(Duration::from_millis(300)).await;
 
     // Simulates the editor sending `workspace/didChangeConfiguration` without
-    // any change to biome.json: behavior must stay the same.
+    // any change to biome.json: behavior must stay the same, and no project
+    // scan may run.
     server.load_configuration().await?;
 
-    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
-    let Some(ServerNotification::PublishDiagnostics(result)) = notification else {
-        panic!("expected diagnostics after the unchanged configuration reload");
-    };
+    let (notification, scans) = wait_for_notification_counting_scans(&mut receiver, |n| {
+        matches!(n, ServerNotification::PublishDiagnostics(params) if !params.diagnostics.is_empty())
+    })
+    .await;
     assert!(
-        !result.diagnostics.is_empty(),
+        notification.is_some(),
         "an unchanged configuration reload should keep reporting noDoubleEquals"
     );
 
     sleep(Duration::from_millis(300)).await;
 
-    // A reload after the configuration changed must apply the new settings.
+    // A reload after the configuration changed must rescan and apply the new
+    // settings. The scans observed since the previous step also cover the
+    // unchanged reload above: exactly one scan means the unchanged reload
+    // did not trigger any.
     let relaxed_config = r#"{
         "linter": {
             "rules": {
@@ -4968,13 +4975,18 @@ async fn should_apply_changed_configuration_after_unchanged_reload() -> Result<(
 
     server.load_configuration().await?;
 
-    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
-    let Some(ServerNotification::PublishDiagnostics(result)) = notification else {
-        panic!("expected diagnostics after the changed configuration reload");
-    };
+    let (notification, more_scans) = wait_for_notification_counting_scans(&mut receiver, |n| {
+        matches!(n, ServerNotification::PublishDiagnostics(params) if params.diagnostics.is_empty())
+    })
+    .await;
     assert!(
-        result.diagnostics.is_empty(),
+        notification.is_some(),
         "diagnostics should be cleared after the configuration disables the rule"
+    );
+    assert_eq!(
+        scans + more_scans,
+        1,
+        "the unchanged reload must not scan; the changed reload must scan exactly once"
     );
 
     sleep(Duration::from_millis(300)).await;
@@ -4985,15 +4997,17 @@ async fn should_apply_changed_configuration_after_unchanged_reload() -> Result<(
 
     server.load_configuration().await?;
 
-    // Wait specifically for a non-empty publish: earlier steps may leave a
-    // stale empty notification in the channel.
-    let notification = wait_for_notification(&mut receiver, |n| {
+    let (notification, scans) = wait_for_notification_counting_scans(&mut receiver, |n| {
         matches!(n, ServerNotification::PublishDiagnostics(params) if !params.diagnostics.is_empty())
     })
     .await;
     assert!(
         notification.is_some(),
         "reverting to the previous strict configuration should report noDoubleEquals again"
+    );
+    assert_eq!(
+        scans, 1,
+        "reverting to a previously applied configuration must scan exactly once"
     );
 
     server.close_document().await?;
@@ -5660,7 +5674,7 @@ fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) 
                     .is_some_and(|c| &NumberOrString::String(code.to_string()) == c)
             }));
         }
-        ServerNotification::ShowMessage(_) => {
+        ServerNotification::ShowMessage(_) | ServerNotification::Progress(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }
@@ -5671,7 +5685,7 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
         ServerNotification::PublishDiagnostics(publish) => {
             assert_eq!(publish.diagnostics.len(), expected_count)
         }
-        ServerNotification::ShowMessage(_) => {
+        ServerNotification::ShowMessage(_) | ServerNotification::Progress(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }

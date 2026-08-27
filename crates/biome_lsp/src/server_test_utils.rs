@@ -20,9 +20,10 @@ use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, CodeActionCapabilityResolveSupport,
     CodeActionClientCapabilities, DidChangeConfigurationParams, DidChangeTextDocumentParams,
     DidCloseTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, InitializeResult,
-    InitializedParams, PublishDiagnosticsParams, ShowMessageParams, TextDocumentClientCapabilities,
-    TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, Uri,
-    VersionedTextDocumentIdentifier, WorkspaceFolder,
+    InitializedParams, ProgressParams, ProgressParamsValue, PublishDiagnosticsParams,
+    ShowMessageParams, TextDocumentClientCapabilities, TextDocumentContentChangeEvent,
+    TextDocumentIdentifier, TextDocumentItem, Uri, VersionedTextDocumentIdentifier,
+    WindowClientCapabilities, WorkDoneProgress, WorkspaceFolder,
 };
 
 /// Statically build an [Uri] instance that points to the file at `$path`
@@ -171,6 +172,39 @@ impl Server {
                     root_uri: Some(root_uri),
                     initialization_options: None,
                     capabilities: ClientCapabilities::default(),
+                    trace: None,
+                    workspace_folders: None,
+                    client_info: None,
+                    locale: None,
+                    work_done_progress_params: Default::default(),
+                },
+            )
+            .await?
+            .context("initialize returned None")?;
+
+        Ok(())
+    }
+
+    /// Like [`Self::initialize`], but declares `window.workDoneProgress`
+    /// support, so the server reports project scans via `$/progress`.
+    #[expect(deprecated)]
+    pub(crate) async fn initialize_with_work_done_progress(&mut self) -> Result<()> {
+        let _res: InitializeResult = self
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: Some(uri!("")),
+                    initialization_options: None,
+                    capabilities: ClientCapabilities {
+                        window: Some(WindowClientCapabilities {
+                            work_done_progress: Some(true),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    },
                     trace: None,
                     workspace_folders: None,
                     client_info: None,
@@ -397,6 +431,7 @@ pub(crate) const CHANNEL_BUFFER_SIZE: usize = 8;
 pub(crate) enum ServerNotification {
     PublishDiagnostics(PublishDiagnosticsParams),
     ShowMessage(ShowMessageParams),
+    Progress(ProgressParams),
 }
 
 impl ServerNotification {
@@ -406,6 +441,47 @@ impl ServerNotification {
 
     pub(crate) fn is_show_message(&self) -> bool {
         matches!(self, Self::ShowMessage(_))
+    }
+
+    /// Returns `true` for the `$/progress` "begin" notification the server
+    /// sends when a project scan starts.
+    pub(crate) fn is_scan_progress_begin(&self) -> bool {
+        matches!(
+            self,
+            Self::Progress(ProgressParams {
+                value: ProgressParamsValue::WorkDone(WorkDoneProgress::Begin(_)),
+                ..
+            })
+        )
+    }
+}
+
+/// Like [`wait_for_notification`], but also counts how many project-scan
+/// `$/progress` "begin" notifications were observed while waiting.
+pub(crate) async fn wait_for_notification_counting_scans(
+    receiver: &mut (impl Stream<Item = ServerNotification> + Unpin),
+    check: impl Fn(&ServerNotification) -> bool,
+) -> (Option<ServerNotification>, usize) {
+    let mut scans = 0;
+    loop {
+        let notification = tokio::select! {
+            msg = receiver.next() => msg,
+            _ = sleep(Duration::from_secs(3)) => {
+                panic!("timed out waiting for a server notification")
+            }
+        };
+
+        match notification {
+            Some(notification) => {
+                if notification.is_scan_progress_begin() {
+                    scans += 1;
+                }
+                if check(&notification) {
+                    return (Some(notification), scans);
+                }
+            }
+            None => break (None, scans),
+        }
     }
 }
 
@@ -481,6 +557,9 @@ where
             "window/showMessage" => Some(ServerNotification::ShowMessage(
                 from_value(params).expect("invalid params"),
             )),
+            "$/progress" => Some(ServerNotification::Progress(
+                from_value(params).expect("invalid params"),
+            )),
             _ => None,
         } {
             match notify.send(notification).await {
@@ -501,6 +580,7 @@ where
 
                 Response::from_ok(id.clone(), result)
             }
+            "window/workDoneProgress/create" => Response::from_ok(id.clone(), to_value(())?),
             _ => Response::from_error(id.clone(), jsonrpc::Error::method_not_found()),
         };
 
