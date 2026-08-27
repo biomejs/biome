@@ -127,16 +127,14 @@ impl OverridePattern {
             mut html,
             #[cfg(feature = "lang_md")]
             mut markdown,
+            #[cfg(feature = "lang_yaml")]
+            mut yaml,
             mut formatter,
             mut linter,
             mut assist,
             files,
             #[cfg(feature = "plugins")]
             plugins,
-            #[cfg(feature = "lang_md")]
-            mut markdown,
-            #[cfg(feature = "lang_yaml")]
-            mut yaml,
         } = self.clone();
 
         #[cfg(feature = "lang_js")]
@@ -581,6 +579,8 @@ impl OverridePattern {
             html,
             #[cfg(feature = "lang_md")]
             markdown,
+            #[cfg(feature = "lang_yaml")]
+            yaml,
             #[cfg(feature = "plugins")]
             plugins,
             assist,
