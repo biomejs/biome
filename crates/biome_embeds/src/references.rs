@@ -99,7 +99,7 @@ pub fn is_svelte_store_reference_used(
         })
 }
 
-fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
+pub(crate) fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
     // These are special Svelte runes that are not valid store names, so we should ignore them.
     const SVELTE_RUNES: [&str; 7] = [
         "$bindable",
@@ -154,7 +154,7 @@ pub fn is_vue_directive_reference_used(
 
 /// Returns `true` if `reference_name` starts with `v` followed by an uppercase letter
 /// or digit, which is the naming convention for Vue custom directives (e.g. `vHighlight`).
-fn is_potential_vue_directive_reference(reference_name: &str) -> bool {
+pub(crate) fn is_potential_vue_directive_reference(reference_name: &str) -> bool {
     matches!(
         reference_name.as_bytes(),
         [b'v', b'A'..=b'Z' | b'0'..=b'9', ..]
@@ -164,7 +164,10 @@ fn is_potential_vue_directive_reference(reference_name: &str) -> bool {
 /// Returns `true` if `directive_name` starts with `v-` and its camelCase
 /// form matches `reference_name` (e.g. `v-highlight` matches `vHighlight`),
 /// without allocating.
-fn vue_directive_name_matches_reference_name(directive_name: &str, reference_name: &str) -> bool {
+pub(crate) fn vue_directive_name_matches_reference_name(
+    directive_name: &str,
+    reference_name: &str,
+) -> bool {
     if !directive_name.starts_with("v-") {
         return false;
     }
