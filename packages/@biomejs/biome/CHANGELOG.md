@@ -1,5 +1,113 @@
 # @biomejs/biome
 
+## 2.5.11
+
+### Patch Changes
+
+- [#11499](https://github.com/biomejs/biome/pull/11499) [`9743d0c`](https://github.com/biomejs/biome/commit/9743d0ceae807757300e5b0ec66266125bc664c1) Thanks [@scs0209](https://github.com/scs0209)! - Fixed [#11496](https://github.com/biomejs/biome/issues/11496): [`useValidAnchor`](https://biomejs.dev/linter/rules/use-valid-anchor/) now treats Astro JSX shorthand attributes like `<a {href}>` as a valid `href`.
+
+- [#11437](https://github.com/biomejs/biome/pull/11437) [`88f805e`](https://github.com/biomejs/biome/commit/88f805e19b67ab4c876e4fc4a8b4018bd03df20b) Thanks [@Princesseuh](https://github.com/Princesseuh)! - Fixed [#9944](https://github.com/biomejs/biome/issues/9944): adjacent elements inside an Astro expression now parse as an implicit fragment instead of raising an error.
+  
+  ```astro
+  {options.map(() =>
+    <div />
+    <div />
+  )}
+  ```
+
+- [#11437](https://github.com/biomejs/biome/pull/11437) [`88f805e`](https://github.com/biomejs/biome/commit/88f805e19b67ab4c876e4fc4a8b4018bd03df20b) Thanks [@Princesseuh](https://github.com/Princesseuh)! - Fixed Astro templates rejecting unclosed HTML void elements, such as `{cond && <br>}`.
+
+- [#11507](https://github.com/biomejs/biome/pull/11507) [`e2fc036`](https://github.com/biomejs/biome/commit/e2fc03669886732ac9c768aa00f3ffae46241848) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#11157](https://github.com/biomejs/biome/issues/11157): [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports Vue `<script setup>` bindings used by CSS `v-bind()` as unused.
+
+- [#11398](https://github.com/biomejs/biome/pull/11398) [`afc4615`](https://github.com/biomejs/biome/commit/afc4615079a72e0810f06186f78e5cb177a5638e) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#11389](https://github.com/biomejs/biome/issues/11389): Files passed through `--stdin-file-path` now use full HTML support for Astro, Svelte, and Vue when it is enabled.
+
+- [#11526](https://github.com/biomejs/biome/pull/11526) [`372cd68`](https://github.com/biomejs/biome/commit/372cd68ba156efdc497017598a49e21484a3ada9) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [`noVueRefAsOperand`](https://biomejs.dev/linter/rules/no-vue-ref-as-operand/) to track Vue refs through declaration aliases and `toRefs()` properties, and to recognize `useTemplateRef()` results. The rule no longer reports false positives such as plain ref transfers, plain `toRefs()` property access, `defineModel()` modifiers, or the supported `.effect` member as operands.
+  
+  The refactor enabling these fixes also improves the performance of the rule.
+
+- [#11458](https://github.com/biomejs/biome/pull/11458) [`a7cd286`](https://github.com/biomejs/biome/commit/a7cd2868c3d98fbc75174c5bf69fdcfacbe87304) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#11436](https://github.com/biomejs/biome/issues/11436): GritQL snippets such as `export { $specifiers } from $source` now match named re-exports with aliases, inline `type` modifiers, and multiple specifiers.
+
+- [#11515](https://github.com/biomejs/biome/pull/11515) [`382b15d`](https://github.com/biomejs/biome/commit/382b15d5e0f9e2a75604fec1f15ad342628c99c7) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#11390](https://github.com/biomejs/biome/issues/11390), where `noFloatingPromises` performed expensive full type inference for calls to non-Promise methods declared on third-party TypeScript classes. The rule now classifies those calls using targeted type information.
+
+- [#11516](https://github.com/biomejs/biome/pull/11516) [`6f40e82`](https://github.com/biomejs/biome/commit/6f40e8224afc58737626d997c0ea779e2b37baca) Thanks [@levrik](https://github.com/levrik)! - Fixed [`noVueRefAsOperand`](https://biomejs.dev/linter/rules/no-vue-ref-as-operand/) so it no longer reports a callback parameter (e.g. from `.find()`, `.map()`) as an unwrapped ref value just because it's nested inside a `ref()`, `computed()`, or similar call.
+  
+  ```js
+  const result = computed(() => list.find((item) => item.label === "a"));
+  ```
+  
+  Previously, `item` here was incorrectly treated as a ref value because the rule attributed it to the outer `computed()` call.
+
+- [#11495](https://github.com/biomejs/biome/pull/11495) [`496268d`](https://github.com/biomejs/biome/commit/496268d1470b6a4cd52bff03d37899c4bb7f77ab) Thanks [@Netail](https://github.com/Netail)! - Fixed [`useGraphqlNamingConvention`](https://biomejs.dev/linter/rules/use-graphql-naming-convention/) so it no longer reports GraphQL enum value definitions with comments & descriptions and now displays a more accurate diagnostic range.
+
+- [#11407](https://github.com/biomejs/biome/pull/11407) [`6ef52b0`](https://github.com/biomejs/biome/commit/6ef52b02fc07e23de7ad498d853aaf2c825717fd) Thanks [@1678092075](https://github.com/1678092075)! - Fixed [#11214](https://github.com/biomejs/biome/issues/11214): [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports type parameters declared by non-default function overload signatures that have an implementation.
+
+- [#11322](https://github.com/biomejs/biome/pull/11322) [`5c353e6`](https://github.com/biomejs/biome/commit/5c353e6c85a40807e2710684da807f8757ee650c) Thanks [@jp-knj](https://github.com/jp-knj)! - Added a new nursery rule `noAstroSetHtmlDirective`, which disallows Astro's `set:html` directive because untrusted content can introduce cross-site scripting vulnerabilities.
+  
+  For example, the following snippet triggers the rule:
+  
+  ```astro
+  <div set:html={content} />
+  ```
+
+- [#11462](https://github.com/biomejs/biome/pull/11462) [`18883b7`](https://github.com/biomejs/biome/commit/18883b7dafb8f9581534508fdd5b1e34632f2724) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10776](https://github.com/biomejs/biome/issues/10776): [`useVueHyphenatedAttributes`](https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes/) no longer reports lowercase attribute names containing punctuation, such as `pt:header:data-test-id` and `some_attr`.
+
+- [#11476](https://github.com/biomejs/biome/pull/11476) [`3270ca4`](https://github.com/biomejs/biome/commit/3270ca4560a28eee92564b9ef64f778972cbf3ab) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10330](https://github.com/biomejs/biome/issues/10330): Vue interpolation delimiters now stay attached to whitespace-sensitive element boundaries and adjacent inline siblings, wrapping their expression when needed to fit the configured line width. Interpolations followed by text now also converge after one formatting pass.
+  
+  ```diff
+  -<v-btn v-if="store.state.user" variant="text" to="/my-rooms"
+  -  >{{ $t("nav.my-rooms") }}</v-btn
+  ->
+  +<v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
+  +  $t("nav.my-rooms")
+  +}}</v-btn>
+  ```
+
+- [#11191](https://github.com/biomejs/biome/pull/11191) [`3e5367f`](https://github.com/biomejs/biome/commit/3e5367f13de6c8cb80070544774c9935cac7d649) Thanks [@ematipico](https://github.com/ematipico)! - Added the nursery rule [`noUndeclaredCustomProperties`](https://biomejs.dev/linter/rules/no-undeclared-custom-properties/), which reports references to custom properties that are not defined in available CSS, static HTML-like `style` attributes, or JSX string `style` attributes.
+  
+  For example, the following snippet triggers the rule:
+  
+  ```css
+  a { color: var(--undefined-color); }
+  ```
+
+- [#11435](https://github.com/biomejs/biome/pull/11435) [`7754894`](https://github.com/biomejs/biome/commit/7754894ffaaaa2ab0b281789d5ceae8f333d61a4) Thanks [@levrik](https://github.com/levrik)! - Fixed: Variables and imports used as custom Vue directives are no longer reported as unused.
+  
+  For example:
+  
+  ```vue
+  <script setup>
+  const vHighlight = {
+    mounted: (element) => {
+      element.style.color = "red";
+    },
+  };
+  </script>
+  
+  <template>
+    <p v-highlight>Hello</p>
+  </template>
+  ```
+
+- [#11501](https://github.com/biomejs/biome/pull/11501) [`e6acded`](https://github.com/biomejs/biome/commit/e6acdedf09c452371670aaaffd0b55206019d1e6) Thanks [@aminya](https://github.com/aminya)! - Improved the performance of [`useArraySortCompare`](https://biomejs.dev/linter/rules/use-array-sort-compare/) by skipping type inference for calls to unrelated methods.
+
+- [#11467](https://github.com/biomejs/biome/pull/11467) [`66b282c`](https://github.com/biomejs/biome/commit/66b282cb70cd61b7606ce1658482b9fe082e37e6) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#11464](https://github.com/biomejs/biome/issues/11464): Biome now parses parenthesized object literals returned from arrow functions when they contain a conditional expression and a nested arrow function.
+
+- [#11456](https://github.com/biomejs/biome/pull/11456) [`db9aa2a`](https://github.com/biomejs/biome/commit/db9aa2a3d936372cbe3ee87687ad25816c9d75ae) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10278](https://github.com/biomejs/biome/issues/10278): Marked the fix for [`noThisInStatic`](https://biomejs.dev/linter/rules/no-this-in-static/) as unsafe by default.
+
+- [#11502](https://github.com/biomejs/biome/pull/11502) [`652aedb`](https://github.com/biomejs/biome/commit/652aedbdcba8ccb45ccecbce506c90a337f2d64c) Thanks [@levrik](https://github.com/levrik)! - `noGlobalAssign` no longer reports assignments to a Vue `<script setup>` binding from a template expression, when the binding's name happens to match a built-in global (e.g. `open`, `parent`, `top`).
+  
+  For example, this no longer triggers a diagnostic:
+  
+  ```vue
+  <script setup>
+  const open = defineModel();
+  </script>
+  
+  <template>
+    <button @click="open = !open">Toggle</button>
+  </template>
+  ```
+
 ## 2.5.10
 
 ### Patch Changes
