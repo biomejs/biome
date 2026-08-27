@@ -1659,8 +1659,6 @@ const items = ['a', 'b'];
     );
 }
 
-/// Astro compiles `.astro` as TSX throughout, so an attribute expression accepts
-/// the same TypeScript and JSX syntax as a text expression does.
 #[test]
 fn astro_attribute_expression_accepts_tsx() {
     const FILE_CONTENT: &str = r#"---
