@@ -4904,6 +4904,87 @@ async fn should_apply_wrapped_biome_settings_from_did_change_configuration() -> 
 }
 
 #[tokio::test]
+async fn should_apply_changed_configuration_after_unchanged_reload() -> Result<()> {
+    let fs = Arc::new(MemoryFileSystem::default());
+    let strict_config = r#"{
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "suspicious": { "noDoubleEquals": "error" }
+            }
+        }
+    }"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), strict_config);
+
+    let factory = ServerFactory::new_with_fs(fs.clone());
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("a == b;\n").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(result)) = notification else {
+        panic!("expected diagnostics for the initial configuration");
+    };
+    assert!(
+        !result.diagnostics.is_empty(),
+        "the strict configuration should report noDoubleEquals"
+    );
+
+    sleep(Duration::from_millis(300)).await;
+
+    // A configuration reload without any change must keep the same behavior.
+    server.load_configuration().await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(result)) = notification else {
+        panic!("expected diagnostics after the unchanged configuration reload");
+    };
+    assert!(
+        !result.diagnostics.is_empty(),
+        "an unchanged configuration reload should keep reporting noDoubleEquals"
+    );
+
+    sleep(Duration::from_millis(300)).await;
+
+    // A reload after the configuration changed must apply the new settings.
+    let relaxed_config = r#"{
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "suspicious": { "noDoubleEquals": "off" }
+            }
+        }
+    }"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), relaxed_config);
+
+    server.load_configuration().await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(result)) = notification else {
+        panic!("expected diagnostics after the changed configuration reload");
+    };
+    assert!(
+        result.diagnostics.is_empty(),
+        "diagnostics should be cleared after the configuration disables the rule"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_plugin_diagnostics_for_vue_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
 
