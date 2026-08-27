@@ -38,7 +38,6 @@ use papaya::{HashMap, HashSet};
 use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
-use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicI32};
@@ -159,14 +158,27 @@ pub(crate) struct Session {
     configuration_status_by_path:
         TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
 
-    /// Fingerprint of the configuration each project was last loaded with,
+    /// The configuration each project was last successfully loaded with,
     /// keyed by project path.
     ///
     /// Editors send `workspace/didChangeConfiguration` for any settings
     /// change, and every notification reloads the configuration and forces a
-    /// full project rescan. The fingerprint lets us skip the rescan when the
-    /// effective configuration has not actually changed.
-    configuration_fingerprints: TokioRwLock<FxHashMap<Utf8PathBuf, u64>>,
+    /// full project rescan. Comparing against the last applied configuration
+    /// lets us skip the rescan when nothing has actually changed. The entry
+    /// is overwritten on every successful load, so changing the configuration
+    /// back and forth still triggers a rescan.
+    last_loaded_configurations: TokioRwLock<FxHashMap<Utf8PathBuf, LoadedConfigurationState>>,
+}
+
+/// The parts of the effective configuration that determine whether a project
+/// rescan is needed after a configuration reload.
+#[derive(Eq, PartialEq)]
+struct LoadedConfigurationState {
+    configuration: Box<Configuration>,
+    configuration_path: Option<Utf8PathBuf>,
+    /// Editor features influence the effective scan kind, so changing them
+    /// must trigger a rescan too.
+    editor_scan_kind: ScanKind,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -284,7 +296,7 @@ impl Session {
             loading_operations: Default::default(),
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
-            configuration_fingerprints: Default::default(),
+            last_loaded_configurations: Default::default(),
         }
     }
 
@@ -1391,28 +1403,19 @@ impl Session {
         // Full project scans can be very expensive, so the rescan is skipped
         // when this project was already registered and the effective
         // configuration is unchanged.
-        let fingerprint = {
-            let mut hasher = DefaultHasher::new();
-            match serde_json::to_string(&configuration) {
-                Ok(serialized) => {
-                    serialized.hash(&mut hasher);
-                    configuration_path.hash(&mut hasher);
-                    // Editor features influence the effective scan kind, so
-                    // changing them must invalidate the fingerprint too.
-                    serde_json::to_string(&self.scan_kind_from_editor_features())
-                        .ok()
-                        .hash(&mut hasher);
-                    Some(hasher.finish())
-                }
-                Err(_) => None,
-            }
+        let loaded_state = LoadedConfigurationState {
+            configuration: Box::new(configuration.clone()),
+            configuration_path: configuration_path.clone(),
+            editor_scan_kind: self.scan_kind_from_editor_features(),
         };
-        let skip_scan = if let Some(fingerprint) = fingerprint {
-            let fingerprints = self.configuration_fingerprints.read().await;
-            project_was_registered && force && fingerprints.get(&project_path) == Some(&fingerprint)
-        } else {
-            false
-        };
+        let skip_scan = project_was_registered
+            && force
+            && self
+                .last_loaded_configurations
+                .read()
+                .await
+                .get(&project_path)
+                == Some(&loaded_state);
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
         // We give priority to the scan kind requested by the user.
@@ -1463,18 +1466,15 @@ impl Session {
             ConfigurationStatus::Loaded
         };
 
-        // Only remember the fingerprint of configurations that were applied
-        // successfully, so a reload with an unchanged configuration retries
-        // after an error instead of being skipped.
+        // Only remember configurations that were applied successfully, so a
+        // reload with an unchanged configuration retries after an error
+        // instead of being skipped.
         {
-            let mut fingerprints = self.configuration_fingerprints.write().await;
-            match fingerprint {
-                Some(fingerprint) if matches!(status, ConfigurationStatus::Loaded) => {
-                    fingerprints.insert(project_path, fingerprint);
-                }
-                _ => {
-                    fingerprints.remove(&project_path);
-                }
+            let mut last_loaded = self.last_loaded_configurations.write().await;
+            if matches!(status, ConfigurationStatus::Loaded) {
+                last_loaded.insert(project_path, loaded_state);
+            } else {
+                last_loaded.remove(&project_path);
             }
         }
 
@@ -1532,6 +1532,16 @@ impl Session {
 
     pub(crate) async fn clear_configuration_cache(&self) {
         self.configuration_status_by_path.write().await.clear();
+    }
+
+    /// Forgets the configurations projects were last successfully loaded
+    /// with, so the next configuration load always rescans.
+    ///
+    /// This must be called when workspace folders change, because removed
+    /// projects are unloaded from the workspace index and a matching
+    /// configuration must not skip the scan that rebuilds it.
+    pub(crate) async fn clear_loaded_configurations(&self) {
+        self.last_loaded_configurations.write().await.clear();
     }
 
     /// Broadcast a shutdown signal to all active connections

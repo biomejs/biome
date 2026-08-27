@@ -4940,7 +4940,8 @@ async fn should_apply_changed_configuration_after_unchanged_reload() -> Result<(
 
     sleep(Duration::from_millis(300)).await;
 
-    // A configuration reload without any change must keep the same behavior.
+    // Simulates the editor sending `workspace/didChangeConfiguration` without
+    // any change to biome.json: behavior must stay the same.
     server.load_configuration().await?;
 
     let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
@@ -4974,6 +4975,25 @@ async fn should_apply_changed_configuration_after_unchanged_reload() -> Result<(
     assert!(
         result.diagnostics.is_empty(),
         "diagnostics should be cleared after the configuration disables the rule"
+    );
+
+    sleep(Duration::from_millis(300)).await;
+
+    // Changing the configuration back to a previously applied one must rescan
+    // as well: only the most recently applied configuration is remembered.
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), strict_config);
+
+    server.load_configuration().await?;
+
+    // Wait specifically for a non-empty publish: earlier steps may leave a
+    // stale empty notification in the channel.
+    let notification = wait_for_notification(&mut receiver, |n| {
+        matches!(n, ServerNotification::PublishDiagnostics(params) if !params.diagnostics.is_empty())
+    })
+    .await;
+    assert!(
+        notification.is_some(),
+        "reverting to the previous strict configuration should report noDoubleEquals again"
     );
 
     server.close_document().await?;
