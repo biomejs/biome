@@ -32,7 +32,7 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
-use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_html_syntax::{HtmlSyntaxKind, T, VOID_ELEMENTS};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -79,26 +79,6 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> =
     token_set!(T![<], T![>], T!['}'], T!["}}"]);
-
-/// HTML [void elements](https://html.spec.whatwg.org/#void-elements): they never
-/// have content or a closing tag. Tag names are keywords, so this is an `O(1)`
-/// token-kind set.
-const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
-    T![area],
-    T![base],
-    T![br],
-    T![col],
-    T![embed],
-    T![hr],
-    T![img],
-    T![input],
-    T![link],
-    T![meta],
-    T![param],
-    T![source],
-    T![track],
-    T![wbr]
-);
 
 /// Elements whose content is treated as raw text / an embedded language. `script`
 /// and `style` share their kinds between HTML and SVG. The rest are
