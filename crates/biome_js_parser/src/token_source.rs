@@ -75,7 +75,9 @@ impl<'l> JsTokenSource<'l> {
         next_token_trivia.is_some()
     }
 
-    /// Trivia with no earlier token must be leading, or the tree sink strands it.
+    /// Returns whether a non-trivia token precedes the current one, walking back
+    /// over the trivia adjacent to it. Trivia with no earlier token must be
+    /// leading, or the tree sink strands it.
     fn preceding_token_exists(&self) -> bool {
         let mut position = self.current_range().start();
         if position == TextSize::from(0) {

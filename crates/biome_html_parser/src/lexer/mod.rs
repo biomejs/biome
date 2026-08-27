@@ -659,7 +659,7 @@ impl<'src> HtmlLexer<'src> {
     fn consume_astro_frontmatter_body(&mut self) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
         let length = JsScanner::frontmatter_length(&self.source.as_bytes()[self.position..]);
-        // The lexer must make progress even if a fence somehow sits at offset zero.
+        // The lexer must make progress even if a fence sits at offset zero.
         self.advance(length.max(1));
 
         HTML_LITERAL
@@ -2030,8 +2030,8 @@ enum JsContext {
         closing: bool,
         /// The offset of the tag name, just past the `<` or `</`.
         name_start: usize,
-        /// Whether the scan is inside an unquoted attribute value.
-        /// A `/` is part of the value.
+        /// Whether the scan is inside an unquoted attribute value, where a `/`
+        /// is part of the value.
         in_unquoted_value: bool,
     },
     /// A type argument list on a JSX tag, between `<` and its `>`.
@@ -2413,8 +2413,8 @@ fn starts_unquoted_value(byte: Option<u8>) -> bool {
 }
 
 /// Returns whether the code scanned so far ends where an expression may start.
-/// After an operand — a non-keyword identifier, a literal, or a closing bracket
-/// — the next `<` is an operator instead.
+/// After an operand (a non-keyword identifier, a literal, or a closing bracket),
+/// the next `<` is an operator instead.
 fn at_expression_position(scanned: &[u8]) -> bool {
     let Some(index) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
         return true;
@@ -2683,7 +2683,7 @@ mod js_scanner {
 
     /// A `<` that opens neither JSX nor a recognisably non-JSX construct
     /// swallows the rest of the source; the scan retries without JSX rather
-    /// than let the expression run away.
+    /// than letting the expression run away.
     #[test]
     fn a_runaway_element_falls_back_to_scanning_without_jsx() {
         let source = "await <T extends U>(v)}";

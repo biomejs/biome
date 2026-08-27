@@ -480,7 +480,6 @@ impl<'src> JsLexer<'src> {
                     .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
                     && ends_the_name(rest, name.len())
             }
-            // Component names are case-sensitive, so `is:raw` names match exactly.
             None => {
                 let JsxRawTextElement::Other(range) = element else {
                     return false;
@@ -634,7 +633,9 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    /// `/` does not terminate the value: HTML5 reads `value=4/>` as `4/`.
+    /// Consumes an unquoted Astro attribute value as a `JSX_STRING_LITERAL`,
+    /// ending at whitespace or one of `<`, `>`, `{`, `}`. A `/` does not
+    /// terminate the value: HTML5 reads `value=4/>` as `4/`.
     fn consume_astro_unquoted_attribute_value(&mut self) -> JsSyntaxKind {
         while let Some(chr) = self.current_byte() {
             match chr {

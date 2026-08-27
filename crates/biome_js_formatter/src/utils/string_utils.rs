@@ -9,7 +9,9 @@ use biome_unicode_table::is_js_ident;
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 
-/// An Astro `JSX_STRING_LITERAL` may be unquoted, so delimiters are not a given.
+/// Returns `literal` without its matching quote delimiters, or unchanged when it
+/// does not start and end with the same quote. An Astro `JSX_STRING_LITERAL` may
+/// be unquoted, so the quotes may be absent.
 fn strip_quotes(literal: &str) -> &str {
     let mut characters = literal.chars();
     match (characters.next(), characters.next_back()) {
@@ -350,7 +352,9 @@ impl<'token> LiteralStringNormaliser<'token> {
         strip_quotes(self.get_token().text_trimmed())
     }
 
-    /// JSX has no escapes, so a value holding both quote kinds fits inside neither.
+    /// Returns whether the token is a `JSX_STRING_LITERAL` whose content contains
+    /// both quote kinds. JSX has no escapes, so neither quote kind can delimit
+    /// such a value.
     fn is_unquotable_jsx_string(&self) -> bool {
         if self.get_token().kind() != JSX_STRING_LITERAL {
             return false;

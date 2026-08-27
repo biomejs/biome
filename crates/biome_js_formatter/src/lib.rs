@@ -1134,8 +1134,7 @@ console.log(a);
 
     #[test]
     fn format_keeps_unquoted_astro_attribute_values_whole() {
-        // An unquoted value used to lose its first character, and a single
-        // character one sliced `1..0` and panicked.
+        // A single-character value must not panic on a `1..0` slice.
         for (src, expected) in [
             ("cond && <div class=foo />", "class=\"foo\""),
             ("cond && <div a=b />", "a=\"b\""),

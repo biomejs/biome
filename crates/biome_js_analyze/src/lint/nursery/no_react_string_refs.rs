@@ -158,7 +158,8 @@ fn is_non_empty_template(template: &JsTemplateExpression) -> bool {
     })
 }
 
-/// A string literal or any template is a string ref, since templates evaluate to strings.
+/// Returns whether the attribute value is a string ref: a string literal, or a
+/// non-empty template, since templates evaluate to strings.
 fn is_string_ref_value(value: &AnyJsxAttributeValue) -> bool {
     match value {
         AnyJsxAttributeValue::AnyJsxTag(_) => false,

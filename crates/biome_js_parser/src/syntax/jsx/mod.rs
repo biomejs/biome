@@ -78,7 +78,9 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
     Present(m.complete(p, JSX_TAG_EXPRESSION))
 }
 
-/// Adjacent siblings are an implicit fragment in Astro but invalid in JSX.
+/// Returns whether an Astro template continues with another JSX tag after a
+/// completed one, which Astro reads as an implicit fragment but JSX rejects.
+/// Skips any `<!-- -->` comments at the current position first.
 #[inline]
 fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
     if !Astro.is_supported(p) {
@@ -88,7 +90,8 @@ fn is_at_astro_adjacent_sibling(p: &mut JsParser) -> bool {
     is_at_jsx_tag_start(p)
 }
 
-/// Astro reads `<!-- -->` as trivia, so children may be separated by comments.
+/// Consumes the `<!-- -->` comments at the current position, re-lexing them into
+/// trivia. Astro reads them as trivia, so children may be separated by comments.
 #[inline]
 pub(crate) fn skip_astro_html_comments(p: &mut JsParser) {
     while p.at(T![<]) {
@@ -290,7 +293,9 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
     }
 }
 
-/// Unclosed `<br>` is valid in Astro templates but not in JSX, hence the gate.
+/// Returns whether the parser is at the `>` of an Astro template element whose
+/// name is an HTML void element. Unclosed `<br>` is valid in Astro templates but
+/// not in JSX.
 #[inline]
 fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> bool {
     if !Astro.is_supported(p) || !p.at(T![>]) {
@@ -299,9 +304,9 @@ fn is_at_astro_void_element(p: &JsParser, name: Option<&CompletedMarker>) -> boo
     name.is_some_and(|name| is_void_element(p.text(name.range(p))))
 }
 
-/// A `<script>` or `<style>` holds text, not markup, so an Astro template
-/// expression reads its children the way the HTML layer already does. In plain
-/// JSX the same element is an ordinary component call, hence the gate.
+/// Returns the raw-text element this opening tag introduces, or `None` when its
+/// children parse as ordinary JSX. In an Astro template a `<script>` or `<style>`
+/// holds text, not markup, as in HTML; in plain JSX it is an ordinary component.
 fn astro_raw_text_element(
     p: &JsParser,
     name: Option<&CompletedMarker>,
@@ -501,8 +506,9 @@ fn parse_jsx_children(p: &mut JsParser) {
     JsxChildrenList.parse_list(p);
 }
 
-/// Raw text is one token, so the list holds at most the single [`JSX_TEXT`] the
-/// lexer produced for everything up to the closing tag.
+/// Parses the child list of a raw-text element. Raw text is one token, so the
+/// list holds at most the single [`JSX_TEXT`] the lexer produced for everything
+/// up to the closing tag.
 fn parse_jsx_raw_text_child(p: &mut JsParser) {
     let list = p.start();
     if p.at(JSX_TEXT_LITERAL) {
@@ -712,7 +718,9 @@ fn parse_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
     Present(m.complete(p, JsSyntaxKind::JSX_ATTRIBUTE))
 }
 
-/// An Astro attribute name like `x-on:keyup.enter` is one flat atom, never a namespace.
+/// Parses a single JSX attribute in an Astro template, returning `Absent` when
+/// the parser is not at an attribute name. An Astro attribute name like
+/// `x-on:keyup.enter` is one flat name, never a namespace.
 fn parse_astro_jsx_attribute(p: &mut JsParser) -> ParsedSyntax {
     p.re_lex(JsReLexContext::AstroJsxAttributeName);
 
