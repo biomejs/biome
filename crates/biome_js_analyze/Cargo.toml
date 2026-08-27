@@ -77,7 +77,7 @@ biome_js_parser = { path = "../biome_js_parser", features = ["tests"] }
 # unification turns type_narrowing on workspace-wide for any `cargo test
 # --workspace` run that includes this crate - the narrowing-off code paths
 # are only exercised by narrowly `-p`-scoped test invocations.
-biome_module_graph  = { workspace = true, features = ["type_narrowing"] }
+biome_module_graph  = { path = "../biome_module_graph", features = ["type_narrowing"] }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
