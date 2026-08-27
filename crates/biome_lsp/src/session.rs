@@ -164,20 +164,9 @@ pub(crate) struct Session {
     ///
     /// Editors send `workspace/didChangeConfiguration` for any settings
     /// change, and every notification reloads the configuration and forces a
-    /// full project rescan. The fingerprint lets us skip the settings update
-    /// and the rescan when the effective configuration has not actually
-    /// changed.
+    /// full project rescan. The fingerprint lets us skip the rescan when the
+    /// effective configuration has not actually changed.
     configuration_fingerprints: TokioRwLock<FxHashMap<Utf8PathBuf, u64>>,
-
-    /// Project scans that are currently running, used to coalesce concurrent
-    /// scan requests for the same project.
-    ///
-    /// The value is `None` while a scan is running with no follow-up
-    /// requested, and `Some((scan_kind, force))` when another scan was
-    /// requested while one was already running. At most one scan runs per
-    /// project at a time, and any burst of requests collapses into a single
-    /// follow-up run with the most recent parameters.
-    scans_in_flight: TokioRwLock<FxHashMap<ProjectKey, Option<(ScanKind, bool)>>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -296,7 +285,6 @@ impl Session {
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
             configuration_fingerprints: Default::default(),
-            scans_in_flight: Default::default(),
         }
     }
 
@@ -1092,46 +1080,6 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
-        {
-            let mut scans = self.scans_in_flight.write().await;
-            if let Some(pending) = scans.get_mut(&project_key) {
-                // A scan for this project is already running. Instead of
-                // piling up another concurrent scan (every editor
-                // configuration change may request one, and full project
-                // scans can take a long time), queue at most one follow-up
-                // run with the latest parameters.
-                *pending = Some((scan_kind, force));
-                return;
-            }
-            scans.insert(project_key, None);
-        }
-
-        let mut next = Some((scan_kind, force));
-        while let Some((scan_kind, force)) = next {
-            self.run_project_scan(project_key, scan_kind, force).await;
-
-            let mut scans = self.scans_in_flight.write().await;
-            match scans
-                .get_mut(&project_key)
-                .and_then(|pending| pending.take())
-            {
-                Some(params) => next = Some(params),
-                None => {
-                    scans.remove(&project_key);
-                    next = None;
-                }
-            }
-        }
-    }
-
-    /// Runs a single project scan. Use [`Self::scan_project()`] instead, which
-    /// coalesces concurrent requests for the same project.
-    async fn run_project_scan(
-        self: &Arc<Self>,
-        project_key: ProjectKey,
-        scan_kind: ScanKind,
-        force: bool,
-    ) {
         let progress_token = ProgressToken::String(Uuid::new_v4().to_string());
         let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {
             params
@@ -1440,9 +1388,9 @@ impl Session {
         // Editors send `workspace/didChangeConfiguration` for any settings
         // change, and every notification reloads the configuration and forces
         // a full project rescan, even when nothing Biome-related changed.
-        // Full project scans can be very expensive, so skip the settings
-        // update and the rescan when this project was already registered and
-        // the effective configuration is unchanged.
+        // Full project scans can be very expensive, so the rescan is skipped
+        // when this project was already registered and the effective
+        // configuration is unchanged.
         let fingerprint = {
             let mut hasher = DefaultHasher::new();
             match serde_json::to_string(&configuration) {
@@ -1459,18 +1407,12 @@ impl Session {
                 Err(_) => None,
             }
         };
-        if let Some(fingerprint) = fingerprint {
+        let skip_scan = if let Some(fingerprint) = fingerprint {
             let fingerprints = self.configuration_fingerprints.read().await;
-            if project_was_registered
-                && force
-                && fingerprints.get(&project_path) == Some(&fingerprint)
-            {
-                debug!(
-                    "Configuration unchanged for {project_path}; skipping settings update and project rescan."
-                );
-                return ConfigurationStatus::Loaded;
-            }
-        }
+            project_was_registered && force && fingerprints.get(&project_path) == Some(&fingerprint)
+        } else {
+            false
+        };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
         // We give priority to the scan kind requested by the user.
@@ -1495,8 +1437,17 @@ impl Session {
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
-        self.insert_and_scan_project(project_key, project_path.clone().into(), scan_kind, force)
+        if skip_scan {
+            debug!("Configuration unchanged for {project_path}; skipping the project rescan.");
+        } else {
+            self.insert_and_scan_project(
+                project_key,
+                project_path.clone().into(),
+                scan_kind,
+                force,
+            )
             .await;
+        }
 
         let status = if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
