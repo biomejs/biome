@@ -65,7 +65,7 @@ impl StaticValue {
                     JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::JSX_STRING_LITERAL
                 ) && text.starts_with(['"', '\''])
                 {
-                    // Astro-embedded JSX string literals can be unquoted.
+                    // SAFETY: a string literal that starts with a quote is terminated by its matching quote
                     return &text[1..text.len() - 1];
                 }
                 text

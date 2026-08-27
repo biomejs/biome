@@ -308,6 +308,7 @@ pub fn inner_string_text(token: &JsSyntaxToken) -> TokenText {
         JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::JSX_STRING_LITERAL
     ) && text.starts_with(['"', '\''])
     {
+        // SAFETY: a string literal that starts with a quote is terminated by its matching quote
         let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
         text = text.slice(range);
     }
