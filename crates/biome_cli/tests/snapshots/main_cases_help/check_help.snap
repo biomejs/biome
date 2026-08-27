@@ -17,6 +17,16 @@ Options that change how the JSON parser behaves.
         --json-parse-allow-trailing-commas=<true|false>  Allows parsing trailing commas in `.json`
                               files.
 
+Options that change how the CSS parser behaves.
+        --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules-specific features.
+                              Enable this feature only when your files don't end in `.module.css`.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
+                              and functions.
+
+Options that change how the Markdown parser behaves
+        --md-parse-frontmatter=<true|false>  Enables parsing frontmatter at the start of the file.
+                              Defaults to `false`.
+
 The configuration contained in `biome.json`.
         --vcs-enabled=<true|false>  Whether Biome should integrate with the version control client.
         --vcs-client-kind=<git>  The version control client.

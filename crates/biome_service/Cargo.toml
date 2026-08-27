@@ -202,6 +202,7 @@ schema                       = [
   "biome_js_syntax/schema",
   "biome_json_syntax/schema",
   "biome_languages/schema",
+  "biome_markdown_formatter/schema",
   "biome_markdown_syntax/schema",
   "biome_module_graph/schema",
   "biome_text_edit/schema",
@@ -215,6 +216,7 @@ schema                       = [
   "lang_html",
   "lang_js",
   "lang_json",
+  "lang_md",
   "module_graph",
   "type_inference"
 ]
@@ -225,6 +227,7 @@ stable                       = [
   "lang_css",
   "lang_graphql",
   "lang_js",
+  "lang_md",
   "module_graph",
   "plugins",
   "type_inference"

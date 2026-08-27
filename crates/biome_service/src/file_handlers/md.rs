@@ -121,9 +121,6 @@ impl ServiceLanguage for MarkdownLanguage {
         override_indices: &[usize],
         _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        // TODO: apply markdown overrides once markdown override settings are introduced.
-        let _ = (overrides, override_indices);
-
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -145,13 +142,17 @@ impl ServiceLanguage for MarkdownLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
         let prose_wrap = language.prose_wrap.unwrap_or_default();
-        MdFormatOptions::new()
+        let mut options = MdFormatOptions::new()
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
             .with_trailing_newline(trailing_newline)
-            .with_prose_wrap(prose_wrap)
+            .with_prose_wrap(prose_wrap);
+
+        overrides.apply_override_markdown_format_options_by_indices(override_indices, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(

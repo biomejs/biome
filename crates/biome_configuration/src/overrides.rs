@@ -68,6 +68,11 @@ pub struct OverridePattern {
     #[cfg_attr(feature = "lang_html", serde(skip_serializing_if = "Option::is_none"))]
     pub html: Option<HtmlConfiguration>,
 
+    /// Specific configuration for the Markdown language
+    #[cfg(feature = "lang_md")]
+    #[cfg_attr(feature = "lang_md", serde(skip_serializing_if = "Option::is_none"))]
+    pub markdown: Option<crate::MarkdownConfiguration>,
+
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<OverrideFormatterConfiguration>,

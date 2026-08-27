@@ -26,6 +26,7 @@ mod javascript;
 mod json_parsing;
 mod linter_domains;
 mod linter_groups_plain;
+mod markdown;
 mod migrate_v2;
 mod monorepo;
 mod multiple_reporters;

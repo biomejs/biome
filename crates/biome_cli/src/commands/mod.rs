@@ -15,6 +15,9 @@ use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfigur
 use biome_configuration::json::{
     JsonFormatterConfiguration, JsonLinterConfiguration, JsonParserConfiguration,
 };
+use biome_configuration::markdown::{
+    MarkdownFormatterConfiguration, MarkdownLinterConfiguration, MarkdownParserConfiguration,
+};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
@@ -29,6 +32,9 @@ use biome_configuration::{
     json::json_linter_configuration,
     json::json_parser_configuration,
     linter_configuration,
+    markdown::markdown_formatter_configuration,
+    markdown::markdown_linter_configuration,
+    markdown::markdown_parser_configuration,
     vcs::vcs_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
@@ -151,8 +157,11 @@ pub enum BiomeCommand {
         #[bpaf(external(json_parser_configuration), optional, hide_usage)]
         json_parser: Option<JsonParserConfiguration>,
 
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_parser_configuration), optional, hide_usage)]
         css_parser: Option<CssParserConfiguration>,
+
+        #[bpaf(external(markdown_parser_configuration), optional, hide_usage)]
+        markdown_parser: Option<MarkdownParserConfiguration>,
 
         #[bpaf(external(configuration), hide_usage, optional)]
         configuration: Option<Configuration>,
@@ -257,8 +266,11 @@ pub enum BiomeCommand {
         #[bpaf(external(json_parser_configuration), optional, hide_usage)]
         json_parser: Option<JsonParserConfiguration>,
 
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_parser_configuration), optional, hide_usage)]
         css_parser: Option<CssParserConfiguration>,
+
+        #[bpaf(external(markdown_parser_configuration), optional, hide_usage)]
+        markdown_parser: Option<MarkdownParserConfiguration>,
 
         #[bpaf(external(linter_configuration), hide_usage, optional)]
         linter_configuration: Option<LinterConfiguration>,
@@ -275,11 +287,14 @@ pub enum BiomeCommand {
         #[bpaf(external(json_linter_configuration), optional, hide_usage)]
         json_linter: Option<JsonLinterConfiguration>,
 
-        #[bpaf(external(css_linter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_linter_configuration), optional, hide_usage)]
         css_linter: Option<CssLinterConfiguration>,
 
-        #[bpaf(external(graphql_linter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(graphql_linter_configuration), optional, hide_usage)]
         graphql_linter: Option<GraphqlLinterConfiguration>,
+
+        #[bpaf(external(markdown_linter_configuration), optional, hide_usage)]
+        markdown_linter: Option<MarkdownLinterConfiguration>,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
@@ -380,6 +395,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external(html_formatter_configuration), optional, hide_usage)]
         html_formatter: Option<HtmlFormatterConfiguration>,
+
+        #[bpaf(external(markdown_formatter_configuration), optional, hide_usage)]
+        markdown_formatter: Option<MarkdownFormatterConfiguration>,
 
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,
