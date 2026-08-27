@@ -577,6 +577,10 @@ impl OverridePattern {
             grit,
             #[cfg(feature = "lang_html")]
             html,
+            #[cfg(feature = "lang_md")]
+            markdown,
+            #[cfg(feature = "lang_yaml")]
+            yaml,
             #[cfg(feature = "plugins")]
             plugins,
             assist,

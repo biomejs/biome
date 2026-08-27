@@ -664,6 +664,90 @@ fn javascript_assist_override_matches_runtime() {
 }
 
 #[test]
+fn markdown_formatter_override_matches_runtime() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "markdown": { "formatter": { "lineWidth": 80 } },
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "markdown": { "formatter": { "lineWidth": 100 } }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "markdown.formatter.lineWidth",
+                "--path=file.md",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "markdown_formatter_override_matches_runtime",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn yaml_formatter_override_matches_runtime() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "yaml": { "formatter": { "indentWidth": 2 } },
+  "overrides": [
+    {
+      "includes": ["**/*.yaml"],
+      "yaml": { "formatter": { "indentWidth": 4 } }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "yaml.formatter.indentWidth",
+                "--path=file.yaml",
+                "--json",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "yaml_formatter_override_matches_runtime",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn later_global_override_replaces_language_value() {
     let fs = MemoryFileSystem::default();
     fs.insert(
