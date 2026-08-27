@@ -1025,13 +1025,12 @@ struct DebugTypeCollector {
     types: TypeStore,
 }
 
+// `recorded_expression_type` is not implemented below, so assignment
+// narrowing (which relies on it to look up a previously resolved
+// expression's type) would silently no-op for this debug collector.
+// Stay opted out of narrowing until that hook is implemented.
 #[cfg(feature = "type_inference")]
 impl RawTypeCollector for DebugTypeCollector {
-    // `recorded_expression_type` is not implemented here, so assignment
-    // narrowing (which relies on it to look up a previously resolved
-    // expression's type) would silently no-op for this debug collector.
-    // Stay opted out of narrowing until that hook is implemented.
-
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }
