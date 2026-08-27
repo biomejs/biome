@@ -5,7 +5,7 @@ use crate::token_source::{
     RestrictedExpressionStopAt, TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
-use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize};
+use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize, VOID_ELEMENTS};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
@@ -1996,13 +1996,20 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 /// it: the `}` of an Astro or Svelte expression, the `---` fence of Astro
 /// frontmatter, or the `]` of a Vue dynamic directive argument.
 ///
-/// Only a delimiter reached in code position ends the construct. The same byte
-/// inside a string, comment, regex literal, template literal or JSX text is
-/// ordinary content, so the scanner tracks nesting on a stack of [`JsContext`]
-/// frames rather than toggling a flag per quote.
-struct JsScanner {
-    /// Nesting stack. The last frame is the active one; an empty stack is the
-    /// outermost code level, the only place the stop delimiter ends the scan.
+/// The closing delimiter must be plain code: a `}`, `---`, or `]` that sits
+/// inside a string, a comment, a regex literal, a template literal, or JSX is
+/// ordinary content and does not end the construct. The scanner recognises
+/// those nested constructs with a stack of [`JsContext`] frames: opening one
+/// pushes a frame, its terminator pops the frame again, and the scan stops at
+/// the first stop delimiter found while no frame is open.
+struct JsScanner<'src> {
+    source: &'src [u8],
+    /// The offset of the byte being classified.
+    position: usize,
+    /// The constructs the current position is nested in, innermost last; an
+    /// empty stack means plain code, the only place the stop delimiter ends
+    /// the scan. Eight inline frames cover typical nesting depths without a
+    /// heap allocation.
     stack: SmallVec<[JsContext; 8]>,
     /// Whether `<` in expression position may open a JSX element.
     jsx: bool,
@@ -2023,8 +2030,8 @@ enum JsContext {
         closing: bool,
         /// The offset of the tag name, just past the `<` or `</`.
         name_start: usize,
-        /// Whether the scan is inside an unquoted attribute value, where a `/`
-        /// is part of the value.
+        /// Whether the scan is inside an unquoted attribute value.
+        /// A `/` is part of the value.
         in_unquoted_value: bool,
     },
     /// A type argument list on a JSX tag, between `<` and its `>`.
@@ -2056,6 +2063,9 @@ enum JsScanStop {
 }
 
 impl JsScanStop {
+    /// Returns whether `byte` on its own closes the construct for this stop.
+    /// [`Self::FrontmatterFence`] never matches here: its delimiter is the
+    /// three-byte `---`, which [`JsScanner::run`] matches separately.
     const fn ends_at(self, byte: u8) -> bool {
         matches!(
             (self, byte),
@@ -2064,44 +2074,71 @@ impl JsScanStop {
     }
 }
 
-impl JsScanner {
+impl<'src> JsScanner<'src> {
     /// Returns the offset of the `}` that closes a text expression, or
     /// `source.len()` when the expression is unterminated.
-    fn expression_length(source: &[u8], jsx: bool) -> usize {
+    fn expression_length(source: &'src [u8], jsx: bool) -> usize {
         Self::scan(source, JsScanStop::ExpressionEnd, jsx)
     }
 
     /// Returns the offset of the `---` that closes Astro frontmatter, or
     /// `source.len()` when the fence is missing. Astro's component script is
     /// TypeScript, so `<` there opens a type assertion rather than JSX.
-    fn frontmatter_length(source: &[u8]) -> usize {
+    fn frontmatter_length(source: &'src [u8]) -> usize {
         Self::scan(source, JsScanStop::FrontmatterFence, false)
     }
 
     /// Returns the offset of the `]` that closes a Vue dynamic directive
     /// argument, or `source.len()` when the bracket is unbalanced.
-    fn argument_length(source: &[u8]) -> usize {
+    fn argument_length(source: &'src [u8]) -> usize {
         Self::scan(source, JsScanStop::ArgumentEnd, false)
     }
 
-    fn scan(source: &[u8], stop: JsScanStop, jsx: bool) -> usize {
+    fn scan(source: &'src [u8], stop: JsScanStop, jsx: bool) -> usize {
         let mut scanner = Self {
+            source,
+            position: 0,
             stack: SmallVec::new(),
             jsx,
             entered_jsx: false,
         };
-        let length = scanner.run(source, stop);
+        let length = scanner.run(stop);
         if length < source.len() || !scanner.entered_jsx {
             return length;
         }
 
-        // A `<` that turned out not to be JSX swallowed the rest of the input.
-        let mut scanner = Self {
-            stack: SmallVec::new(),
-            jsx: false,
-            entered_jsx: false,
-        };
-        scanner.run(source, stop)
+        // Running off the end inside JSX means a `<` was really a comparison
+        // or a cast, misread as an element whose closing tag never comes;
+        // rescan reading `<` as an operator.
+        scanner.position = 0;
+        scanner.stack.clear();
+        scanner.jsx = false;
+        scanner.run(stop)
+    }
+
+    fn current_byte(&self) -> Option<u8> {
+        self.source.get(self.position).copied()
+    }
+
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        self.source.get(self.position + offset).copied()
+    }
+
+    /// Clamped to the source end, so an escape at the very end cannot step past it.
+    fn advance(&mut self, count: usize) {
+        self.position = (self.position + count).min(self.source.len());
+    }
+
+    fn scanned(&self) -> &[u8] {
+        &self.source[..self.position]
+    }
+
+    fn previous_non_whitespace(&self) -> Option<u8> {
+        self.scanned()
+            .iter()
+            .rev()
+            .copied()
+            .find(|byte| !byte.is_ascii_whitespace())
     }
 
     fn set_in_unquoted_value(&mut self, value: bool) {
@@ -2113,237 +2150,242 @@ impl JsScanner {
         }
     }
 
-    fn run(&mut self, source: &[u8], stop: JsScanStop) -> usize {
-        let mut position = 0;
-
-        while let Some(&byte) = source.get(position) {
+    fn run(&mut self, stop: JsScanStop) -> usize {
+        while let Some(byte) = self.current_byte() {
             match self.stack.last().copied() {
-                None | Some(JsContext::Code(_)) => match byte {
-                    b'"' | b'\'' => position = skip_string(source, position + 1, byte),
-                    b'`' => {
+                None | Some(JsContext::Code(_)) => match lookup_byte(byte) {
+                    QOT => self.skip_string(byte),
+                    TPL => {
                         self.stack.push(JsContext::Template);
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'/' => position = skip_slash(source, position),
-                    b'{' => {
+                    SLH => self.skip_slash(),
+                    BEO => {
                         self.stack.push(JsContext::Code(b'}'));
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'[' if stop == JsScanStop::ArgumentEnd => {
+                    BTO if stop == JsScanStop::ArgumentEnd => {
                         self.stack.push(JsContext::Code(b']'));
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'}' | b']' => {
+                    BEC | BTC => {
                         if self.stack.last() == Some(&JsContext::Code(byte)) {
                             self.stack.pop();
                         } else if self.stack.is_empty() && stop.ends_at(byte) {
-                            return position;
+                            return self.position;
                         }
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'-' if stop == JsScanStop::FrontmatterFence
+                    MIN if stop == JsScanStop::FrontmatterFence
                         && self.stack.is_empty()
-                        && source[position..].starts_with(b"---") =>
+                        && self.source[self.position..].starts_with(b"---") =>
                     {
-                        return position;
+                        return self.position;
                     }
-                    b'<' if self.jsx && jsx_element_starts(source, position) => {
+                    LSS if self.jsx && self.jsx_element_starts() => {
                         self.entered_jsx = true;
-                        self.stack.push(JsContext::jsx_tag(false, position + 1));
-                        position += 1;
+                        self.stack
+                            .push(JsContext::jsx_tag(false, self.position + 1));
+                        self.advance(1);
                     }
-                    _ => position += 1,
+                    _ => self.advance(1),
                 },
 
-                Some(JsContext::Template) => match byte {
-                    b'\\' => position += 2,
-                    b'`' => {
+                Some(JsContext::Template) => match lookup_byte(byte) {
+                    BSL => self.advance(2),
+                    TPL => {
                         self.stack.pop();
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'$' if source.get(position + 1) == Some(&b'{') => {
+                    DOL if self.byte_at(1) == Some(b'{') => {
                         self.stack.push(JsContext::Code(b'}'));
-                        position += 2;
+                        self.advance(2);
                     }
-                    _ => position += 1,
+                    _ => self.advance(1),
                 },
 
                 Some(JsContext::JsxTag {
                     closing,
                     name_start,
                     in_unquoted_value,
-                }) => match byte {
-                    b'"' | b'\'' => position = skip_string(source, position + 1, byte),
-                    b'`' => {
+                }) => match lookup_byte(byte) {
+                    QOT => self.skip_string(byte),
+                    TPL => {
                         self.stack.push(JsContext::Template);
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'{' => {
+                    BEO => {
                         self.stack.push(JsContext::Code(b'}'));
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'=' => {
-                        let next = source.get(position + 1).copied();
-                        self.set_in_unquoted_value(starts_unquoted_value(next));
-                        position += 1;
+                    EQL => {
+                        self.set_in_unquoted_value(starts_unquoted_value(self.byte_at(1)));
+                        self.advance(1);
                     }
-                    b'>' => {
+                    MOR => {
                         self.stack.pop();
-                        let self_closing = !in_unquoted_value
-                            && previous_non_whitespace(&source[..position]) == Some(b'/');
-                        if !closing
-                            && !self_closing
-                            && !is_void_element(tag_name(source, name_start))
+                        let self_closing =
+                            !in_unquoted_value && self.previous_non_whitespace() == Some(b'/');
+                        if !closing && !self_closing && !is_void_element(self.tag_name(name_start))
                         {
                             self.stack.push(JsContext::JsxChildren);
                         }
-                        position += 1;
+                        self.advance(1);
                     }
                     // A `,` cannot appear in a JSX tag, so this was a type parameter list.
-                    b',' => {
+                    COM => {
                         self.stack.pop();
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'<' => {
+                    LSS => {
                         self.stack.push(JsContext::TypeArguments);
-                        position += 1;
+                        self.advance(1);
                     }
                     _ if in_unquoted_value && byte.is_ascii_whitespace() => {
                         self.set_in_unquoted_value(false);
-                        position += 1;
+                        self.advance(1);
                     }
-                    _ => position += 1,
+                    _ => self.advance(1),
                 },
 
-                Some(JsContext::TypeArguments) => match byte {
-                    b'"' | b'\'' => position = skip_string(source, position + 1, byte),
-                    b'`' => {
+                Some(JsContext::TypeArguments) => match lookup_byte(byte) {
+                    QOT => self.skip_string(byte),
+                    TPL => {
                         self.stack.push(JsContext::Template);
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'<' => {
+                    LSS => {
                         self.stack.push(JsContext::TypeArguments);
-                        position += 1;
+                        self.advance(1);
                     }
                     // The `>` of a function type's arrow does not close the list.
-                    b'=' if source.get(position + 1) == Some(&b'>') => position += 2,
-                    b'>' => {
+                    EQL if self.byte_at(1) == Some(b'>') => self.advance(2),
+                    MOR => {
                         self.stack.pop();
-                        position += 1;
+                        self.advance(1);
                     }
-                    _ => position += 1,
+                    _ => self.advance(1),
                 },
 
-                Some(JsContext::JsxChildren) => match byte {
-                    b'{' => {
+                Some(JsContext::JsxChildren) => match lookup_byte(byte) {
+                    BEO => {
                         self.stack.push(JsContext::Code(b'}'));
-                        position += 1;
+                        self.advance(1);
                     }
-                    b'<' => match source.get(position + 1) {
+                    LSS => match self.byte_at(1) {
                         Some(b'/') => {
                             self.stack.pop();
-                            self.stack.push(JsContext::jsx_tag(true, position + 2));
-                            position += 2;
+                            self.stack.push(JsContext::jsx_tag(true, self.position + 2));
+                            self.advance(2);
                         }
-                        Some(&next) if starts_tag_name(next) => {
-                            self.stack.push(JsContext::jsx_tag(false, position + 1));
-                            position += 1;
+                        Some(next) if starts_tag_name(next) => {
+                            self.stack
+                                .push(JsContext::jsx_tag(false, self.position + 1));
+                            self.advance(1);
                         }
-                        _ => position += 1,
+                        _ => self.advance(1),
                     },
-                    _ => position += 1,
+                    _ => self.advance(1),
                 },
             }
         }
 
-        // An escape at the very end of the input steps past it.
-        position.min(source.len())
+        self.position
     }
-}
 
-/// Returns the offset just past the closing `quote`, or the end of `source`.
-fn skip_string(source: &[u8], mut position: usize, quote: u8) -> usize {
-    while let Some(&byte) = source.get(position) {
-        position += 1;
-        if byte == b'\\' {
-            position += 1;
-        } else if byte == quote {
-            break;
+    /// Skips the string literal whose opening `quote` is the current byte,
+    /// stopping just past the closing quote or at the end of the source.
+    fn skip_string(&mut self, quote: u8) {
+        self.advance(1);
+        while let Some(byte) = self.current_byte() {
+            self.advance(1);
+            if byte == b'\\' {
+                self.advance(1);
+            } else if byte == quote {
+                break;
+            }
         }
     }
 
-    position.min(source.len())
-}
-
-/// Returns the offset just past a `/` in code position: the end of the comment
-/// or regex literal it opens, or the byte after the slash.
-fn skip_slash(source: &[u8], position: usize) -> usize {
-    let scanned = &source[..position];
-
-    match source.get(position + 1) {
-        Some(b'/') => skip_line_comment(source, position + 2),
-        Some(b'*') => skip_block_comment(source, position + 2),
-        // `/>` closes a tag that was not recognised as JSX; it never opens a regex.
-        Some(b'>') => position + 1,
-        _ if scanned.last() != Some(&b'<')
-            && slash_starts_regex(previous_non_whitespace(scanned)) =>
-        {
-            skip_regex(source, position + 1)
-        }
-        _ => position + 1,
-    }
-}
-
-/// Returns the offset just past the closing `/`, or the end of `source`. A `/`
-/// inside a `[…]` character class does not close the literal.
-fn skip_regex(source: &[u8], mut position: usize) -> usize {
-    let mut in_character_class = false;
-
-    while let Some(&byte) = source.get(position) {
-        position += 1;
-        match byte {
-            b'\\' => position += 1,
-            b'[' => in_character_class = true,
-            b']' => in_character_class = false,
-            b'/' if !in_character_class => break,
-            _ => {}
+    /// Skips from a `/` in code position past the comment or regex literal it
+    /// opens, or past the slash alone.
+    fn skip_slash(&mut self) {
+        match self.byte_at(1) {
+            Some(b'/') => {
+                self.advance(2);
+                self.skip_line_comment();
+            }
+            Some(b'*') => {
+                self.advance(2);
+                self.skip_block_comment();
+            }
+            // `/>` closes a tag that was not recognised as JSX; it never opens a regex.
+            Some(b'>') => self.advance(1),
+            _ if self.scanned().last() != Some(&b'<')
+                && slash_starts_regex(self.previous_non_whitespace()) =>
+            {
+                self.advance(1);
+                self.skip_regex();
+            }
+            _ => self.advance(1),
         }
     }
 
-    position.min(source.len())
-}
+    /// Skips the regex literal body, stopping just past the closing `/` or at
+    /// the end of the source. A `/` inside a `[…]` character class does not
+    /// close the literal.
+    fn skip_regex(&mut self) {
+        let mut in_character_class = false;
 
-/// Returns the offset just past the terminating newline, or the end of `source`.
-fn skip_line_comment(source: &[u8], mut position: usize) -> usize {
-    while let Some(&byte) = source.get(position) {
-        position += 1;
-        if byte == b'\n' {
-            break;
+        while let Some(byte) = self.current_byte() {
+            self.advance(1);
+            match byte {
+                b'\\' => self.advance(1),
+                b'[' => in_character_class = true,
+                b']' => in_character_class = false,
+                b'/' if !in_character_class => break,
+                _ => {}
+            }
         }
     }
 
-    position
-}
-
-/// Returns the offset just past the closing `*/`, or the end of `source`.
-fn skip_block_comment(source: &[u8], mut position: usize) -> usize {
-    while let Some(&byte) = source.get(position) {
-        if byte == b'*' && source.get(position + 1) == Some(&b'/') {
-            return position + 2;
+    /// Skips just past the terminating newline, or to the end of the source.
+    fn skip_line_comment(&mut self) {
+        while let Some(byte) = self.current_byte() {
+            self.advance(1);
+            if byte == b'\n' {
+                break;
+            }
         }
-        position += 1;
     }
 
-    position
-}
+    /// Skips just past the closing `*/`, or to the end of the source.
+    fn skip_block_comment(&mut self) {
+        while let Some(byte) = self.current_byte() {
+            if byte == b'*' && self.byte_at(1) == Some(b'/') {
+                self.advance(2);
+                return;
+            }
+            self.advance(1);
+        }
+    }
 
-/// Returns whether the `<` at `position` opens a JSX element rather than a
-/// comparison, a shift, or a TypeScript type argument list.
-fn jsx_element_starts(source: &[u8], position: usize) -> bool {
-    source
-        .get(position + 1)
-        .is_some_and(|byte| starts_tag_name(*byte))
-        && at_expression_position(&source[..position])
+    /// Returns whether the `<` at the current position opens a JSX element
+    /// rather than a comparison, a shift, or a TypeScript type argument list.
+    fn jsx_element_starts(&self) -> bool {
+        self.byte_at(1).is_some_and(starts_tag_name) && at_expression_position(self.scanned())
+    }
+
+    /// Returns the tag name starting at `start`, which is empty for a fragment.
+    fn tag_name(&self, start: usize) -> &[u8] {
+        let name = self.source.get(start..).unwrap_or_default();
+        let length = name
+            .iter()
+            .position(|byte| !is_tag_name_byte(*byte))
+            .unwrap_or(name.len());
+
+        &name[..length]
+    }
 }
 
 /// Returns whether a byte can follow `<` in a JSX element, counting the `>` of
@@ -2352,38 +2394,14 @@ fn starts_tag_name(byte: u8) -> bool {
     byte == b'>' || byte == b'_' || byte.is_ascii_alphabetic()
 }
 
-/// Returns the tag name starting at `position`, which is empty for a fragment.
-fn tag_name(source: &[u8], position: usize) -> &[u8] {
-    let name = source.get(position..).unwrap_or_default();
-    let length = name
-        .iter()
-        .position(|byte| !is_tag_name_byte(*byte))
-        .unwrap_or(name.len());
-
-    &name[..length]
-}
-
-/// Returns whether `name` is an HTML [void element](https://html.spec.whatwg.org/#void-elements),
-/// which never has children. Astro matches the spec names case-sensitively, so
-/// `<BR>` is a component rather than a line break.
+/// Returns whether `name` is a [void element](https://html.spec.whatwg.org/#void-elements),
+/// which never has children. The keyword lookup is exact because Astro matches
+/// the spec names case-sensitively: `<BR>` is a component, not a line break.
 fn is_void_element(name: &[u8]) -> bool {
-    matches!(
-        name,
-        b"area"
-            | b"base"
-            | b"br"
-            | b"col"
-            | b"embed"
-            | b"hr"
-            | b"img"
-            | b"input"
-            | b"link"
-            | b"meta"
-            | b"param"
-            | b"source"
-            | b"track"
-            | b"wbr"
-    )
+    std::str::from_utf8(name)
+        .ok()
+        .and_then(HtmlSyntaxKind::from_keyword)
+        .is_some_and(|kind| VOID_ELEMENTS.contains(kind))
 }
 
 /// Returns whether `byte`, the one right after an `=` in a tag, opens an
@@ -2431,14 +2449,6 @@ fn at_expression_position(scanned: &[u8]) -> bool {
 
 fn is_js_word_byte(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'$'
-}
-
-fn previous_non_whitespace(scanned: &[u8]) -> Option<u8> {
-    scanned
-        .iter()
-        .rev()
-        .copied()
-        .find(|byte| !byte.is_ascii_whitespace())
 }
 
 #[cfg(test)]
