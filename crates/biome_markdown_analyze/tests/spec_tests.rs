@@ -3,12 +3,12 @@ use biome_analyze::{
     Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_markdown_parser::parse_markdown;
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::MarkdownLanguage;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, NodeCache};
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -85,6 +85,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     let mut snapshot = String::new();
+    let mut diagnostics = Vec::new();
+    let parser_options =
+        create_parser_options::<MarkdownLanguage>(input_file, &mut diagnostics).unwrap_or_default();
     let extension = input_file.extension().unwrap_or_default();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
@@ -98,6 +101,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
+                parser_options.clone(),
             );
         }
     } else {
@@ -108,6 +112,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
+            parser_options,
         );
     };
 
@@ -126,6 +131,7 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
+    parser_options: MarkdownParserOptions,
 ) {
     let mut diagnostics = Vec::new();
     let working_directory = input_file.parent().unwrap_or(input_file);
@@ -134,8 +140,8 @@ pub(crate) fn analyze_and_snap(
         working_directory,
         &mut diagnostics,
     );
-
-    let parsed = parse_markdown(input_code);
+    let mut cache = NodeCache::default();
+    let parsed = parse_markdown_with_cache(input_code, &mut cache, parser_options.clone());
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
@@ -147,11 +153,11 @@ pub(crate) fn analyze_and_snap(
             for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.is_suppression() {
-                        check_code_action(input_file, input_code, &action);
+                        check_code_action(input_file, input_code, &action, &parser_options);
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
                 } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action);
+                    check_code_action(input_file, input_code, &action, &parser_options);
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
@@ -163,11 +169,11 @@ pub(crate) fn analyze_and_snap(
         for action in event.actions(ActionFilter::all()) {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
-                    check_code_action(input_file, input_code, &action);
+                    check_code_action(input_file, input_code, &action, &parser_options);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
             } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, &action);
+                check_code_action(input_file, input_code, &action, &parser_options);
                 code_fixes.push(code_fix_to_string(input_code, action));
             }
         }
@@ -196,7 +202,12 @@ pub(crate) fn analyze_and_snap(
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
-fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<MarkdownLanguage>) {
+fn check_code_action(
+    path: &Utf8Path,
+    source: &str,
+    action: &AnalyzerAction<MarkdownLanguage>,
+    parser_options: &MarkdownParserOptions,
+) {
     let (new_tree, text_edit) = match action
         .mutation
         .clone()
@@ -222,7 +233,8 @@ fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<Mark
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_markdown(&output);
+    let mut cache = NodeCache::default();
+    let re_parse = parse_markdown_with_cache(&output, &mut cache, parser_options.clone());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 
@@ -251,6 +263,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         file_name,
         input_file,
         CheckActionType::Suppression,
+        MarkdownParserOptions::default(),
     );
 
     insta::with_settings!({
