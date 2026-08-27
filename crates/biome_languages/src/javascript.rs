@@ -212,7 +212,9 @@ impl JsEmbeddingKind {
             }
         )
     }
-    /// Astro's HTML-flavored leniencies stop at the template; frontmatter is plain TypeScript, without JSX.
+    /// Returns `true` when the code is embedded in the template of an Astro
+    /// file, the only place template-only syntax such as JSX applies; the
+    /// frontmatter is plain TypeScript.
     pub const fn is_astro_template(&self) -> bool {
         matches!(
             self,
