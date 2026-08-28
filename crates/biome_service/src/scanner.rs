@@ -6,15 +6,19 @@
 //!
 //! ## Scanner behaviour
 //!
-//! The scanner must run as an epoch. The database setters must not
-//! interrupt an active scan with [`salsa::Cancelled::PendingWrite`].
+//! An initial project scan runs as an epoch. Database setters must not interrupt
+//! it with [`salsa::Cancelled::PendingWrite`].
 //!
-//! Before a scan starts, the workspace creates a dedicated database view with
-//! [`DbState::scanner_epoch`](crate::db::DbState::scanner_epoch). When the LSP
-//! owns the database, the scanner updates this view without invoking Salsa
+//! Before the scan starts, the workspace creates a dedicated database view
+//! with [`DbState::scanner_epoch`](crate::db::DbState::scanner_epoch). When the
+//! LSP owns the database, the scanner updates this view without invoking Salsa
 //! setters. Regular writes wait until the scan ends, while reads continue.
 //! After the scan, the temporary view is dropped, the database reports module
 //! graph changes to Salsa once, and waiting writes continue.
+//!
+//! Watcher-driven updates run outside the epoch. If a setter interrupts file
+//! indexing, the scanner retries that file instead of restarting a project
+//! scan.
 //!
 //! A file changed during traversal may leave the completed index temporarily
 //! stale. A subsequent watcher update indexes the latest file state. This is

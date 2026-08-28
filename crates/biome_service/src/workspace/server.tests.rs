@@ -1036,6 +1036,119 @@ fn scanner_epoch_queues_setters_without_cancelling_scan() {
 }
 
 #[test]
+fn incremental_index_retries_pending_write() {
+    const PATH: &str = "/project/package.json";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"{}");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let retained_db = workspace.get_db();
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+    let initial_index_attempts = test_state.file_index_attempts.load(Ordering::Acquire);
+    let initial_settings_read_attempts = test_state
+        .file_settings_read_attempts
+        .load(Ordering::Acquire);
+
+    let (setter_pending, first_attempt_paused, retry_observed, update_result, index_result) =
+        std::thread::scope(|scope| {
+            let update_workspace = &workspace;
+            let update = scope.spawn(move || {
+                update_workspace
+                    .as_workspace()
+                    .update_settings(UpdateSettingsParams {
+                        project_key,
+                        workspace_directory: Some(BiomePath::new("/project")),
+                        configuration: Configuration::default(),
+                        extended_configurations: vec![],
+                        module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+                    })
+            });
+            let setter_pending = wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1);
+
+            let index = setter_pending.then(|| {
+                let index_workspace = workspace.as_workspace();
+                scope.spawn(move || {
+                    WorkspaceScannerBridge::index_file(
+                        &index_workspace,
+                        project_key,
+                        BiomePath::new(PATH),
+                        IndexTrigger::Update,
+                    )
+                })
+            });
+            let first_attempt_paused = index.as_ref().is_some_and(|_| {
+                wait_until(TIMEOUT, || {
+                    test_state
+                        .file_settings_read_attempts
+                        .load(Ordering::Acquire)
+                        > initial_settings_read_attempts
+                })
+            });
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let retry_observed = first_attempt_paused
+                && wait_until(TIMEOUT, || {
+                    test_state.file_index_attempts.load(Ordering::Acquire)
+                        >= initial_index_attempts + 2
+                });
+
+            drop(retained_db);
+            let update_result = update.join();
+            let index_result = index.map(|index| index.join());
+
+            (
+                setter_pending,
+                first_attempt_paused,
+                retry_observed,
+                update_result,
+                index_result,
+            )
+        });
+
+    assert!(setter_pending, "the settings update did not become pending");
+    assert!(first_attempt_paused, "incremental indexing did not start");
+    assert!(retry_observed, "incremental indexing was not retried");
+    assert!(matches!(update_result, Ok(Ok(_))));
+    assert!(matches!(index_result, Some(Ok(Ok(_)))));
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some()
+    );
+}
+
+#[test]
 fn retrying_workspace_does_not_retry_project_scan() {
     let fs = MemoryFileSystem::default();
     let (watcher_tx, _) = crossbeam::channel::unbounded();

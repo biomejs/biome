@@ -1885,8 +1885,8 @@ pub(crate) fn retry_on_pending_write<T>(op: impl Fn() -> T) -> T {
 /// would rather handle the interruption themselves — for example, LSP request
 /// handlers that answer with `ContentModified` so the editor re-sends the
 /// request — should call the inner workspace directly instead.
-/// Project scans are delegated without retry because the scanner handles
-/// interruptions at individual indexing boundaries.
+/// Project scans are delegated without retry because a scanner epoch queues
+/// setter-based writes until the traversal completes.
 pub struct RetryingWorkspace<W>(W);
 
 impl<W: Workspace> RetryingWorkspace<W> {

@@ -290,8 +290,8 @@ impl Session {
     ///   permanently out of sync with the editor.
     /// - **Background tasks** the server starts on its own, such as
     ///   refreshing the diagnostics of the open documents or loading the
-    ///   configuration file. Project scans handle interruptions at individual
-    ///   indexing boundaries instead of retrying the entire scan.
+    ///   configuration file. Project scans run inside an epoch that queues
+    ///   setter-based writes instead of retrying the traversal.
     ///
     /// LSP request handlers (formatting, code actions, ...) should use
     /// [Self::workspace_for_request] instead.

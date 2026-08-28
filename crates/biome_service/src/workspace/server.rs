@@ -4215,19 +4215,25 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         trigger: IndexTrigger,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         let path = path.into();
-        self.open_file_internal(
-            OpenFileReason::Index(trigger),
-            OpenFileParams {
-                project_key,
-                path,
-                content: FileContent::FromServer,
-                document_file_source: None,
-                persist_node_cache: false,
-                // TODO: review here, it feels wrong that we can't pass the inline config
-                inline_config: None,
-                editor_features: None,
-            },
-        )
+        let open_file = |path| {
+            self.open_file_internal(
+                OpenFileReason::Index(trigger),
+                OpenFileParams {
+                    project_key,
+                    path,
+                    content: FileContent::FromServer,
+                    document_file_source: None,
+                    persist_node_cache: false,
+                    // TODO: review here, it feels wrong that we can't pass the inline config
+                    inline_config: None,
+                    editor_features: None,
+                },
+            )
+        };
+        match trigger {
+            IndexTrigger::InitialScan => open_file(path),
+            IndexTrigger::Update => retry_on_pending_write(|| open_file(path.clone())),
+        }
         .map(|result| (result.dependencies, result.diagnostics))
     }
 
