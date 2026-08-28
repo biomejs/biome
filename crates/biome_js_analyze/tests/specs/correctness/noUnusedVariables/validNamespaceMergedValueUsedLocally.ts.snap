@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamespaceMergedValueUsedLocally.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// The call resolves to the namespace binding, which is declared last, so the
+// function itself has no references of its own. Declaration merging makes them
+// one entity, so a use of the name is a use of the function.
+function F() {}
+namespace F {}
+
+F();
+
+// The same, with the namespace carrying a type and the value being a const
+// arrow function: used locally, never exported.
+const G = () => {};
+namespace G {
+    export type Props = { id: string };
+}
+
+G();
+
+// A class merged with a namespace, used only as a type annotation.
+class H {}
+namespace H {
+    export type Options = { deep: boolean };
+}
+
+const h: H = new H();
+console.log(h);
+
+```

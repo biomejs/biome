@@ -698,7 +698,7 @@ fn is_namespace_merged_with_used_value(
     Some(false)
 }
 
-fn is_value_merged_with_exported_namespace(
+fn is_value_merged_with_used_namespace(
     model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
 ) -> Option<bool> {
@@ -723,7 +723,16 @@ fn is_value_merged_with_exported_namespace(
         return Some(false);
     }
 
-    Some(model.is_exported(&namespace))
+    // A reference to the shared name resolves to the namespace, since it is the
+    // later declaration, so the value keeps no references of its own. Merging
+    // makes them one entity: a used namespace means a used value.
+    //
+    // References are counted directly rather than by asking `is_unused` about the
+    // namespace. `is_unused` ends by consulting this very function through
+    // `is_declaration_merged_with_used`, so that would recurse: value asks about
+    // namespace, namespace asks about value. A namespace binding cannot be
+    // assigned to, so any reference to it is a read.
+    Some(model.is_exported(&namespace) || namespace.all_references(model).next().is_some())
 }
 
 fn is_declaration_merged_with_used(
@@ -736,7 +745,7 @@ fn is_declaration_merged_with_used(
             is_namespace_merged_with_used_value(model, binding)
         }
         _ if is_namespace_merge_value_declaration(&decl) => {
-            is_value_merged_with_exported_namespace(model, binding)
+            is_value_merged_with_used_namespace(model, binding)
         }
         _ => None,
     }
