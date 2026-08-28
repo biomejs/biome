@@ -873,9 +873,67 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
 
             let InferredTypeData::InstanceOf(instance) = ty else {
-                continue;
+                return Some(ty);
             };
             let target = self.resolve_inferred_type(instance.ty(self.db));
+            // Generic type aliases are represented as nested instances. Apply
+            // their arguments to the aliased body, then discard the declaration
+            // wrapper so its parameters are not interpreted a second time.
+            if let InferredTypeData::InstanceOf(alias) = target {
+                let supplied_parameters = instance.type_parameters(self.db);
+                let declared_parameters = alias.type_parameters(self.db);
+                let has_generic_parameters = declared_parameters.iter().any(|parameter| {
+                    matches!(parameter, InferredTypeData::Generic(_))
+                        || matches!(
+                            parameter,
+                            InferredTypeData::InstanceOf(instance)
+                                if matches!(instance.ty(self.db), InferredTypeData::Generic(_))
+                        )
+                });
+                if !has_generic_parameters {
+                    pending.push(target);
+                    continue;
+                }
+
+                let mut type_parameters = Vec::with_capacity(declared_parameters.len());
+                for (index, declared) in declared_parameters.iter().enumerate() {
+                    let substitutions =
+                        substitutions_for_instance(self.db, target, &type_parameters, &[]);
+                    let supplied = supplied_parameters.get(index).copied();
+                    let parameter = supplied.unwrap_or(*declared);
+                    let parameter = apply_substitutions(self.db, parameter, &substitutions);
+                    let generic = if let InferredTypeData::Generic(generic) = declared {
+                        Some(*generic)
+                    } else if let InferredTypeData::InstanceOf(instance) = declared
+                        && let InferredTypeData::Generic(generic) = instance.ty(self.db)
+                    {
+                        Some(generic)
+                    } else {
+                        None
+                    };
+                    type_parameters.push(
+                        (supplied.is_none() || supplied == Some(*declared))
+                            .then_some(generic)
+                            .flatten()
+                            .and_then(|generic| generic.default(self.db))
+                            .map_or(parameter, |default| {
+                                apply_substitutions(self.db, default, &substitutions)
+                            }),
+                    );
+                }
+                let substitutions =
+                    substitutions_for_instance(self.db, target, &type_parameters, &[]);
+                if substitutions.is_empty() {
+                    pending.push(target);
+                } else {
+                    pending.push(apply_substitutions(
+                        self.db,
+                        alias.ty(self.db),
+                        &substitutions,
+                    ));
+                }
+                continue;
+            }
             if self.is_promise_like_target(target) {
                 return Some(
                     instance
