@@ -1878,13 +1878,15 @@ pub(crate) fn retry_on_pending_write<T>(op: impl Fn() -> T) -> T {
     }
 }
 
-/// Wraps another [Workspace] so that any call interrupted by a concurrent
-/// update to the workspace database is automatically retried.
+/// Wraps another [Workspace] so that short operations interrupted by a
+/// concurrent update to the workspace database are automatically retried.
 ///
 /// See [retry_on_pending_write] for what "interrupted" means. Callers that
 /// would rather handle the interruption themselves — for example, LSP request
 /// handlers that answer with `ContentModified` so the editor re-sends the
 /// request — should call the inner workspace directly instead.
+/// Project scans are delegated without retry because the scanner handles
+/// interruptions at individual indexing boundaries.
 pub struct RetryingWorkspace<W>(W);
 
 impl<W: Workspace> RetryingWorkspace<W> {
@@ -1904,9 +1906,12 @@ macro_rules! retrying_workspace_methods {
 }
 
 impl<W: Workspace> Workspace for RetryingWorkspace<W> {
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
+        self.0.scan_project(params)
+    }
+
     retrying_workspace_methods! {
         fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
-        fn scan_project(params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError>;
         fn update_settings(params: UpdateSettingsParams) -> Result<UpdateSettingsResult, WorkspaceError>;
         fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
         fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;

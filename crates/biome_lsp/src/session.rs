@@ -289,8 +289,9 @@ impl Session {
     ///   again: dropping a `didChange` would leave our copy of the document
     ///   permanently out of sync with the editor.
     /// - **Background tasks** the server starts on its own, such as
-    ///   refreshing the diagnostics of the open documents, loading the
-    ///   configuration file, or scanning the project folder.
+    ///   refreshing the diagnostics of the open documents or loading the
+    ///   configuration file. Project scans handle interruptions at individual
+    ///   indexing boundaries instead of retrying the entire scan.
     ///
     /// LSP request handlers (formatting, code actions, ...) should use
     /// [Self::workspace_for_request] instead.

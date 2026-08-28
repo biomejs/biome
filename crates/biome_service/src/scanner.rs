@@ -3,6 +3,26 @@
 //! In addition to scanning and indexing, the scanner also has a
 //! [`watcher`](watcher::Watcher) that can watch scanned folders to keep the
 //! index in sync with the filesystem.
+//!
+//! ## Scanner behaviour
+//!
+//! The scanner must run as an epoch. The database setters must not
+//! interrupt an active scan with [`salsa::Cancelled::PendingWrite`].
+//!
+//! Before a scan starts, the workspace creates a dedicated database view with
+//! [`DbState::scanner_epoch`](crate::db::DbState::scanner_epoch). When the LSP
+//! owns the database, the scanner updates this view without invoking Salsa
+//! setters. Regular writes wait until the scan ends, while reads continue.
+//! After the scan, the temporary view is dropped, the database reports module
+//! graph changes to Salsa once, and waiting writes continue.
+//!
+//! A file changed during traversal may leave the completed index temporarily
+//! stale. A subsequent watcher update indexes the latest file state. This is
+//! an intended limitation, because:
+//! - Dependencies rarely change during a scan phase
+//! - Files opened by the editor still fire `changeFile`, so they are indexed again.
+//!
+//! A possible desynchronization is negligible.
 
 mod watcher;
 mod workspace_bridges;
