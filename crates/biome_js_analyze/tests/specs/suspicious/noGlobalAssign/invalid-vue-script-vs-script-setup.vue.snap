@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-script-vs-script-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const open = defineModel();
+open = true;
+</script>
+
+<script>
+open = true;
+</script>
+
+<template>
+  <button @click="open = !open">Swap</button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-script-vs-script-setup.vue:8:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+     7 │ <script>
+   > 8 │ open = true;
+       │ ^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
