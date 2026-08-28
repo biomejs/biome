@@ -335,4 +335,29 @@ mod tests {
             [Modifier::BogusAccessibility, Modifier::Declare],
         );
     }
+
+    #[test]
+    fn sorts_declare_before_accessibility_modifiers() {
+        for (accessibility, expected) in [
+            (T![private], Modifier::Private),
+            (T![protected], Modifier::Protected),
+            (T![public], Modifier::Public),
+        ] {
+            let modifiers = make::ts_property_signature_modifier_list([
+                AnyTsPropertySignatureModifier::TsAccessibilityModifier(
+                    make::ts_accessibility_modifier(make::token(accessibility)),
+                ),
+                AnyTsPropertySignatureModifier::TsDeclareModifier(make::ts_declare_modifier(
+                    make::token(T![declare]),
+                )),
+            ]);
+
+            let sorted = sort_modifiers_by_precedence(&modifiers);
+
+            assert_eq!(
+                sorted.iter().map(Modifier::from).collect::<Vec<_>>(),
+                [Modifier::Declare, expected],
+            );
+        }
+    }
 }
