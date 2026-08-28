@@ -310,4 +310,3 @@ where
 
     join_with.finish()
 }
-
