@@ -387,10 +387,9 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Resolves the arguments that can influence the return type of a direct function.
     ///
-    /// Generic inference only consumes a non-generic argument when both its parameter
-    /// and the argument are callable. A raw object with no call signature cannot be
-    /// callable, so its nested member types do not affect the result. An `Unknown`
-    /// placeholder preserves its position without resolving those nested types.
+    /// Arguments are resolved normally, except when a non-generic parameter is paired
+    /// with a non-callable raw object. An `Unknown` placeholder preserves that
+    /// argument's position without resolving its nested member types.
     fn resolve_function_call_arguments(
         &mut self,
         function: InferredFunction<'db>,
@@ -399,7 +398,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         debug_assert!(
             arguments
                 .iter()
-                .all(|argument| matches!(argument, RawCallArgumentType::Argument(_)))
+                .all(|argument| matches!(argument, RawCallArgumentType::Argument(_))),
+            "selective argument resolution requires positional arguments; use full argument resolution for calls with spreads"
         );
         let parameters = function.parameters(self.db);
 
@@ -407,9 +407,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             .iter()
             .take(parameters.len())
             .enumerate()
-            .map(|(index, argument)| {
+            .filter_map(|(index, argument)| {
                 let RawCallArgumentType::Argument(reference) = argument else {
-                    unreachable!("spread arguments are handled before selective resolution")
+                    return None;
                 };
                 let can_use_placeholder = parameters.get(index).is_some_and(|parameter| {
                     !parameter.ty().is_generic_reference(self.db)
@@ -420,7 +420,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else {
                     self.resolve(reference)
                 };
-                ResolvedCallArgument::Argument(ty)
+                Some(ResolvedCallArgument::Argument(ty))
             })
             .collect()
     }

@@ -453,14 +453,18 @@ fn test_call_return_inference_skips_non_callable_object_argument_members() {
     assert_function_query_was_not_run(&db, infer_local_type, local_input("SkippedNoise"), &events);
 
     db.clear_salsa_events();
-    let _ = infer_binding_type(
+    let direct = infer_binding_type(
         &db,
         BindingTypeInput::new(
             &db,
             index_module,
             binding_range_by_name(&db, index_module, "direct"),
         ),
-    );
+    )
+    .expect("direct result must be inferred");
+    let value =
+        find_member_type(&db, direct, "value").expect("direct generic value must be inferred");
+    assert!(is_inferred_string(&db, value));
     let events = db.take_salsa_events();
     assert_function_query_was_run(&db, infer_local_type, local_input("DirectNoise"), &events);
 

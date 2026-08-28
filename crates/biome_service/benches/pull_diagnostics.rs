@@ -167,6 +167,16 @@ fn e2e_no_misused_promises(bencher: Bencher, case: &RuleBenchmarkCase) {
     );
 }
 
+#[divan::bench]
+fn e2e_create_env_like_call(bencher: Bencher) {
+    bench_pull_diagnostics(
+        bencher,
+        create_env_like_files,
+        "lint/nursery/noFloatingPromises",
+        ScanKind::TypeAware,
+    );
+}
+
 struct PullDiagnosticsBenchmark {
     workspace: Box<dyn Workspace>,
     params: PullDiagnosticsParams,
@@ -308,6 +318,13 @@ fn no_misused_promises_callback_files() -> BenchmarkFiles {
 
 fn no_misused_promises_imported_chain_files() -> BenchmarkFiles {
     imported_promise_chain_files(true)
+}
+
+fn create_env_like_files() -> BenchmarkFiles {
+    benchmark_files(&[(
+        TARGET_PATH,
+        include_str!("fixtures/no_floating_promises/create_env_like.ts"),
+    )])
 }
 
 fn imported_promise_chain_files(as_callbacks: bool) -> BenchmarkFiles {
