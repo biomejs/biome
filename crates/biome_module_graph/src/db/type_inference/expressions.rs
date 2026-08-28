@@ -376,6 +376,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             && arguments
                 .iter()
                 .all(|argument| matches!(argument, RawCallArgumentType::Argument(_)))
+            && function
+                .parameters(self.db)
+                .iter()
+                .all(|parameter| !parameter.is_rest())
         {
             self.resolve_function_call_arguments(function, arguments)
         } else {

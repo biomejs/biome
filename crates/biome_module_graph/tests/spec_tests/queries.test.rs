@@ -497,6 +497,8 @@ fn test_call_return_inference_preserves_relevant_argument_shapes() {
             export interface DefaultNoise { field: string; }
             export interface SpreadNoise { field: string; }
             export interface TrailingNoise { field: string; }
+            export interface RestFirstNoise { field: string; }
+            export interface RestSecondNoise { field: string; }
         "#,
     );
     fs.insert(
@@ -505,6 +507,8 @@ fn test_call_return_inference_preserves_relevant_argument_shapes() {
             import type {
                 DefaultNoise,
                 PositionalNoise,
+                RestFirstNoise,
+                RestSecondNoise,
                 SpreadNoise,
                 TrailingNoise,
             } from "./noise.ts";
@@ -513,6 +517,8 @@ fn test_call_return_inference_preserves_relevant_argument_shapes() {
             declare const defaultNoise: DefaultNoise;
             declare const spreadNoise: SpreadNoise;
             declare const trailingNoise: TrailingNoise;
+            declare const restFirstNoise: RestFirstNoise;
+            declare const restSecondNoise: RestSecondNoise;
 
             type Options = { value: unknown };
             type Callback<T> = () => T;
@@ -520,6 +526,7 @@ fn test_call_return_inference_preserves_relevant_argument_shapes() {
             declare function fromCallback<T>(callback: Callback<T>): T;
             declare function withDefaults<T = string, U = T>(options: Options): U;
             declare function fixed(value: number): string;
+            declare function withRest(value: number, ...options: Options[]): string;
 
             export const positionalResult = select(
                 { value: positionalNoise.field },
@@ -534,6 +541,11 @@ fn test_call_return_inference_preserves_relevant_argument_shapes() {
                 ...[{ value: spreadNoise.field }, true] as const,
             );
             export const trailingResult = fixed(1, { value: trailingNoise.field });
+            export const restResult = withRest(
+                1,
+                { value: restFirstNoise.field },
+                { value: restSecondNoise.field },
+            );
         "#,
     );
 
@@ -590,6 +602,22 @@ fn test_call_return_inference_preserves_relevant_argument_shapes() {
     assert!(is_inferred_string(&db, infer_result("trailingResult")));
     let events = db.take_salsa_events();
     assert_function_query_was_not_run(&db, infer_local_type, local_input("TrailingNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("restResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(
+        &db,
+        infer_local_type,
+        local_input("RestFirstNoise"),
+        &events,
+    );
+    assert_function_query_was_run(
+        &db,
+        infer_local_type,
+        local_input("RestSecondNoise"),
+        &events,
+    );
 }
 
 #[test]
