@@ -15,8 +15,8 @@ use crate::{
 pub enum Modifier {
     // modifiers must be sorted by precedence.
     Decorator = 1 << 0,
-    Declare = 1 << 1,
-    BogusAccessibility = 1 << 2,
+    BogusAccessibility = 1 << 1,
+    Declare = 1 << 2,
     Private = 1 << 3,
     Protected = 1 << 4,
     Public = 1 << 5,

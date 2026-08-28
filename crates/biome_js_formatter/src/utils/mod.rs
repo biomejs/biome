@@ -310,3 +310,29 @@ where
 
     join_with.finish()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::sort_modifiers_by_precedence;
+    use biome_js_factory::make;
+    use biome_js_syntax::{AnyTsPropertySignatureModifier, Modifier, T};
+
+    #[test]
+    fn sorts_bogus_accessibility_before_declare() {
+        let modifiers = make::ts_property_signature_modifier_list([
+            AnyTsPropertySignatureModifier::TsDeclareModifier(make::ts_declare_modifier(
+                make::token(T![declare]),
+            )),
+            AnyTsPropertySignatureModifier::TsAccessibilityModifier(
+                make::ts_accessibility_modifier(make::token(T![static])),
+            ),
+        ]);
+
+        let sorted = sort_modifiers_by_precedence(&modifiers);
+
+        assert_eq!(
+            sorted.iter().map(Modifier::from).collect::<Vec<_>>(),
+            [Modifier::BogusAccessibility, Modifier::Declare],
+        );
+    }
+}
