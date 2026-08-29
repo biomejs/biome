@@ -407,7 +407,23 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            SLH if let Some(comment) = self.consume_js_comment_in_tag() => return comment,
+            LSS if self.at_start_comment() => {
+                let start = self.text_position();
+                let comment = self.consume_comment();
+                self.push_diagnostic(
+                    ParseDiagnostic::new(
+                        "HTML comments are not allowed here.",
+                        start..self.text_position(),
+                    )
+                    .with_hint(
+                        "Use a JavaScript `//` or `/* ... */` comment when inside a tag's attributes.",
+                    ),
+                );
+                return comment;
+            }
+            SLH if let Some(comment) = self.consume_js_comment_in_tag() => {
+                return comment;
+            }
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
