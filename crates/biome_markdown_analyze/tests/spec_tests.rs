@@ -3,9 +3,9 @@ use biome_analyze::{
     Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 use biome_markdown_syntax::MarkdownLanguage;
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
@@ -140,8 +140,7 @@ pub(crate) fn analyze_and_snap(
         working_directory,
         &mut diagnostics,
     );
-    let mut cache = NodeCache::default();
-    let parsed = parse_markdown_with_cache(input_code, &mut cache, parser_options.clone());
+    let parsed = parse_markdown(input_code, parser_options.clone());
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
@@ -233,8 +232,7 @@ fn check_code_action(
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let mut cache = NodeCache::default();
-    let re_parse = parse_markdown_with_cache(&output, &mut cache, parser_options.clone());
+    let re_parse = parse_markdown(&output, parser_options.clone());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 

@@ -222,7 +222,7 @@ pub fn quick_test() {
     use biome_rowan::AstNode;
 
     fn test_example(num: u32, input: &str, expected: &str) {
-        let root = parse_markdown(input);
+        let root = parse_markdown(input, MarkdownParserOptions::default());
         let doc = MdRoot::cast(root.syntax())
             .unwrap_or_else(|| panic!("Example {:03}: parse failed", num));
         let html = document_to_html(
@@ -503,7 +503,7 @@ pub fn quick_test() {
 }
 
 fn fuzz_test_example(num: u32, input: &str, expected: &str) {
-    let root = parse_markdown(input);
+    let root = parse_markdown(input, MarkdownParserOptions::default());
     let doc =
         MdRoot::cast(root.syntax()).unwrap_or_else(|| panic!("Fuzz {:03}: parse failed", num));
     let html = document_to_html(

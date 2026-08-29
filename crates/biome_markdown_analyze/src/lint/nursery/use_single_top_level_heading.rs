@@ -15,12 +15,15 @@ declare_lint_rule! {
     /// The rule reports a document only when it follows this convention, so it stays silent
     /// when:
     ///
+    /// - the document starts with a front matter block (only parsed when
+    ///   `markdown.parser.frontmatter` is enabled): the front matter may already carry the
+    ///   document title, so a heading in the body isn't necessarily a duplicate;
     /// - the heading isn't a direct child of the document: a heading nested in a blockquote or
     ///   in a list item never counts as the title, and is never reported as an extra top-level
     ///   heading;
     /// - the first heading at the configured level isn't the document's title, because it is
     ///   preceded by something other than blank lines and HTML comments, such as a heading at
-    ///   another level, a paragraph, or a front matter block.
+    ///   another level or a paragraph.
     ///
     /// ## Examples
     ///
@@ -101,6 +104,9 @@ impl Rule for UseSingleTopLevelHeading {
 
         let root = ctx.root();
 
+        // Front matter isn't a sibling in the block list, so `is_document_title` can't see it.
+        // A document with front matter may already carry its title there, so body headings
+        // aren't necessarily duplicates: stay silent rather than risk a false positive.
         if root.frontmatter().is_some() {
             return None;
         }

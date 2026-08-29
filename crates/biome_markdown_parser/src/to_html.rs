@@ -2039,10 +2039,10 @@ fn list_item_required_indent(entry: &ListItemIndent) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parse_markdown;
+    use crate::{MarkdownParserOptions, parse_markdown};
 
     fn render(input: &str) -> String {
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2068,7 +2068,7 @@ mod tests {
 
     #[test]
     fn test_simple_paragraph() {
-        let parsed = parse_markdown("Hello, world!\n");
+        let parsed = parse_markdown("Hello, world!\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2080,7 +2080,7 @@ mod tests {
 
     #[test]
     fn test_atx_header() {
-        let parsed = parse_markdown("# Hello\n");
+        let parsed = parse_markdown("# Hello\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2092,7 +2092,7 @@ mod tests {
 
     #[test]
     fn test_emphasis() {
-        let parsed = parse_markdown("*italic* and **bold**\n");
+        let parsed = parse_markdown("*italic* and **bold**\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2121,7 +2121,10 @@ mod tests {
     #[test]
     fn test_emphasis_complex_cases() {
         // Test: Nested
-        let parsed = parse_markdown("**bold *and italic* text**\n");
+        let parsed = parse_markdown(
+            "**bold *and italic* text**\n",
+            MarkdownParserOptions::default(),
+        );
         assert_eq!(
             parsed.syntax().kind(),
             biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
@@ -2130,7 +2133,7 @@ mod tests {
         );
 
         // Test: Rule of 3
-        let parsed = parse_markdown("***bold italic***\n");
+        let parsed = parse_markdown("***bold italic***\n", MarkdownParserOptions::default());
         assert_eq!(
             parsed.syntax().kind(),
             biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
@@ -2139,7 +2142,7 @@ mod tests {
         );
 
         // Test: Multiple runs
-        let parsed = parse_markdown("*a **b** c*\n");
+        let parsed = parse_markdown("*a **b** c*\n", MarkdownParserOptions::default());
         assert_eq!(
             parsed.syntax().kind(),
             biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
@@ -2148,7 +2151,7 @@ mod tests {
         );
 
         // Test: Overlapping
-        let parsed = parse_markdown("*foo**bar**baz*\n");
+        let parsed = parse_markdown("*foo**bar**baz*\n", MarkdownParserOptions::default());
         assert_eq!(
             parsed.syntax().kind(),
             biome_markdown_syntax::MarkdownSyntaxKind::MD_ROOT,
@@ -2158,7 +2161,7 @@ mod tests {
 
         // Test: Unbalanced emphasis (CommonMark example 442)
         // **foo* should produce *<em>foo</em>
-        let parsed = parse_markdown("**foo*\n");
+        let parsed = parse_markdown("**foo*\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2177,7 +2180,7 @@ mod tests {
     fn test_example_431() {
         // Test: Example 431 - nested emphasis with triple star closer
         // **foo *bar*** should produce <strong>foo <em>bar</em></strong>
-        let parsed = parse_markdown("**foo *bar***\n");
+        let parsed = parse_markdown("**foo *bar***\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2224,7 +2227,7 @@ mod tests {
     fn test_paren_depth_limit_in_destination() {
         let dest = format!("x{}y{}", "(".repeat(32), ")".repeat(32));
         let input = format!("[a]({dest})\n");
-        let parsed = parse_markdown(&input);
+        let parsed = parse_markdown(&input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2239,7 +2242,7 @@ mod tests {
     fn test_paren_depth_limit_exceeded_in_destination() {
         let dest = format!("x{}y{}", "(".repeat(33), ")".repeat(33));
         let input = format!("[a]({dest})\n");
-        let parsed = parse_markdown(&input);
+        let parsed = parse_markdown(&input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2284,7 +2287,7 @@ mod tests {
 
     #[test]
     fn test_hard_line_break_at_end_of_block_is_literal() {
-        let parsed = parse_markdown("foo\\\\\n");
+        let parsed = parse_markdown("foo\\\\\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2296,7 +2299,10 @@ mod tests {
 
     #[test]
     fn test_hard_break_in_blockquote() {
-        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let parsed = parse_markdown(
+            "> foo  \n> bar  \n>\n> baz",
+            MarkdownParserOptions::default(),
+        );
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2311,7 +2317,10 @@ mod tests {
 
     #[test]
     fn test_hard_break_nested_quote_in_list() {
-        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let parsed = parse_markdown(
+            "- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n",
+            MarkdownParserOptions::default(),
+        );
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2328,7 +2337,7 @@ mod tests {
     fn test_tight_list_marker_split() {
         // Two tight lists separated by blank line with different markers
         let input = "- foo\n- bar\n\n* baz\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2344,7 +2353,7 @@ mod tests {
     #[test]
     fn test_tight_list_basic() {
         let input = "- foo\n- bar\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2357,7 +2366,7 @@ mod tests {
     #[test]
     fn test_loose_list_same_marker() {
         let input = "- foo\n\n- bar\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2374,7 +2383,7 @@ mod tests {
     fn test_ordered_delim_split_tight() {
         // Different ordered delimiters across blank line → separate tight lists
         let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2391,7 +2400,7 @@ mod tests {
     fn test_cross_type_split_tight() {
         // Bullet → ordered across blank line → separate tight lists
         let input = "- bullet\n\n1. ordered\n";
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2406,7 +2415,7 @@ mod tests {
 
     #[test]
     fn test_tight_bullet_list_in_blockquote() {
-        let parsed = parse_markdown("> - a\n> - b\n");
+        let parsed = parse_markdown("> - a\n> - b\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2421,7 +2430,7 @@ mod tests {
 
     #[test]
     fn test_tight_ordered_list_in_blockquote() {
-        let parsed = parse_markdown("> 1. a\n> 2. b\n");
+        let parsed = parse_markdown("> 1. a\n> 2. b\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2436,7 +2445,7 @@ mod tests {
 
     #[test]
     fn test_tight_three_item_bullet_list_in_blockquote() {
-        let parsed = parse_markdown("> - a\n> - b\n> - c\n");
+        let parsed = parse_markdown("> - a\n> - b\n> - c\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
@@ -2451,7 +2460,7 @@ mod tests {
 
     #[test]
     fn test_tight_list_not_in_blockquote() {
-        let parsed = parse_markdown("- a\n- b\n");
+        let parsed = parse_markdown("- a\n- b\n", MarkdownParserOptions::default());
         let html = document_to_html(
             &parsed.tree(),
             parsed.list_tightness(),
