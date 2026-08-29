@@ -40,6 +40,7 @@ fn expression_range_by_source(
 
 const BUDGETED_BINDING_QUERY: &str = "infer_binding_type_with_import_budget";
 const IMPORT_DEPTH_PREPARATION_QUERY: &str = "prepare_module_types_bottom_up_for_import_depth";
+const INFERENCE_SCC_QUERY: &str = "inference_module_sccs";
 
 #[test]
 fn test_binding_query_does_not_infer_complete_module_tables() {
@@ -60,6 +61,60 @@ fn test_binding_query_does_not_infer_complete_module_tables() {
 
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn test_local_lookups_skip_cycle_detection_for_unrelated_imports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/source.ts".into(), "export const unused = 1;");
+    fs.insert(
+        "/src/binding.ts".into(),
+        "import { unused } from './source.ts'; export const value = 1;",
+    );
+    fs.insert(
+        "/src/type.ts".into(),
+        "import { unused } from './source.ts'; export interface Value { field: string; }",
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/source.ts", "/src/binding.ts", "/src/type.ts"],
+        true,
+    );
+    let binding_module = db
+        .module_for_path(Utf8Path::new("/src/binding.ts"))
+        .expect("binding module must exist");
+    let type_module = db
+        .module_for_path(Utf8Path::new("/src/type.ts"))
+        .expect("type module must exist");
+
+    db.clear_salsa_events();
+    let binding = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            binding_module,
+            binding_range_by_name(&db, binding_module, "value"),
+        ),
+    )
+    .expect("value type must be inferred");
+    let local = infer_local_type(
+        &db,
+        LocalTypeInput::new(
+            &db,
+            type_module,
+            local_type_id_by_name(&db, type_module, "Value"),
+        ),
+    )
+    .expect("Value type must be inferred");
+    assert!(InferredType::new(&db, binding).is_inferred());
+    assert!(InferredType::new(&db, local).is_inferred());
+    let events = db.take_salsa_events();
+
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, INFERENCE_SCC_QUERY, &events),
+        0
+    );
 }
 
 #[test]

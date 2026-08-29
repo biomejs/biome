@@ -1,7 +1,7 @@
 use super::{
     InferredModuleTypes,
     globals::global_type,
-    resolver::{MAX_RAW_TYPE_RESOLUTION_DEPTH, ResolutionCtx},
+    resolver::{MAX_RAW_TYPE_RESOLUTION_DEPTH, OnDemandDeclaration, ResolutionCtx},
 };
 use crate::db::queries::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, LocalTypeInput,
@@ -26,6 +26,7 @@ use rustc_hash::FxHashSet;
 use salsa::plumbing::AsId;
 
 const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
+pub(super) const MAX_NAMESPACE_IMPORT_MEMBER_STEPS: usize = 64;
 
 /// Result of searching for the declaration behind a named export.
 #[derive(Clone, Debug, Eq, PartialEq, salsa::Update)]
@@ -344,6 +345,90 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.resolve_import_symbol(module, &qualifier.symbol)
     }
 
+    /// Projects `member` through an import without building the full namespace.
+    ///
+    /// Projection follows namespace imports, namespace re-exports, and bindings
+    /// that alias a namespace. `None` means available graph data and the
+    /// remaining work budget cannot establish such a projection. A supported
+    /// projection whose target cannot be inferred returns `Some(Unknown)`.
+    pub(super) fn resolve_import_member_with_steps(
+        &self,
+        qualifier: &TypeImportQualifier,
+        member: &Text,
+        remaining_projection_steps: usize,
+    ) -> Option<InferredTypeData<'db>> {
+        let remaining_projection_steps = remaining_projection_steps.checked_sub(1)?;
+        let module = self.module_for_resolved_path(&qualifier.resolved_path)?;
+        let export_name = match &qualifier.symbol {
+            ImportSymbol::All => {
+                return Some(
+                    self.resolve_import_symbol(module, &ImportSymbol::Named(member.clone())),
+                );
+            }
+            ImportSymbol::Default => "default",
+            ImportSymbol::Named(name) => name.text(),
+        };
+
+        let symbol = SymbolFromModuleInfo::new(self.db, export_name.to_string(), module);
+        let ExportOriginResult::Found { module, name } = resolved_export_origin(self.db, symbol)
+        else {
+            return None;
+        };
+        let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
+            return None;
+        };
+        let Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) =
+            js_info.exports.get(name.text())
+        else {
+            return None;
+        };
+        match own_export {
+            JsOwnExport::Namespace(reexport) => {
+                if reexport.import.symbol != ImportSymbol::All {
+                    return None;
+                }
+                Some(
+                    self.module_for_resolved_path(&reexport.import.resolved_path)
+                        .map_or(InferredTypeData::Unknown, |module| {
+                            self.resolve_import_symbol(module, &ImportSymbol::Named(member.clone()))
+                        }),
+                )
+            }
+            JsOwnExport::Binding(range) => {
+                let reference = js_info.raw_binding_types.get(range)?.clone();
+                let mut ctx = match self.import_resolution {
+                    super::ImportResolution::OnDemand { remaining } => {
+                        let resolve_declarations_directly = if self.resolves_declarations_directly()
+                        {
+                            let sccs =
+                                inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
+                            *module == self.module
+                                || sccs.contains_cycle_between(self.module, *module)
+                        } else {
+                            false
+                        };
+                        self.for_on_demand_import(
+                            *module,
+                            &js_info,
+                            remaining,
+                            resolve_declarations_directly,
+                        )
+                    }
+                    import_resolution @ (super::ImportResolution::FromTables { .. }
+                    | super::ImportResolution::CycleFallback(_)) => {
+                        ResolutionCtx::new(self.db, *module, &js_info, import_resolution)
+                    }
+                };
+                ctx.resolve_namespace_import_member_with_steps(
+                    &reference,
+                    member,
+                    remaining_projection_steps,
+                )
+            }
+            JsOwnExport::Type(_) => None,
+        }
+    }
+
     fn module_for_resolved_path(&self, resolved_path: &ResolvedPath) -> Option<ModuleInfo> {
         let path = resolved_path.as_path()?;
         self.db.module_for_path(path)
@@ -374,10 +459,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Resolves only the requested import through export and lookup queries.
     ///
     /// Unlike [`Self::resolve_import_symbol_from_tables`], this path does not
-    /// infer the imported module's complete type tables. Dependency graphs that
-    /// exceed the on-demand traversal budget use bottom-up whole-module
-    /// inference instead. The fallback returns `Unknown` if those module tables
-    /// cannot be inferred.
+    /// infer the imported module's complete type tables. Declarations in a
+    /// module SCC are evaluated directly; other declarations use tracked
+    /// lookup queries. Dependency graphs that exceed the on-demand traversal
+    /// budget use bottom-up whole-module inference instead. The fallback
+    /// returns `Unknown` if those module tables cannot be inferred.
     fn resolve_import_symbol_on_demand(
         &self,
         module: ModuleInfo,
@@ -403,30 +489,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                     self.resolve_import_symbol_from_tables(module, types, symbol)
                 }),
             super::ImportResolution::OnDemand { remaining } => {
-                let sccs = inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
-                if module == self.module || sccs.contains_cycle_between(self.module, module) {
-                    return InferredTypeData::Unknown;
-                }
-                if remaining == 0 {
-                    return infer_module_types_bottom_up_for_import_depth(self.db, module)
-                        .map_or(InferredTypeData::Unknown, |types| {
-                            self.resolve_import_symbol_from_tables(module, types, symbol)
-                        });
-                }
-
                 let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
                     return InferredTypeData::Unknown;
                 };
                 if !js_info.infer_types {
                     return InferredTypeData::Unknown;
                 }
-                let ctx = ResolutionCtx::new(
-                    self.db,
+                let sccs = inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
+                let in_same_cycle = sccs.contains_cycle_between(self.module, module);
+                let resolve_declarations_directly = module == self.module || in_same_cycle;
+                if resolve_declarations_directly && !self.resolves_declarations_directly() {
+                    self.mark_inference_cycle();
+                }
+                if remaining == 0 && !resolve_declarations_directly {
+                    return infer_module_types_bottom_up_for_import_depth(self.db, module)
+                        .map_or(InferredTypeData::Unknown, |types| {
+                            self.resolve_import_symbol_from_tables(module, types, symbol)
+                        });
+                }
+
+                // Imports inside the active import SCC use the declaration
+                // evaluator's work limit. Spending the import-depth budget on
+                // these edges could force complete-module inference, whose
+                // cycle fallback cannot recover acyclic declarations from the
+                // blocked component.
+                let remaining = if resolve_declarations_directly {
+                    remaining
+                } else {
+                    remaining - 1
+                };
+                let ctx = self.for_on_demand_import(
                     module,
                     &js_info,
-                    super::ImportResolution::OnDemand {
-                        remaining: remaining - 1,
-                    },
+                    remaining,
+                    resolve_declarations_directly,
                 );
                 ctx.resolve_import_symbol_on_demand(module, symbol)
             }
@@ -532,22 +628,38 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ExportResolution::Missing;
         };
 
+        let resolve_declaration_directly = if self.resolves_declarations_directly() {
+            let sccs = inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
+            *module == self.module || sccs.contains_cycle_between(self.module, *module)
+        } else {
+            false
+        };
+
         let ty = match own_export {
             JsOwnExport::Binding(range) => inferred_type_from_binding_on_demand(
-                self.db,
+                self,
                 *module,
                 &js_info,
                 *range,
-                self.import_resolution,
+                resolve_declaration_directly,
             ),
             JsOwnExport::Type(resolved_id) => inferred_type_from_resolved_id_on_demand(
-                self.db,
+                self,
                 *module,
                 &js_info,
                 ResolvedTypeId::Local(*resolved_id),
-                self.import_resolution,
+                resolve_declaration_directly,
             ),
-            JsOwnExport::Namespace(reexport) => self.resolve_js_import(&reexport.import),
+            JsOwnExport::Namespace(reexport) => {
+                match (resolve_declaration_directly, self.import_resolution) {
+                    (true, super::ImportResolution::OnDemand { .. }) => self
+                        .resolve_on_demand_declaration(OnDemandDeclaration::Namespace {
+                            module: *module,
+                            name: name.clone(),
+                        }),
+                    _ => self.resolve_js_import(&reexport.import),
+                }
+            }
         };
         ExportResolution::Resolved(ResolvedExport {
             identity: ExportIdentity {
@@ -556,6 +668,17 @@ impl<'db> ResolutionCtx<'db, '_> {
             },
             ty,
         })
+    }
+
+    pub(super) fn resolve_own_namespace_export(&self, name: &str) -> InferredTypeData<'db> {
+        let Some(
+            JsExport::Own(JsOwnExport::Namespace(reexport))
+            | JsExport::OwnType(JsOwnExport::Namespace(reexport)),
+        ) = self.js_info.exports.get(name)
+        else {
+            return InferredTypeData::Unknown;
+        };
+        self.resolve_js_import(&reexport.import)
     }
 
     /// Builds a namespace from whole-module tables during cycle fallback.
@@ -821,34 +944,38 @@ fn is_namespace_export_collectible(infer_types: bool, export: &JsExport) -> bool
 }
 
 fn inferred_type_from_binding_on_demand<'db>(
-    db: &'db dyn ModuleDb,
+    resolution_ctx: &ResolutionCtx<'db, '_>,
     module: ModuleInfo,
     js_info: &crate::JsModuleInfo,
     range: TextRange,
-    import_resolution: super::ImportResolution<'_>,
+    resolve_declaration_directly: bool,
 ) -> InferredTypeData<'db> {
     if let Some(TypeReference::Resolved(resolved_id)) = js_info.raw_binding_types.get(&range)
         && resolved_id.level() == TypeResolverLevel::Thin
         && js_info.is_named_type(resolved_id.id())
     {
         return InferredTypeData::Local(LocalTypeHandle::new(
-            db,
+            resolution_ctx.db,
             ModuleKey::new(module.as_id()),
             LocalTypeId::new(resolved_id.index()),
         ));
     }
 
+    let db = resolution_ctx.db;
     let input = BindingTypeInput::new(db, module, range);
-    match import_resolution {
+    match resolution_ctx.import_resolution {
+        super::ImportResolution::OnDemand { remaining } if resolve_declaration_directly => {
+            let mut ctx = resolution_ctx.for_on_demand_import(module, js_info, remaining, true);
+            ctx.resolve_local_binding(range)
+        }
         super::ImportResolution::OnDemand { remaining } => {
             let input = BindingTypeWithImportBudgetInput::new(db, input, remaining);
-            infer_binding_type_with_import_budget(db, input)
+            infer_binding_type_with_import_budget(db, input).unwrap_or(InferredTypeData::Unknown)
         }
         super::ImportResolution::FromTables { .. } | super::ImportResolution::CycleFallback(_) => {
-            infer_binding_type(db, input)
+            infer_binding_type(db, input).unwrap_or(InferredTypeData::Unknown)
         }
     }
-    .unwrap_or(InferredTypeData::Unknown)
 }
 
 /// Resolves an exported type ID from complete inferred module tables.
@@ -887,15 +1014,16 @@ fn inferred_type_from_resolved_id_from_tables<'db>(
 /// Resolves an exported type ID without inferring complete module tables.
 ///
 /// Named declarations remain symbolic local handles so recursive types retain
-/// their module identity. Other local types are requested through the lookup
-/// query.
+/// their module identity. Other local types use tracked lookup queries outside
+/// the current module SCC and direct declaration evaluation within it.
 fn inferred_type_from_resolved_id_on_demand<'db>(
-    db: &'db dyn ModuleDb,
+    resolution_ctx: &ResolutionCtx<'db, '_>,
     module: ModuleInfo,
     js_info: &crate::JsModuleInfo,
     resolved_id: ResolvedTypeId,
-    import_resolution: super::ImportResolution<'_>,
+    resolve_declaration_directly: bool,
 ) -> InferredTypeData<'db> {
+    let db = resolution_ctx.db;
     match resolved_id.level() {
         TypeResolverLevel::Thin => {
             let local_type_id = LocalTypeId::new(resolved_id.index());
@@ -907,15 +1035,24 @@ fn inferred_type_from_resolved_id_on_demand<'db>(
                 ))
             } else {
                 let input = LocalTypeInput::new(db, module, local_type_id);
-                match import_resolution {
+                match resolution_ctx.import_resolution {
+                    super::ImportResolution::OnDemand { remaining }
+                        if resolve_declaration_directly =>
+                    {
+                        let mut ctx =
+                            resolution_ctx.for_on_demand_import(module, js_info, remaining, true);
+                        ctx.resolve_local_declaration(resolved_id.id())
+                    }
                     super::ImportResolution::OnDemand { remaining } => {
                         let input = LocalTypeWithImportBudgetInput::new(db, input, remaining);
                         infer_local_type_with_import_budget(db, input)
+                            .unwrap_or(InferredTypeData::Unknown)
                     }
                     super::ImportResolution::FromTables { .. }
-                    | super::ImportResolution::CycleFallback(_) => infer_local_type(db, input),
+                    | super::ImportResolution::CycleFallback(_) => {
+                        infer_local_type(db, input).unwrap_or(InferredTypeData::Unknown)
+                    }
                 }
-                .unwrap_or(InferredTypeData::Unknown)
             }
         }
         TypeResolverLevel::Global => GlobalTypeId::try_from_type_id(resolved_id.id())

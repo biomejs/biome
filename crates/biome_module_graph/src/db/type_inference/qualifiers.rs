@@ -1,4 +1,4 @@
-use super::resolver::ResolutionCtx;
+use super::{imports::MAX_NAMESPACE_IMPORT_MEMBER_STEPS, resolver::ResolutionCtx};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
     Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
@@ -99,7 +99,31 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
                 .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
             if let Some(binding) = binding {
-                let mut target = if binding.is_imported()
+                let binding_is_imported = binding.is_imported();
+                let resolves_declarations_directly = self.resolves_declarations_directly();
+                // Project the selected namespace member before resolving its
+                // base. Building the complete namespace here would add
+                // unrelated exports to the declaration graph and could turn
+                // an acyclic lookup into a dependency cycle.
+                let projected_member = resolves_declarations_directly.then(|| {
+                    members.first().and_then(|member| {
+                        self.resolve_namespace_import_member(
+                            &TypeReference::Qualifier(Box::new(TypeReferenceQualifier {
+                                path: Path::from(identifier.clone()),
+                                type_parameters: Box::default(),
+                                scope_id: qualifier.scope_id,
+                                type_only: qualifier.type_only,
+                                excluded_binding_id: qualifier.excluded_binding_id,
+                            })),
+                            member,
+                        )
+                    })
+                });
+                let projected_member = projected_member.flatten();
+                let consumed_first_member = projected_member.is_some();
+                let mut target = if let Some(projected_member) = projected_member {
+                    projected_member
+                } else if binding_is_imported
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
                     self.resolve_import(&TypeImportQualifier {
@@ -107,6 +131,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                         resolved_path: import.resolved_path.clone(),
                         type_only: qualifier.type_only,
                     })
+                } else if resolves_declarations_directly {
+                    self.resolve_local_binding(binding.syntax().text_trimmed_range())
                 } else {
                     self.js_info
                         .raw_binding_types
@@ -117,7 +143,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         })
                 };
 
-                for member in &members {
+                for member in members.iter().skip(usize::from(consumed_first_member)) {
                     let Some(member_ty) =
                         self.resolve_static_member_expression(target, member.text())
                     else {
@@ -237,6 +263,116 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         InferredTypeData::Unknown
+    }
+
+    /// Projects one member from a reference that leads to a namespace import.
+    ///
+    /// Direct declaration evaluation uses this path to avoid resolving every
+    /// export on the namespace. Returns `None` when the reference does not lead
+    /// to a supported namespace import or the bounded projection cannot finish.
+    pub(super) fn resolve_namespace_import_member(
+        &mut self,
+        reference: &TypeReference,
+        member: &Text,
+    ) -> Option<InferredTypeData<'db>> {
+        self.resolve_namespace_import_member_with_steps(
+            reference,
+            member,
+            MAX_NAMESPACE_IMPORT_MEMBER_STEPS,
+        )
+    }
+
+    /// Follows local aliases and qualifiers until it reaches the import that
+    /// supplies `member`.
+    ///
+    /// Each iteration through the `TypeReference` chain consumes one step.
+    /// Entering `resolve_import_member_with_steps` consumes another step for
+    /// the cross-module projection. Walking parent scopes has a separate limit
+    /// and does not consume this budget.
+    pub(super) fn resolve_namespace_import_member_with_steps(
+        &mut self,
+        reference: &TypeReference,
+        member: &Text,
+        mut remaining_projection_steps: usize,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut reference = reference.clone();
+        while remaining_projection_steps > 0 {
+            remaining_projection_steps -= 1;
+            if let TypeReference::Import(import) = &reference {
+                return self.resolve_import_member_with_steps(
+                    import,
+                    member,
+                    remaining_projection_steps,
+                );
+            }
+
+            if let TypeReference::Resolved(resolved_id) = &reference {
+                if resolved_id.level() != TypeResolverLevel::Thin {
+                    return None;
+                }
+                let raw = self.js_info.raw_types.get(resolved_id.id().index())?;
+                if let biome_js_type_info::RawTypeData::Reference(next) = raw {
+                    reference = next.clone();
+                    continue;
+                }
+                if let biome_js_type_info::RawTypeData::TypeofValue(value) = raw
+                    && value.ty.is_unknown()
+                {
+                    reference =
+                        TypeReference::Qualifier(Box::new(TypeReferenceQualifier::from_path(
+                            value.scope_id.unwrap_or(biome_js_semantic::ScopeId::GLOBAL),
+                            value.identifier.clone(),
+                        )));
+                    continue;
+                }
+                return None;
+            }
+
+            let TypeReference::Qualifier(qualifier) = &reference else {
+                return None;
+            };
+            let identifier = qualifier.path.identifier()?;
+            let mut scope = self
+                .js_info
+                .semantic_model
+                .scope_from_id(qualifier.scope_id);
+            let mut next = None;
+            for _ in 0..MAX_SCOPE_RESOLUTION_STEPS {
+                let binding = scope
+                    .get_binding_reference(identifier.text())
+                    .and_then(|binding_reference| {
+                        binding_reference.get_binding_id_for_qualifier(qualifier)
+                    })
+                    .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
+                if let Some(binding) = binding {
+                    if binding.is_imported() {
+                        let import = self.js_info.static_imports.get(identifier.text())?;
+                        return self.resolve_import_member_with_steps(
+                            &TypeImportQualifier {
+                                symbol: import.symbol.clone(),
+                                resolved_path: import.resolved_path.clone(),
+                                type_only: qualifier.type_only,
+                            },
+                            member,
+                            remaining_projection_steps,
+                        );
+                    }
+                    next = self
+                        .js_info
+                        .raw_binding_types
+                        .get(&binding.syntax().text_trimmed_range())
+                        .cloned();
+                    break;
+                }
+                let Some(parent) = scope.parent() else {
+                    break;
+                };
+                scope = parent;
+            }
+            reference = next?;
+        }
+
+        None
     }
 
     fn resolve_global_member_qualifier(
