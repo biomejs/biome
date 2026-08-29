@@ -1,6 +1,11 @@
-/// Sorted array of Node builtin modules
+/// Sorted array of built-in modules recognized by the resolver.
 ///
-/// Source: <https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158>
+/// Contains the Node.js core modules (with and without the `node:` prefix) as
+/// well as the Bun runtime built-ins exposed under the `bun:` scheme, since
+/// those are import specifiers that never resolve to a file on disk.
+///
+/// Node source: <https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158>
+/// Bun source: <https://bun.sh/docs/runtime/bun-apis>
 const BUILTIN_NODE_MODULES: &[&str] = &[
     "_debug_agent",
     "_debugger",
@@ -25,6 +30,12 @@ const BUILTIN_NODE_MODULES: &[&str] = &[
     "async_hooks",
     "buffer",
     "buffer_ieee754",
+    "bun",
+    "bun:ffi",
+    "bun:jsc",
+    "bun:sqlite",
+    "bun:test",
+    "bun:wrap",
     "child_process",
     "cluster",
     "console",

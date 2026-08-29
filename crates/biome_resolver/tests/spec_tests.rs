@@ -331,6 +331,22 @@ fn test_resolve_node_builtins() {
             "{base_dir}/node_modules/buffer/index.js"
         )))
     );
+
+    // Bun runtime built-ins are treated the same as Node built-ins.
+    assert_eq!(
+        resolve(
+            "bun:test",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["js"],
+                resolve_node_builtins: true,
+                ..Default::default()
+            }
+        ),
+        Err(ResolveError::NodeBuiltIn)
+    );
 }
 
 #[test]
