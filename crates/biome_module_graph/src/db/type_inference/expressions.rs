@@ -372,9 +372,83 @@ impl<'db> ResolutionCtx<'db, '_> {
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
-        let args = self.resolve_call_arguments(arguments);
+        let args = if let InferredTypeData::Function(function) = callee
+            && arguments
+                .iter()
+                .all(|argument| matches!(argument, RawCallArgumentType::Argument(_)))
+            && function
+                .parameters(self.db)
+                .iter()
+                .all(|parameter| !parameter.is_rest())
+        {
+            self.resolve_function_call_arguments(function, arguments)
+        } else {
+            self.resolve_call_arguments(arguments)
+        };
         let callee = self.resolve_call_callee(callee);
         infer_call_expression_return_type_from_args(self.db, callee, &args)
+    }
+
+    /// Resolves the arguments that can influence the return type of a direct function.
+    ///
+    /// Arguments are resolved normally, except when a non-generic parameter is paired
+    /// with a non-callable raw object. An `Unknown` placeholder preserves that
+    /// argument's position without resolving its nested member types.
+    fn resolve_function_call_arguments(
+        &mut self,
+        function: InferredFunction<'db>,
+        arguments: &[RawCallArgumentType],
+    ) -> Vec<ResolvedCallArgument<'db>> {
+        debug_assert!(
+            arguments
+                .iter()
+                .all(|argument| matches!(argument, RawCallArgumentType::Argument(_))),
+            "selective argument resolution requires positional arguments; use full argument resolution for calls with spreads"
+        );
+        let parameters = function.parameters(self.db);
+
+        arguments
+            .iter()
+            .take(parameters.len())
+            .enumerate()
+            .filter_map(|(index, argument)| {
+                let RawCallArgumentType::Argument(reference) = argument else {
+                    return None;
+                };
+                let can_use_placeholder = parameters.get(index).is_some_and(|parameter| {
+                    !parameter.ty().is_generic_reference(self.db)
+                        && self.is_non_callable_raw_object(reference)
+                });
+                let ty = if can_use_placeholder {
+                    InferredTypeData::Unknown
+                } else {
+                    self.resolve(reference)
+                };
+                Some(ResolvedCallArgument::Argument(ty))
+            })
+            .collect()
+    }
+
+    fn is_non_callable_raw_object(&self, reference: &TypeReference) -> bool {
+        let TypeReference::Resolved(resolved) = reference else {
+            return false;
+        };
+        if resolved.level() != TypeResolverLevel::Thin {
+            return false;
+        }
+        let type_id = resolved.id();
+        if self.js_info.is_named_type(type_id) {
+            return false;
+        }
+        let Some(RawTypeData::Object(object)) = self.js_info.raw_types.get(type_id.index()) else {
+            return false;
+        };
+        !object.has_unknown_members
+            && object.prototype.is_none()
+            && object
+                .members
+                .iter()
+                .all(|member| !member.kind.is_call_signature())
     }
 
     /// Resolves the parent reference of a `this` expression.

@@ -698,11 +698,22 @@ fn is_unused(
     };
 
     let binding_name = binding.name_token().ok();
+    let file_source = ctx.source_type::<JsFileSource>();
 
     // Used in the template, as a value or a type, which the script's semantic
     // model can't see.
     if let Some(token) = binding_name.as_ref()
         && embedded.is_used(token.token_text_trimmed())
+    {
+        return false;
+    }
+
+    // Used as a Vue custom directive in the template (e.g. `v-highlight`
+    // referring to an imported `vHighlight`), which the generic reference
+    // check above can't see because the spellings differ (kebab vs. camel).
+    if let Some(token) = binding_name.as_ref()
+        && matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
+        && embedded.is_vue_directive_used(token.token_text_trimmed())
     {
         return false;
     }
@@ -714,7 +725,7 @@ fn is_unused(
     // would otherwise self-suppress every import in the script; for those,
     // the reference check above and the semantic model below are the precise
     // gates.
-    let is_defined_in_embed = !ctx.source_type::<JsFileSource>().is_embedded_source()
+    let is_defined_in_embed = !file_source.is_embedded_source()
         && binding_name
             .as_ref()
             .is_some_and(|token| embedded.contains_binding(token.token_text_trimmed()));

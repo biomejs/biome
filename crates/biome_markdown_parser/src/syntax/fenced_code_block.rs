@@ -135,21 +135,17 @@ pub(crate) fn detect_fence(s: &str) -> Option<(char, usize)> {
 
 /// Check if we're at a fenced code block (``` or ~~~).
 pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
-            return false;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-        let rest = p.source_after_current();
-        let Some((fence_char, _)) = detect_fence(rest) else {
-            return false;
-        };
-        if fence_char == '`' && info_string_has_backtick(p) {
-            return false;
-        }
-        true
-    })
+    if !p.is_at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
+        return false;
+    }
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    let Some(rest) = p.source_after_current().get(indent.byte_count..) else {
+        return false;
+    };
+    let Some((fence_char, fence_len)) = detect_fence(rest) else {
+        return false;
+    };
+    fence_char != '`' || !info_string_has_backtick(rest, fence_len)
 }
 
 /// Parse a fenced code block.
@@ -419,41 +415,16 @@ fn prepare_next_code_content_token(
 /// Consume all expected `>` quote prefixes for the current line inside a
 /// fenced code block.
 ///
-/// Uses a lookahead preflight to verify all `quote_depth` prefixes are
-/// present before consuming any. This prevents partial consumption from
-/// stealing outer blockquote markers when an inner prefix is missing
+/// Verifies all `quote_depth` prefixes in the source before consuming any.
+/// This prevents partial consumption from stealing outer blockquote markers
+/// when an inner prefix is missing
 /// (e.g., `> hello` inside a depth-2 blockquote would consume the outer
 /// `>` but fail on the missing inner `>`, corrupting outer parsing).
 ///
 /// Returns `true` if all prefixes were consumed successfully, `false` if
 /// any prefix is missing — the caller should break out of the content loop.
 fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
-    // Preflight: verify all prefixes exist before consuming any.
-    let all_present = p.lookahead(|p| {
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        for _ in 0..quote_depth {
-            if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
-                p.force_relex_regular();
-            }
-            if p.at(T![>]) {
-                p.bump(T![>]);
-            } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-                p.bump(MD_TEXTUAL_LITERAL);
-            } else {
-                return false;
-            }
-            // Skip optional post-marker space
-            if p.at(MD_TEXTUAL_LITERAL) {
-                let text = p.cur_text();
-                if text == " " || text == "\t" {
-                    p.bump(MD_TEXTUAL_LITERAL);
-                }
-            }
-        }
-        true
-    });
-
-    if !all_present {
+    if !has_code_content_quote_prefixes(p, quote_depth) {
         return false;
     }
 
@@ -487,7 +458,7 @@ fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
 
     let prefix_m = p.start();
 
-    // Empty pre-marker indent list (initial indent handled by skip_line_indent).
+    // The initial pre-marker indent is emitted before consuming the prefixes.
     let indent_list_m = p.start();
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
 
@@ -534,29 +505,31 @@ fn bump_code_textual(p: &mut MarkdownParser) {
     text_m.complete(p, MD_TEXTUAL);
 }
 
-pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if p.at(TRIPLE_TILDE) {
+pub(crate) fn info_string_has_backtick(line: &str, fence_len: usize) -> bool {
+    line.get(fence_len..)
+        .and_then(|rest| rest.split(['\n', '\r']).next())
+        .is_some_and(|info| info.contains('`'))
+}
+
+fn has_code_content_quote_prefixes(p: &MarkdownParser, quote_depth: usize) -> bool {
+    let Some((start, source)) = get_source_context(p) else {
+        return false;
+    };
+    let bytes = source.as_bytes();
+    let Some(mut idx) = consume_indent(bytes, start, MAX_BLOCK_PREFIX_INDENT, false) else {
+        return false;
+    };
+
+    for _ in 0..quote_depth {
+        if bytes.get(idx) != Some(&b'>') {
             return false;
         }
-
-        if p.at(T!["```"]) {
-            p.bump(T!["```"]);
-        } else if p.at(BACKTICK) {
-            p.bump(BACKTICK);
-        } else {
-            return false;
+        idx += 1;
+        if matches!(bytes.get(idx), Some(b' ' | b'\t')) {
+            idx += 1;
         }
-
-        while !p.at_inline_end() {
-            if p.at(BACKTICK) || p.at(T!["```"]) {
-                return true;
-            }
-            p.bump(p.cur());
-        }
-
-        false
-    })
+    }
+    true
 }
 
 /// Skip up to `quote_depth` blockquote prefixes (`>` with optional 0-3 leading

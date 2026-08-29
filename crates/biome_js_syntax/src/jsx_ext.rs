@@ -326,6 +326,19 @@ impl JsxAttributeList {
         })
     }
 
+    pub fn has_shorthand_attribute(&self, name_to_lookup: &str) -> bool {
+        self.iter().any(|attribute| {
+            let AnyJsxAttribute::JsxShorthandAttribute(attribute) = attribute else {
+                return false;
+            };
+            attribute
+                .name()
+                .ok()
+                .and_then(|name| name.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == name_to_lookup)
+        })
+    }
+
     pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         let mut current_attribute_found = false;
         for attribute in self {
@@ -559,6 +572,10 @@ impl AnyJsxElement {
         self.attributes()
             .into_iter()
             .any(|attribute| matches!(attribute, AnyJsxAttribute::JsxSpreadAttribute(_)))
+    }
+
+    pub fn has_shorthand_attribute(&self, name_to_lookup: &str) -> bool {
+        self.attributes().has_shorthand_attribute(name_to_lookup)
     }
 
     pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {

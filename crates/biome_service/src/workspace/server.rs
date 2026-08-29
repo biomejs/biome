@@ -62,6 +62,8 @@ use biome_diagnostics::print_diagnostic_to_string;
 use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Error, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
+#[cfg(feature = "html_embeds")]
+use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
@@ -102,7 +104,7 @@ use std::panic::RefUnwindSafe;
 #[cfg(feature = "module_graph")]
 use std::rc::Rc;
 #[cfg(test)]
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
@@ -155,6 +157,9 @@ pub struct WorkspaceServer {
 
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
+
+    #[cfg(test)]
+    scanner_test_state: ScannerTestState,
 }
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
@@ -177,6 +182,66 @@ struct ProcessFileState {
     db: WorkspaceDb,
 }
 
+/// Synchronization and cancellation controls for scanner concurrency tests.
+///
+/// The controls expose deterministic boundaries at file-index entry, project
+/// settings lookup, file commit, and project-scan entry.
+#[cfg(test)]
+#[derive(Default)]
+struct ScannerTestState {
+    /// Number of scanner-driven file indexing attempts.
+    file_index_attempts: AtomicUsize,
+    /// Number of project settings reads made by scanner-driven file indexing.
+    file_settings_read_attempts: AtomicUsize,
+    /// Whether scanner file indexing should pause after reaching settings lookup.
+    pause_file_settings_read: AtomicBool,
+    /// Number of scanner-driven file commit attempts.
+    file_commit_attempts: AtomicUsize,
+    /// Number of project scan attempts.
+    project_scan_attempts: AtomicUsize,
+    /// Whether the first project scan should be cancelled before it starts.
+    cancel_first_scan_attempt: AtomicBool,
+}
+
+#[cfg(test)]
+impl ScannerTestState {
+    /// Records entry into scanner-driven file indexing.
+    fn enter_file_indexing(&self, reason: OpenFileReason) {
+        if reason.is_index() {
+            self.file_index_attempts.fetch_add(1, Ordering::AcqRel);
+        }
+    }
+
+    /// Records a project settings read made by scanner-driven file indexing.
+    fn enter_file_settings_read(&self, reason: OpenFileReason) {
+        if reason.is_index() {
+            self.file_settings_read_attempts
+                .fetch_add(1, Ordering::AcqRel);
+            while self.pause_file_settings_read.load(Ordering::Acquire) {
+                std::thread::yield_now();
+            }
+        }
+    }
+
+    /// Records scanner-driven file commits after parsing and before publication.
+    fn enter_file_commit(&self, reason: OpenFileReason) {
+        if reason.is_index() {
+            self.file_commit_attempts.fetch_add(1, Ordering::AcqRel);
+        }
+    }
+
+    /// Records entry into a project scan and optionally cancels its first attempt.
+    ///
+    /// The cancellation lets tests verify that [`RetryingWorkspace`] propagates
+    /// an interrupted project scan instead of restarting the complete traversal.
+    fn enter_project_scan(&self) {
+        self.project_scan_attempts.fetch_add(1, Ordering::AcqRel);
+        if self.cancel_first_scan_attempt.swap(false, Ordering::AcqRel) {
+            std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
+        }
+    }
+}
+
 impl ProcessFileState {
     fn iter_snippets(&self) -> SnippetsIterator<'_> {
         match &self.parsed {
@@ -188,6 +253,39 @@ impl ProcessFileState {
             }
             ParsedOrigin::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
         }
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn collect_embedded_data(&self) -> Option<Arc<EmbeddedData>> {
+        let ParsedOrigin::Interned {
+            parse, snippets, ..
+        } = &self.parsed
+        else {
+            return None;
+        };
+
+        Some(Arc::new(collect_embedded_data(
+            self.file_source,
+            parse,
+            snippets
+                .iter()
+                .filter_map(|snippet| {
+                    let ParsedSnippetOrigin::Interned {
+                        parse,
+                        content,
+                        file_source,
+                    } = snippet
+                    else {
+                        return None;
+                    };
+                    Some(EmbeddedSnippet::new(
+                        parse,
+                        content.content_range,
+                        *file_source,
+                    ))
+                })
+                .collect(),
+        )))
     }
 
     fn has_errors(&self) -> bool {
@@ -339,6 +437,8 @@ impl WorkspaceServer {
             notification_tx,
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
+            #[cfg(test)]
+            scanner_test_state: ScannerTestState::default(),
         }
     }
 
@@ -659,6 +759,9 @@ impl WorkspaceServerWithDb<'_> {
         reason: OpenFileReason,
         params: OpenFileParams,
     ) -> Result<InternalOpenFileResult, WorkspaceError> {
+        #[cfg(test)]
+        self.scanner_test_state.enter_file_indexing(reason);
+
         let OpenFileParams {
             project_key,
             path: biome_path,
@@ -683,6 +786,8 @@ impl WorkspaceServerWithDb<'_> {
         }
 
         let (_, settings, query) = {
+            #[cfg(test)]
+            self.scanner_test_state.enter_file_settings_read(reason);
             let db = self.get_db();
             self.project_get_settings_query(&db, project_key, &path, inline_config)
         }
@@ -777,20 +882,13 @@ impl WorkspaceServerWithDb<'_> {
         let size = content.len();
         let limit = settings.as_ref().get_max_file_size(&path);
 
-        let mut parsed_source = None;
-        let syntax = if size > limit {
-            Some(Err(FileTooLarge { size, limit }))
+        let parsed = if size > limit {
+            Err(FileTooLarge { size, limit })
         } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
-            None
+            Ok(None)
         } else {
             let mut node_cache = NodeCache::default();
-            let parse_result = self.parse(
-                &path,
-                &content,
-                &settings,
-                file_source_index,
-                &mut node_cache,
-            )?;
+            let parse_result = self.parse(&path, &content, &settings, source, &mut node_cache)?;
 
             let ParseResult {
                 any_parse,
@@ -829,10 +927,26 @@ impl WorkspaceServerWithDb<'_> {
                 .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
                 .collect();
 
-            let final_source =
-                self.db_update_parsed_file(&path, any_parse, file_source_index, embedded_snippets);
-            parsed_source = Some(final_source);
-            Some(Ok(()))
+            Ok(Some((any_parse, file_source_index, embedded_snippets)))
+        };
+
+        #[cfg(test)]
+        self.scanner_test_state.enter_file_commit(reason);
+
+        let mut parsed_source = None;
+        let syntax = match parsed {
+            Err(error) => Some(Err(error)),
+            Ok(None) => None,
+            Ok(Some((any_parse, file_source_index, embedded_snippets))) => {
+                let final_source = self.db_update_parsed_file(
+                    &path,
+                    any_parse,
+                    file_source_index,
+                    embedded_snippets,
+                );
+                parsed_source = Some(final_source);
+                Some(Ok(()))
+            }
         };
 
         let is_indexed = if
@@ -1071,10 +1185,7 @@ impl WorkspaceServerWithDb<'_> {
         node_cache: &mut NodeCache,
         settings: &SettingsWithEditor,
     ) -> Result<Vec<(AnyParse, EmbedContent, DocumentFileSource)>, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(
-            path,
-            settings.as_ref().experimental_full_html_support_enabled(),
-        );
+        let capabilities = self.features.get_deprecated_capabilities(*file_source);
         let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
@@ -1094,12 +1205,9 @@ impl WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         content: &str,
         settings: &SettingsWithEditor,
-        file_source_index: usize,
+        file_source: DocumentFileSource,
         node_cache: &mut NodeCache,
     ) -> Result<ParseResult, WorkspaceError> {
-        let file_source = self
-            .db_get_source(file_source_index)
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let capabilities = self.features.get_deprecated_capabilities(file_source);
 
         let parse = capabilities
@@ -1169,7 +1277,7 @@ impl WorkspaceServerWithDb<'_> {
         let file_source = language.unwrap_or(file_source);
 
         let mut snippet_cache = NodeCache::default();
-        let snippets = if DocumentFileSource::can_contain_embeds(
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(
             path.as_path(),
             settings.as_ref().experimental_full_html_support_enabled(),
         ) {
@@ -1182,16 +1290,18 @@ impl WorkspaceServerWithDb<'_> {
             )?
         } else {
             Vec::new()
-        }
-        .into_iter()
-        .map(
-            |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
-                parse,
-                content,
-                file_source,
-            },
-        )
-        .collect();
+        };
+
+        let snippets = embedded_snippets
+            .into_iter()
+            .map(
+                |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
+                    parse,
+                    content,
+                    file_source,
+                },
+            )
+            .collect();
 
         Ok(ProcessFileState {
             parsed: ParsedOrigin::interned_document(any_parse, snippets),
@@ -1274,6 +1384,8 @@ impl WorkspaceServerWithDb<'_> {
             suppression_reason,
             inline_config,
         } = params;
+        #[cfg(feature = "html_embeds")]
+        let embedded_data = state.collect_embedded_data();
         let (working_directory, settings, query_context) = self
             .project_get_settings_query(&state.db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -1321,6 +1433,8 @@ impl WorkspaceServerWithDb<'_> {
                     settings: &settings,
                     biome_path: &path,
                     workspace_db: state.db.clone(),
+                    #[cfg(feature = "html_embeds")]
+                    embedded_data: embedded_data.clone(),
                     #[cfg(feature = "module_graph")]
                     module_db: module_db.clone(),
                     project_layout: self.project_layout.clone(),
@@ -1414,6 +1528,8 @@ impl WorkspaceServerWithDb<'_> {
             settings: &settings,
             biome_path: &path,
             workspace_db: state.db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data,
             #[cfg(feature = "module_graph")]
             module_db,
             project_layout: self.project_layout.clone(),
@@ -1522,6 +1638,8 @@ impl WorkspaceServerWithDb<'_> {
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
+            #[cfg(feature = "html_embeds")]
+            let embedded_data = state.collect_embedded_data();
             let plugins = cfg_select! {
                 feature = "plugins" => {
                     if categories.is_lint() {
@@ -1550,6 +1668,8 @@ impl WorkspaceServerWithDb<'_> {
                 language: state.file_source,
                 categories,
                 workspace_db: state.db.clone(),
+                #[cfg(feature = "html_embeds")]
+                embedded_data: embedded_data.clone(),
                 #[cfg(feature = "module_graph")]
                 module_db: module_db.clone(),
                 project_layout: self.project_layout.clone(),
@@ -1587,6 +1707,8 @@ impl WorkspaceServerWithDb<'_> {
                     language: file_source,
                     categories,
                     workspace_db: state.db.clone(),
+                    #[cfg(feature = "html_embeds")]
+                    embedded_data: embedded_data.clone(),
                     #[cfg(feature = "module_graph")]
                     module_db: module_db.clone(),
                     project_layout: self.project_layout.clone(),
@@ -1902,7 +2024,6 @@ impl WorkspaceServerWithDb<'_> {
         project_key: ProjectKey,
     ) -> Result<(), WorkspaceError> {
         let filename = path.file_name();
-        let db = self.get_db();
         if filename.is_some_and(|filename| filename == "package.json") {
             let package_path = path
                 .parent()
@@ -1911,7 +2032,10 @@ impl WorkspaceServerWithDb<'_> {
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root) => {
-                    let send_node = root.unwrap_as_send_node(&*db);
+                    let send_node = {
+                        let db = self.get_db();
+                        root.unwrap_as_send_node(&*db)
+                    };
                     self.project_layout
                         .insert_serialized_node_manifest(package_path.clone(), &send_node);
                     self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
@@ -1928,7 +2052,10 @@ impl WorkspaceServerWithDb<'_> {
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root) => {
-                    let send_node = root.unwrap_as_send_node(&*db);
+                    let send_node = {
+                        let db = self.get_db();
+                        root.unwrap_as_send_node(&*db)
+                    };
                     self.project_layout
                         .insert_serialized_tsconfig(package_path, &send_node);
                 }
@@ -1947,7 +2074,10 @@ impl WorkspaceServerWithDb<'_> {
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root) => {
-                    let send_node = root.unwrap_as_send_node(&*db);
+                    let send_node = {
+                        let db = self.get_db();
+                        root.unwrap_as_send_node(&*db)
+                    };
                     self.project_layout.insert_serialized_turbo_json(
                         package_path,
                         &send_node,
@@ -2145,14 +2275,6 @@ impl WorkspaceServerWithDb<'_> {
     // - `db_update` for operations that update existing inputs
     // - `db_remove` for operations that remove existing inputs
     // - `db_get` for operations that read data
-
-    /// Returns a previously inserted file source by index.
-    ///
-    /// File sources can be inserted using `insert_source()`.
-    fn db_get_source(&self, index: usize) -> Option<DocumentFileSource> {
-        let db = self.get_db();
-        db.source_from_index(index)
-    }
 
     /// Inserts a file source so that it can be retrieved by index later.
     ///
@@ -2482,21 +2604,9 @@ impl Workspace for LocalWorkspace {
     }
 }
 
-impl Workspace for WorkspaceServerWithDb<'_> {
-    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
-        let path = if params.open_uninitialized {
-            let path = params.path.to_path_buf();
-            self.find_project_root(params.path).unwrap_or(path)
-        } else {
-            self.find_project_root(params.path)?
-        };
-
-        let project_key = self.insert_project(path);
-
-        Ok(OpenProjectResult { project_key })
-    }
-
-    fn scan_project(
+impl WorkspaceServerWithDb<'_> {
+    /// Performs a project traversal using the database view selected by the caller.
+    fn scan_project_inner(
         &self,
         ScanProjectParams {
             project_key,
@@ -2515,12 +2625,12 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
                 let trigger = IndexTrigger::InitialScan;
-                let (_, _diagnostics) = self.index_file(project_key, manifest.clone(), trigger)?;
+                let (_, manifest_diagnostics) =
+                    self.index_file(project_key, manifest.clone(), trigger)?;
                 diagnostics.extend(
-                    _diagnostics
+                    manifest_diagnostics
                         .into_iter()
-                        .map(biome_diagnostics::serde::Diagnostic::new)
-                        .collect::<Vec<_>>(),
+                        .map(biome_diagnostics::serde::Diagnostic::new),
                 );
             }
             return Ok(ScanProjectResult {
@@ -2544,6 +2654,37 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         result.diagnostics.extend(diagnostics);
 
         Ok(result)
+    }
+}
+
+impl Workspace for WorkspaceServerWithDb<'_> {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
+        let path = if params.open_uninitialized {
+            let path = params.path.to_path_buf();
+            self.find_project_root(params.path).unwrap_or(path)
+        } else {
+            self.find_project_root(params.path)?
+        };
+
+        let project_key = self.insert_project(path);
+
+        Ok(OpenProjectResult { project_key })
+    }
+
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
+        #[cfg(test)]
+        self.scanner_test_state.enter_project_scan();
+
+        let epoch = self.db_state.scanner_epoch();
+        let result = {
+            let scanner_workspace = WorkspaceServerWithDb {
+                server: self.server,
+                db_state: epoch.view(),
+            };
+            scanner_workspace.scan_project_inner(params)
+        };
+        drop(epoch);
+        result
     }
 
     /// Updates the global settings for this workspace.
@@ -3037,7 +3178,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let ParseResult {
             any_parse,
             language,
-        } = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+        } = self.parse(&path, &content, &settings, document_source, &mut node_cache)?;
 
         let (index, document_source) = if let Some(language) = language {
             (self.db_add_source(language), language)
@@ -4074,16 +4215,12 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         trigger: IndexTrigger,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         let path = path.into();
-        // Indexing this file can be interrupted when another thread updates
-        // the workspace database at the same time (this only happens in the
-        // LSP, see `DbState`). Retry until the file is fully indexed, so its
-        // data is not missing from the module graph.
-        retry_on_pending_write(|| {
+        let open_file = |path| {
             self.open_file_internal(
                 OpenFileReason::Index(trigger),
                 OpenFileParams {
                     project_key,
-                    path: path.clone(),
+                    path,
                     content: FileContent::FromServer,
                     document_file_source: None,
                     persist_node_cache: false,
@@ -4092,7 +4229,11 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                     editor_features: None,
                 },
             )
-        })
+        };
+        match trigger {
+            IndexTrigger::InitialScan => open_file(path),
+            IndexTrigger::Update => retry_on_pending_write(|| open_file(path.clone())),
+        }
         .map(|result| (result.dependencies, result.diagnostics))
     }
 
@@ -4168,8 +4309,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             };
 
             let scan_kind = ProjectScanComputer::new(&nested_configuration).compute();
-
-            let result = self.update_settings(UpdateSettingsParams {
+            let params = UpdateSettingsParams {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
                 configuration: nested_configuration,
@@ -4178,7 +4318,8 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                     .map(|(path, config)| (BiomePath::from(path), config))
                     .collect(),
                 module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
-            })?;
+            };
+            let result = self.update_settings(params)?;
 
             returned_diagnostics.extend(result.diagnostics)
         }
@@ -4264,7 +4405,13 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         self.project_layout.unload_folder(path);
 
         // Finally unloads the path itself.
-        self.unload_file(path, project_key)
+        self.update_service_data(path, UpdateKind::Removed, project_key)
+            .map(|(_, diagnostics)| {
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect()
+            })
     }
 }
 

@@ -19,6 +19,7 @@ use biome_analyze::{
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
+use biome_embeds::EmbeddedData;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
@@ -60,6 +61,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct JsAnalyzerServices<'a> {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
+    embedded_data: Option<Arc<EmbeddedData>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     semantic_model: Option<&'a SemanticModel>,
@@ -76,6 +78,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
         Self {
             module_db: Some(module_db),
             language_db: None,
+            embedded_data: None,
             project_layout,
             source_type,
             semantic_model: None,
@@ -88,6 +91,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
         Self {
             module_db: None,
             language_db: None,
+            embedded_data: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             semantic_model: None,
@@ -113,6 +117,11 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
         self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
+        self.embedded_data = embedded_data;
         self
     }
 
@@ -174,6 +183,7 @@ where
     let JsAnalyzerServices {
         module_db,
         language_db: embedded_db,
+        embedded_data,
         project_layout,
         source_type,
         semantic_model,
@@ -239,7 +249,9 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    if let Some(embedded_db) = embedded_db {
+    if let Some(embedded_data) = embedded_data {
+        services.insert_service(EmbeddedService::from_data(embedded_data));
+    } else if let Some(embedded_db) = embedded_db {
         services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
     }
     // If a pre-built model is available (workspace open_file/change_file path),

@@ -61,19 +61,19 @@ impl Rule for UseArraySortCompare {
         let binding = node.callee().ok()?.omit_parentheses();
         let callee = binding.as_js_static_member_expression()?;
 
-        let call_object = callee.object().ok()?;
-        if !ctx
-            .type_of_expression(&call_object)
-            .is_some_and(|ty| ty.is_array())
-        {
-            return None;
-        }
-
         let member = callee.member().ok()?;
         let name = member.as_js_name()?;
         let token = name.value_token().ok()?;
         let call_name = token.text_trimmed();
         if call_name != "sort" && call_name != "toSorted" {
+            return None;
+        }
+
+        let call_object = callee.object().ok()?;
+        if !ctx
+            .type_of_expression(&call_object)
+            .is_some_and(|ty| ty.is_array())
+        {
             return None;
         }
 
