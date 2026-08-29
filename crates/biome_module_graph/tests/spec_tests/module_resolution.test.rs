@@ -193,7 +193,7 @@ fn test_node_builtin_imports_resolve_to_builtin_error() {
                 .unwrap()
                 .resolved_path
                 .error(),
-            Some(&ResolveError::NodeBuiltIn)
+            Some(&ResolveError::RuntimeBuiltIn)
         );
     }
 }

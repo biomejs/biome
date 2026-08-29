@@ -1,11 +1,6 @@
-/// Sorted array of built-in modules recognized by the resolver.
+/// Sorted array of Node builtin modules
 ///
-/// Contains the Node.js core modules (with and without the `node:` prefix) as
-/// well as the Bun runtime built-ins exposed under the `bun:` scheme, since
-/// those are import specifiers that never resolve to a file on disk.
-///
-/// Node source: <https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158>
-/// Bun source: <https://bun.sh/docs/runtime/bun-apis>
+/// Source: <https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158>
 const BUILTIN_NODE_MODULES: &[&str] = &[
     "_debug_agent",
     "_debugger",
@@ -30,12 +25,6 @@ const BUILTIN_NODE_MODULES: &[&str] = &[
     "async_hooks",
     "buffer",
     "buffer_ieee754",
-    "bun",
-    "bun:ffi",
-    "bun:jsc",
-    "bun:sqlite",
-    "bun:test",
-    "bun:wrap",
     "child_process",
     "cluster",
     "console",
@@ -182,9 +171,42 @@ pub fn is_builtin_node_module(name: &str) -> bool {
     BUILTIN_NODE_MODULES.binary_search(&name).is_ok()
 }
 
+/// Sorted array of Bun runtime built-in modules, exposed under the `bun` name
+/// and the `bun:` scheme.
+///
+/// Like Node.js built-ins, these are import specifiers that never resolve to a
+/// file on disk. They are kept separate from [`BUILTIN_NODE_MODULES`] because
+/// Bun built-ins are not Node.js built-ins: lint rules that are specific to
+/// Node.js (such as `noNodejsModules` and `useNodejsImportProtocol`) must not
+/// treat them as Node modules.
+///
+/// Source: <https://bun.com/reference>
+const BUILTIN_BUN_MODULES: &[&str] = &[
+    "bun",
+    "bun:ffi",
+    "bun:jsc",
+    "bun:sqlite",
+    "bun:test",
+    "bun:wrap",
+];
+
+/// Returns `true` if `name` is a built-in Bun runtime module.
+///
+/// ```
+/// use biome_resolver::is_builtin_bun_module;
+///
+/// assert!(is_builtin_bun_module(&"bun:test"));
+/// ```
+pub fn is_builtin_bun_module(name: &str) -> bool {
+    BUILTIN_BUN_MODULES.binary_search(&name).is_ok()
+}
+
 #[test]
 fn test_order() {
     for items in BUILTIN_NODE_MODULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in BUILTIN_BUN_MODULES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

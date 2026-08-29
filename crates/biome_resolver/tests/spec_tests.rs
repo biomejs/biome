@@ -312,7 +312,7 @@ fn test_resolve_node_builtins() {
                 ..Default::default()
             }
         ),
-        Err(ResolveError::NodeBuiltIn)
+        Err(ResolveError::RuntimeBuiltIn)
     );
 
     assert_eq!(
@@ -345,7 +345,7 @@ fn test_resolve_node_builtins() {
                 ..Default::default()
             }
         ),
-        Err(ResolveError::NodeBuiltIn)
+        Err(ResolveError::RuntimeBuiltIn)
     );
 }
 

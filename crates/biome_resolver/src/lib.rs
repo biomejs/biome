@@ -12,7 +12,7 @@ use biome_package::{PackageJson, TsConfigJson};
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub use errors::*;
-pub use node_builtins::is_builtin_node_module;
+pub use node_builtins::{is_builtin_bun_module, is_builtin_node_module};
 pub use resolver_fs_proxy::*;
 
 /// Resolves the given `specifier` from the given `base_dir`.
@@ -36,8 +36,10 @@ pub fn resolve(
 ) -> Result<Utf8PathBuf, ResolveError> {
     let specifier = strip_query_and_fragment(specifier);
 
-    if options.resolve_node_builtins && is_builtin_node_module(specifier) {
-        return Err(ResolveError::NodeBuiltIn);
+    if options.resolve_node_builtins
+        && (is_builtin_node_module(specifier) || is_builtin_bun_module(specifier))
+    {
+        return Err(ResolveError::RuntimeBuiltIn);
     }
 
     if specifier.starts_with('/') {
@@ -871,11 +873,12 @@ pub struct ResolveOptions<'a> {
     /// Whether Node.js builtin modules should be resolved.
     ///
     /// Note that this setting primarily influences the kind of error returned
-    /// when attempting to resolve a Node.js built-in. Built-ins cannot be
-    /// resolved to a path, so if this setting is `true`, any attempt to do so
-    /// will return an error of kind [`ResolveError::NodeBuiltIn`]. If `false`,
-    /// the resolver may try to resolve the built-in as an ordinary dependency,
-    /// which will likely fail too, but will result in a different error.
+    /// when attempting to resolve a runtime built-in (Node.js or Bun).
+    /// Built-ins cannot be resolved to a path, so if this setting is `true`,
+    /// any attempt to do so will return an error of kind
+    /// [`ResolveError::RuntimeBuiltIn`]. If `false`, the resolver may try to
+    /// resolve the built-in as an ordinary dependency, which will likely fail
+    /// too, but will result in a different error.
     pub resolve_node_builtins: bool,
 
     /// If `true`, the resolver will attempt to resolve to a type definition

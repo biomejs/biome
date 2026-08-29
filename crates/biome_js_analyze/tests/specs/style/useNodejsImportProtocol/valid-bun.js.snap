@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-bun.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+// Bun runtime built-ins use the `bun:` scheme and must not be rewritten to `node:`.
+import { test } from "bun:test";
+import { Database } from "bun:sqlite";
+
+```

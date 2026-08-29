@@ -28,8 +28,9 @@ pub enum ResolveError {
     /// No manifest could be found.
     ManifestNotFound,
 
-    /// The specifier referenced a Node.js built-in module instead of a path.
-    NodeBuiltIn,
+    /// The specifier referenced a runtime built-in module (Node.js or Bun)
+    /// instead of a path.
+    RuntimeBuiltIn,
 
     /// The resolver did its best, but couldn't find what you were looking for.
     NotFound,
@@ -46,7 +47,7 @@ impl Display for ResolveError {
             }
             Self::InvalidPackageSpecifier => f.write_str("invalid package name"),
             Self::ManifestNotFound => f.write_str("no package.json manifest found"),
-            Self::NodeBuiltIn => f.write_str("resolved to a Node.js built-in"),
+            Self::RuntimeBuiltIn => f.write_str("resolved to a runtime built-in"),
             Self::NotFound => f.write_str("module not found"),
         }
     }
