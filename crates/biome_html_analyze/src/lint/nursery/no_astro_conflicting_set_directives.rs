@@ -4,11 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{
-    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElement,
-    HtmlSelfClosingElement, HtmlSyntaxToken,
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlSyntaxToken,
 };
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, AstNodeList, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::no_astro_conflicting_set_directives::NoAstroConflictingSetDirectivesOptions;
 
 declare_lint_rule! {
@@ -68,13 +67,9 @@ pub struct State {
     sources: Box<[ContentSource]>,
 }
 
-declare_node_union! {
-    pub AnyHtmlElementLike = HtmlElement | HtmlSelfClosingElement
-}
-
 impl Rule for NoAstroConflictingSetDirectives {
-    type Query = Ast<AnyHtmlElementLike>;
-    type State = Box<[ContentSource]>;
+    type Query = Ast<AnyHtmlElement>;
+    type State = State;
     type Signals = Option<Self::State>;
     type Options = NoAstroConflictingSetDirectivesOptions;
 
@@ -84,11 +79,11 @@ impl Rule for NoAstroConflictingSetDirectives {
         }
 
         let (attributes, children) = match ctx.query() {
-            AnyHtmlElementLike::HtmlElement(element) => (
+            AnyHtmlElement::HtmlElement(element) => (
                 element.opening_element().ok()?.attributes(),
                 Some(element.children()),
             ),
-            AnyHtmlElementLike::HtmlSelfClosingElement(element) => (element.attributes(), None),
+            AnyHtmlElement::HtmlSelfClosingElement(element) => (element.attributes(), None),
         };
 
         collect_conflicting_content_sources(
