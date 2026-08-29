@@ -1,6 +1,6 @@
 #![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
 
-use crate::fonts::{CssFontValue, find_font_family, is_font_family_keyword};
+use crate::fonts::{CssFontValue, find_font_family};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -84,15 +84,6 @@ impl Rule for NoDuplicateFontNames {
         let font_families = find_font_family(value_list);
 
         for css_value in font_families {
-            let value = css_value.to_string()?;
-
-            // check the case: "Arial", Arial
-            // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
-            // e.g "sans-serif", sans-serif
-            if css_value.is_identifier() && is_font_family_keyword(&value) && is_font {
-                continue;
-            }
-
             if let Some(duplicate) = family_names.get(&css_value) {
                 return Some((css_value.clone(), duplicate.clone()));
             } else {

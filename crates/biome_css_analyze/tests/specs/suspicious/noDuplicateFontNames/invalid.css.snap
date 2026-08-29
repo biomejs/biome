@@ -10,6 +10,7 @@ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
 a { font-family: 'Times', Times }
 a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
 b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+b { font: 1em serif, SERIF; }
 
 ```
 
@@ -122,7 +123,7 @@ invalid.css:5:39 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
   > 5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
       │                                       ^^^^^^^^
     6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
-    7 │ 
+    7 │ b { font: 1em serif, SERIF; }
   
   i This is where the duplicate font name is found:
   
@@ -131,7 +132,57 @@ invalid.css:5:39 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
   > 5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
       │                                ^^^^^
     6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
-    7 │ 
+    7 │ b { font: 1em serif, SERIF; }
+  
+  i Remove duplicate font names within the property.
+  
+
+```
+
+```
+invalid.css:6:75 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate font names are redundant and unnecessary: sans-serif
+  
+    4 │ a { font-family: 'Times', Times }
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+  > 6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+      │                                                                           ^^^^^^^^^^
+    7 │ b { font: 1em serif, SERIF; }
+    8 │ 
+  
+  i This is where the duplicate font name is found:
+  
+    4 │ a { font-family: 'Times', Times }
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+  > 6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+      │                                                               ^^^^^^^^^^
+    7 │ b { font: 1em serif, SERIF; }
+    8 │ 
+  
+  i Remove duplicate font names within the property.
+  
+
+```
+
+```
+invalid.css:7:22 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate font names are redundant and unnecessary: SERIF
+  
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+    6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+  > 7 │ b { font: 1em serif, SERIF; }
+      │                      ^^^^^
+    8 │ 
+  
+  i This is where the duplicate font name is found:
+  
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+    6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+  > 7 │ b { font: 1em serif, SERIF; }
+      │               ^^^^^
+    8 │ 
   
   i Remove duplicate font names within the property.
   

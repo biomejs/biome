@@ -22,9 +22,9 @@ use biome_string_case::StrLikeExtension;
 use std::hash::Hash;
 
 /// Particular type that holds the value of a particular font.
-/// This type implements a particular algorithm of [PartialEq] and [Hash], where the
-/// values checked are the **trimmed text of their value**, which means that
-/// nodes (raw values and ranges) aren't taken into consideration.
+/// [PartialEq] and [Hash] compare trimmed font names without considering raw nodes or ranges.
+/// Generic family keyword identifiers are case-insensitive and remain distinct from quoted
+/// strings with the same text.
 #[derive(Debug, Clone, Eq)]
 pub enum CssFontValue {
     /// Groups those font names that are represented by a multiple [CssIdentifier].
@@ -54,7 +54,14 @@ impl Hash for CssFontValue {
         match self {
             Self::SingleValue(node) => {
                 if let Some(text) = node.inner_string_text() {
-                    text.text().trim().hash(state);
+                    let is_keyword_identifier = node.is_font_family_keyword_identifier();
+                    is_keyword_identifier.hash(state);
+                    let text = text.text().trim();
+                    if is_keyword_identifier {
+                        text.to_ascii_lowercase_cow().hash(state);
+                    } else {
+                        text.hash(state);
+                    }
                 } else {
                     state.write_u8(0);
                 }
@@ -62,7 +69,14 @@ impl Hash for CssFontValue {
             Self::MultipleValue(nodes) => {
                 for node in nodes {
                     if let Some(text) = node.inner_string_text() {
-                        text.text().trim().hash(state);
+                        let is_keyword_identifier = node.is_font_family_keyword_identifier();
+                        is_keyword_identifier.hash(state);
+                        let text = text.text().trim();
+                        if is_keyword_identifier {
+                            text.to_ascii_lowercase_cow().hash(state);
+                        } else {
+                            text.hash(state);
+                        }
                     } else {
                         state.write_u8(0);
                     }
@@ -75,29 +89,13 @@ impl Hash for CssFontValue {
 impl PartialEq for CssFontValue {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::SingleValue(this), Self::SingleValue(other)) => {
-                if let (Some(this), Some(other)) =
-                    (this.inner_string_text(), other.inner_string_text())
-                {
-                    this.text().trim() == other.text().trim()
-                } else {
-                    false
-                }
-            }
+            (Self::SingleValue(this), Self::SingleValue(other)) => this.has_same_name(other),
             (Self::MultipleValue(this_values), Self::MultipleValue(other_values)) => {
                 this_values.len() == other_values.len()
                     && this_values
                         .iter()
                         .zip(other_values.iter())
-                        .all(|(this, other)| {
-                            if let (Some(this), Some(other)) =
-                                (this.inner_string_text(), other.inner_string_text())
-                            {
-                                this.text().trim() == other.text().trim()
-                            } else {
-                                false
-                            }
-                        })
+                        .all(|(this, other)| this.has_same_name(other))
             }
             _ => false,
         }
@@ -105,16 +103,6 @@ impl PartialEq for CssFontValue {
 }
 
 impl CssFontValue {
-    pub fn is_identifier(&self) -> bool {
-        match self {
-            Self::MultipleValue(nodes) => nodes
-                .iter()
-                .all(|node| matches!(node, AnyCssFontValue::CssIdentifier(_))),
-            Self::SingleValue(AnyCssFontValue::CssIdentifier(_)) => true,
-            Self::SingleValue(AnyCssFontValue::CssString(_)) => false,
-        }
-    }
-
     pub fn range(&self) -> TextRange {
         match &self {
             // SAFETY: we assume the caller provides a non-empty list
@@ -158,6 +146,35 @@ declare_node_union! {
 }
 
 impl AnyCssFontValue {
+    fn has_same_name(&self, other: &Self) -> bool {
+        let is_keyword_identifier = self.is_font_family_keyword_identifier();
+        if is_keyword_identifier != other.is_font_family_keyword_identifier() {
+            return false;
+        }
+        self.inner_string_text()
+            .zip(other.inner_string_text())
+            .is_some_and(|(this, other)| {
+                let this = this.text().trim();
+                let other = other.text().trim();
+                if is_keyword_identifier {
+                    this.eq_ignore_ascii_case(other)
+                } else {
+                    this == other
+                }
+            })
+    }
+
+    fn is_font_family_keyword_identifier(&self) -> bool {
+        let Self::CssIdentifier(node) = self else {
+            return false;
+        };
+        let Ok(token) = node.value_token() else {
+            return false;
+        };
+        let text = token.text_trimmed().to_ascii_lowercase_cow();
+        is_font_family_keyword(&text)
+    }
+
     /// Returns the value without quotes
     fn inner_string_text(&self) -> Option<TokenText> {
         match self {
