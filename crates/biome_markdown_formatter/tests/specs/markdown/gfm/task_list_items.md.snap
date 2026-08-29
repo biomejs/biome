@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/task_list_items.md
+---
+
+# Input
+
+```md
+- [ ] todo
+  - [x] nested
+1. [X] done
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+- [ ] todo
+  - [x] nested
+
+1. [x] done
+
+```

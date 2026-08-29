@@ -25,7 +25,7 @@ use crate::parser::{
     MarkdownParserOutput,
 };
 use crate::syntax::header::parse_header_content;
-use crate::syntax::parse_inline_item_list;
+use crate::syntax::parse_inline_item_list_with_task_list_item;
 
 /// Resolves deferred inline subtrees into an event stream ready for the
 /// lossless tree sink.
@@ -150,7 +150,7 @@ fn validate_deferred_inlines(source: &str, output: &MarkdownParserOutput) -> boo
         let event_range = deferred.event_range();
         let source_range = deferred.source_range();
         let expected_kind = match deferred.flavor() {
-            DeferredInlineFlavor::Paragraph => MD_INLINE_ITEM_LIST,
+            DeferredInlineFlavor::Paragraph { .. } => MD_INLINE_ITEM_LIST,
             DeferredInlineFlavor::AtxParagraph => MD_PARAGRAPH,
         };
         if event_range.start < previous_event_end {
@@ -271,7 +271,9 @@ fn parse_inline_fragment<'source>(
     let wrapper = parser.start();
 
     match deferred.flavor() {
-        DeferredInlineFlavor::Paragraph => parse_inline_item_list(&mut parser),
+        DeferredInlineFlavor::Paragraph {
+            task_list_item_allowed,
+        } => parse_inline_item_list_with_task_list_item(&mut parser, task_list_item_allowed),
         DeferredInlineFlavor::AtxParagraph => parse_header_content(&mut parser),
     }
 
@@ -361,7 +363,9 @@ mod tests {
         DeferredInline::for_test(
             event_range,
             source_range,
-            DeferredInlineFlavor::Paragraph,
+            DeferredInlineFlavor::Paragraph {
+                task_list_item_allowed: false,
+            },
             context(),
             0,
             false,
@@ -375,7 +379,9 @@ mod tests {
         DeferredInline::for_test(
             event_range,
             source_range,
-            DeferredInlineFlavor::Paragraph,
+            DeferredInlineFlavor::Paragraph {
+                task_list_item_allowed: false,
+            },
             context(),
             0,
             true,

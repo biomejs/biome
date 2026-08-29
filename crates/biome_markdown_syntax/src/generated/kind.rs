@@ -106,6 +106,7 @@ pub enum MarkdownSyntaxKind {
     MD_THEMATIC_BREAK_CHAR,
     MD_THEMATIC_BREAK_PART_LIST,
     MD_CONTINUATION_INDENT,
+    GFM_TASK_LIST_ITEM,
     #[doc(hidden)]
     __LAST,
 }

@@ -74,3 +74,42 @@ fn formats_crlf_frontmatter() {
         "---\n# ---\n---\n\n# Heading\n"
     );
 }
+
+#[test]
+fn formats_gfm_task_list_items() {
+    let source = "- [ ] todo\n  - [x] nested\n1. [X] done\n";
+    let expected = "- [ ] todo\n  - [x] nested\n\n1. [X] done\n";
+    let options = MarkdownParserOptions::default().with_gfm(true);
+    let parse = parse_markdown_with_cache(source, &mut NodeCache::default(), options.clone());
+    let formatted = biome_formatter::format_node(
+        &parse.syntax(),
+        MdFormatLanguage::new(MdFormatOptions::default()),
+        false,
+    )
+    .expect("GFM task list items should format");
+    let output = formatted
+        .print()
+        .expect("GFM task list items should print");
+
+    assert_eq!(output.as_code(), expected);
+
+    let reparse = parse_markdown_with_cache(
+        output.as_code(),
+        &mut NodeCache::default(),
+        options,
+    );
+    let reformatted = biome_formatter::format_node(
+        &reparse.syntax(),
+        MdFormatLanguage::new(MdFormatOptions::default()),
+        false,
+    )
+    .expect("reparsed GFM task list items should format");
+
+    assert_eq!(
+        reformatted
+            .print()
+            .expect("reparsed GFM task list items should print")
+            .as_code(),
+        output.as_code()
+    );
+}

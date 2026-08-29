@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::MarkdownSyntaxNode::kind(&node) {
+                $crate::MarkdownSyntaxKind::GFM_TASK_LIST_ITEM => {
+                    let $pattern = unsafe { $crate::GfmTaskListItem::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_AUTOLINK => {
                     let $pattern = unsafe { $crate::MdAutolink::new_unchecked(node) };
                     $body

@@ -49,7 +49,8 @@ use biome_markdown_syntax::{
     MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
     MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
     MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
+    MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, GfmTaskListItem,
+    MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -1049,6 +1050,21 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
+        if let Some(task_list_item) = GfmTaskListItem::cast(node.clone()) {
+            let checked = task_list_item
+                .state()
+                .ok()
+                .and_then(|state| state.value_token().ok())
+                .is_some_and(|token| matches!(token.text().as_bytes(), b"x" | b"X"));
+            if checked {
+                self.push_str("<input checked=\"\" disabled=\"\" type=\"checkbox\">");
+            } else {
+                self.push_str("<input disabled=\"\" type=\"checkbox\">");
+            }
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
         if let Some(text) = MdTextual::cast(node.clone()) {
             render_textual(&text, self.out_mut());
             return;
@@ -1946,6 +1962,15 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
                     out.push_str(text);
                 }
             }
+        }
+        AnyMdInline::GfmTaskListItem(task_list_item) => {
+            out.push('[');
+            if let Ok(state) = task_list_item.state()
+                && let Ok(token) = state.value_token()
+            {
+                out.push_str(token.text());
+            }
+            out.push(']');
         }
         AnyMdInline::MdInlineHtml(_) | AnyMdInline::MdHtmlBlock(_) => {
             // HTML tags are stripped in alt text

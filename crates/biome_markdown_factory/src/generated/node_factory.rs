@@ -6,6 +6,20 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn gfm_task_list_item(
+    l_bracket_token: SyntaxToken,
+    state: MdTextual,
+    r_bracket_token: SyntaxToken,
+) -> GfmTaskListItem {
+    GfmTaskListItem::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TASK_LIST_ITEM,
+        [
+            Some(SyntaxElement::Token(l_bracket_token)),
+            Some(SyntaxElement::Node(state.into_syntax())),
+            Some(SyntaxElement::Token(r_bracket_token)),
+        ],
+    ))
+}
 pub fn md_autolink(
     l_angle_token: SyntaxToken,
     value: MdInlineItemList,

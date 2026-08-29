@@ -924,6 +924,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
 
     let prev_required_indent = p.state().list_item_required_indent;
     let prev_marker_indent = p.state().list_item_marker_indent;
+    let prev_task_list_item_allowed = p.state().task_list_item_allowed;
 
     let effective_spaces = spaces_after_marker;
 
@@ -934,6 +935,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
             marker_indent + marker_width + effective_spaces.max(1)
         };
     p.state_mut().list_item_marker_indent = marker_indent;
+    p.state_mut().task_list_item_allowed = true;
 
     // Parse block content (MD_BLOCK_LIST)
     let blank_info = parse_list_item_block_content(p, effective_spaces);
@@ -941,6 +943,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     // Restore previous required indent
     p.state_mut().list_item_required_indent = prev_required_indent;
     p.state_mut().list_item_marker_indent = prev_marker_indent;
+    p.state_mut().task_list_item_allowed = prev_task_list_item_allowed;
 
     let completed = m.complete(p, MD_BULLET);
     let range = completed.range(p);
@@ -1250,6 +1253,7 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
 
     let prev_required_indent = p.state().list_item_required_indent;
     let prev_marker_indent = p.state().list_item_marker_indent;
+    let prev_task_list_item_allowed = p.state().task_list_item_allowed;
     p.state_mut().list_item_required_indent =
         if spaces_after_marker > INDENT_CODE_BLOCK_SPACES || first_line_empty {
             marker_indent + marker_width + 1
@@ -1257,11 +1261,13 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
             marker_indent + marker_width + spaces_after_marker.max(1)
         };
     p.state_mut().list_item_marker_indent = marker_indent;
+    p.state_mut().task_list_item_allowed = true;
 
     let blank_info = parse_list_item_block_content(p, spaces_after_marker);
 
     p.state_mut().list_item_required_indent = prev_required_indent;
     p.state_mut().list_item_marker_indent = prev_marker_indent;
+    p.state_mut().task_list_item_allowed = prev_task_list_item_allowed;
 
     let completed = m.complete(p, MD_BULLET);
     let range = completed.range(p);
@@ -2075,6 +2081,7 @@ fn handle_first_line_marker_only(
     newline_m.complete(p, MD_NEWLINE);
     state.first_line = false;
     state.last_was_blank = false;
+    p.state_mut().task_list_item_allowed = false;
 
     if next_is_sibling {
         return LoopAction::Continue;
@@ -2985,7 +2992,10 @@ fn parse_list_item_block_content(
 
         // First-line: block-level constructs
         match parse_first_line_blocks(p, &mut state, spaces_after_marker) {
-            LoopAction::Continue => continue,
+            LoopAction::Continue => {
+                p.state_mut().task_list_item_allowed = false;
+                continue;
+            }
             LoopAction::FallThrough => {}
             LoopAction::Break => break,
         }

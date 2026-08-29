@@ -21,6 +21,51 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GfmTaskListItem {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GfmTaskListItem {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GfmTaskListItemFields {
+        GfmTaskListItemFields {
+            l_bracket_token: self.l_bracket_token(),
+            state: self.state(),
+            r_bracket_token: self.r_bracket_token(),
+        }
+    }
+    pub fn l_bracket_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn state(&self) -> SyntaxResult<MdTextual> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_bracket_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GfmTaskListItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GfmTaskListItemFields {
+    pub l_bracket_token: SyntaxResult<SyntaxToken>,
+    pub state: SyntaxResult<MdTextual>,
+    pub r_bracket_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdAutolink {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1823,6 +1868,7 @@ impl AnyMdContainerBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdInline {
+    GfmTaskListItem(GfmTaskListItem),
     MdAutolink(MdAutolink),
     MdCodeContent(MdCodeContent),
     MdEntityReference(MdEntityReference),
@@ -1841,6 +1887,12 @@ pub enum AnyMdInline {
     MdTextual(MdTextual),
 }
 impl AnyMdInline {
+    pub fn as_gfm_task_list_item(&self) -> Option<&GfmTaskListItem> {
+        match &self {
+            Self::GfmTaskListItem(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_md_autolink(&self) -> Option<&MdAutolink> {
         match &self {
             Self::MdAutolink(item) => Some(item),
@@ -2023,6 +2075,61 @@ impl AnyMdThematicBreakPart {
             Self::MdThematicBreakChar(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for GfmTaskListItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GFM_TASK_LIST_ITEM as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GFM_TASK_LIST_ITEM
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GfmTaskListItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("GfmTaskListItem")
+                .field(
+                    "l_bracket_token",
+                    &support::DebugSyntaxResult(self.l_bracket_token()),
+                )
+                .field("state", &support::DebugSyntaxResult(self.state()))
+                .field(
+                    "r_bracket_token",
+                    &support::DebugSyntaxResult(self.r_bracket_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GfmTaskListItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<GfmTaskListItem> for SyntaxNode {
+    fn from(n: GfmTaskListItem) -> Self {
+        n.syntax
+    }
+}
+impl From<GfmTaskListItem> for SyntaxElement {
+    fn from(n: GfmTaskListItem) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for MdAutolink {
@@ -4347,6 +4454,11 @@ impl From<AnyMdContainerBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<GfmTaskListItem> for AnyMdInline {
+    fn from(node: GfmTaskListItem) -> Self {
+        Self::GfmTaskListItem(node)
+    }
+}
 impl From<MdAutolink> for AnyMdInline {
     fn from(node: MdAutolink) -> Self {
         Self::MdAutolink(node)
@@ -4429,7 +4541,8 @@ impl From<MdTextual> for AnyMdInline {
 }
 impl AstNode for AnyMdInline {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = MdAutolink::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = GfmTaskListItem::KIND_SET
+        .union(MdAutolink::KIND_SET)
         .union(MdCodeContent::KIND_SET)
         .union(MdEntityReference::KIND_SET)
         .union(MdHardLine::KIND_SET)
@@ -4448,7 +4561,8 @@ impl AstNode for AnyMdInline {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            MD_AUTOLINK
+            GFM_TASK_LIST_ITEM
+                | MD_AUTOLINK
                 | MD_CODE_CONTENT
                 | MD_ENTITY_REFERENCE
                 | MD_HARD_LINE
@@ -4468,6 +4582,7 @@ impl AstNode for AnyMdInline {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GFM_TASK_LIST_ITEM => Self::GfmTaskListItem(GfmTaskListItem { syntax }),
             MD_AUTOLINK => Self::MdAutolink(MdAutolink { syntax }),
             MD_CODE_CONTENT => Self::MdCodeContent(MdCodeContent { syntax }),
             MD_ENTITY_REFERENCE => Self::MdEntityReference(MdEntityReference { syntax }),
@@ -4490,6 +4605,7 @@ impl AstNode for AnyMdInline {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::GfmTaskListItem(it) => it.syntax(),
             Self::MdAutolink(it) => it.syntax(),
             Self::MdCodeContent(it) => it.syntax(),
             Self::MdEntityReference(it) => it.syntax(),
@@ -4510,6 +4626,7 @@ impl AstNode for AnyMdInline {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::GfmTaskListItem(it) => it.into_syntax(),
             Self::MdAutolink(it) => it.into_syntax(),
             Self::MdCodeContent(it) => it.into_syntax(),
             Self::MdEntityReference(it) => it.into_syntax(),
@@ -4532,6 +4649,7 @@ impl AstNode for AnyMdInline {
 impl std::fmt::Debug for AnyMdInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::GfmTaskListItem(it) => std::fmt::Debug::fmt(it, f),
             Self::MdAutolink(it) => std::fmt::Debug::fmt(it, f),
             Self::MdCodeContent(it) => std::fmt::Debug::fmt(it, f),
             Self::MdEntityReference(it) => std::fmt::Debug::fmt(it, f),
@@ -4554,6 +4672,7 @@ impl std::fmt::Debug for AnyMdInline {
 impl From<AnyMdInline> for SyntaxNode {
     fn from(n: AnyMdInline) -> Self {
         match n {
+            AnyMdInline::GfmTaskListItem(it) => it.into_syntax(),
             AnyMdInline::MdAutolink(it) => it.into_syntax(),
             AnyMdInline::MdCodeContent(it) => it.into_syntax(),
             AnyMdInline::MdEntityReference(it) => it.into_syntax(),
@@ -4814,6 +4933,11 @@ impl std::fmt::Display for AnyMdLeafBlock {
     }
 }
 impl std::fmt::Display for AnyMdThematicBreakPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GfmTaskListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

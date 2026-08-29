@@ -39,7 +39,7 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    CompletedMarker, Parser, TokenSet,
+    CompletedMarker, Parser, SyntaxFeature, TokenSet,
     prelude::ParsedSyntax::{self, *},
     token_set,
 };
@@ -69,9 +69,9 @@ use quote::{
 use std::rc::Rc;
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
-use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
 use crate::parser::DeferredInlineFlavor;
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -702,10 +702,13 @@ fn consume_blank_line(p: &mut MarkdownParser) {
 /// not a paragraph-level slot.
 pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
+    let task_list_item_allowed = p.take_task_list_item_allowed();
 
     let inline_start: usize = p.cur_range().start().into();
-    let deferred = p.start_deferred_inline(DeferredInlineFlavor::Paragraph);
-    parse_inline_item_list(p);
+    let deferred = p.start_deferred_inline(DeferredInlineFlavor::Paragraph {
+        task_list_item_allowed,
+    });
+    parse_inline_item_list_with_task_list_item(p, task_list_item_allowed);
     let inline_end: usize = p.cur_range().start().into();
     p.finish_deferred_inline(deferred);
 
@@ -1409,7 +1412,10 @@ fn handle_line_continuation(
 /// NEWLINE is an explicit token (not trivia). When we hit NEWLINE:
 /// - If it's a blank line (NEWLINE + optional whitespace + NEWLINE/EOF) → stop
 /// - Otherwise it's a soft line break → consume and continue to next line
-pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
+pub(crate) fn parse_inline_item_list_with_task_list_item(
+    p: &mut MarkdownParser,
+    mut task_list_item_allowed: bool,
+) {
     let m = p.start();
     let prev_emphasis_context = set_inline_emphasis_context(p);
     let quote_depth = p.state().block_quote_depth;
@@ -1424,6 +1430,14 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         // EOF ends inline content
         if p.at(T![EOF]) {
             break;
+        }
+
+        if task_list_item_allowed {
+            task_list_item_allowed = false;
+            if MarkdownSyntaxFeatures::Gfm.is_supported(p) && parse_task_list_item(p).is_present() {
+                has_content = true;
+                continue;
+            }
         }
 
         // NEWLINE handling: check for blank line (paragraph boundary)
@@ -1509,6 +1523,34 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
 
     m.complete(p, MD_INLINE_ITEM_LIST);
     p.set_emphasis_context(prev_emphasis_context);
+}
+
+fn parse_task_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !p.at(L_BRACK) {
+        return Absent;
+    }
+
+    let source = p.source_after_current().as_bytes();
+    let Some(&state) = source.get(1) else {
+        return Absent;
+    };
+    if source.get(2) != Some(&b']')
+        || !matches!(
+            state,
+            b' ' | b'\t' | 0x0C | b'x' | b'X'
+        )
+        || source
+            .get(3)
+            .is_some_and(|byte| !matches!(*byte, b' ' | b'\t' | b'\n' | 0x0B | 0x0C | b'\r'))
+    {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(L_BRACK);
+    parse_textual(p).ok();
+    p.bump(R_BRACK);
+    Present(m.complete(p, GFM_TASK_LIST_ITEM))
 }
 
 fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> bool {

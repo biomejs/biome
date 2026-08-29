@@ -26,12 +26,21 @@ pub struct MarkdownParserOptions {
     /// This limits recursion on pathological input to avoid stack overflow.
     pub max_nesting_depth: usize,
     pub(crate) frontmatter: bool,
+
+    /// Enables GitHub Flavored Markdown extensions.
+    pub(crate) gfm: bool,
 }
 
 impl MarkdownParserOptions {
     /// Controls whether a complete `---` pair at the start of the document is parsed as frontmatter.
     pub fn with_frontmatter(mut self, frontmatter: bool) -> Self {
         self.frontmatter = frontmatter;
+        self
+    }
+
+    /// Controls whether GitHub Flavored Markdown extensions are parsed.
+    pub fn with_gfm(mut self, gfm: bool) -> Self {
+        self.gfm = gfm;
         self
     }
 }
@@ -41,6 +50,7 @@ impl Default for MarkdownParserOptions {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
             frontmatter: false,
+            gfm: false,
         }
     }
 }
@@ -104,6 +114,8 @@ pub(crate) struct MarkdownParserState {
     pub(crate) virtual_line_start: Option<TextSize>,
     /// Flag to unwind quote parsing when nesting exceeds the maximum depth.
     pub(crate) quote_depth_exceeded: bool,
+    /// Whether the next paragraph is the first block of a list item.
+    pub(crate) task_list_item_allowed: bool,
 }
 
 struct MarkdownParserStateCheckpoint {
@@ -123,6 +135,7 @@ struct MarkdownParserStateCheckpoint {
     last_list_ends_with_blank: bool,
     virtual_line_start: Option<TextSize>,
     quote_depth_exceeded: bool,
+    task_list_item_allowed: bool,
 }
 
 impl MarkdownParserState {
@@ -144,6 +157,7 @@ impl MarkdownParserState {
             last_list_ends_with_blank: self.last_list_ends_with_blank,
             virtual_line_start: self.virtual_line_start,
             quote_depth_exceeded: self.quote_depth_exceeded,
+            task_list_item_allowed: self.task_list_item_allowed,
         }
     }
 
@@ -168,6 +182,7 @@ impl MarkdownParserState {
         self.last_list_ends_with_blank = checkpoint.last_list_ends_with_blank;
         self.virtual_line_start = checkpoint.virtual_line_start;
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
+        self.task_list_item_allowed = checkpoint.task_list_item_allowed;
     }
 }
 
@@ -215,7 +230,7 @@ pub(crate) struct MarkdownParserOutput {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DeferredInlineFlavor {
     /// An `MdInlineItemList` that is already enclosed by its block node.
-    Paragraph,
+    Paragraph { task_list_item_allowed: bool },
     /// An ATX heading's `MdParagraph`, including its inline item list.
     AtxParagraph,
 }
@@ -585,6 +600,10 @@ impl<'source> MarkdownParser<'source> {
             definitions_len: self.link_reference_definitions_len(),
             unresolved_reference_lookup_count: self.unresolved_reference_lookup_count(),
         }
+    }
+
+    pub(crate) fn take_task_list_item_allowed(&mut self) -> bool {
+        std::mem::take(&mut self.state.task_list_item_allowed)
     }
 
     pub(crate) fn finish_deferred_inline(&mut self, start: DeferredInlineStart) {

@@ -276,6 +276,7 @@ AnyMdInline =
 	| MdCodeContent
 	| MdHardLine
 	| MdTextual
+	| GfmTaskListItem
 	| MdQuotePrefix
 	| MdIndentToken
 
@@ -400,3 +401,13 @@ MdContinuationIndent = indent: MdIndentTokenList
 
 MdHardLine = value: 'md_hard_line_literal'
 MdTextual = value: 'md_textual_literal'
+
+// ==================================
+// GitHub Flavoured Markdown (GFM)
+// ==================================
+
+GfmTaskListItem =
+	l_bracket: '['
+	// State is generic on purpose, the parser will take care of checking for `x`/whitespace
+	state: MdTextual
+	r_bracket: ']'

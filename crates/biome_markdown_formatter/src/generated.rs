@@ -7,6 +7,44 @@ use crate::{
     MarkdownFormatter,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+impl FormatRule<biome_markdown_syntax::GfmTaskListItem>
+    for crate::gfm::auxiliary::task_list_item::FormatGfmTaskListItem
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::GfmTaskListItem,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::GfmTaskListItem>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::GfmTaskListItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::GfmTaskListItem,
+        crate::gfm::auxiliary::task_list_item::FormatGfmTaskListItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::gfm::auxiliary::task_list_item::FormatGfmTaskListItem::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::GfmTaskListItem {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::GfmTaskListItem,
+        crate::gfm::auxiliary::task_list_item::FormatGfmTaskListItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::gfm::auxiliary::task_list_item::FormatGfmTaskListItem::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::MdAutolink>
     for crate::markdown::auxiliary::autolink::FormatMdAutolink
 {
