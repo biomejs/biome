@@ -276,6 +276,7 @@ AnyMdInline =
 	| MdCodeContent
 	| MdHardLine
 	| MdTextual
+	| GfmStrikethrough
 	| GfmTaskListItem
 	| MdQuotePrefix
 	| MdIndentToken
@@ -411,3 +412,8 @@ GfmTaskListItem =
 	// State is generic on purpose, the parser will take care of checking for `x`/whitespace
 	state: MdTextual
 	r_bracket: ']'
+
+GfmStrikethrough =
+	l_fence: '~~'
+	content: MdInlineItemList
+	r_fence: '~~'

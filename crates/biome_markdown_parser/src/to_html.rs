@@ -43,14 +43,13 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
-    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdEntityReference,
-    MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode,
-    MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
-    MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
-    MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, GfmTaskListItem,
-    MdThematicBreakBlock,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmStrikethrough, GfmTaskListItem,
+    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent,
+    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
+    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
+    MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle,
+    MdNewline, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage,
+    MdReferenceLink, MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -924,6 +923,11 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
+        if GfmStrikethrough::cast(node.clone()).is_some() {
+            self.push_str("<del>");
+            return;
+        }
+
         if let Some(code) = MdInlineCode::cast(node.clone()) {
             render_inline_code(&code, self.out_mut());
             self.opaque_depth = Some(self.depth);
@@ -1197,6 +1201,11 @@ impl<'a> HtmlRenderer<'a> {
 
         if MdInlineItalic::cast(node.clone()).is_some() {
             self.push_str("</em>");
+            return;
+        }
+
+        if GfmStrikethrough::cast(node.clone()).is_some() {
+            self.push_str("</del>");
             return;
         }
 
@@ -1914,6 +1923,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdInlineItalic(italic) => {
             out.push_str(&extract_alt_text(&italic.content(), ctx));
+        }
+        AnyMdInline::GfmStrikethrough(strikethrough) => {
+            out.push_str(&extract_alt_text(&strikethrough.content(), ctx));
         }
         AnyMdInline::MdInlineCode(code) => {
             // Plain text only — no <code> tags for alt attribute

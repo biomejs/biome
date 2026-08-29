@@ -50,10 +50,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             .markdown
             .and_then(|markdown| markdown.parser)
             .unwrap_or_default();
-        let frontmatter = parser
-            .frontmatter
-            .unwrap_or_default()
-            .into();
+        let frontmatter = parser.frontmatter.unwrap_or_default().into();
         let gfm = parser.gfm.unwrap_or_default().into();
 
         MarkdownParserOptions::default()

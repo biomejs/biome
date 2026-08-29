@@ -1285,6 +1285,11 @@ impl<'src> MarkdownLexer<'src> {
             return TRIPLE_TILDE;
         }
 
+        if count == 2 {
+            self.advance(count);
+            return DOUBLE_TILDE;
+        }
+
         // Otherwise: emit all consecutive tildes as a single TILDE token
         self.advance(count);
         TILDE

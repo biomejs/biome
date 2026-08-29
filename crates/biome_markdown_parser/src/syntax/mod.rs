@@ -1535,10 +1535,7 @@ fn parse_task_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     };
     if source.get(2) != Some(&b']')
-        || !matches!(
-            state,
-            b' ' | b'\t' | 0x0C | b'x' | b'X'
-        )
+        || !matches!(state, b' ' | b'\t' | 0x0C | b'x' | b'X')
         || source
             .get(3)
             .is_some_and(|byte| !matches!(*byte, b' ' | b'\t' | b'\n' | 0x0B | 0x0C | b'\r'))
@@ -1626,9 +1623,12 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisCont
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
     // Create a reference checker closure that uses the parser's link reference definitions
-    let context = EmphasisContext::new(inline_source, base_offset, |label| {
-        p.has_link_reference_definition(label)
-    });
+    let context = EmphasisContext::new(
+        inline_source,
+        base_offset,
+        MarkdownSyntaxFeatures::Gfm.is_supported(p),
+        |label| p.has_link_reference_definition(label),
+    );
     p.set_new_emphasis_context(context)
 }
 

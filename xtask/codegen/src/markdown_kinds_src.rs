@@ -18,6 +18,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("`", "BACKTICK"),
         ("```", "TRIPLE_BACKTICK"),
         ("~", "TILDE"),
+        ("~~", "DOUBLE_TILDE"),
         ("~~~", "TRIPLE_TILDE"),
         ("---", "FENCE"),
         ("_", "UNDERSCORE"),
@@ -100,5 +101,6 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_THEMATIC_BREAK_PART_LIST",
         "MD_CONTINUATION_INDENT",
         "GFM_TASK_LIST_ITEM",
+        "GFM_STRIKETHROUGH",
     ],
 };

@@ -7,6 +7,44 @@ use crate::{
     MarkdownFormatter,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+impl FormatRule<biome_markdown_syntax::GfmStrikethrough>
+    for crate::gfm::auxiliary::strikethrough::FormatGfmStrikethrough
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::GfmStrikethrough,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::GfmStrikethrough>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::GfmStrikethrough {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::GfmStrikethrough,
+        crate::gfm::auxiliary::strikethrough::FormatGfmStrikethrough,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::gfm::auxiliary::strikethrough::FormatGfmStrikethrough::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::GfmStrikethrough {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::GfmStrikethrough,
+        crate::gfm::auxiliary::strikethrough::FormatGfmStrikethrough,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::gfm::auxiliary::strikethrough::FormatGfmStrikethrough::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::GfmTaskListItem>
     for crate::gfm::auxiliary::task_list_item::FormatGfmTaskListItem
 {

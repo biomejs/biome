@@ -6,6 +6,20 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn gfm_strikethrough(
+    l_fence_token: SyntaxToken,
+    content: MdInlineItemList,
+    r_fence_token: SyntaxToken,
+) -> GfmStrikethrough {
+    GfmStrikethrough::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_STRIKETHROUGH,
+        [
+            Some(SyntaxElement::Token(l_fence_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_fence_token)),
+        ],
+    ))
+}
 pub fn gfm_task_list_item(
     l_bracket_token: SyntaxToken,
     state: MdTextual,
