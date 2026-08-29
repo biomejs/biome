@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_html_syntax::{
     AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElement,
     HtmlSelfClosingElement, HtmlSyntaxToken,
@@ -43,6 +44,7 @@ declare_lint_rule! {
         version: "next",
         name: "noAstroConflictingSetDirectives",
         language: "html",
+        severity: Severity::Error,
         recommended: true,
         domains: &[RuleDomain::Astro],
         sources: &[RuleSource::EslintAstro("no-conflict-set-directives").same()],
@@ -82,9 +84,10 @@ impl Rule for NoAstroConflictingSetDirectives {
         }
 
         let (attributes, children) = match ctx.query() {
-            AnyHtmlElementLike::HtmlElement(element) => {
-                (element.opening_element().ok()?.attributes(), Some(element.children()))
-            }
+            AnyHtmlElementLike::HtmlElement(element) => (
+                element.opening_element().ok()?.attributes(),
+                Some(element.children()),
+            ),
             AnyHtmlElementLike::HtmlSelfClosingElement(element) => (element.attributes(), None),
         };
 
@@ -100,9 +103,7 @@ impl Rule for NoAstroConflictingSetDirectives {
                     })
             },
         )
-        .map(|sources| State {
-            sources,
-        })
+        .map(|sources| State { sources })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
