@@ -74,7 +74,7 @@ declare_node_union! {
 
 impl Rule for NoAstroConflictingSetDirectives {
     type Query = Ast<AnyHtmlElementLike>;
-    type State = State;
+    type State = Box<[ContentSource]>;
     type Signals = Option<Self::State>;
     type Options = NoAstroConflictingSetDirectivesOptions;
 
