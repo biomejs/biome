@@ -315,6 +315,15 @@ impl WorkspaceDb {
         pending_setter.to(next);
     }
 
+    /// Advances the module graph generation without changing its entries.
+    ///
+    /// This publishes module changes already made through shared collections to
+    /// Salsa-tracked queries.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn invalidate_module_graph(&mut self) {
+        self.write_module_data(|_| {});
+    }
+
     /// Returns handles to the collections that this database shares with all
     /// its clones.
     pub fn data(&self) -> WorkspaceDbData {
@@ -763,6 +772,16 @@ pub struct SharedWorkspaceDb {
 
 impl Default for SharedWorkspaceDb {
     fn default() -> Self {
+        Self::from_workspace_db(WorkspaceDb::default())
+    }
+}
+
+impl SharedWorkspaceDb {
+    /// Converts `db` into handles for creating operation-local forks.
+    ///
+    /// The resulting forks share Salsa storage and workspace collections with
+    /// `db`, but each fork has fresh Salsa local state.
+    pub(crate) fn from_workspace_db(db: WorkspaceDb) -> Self {
         let WorkspaceDb {
             files,
             #[cfg(feature = "module_graph")]
@@ -771,7 +790,7 @@ impl Default for SharedWorkspaceDb {
             storage,
             projects,
             settings_queries,
-        } = WorkspaceDb::default();
+        } = db;
         Self {
             files,
             #[cfg(feature = "module_graph")]
@@ -782,9 +801,7 @@ impl Default for SharedWorkspaceDb {
             storage: storage.into_zalsa_handle(),
         }
     }
-}
 
-impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
             files: self.files.clone(),
