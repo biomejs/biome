@@ -101,8 +101,26 @@ impl schemars::JsonSchema for RuleDomains {
     fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         let _names = generator.subschema_for::<RuleDomain>();
         let _values = generator.subschema_for::<RuleDomainValue>();
+        // Editors complete object keys from `properties`, not `propertyNames`.
         schemars::json_schema!({
             "type": "object",
+            "properties": {
+                "astro": { "$ref": "#/$defs/RuleDomainValue" },
+                "drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+                "react": { "$ref": "#/$defs/RuleDomainValue" },
+                "reactNative": { "$ref": "#/$defs/RuleDomainValue" },
+                "test": { "$ref": "#/$defs/RuleDomainValue" },
+                "solid": { "$ref": "#/$defs/RuleDomainValue" },
+                "next": { "$ref": "#/$defs/RuleDomainValue" },
+                "qwik": { "$ref": "#/$defs/RuleDomainValue" },
+                "svelte": { "$ref": "#/$defs/RuleDomainValue" },
+                "vue": { "$ref": "#/$defs/RuleDomainValue" },
+                "project": { "$ref": "#/$defs/RuleDomainValue" },
+                "tailwind": { "$ref": "#/$defs/RuleDomainValue" },
+                "turborepo": { "$ref": "#/$defs/RuleDomainValue" },
+                "playwright": { "$ref": "#/$defs/RuleDomainValue" },
+                "types": { "$ref": "#/$defs/RuleDomainValue" }
+            },
             "propertyNames": {
                 "$ref": "#/$defs/RuleDomain"
             },
