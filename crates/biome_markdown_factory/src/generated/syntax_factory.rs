@@ -50,6 +50,204 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(GFM_STRIKETHROUGH, children)
             }
+            GFM_TABLE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && GfmTableRow::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GfmTableDelimiterRow::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GfmTableRowList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GFM_TABLE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GFM_TABLE, children)
+            }
+            GFM_TABLE_CELL => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdInlineItemList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GFM_TABLE_CELL.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GFM_TABLE_CELL, children)
+            }
+            GFM_TABLE_DELIMITER_CELL => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GfmTableDelimiterDashList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GFM_TABLE_DELIMITER_CELL.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GFM_TABLE_DELIMITER_CELL, children)
+            }
+            GFM_TABLE_DELIMITER_DASH => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [-]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GFM_TABLE_DELIMITER_DASH.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GFM_TABLE_DELIMITER_DASH, children)
+            }
+            GFM_TABLE_DELIMITER_ROW => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdQuotePrefixList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [|]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GfmTableDelimiterCellList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [|]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == NEWLINE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GFM_TABLE_DELIMITER_ROW.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GFM_TABLE_DELIMITER_ROW, children)
+            }
+            GFM_TABLE_ROW => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdQuotePrefixList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [|]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GfmTableCellList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [|]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == NEWLINE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GFM_TABLE_ROW.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GFM_TABLE_ROW, children)
+            }
             GFM_TASK_LIST_ITEM => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -1262,6 +1460,26 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_THEMATIC_BREAK_CHAR, children)
             }
+            GFM_TABLE_CELL_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                GfmTableCell::can_cast,
+                T ! [|],
+                false,
+            ),
+            GFM_TABLE_DELIMITER_CELL_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                GfmTableDelimiterCell::can_cast,
+                T ! [|],
+                false,
+            ),
+            GFM_TABLE_DELIMITER_DASH_LIST => {
+                Self::make_node_list_syntax(kind, children, GfmTableDelimiterDash::can_cast)
+            }
+            GFM_TABLE_ROW_LIST => {
+                Self::make_node_list_syntax(kind, children, GfmTableRow::can_cast)
+            }
             MD_BLOCK_LIST => Self::make_node_list_syntax(kind, children, AnyMdBlock::can_cast),
             MD_BULLET_LIST => Self::make_node_list_syntax(kind, children, MdBullet::can_cast),
             MD_CODE_NAME_LIST => Self::make_node_list_syntax(kind, children, MdTextual::can_cast),
@@ -1274,6 +1492,9 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_QUOTE_INDENT_LIST => {
                 Self::make_node_list_syntax(kind, children, MdQuoteIndent::can_cast)
+            }
+            MD_QUOTE_PREFIX_LIST => {
+                Self::make_node_list_syntax(kind, children, MdQuotePrefix::can_cast)
             }
             MD_THEMATIC_BREAK_PART_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdThematicBreakPart::can_cast)

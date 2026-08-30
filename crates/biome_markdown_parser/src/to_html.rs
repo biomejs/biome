@@ -43,15 +43,18 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmStrikethrough, GfmTaskListItem,
-    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent,
-    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
-    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
-    MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle,
-    MdNewline, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage,
-    MdReferenceLink, MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmStrikethrough, GfmTable,
+    GfmTableCell, GfmTableDelimiterCell, GfmTaskListItem, MarkdownLanguage, MdAutolink,
+    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdEntityReference,
+    MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode,
+    MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
+    MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
+    MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
+    MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
-use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, Direction, SyntaxNode, TextRange, WalkEvent,
+};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
 
@@ -899,6 +902,13 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
+        if let Some(table) = GfmTable::cast(node.clone()) {
+            let content = render_table(&table, self.ctx);
+            self.push_str(&content);
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
         if MdLinkReferenceDefinition::cast(node.clone()).is_some() {
             self.opaque_depth = Some(self.depth);
             return;
@@ -1280,6 +1290,106 @@ impl<'a> HtmlRenderer<'a> {
     }
 }
 
+const MAX_AUTOCOMPLETED_TABLE_CELLS: usize = 0x80000;
+
+fn render_table(table: &GfmTable, ctx: &HtmlRenderContext) -> String {
+    render_table_with_limit(table, ctx, MAX_AUTOCOMPLETED_TABLE_CELLS)
+}
+
+fn render_table_with_limit(
+    table: &GfmTable,
+    ctx: &HtmlRenderContext,
+    max_autocompleted_cells: usize,
+) -> String {
+    let Ok(header) = table.header() else {
+        return String::new();
+    };
+    let Ok(delimiter) = table.delimiter() else {
+        return String::new();
+    };
+
+    let header_cells: Vec<_> = header.cells().iter().filter_map(Result::ok).collect();
+    let alignments: Vec<_> = delimiter
+        .cells()
+        .iter()
+        .filter_map(Result::ok)
+        .map(|cell| table_alignment(&cell))
+        .collect();
+    let mut out = String::new();
+
+    out.push_str("<table>\n<thead>\n<tr>\n");
+    for (index, cell) in header_cells.iter().enumerate() {
+        render_table_cell(
+            "th",
+            Some(cell),
+            alignments.get(index).copied().flatten(),
+            ctx,
+            &mut out,
+        );
+    }
+    out.push_str("</tr>\n</thead>\n");
+
+    if table.body().iter().next().is_some() {
+        out.push_str("<tbody>\n");
+        let mut autocompleted_cells = 0usize;
+        for row in table.body().iter() {
+            let cells: Vec<_> = row.cells().iter().filter_map(Result::ok).collect();
+            let source_cell_count = cells.len().min(alignments.len());
+            let missing_cell_count = alignments.len().saturating_sub(source_cell_count);
+            let remaining_autocompleted_cells =
+                max_autocompleted_cells.saturating_sub(autocompleted_cells);
+            let autocompleted_in_row = missing_cell_count.min(remaining_autocompleted_cells);
+            autocompleted_cells += autocompleted_in_row;
+            let rendered_cell_count = source_cell_count + autocompleted_in_row;
+
+            out.push_str("<tr>\n");
+            for (index, alignment) in alignments.iter().take(rendered_cell_count).enumerate() {
+                render_table_cell("td", cells.get(index), *alignment, ctx, &mut out);
+            }
+            out.push_str("</tr>\n");
+        }
+        out.push_str("</tbody>\n");
+    }
+
+    out.push_str("</table>\n");
+    out
+}
+
+fn render_table_cell(
+    tag: &str,
+    cell: Option<&GfmTableCell>,
+    alignment: Option<&str>,
+    ctx: &HtmlRenderContext,
+    out: &mut String,
+) {
+    out.push('<');
+    out.push_str(tag);
+    if let Some(alignment) = alignment {
+        out.push_str(" align=\"");
+        out.push_str(alignment);
+        out.push('"');
+    }
+    out.push('>');
+    if let Some(cell) = cell {
+        out.push_str(&HtmlRenderer::new(ctx).render(cell.content().syntax()));
+    }
+    out.push_str("</");
+    out.push_str(tag);
+    out.push_str(">\n");
+}
+
+fn table_alignment(cell: &GfmTableDelimiterCell) -> Option<&'static str> {
+    match (
+        cell.l_colon_token().is_some(),
+        cell.r_colon_token().is_some(),
+    ) {
+        (true, true) => Some("center"),
+        (true, false) => Some("left"),
+        (false, true) => Some("right"),
+        (false, false) => None,
+    }
+}
+
 fn is_last_inline_item(node: &SyntaxNode<MarkdownLanguage>) -> bool {
     let Some(parent) = node.parent() else {
         return false;
@@ -1524,7 +1634,14 @@ fn render_textual(text: &MdTextual, out: &mut String) {
 fn render_inline_code(code: &MdInlineCode, out: &mut String) {
     out.push_str("<code>");
 
-    let content = collect_raw_inline_text(&code.content());
+    let mut content = collect_raw_inline_text(&code.content());
+    if code
+        .syntax()
+        .ancestors()
+        .any(|ancestor| GfmTableCell::can_cast(ancestor.kind()))
+    {
+        content = unescape_table_cell_pipes(&content);
+    }
     // Code spans: normalize line endings to spaces
     let content = content.replace('\n', " ");
     // Code spans: strip one leading/trailing space if content has both
@@ -1541,6 +1658,35 @@ fn render_inline_code(code: &MdInlineCode, out: &mut String) {
 
     out.push_str(&escape_html(&content));
     out.push_str("</code>");
+}
+
+fn unescape_table_cell_pipes(text: &str) -> String {
+    let mut output = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+
+    while let Some(char) = chars.next() {
+        if char != '\\' {
+            output.push(char);
+            continue;
+        }
+
+        let mut backslashes = 1;
+        while chars.next_if_eq(&'\\').is_some() {
+            backslashes += 1;
+        }
+        if backslashes % 2 == 1 && chars.next_if_eq(&'|').is_some() {
+            for _ in 1..backslashes {
+                output.push('\\');
+            }
+            output.push('|');
+        } else {
+            for _ in 0..backslashes {
+                output.push('\\');
+            }
+        }
+    }
+
+    output
 }
 
 fn resolve_reference_label<L, F>(
@@ -2076,7 +2222,8 @@ fn list_item_required_indent(entry: &ListItemIndent) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{MarkdownParserOptions, parse_markdown};
+    use crate::{MarkdownParserOptions, parse_markdown, parse_markdown_with_cache};
+    use biome_rowan::NodeCache;
 
     fn render(input: &str) -> String {
         let parsed = parse_markdown(input, MarkdownParserOptions::default());
@@ -2113,6 +2260,36 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<p>Hello, world!</p>\n");
+    }
+
+    #[test]
+    fn test_table_autocompleted_cells_are_bounded() {
+        let input = "a | b | c | d\n--- | --- | --- | ---\nx\ny\nz\n";
+        let mut cache = NodeCache::default();
+        let parsed = parse_markdown_with_cache(
+            input,
+            &mut cache,
+            MarkdownParserOptions::default().with_gfm(true),
+        );
+        let tree = parsed.tree();
+        let table = tree
+            .syntax()
+            .descendants()
+            .find_map(GfmTable::cast)
+            .expect("input must parse as a table");
+        let context = HtmlRenderContext::new(
+            &tree,
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+
+        let html = render_table_with_limit(&table, &context, 2);
+
+        assert_eq!(html.matches("<td>").count(), 5);
+        assert!(html.contains("<td>x</td>"));
+        assert!(html.contains("<td>y</td>"));
+        assert!(html.contains("<td>z</td>"));
     }
 
     #[test]

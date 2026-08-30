@@ -1525,6 +1525,7 @@ dependencies = [
  "smallvec",
  "tests_macros",
  "tikv-jemallocator",
+ "unicode-width 0.1.12",
 ]
 
 [[package]]

@@ -770,3 +770,59 @@ fn force_relex_at_line_start_produces_thematic_break() {
     );
     assert_eq!(buffered.current(), MD_THEMATIC_BREAK_LITERAL);
 }
+
+#[test]
+fn table_context_separates_cell_edges() {
+    assert_lex! {
+        MarkdownLexContext::Table,
+        "| left middle | right |\r\n",
+        PIPE:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:11,
+        WHITESPACE:1,
+        PIPE:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:5,
+        WHITESPACE:1,
+        PIPE:1,
+        NEWLINE:2,
+    }
+
+    assert_lex! {
+        MarkdownLexContext::Table,
+        "  left middle  \n",
+        WHITESPACE:2,
+        MD_TEXTUAL_LITERAL:11,
+        WHITESPACE:2,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn table_context_supports_all_line_endings() {
+    assert_lex! {
+        MarkdownLexContext::Table,
+        "|a|\r|b|\r\n|c|\n",
+        PIPE:1,
+        MD_TEXTUAL_LITERAL:1,
+        PIPE:1,
+        NEWLINE:1,
+        PIPE:1,
+        MD_TEXTUAL_LITERAL:1,
+        PIPE:1,
+        NEWLINE:2,
+        PIPE:1,
+        MD_TEXTUAL_LITERAL:1,
+        PIPE:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn table_context_does_not_change_regular_pipe_lexing() {
+    assert_lex! {
+        MarkdownLexContext::Regular,
+        "left | right",
+        MD_TEXTUAL_LITERAL:12,
+    }
+}

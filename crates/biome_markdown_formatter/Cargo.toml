@@ -24,6 +24,7 @@ biome_rowan              = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 smallvec                 = { workspace = true }
+unicode-width            = { workspace = true }
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }

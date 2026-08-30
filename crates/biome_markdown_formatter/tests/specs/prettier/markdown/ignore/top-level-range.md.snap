@@ -36,19 +36,19 @@ info: markdown/ignore/top-level-range.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -13,9 +13,9 @@
- > <!-- some tool start (this shouldn't be ignored) -->
- >
- > | some | table |
--> | ---- | ----- |
--> | 1    | a     |
--> | 2    | b     |
-+> | - | - |
-+> | 1 | a |
-+> | 2 | b |
- >
- > <!-- some tool end -->
- > <!-- prettier-ignore-end -->
+@@ -2,9 +2,9 @@
+ <!-- some tool start (this should be ignored) -->
+ 
+ | some | table |
+-| - | - |
+-| 1 | a |
+-| 2 | b |
++| ---- | ----- |
++| 1    | a     |
++| 2    | b     |
+ 
+ <!-- some tool end -->
+ <!-- prettier-ignore-end -->
 ```
 
 # Output
@@ -58,9 +58,9 @@ info: markdown/ignore/top-level-range.md
 <!-- some tool start (this should be ignored) -->
 
 | some | table |
-| - | - |
-| 1 | a |
-| 2 | b |
+| ---- | ----- |
+| 1    | a     |
+| 2    | b     |
 
 <!-- some tool end -->
 <!-- prettier-ignore-end -->
@@ -69,9 +69,9 @@ info: markdown/ignore/top-level-range.md
 > <!-- some tool start (this shouldn't be ignored) -->
 >
 > | some | table |
-> | - | - |
-> | 1 | a |
-> | 2 | b |
+> | ---- | ----- |
+> | 1    | a     |
+> | 2    | b     |
 >
 > <!-- some tool end -->
 > <!-- prettier-ignore-end -->

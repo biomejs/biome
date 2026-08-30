@@ -5,10 +5,6 @@
 # Can't move inline code
 markdown/spec/example-2.md
 
-# Tables (GFM extension, not supported by Biome's parser)
-markdown/table/
-markdown/long-table/
-
 # Wiki-links (extension, not supported)
 markdown/wiki-link/
 

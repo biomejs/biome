@@ -20,6 +20,30 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GfmStrikethrough::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::GFM_TABLE => {
+                    let $pattern = unsafe { $crate::GfmTable::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_CELL => {
+                    let $pattern = unsafe { $crate::GfmTableCell::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_DELIMITER_CELL => {
+                    let $pattern = unsafe { $crate::GfmTableDelimiterCell::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_DELIMITER_DASH => {
+                    let $pattern = unsafe { $crate::GfmTableDelimiterDash::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_DELIMITER_ROW => {
+                    let $pattern = unsafe { $crate::GfmTableDelimiterRow::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_ROW => {
+                    let $pattern = unsafe { $crate::GfmTableRow::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::GFM_TASK_LIST_ITEM => {
                     let $pattern = unsafe { $crate::GfmTaskListItem::new_unchecked(node) };
                     $body
@@ -201,6 +225,24 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBogusBullet::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_CELL_LIST => {
+                    let $pattern = unsafe { $crate::GfmTableCellList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_DELIMITER_CELL_LIST => {
+                    let $pattern =
+                        unsafe { $crate::GfmTableDelimiterCellList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_DELIMITER_DASH_LIST => {
+                    let $pattern =
+                        unsafe { $crate::GfmTableDelimiterDashList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::GFM_TABLE_ROW_LIST => {
+                    let $pattern = unsafe { $crate::GfmTableRowList::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BLOCK_LIST => {
                     let $pattern = unsafe { $crate::MdBlockList::new_unchecked(node) };
                     $body
@@ -227,6 +269,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST => {
                     let $pattern = unsafe { $crate::MdQuoteIndentList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_PREFIX_LIST => {
+                    let $pattern = unsafe { $crate::MdQuotePrefixList::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_PART_LIST => {

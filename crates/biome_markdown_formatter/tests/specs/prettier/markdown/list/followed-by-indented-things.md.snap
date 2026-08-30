@@ -205,23 +205,17 @@ info: markdown/list/followed-by-indented-things.md
  
  ---
  
-@@ -46,56 +45,54 @@
-         indented code block in numbered item
+@@ -47,8 +46,7 @@
  
  ---
--
--- [ ] foo
  
-+-    [] foo
+-- [ ] foo
+-
++-    [ ] foo
  
      top level indented code block
  
- ---
- 
--- [ ] foo
-+- [] foo
- 
-       indented code block in checkbox item
+@@ -60,42 +58,41 @@
  
  ---
  
@@ -244,15 +238,15 @@ info: markdown/list/followed-by-indented-things.md
 +    naive paragraph in item 1
  
  ---
- 
+-
 -- item 1
 -  - item 1-1
 -  - item 1-2
+ 
 +   -    item 1
 +        - item 1-1
 +        - item 1-2
  
--
      top level indented code block
  
  ---
@@ -291,32 +285,32 @@ info: markdown/list/followed-by-indented-things.md
      top level indented code block
  
  ---
- 
+-
 -- item 1
--
+ 
 -  > quote
--
--  text
 +   -    item 1
 +        > quote
  
+-  text
+-
 +        text
  
      top level indented code block
  
  ---
- 
+-
 -- item 1
 -  - item 1-1
 -  - item 1-2
 -
--
+ 
 -      indented code block
--
 +   -    item 1
 +        -    item 1-1
 +        -    item 1-2
  
+-
 +            indented code block
      top level indented code block
  
@@ -380,13 +374,13 @@ info: markdown/list/followed-by-indented-things.md
 
 ---
 
--    [] foo
+-    [ ] foo
 
     top level indented code block
 
 ---
 
-- [] foo
+- [ ] foo
 
       indented code block in checkbox item
 

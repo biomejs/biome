@@ -151,7 +151,7 @@ impl SyntaxFeature for MarkdownSyntaxFeatures {
 
     fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
         match self {
-            MarkdownSyntaxFeatures::Gfm => p.options().gfm,
+            Self::Gfm => p.options().gfm,
         }
     }
 }

@@ -80,6 +80,7 @@ AnyMdLeafBlock =
 	| MdParagraph
 	| MdNewline
 	| MdContinuationIndent
+	| GfmTable
 
 AnyMdContainerBlock =
 	MdQuote
@@ -210,6 +211,8 @@ MdQuotePrefix =
 	pre_marker_indent: MdQuoteIndentList
 	marker: '>'
 	post_marker_space: 'md_quote_post_marker_space'?
+
+MdQuotePrefixList = MdQuotePrefix*
 
 // Single pre-marker indent token (MdHash/MdHashList pattern).
 MdQuoteIndent = 'md_quote_pre_marker_indent'
@@ -417,3 +420,53 @@ GfmStrikethrough =
 	l_fence: '~~'
 	content: MdInlineItemList
 	r_fence: '~~'
+
+// | Header |
+// | ------ |
+// | Cell   |
+// ^^^^^^^^^^
+GfmTable =
+	header: GfmTableRow
+	delimiter: GfmTableDelimiterRow
+	body: GfmTableRowList
+
+GfmTableRowList = GfmTableRow*
+
+// | Header |
+// ^^^^^^^^^^
+GfmTableRow =
+	quote_prefixes: MdQuotePrefixList
+	l_pipe: '|'?
+	cells: GfmTableCellList
+	r_pipe: '|'?
+	newline: 'NEWLINE'?
+
+GfmTableCellList = (GfmTableCell ('|' GfmTableCell)*)
+
+// Header
+// ^^^^^^
+GfmTableCell = content: MdInlineItemList
+
+// | :--- |
+// ^^^^^^^^^
+GfmTableDelimiterRow =
+	quote_prefixes: MdQuotePrefixList
+	l_pipe: '|'?
+	cells: GfmTableDelimiterCellList
+	r_pipe: '|'?
+	newline: 'NEWLINE'?
+
+GfmTableDelimiterCellList = (GfmTableDelimiterCell ('|' GfmTableDelimiterCell)*)
+
+// :---
+// ^^^^
+GfmTableDelimiterCell =
+	l_colon: ':'?
+	dashes: GfmTableDelimiterDashList
+	r_colon: ':'?
+
+GfmTableDelimiterDashList = GfmTableDelimiterDash*
+
+// -
+// ^
+GfmTableDelimiterDash = '-'
