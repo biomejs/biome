@@ -10,6 +10,8 @@ info: markdown/gfm/strikethrough.md
 
 ~~outer ~~inner~~ text~~
 
+~~*struck and emphasized*~~
+
 ```
 
 
@@ -31,5 +33,7 @@ info: markdown/gfm/strikethrough.md
 ~~struck~~ text
 
 ~~outer ~~inner~~ text~~
+
+~~_struck and emphasized_~~
 
 ```
