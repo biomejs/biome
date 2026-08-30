@@ -1,0 +1,172 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComment.js
+---
+# Input
+```js
+function useQueryAssistant() {
+  if (
+    !showThinking && // while it's thinking there is hope to get suggestions
+    !comments?.length
+  ) {
+    console.log();
+  }
+}
+
+const isEmpty =
+  // leading comment
+  !foo.length;
+
+const isNotEmpty =
+  Boolean(foo.length);
+
+if (
+  // check length
+  foo.length
+) {}
+
+const isEmptyToo =
+  // check length
+  foo.length < 1;
+
+while (
+  bar ||
+  // own line
+  foo.length
+) {}
+
+```
+
+# Diagnostics
+```
+invalidComment.js:4:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use .length === 0 when checking .length is zero.
+  
+    2 │   if (
+    3 │     !showThinking && // while it's thinking there is hope to get suggestions
+  > 4 │     !comments?.length
+      │     ^^^^^^^^^^^^^^^^^
+    5 │   ) {
+    6 │     console.log();
+  
+  i Unsafe fix: Replace .length with .length === 0
+  
+     2  2 │     if (
+     3  3 │       !showThinking && // while it's thinking there is hope to get suggestions
+     4    │ - ····!comments?.length
+        4 │ + ····comments?.length·===·0
+     5  5 │     ) {
+     6  6 │       console.log();
+  
+
+```
+
+```
+invalidComment.js:12:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use .length === 0 when checking .length is zero.
+  
+    10 │ const isEmpty =
+    11 │   // leading comment
+  > 12 │   !foo.length;
+       │   ^^^^^^^^^^^
+    13 │ 
+    14 │ const isNotEmpty =
+  
+  i Unsafe fix: Replace .length with .length === 0
+  
+    10 10 │   const isEmpty =
+    11 11 │     // leading comment
+    12    │ - ··!foo.length;
+       12 │ + ··foo.length·===·0;
+    13 13 │   
+    14 14 │   const isNotEmpty =
+  
+
+```
+
+```
+invalidComment.js:15:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use .length > 0 when checking .length is not zero.
+  
+    14 │ const isNotEmpty =
+  > 15 │   Boolean(foo.length);
+       │   ^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ if (
+  
+  i Unsafe fix: Replace .length with .length > 0
+  
+    13 13 │   
+    14 14 │   const isNotEmpty =
+    15    │ - ··Boolean(foo.length);
+       15 │ + ··foo.length·>·0;
+    16 16 │   
+    17 17 │   if (
+  
+
+```
+
+```
+invalidComment.js:19:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use .length > 0 when checking .length is not zero.
+  
+    17 │ if (
+    18 │   // check length
+  > 19 │   foo.length
+       │   ^^^^^^^^^^
+    20 │ ) {}
+    21 │ 
+  
+  i Unsafe fix: Replace .length with .length > 0
+  
+    19 │ ··foo.length·>·0
+       │             ++++
+
+```
+
+```
+invalidComment.js:24:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use .length === 0 when checking .length is zero.
+  
+    22 │ const isEmptyToo =
+    23 │   // check length
+  > 24 │   foo.length < 1;
+       │   ^^^^^^^^^^^^^^
+    25 │ 
+    26 │ while (
+  
+  i Unsafe fix: Replace .length with .length === 0
+  
+    22 22 │   const isEmptyToo =
+    23 23 │     // check length
+    24    │ - ··foo.length·<·1;
+       24 │ + ··foo.length·===·0;
+    25 25 │   
+    26 26 │   while (
+  
+
+```
+
+```
+invalidComment.js:29:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use .length > 0 when checking .length is not zero.
+  
+    27 │   bar ||
+    28 │   // own line
+  > 29 │   foo.length
+       │   ^^^^^^^^^^
+    30 │ ) {}
+    31 │ 
+  
+  i Unsafe fix: Replace .length with .length > 0
+  
+    29 │ ··foo.length·>·0
+       │             ++++
+
+```

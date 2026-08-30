@@ -267,9 +267,19 @@ impl Rule for UseExplicitLengthCheck {
 
         let mut new_node = new_binary_expr.into_syntax();
         let parent = state.node.syntax().parent()?;
-        // In cases like `export default!foo.length` -> `export default foo.length === 0`
-        // we need to add a space between keyword and expression
-        if does_node_needs_space_before_child(&parent) {
+        let replaced_first_token = state.node.syntax().first_token()?;
+        // When the checked node wraps the member expression, as in `!foo.length`, the wrapper holds
+        // the trivia belonging at this position, so it replaces the member expression's own.
+        let wraps_member_expr = replaced_first_token != member_expr.syntax().first_token()?;
+        let replaced_leading_trivia = replaced_first_token.leading_trivia();
+
+        if wraps_member_expr && !replaced_leading_trivia.is_empty() {
+            new_node = new_node
+                .trim_leading_trivia()?
+                .prepend_trivia_pieces(replaced_leading_trivia.pieces())?;
+        } else if does_node_needs_space_before_child(&parent) {
+            // In cases like `export default!foo.length` -> `export default foo.length === 0`
+            // we need to add a space between keyword and expression
             // Make fake token to get leading trivia
             let leading_trivia = make::token_decorated_with_space(T![=])
                 .leading_trivia()
