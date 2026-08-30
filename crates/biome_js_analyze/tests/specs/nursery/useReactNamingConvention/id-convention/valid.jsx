@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+import { useId } from "react";
+
+const id = useId();
+const userId = useId();
+obj.nested.myId = useId();
+
+// Not a call to the React API.
+const foo = useId;
+
+function useCustomId() {
+	return useId();
+}

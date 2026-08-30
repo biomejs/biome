@@ -2766,6 +2766,11 @@ See https://biomejs.dev/linter/rules/use-react-function-component-definition
 	 */
 	useReactFunctionComponentDefinition?: UseReactFunctionComponentDefinitionConfiguration;
 	/**
+	* Enforces naming conventions for React createContext, useId, and useRef.
+See https://biomejs.dev/linter/rules/use-react-naming-convention 
+	 */
+	useReactNamingConvention?: UseReactNamingConventionConfiguration;
+	/**
 	* Ensure that platform-specific React Native components are only imported in files named for that platform.
 See https://biomejs.dev/linter/rules/use-react-native-platform-components 
 	 */
@@ -4946,6 +4951,9 @@ export type UseReactCompilerConfiguration =
 export type UseReactFunctionComponentDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactFunctionComponentDefinitionOptions;
+export type UseReactNamingConventionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactNamingConventionOptions;
 export type UseReactNativePlatformComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactNativePlatformComponentsOptions;
@@ -6928,6 +6936,10 @@ export interface RuleWithUseReactFunctionComponentDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactFunctionComponentDefinitionOptions;
 }
+export interface RuleWithUseReactNamingConventionOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactNamingConventionOptions;
+}
 export interface RuleWithUseReactNativePlatformComponentsOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactNativePlatformComponentsOptions;
@@ -8738,6 +8750,7 @@ export interface UseReactFunctionComponentDefinitionOptions {
 	 */
 	namedComponents?: ComponentDefinitionStyle;
 }
+export type UseReactNamingConventionOptions = {};
 export interface UseReactNativePlatformComponentsOptions {
 	/**
 	* A list of glob patterns to identify Android-specific files.
@@ -10051,6 +10064,7 @@ export type Category =
 	| "lint/nursery/useReactAsyncServerFunction"
 	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"
+	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"

@@ -461,6 +461,7 @@ pub mod use_react_async_server_function;
 pub mod use_react_compiler;
 pub mod use_react_function_component_definition;
 pub mod use_react_function_components;
+pub mod use_react_naming_convention;
 pub mod use_react_native_platform_components;
 pub mod use_readonly_class_properties;
 pub mod use_reduce_type_parameter;

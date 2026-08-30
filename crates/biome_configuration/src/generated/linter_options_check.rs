@@ -2176,6 +2176,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_react_function_components::UseReactFunctionComponentsOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "useReactNamingConvention",
+        TypeId::of::<
+            biome_rule_options::use_react_naming_convention::UseReactNamingConventionOptions,
+        >(),
+    ));
     result.push(("nursery", "useReactNativePlatformComponents", TypeId::of::<biome_rule_options::use_react_native_platform_components::UseReactNativePlatformComponentsOptions>()));
     result.push((
         "style",
