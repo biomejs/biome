@@ -16,7 +16,7 @@ const randomString = useId();
 ```
 invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This React id is not following the id convention.
+  i This React id is not following the id naming convention.
   
     2 │ import { useId } from "react";
     3 │ 
@@ -25,7 +25,7 @@ invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
     5 │ const randomString = useId();
     6 │ 
   
-  i React ids have to follow a convention to make them more recognizable across the codebase.
+  i React ids have to follow a naming convention to make them more recognizable across the codebase.
   
   i Rename the value to id or a name ending with Id, such as myId.
   
@@ -37,14 +37,14 @@ invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
 ```
 invalid.jsx:5:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This React id is not following the id convention.
+  i This React id is not following the id naming convention.
   
     4 │ const myRef = useId();
   > 5 │ const randomString = useId();
       │       ^^^^^^^^^^^^
     6 │ 
   
-  i React ids have to follow a convention to make them more recognizable across the codebase.
+  i React ids have to follow a naming convention to make them more recognizable across the codebase.
   
   i Rename the value to id or a name ending with Id, such as myId.
   

@@ -1,0 +1,142 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+import { useRef } from "react";
+
+const myId = useRef(null);
+const node = useRef(null);
+refs.node = useRef(null);
+const wrapped = (useRef(null));
+const wrapped2 = useRef(null) as Ref;
+const wrapped3 = useRef(null) satisfies Ref;
+
+```
+
+# Diagnostics
+```
+invalid.tsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+    2 │ import { useRef } from "react";
+    3 │ 
+  > 4 │ const myId = useRef(null);
+      │       ^^^^
+    5 │ const node = useRef(null);
+    6 │ refs.node = useRef(null);
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:5:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+    4 │ const myId = useRef(null);
+  > 5 │ const node = useRef(null);
+      │       ^^^^
+    6 │ refs.node = useRef(null);
+    7 │ const wrapped = (useRef(null));
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:6:6 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+    4 │ const myId = useRef(null);
+    5 │ const node = useRef(null);
+  > 6 │ refs.node = useRef(null);
+      │      ^^^^
+    7 │ const wrapped = (useRef(null));
+    8 │ const wrapped2 = useRef(null) as Ref;
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:7:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+    5 │ const node = useRef(null);
+    6 │ refs.node = useRef(null);
+  > 7 │ const wrapped = (useRef(null));
+      │       ^^^^^^^
+    8 │ const wrapped2 = useRef(null) as Ref;
+    9 │ const wrapped3 = useRef(null) satisfies Ref;
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:8:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+     6 │ refs.node = useRef(null);
+     7 │ const wrapped = (useRef(null));
+   > 8 │ const wrapped2 = useRef(null) as Ref;
+       │       ^^^^^^^^
+     9 │ const wrapped3 = useRef(null) satisfies Ref;
+    10 │ 
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:9:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+     7 │ const wrapped = (useRef(null));
+     8 │ const wrapped2 = useRef(null) as Ref;
+   > 9 │ const wrapped3 = useRef(null) satisfies Ref;
+       │       ^^^^^^^^
+    10 │ 
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

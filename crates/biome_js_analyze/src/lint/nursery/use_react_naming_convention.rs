@@ -5,7 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsMemberExpression, JsAssignmentExpression,
-    JsCallExpression, JsInitializerClause, JsSyntaxToken, JsVariableDeclarator,
+    JsCallExpression, JsInitializerClause, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_react_naming_convention::UseReactNamingConventionOptions;
@@ -83,31 +84,6 @@ declare_lint_rule! {
     }
 }
 
-/// The React API whose naming convention is being enforced.
-#[derive(Clone, Copy)]
-pub enum ReactNamingConvention {
-    Context,
-    Id,
-    Ref,
-}
-
-impl ReactNamingConvention {
-    fn is_satisfied_by(self, name: &str) -> bool {
-        match self {
-            Self::Context => {
-                Case::identify(name, false) == Case::Pascal && name.ends_with("Context")
-            }
-            Self::Id => name == "id" || name.ends_with("Id"),
-            Self::Ref => name == "ref" || name.ends_with("Ref"),
-        }
-    }
-}
-
-pub struct ReactNamingConventionState {
-    convention: ReactNamingConvention,
-    range: TextRange,
-}
-
 impl Rule for UseReactNamingConvention {
     type Query = Semantic<JsCallExpression>;
     type State = ReactNamingConventionState;
@@ -130,14 +106,18 @@ impl Rule for UseReactNamingConvention {
             return None;
         };
 
+        // Look past parentheses and type-cast wrappers so that assignments such as
+        // `const node = (useRef(null))` or `const node = useRef(null) as Ref` are resolved.
+        let expression = unwrap_expression(call.syntax().clone());
+        let parent = expression.parent()?;
+
         // The result is immediately dereferenced (e.g. `useRef(null).current`)
         // rather than stored, so there is no name to check.
-        let parent = call.syntax().parent()?;
         if AnyJsMemberExpression::can_cast(parent.kind()) {
             return None;
         }
 
-        let name = resolve_assignment_target_name(call)?;
+        let name = resolve_assignment_target_name(&parent)?;
         if convention.is_satisfied_by(name.text_trimmed()) {
             return None;
         }
@@ -149,67 +129,98 @@ impl Rule for UseReactNamingConvention {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let (message, reason, action) = match state.convention {
-            ReactNamingConvention::Context => (
+        match state.convention {
+            ReactNamingConvention::Context => Some(RuleDiagnostic::new(
+                rule_category!(),
+                state.range,
                 markup! {
-                    "This React context is not following the context convention."
-                }
-                .to_owned(),
+                    "This React context is not following the context naming convention."
+                },
+            )
+            .note(markup! {
+                "React contexts have to follow a naming convention to make them more recognizable across the codebase."
+            })
+            .note(markup! {
+                "Rename it to a PascalCase name ending with "<Emphasis>"Context"</Emphasis>", such as "<Emphasis>"ThemeContext"</Emphasis>"."
+            })),
+            ReactNamingConvention::Id => Some(RuleDiagnostic::new(
+                rule_category!(),
+                state.range,
                 markup! {
-                    "React contexts have to follow a convention to make them more recognizable across the codebase."
-                }
-                .to_owned(),
+                    "This React id is not following the id naming convention."
+                },
+            )
+            .note(markup! {
+                "React ids have to follow a naming convention to make them more recognizable across the codebase."
+            })
+            .note(markup! {
+                "Rename the value to "<Emphasis>"id"</Emphasis>" or a name ending with "<Emphasis>"Id"</Emphasis>", such as "<Emphasis>"myId"</Emphasis>"."
+            })),
+            ReactNamingConvention::Ref => Some(RuleDiagnostic::new(
+                rule_category!(),
+                state.range,
                 markup! {
-                    "Rename it to a PascalCase name ending with "<Emphasis>"Context"</Emphasis>", such as "<Emphasis>"ThemeContext"</Emphasis>"."
-                }
-                .to_owned(),
-            ),
-            ReactNamingConvention::Id => (
-                markup! {
-                    "This React id is not following the id convention."
-                }
-                .to_owned(),
-                markup! {
-                    "React ids have to follow a convention to make them more recognizable across the codebase."
-                }
-                .to_owned(),
-                markup! {
-                    "Rename the value to "<Emphasis>"id"</Emphasis>" or a name ending with "<Emphasis>"Id"</Emphasis>", such as "<Emphasis>"myId"</Emphasis>"."
-                }
-                .to_owned(),
-            ),
-            ReactNamingConvention::Ref => (
-                markup! {
-                    "This React ref is not following the ref convention."
-                }
-                .to_owned(),
-                markup! {
-                    "React refs have to follow a convention to make them more recognizable across the codebase."
-                }
-                .to_owned(),
-                markup! {
-                    "Rename the value to "<Emphasis>"ref"</Emphasis>" or a name ending with "<Emphasis>"Ref"</Emphasis>", such as "<Emphasis>"myRef"</Emphasis>"."
-                }
-                .to_owned(),
-            ),
-        };
-        Some(
-            RuleDiagnostic::new(rule_category!(), state.range, message)
-                .note(reason)
-                .note(action),
-        )
+                    "This React ref is not following the ref naming convention."
+                },
+            )
+            .note(markup! {
+                "React refs have to follow a naming convention to make them more recognizable across the codebase."
+            })
+            .note(markup! {
+                "Rename the value to "<Emphasis>"ref"</Emphasis>" or a name ending with "<Emphasis>"Ref"</Emphasis>", such as "<Emphasis>"myRef"</Emphasis>"."
+            })),
+        }
     }
+}
+
+pub struct ReactNamingConventionState {
+    convention: ReactNamingConvention,
+    range: TextRange,
+}
+
+/// The React API whose naming convention is being enforced.
+#[derive(Clone, Copy)]
+pub enum ReactNamingConvention {
+    Context,
+    Id,
+    Ref,
+}
+
+impl ReactNamingConvention {
+    fn is_satisfied_by(self, name: &str) -> bool {
+        match self {
+            Self::Context => {
+                Case::identify(name, false) == Case::Pascal && name.ends_with("Context")
+            }
+            Self::Id => name == "id" || name.ends_with("Id"),
+            Self::Ref => name == "ref" || name.ends_with("Ref"),
+        }
+    }
+}
+
+/// Walks up from a call expression through parentheses and type-cast wrappers
+/// (`as`, `satisfies`) to the outermost expression that still evaluates to the call.
+fn unwrap_expression(node: JsSyntaxNode) -> JsSyntaxNode {
+    let mut current = node;
+    while let Some(parent) = current.parent() {
+        match parent.kind() {
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            | JsSyntaxKind::TS_AS_EXPRESSION
+            | JsSyntaxKind::TS_SATISFIES_EXPRESSION => current = parent,
+            _ => break,
+        }
+    }
+    current
 }
 
 /// Returns the identifier token the call result is assigned to.
 ///
 /// It resolves both variable declarators (`const myRef = useRef()`) and assignment
 /// targets (`refs.myRef = useRef()`), and returns `None` when the result is not stored
-/// in a plain identifier.
-fn resolve_assignment_target_name(call: &JsCallExpression) -> Option<JsSyntaxToken> {
-    let parent = call.syntax().parent()?;
-
-    if let Some(initializer) = JsInitializerClause::cast_ref(&parent) {
+/// in a plain identifier. `parent` is the parent of the call expression after unwrapping
+/// any parentheses and type-cast wrappers.
+fn resolve_assignment_target_name(parent: &JsSyntaxNode) -> Option<JsSyntaxToken> {
+    if let Some(initializer) = JsInitializerClause::cast_ref(parent) {
         return initializer
             .parent::<JsVariableDeclarator>()?
             .id()
@@ -220,7 +231,7 @@ fn resolve_assignment_target_name(call: &JsCallExpression) -> Option<JsSyntaxTok
             .ok();
     }
 
-    if let Some(assignment) = JsAssignmentExpression::cast_ref(&parent) {
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(parent) {
         return match assignment.left().ok()? {
             AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsIdentifierAssignment(
                 identifier,

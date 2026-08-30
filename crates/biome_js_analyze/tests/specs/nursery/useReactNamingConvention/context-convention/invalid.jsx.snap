@@ -16,7 +16,7 @@ const themeContext = createContext("");
 ```
 invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This React context is not following the context convention.
+  i This React context is not following the context naming convention.
   
     2 │ import { createContext } from "react";
     3 │ 
@@ -25,7 +25,7 @@ invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
     5 │ const themeContext = createContext("");
     6 │ 
   
-  i React contexts have to follow a convention to make them more recognizable across the codebase.
+  i React contexts have to follow a naming convention to make them more recognizable across the codebase.
   
   i Rename it to a PascalCase name ending with Context, such as ThemeContext.
   
@@ -37,14 +37,14 @@ invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
 ```
 invalid.jsx:5:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This React context is not following the context convention.
+  i This React context is not following the context naming convention.
   
     4 │ const theme = createContext("");
   > 5 │ const themeContext = createContext("");
       │       ^^^^^^^^^^^^
     6 │ 
   
-  i React contexts have to follow a convention to make them more recognizable across the codebase.
+  i React contexts have to follow a naming convention to make them more recognizable across the codebase.
   
   i Rename it to a PascalCase name ending with Context, such as ThemeContext.
   
