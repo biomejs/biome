@@ -1,0 +1,161 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_children.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+
+<div set:html="html">text child</div>
+<div set:text={text}>{expression}</div>
+<div set:html={html}><span>nested element</span></div>
+
+<script set:html={html}>alert(1)</script>
+<style set:text={text}>body { color: red; }</style>
+
+```
+
+# Diagnostics
+```
+invalid_children.astro:3:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div set:html="html">text child</div>
+      │      ^^^^^^^^^^^^^^^
+    4 │ <div set:text={text}>{expression}</div>
+    5 │ <div set:html={html}><span>nested element</span></div>
+  
+  i Child content defines the element content here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div set:html="html">text child</div>
+      │                      ^^^^^^^^^^
+    4 │ <div set:text={text}>{expression}</div>
+    5 │ <div set:html={html}><span>nested element</span></div>
+  
+  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_children.astro:4:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:text directive conflicts with another content source.
+  
+    3 │ <div set:html="html">text child</div>
+  > 4 │ <div set:text={text}>{expression}</div>
+      │      ^^^^^^^^^^^^^^^
+    5 │ <div set:html={html}><span>nested element</span></div>
+    6 │ 
+  
+  i Child content defines the element content here.
+  
+    3 │ <div set:html="html">text child</div>
+  > 4 │ <div set:text={text}>{expression}</div>
+      │                      ^^^^^^^^^^^^
+    5 │ <div set:html={html}><span>nested element</span></div>
+    6 │ 
+  
+  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_children.astro:5:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    3 │ <div set:html="html">text child</div>
+    4 │ <div set:text={text}>{expression}</div>
+  > 5 │ <div set:html={html}><span>nested element</span></div>
+      │      ^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <script set:html={html}>alert(1)</script>
+  
+  i Child content defines the element content here.
+  
+    3 │ <div set:html="html">text child</div>
+    4 │ <div set:text={text}>{expression}</div>
+  > 5 │ <div set:html={html}><span>nested element</span></div>
+      │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <script set:html={html}>alert(1)</script>
+  
+  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_children.astro:7:9 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    5 │ <div set:html={html}><span>nested element</span></div>
+    6 │ 
+  > 7 │ <script set:html={html}>alert(1)</script>
+      │         ^^^^^^^^^^^^^^^
+    8 │ <style set:text={text}>body { color: red; }</style>
+    9 │ 
+  
+  i Child content defines the element content here.
+  
+    5 │ <div set:html={html}><span>nested element</span></div>
+    6 │ 
+  > 7 │ <script set:html={html}>alert(1)</script>
+      │                         ^^^^^^^^
+    8 │ <style set:text={text}>body { color: red; }</style>
+    9 │ 
+  
+  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_children.astro:8:8 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:text directive conflicts with another content source.
+  
+    7 │ <script set:html={html}>alert(1)</script>
+  > 8 │ <style set:text={text}>body { color: red; }</style>
+      │        ^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Child content defines the element content here.
+  
+    7 │ <script set:html={html}>alert(1)</script>
+  > 8 │ <style set:text={text}>body { color: red; }</style>
+      │                        ^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

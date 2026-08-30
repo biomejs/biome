@@ -1,0 +1,8 @@
+<!-- should generate diagnostics -->
+
+<div set:html="html">text child</div>
+<div set:text={text}>{expression}</div>
+<div set:html={html}><span>nested element</span></div>
+
+<script set:html={html}>alert(1)</script>
+<style set:text={text}>body { color: red; }</style>

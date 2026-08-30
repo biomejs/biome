@@ -6,436 +6,49 @@ expression: invalid.astro
 ```astro
 <!-- should generate diagnostics -->
 
-<div set:html={html} set:text={text}></div>
-<div set:text={text} set:html={html}></div>
-
-<div set:html={html}>text</div>
-<div set:text={text}>text</div>
-
-<div set:html={html}>{expression}</div>
-<div set:text={text}>{expression}</div>
-
-<div set:html={html}><span>nested element</span></div>
-<div set:text={text}><span>nested element</span></div>
-
-<div set:html={html} set:text={text}>child content</div>
-
-<Component set:html={html} set:text={text} />
-
-<div set:html={first} set:html={second}></div>
-<div set:text={first} set:text={second}></div>
-
-<script set:html={html}>alert(1)</script>
-<style set:text={text}>body { color: red; }</style>
+<div set:html={html} set:text={text}>
+    <!-- leading comment -->
+    first
+    <span>{middle}</span>
+    last
+    <!-- trailing comment -->
+</div>
 
 ```
 
 # Diagnostics
 ```
-invalid.astro:3:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:3:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The set:text directive conflicts with another content source.
+  × The set:html directive conflicts with another content source.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
-  > 3 │ <div set:html={html} set:text={text}></div>
-      │                      ^^^^^^^^^^^^^^^
-    4 │ <div set:text={text} set:html={html}></div>
-    5 │ 
+  > 3 │ <div set:html={html} set:text={text}>
+      │      ^^^^^^^^^^^^^^^
+    4 │     <!-- leading comment -->
+    5 │     first
   
-  i The set:html directive defines the element content here.
+  i The set:text directive defines the element content here.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
-  > 3 │ <div set:html={html} set:text={text}></div>
-      │      ^^^^^^^^^^^^^^^
-    4 │ <div set:text={text} set:html={html}></div>
-    5 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:4:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The set:html directive conflicts with another content source.
-  
-    3 │ <div set:html={html} set:text={text}></div>
-  > 4 │ <div set:text={text} set:html={html}></div>
+  > 3 │ <div set:html={html} set:text={text}>
       │                      ^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ <div set:html={html}>text</div>
-  
-  i The set:text directive defines the element content here.
-  
-    3 │ <div set:html={html} set:text={text}></div>
-  > 4 │ <div set:text={text} set:html={html}></div>
-      │      ^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ <div set:html={html}>text</div>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:6:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-    4 │ <div set:text={text} set:html={html}></div>
-    5 │ 
-  > 6 │ <div set:html={html}>text</div>
-      │                      ^^^^
-    7 │ <div set:text={text}>text</div>
-    8 │ 
-  
-  i The set:html directive defines the element content here.
-  
-    4 │ <div set:text={text} set:html={html}></div>
-    5 │ 
-  > 6 │ <div set:html={html}>text</div>
-      │      ^^^^^^^^^^^^^^^
-    7 │ <div set:text={text}>text</div>
-    8 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:7:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-    6 │ <div set:html={html}>text</div>
-  > 7 │ <div set:text={text}>text</div>
-      │                      ^^^^
-    8 │ 
-    9 │ <div set:html={html}>{expression}</div>
-  
-  i The set:text directive defines the element content here.
-  
-    6 │ <div set:html={html}>text</div>
-  > 7 │ <div set:text={text}>text</div>
-      │      ^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ <div set:html={html}>{expression}</div>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:9:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-     7 │ <div set:text={text}>text</div>
-     8 │ 
-   > 9 │ <div set:html={html}>{expression}</div>
-       │                      ^^^^^^^^^^^^
-    10 │ <div set:text={text}>{expression}</div>
-    11 │ 
-  
-  i The set:html directive defines the element content here.
-  
-     7 │ <div set:text={text}>text</div>
-     8 │ 
-   > 9 │ <div set:html={html}>{expression}</div>
-       │      ^^^^^^^^^^^^^^^
-    10 │ <div set:text={text}>{expression}</div>
-    11 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:10:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-     9 │ <div set:html={html}>{expression}</div>
-  > 10 │ <div set:text={text}>{expression}</div>
-       │                      ^^^^^^^^^^^^
-    11 │ 
-    12 │ <div set:html={html}><span>nested element</span></div>
-  
-  i The set:text directive defines the element content here.
-  
-     9 │ <div set:html={html}>{expression}</div>
-  > 10 │ <div set:text={text}>{expression}</div>
-       │      ^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ <div set:html={html}><span>nested element</span></div>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:12:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-    10 │ <div set:text={text}>{expression}</div>
-    11 │ 
-  > 12 │ <div set:html={html}><span>nested element</span></div>
-       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ <div set:text={text}><span>nested element</span></div>
-    14 │ 
-  
-  i The set:html directive defines the element content here.
-  
-    10 │ <div set:text={text}>{expression}</div>
-    11 │ 
-  > 12 │ <div set:html={html}><span>nested element</span></div>
-       │      ^^^^^^^^^^^^^^^
-    13 │ <div set:text={text}><span>nested element</span></div>
-    14 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:13:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-    12 │ <div set:html={html}><span>nested element</span></div>
-  > 13 │ <div set:text={text}><span>nested element</span></div>
-       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ <div set:html={html} set:text={text}>child content</div>
-  
-  i The set:text directive defines the element content here.
-  
-    12 │ <div set:html={html}><span>nested element</span></div>
-  > 13 │ <div set:text={text}><span>nested element</span></div>
-       │      ^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ <div set:html={html} set:text={text}>child content</div>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:15:22 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The set:text directive conflicts with another content source.
-  
-    13 │ <div set:text={text}><span>nested element</span></div>
-    14 │ 
-  > 15 │ <div set:html={html} set:text={text}>child content</div>
-       │                      ^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ <Component set:html={html} set:text={text} />
-  
-  i The set:html directive defines the element content here.
-  
-    13 │ <div set:text={text}><span>nested element</span></div>
-    14 │ 
-  > 15 │ <div set:html={html} set:text={text}>child content</div>
-       │      ^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ <Component set:html={html} set:text={text} />
+    4 │     <!-- leading comment -->
+    5 │     first
   
   i Child content defines the element content here.
   
-    13 │ <div set:text={text}><span>nested element</span></div>
-    14 │ 
-  > 15 │ <div set:html={html} set:text={text}>child content</div>
-       │                                      ^^^^^^^^^^^^^
-    16 │ 
-    17 │ <Component set:html={html} set:text={text} />
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:17:28 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The set:text directive conflicts with another content source.
-  
-    15 │ <div set:html={html} set:text={text}>child content</div>
-    16 │ 
-  > 17 │ <Component set:html={html} set:text={text} />
-       │                            ^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ <div set:html={first} set:html={second}></div>
-  
-  i The set:html directive defines the element content here.
-  
-    15 │ <div set:html={html} set:text={text}>child content</div>
-    16 │ 
-  > 17 │ <Component set:html={html} set:text={text} />
-       │            ^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ <div set:html={first} set:html={second}></div>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:19:23 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The set:html directive conflicts with another content source.
-  
-    17 │ <Component set:html={html} set:text={text} />
-    18 │ 
-  > 19 │ <div set:html={first} set:html={second}></div>
-       │                       ^^^^^^^^^^^^^^^^^
-    20 │ <div set:text={first} set:text={second}></div>
-    21 │ 
-  
-  i The set:html directive defines the element content here.
-  
-    17 │ <Component set:html={html} set:text={text} />
-    18 │ 
-  > 19 │ <div set:html={first} set:html={second}></div>
-       │      ^^^^^^^^^^^^^^^^
-    20 │ <div set:text={first} set:text={second}></div>
-    21 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:20:23 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The set:text directive conflicts with another content source.
-  
-    19 │ <div set:html={first} set:html={second}></div>
-  > 20 │ <div set:text={first} set:text={second}></div>
-       │                       ^^^^^^^^^^^^^^^^^
-    21 │ 
-    22 │ <script set:html={html}>alert(1)</script>
-  
-  i The set:text directive defines the element content here.
-  
-    19 │ <div set:html={first} set:html={second}></div>
-  > 20 │ <div set:text={first} set:text={second}></div>
-       │      ^^^^^^^^^^^^^^^^
-    21 │ 
-    22 │ <script set:html={html}>alert(1)</script>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:22:25 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-    20 │ <div set:text={first} set:text={second}></div>
-    21 │ 
-  > 22 │ <script set:html={html}>alert(1)</script>
-       │                         ^^^^^^^^
-    23 │ <style set:text={text}>body { color: red; }</style>
-    24 │ 
-  
-  i The set:html directive defines the element content here.
-  
-    20 │ <div set:text={first} set:text={second}></div>
-    21 │ 
-  > 22 │ <script set:html={html}>alert(1)</script>
-       │         ^^^^^^^^^^^^^^^
-    23 │ <style set:text={text}>body { color: red; }</style>
-    24 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:23:24 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This child content conflicts with another content source.
-  
-    22 │ <script set:html={html}>alert(1)</script>
-  > 23 │ <style set:text={text}>body { color: red; }</style>
-       │                        ^^^^^^^^^^^^^^^^^^^^
-    24 │ 
-  
-  i The set:text directive defines the element content here.
-  
-    22 │ <script set:html={html}>alert(1)</script>
-  > 23 │ <style set:text={text}>body { color: red; }</style>
-       │        ^^^^^^^^^^^^^^^
-    24 │ 
+    3 │ <div set:html={html} set:text={text}>
+    4 │     <!-- leading comment -->
+  > 5 │     first
+      │     ^^^^^
+  > 6 │     <span>{middle}</span>
+  > 7 │     last
+      │     ^^^^
+    8 │     <!-- trailing comment -->
+    9 │ </div>
   
   i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
   

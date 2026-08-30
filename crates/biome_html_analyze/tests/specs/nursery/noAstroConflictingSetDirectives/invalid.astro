@@ -1,23 +1,9 @@
 <!-- should generate diagnostics -->
 
-<div set:html={html} set:text={text}></div>
-<div set:text={text} set:html={html}></div>
-
-<div set:html={html}>text</div>
-<div set:text={text}>text</div>
-
-<div set:html={html}>{expression}</div>
-<div set:text={text}>{expression}</div>
-
-<div set:html={html}><span>nested element</span></div>
-<div set:text={text}><span>nested element</span></div>
-
-<div set:html={html} set:text={text}>child content</div>
-
-<Component set:html={html} set:text={text} />
-
-<div set:html={first} set:html={second}></div>
-<div set:text={first} set:text={second}></div>
-
-<script set:html={html}>alert(1)</script>
-<style set:text={text}>body { color: red; }</style>
+<div set:html={html} set:text={text}>
+    <!-- leading comment -->
+    first
+    <span>{middle}</span>
+    last
+    <!-- trailing comment -->
+</div>
