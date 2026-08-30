@@ -146,10 +146,69 @@ fn select_call_signature<'db>(
         return Some(first);
     };
 
-    [first, second]
+    let accepted: Vec<_> = [first, second]
         .into_iter()
         .chain(signatures)
-        .find(|function| signature_accepts_arguments(db, *function, args))
+        .filter(|function| signature_accepts_arguments(db, *function, args))
+        .collect();
+    let (&selected, rest) = accepted.split_first()?;
+
+    // The first signature that is definitively compatible wins, matching
+    // TypeScript's declaration-order resolution.
+    if let Some(definite) = accepted
+        .iter()
+        .find(|function| signature_definitely_accepts_arguments(db, **function, args))
+    {
+        return Some(*definite);
+    }
+
+    // Otherwise every survivor merely was not ruled out: `is_satisfied()` only
+    // narrows on arity and on a callback's promise-ness, so it says nothing
+    // about the returned value. Returning the first would report a type the
+    // analysis never established, which is why swapping two declarations
+    // changes the result. When the survivors disagree, the call is unknown.
+    //
+    // This only applies while every survivor takes the arguments in the same
+    // exact positional shape. A survivor with optional or rest parameters (an
+    // overloaded function's implementation signature, which is not callable on
+    // its own) is not a competing declaration, so it must not make the call
+    // ambiguous.
+    if !accepted
+        .iter()
+        .all(|function| has_exact_positional_shape(db, *function, args))
+    {
+        return Some(selected);
+    }
+
+    let selected_return_type = infer_function_return_type(db, selected, args);
+    for function in rest {
+        if infer_function_return_type(db, *function, args) != selected_return_type {
+            return None;
+        }
+    }
+
+    Some(selected)
+}
+
+/// Whether `function` takes `args` as one required parameter per argument.
+///
+/// Optional and rest parameters, and spread arguments, all make the mapping
+/// from arguments to parameters depend on the call site rather than on the
+/// declaration alone.
+fn has_exact_positional_shape<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+) -> bool {
+    let parameters = ResolvedParameters::from_function(db, function);
+    let parameters = parameters.as_slice();
+    parameters.len() == args.len()
+        && parameters
+            .iter()
+            .all(|parameter| matches!(parameter, ResolvedParameter::Required(_)))
+        && args
+            .iter()
+            .all(|argument| matches!(argument, ResolvedCallArgument::Argument(_)))
 }
 
 /// Expands tuple spreads and maps a source argument index to the expanded list.
@@ -617,6 +676,29 @@ fn select_constructor_argument_type<'db>(
         })
 }
 
+/// Whether every argument is definitively compatible with `function`.
+///
+/// Only the all-required, all-positional shape can be decided here; anything
+/// needing the sequence matcher is left to [`signature_accepts_arguments()`].
+fn signature_definitely_accepts_arguments<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+) -> bool {
+    let parameters = ResolvedParameters::from_function(db, function);
+    let parameters = parameters.as_slice();
+    parameters
+        .iter()
+        .all(|parameter| matches!(parameter, ResolvedParameter::Required(_)))
+        && args
+            .iter()
+            .all(|argument| matches!(argument, ResolvedCallArgument::Argument(_)))
+        && parameters.len() == args.len()
+        && parameters.iter().zip(args).all(|(parameter, argument)| {
+            ArgumentTypeCompatibility::new(parameter.ty(), argument.ty()).is_definite(db)
+        })
+}
+
 fn signature_accepts_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -968,6 +1050,28 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                         == argument_function.returns_promise(db)
             }
             _ => true,
+        }
+    }
+
+    /// Returns whether `argument_ty` is compatible with `parameter_ty` for a
+    /// reason this checker actually established, rather than merely not being
+    /// ruled out by [`Self::is_satisfied`].
+    ///
+    /// A parameter declaring a `void` return discards whatever the argument
+    /// returns, so any callable satisfies it. Every other relation is either
+    /// unsupported or only narrows on promise-ness, which says nothing about
+    /// the returned value.
+    fn is_definite(self, db: &'db dyn ModuleDb) -> bool {
+        if !self.may_match(db) {
+            return false;
+        }
+
+        match (
+            resolve_callable_function(db, self.parameter_ty),
+            resolve_callable_function(db, self.argument_ty),
+        ) {
+            (Some(parameter_function), Some(_)) => returns_void(db, parameter_function),
+            _ => false,
         }
     }
 
