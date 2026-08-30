@@ -2,9 +2,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{
-    AnyRuleStart, Rule as CssSemanticRule, RuleId, Specificity,
-};
+use biome_css_semantic::model::{AnyRuleStart, Rule as CssSemanticRule, RuleId, Specificity};
 use biome_css_syntax::{AnyCssRoot, AnyCssSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
@@ -120,15 +118,6 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Debug)]
-pub struct DescendingSelector {
-    high: (TextRange, Specificity),
-    low: (TextRange, Specificity),
-}
-
-// `None` represents the top-level comparison context, which has no enclosing at-rule.
-type SelectorContexts = FxHashMap<Option<RuleId>, FxHashMap<String, (TextRange, Specificity)>>;
-
 impl Rule for NoDescendingSpecificity {
     type Query = Semantic<AnyCssRoot>;
     type State = DescendingSelector;
@@ -196,6 +185,14 @@ impl Rule for NoDescendingSpecificity {
     }
 }
 
+#[derive(Debug)]
+pub struct DescendingSelector {
+    high: (TextRange, Specificity),
+    low: (TextRange, Specificity),
+}
+
+// `None` represents the top-level comparison context, which has no enclosing at-rule.
+type SelectorContexts = FxHashMap<Option<RuleId>, FxHashMap<String, (TextRange, Specificity)>>;
 /// find tail selector
 /// ```css
 /// a b:hover {
