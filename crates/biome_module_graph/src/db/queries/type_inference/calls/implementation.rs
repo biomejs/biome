@@ -153,13 +153,11 @@ fn select_call_signature<'db>(
         .collect();
     let (&selected, rest) = accepted.split_first()?;
 
-    // The first signature that is definitively compatible wins, matching
-    // TypeScript's declaration-order resolution.
-    if let Some(definite) = accepted
-        .iter()
-        .find(|function| signature_definitely_accepts_arguments(db, **function, args))
-    {
-        return Some(*definite);
+    // Declaration order decides the call, so only the earliest survivor may be
+    // taken on its own. Scanning ahead for a later definitive signature would
+    // skip an earlier one that is compatible too.
+    if signature_definitely_accepts_arguments(db, selected, args) {
+        return Some(selected);
     }
 
     // Otherwise every survivor merely was not ruled out: `is_satisfied()` only
