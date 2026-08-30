@@ -159,9 +159,6 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
         mut ctx: VisitorContext<Self::Language>,
     ) {
         match event {
-            WalkEvent::Enter(node) if is_declaration_list(node.kind()) => {
-                self.prior_props_in_lists.push(Vec::new());
-            }
             WalkEvent::Enter(node) => match node.kind() {
                 CssSyntaxKind::CSS_GENERIC_PROPERTY => {
                     if !is_declaration_in_list(node) {
@@ -171,13 +168,13 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                     let Some(prior_props) = self.prior_props_in_lists.last_mut() else {
                         return;
                     };
-                    let Some((property_node, prop)) = CssGenericProperty::cast_ref(node).and_then(
-                        |property| {
+                    let Some((property_node, prop)) =
+                        CssGenericProperty::cast_ref(node).and_then(|property| {
                             let property_node = property.name().ok()?;
                             let prop = property_node.identifier_text()?;
                             Some((property_node, prop))
-                        },
-                    ) else {
+                        })
+                    else {
                         return;
                     };
 
@@ -208,6 +205,10 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                         original: prop,
                         lowercase: prop_lowercase.into(),
                     });
+                }
+
+                kind if is_declaration_list(kind) => {
+                    self.prior_props_in_lists.push(Vec::new());
                 }
                 _ => {}
             },
