@@ -833,6 +833,7 @@ impl<'a> RuleFilter<'a> {
         self.match_group_name(G::NAME)
     }
 
+    #[inline]
     pub fn match_group_name(self, group_name: &str) -> bool {
         match self {
             RuleFilter::Group(group) => group == group_name,
@@ -848,6 +849,7 @@ impl<'a> RuleFilter<'a> {
         self.match_rule_name(<R::Group as RuleGroup>::NAME, R::METADATA.name)
     }
 
+    #[inline]
     pub fn match_rule_name(self, group_name: &str, rule_name: &str) -> bool {
         match self {
             RuleFilter::Group(group) => group == group_name,
@@ -919,41 +921,34 @@ impl<'analysis> AnalysisFilter<'analysis> {
 
     /// Return `true` if the group `G` matches this filter
     pub fn match_group<G: RuleGroup>(&self) -> bool {
-        self.match_group_name(<G::Category as GroupCategory>::CATEGORY, G::NAME)
+        self.match_category::<G::Category>() && self.match_group_name(G::NAME)
     }
 
-    fn match_group_name(&self, category: RuleCategory, group_name: &str) -> bool {
-        self.categories.contains(category)
-            && self.enabled_rules.is_none_or(|enabled_rules| {
-                enabled_rules
-                    .iter()
-                    .any(|filter| filter.match_group_name(group_name))
-            })
-            && !self.disabled_rules.iter().any(|filter| {
-                matches!(filter, RuleFilter::Group(_)) && filter.match_group_name(group_name)
-            })
+    fn match_group_name(&self, group_name: &'static str) -> bool {
+        self.enabled_rules.is_none_or(|enabled_rules| {
+            enabled_rules
+                .iter()
+                .any(|filter| filter.match_group_name(group_name))
+        }) && !self.disabled_rules.iter().any(|filter| {
+            matches!(filter, RuleFilter::Group(_)) && filter.match_group_name(group_name)
+        })
     }
 
     /// Return `true` if the rule `R` matches this filter
     pub fn match_rule<R: Rule>(&self) -> bool {
-        self.match_rule_name(
-            <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY,
-            <R::Group as RuleGroup>::NAME,
-            R::METADATA.name,
-        )
+        self.match_category::<<R::Group as RuleGroup>::Category>()
+            && self.match_rule_name(<R::Group as RuleGroup>::NAME, R::METADATA.name)
     }
 
-    fn match_rule_name(&self, category: RuleCategory, group_name: &str, rule_name: &str) -> bool {
-        self.categories.contains(category)
-            && self.enabled_rules.is_none_or(|enabled_rules| {
-                enabled_rules
-                    .iter()
-                    .any(|filter| filter.match_rule_name(group_name, rule_name))
-            })
-            && !self
-                .disabled_rules
+    fn match_rule_name(&self, group_name: &'static str, rule_name: &'static str) -> bool {
+        self.enabled_rules.is_none_or(|enabled_rules| {
+            enabled_rules
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name))
+        }) && !self
+            .disabled_rules
+            .iter()
+            .any(|filter| filter.match_rule_name(group_name, rule_name))
     }
 
     /// Return `true` if analyzer plugins match this filter.
