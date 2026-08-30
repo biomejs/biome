@@ -16,9 +16,12 @@ import { fileURLToPath } from "node:url";
 import { EventEmitter } from "node:events";
 import * as crypto from "node:crypto";
 
-// Bun runtime built-in modules with the `bun:` scheme must never be flagged.
-import { test } from "bun:test";
-import { Database } from "bun:sqlite";
+// Bun runtime built-in modules must never be flagged.
+import Bun from "bun";
 import { dlopen } from "bun:ffi";
+import { jsc } from "bun:jsc";
+import { Database } from "bun:sqlite";
+import { test } from "bun:test";
+import { wrap } from "bun:wrap";
 
 ```

@@ -174,11 +174,9 @@ pub fn is_builtin_node_module(name: &str) -> bool {
 /// Sorted array of Bun runtime built-in modules, exposed under the `bun` name
 /// and the `bun:` scheme.
 ///
-/// Like Node.js built-ins, these are import specifiers that never resolve to a
-/// file on disk. They are kept separate from [`BUILTIN_NODE_MODULES`] because
-/// Bun built-ins are not Node.js built-ins: lint rules that are specific to
-/// Node.js (such as `noNodejsModules` and `useNodejsImportProtocol`) must not
-/// treat them as Node modules.
+/// Kept separate from [`BUILTIN_NODE_MODULES`] so that Node.js-specific lint
+/// rules (`noNodejsModules`, `useNodejsImportProtocol`) do not treat them as
+/// Node modules.
 ///
 /// Source: <https://bun.com/reference>
 const BUILTIN_BUN_MODULES: &[&str] = &[
