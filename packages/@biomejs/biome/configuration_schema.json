@@ -7988,82 +7988,6 @@
 			},
 			"required": ["level", "options"]
 		},
-		"RuleDomain": {
-			"description": "Rule domains",
-			"oneOf": [
-				{
-					"description": "Astro framework rules",
-					"type": "string",
-					"const": "astro"
-				},
-				{
-					"description": "Drizzle ORM rules",
-					"type": "string",
-					"const": "drizzle"
-				},
-				{
-					"description": "React library rules",
-					"type": "string",
-					"const": "react"
-				},
-				{
-					"description": "React Native framework rules",
-					"type": "string",
-					"const": "reactNative"
-				},
-				{ "description": "Testing rules", "type": "string", "const": "test" },
-				{
-					"description": "Solid.js framework rules",
-					"type": "string",
-					"const": "solid"
-				},
-				{
-					"description": "Next.js framework rules",
-					"type": "string",
-					"const": "next"
-				},
-				{
-					"description": "Qwik framework rules",
-					"type": "string",
-					"const": "qwik"
-				},
-				{
-					"description": "Svelte framework rules",
-					"type": "string",
-					"const": "svelte"
-				},
-				{
-					"description": "Vue.js framework rules",
-					"type": "string",
-					"const": "vue"
-				},
-				{
-					"description": "For rules that require querying multiple files inside a project",
-					"type": "string",
-					"const": "project"
-				},
-				{
-					"description": "Tailwind CSS rules",
-					"type": "string",
-					"const": "tailwind"
-				},
-				{
-					"description": "Turborepo build system rules",
-					"type": "string",
-					"const": "turborepo"
-				},
-				{
-					"description": "Playwright testing framework rules",
-					"type": "string",
-					"const": "playwright"
-				},
-				{
-					"description": "Rules that require type inference",
-					"type": "string",
-					"const": "types"
-				}
-			]
-		},
 		"RuleDomainValue": {
 			"oneOf": [
 				{
@@ -8085,8 +8009,24 @@
 		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
+			"properties": {
+				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+				"next": { "$ref": "#/$defs/RuleDomainValue" },
+				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
+				"project": { "$ref": "#/$defs/RuleDomainValue" },
+				"qwik": { "$ref": "#/$defs/RuleDomainValue" },
+				"react": { "$ref": "#/$defs/RuleDomainValue" },
+				"reactNative": { "$ref": "#/$defs/RuleDomainValue" },
+				"solid": { "$ref": "#/$defs/RuleDomainValue" },
+				"svelte": { "$ref": "#/$defs/RuleDomainValue" },
+				"tailwind": { "$ref": "#/$defs/RuleDomainValue" },
+				"test": { "$ref": "#/$defs/RuleDomainValue" },
+				"turborepo": { "$ref": "#/$defs/RuleDomainValue" },
+				"types": { "$ref": "#/$defs/RuleDomainValue" },
+				"vue": { "$ref": "#/$defs/RuleDomainValue" }
+			},
+			"additionalProperties": false
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
