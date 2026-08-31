@@ -1,6 +1,6 @@
-use crate::logging::LogOptions;
+use crate::logging::{LogOptions, LoggingFilter};
 use crate::{
-    CliDiagnostic, CliSession, open_transport,
+    CliDiagnostic, CliSession, LoggingLevel, open_transport,
     service::{self, ensure_daemon, open_socket, run_daemon},
 };
 use biome_console::{ConsoleExt, markup};
@@ -13,15 +13,9 @@ use camino::Utf8PathBuf;
 use std::{env, fs, process};
 use tokio::io;
 use tokio::runtime::Runtime;
-use tracing::subscriber::Interest;
-use tracing::{Instrument, Metadata, debug_span, metadata::LevelFilter};
+use tracing::{Instrument, debug_span};
 use tracing_appender::rolling::Rotation;
-use tracing_subscriber::{
-    Layer,
-    layer::{Context, Filter},
-    prelude::*,
-    registry,
-};
+use tracing_subscriber::{Layer, prelude::*, registry};
 use tracing_tree::HierarchicalLayer;
 
 pub(crate) fn start(
@@ -74,9 +68,10 @@ pub(crate) fn run_server(
     watcher_options: WatcherOptions,
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
-    setup_tracing_subscriber(
+    setup_daemon_subscriber(
         log_options.log_path.clone(),
         log_options.log_prefix_name.clone(),
+        log_options.log_level,
     );
 
     let span = debug_span!(
@@ -211,7 +206,11 @@ pub(crate) fn read_most_recent_log_file(
 /// is written to log files rotated on a hourly basis (in
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
-fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String) {
+fn setup_daemon_subscriber(
+    log_path: Utf8PathBuf,
+    log_file_name_prefix: String,
+    level: LoggingLevel,
+) {
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
         .filename_prefix(log_file_name_prefix)
@@ -229,7 +228,7 @@ fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String)
                 .with_targets(true)
                 .with_ansi(false)
                 .with_writer(file_appender)
-                .with_filter(LoggingFilter),
+                .with_filter(LoggingFilter { level }),
         )
         .init();
 }
@@ -238,48 +237,6 @@ pub fn default_biome_log_path() -> Utf8PathBuf {
     match env::var_os("BIOME_LOG_PATH") {
         Some(directory) => Utf8PathBuf::from(directory.as_os_str().to_str().unwrap()),
         None => biome_fs::ensure_cache_dir().join("biome-logs"),
-    }
-}
-
-/// Tracing filter enabling:
-/// - All spans and events at level info or higher
-/// - All spans and events at level debug in crates whose name starts with `biome`
-struct LoggingFilter;
-
-/// Tracing filter used for spans emitted by `biome*` crates
-const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
-    LevelFilter::TRACE
-} else {
-    LevelFilter::DEBUG
-};
-
-impl LoggingFilter {
-    fn is_enabled(&self, meta: &Metadata<'_>) -> bool {
-        let filter = if meta.target().starts_with("biome") {
-            SELF_FILTER
-        } else {
-            return false;
-        };
-
-        meta.level() <= &filter
-    }
-}
-
-impl<S> Filter<S> for LoggingFilter {
-    fn enabled(&self, meta: &Metadata<'_>, _cx: &Context<'_, S>) -> bool {
-        self.is_enabled(meta)
-    }
-
-    fn callsite_enabled(&self, meta: &'static Metadata<'static>) -> Interest {
-        if self.is_enabled(meta) {
-            Interest::always()
-        } else {
-            Interest::never()
-        }
-    }
-
-    fn max_level_hint(&self) -> Option<LevelFilter> {
-        Some(SELF_FILTER)
     }
 }
 
