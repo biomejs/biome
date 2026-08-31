@@ -26,10 +26,10 @@ pub use to_html::document_to_html;
 pub(crate) type MarkdownLosslessTreeSink<'source> =
     LosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
 
-/// Parse markdown source code with default options.
-pub fn parse_markdown(source: &str) -> MarkdownParse {
+/// Parse markdown source code with the given options.
+pub fn parse_markdown(source: &str, options: MarkdownParserOptions) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_markdown_with_cache(source, &mut cache, MarkdownParserOptions::default())
+    parse_markdown_with_cache(source, &mut cache, options)
 }
 
 /// Parse markdown source code with custom options and a node cache.

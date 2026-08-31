@@ -476,6 +476,7 @@ pub mod use_shorthand_function_type;
 pub mod use_simple_number_keys;
 pub mod use_simplified_logic_expression;
 pub mod use_single_js_doc_asterisk;
+pub mod use_single_top_level_heading;
 pub mod use_single_var_declarator;
 pub mod use_solid_for_component;
 pub mod use_sorted_attributes;

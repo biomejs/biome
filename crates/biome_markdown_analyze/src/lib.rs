@@ -130,7 +130,7 @@ mod tests {
     use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_markdown_parser::parse_markdown;
+    use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
     use biome_rowan::TextRange;
     use std::slice;
 
@@ -148,7 +148,7 @@ mod tests {
 
         const SOURCE: &str = r#" "#;
 
-        let parsed = parse_markdown(SOURCE);
+        let parsed = parse_markdown(SOURCE, MarkdownParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
