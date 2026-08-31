@@ -26,6 +26,11 @@ function useShadowed() {
     console.log(Shadowed);
 }
 
+// A discarded identifier expression is not a use of the merged name
+function Discarded() {}
+namespace Discarded {}
+Discarded;
+
 ```
 
 # Diagnostics
@@ -125,6 +130,48 @@ invalidNamespaceUnused.ts:18:10 lint/correctness/noUnusedVariables  FIXABLE  ━
        18 │ + function·_useShadowed()·{
     19 19 │       const Shadowed = 42;
     20 20 │       console.log(Shadowed);
+  
+
+```
+
+```
+invalidNamespaceUnused.ts:24:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function Discarded is unused.
+  
+    23 │ // A discarded identifier expression is not a use of the merged name
+  > 24 │ function Discarded() {}
+       │          ^^^^^^^^^
+    25 │ namespace Discarded {}
+    26 │ Discarded;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Discarded with an underscore.
+  
+    22 22 │   
+    23 23 │   // A discarded identifier expression is not a use of the merged name
+    24    │ - function·Discarded()·{}
+       24 │ + function·_Discarded()·{}
+    25 25 │   namespace Discarded {}
+    26 26 │   Discarded;
+  
+
+```
+
+```
+invalidNamespaceUnused.ts:25:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Discarded is unused.
+  
+    23 │ // A discarded identifier expression is not a use of the merged name
+    24 │ function Discarded() {}
+  > 25 │ namespace Discarded {}
+       │           ^^^^^^^^^
+    26 │ Discarded;
+    27 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
 
 ```

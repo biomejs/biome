@@ -100,13 +100,20 @@ declare_lint_rule! {
     /// ```
     ///
     /// TypeScript namespaces that participate in declaration merging with an exported
-    /// or referenced value of the same name are not flagged.
+    /// or referenced value of the same name are not flagged. A value merged with an
+    /// exported or referenced namespace is also not flagged.
     /// ```ts
     /// const MyComponent = () => {};
     /// namespace MyComponent {
     ///     export type Props = { id: string };
     /// }
     /// export default MyComponent;
+    /// ```
+    ///
+    /// ```ts
+    /// function F() {}
+    /// namespace F {}
+    /// F();
     /// ```
     ///
     /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
@@ -475,9 +482,9 @@ fn is_implemented_overload_type_parameter(
         }
 
         signatures.iter().any(|id| {
-            model.binding_by_id(*id).is_some_and(|binding| {
-                binding.syntax().text_trimmed_range() == signature_range
-            })
+            model
+                .binding_by_id(*id)
+                .is_some_and(|binding| binding.syntax().text_trimmed_range() == signature_range)
         })
     })
 }
@@ -698,7 +705,7 @@ fn is_namespace_merged_with_used_value(
     Some(false)
 }
 
-fn is_value_merged_with_exported_namespace(
+fn is_value_merged_with_used_namespace(
     model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
 ) -> Option<bool> {
@@ -723,7 +730,30 @@ fn is_value_merged_with_exported_namespace(
         return Some(false);
     }
 
-    Some(model.is_exported(&namespace))
+    Some(namespace_has_live_use(model, &namespace))
+}
+
+/// Returns `true` if `namespace` is exported or referenced in a used expression.
+///
+/// Shared-name references bind to the later declaration, so this is also the
+/// use-check for a value merged with that namespace. Discarded identifier
+/// statements such as `F;` are not uses.
+fn namespace_has_live_use(model: &SemanticModel, namespace: &AnyJsIdentifierBinding) -> bool {
+    if model.is_exported(namespace) {
+        return true;
+    }
+
+    // `is_unused` on the namespace would recurse through the merge helpers.
+    namespace.all_references(model).any(|reference| {
+        let Some(ref_parent) = reference.syntax().parent() else {
+            return false;
+        };
+        if JsIdentifierExpression::can_cast(ref_parent.kind()) {
+            matches!(is_unused_expression(&ref_parent), Ok(false))
+        } else {
+            true
+        }
+    })
 }
 
 fn is_declaration_merged_with_used(
@@ -736,7 +766,7 @@ fn is_declaration_merged_with_used(
             is_namespace_merged_with_used_value(model, binding)
         }
         _ if is_namespace_merge_value_declaration(&decl) => {
-            is_value_merged_with_exported_namespace(model, binding)
+            is_value_merged_with_used_namespace(model, binding)
         }
         _ => None,
     }

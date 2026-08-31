@@ -19,3 +19,8 @@ function useShadowed() {
     const Shadowed = 42;
     console.log(Shadowed);
 }
+
+// A discarded identifier expression is not a use of the merged name
+function Discarded() {}
+namespace Discarded {}
+Discarded;
