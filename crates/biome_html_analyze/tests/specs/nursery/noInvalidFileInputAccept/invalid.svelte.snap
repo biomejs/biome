@@ -1,0 +1,64 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<input type="file" accept="image/jpg" />
+<input {...props} type="file" accept="image/jpg" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:28 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input type="file" accept="image/jpg" />
+      │                            ^^^^^^^^^
+    3 │ <input {...props} type="file" accept="image/jpg" />
+    4 │ 
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <input·type="file"·accept="image/jpg"·/>
+      2 │ + <input·type="file"·accept="image/jpeg"·/>
+    3 3 │   <input {...props} type="file" accept="image/jpg" />
+    4 4 │   
+  
+
+```
+
+```
+invalid.svelte:3:39 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input type="file" accept="image/jpg" />
+  > 3 │ <input {...props} type="file" accept="image/jpg" />
+      │                                       ^^^^^^^^^
+    4 │ 
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <input type="file" accept="image/jpg" />
+    3   │ - <input·{...props}·type="file"·accept="image/jpg"·/>
+      3 │ + <input·{...props}·type="file"·accept="image/jpeg"·/>
+    4 4 │   
+  
+
+```

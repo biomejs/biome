@@ -145,6 +145,7 @@ pub mod no_interactive_element_to_noninteractive_role;
 pub mod no_invalid_builtin_instantiation;
 pub mod no_invalid_constructor_super;
 pub mod no_invalid_direction_in_linear_gradient;
+pub mod no_invalid_file_input_accept;
 pub mod no_invalid_grid_areas;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_invalid_property_init_value;

@@ -4532,6 +4532,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidFileInputAcceptConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidFileInputAcceptOptions" }
+			]
+		},
+		"NoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidGridAreasConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6836,6 +6846,13 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidFileInputAccept": {
+					"description": "Disallow invalid accept values on file inputs.\nSee https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidFileInputAcceptConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9436,6 +9453,16 @@
 				"options": {
 					"$ref": "#/$defs/NoInvalidDirectionInLinearGradientOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidFileInputAcceptOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
