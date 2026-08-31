@@ -10,6 +10,10 @@ import { createContext } from "react";
 const theme = createContext("");
 const themeContext = createContext("");
 
+class Provider {
+	theme = createContext("");
+}
+
 ```
 
 # Diagnostics
@@ -43,6 +47,27 @@ invalid.jsx:5:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
   > 5 │ const themeContext = createContext("");
       │       ^^^^^^^^^^^^
     6 │ 
+    7 │ class Provider {
+  
+  i React contexts have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename it to a PascalCase name ending with Context, such as ThemeContext.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React context is not following the context naming convention.
+  
+     7 │ class Provider {
+   > 8 │ 	theme = createContext("");
+       │ 	^^^^^
+     9 │ }
+    10 │ 
   
   i React contexts have to follow a naming convention to make them more recognizable across the codebase.
   

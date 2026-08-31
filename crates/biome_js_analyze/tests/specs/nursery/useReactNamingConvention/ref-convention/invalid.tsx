@@ -7,3 +7,7 @@ refs.node = useRef(null);
 const wrapped = (useRef(null));
 const wrapped2 = useRef(null) as Ref;
 const wrapped3 = useRef(null) satisfies Ref;
+
+class Field {
+	node = useRef(null);
+}

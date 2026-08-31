@@ -11,6 +11,14 @@ const id = useId();
 const userId = useId();
 obj.nested.myId = useId();
 
+// Class property following the convention.
+class Field {
+	inputId = useId();
+}
+
+// The assignment target is a computed member, so no name can be resolved.
+foo[bar] = useId();
+
 // Not a call to the React API.
 const foo = useId;
 

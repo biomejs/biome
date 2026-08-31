@@ -20,7 +20,7 @@ pub(crate) trait ReactApiCall {
 
 /// A convenient data structure that returns the three arguments of the [React.createElement] call
 ///
-///[React.createElement]:https://react.dev/reference/react/createElement
+/// [React.createElement]: https://react.dev/reference/react/createElement
 pub struct ReactCreateElementCall {
     /// The type of the react element
     pub(crate) element_type: AnyJsCallArgument,

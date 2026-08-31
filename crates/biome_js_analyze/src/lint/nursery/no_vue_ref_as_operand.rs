@@ -12,7 +12,7 @@ use biome_js_syntax::{
     JsConditionalExpression, JsIdentifierBinding, JsIdentifierExpression, JsInitializerClause,
     JsLogicalExpression, JsMethodObjectMember, JsStaticMemberAssignment, JsStaticMemberExpression,
     JsSyntaxKind, JsTemplateElement, JsTemplateExpression, JsVariableDeclaration,
-    JsVariableDeclarator, is_transparent_expression_wrapper,
+    JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, declare_node_union};
 use biome_rule_options::no_vue_ref_as_operand::NoVueRefAsOperandOptions;
@@ -375,7 +375,9 @@ fn track_to_refs_references(
             continue;
         }
 
-        let object_expression = outermost_transparent_expression(&expression);
+        let Some(object_expression) = expression.outer_expression() else {
+            continue;
+        };
         let Some(member) = object_expression
             .syntax()
             .parent()
@@ -405,12 +407,14 @@ fn track_to_refs_references(
     }
 }
 
-fn identifier_initializer_binding(expression: &JsIdentifierExpression) -> Option<JsIdentifierBinding> {
+fn identifier_initializer_binding(
+    expression: &JsIdentifierExpression,
+) -> Option<JsIdentifierBinding> {
     identifier_binding(&initializer_pattern(&expression.clone().into())?)
 }
 
 fn initializer_pattern(expression: &AnyJsExpression) -> Option<AnyJsBindingPattern> {
-    let expression = outermost_transparent_expression(expression);
+    let expression = expression.outer_expression()?;
     let initializer = expression
         .syntax()
         .parent()
@@ -421,30 +425,10 @@ fn initializer_pattern(expression: &AnyJsExpression) -> Option<AnyJsBindingPatte
     initializer.parent::<JsVariableDeclarator>()?.id().ok()
 }
 
-fn outermost_transparent_expression(expression: &AnyJsExpression) -> AnyJsExpression {
-    let innermost = expression.clone();
-    let mut expression = expression.clone();
-    while let Some(parent) = expression
-        .syntax()
-        .parent()
-        .and_then(AnyJsExpression::cast)
-    {
-        if !is_transparent_expression_wrapper(parent.syntax()) {
-            break;
-        }
-        if !parent
-            .inner_expression()
-            .is_some_and(|inner| inner == innermost)
-        {
-            break;
-        }
-        expression = parent;
-    }
-    expression
-}
-
 fn is_plain_assignment_right(expression: &AnyJsExpression) -> bool {
-    let expression = outermost_transparent_expression(expression);
+    let Some(expression) = expression.outer_expression() else {
+        return false;
+    };
     let Some(assignment) = expression
         .syntax()
         .parent()
@@ -464,7 +448,7 @@ fn check_ref_expression(
     if is_plain_assignment_right(expression) {
         return None;
     }
-    let operand = outermost_transparent_expression(expression);
+    let operand = expression.outer_expression()?;
     let parent = operand.syntax().parent()?;
     match parent.kind() {
         JsSyntaxKind::JS_IF_STATEMENT

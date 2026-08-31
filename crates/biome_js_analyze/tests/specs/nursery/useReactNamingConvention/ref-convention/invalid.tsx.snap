@@ -14,6 +14,10 @@ const wrapped = (useRef(null));
 const wrapped2 = useRef(null) as Ref;
 const wrapped3 = useRef(null) satisfies Ref;
 
+class Field {
+	node = useRef(null);
+}
+
 ```
 
 # Diagnostics
@@ -131,6 +135,27 @@ invalid.tsx:9:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
    > 9 │ const wrapped3 = useRef(null) satisfies Ref;
        │       ^^^^^^^^
     10 │ 
+    11 │ class Field {
+  
+  i React refs have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to ref or a name ending with Ref, such as myRef.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:12:2 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React ref is not following the ref naming convention.
+  
+    11 │ class Field {
+  > 12 │ 	node = useRef(null);
+       │ 	^^^^
+    13 │ }
+    14 │ 
   
   i React refs have to follow a naming convention to make them more recognizable across the codebase.
   

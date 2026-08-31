@@ -9,6 +9,11 @@ import { useId } from "react";
 
 const myRef = useId();
 const randomString = useId();
+const fooIIIId = useId();
+
+class Field {
+	value = useId();
+}
 
 ```
 
@@ -23,7 +28,7 @@ invalid.jsx:4:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
   > 4 │ const myRef = useId();
       │       ^^^^^
     5 │ const randomString = useId();
-    6 │ 
+    6 │ const fooIIIId = useId();
   
   i React ids have to follow a naming convention to make them more recognizable across the codebase.
   
@@ -42,7 +47,49 @@ invalid.jsx:5:7 lint/nursery/useReactNamingConvention ━━━━━━━━�
     4 │ const myRef = useId();
   > 5 │ const randomString = useId();
       │       ^^^^^^^^^^^^
-    6 │ 
+    6 │ const fooIIIId = useId();
+    7 │ 
+  
+  i React ids have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to id or a name ending with Id, such as myId.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:7 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React id is not following the id naming convention.
+  
+    4 │ const myRef = useId();
+    5 │ const randomString = useId();
+  > 6 │ const fooIIIId = useId();
+      │       ^^^^^^^^
+    7 │ 
+    8 │ class Field {
+  
+  i React ids have to follow a naming convention to make them more recognizable across the codebase.
+  
+  i Rename the value to id or a name ending with Id, such as myId.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:2 lint/nursery/useReactNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React id is not following the id naming convention.
+  
+     8 │ class Field {
+   > 9 │ 	value = useId();
+       │ 	^^^^^
+    10 │ }
+    11 │ 
   
   i React ids have to follow a naming convention to make them more recognizable across the codebase.
   
