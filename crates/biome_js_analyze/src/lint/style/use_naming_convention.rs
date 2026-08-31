@@ -1249,7 +1249,7 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) =>
                 Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
             AnyJsBindingDeclaration::TsModuleDeclaration(_) =>
-                Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
+                Some(Selector::with_scope(Kind::Namespace, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) =>
                 Some(Selector::with_scope(Kind::TypeAlias, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsClassDeclaration(class) => {
