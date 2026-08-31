@@ -2018,6 +2018,56 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 /// those nested constructs with a stack of [`JsContext`] frames: opening one
 /// pushes a frame, its terminator pops the frame again, and the scan stops at
 /// the first stop delimiter found while no frame is open.
+const CODE_BYTES: u8 = 1 << 0;
+const TEMPLATE_BYTES: u8 = 1 << 1;
+const JSX_TAG_BYTES: u8 = 1 << 2;
+const TYPE_ARGUMENT_BYTES: u8 = 1 << 3;
+const JSX_CHILDREN_BYTES: u8 = 1 << 4;
+
+/// For each byte, the [`JsContext`]s whose [`JsScanner::run`] arm does more
+/// than advance past it.
+static INTERESTING_BYTES: [u8; 256] = {
+    let mut table = [0u8; 256];
+    let mut index = 0;
+    while index < 256 {
+        let byte = index as u8;
+        let mut mask = 0u8;
+        if matches!(
+            byte,
+            b'"' | b'\'' | b'`' | b'/' | b'{' | b'[' | b'}' | b']' | b'-' | b'<'
+        ) {
+            mask |= CODE_BYTES;
+        }
+        if matches!(byte, b'\\' | b'`' | b'$') {
+            mask |= TEMPLATE_BYTES;
+        }
+        if matches!(byte, b'"' | b'\'' | b'`' | b'{' | b'=' | b'>' | b',' | b'<')
+            || byte.is_ascii_whitespace()
+        {
+            mask |= JSX_TAG_BYTES;
+        }
+        if matches!(byte, b'"' | b'\'' | b'`' | b'<' | b'=' | b'>') {
+            mask |= TYPE_ARGUMENT_BYTES;
+        }
+        if matches!(byte, b'{' | b'<') {
+            mask |= JSX_CHILDREN_BYTES;
+        }
+        table[index] = mask;
+        index += 1;
+    }
+    table
+};
+
+const fn interest_mask(context: Option<JsContext>) -> u8 {
+    match context {
+        None | Some(JsContext::Code(_)) => CODE_BYTES,
+        Some(JsContext::Template) => TEMPLATE_BYTES,
+        Some(JsContext::JsxTag { .. }) => JSX_TAG_BYTES,
+        Some(JsContext::TypeArguments) => TYPE_ARGUMENT_BYTES,
+        Some(JsContext::JsxChildren) => JSX_CHILDREN_BYTES,
+    }
+}
+
 struct JsScanner<'src> {
     source: &'src [u8],
     /// The offset of the byte being classified.
@@ -2166,9 +2216,26 @@ impl<'src> JsScanner<'src> {
         }
     }
 
+    /// Advances past every byte the current context handles with a plain
+    /// `advance(1)`, so the per-byte cost stays one table load and one add.
+    fn skip_uninteresting(&mut self, mask: u8) {
+        while let Some(&byte) = self.source.get(self.position) {
+            if INTERESTING_BYTES[byte as usize] & mask != 0 {
+                break;
+            }
+            self.position += 1;
+        }
+    }
+
     fn run(&mut self, stop: JsScanStop) -> usize {
         while let Some(byte) = self.current_byte() {
-            match self.stack.last().copied() {
+            let context = self.stack.last().copied();
+            let mask = interest_mask(context);
+            if INTERESTING_BYTES[byte as usize] & mask == 0 {
+                self.skip_uninteresting(mask);
+                continue;
+            }
+            match context {
                 None | Some(JsContext::Code(_)) => match lookup_byte(byte) {
                     QOT => self.skip_string(byte),
                     TPL => {
