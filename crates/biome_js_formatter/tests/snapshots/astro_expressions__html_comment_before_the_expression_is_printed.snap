@@ -1,0 +1,8 @@
+---
+source: crates/biome_js_formatter/tests/astro_expressions.rs
+expression: "format_astro_expression(\"<!-- lead --> <a></a>\")"
+---
+(
+	<!-- lead -->
+	<a></a>
+)
