@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::jsx::tag::element::AnyJsxTagWithChildren;
-use crate::utils::jsx::{is_implicit_fragment_child, is_jsx_suppressed};
+use crate::utils::jsx::is_jsx_suppressed;
 use biome_formatter::write;
 use biome_js_syntax::JsxFragment;
 
@@ -15,44 +15,5 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
 
     fn is_suppressed(&self, node: &JsxFragment, f: &JsFormatter) -> bool {
         is_jsx_suppressed(&node.clone().into(), f.comments())
-    }
-
-    fn fmt_leading_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        // A fragment nested in an implicit one is a child of it, so it carries
-        // real comments.
-        if is_implicit_fragment_child(node.syntax()) {
-            return format_leading_comments(node.syntax()).fmt(f);
-        }
-        debug_assert!(
-            !f.comments().has_leading_comments(node.syntax()),
-            "JsxFragment can not have comments."
-        );
-        Ok(())
-    }
-
-    fn fmt_dangling_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        // A fragment nested in an implicit one is a child of it, so it carries
-        // real comments.
-        if is_implicit_fragment_child(node.syntax()) {
-            return format_dangling_comments(node.syntax()).fmt(f);
-        }
-        debug_assert!(
-            !f.comments().has_dangling_comments(node.syntax()),
-            "JsxFragment can not have comments."
-        );
-        Ok(())
-    }
-
-    fn fmt_trailing_comments(&self, node: &JsxFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        // A fragment nested in an implicit one is a child of it, so it carries
-        // real comments.
-        if is_implicit_fragment_child(node.syntax()) {
-            return format_trailing_comments(node.syntax()).fmt(f);
-        }
-        debug_assert!(
-            !f.comments().has_trailing_comments(node.syntax()),
-            "JsxFragment can not have comments."
-        );
-        Ok(())
     }
 }
