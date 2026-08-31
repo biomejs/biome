@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, AnyJsMemberExpression,
-    JsAssignmentExpression, JsCallExpression, JsInitializerClause, JsPropertyClassMember,
-    JsSyntaxToken, JsVariableDeclarator,
+    JsAssignmentExpression, JsAssignmentOperator, JsCallExpression, JsInitializerClause,
+    JsPropertyClassMember, JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_react_naming_convention::UseReactNamingConventionOptions;
@@ -114,6 +114,9 @@ impl Rule for UseReactNamingConvention {
         let name = if let Some(initializer) = JsInitializerClause::cast_ref(&parent) {
             resolve_initializer_target_name(&initializer)
         } else if let Some(assignment) = JsAssignmentExpression::cast_ref(&parent) {
+            if assignment.operator().ok() != Some(JsAssignmentOperator::Assign) {
+                return None;
+            }
             resolve_assignment_target_name(&assignment)
         } else {
             None
