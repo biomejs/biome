@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamespaceDeclarationMerging4.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+function F() {}
+namespace F {}
+F();
+
+const G = () => {};
+namespace G {
+    export type Props = { id: string };
+}
+G();
+
+```

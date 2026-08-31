@@ -698,7 +698,7 @@ fn is_namespace_merged_with_used_value(
     Some(false)
 }
 
-fn is_value_merged_with_exported_namespace(
+fn is_value_merged_with_used_namespace(
     model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
 ) -> Option<bool> {
@@ -723,7 +723,7 @@ fn is_value_merged_with_exported_namespace(
         return Some(false);
     }
 
-    Some(model.is_exported(&namespace))
+    Some(model.is_exported(&namespace) || !is_unused_by_references(model, &namespace))
 }
 
 fn is_declaration_merged_with_used(
@@ -736,7 +736,7 @@ fn is_declaration_merged_with_used(
             is_namespace_merged_with_used_value(model, binding)
         }
         _ if is_namespace_merge_value_declaration(&decl) => {
-            is_value_merged_with_exported_namespace(model, binding)
+            is_value_merged_with_used_namespace(model, binding)
         }
         _ => None,
     }
@@ -811,11 +811,24 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
         return false;
     }
 
+    if !is_unused_by_references(model, binding) {
+        return false;
+    }
+    !is_declaration_merged_with_used(model, binding).unwrap_or(false)
+}
+
+/// Returns `true` when no reference to `binding` counts as a use.
+///
+/// Declaration merging is deliberately not considered here. The merge checks ask
+/// whether the other half of a merge is referenced, and routing that through
+/// [`is_unused`] would make the two halves call each other forever when both are
+/// unused.
+fn is_unused_by_references(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
     let Some(declaration) = binding.declaration() else {
         return false;
     };
     let declaration = declaration.syntax();
-    let unused_by_refs = binding
+    binding
         .all_references(model)
         .filter_map(|reference| {
             let ref_parent = reference.syntax().parent()?;
@@ -879,11 +892,7 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
             }
             // Always false when the ref is outside the declaration
             false
-        });
-    if !unused_by_refs {
-        return false;
-    }
-    !is_declaration_merged_with_used(model, binding).unwrap_or(false)
+        })
 }
 
 /// Returns `true` if `expr` is unused.
