@@ -10,6 +10,11 @@ info: svelte/comments/render.svelte
 {@render sum(1, 2)}
 <!-- 2 -->
 
+<div>
+	{@render children?.()}
+	<!-- comment -->
+</div>
+
 ```
 
 
@@ -19,5 +24,10 @@ info: svelte/comments/render.svelte
 <!-- 1 -->
 {@render sum(1, 2)}
 <!-- 2 -->
+
+<div>
+	{@render children?.()}
+	<!-- comment -->
+</div>
 
 ```

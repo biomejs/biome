@@ -1002,14 +1002,14 @@ fn generate_for_domains(
             #domain_as_string => #domain_filters.clone()
         });
         match_rule_arms.push(quote! {
-            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule::<R>())
+            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule_name(group_name, rule_name))
         });
     }
 
     let stream = quote! {
         use std::sync::LazyLock;
         use crate::analyzer::DomainSelector;
-        use biome_analyze::{Rule, RuleFilter};
+        use biome_analyze::{Rule, RuleFilter, RuleGroup};
 
         #( #lazy_locks )*
 
@@ -1028,6 +1028,10 @@ fn generate_for_domains(
                 where
                     R: Rule,
             {
+                self.match_rule_name(<R::Group as RuleGroup>::NAME, R::METADATA.name)
+            }
+
+            pub(crate) fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
                 match self.0 {
                     #( #match_rule_arms ),*,
                     _ => false,

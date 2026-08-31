@@ -4,10 +4,7 @@ mod tests;
 mod scan_cursor;
 mod source_cursor;
 
-use self::scan_cursor::CssScanCursor;
-use self::scan_cursor::{
-    PendingUrlRawValueScan, StringBodyScan, StringBodyScanStop, UrlBodyStartScan,
-};
+use self::scan_cursor::{CssScanCursor, StringBodyScan, StringBodyScanStop};
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
@@ -40,6 +37,17 @@ enum TokenFallback {
     Delimiter,
 }
 
+/// Byte range for a raw URL literal discovered by URL-body classification.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct UrlRawValueScan {
+    /// Absolute byte position where the raw value starts.
+    pub(crate) start: usize,
+    /// Absolute byte position immediately before the closing `)` or EOF.
+    pub(crate) end: usize,
+    /// Whether the scan stopped on a closing `)` instead of EOF.
+    pub(crate) terminated: bool,
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
     /// Default context: no particular rules are applied to the lexer logic.
@@ -53,13 +61,23 @@ pub enum CssLexContext {
     /// Distinct '-' from identifiers and '+' from numbers.
     PseudoNthSelector,
 
-    /// Applied when lexing CSS url function.
-    /// Chooses whether the first body token should stay on regular tokenization
-    /// or become a raw URL literal.
-    UrlBody { scss_exclusive_syntax_allowed: bool },
-    /// Applied when lexing CSS url function raw bodies after classification.
-    /// Greedily consume tokens in the URL function until encountering `)`.
-    UrlRawValue,
+    /// Emits regular trivia until the precomputed raw URL body starts, then
+    /// commits the body without rescanning it.
+    ///
+    /// ```css
+    /// url(images/logo.png)
+    /// ```
+    UrlRawValue(UrlRawValueScan),
+    /// Emits regular trivia until the segmented SCSS URL body starts, then
+    /// lexes its text and interpolation boundaries.
+    ///
+    /// ```scss
+    /// url(images/#{$name}.png)
+    /// ```
+    ScssUrlValue {
+        /// Absolute byte position where segmented URL content starts.
+        start: usize,
+    },
 
     /// Applied when lexing CSS color literals.
     /// Starting from #
@@ -168,7 +186,6 @@ pub(crate) struct CssLexer<'src> {
     options: CssParserOptions,
     source_type: CssFileSource,
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
-    pending_url_raw_value_scan: Option<PendingUrlRawValueScan>,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -211,10 +228,10 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 }
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
-                CssLexContext::UrlBody {
-                    scss_exclusive_syntax_allowed,
-                } => self.consume_url_body_token(current, scss_exclusive_syntax_allowed),
-                CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
+                CssLexContext::UrlRawValue(scan) => self.consume_url_raw_value_token(current, scan),
+                CssLexContext::ScssUrlValue { start } => {
+                    self.consume_scss_url_value_token(current, start)
+                }
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
@@ -278,7 +295,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
         self.pending_scss_string_start = None;
-        self.pending_url_raw_value_scan = None;
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
@@ -344,7 +360,6 @@ impl<'src> CssLexer<'src> {
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
-            pending_url_raw_value_scan: None,
         }
     }
 
@@ -653,49 +668,9 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
-        self.scan_cursor()
-            .scan_url_raw_value()
-            .and_then(|scan| self.consume_pending_url_raw_value(scan))
-            .unwrap_or_else(|| self.consume_token(current))
-    }
-
-    fn consume_url_body_token(
-        &mut self,
-        current: u8,
-        scss_exclusive_syntax_allowed: bool,
-    ) -> CssSyntaxKind {
-        if let Some(scan) = self.take_pending_url_raw_value_scan_at_current_position() {
-            return self
-                .consume_pending_url_raw_value(scan)
-                .unwrap_or_else(|| self.consume_token(current));
-        }
-
-        match self.scan_url_body_start(self.position(), scss_exclusive_syntax_allowed) {
-            UrlBodyStartScan::InterpolatedFunction | UrlBodyStartScan::Other => {
-                self.consume_token(current)
-            }
-            UrlBodyStartScan::RawValue(scan) => {
-                if scan.start == self.position() {
-                    self.consume_pending_url_raw_value(scan)
-                        .unwrap_or_else(|| self.consume_token(current))
-                } else {
-                    // Leading trivia is still emitted as normal trivia tokens.
-                    // Cache the raw-value scan so the next non-trivia token can
-                    // commit the already-classified URL body in one step.
-                    self.pending_url_raw_value_scan = Some(scan);
-                    self.consume_token(current)
-                }
-            }
-        }
-    }
-
-    fn consume_pending_url_raw_value(
-        &mut self,
-        scan: PendingUrlRawValueScan,
-    ) -> Option<CssSyntaxKind> {
+    fn consume_url_raw_value_token(&mut self, current: u8, scan: UrlRawValueScan) -> CssSyntaxKind {
         if scan.start != self.position() {
-            return None;
+            return self.consume_token(current);
         }
 
         self.set_position(scan.end);
@@ -708,7 +683,28 @@ impl<'src> CssLexer<'src> {
             self.diagnostics.push(diagnostic);
         }
 
-        Some(CSS_URL_VALUE_RAW_LITERAL)
+        CSS_URL_VALUE_RAW_LITERAL
+    }
+
+    /// Emits `images/`, `#`, or `.png` from `url(images/#{$name}.png)`.
+    ///
+    /// Text stops before `#{` or `)`, and `#` leaves the cursor at `{`.
+    fn consume_scss_url_value_token(&mut self, current: u8, start: usize) -> CssSyntaxKind {
+        if self.position() < start {
+            return self.consume_token(current);
+        }
+
+        if self.is_at_scss_interpolation() {
+            return self.consume_byte(T![#]);
+        }
+
+        let end = self.scan_cursor().scan_scss_url_value_chunk();
+        if end > self.position() {
+            self.set_position(end);
+            SCSS_URL_CONTENT_LITERAL
+        } else {
+            self.consume_token(current)
+        }
     }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1740,26 +1736,6 @@ impl<'src> CssLexer<'src> {
             )
     }
 
-    fn take_pending_url_raw_value_scan_at_current_position(
-        &mut self,
-    ) -> Option<PendingUrlRawValueScan> {
-        let scan = self.pending_url_raw_value_scan?;
-
-        if scan.start == self.position() {
-            self.pending_url_raw_value_scan = None;
-            Some(scan)
-        } else {
-            if self.position() > scan.start {
-                // A fallback tokenization path already moved past the cached
-                // raw-literal start, so the speculative range is no longer
-                // aligned with the real lexer position.
-                self.pending_url_raw_value_scan = None;
-            }
-
-            None
-        }
-    }
-
     fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b'+' => self.consume_byte(T![+]),
@@ -1768,13 +1744,13 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn scan_url_body_start(
+    pub(crate) fn url_body_lex_context(
         &self,
         start: usize,
         scss_exclusive_syntax_allowed: bool,
-    ) -> UrlBodyStartScan {
+    ) -> CssLexContext {
         self.scan_cursor_at(start)
-            .scan_url_body_start(scss_exclusive_syntax_allowed)
+            .url_body_lex_context(scss_exclusive_syntax_allowed)
     }
 }
 

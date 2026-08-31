@@ -191,24 +191,42 @@ impl Rule for NoFloatingPromises {
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
         let array_classification = ctx.classify_expression_as_array_of_promises(&expression);
-        if array_classification == TypeInferenceClassification::Match {
-            return Some(NoFloatingPromisesState::ArrayOfPromises);
+        let mut inferred_ty = None;
+        match array_classification {
+            TypeInferenceClassification::Match => {
+                return Some(NoFloatingPromisesState::ArrayOfPromises);
+            }
+            TypeInferenceClassification::NoMatch => {}
+            TypeInferenceClassification::Indeterminate => {
+                let ty = ctx.type_of_expression(&expression)?;
+                if ty.is_array_of_promise() == Some(true) {
+                    return Some(NoFloatingPromisesState::ArrayOfPromises);
+                }
+                inferred_ty = Some(ty);
+            }
+        }
+
+        // Expressions that are awaited can't produce a floating Promise. Arrays of
+        // Promises remain unhandled and are classified above.
+        if matches!(
+            expression.clone().omit_parentheses(),
+            AnyJsExpression::JsAwaitExpression(_)
+        ) {
+            return None;
         }
 
         let promise_classification = ctx.classify_expression_as_promise(&expression);
-        if promise_classification != TypeInferenceClassification::Match {
-            if array_classification == TypeInferenceClassification::NoMatch
-                && promise_classification == TypeInferenceClassification::NoMatch
-            {
-                return None;
-            }
-
-            let ty = ctx.type_of_expression(&expression)?;
-            if ty.is_array_of_promise() == Some(true) {
-                return Some(NoFloatingPromisesState::ArrayOfPromises);
-            }
-            if ty.is_promise_instance() != Some(true) {
-                return None;
+        match promise_classification {
+            TypeInferenceClassification::Match => {}
+            TypeInferenceClassification::NoMatch => return None,
+            TypeInferenceClassification::Indeterminate => {
+                let ty = match inferred_ty {
+                    Some(ty) => ty,
+                    None => ctx.type_of_expression(&expression)?,
+                };
+                if ty.is_promise_instance() != Some(true) {
+                    return None;
+                }
             }
         }
 

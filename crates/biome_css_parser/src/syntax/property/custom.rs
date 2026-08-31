@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
     is_at_scss_interpolated_string, is_at_scss_interpolation, parse_scss_interpolated_string,
-    parse_scss_interpolation_inner_expression, parse_scss_interpolation_prefix,
+    parse_scss_interpolation_with_context,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::value::function::is_nth_at_source_tight_l_paren;
@@ -182,7 +182,7 @@ fn parse_custom_property_component(
     let context = CssLexContext::CustomPropertyValue(comment_mode);
 
     if is_at_scss_interpolation(p) {
-        parse_custom_property_interpolation(p, context)
+        parse_scss_interpolation_with_context(p, context)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p, context)
     } else if p.at(CSS_STRING_LITERAL) {
@@ -263,21 +263,6 @@ fn parse_custom_property_block(
     CustomPropertyComponentList::block(comment_mode).parse_list(p);
     p.expect_with_context(close, context);
     Present(block.complete(p, kind))
-}
-
-/// Parses `#{$gap}` and resumes raw-value lexing after `}`.
-fn parse_custom_property_interpolation(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
-    if !is_at_scss_interpolation(p) {
-        return Absent;
-    }
-
-    let Some(interpolation) = parse_scss_interpolation_prefix(p) else {
-        return Absent;
-    };
-
-    parse_scss_interpolation_inner_expression(p);
-    p.expect_with_context(T!['}'], context);
-    Present(interpolation.complete(p, SCSS_INTERPOLATION))
 }
 
 /// Parses a plain string such as `"$gap"` as raw value content.

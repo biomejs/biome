@@ -12,6 +12,7 @@ impl FormatRule<AnyCssUrlValue> for FormatAnyCssUrlValue {
             AnyCssUrlValue::CssUrlValueRaw(node) => node.format().fmt(f),
             AnyCssUrlValue::ScssExpression(node) => node.format().fmt(f),
             AnyCssUrlValue::ScssInterpolatedString(node) => node.format().fmt(f),
+            AnyCssUrlValue::ScssInterpolatedUrlValue(node) => node.format().fmt(f),
         }
     }
 }
