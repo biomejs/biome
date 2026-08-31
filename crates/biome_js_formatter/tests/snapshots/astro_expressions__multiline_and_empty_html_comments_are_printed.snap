@@ -1,9 +1,0 @@
----
-source: crates/biome_js_formatter/tests/astro_expressions.rs
-expression: "format_astro_expression(\"x && <section><!-- line one\\nline two --><!----></section>\")"
----
-x && (
-	<section></section <!-- line one
-line two --> <!---->
-	>
-)

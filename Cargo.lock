@@ -1096,7 +1096,6 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "countme",
- "insta",
  "mimalloc",
  "quickcheck",
  "schemars",

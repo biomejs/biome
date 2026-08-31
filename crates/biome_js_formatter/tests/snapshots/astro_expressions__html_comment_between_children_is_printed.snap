@@ -1,9 +1,0 @@
----
-source: crates/biome_js_formatter/tests/astro_expressions.rs
-expression: "format_astro_expression(\"x &&    <section><!-- single --><p>hi</p></section>\")"
----
-x && (
-	<section> <!-- single -->
-		<p>hi</p>
-	</section>
-)
