@@ -3,8 +3,8 @@ use crate::prelude::*;
 use biome_formatter::{FormatOptions, QuoteStyle, comments::CommentStyle, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsxChildList, JsxExpressionChild,
-    JsxTagExpression, JsxText, TextLen,
+    JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,
+    JsxText, TextLen,
 };
 use biome_rowan::{Direction, SyntaxResult, TextRange, TextSize, TokenText};
 use std::iter::{FusedIterator, Peekable};
