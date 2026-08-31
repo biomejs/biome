@@ -38,6 +38,7 @@ pub(crate) struct HtmlLexer<'src> {
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct HtmlLexerOptions {
     pub(crate) framework: HtmlFramework,
+    pub(crate) text_expression: Option<TextExpressionKind>,
 }
 
 enum IdentifierContext {
@@ -453,7 +454,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
-    fn consume_token(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
+    fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -465,20 +466,7 @@ impl<'src> HtmlLexer<'src> {
                 self.consume_frontmatter_edge()
             }
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
-            BEO => {
-                if double_text_expressions && self.at_opening_double_text_expression() {
-                    self.consume_l_double_text_expression()
-                } else {
-                    self.consume_byte(T!['{'])
-                }
-            }
-            BEC => {
-                if self.at_closing_double_text_expression() {
-                    self.consume_r_double_text_expression()
-                } else {
-                    self.consume_byte(T!['}'])
-                }
-            }
+            BEO | BEC => self.consume_html_text(current),
             LSS => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -503,7 +491,7 @@ impl<'src> HtmlLexer<'src> {
             }
             IDT => self
                 .consume_language_identifier(current)
-                .unwrap_or_else(|| self.consume_html_text(current, double_text_expressions)),
+                .unwrap_or_else(|| self.consume_html_text(current)),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -511,7 +499,7 @@ impl<'src> HtmlLexer<'src> {
                     self.unicode_bom_length = bom_size;
                     return bom;
                 }
-                self.consume_html_text(current, double_text_expressions)
+                self.consume_html_text(current)
             }
         }
     }
@@ -1599,6 +1587,8 @@ impl<'src> HtmlLexer<'src> {
     /// We consider a "block" of text to be a sequence of words, with whitespace
     /// separating them. A block ends when there is 2 newlines, or when a special
     /// character (eg. `<`) is found.
+    /// When text expressions are disabled, a curly brace extends the current block
+    /// to the next `<`, even across blank lines.
     ///
     /// Spaces between words are treated the same as newlines between words in HTML,
     /// and we don't end a block when we encounter a newline. However, we do not
@@ -1611,9 +1601,10 @@ impl<'src> HtmlLexer<'src> {
     ///
     /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
-    fn consume_html_text(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
+    fn consume_html_text(&mut self, current: u8) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
         let mut seen_newlines = 0;
+        let mut contains_curly = false;
 
         let mut closing_expression = None;
         let mut was_escaped = false;
@@ -1621,14 +1612,16 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            BEO => {
-                if double_text_expressions && self.at_opening_double_text_expression() {
+            BEO if self.options.text_expression.is_some() => {
+                if self.options.text_expression == Some(TextExpressionKind::Double)
+                    && self.at_opening_double_text_expression()
+                {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
-            BEC => {
+            BEC if self.options.text_expression.is_some() => {
                 if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
@@ -1640,6 +1633,12 @@ impl<'src> HtmlLexer<'src> {
                     let dispatched = lookup_byte(current);
 
                     match dispatched {
+                        BEO | BEC if self.options.text_expression.is_none() => {
+                            contains_curly = true;
+                            whitespace_started = None;
+                            seen_newlines = 0;
+                            self.advance(1);
+                        }
                         BEO => {
                             if was_escaped {
                                 self.advance(1);
@@ -1675,7 +1674,7 @@ impl<'src> HtmlLexer<'src> {
                             }
                             self.after_newline = true;
                             seen_newlines += 1;
-                            if seen_newlines > 1 {
+                            if seen_newlines > 1 && !contains_curly {
                                 break;
                             }
                             self.advance(1);
@@ -1738,9 +1737,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         } else {
             match self.current_byte() {
                 Some(current) => match context {
-                    HtmlLexContext::Regular { framework } => {
-                        self.consume_token(current, framework != HtmlFramework::Svelte)
-                    }
+                    HtmlLexContext::Regular { .. } => self.consume_token(current),
                     HtmlLexContext::InsideTag { framework } => {
                         let mode = TagNameMode::for_inside_tag(framework);
                         match framework {
@@ -1874,9 +1871,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
-                HtmlReLexContext::HtmlText { framework } => {
-                    self.consume_html_text(current, framework != HtmlFramework::Svelte)
-                }
+                HtmlReLexContext::HtmlText { .. } => self.consume_html_text(current),
                 // Re-lexing is only used mid-tag (e.g. to split `:`/`.`), never at the
                 // tag-name position, so the classification mode is irrelevant here.
                 HtmlReLexContext::InsideTag => {

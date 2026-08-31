@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use super::{HtmlLexer, HtmlLexerOptions, TextSize};
-use crate::token_source::{HtmlFramework, HtmlLexContext};
+use crate::token_source::{HtmlFramework, HtmlLexContext, TextExpressionKind};
 use biome_html_syntax::HtmlSyntaxKind::{self, *};
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
@@ -56,7 +56,15 @@ macro_rules! assert_lex {
             HtmlLexContext::InsideTagWithDirectives { svelte: true } => HtmlFramework::Svelte,
             _ => HtmlFramework::Plain,
         };
-        let mut lexer = HtmlLexer::from_str($src).with_options(HtmlLexerOptions { framework });
+        let text_expression = match framework {
+            HtmlFramework::Plain => None,
+            HtmlFramework::Vue | HtmlFramework::Angular => Some(TextExpressionKind::Double),
+            HtmlFramework::Svelte | HtmlFramework::Astro => Some(TextExpressionKind::Single),
+        };
+        let mut lexer = HtmlLexer::from_str($src).with_options(HtmlLexerOptions {
+            framework,
+            text_expression,
+        });
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -423,9 +431,15 @@ fn svelte_openings_are_not_lexed_outside_svelte() {
 }
 
 #[test]
-fn double_curly_depends_on_regular_context() {
+fn curly_braces_depend_on_text_expression_options() {
     assert_lex! {
         HtmlLexContext::Regular { framework: HtmlFramework::Plain },
+        "{{",
+        HTML_LITERAL: 2,
+    }
+
+    assert_lex! {
+        HtmlLexContext::Regular { framework: HtmlFramework::Vue },
         "{{",
         L_DOUBLE_CURLY: 2,
     }
