@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
+use crate::utils::jsx::is_meaningful_jsx_child;
 use biome_diagnostics_categories::category;
 use biome_formatter::comments::is_alignable_comment;
 use biome_formatter::{
@@ -12,11 +13,11 @@ use biome_formatter::{
 use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
 use biome_js_syntax::{
     AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
-    JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
-    JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement,
-    JsLanguage, JsNamedImportSpecifiers, JsParameters, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, JsWhileStatement, JsxElement, JsxFragment, JsxText, TsFunctionType,
-    TsInterfaceDeclaration, TsMappedType,
+    JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsExpressionTemplateRoot,
+    JsFinallyClause, JsFormalParameter, JsFunctionBody, JsIdentifierBinding,
+    JsIdentifierExpression, JsIfStatement, JsLanguage, JsNamedImportSpecifiers, JsParameters,
+    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, JsxChildList, JsxElement,
+    JsxFragment, JsxText, TsFunctionType, TsInterfaceDeclaration, TsMappedType,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
@@ -112,7 +113,7 @@ impl CommentStyle for JsCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_global_suppression(comment)
-                .or_else(handle_jsx_closing_tag_comment)
+                .or_else(handle_jsx_child_comment)
                 .or_else(handle_typecast_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
@@ -135,7 +136,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_import_named_clause_comments)
                 .or_else(handle_array_expression),
             CommentTextPosition::OwnLine => handle_global_suppression(comment)
-                .or_else(handle_jsx_closing_tag_comment)
+                .or_else(handle_jsx_child_comment)
                 .or_else(handle_member_expression_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
@@ -154,7 +155,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_import_export_specifier_comment)
                 .or_else(handle_class_method_comment)
                 .or_else(handle_import_named_clause_comments),
-            CommentTextPosition::SameLine => handle_jsx_closing_tag_comment(comment)
+            CommentTextPosition::SameLine => handle_jsx_child_comment(comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_for_comment)
@@ -170,56 +171,75 @@ impl CommentStyle for JsCommentStyle {
     }
 }
 
-/// An Astro `<!-- -->` between the last child and the closing tag leads the
-/// closing tag; as a trailing line suffix it would flush inside `</name >`.
-/// One attached to whitespace-only [`JsxText`] must move too, because the
-/// child list elides such text without ever formatting it.
-fn handle_jsx_closing_tag_comment(
-    comment: DecoratedComment<JsLanguage>,
-) -> CommentPlacement<JsLanguage> {
-    if let Some(following) = comment.following_node()
-        && matches!(
-            following.kind(),
-            JsSyntaxKind::JSX_CLOSING_ELEMENT | JsSyntaxKind::JSX_CLOSING_FRAGMENT
-        )
+/// An Astro `<!-- -->` in child position leads the next meaningful child, or the closing
+/// tag when nothing meaningful follows it. It dangles on a tag whose children are all
+/// meaningless, the only placement such a tag prints.
+///
+/// Placement is deliberately independent of the whitespace around the comment:
+/// trailing placement flushes a line suffix inside `</name >`, and whitespace-only
+/// [`JsxText`] is elided by the child list without its comments ever being formatted,
+/// so a whitespace-sensitive rule makes the first and second passes disagree.
+fn handle_jsx_child_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    let enclosing = comment.enclosing_node();
+    let is_child_position = matches!(
+        enclosing.kind(),
+        JsSyntaxKind::JSX_ELEMENT
+            | JsSyntaxKind::JSX_FRAGMENT
+            | JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT
+            | JsSyntaxKind::JSX_TEXT
+    );
+    if !is_child_position {
+        return CommentPlacement::Default(comment);
+    }
+
+    if let Some(children) = jsx_children_of(enclosing)
+        && !children
+            .into_iter()
+            .any(|child| is_meaningful_jsx_child(&child))
     {
-        return CommentPlacement::leading(following.clone(), comment);
+        return CommentPlacement::dangling(enclosing.clone(), comment);
     }
 
-    let is_elided_text = |node: &JsSyntaxNode| {
-        JsxText::cast_ref(node)
-            .and_then(|text| text.value_token().ok())
-            .is_some_and(|token| token.text_trimmed().trim().is_empty())
-    };
-
-    let is_stranded = comment.preceding_node().is_some_and(is_elided_text)
-        || comment.following_node().is_some_and(is_elided_text)
-        || is_elided_text(comment.enclosing_node());
-    if is_stranded {
-        let mut target = comment.following_node().cloned();
-        while let Some(node) = &target
-            && is_elided_text(node)
-        {
-            target = node.next_sibling();
-        }
-        if let Some(node) = target {
-            return CommentPlacement::leading(node, comment);
-        }
-        let closing = comment.enclosing_node().ancestors().find_map(|node| {
-            if let Some(element) = JsxElement::cast_ref(&node) {
-                element.closing_element().ok().map(AstNode::into_syntax)
-            } else if let Some(fragment) = JsxFragment::cast_ref(&node) {
-                fragment.closing_fragment().ok().map(AstNode::into_syntax)
-            } else {
-                None
-            }
-        });
-        if let Some(closing) = closing {
-            return CommentPlacement::leading(closing, comment);
-        }
+    let mut following = comment.following_node().cloned();
+    while let Some(node) = &following
+        && is_whitespace_only_jsx_text(node)
+    {
+        following = node.next_sibling();
     }
 
-    CommentPlacement::Default(comment)
+    if let Some(following) = following {
+        return CommentPlacement::leading(following, comment);
+    }
+
+    let closing = enclosing.ancestors().find_map(|node| {
+        if let Some(element) = JsxElement::cast_ref(&node) {
+            element.closing_element().ok().map(AstNode::into_syntax)
+        } else if let Some(fragment) = JsxFragment::cast_ref(&node) {
+            fragment.closing_fragment().ok().map(AstNode::into_syntax)
+        } else {
+            None
+        }
+    });
+
+    match closing {
+        Some(closing) => CommentPlacement::leading(closing, comment),
+        None => CommentPlacement::Default(comment),
+    }
+}
+
+/// A [`JsxText`] the child list turns into a separator, never formatting the node itself.
+fn is_whitespace_only_jsx_text(node: &JsSyntaxNode) -> bool {
+    JsxText::cast_ref(node)
+        .and_then(|text| text.value_token().ok())
+        .is_some_and(|token| token.text_trimmed().trim().is_empty())
+}
+
+fn jsx_children_of(node: &JsSyntaxNode) -> Option<JsxChildList> {
+    match node.kind() {
+        JsSyntaxKind::JSX_ELEMENT => JsxElement::cast_ref(node).map(|it| it.children()),
+        JsSyntaxKind::JSX_FRAGMENT => JsxFragment::cast_ref(node).map(|it| it.children()),
+        _ => None,
+    }
 }
 
 /// Force end of line type cast comments to remain leading comments of the next node, if any
@@ -674,6 +694,15 @@ fn handle_method_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacem
 /// Handle a all comments document.
 /// See `blank.js`
 fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    // The space a leading block comment takes to separate itself from what follows has
+    // nothing to separate in a comment-only body, and lands inside the host's braces.
+    if !comment.kind().is_line()
+        && let Some(root) = JsExpressionTemplateRoot::cast_ref(comment.enclosing_node())
+        && root.expression().is_none()
+    {
+        return CommentPlacement::dangling(root.into_syntax(), comment);
+    }
+
     if let Some(root) = AnyJsRoot::cast_ref(comment.enclosing_node()) {
         let is_blank = match &root {
             AnyJsRoot::JsExpressionSnippet(_) => false,
