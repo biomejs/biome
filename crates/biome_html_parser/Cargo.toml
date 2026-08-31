@@ -26,6 +26,7 @@ biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_string_case   = { workspace = true }
 biome_unicode_table = { workspace = true }
+smallvec            = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]

@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<input type="file" accept={allowedTypes} />
+<input type={fileType} accept="image/jpg" />
+<input type="file" accept="image/jpg" accept={allowedTypes} />
+<input type="file" accept="image/jpg" {...props} />
+
+```

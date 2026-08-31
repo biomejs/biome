@@ -210,30 +210,28 @@ fn has_valid_yield_expression(stmt: &AnyJsStatement) -> Option<bool> {
     let mut stmt_list = get_statement_list(stmt)?.into_iter();
 
     loop {
-        match stmt_list.next() {
-            Some(first_stmt) => {
-                if get_yield_expression(&first_stmt).is_some()
-                    || stmt_list.any(|stmt| get_yield_expression(&stmt).is_some())
-                {
-                    return Some(true);
-                } else {
-                    // We need to examine `while`, `do...while`, and `for` statements more closely,
-                    // as there are cases where a yield expression is correctly returned even with nested loops.
-                    match first_stmt {
-                        AnyJsStatement::JsWhileStatement(stmt) => {
-                            stmt_list = get_statement_list(&stmt.body().ok()?)?.into_iter();
-                        }
-                        AnyJsStatement::JsDoWhileStatement(stmt) => {
-                            stmt_list = get_statement_list(&stmt.body().ok()?)?.into_iter();
-                        }
-                        AnyJsStatement::JsForStatement(stmt) => {
-                            stmt_list = get_statement_list(&stmt.body().ok()?)?.into_iter();
-                        }
-                        _ => return None,
+        {
+            let first_stmt = stmt_list.next()?;
+            if get_yield_expression(&first_stmt).is_some()
+                || stmt_list.any(|stmt| get_yield_expression(&stmt).is_some())
+            {
+                return Some(true);
+            } else {
+                // We need to examine `while`, `do...while`, and `for` statements more closely,
+                // as there are cases where a yield expression is correctly returned even with nested loops.
+                match first_stmt {
+                    AnyJsStatement::JsWhileStatement(stmt) => {
+                        stmt_list = get_statement_list(&stmt.body().ok()?)?.into_iter();
                     }
+                    AnyJsStatement::JsDoWhileStatement(stmt) => {
+                        stmt_list = get_statement_list(&stmt.body().ok()?)?.into_iter();
+                    }
+                    AnyJsStatement::JsForStatement(stmt) => {
+                        stmt_list = get_statement_list(&stmt.body().ok()?)?.into_iter();
+                    }
+                    _ => return None,
                 }
             }
-            None => return None,
         }
     }
 }

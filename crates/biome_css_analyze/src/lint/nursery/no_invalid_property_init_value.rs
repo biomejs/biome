@@ -164,5 +164,5 @@ fn find_initial_value(node: &CssPropertyAtRule) -> Option<CssGenericComponentVal
                 .as_css_generic_component_value_list()
                 .cloned()
         })
-        .last()
+        .next_back()
 }

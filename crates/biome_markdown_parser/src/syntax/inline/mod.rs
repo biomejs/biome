@@ -76,7 +76,7 @@ fn parse_inline_item_list_until_impl(
         // Per CommonMark, link text can span lines, but blank lines end the link.
         // Check for blank line (NEWLINE followed by NEWLINE or EOF after optional whitespace)
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break; // Blank line ends link text
             }
             // Single newline inside link text - consume and continue
@@ -222,7 +222,7 @@ fn parse_any_inline_no_links(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     if p.at(BANG) && p.nth_at(1, L_BRACK) {
-        return links::parse_inline_image(p);
+        return links::parse_image_or_reference(p);
     }
 
     parse_any_inline(p)
@@ -268,7 +268,7 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         }
     } else if p.at(BANG) && p.nth_at(1, L_BRACK) {
         // Try image, fall back to literal text if parsing fails
-        let result = links::parse_inline_image(p);
+        let result = links::parse_image_or_reference(p);
         if result.is_absent() {
             super::parse_textual(p)
         } else {

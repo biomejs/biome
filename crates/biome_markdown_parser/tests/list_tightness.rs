@@ -1,9 +1,9 @@
-use biome_markdown_parser::parse_markdown;
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 
 #[test]
 fn tracks_list_tightness() {
     let source = "- a\n- b\n\npara\n\n- a\n\n  b\n";
-    let parse = parse_markdown(source);
+    let parse = parse_markdown(source, MarkdownParserOptions::default());
     let tightness = parse.list_tightness();
 
     assert_eq!(tightness.len(), 2);

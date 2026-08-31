@@ -1,4 +1,5 @@
 use crate::runner::create_bogus_node_in_tree_diagnostic;
+use crate::util::checkout_repository;
 use crate::{
     check_file_encoding,
     runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite},
@@ -8,7 +9,6 @@ use biome_languages::{JsFileSource, javascript::LanguageVariant};
 use biome_rowan::SyntaxKind;
 use std::io;
 use std::path::Path;
-use std::process::Command;
 use xtask_glue::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/typescript";
@@ -93,23 +93,11 @@ impl TestSuite for BabelTypescriptTestSuite {
     }
 
     fn checkout(&self) -> io::Result<()> {
-        let base_path = project_root().join("xtask/coverage/babel");
-        let mut command = Command::new("git");
-        command
-            .arg("clone")
-            .arg("https://github.com/babel/babel.git")
-            .arg("--depth")
-            .arg("1")
-            .arg(base_path.display().to_string());
-        command.output()?;
-        let mut command = Command::new("git");
-        command
-            .arg("reset")
-            .arg("--hard")
-            .arg("33a6be4e56b149647c15fd6c0157c1413456851d");
-        command.output()?;
-
-        Ok(())
+        checkout_repository(
+            "https://github.com/babel/babel.git",
+            "33a6be4e56b149647c15fd6c0157c1413456851d",
+            &project_root().join("xtask/coverage/babel"),
+        )
     }
 
     fn is_test(&self, path: &std::path::Path) -> bool {

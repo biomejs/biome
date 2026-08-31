@@ -1,0 +1,25 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<input type="file" accept="image/png">
+<input type="file" accept=".png">
+<input type="file" accept="image/png, .png">
+<input type="file" accept=".tar.gz">
+<input type="file" accept="audio/*, video/*, image/*">
+<input type="FILE" accept="image/png">
+<input type=file accept=image/png>
+<input accept="image/png">
+<input type="text" accept="image/png">
+<file-input type="file" accept="image/jpg"></file-input>
+<input type=file accept="image&#x2F;png">
+<input type="f&#105;le" accept="image/jpg">
+<input type="text" type="file" accept="image/jpg">
+<input type="file" accept="image/jpeg" accept="image/jpg">
+<input type="file" accept="image/jpg" accept="image/jpeg">
+<input type="file" type="text" accept="image/jpg">
+
+```

@@ -74,8 +74,9 @@ use biome_js_semantic::{
 };
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsTemplateExpression,
+    AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeName, AnyJsxAttributeValue,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsTemplateExpression, JsxAttribute,
+    JsxAttributeList, jsx_ext::AnyJsxElement,
 };
 #[cfg(feature = "type_inference")]
 use biome_js_syntax::{
@@ -760,12 +761,20 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
 
     let js_root: AnyJsRoot = any_parse.tree();
 
-    let nodes = js_root
+    let candidates = js_root
         .syntax()
         .descendants()
         .filter_map(JsTemplateExpression::cast)
-        .filter_map(|expr| {
-            let candidate = build_js_template_candidate(&expr)?;
+        .filter_map(|expr| build_js_template_candidate(&expr))
+        .chain(
+            js_root
+                .syntax()
+                .descendants()
+                .filter_map(JsxAttribute::cast)
+                .filter_map(|attribute| build_jsx_style_candidate(&attribute)),
+        );
+    let nodes = candidates
+        .filter_map(|candidate| {
             let embed_match = EmbedDetectorsRegistry::detect_match(&candidate, file_source)?;
             let (snippet, content, doc_source) =
                 parse_js_matched_embed(&candidate, &embed_match, node_cache, path, settings)?;
@@ -774,6 +783,36 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         .collect();
 
     ParseEmbedResult { nodes }
+}
+
+#[cfg(feature = "js_embeds")]
+fn build_jsx_style_candidate(attribute: &JsxAttribute) -> Option<EmbedCandidate> {
+    let AnyJsxAttributeName::JsxName(name) = attribute.name().ok()? else {
+        return None;
+    };
+    if name.value_token().ok()?.text_trimmed() != "style" {
+        return None;
+    }
+    let element = attribute
+        .parent::<JsxAttributeList>()?
+        .parent::<AnyJsxElement>()?;
+    if !element.is_element() {
+        return None;
+    }
+    let AnyJsxAttributeValue::JsxString(value) = attribute.initializer()?.value().ok()? else {
+        return None;
+    };
+    let value_token = value.value_token().ok()?;
+    let text = value.inner_string_text().ok()?;
+    let content_range = text.source_range(value_token.text_range());
+    Some(EmbedCandidate::JsxStyleAttribute {
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text,
+        },
+    })
 }
 
 /// Build an `EmbedCandidate::TaggedTemplate` from a `JsTemplateExpression`.
@@ -887,9 +926,13 @@ fn parse_js_matched_embed(
 
     match embed_match.guest {
         GuestLanguage::Css => {
-            let file_source = DocumentFileSource::Css(
-                CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
-            );
+            let embedding_kind = if matches!(candidate, EmbedCandidate::JsxStyleAttribute { .. }) {
+                CssEmbeddingKind::HtmlStyleAttribute
+            } else {
+                CssEmbeddingKind::Styled
+            };
+            let file_source =
+                DocumentFileSource::Css(CssFileSource::css().with_embedding_kind(embedding_kind));
             let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
             let parse = parse_css_with_offset_and_cache(
                 content.text.text(),
@@ -1187,28 +1230,18 @@ fn js_analyzer_services_for_fix<'a>(
     params: &FixAllParams,
     source_type: JsFileSource,
 ) -> JsAnalyzerServices<'a> {
-    #[cfg(feature = "module_graph")]
-    {
-        js_analyzer_services(
-            root,
-            &params.workspace_db,
-            params.module_db.clone(),
-            params.project_layout.clone(),
-            source_type,
-        )
-        .with_semantic_model(semantic_model)
-    }
-
-    #[cfg(not(feature = "module_graph"))]
-    js_analyzer_services(
+    let services = js_analyzer_services(
         root,
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
         params.module_db.clone(),
         params.project_layout.clone(),
         source_type,
-    )
-    .with_semantic_model(semantic_model)
+    );
+    #[cfg(feature = "html_embeds")]
+    let services = services.with_embedded_data(params.embedded_data.clone());
+
+    services.with_semantic_model(semantic_model)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -1267,6 +1300,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         params.project_layout.clone(),
         files_source,
     );
+    #[cfg(feature = "html_embeds")]
+    let services = services.with_embedded_data(params.embedded_data.clone());
     let services = services.with_semantic_model(&semantic_model);
 
     let (_, analyze_diagnostics) = analyze(

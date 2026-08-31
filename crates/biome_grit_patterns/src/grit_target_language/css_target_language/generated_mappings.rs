@@ -390,6 +390,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .next()
         }
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
+        "ScssInterpolatedUrlValue" => lang::ScssInterpolatedUrlValue::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
         "ScssKeyframesName" => lang::ScssKeyframesName::KIND_SET.iter().next(),
@@ -427,6 +428,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "ScssUnaryExpression" => lang::ScssUnaryExpression::KIND_SET.iter().next(),
+        "ScssUrlText" => lang::ScssUrlText::KIND_SET.iter().next(),
         "ScssUseAllNamespace" => lang::ScssUseAllNamespace::KIND_SET.iter().next(),
         "ScssUseAsClause" => lang::ScssUseAsClause::KIND_SET.iter().next(),
         "ScssUseAtRule" => lang::ScssUseAtRule::KIND_SET.iter().next(),
@@ -701,6 +703,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssInterpolatedPseudoElementSelectorArguments" => &[("selectors", 0)],
         "ScssInterpolatedPseudoElementValueArguments" => &[("values", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
+        "ScssInterpolatedUrlValue" => &[("parts", 0)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],
         "ScssKeyframesName" => &[("name", 0)],

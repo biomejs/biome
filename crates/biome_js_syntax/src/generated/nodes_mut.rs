@@ -3,6 +3,14 @@
 use crate::{JsSyntaxToken as SyntaxToken, generated::nodes::*};
 use biome_rowan::AstNode;
 use std::iter::once;
+impl AstroImplicitFragment {
+    pub fn with_children(self, element: JsxChildList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl JsAccessorModifier {
     pub fn with_modifier_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -1183,11 +1191,11 @@ impl JsExpressionStatement {
     }
 }
 impl JsExpressionTemplateRoot {
-    pub fn with_expression(self, element: AnyJsExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_expression(self, element: Option<AnyJsExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_eof_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -3097,7 +3105,7 @@ impl JsSuperExpression {
     }
 }
 impl JsSvelteDeclarationRoot {
-    pub fn with_declaration(self, element: JsVariableDeclaration) -> Self {
+    pub fn with_declaration(self, element: AnyJsSvelteDeclaration) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3769,10 +3777,10 @@ impl JsxSelfClosingElement {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_slash_token(self, element: SyntaxToken) -> Self {
+    pub fn with_slash_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
         )
     }
     pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {

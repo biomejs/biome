@@ -3096,6 +3096,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroSetHtmlDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroSetHtmlDirectiveOptions" }
+			]
+		},
+		"NoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4522,6 +4532,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidFileInputAcceptConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidFileInputAcceptOptions" }
+			]
+		},
+		"NoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidGridAreasConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5774,6 +5794,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredCustomPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredCustomPropertiesOptions" }
+			]
+		},
+		"NoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6707,6 +6737,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroSetHtmlDirective": {
+					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroSetHtmlDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBaseToString": {
 					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
@@ -6809,6 +6846,13 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidFileInputAccept": {
+					"description": "Disallow invalid accept values on file inputs.\nSee https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidFileInputAcceptConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7012,6 +7056,13 @@
 					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUndeclaredCustomProperties": {
+					"description": "Reports custom properties used with var() that have no visible declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7954,82 +8005,6 @@
 			},
 			"required": ["level", "options"]
 		},
-		"RuleDomain": {
-			"description": "Rule domains",
-			"oneOf": [
-				{
-					"description": "Astro framework rules",
-					"type": "string",
-					"const": "astro"
-				},
-				{
-					"description": "Drizzle ORM rules",
-					"type": "string",
-					"const": "drizzle"
-				},
-				{
-					"description": "React library rules",
-					"type": "string",
-					"const": "react"
-				},
-				{
-					"description": "React Native framework rules",
-					"type": "string",
-					"const": "reactNative"
-				},
-				{ "description": "Testing rules", "type": "string", "const": "test" },
-				{
-					"description": "Solid.js framework rules",
-					"type": "string",
-					"const": "solid"
-				},
-				{
-					"description": "Next.js framework rules",
-					"type": "string",
-					"const": "next"
-				},
-				{
-					"description": "Qwik framework rules",
-					"type": "string",
-					"const": "qwik"
-				},
-				{
-					"description": "Svelte framework rules",
-					"type": "string",
-					"const": "svelte"
-				},
-				{
-					"description": "Vue.js framework rules",
-					"type": "string",
-					"const": "vue"
-				},
-				{
-					"description": "For rules that require querying multiple files inside a project",
-					"type": "string",
-					"const": "project"
-				},
-				{
-					"description": "Tailwind CSS rules",
-					"type": "string",
-					"const": "tailwind"
-				},
-				{
-					"description": "Turborepo build system rules",
-					"type": "string",
-					"const": "turborepo"
-				},
-				{
-					"description": "Playwright testing framework rules",
-					"type": "string",
-					"const": "playwright"
-				},
-				{
-					"description": "Rules that require type inference",
-					"type": "string",
-					"const": "types"
-				}
-			]
-		},
 		"RuleDomainValue": {
 			"oneOf": [
 				{
@@ -8051,8 +8026,24 @@
 		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
+			"properties": {
+				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+				"next": { "$ref": "#/$defs/RuleDomainValue" },
+				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
+				"project": { "$ref": "#/$defs/RuleDomainValue" },
+				"qwik": { "$ref": "#/$defs/RuleDomainValue" },
+				"react": { "$ref": "#/$defs/RuleDomainValue" },
+				"reactNative": { "$ref": "#/$defs/RuleDomainValue" },
+				"solid": { "$ref": "#/$defs/RuleDomainValue" },
+				"svelte": { "$ref": "#/$defs/RuleDomainValue" },
+				"tailwind": { "$ref": "#/$defs/RuleDomainValue" },
+				"test": { "$ref": "#/$defs/RuleDomainValue" },
+				"turborepo": { "$ref": "#/$defs/RuleDomainValue" },
+				"types": { "$ref": "#/$defs/RuleDomainValue" },
+				"vue": { "$ref": "#/$defs/RuleDomainValue" }
+			},
+			"additionalProperties": false
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
@@ -8179,6 +8170,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroSetHtmlDirectiveOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9397,6 +9397,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidFileInputAcceptOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoInvalidGridAreasOptions": {
 			"type": "object",
 			"properties": {
@@ -10466,6 +10476,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredCustomPropertiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14010,7 +14029,7 @@
 					]
 				},
 				"useVueHyphenatedAttributes": {
-					"description": "Enforce hyphenated (kebab-case) attribute names in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
+					"description": "Disallow uppercase letters in Vue template attribute names.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueHyphenatedAttributesConfiguration" },
 						{ "type": "null" }
@@ -17157,14 +17176,14 @@
 			"type": "object",
 			"properties": {
 				"ignore": {
-					"description": "List of attribute names to ignore when checking for hyphenated attributes.",
+					"description": "List of attribute names to ignore when checking for uppercase letters.",
 					"type": ["array", "null"],
 					"default": null,
 					"items": { "type": "string" },
 					"uniqueItems": true
 				},
 				"ignoreTags": {
-					"description": "List of HTML tags to ignore when checking for hyphenated attributes.",
+					"description": "List of HTML tags whose attributes should not be checked for uppercase letters.",
 					"type": ["array", "null"],
 					"default": null,
 					"items": { "type": "string" },

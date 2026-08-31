@@ -58,12 +58,15 @@ YamlRoot {
 ## Diagnostics
 
 ```
-missing_closing_double_quoted.yaml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing_closing_double_quoted.yaml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing `"` quote
   
-    1 │ "double quoted
+  > 1 │ "double quoted
+      │ ^^^^^^^^^^^^^^
   > 2 │ 
       │ 
+  
+  i Add a closing `"` quote.
   
 ```

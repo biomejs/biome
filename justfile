@@ -282,19 +282,43 @@ update-commonmark-spec version:
 	./scripts/update-commonmark-spec.sh {{version}}
 
 # Tests a lint rule. The name of the rule needs to be camel case
-test-lintrule name:
+test-lintrule rulename:
+  just test-js-lintrule {{rulename}}
+  just test-json-lintrule {{rulename}}
+  just test-css-lintrule {{rulename}}
+  just test-graphql-lintrule {{rulename}}
+  just test-html-lintrule {{rulename}}
+  just test-markdown-lintrule {{rulename}}
+
+# Test a js lint rule. The name of the rule needs to be camel case
+test-js-lintrule rulename:
   just _touch crates/biome_js_analyze/tests/spec_tests.rs
+  cargo test -p biome_js_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a json lint rule. The name of the rule needs to be camel case
+test-json-lintrule rulename:
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
+  cargo test -p biome_json_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a css lint rule. The name of the rule needs to be camel case
+test-css-lintrule rulename:
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
+  cargo test -p biome_css_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a graphql lint rule. The name of the rule needs to be camel case
+test-graphql-lintrule rulename:
   just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
+  cargo test -p biome_graphql_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a html lint rule. The name of the rule needs to be camel case
+test-html-lintrule rulename:
   just _touch crates/biome_html_analyze/tests/spec_tests.rs
+  cargo test -p biome_html_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a markdown lint rule. The name of the rule needs to be camel case
+test-markdown-lintrule rulename:
   just _touch crates/biome_markdown_analyze/tests/spec_tests.rs
-  cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_html_analyze -- {{snakecase(name)}} --show-output
-  cargo test -p biome_markdown_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_markdown_analyze -- {{snakecase(rulename)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

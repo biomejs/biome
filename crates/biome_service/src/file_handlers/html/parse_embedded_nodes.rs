@@ -6,7 +6,7 @@ use crate::embed::html::{
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssLanguage, TextSize};
+use biome_css_syntax::{AnyCssRoot, CssFunction, CssLanguage, CssString, TextSize};
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
@@ -63,7 +63,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 match text_expression {
                     HtmlTextExpressions::Single => {
                         if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-                            && let Ok(expression) = text_expression.expression()
+                            && let Some(expression) = text_expression.expression()
                             && let Some(candidate) = build_text_expression_candidate(&expression)
                         {
                             ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
@@ -94,7 +94,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
                 // Text expressions via registry
                 if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-                    && let Ok(expression) = text_expression.expression()
+                    && let Some(expression) = text_expression.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
@@ -171,15 +171,33 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
             // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
+            let mut css_v_bind_candidates = vec![];
             for element in elements {
                 if let Some(candidate) = build_html_candidate(&element)
                     && let Some(parsed) = ctx.detect_and_parse(&candidate, &doc_file_source, None)
                 {
-                    if let Some(js_fs) = parsed.js_file_source {
+                    let ParsedEmbed {
+                        node: (parse, content, file_source),
+                        js_file_source,
+                    } = parsed;
+                    if let Some(js_fs) = js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
                     }
-                    nodes.push(parsed.node);
+                    if file_source.to_css_file_source().is_some() {
+                        css_v_bind_candidates
+                            .extend(build_vue_css_v_bind_candidates(&parse, &content));
+                    }
+                    nodes.push((parse, content, file_source));
                 }
+            }
+
+            for candidate in css_v_bind_candidates {
+                ctx.parse_and_push(
+                    &candidate,
+                    &doc_file_source,
+                    Some(embedded_file_source),
+                    &mut nodes,
+                );
             }
 
             // Pass 2: text expressions via registry using merged embedded_file_source
@@ -297,7 +315,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
             // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
-                if let Ok(expression) = snippet.expression()
+                if let Some(expression) = snippet.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(
@@ -813,6 +831,11 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
         return None;
     }
 
+    // Astro emits the children of `is:raw` verbatim, so they are not a guest language.
+    if element.has_astro_is_raw() {
+        return None;
+    }
+
     let tag_name = element.tag_name()?;
 
     let attributes: Vec<_> = element
@@ -871,6 +894,64 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
             // The parser needs text and offset to be consistent.
             text: value_token.token_text(),
         },
+    })
+}
+
+fn build_vue_css_v_bind_candidates(
+    parse: &AnyParse,
+    style_content: &EmbedContent,
+) -> Vec<EmbedCandidate> {
+    let root: AnyCssRoot = parse.tree();
+    root.syntax()
+        .descendants()
+        .skip(1)
+        .filter_map(CssFunction::cast)
+        .filter_map(|function| build_vue_css_v_bind_candidate(&function, style_content))
+        .collect()
+}
+
+fn build_vue_css_v_bind_candidate(
+    function: &CssFunction,
+    style_content: &EmbedContent,
+) -> Option<EmbedCandidate> {
+    let name = function
+        .name()
+        .ok()?
+        .as_css_identifier()?
+        .value_token()
+        .ok()?;
+    if name.text_trimmed() != "v-bind" {
+        return None;
+    }
+
+    let items = function.items();
+    let string = items
+        .syntax()
+        .descendants()
+        .skip(1)
+        .find_map(CssString::cast)
+        .filter(|string| string.range() == items.range());
+    let (relative_range, text) = if let Some(string) = string {
+        let value_token = string.value_token().ok()?;
+        let text = string.inner_string_text().ok()?;
+        (text.source_range(value_token.text_range()), text)
+    } else {
+        let range = items.syntax().text_trimmed_range();
+        (range, style_content.text.clone().slice(range))
+    };
+    if relative_range.is_empty() {
+        return None;
+    }
+
+    let content_range = relative_range + style_content.content_offset;
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: content_range,
+            content_range,
+            content_offset: content_range.start(),
+            text,
+        },
+        block_kind: EmbedBlockKind::Neutral,
     })
 }
 

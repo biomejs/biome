@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
 use crate::{
-    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
-    AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement,
-    JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString, inner_string_text,
-    static_value::StaticValue,
+    AnyJsExpression, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild,
+    AnyJsxElementName, AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList,
+    JsxElement, JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
@@ -47,7 +47,7 @@ impl AnyJsxTag {
     pub fn name(&self) -> Option<AnyJsxElementName> {
         match self {
             Self::JsxElement(element) => element.opening_element().ok()?.name().ok(),
-            Self::JsxFragment(_) => None,
+            Self::JsxFragment(_) | Self::AstroImplicitFragment(_) => None,
             Self::JsxSelfClosingElement(element) => element.name().ok(),
         }
     }
@@ -55,7 +55,7 @@ impl AnyJsxTag {
     pub fn attributes(&self) -> Option<JsxAttributeList> {
         match self {
             Self::JsxElement(element) => Some(element.opening_element().ok()?.attributes()),
-            Self::JsxFragment(_) => None,
+            Self::JsxFragment(_) | Self::AstroImplicitFragment(_) => None,
             Self::JsxSelfClosingElement(element) => Some(element.attributes()),
         }
     }
@@ -206,9 +206,8 @@ impl JsxSelfClosingElement {
     ///         jsx_name(ident("Test"))
     ///     ),
     ///     attributes,
-    ///     token(T![/]),
     ///     token(T![>]),
-    /// ).build();
+    /// ).with_slash_token(token(T![/])).build();
     ///
     /// assert!(opening_element.find_attribute_by_name("div").is_some());
     /// assert!(opening_element.find_attribute_by_name("img").is_some());
@@ -256,9 +255,8 @@ impl JsxSelfClosingElement {
     ///         jsx_name(ident("Test"))
     ///     ),
     ///     attributes,
-    ///     token(T![/]),
     ///     token(T![>]),
-    /// ).build();
+    /// ).with_slash_token(token(T![/])).build();
     ///
     /// let div = opening_element.find_attribute_by_name("div").unwrap();
     /// assert!(opening_element.has_trailing_spread_prop(&div));
@@ -325,6 +323,19 @@ impl JsxAttributeList {
                 return Some(attribute);
             }
             None
+        })
+    }
+
+    pub fn has_shorthand_attribute(&self, name_to_lookup: &str) -> bool {
+        self.iter().any(|attribute| {
+            let AnyJsxAttribute::JsxShorthandAttribute(attribute) = attribute else {
+                return false;
+            };
+            attribute
+                .name()
+                .ok()
+                .and_then(|name| name.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == name_to_lookup)
         })
     }
 
@@ -563,6 +574,10 @@ impl AnyJsxElement {
             .any(|attribute| matches!(attribute, AnyJsxAttribute::JsxSpreadAttribute(_)))
     }
 
+    pub fn has_shorthand_attribute(&self, name_to_lookup: &str) -> bool {
+        self.attributes().has_shorthand_attribute(name_to_lookup)
+    }
+
     pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         match self {
             Self::JsxSelfClosingElement(element) => {
@@ -619,9 +634,8 @@ impl AnyJsxElement {
     ///           jsx_name(ident("button"))
     ///       ),
     ///       attributes,
-    ///       token(T![/]),
     ///       token(T![>]),
-    ///   ).build()
+    ///   ).with_slash_token(token(T![/])).build()
     /// );
     ///
     /// assert!(jsx_element.get_attribute_inner_string_text("unknown").is_none());
@@ -736,6 +750,9 @@ impl AnyJsxAttributeValue {
                 expression.expression().ok()?.as_static_value()
             }
             Self::JsxString(string) => Some(StaticValue::String(string.value_token().ok()?)),
+            Self::JsTemplateExpression(template) => {
+                AnyJsExpression::JsTemplateExpression(template.clone()).as_static_value()
+            }
         }
     }
 }
@@ -775,4 +792,21 @@ impl AnyJsxChild {
             _ => true,
         })
     }
+}
+
+/// HTML elements that never have a closing tag.
+///
+/// Deliberately excludes the legacy `keygen` and `menuitem`, which Astro requires
+/// a closing tag for.
+///
+/// <https://html.spec.whatwg.org/multipage/syntax.html#void-elements>
+const VOID_ELEMENTS: [&str; 14] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
+];
+
+/// Whether `name` is an HTML void element, matched case-sensitively against the
+/// lowercase spec names. A PascalCase component never matches.
+pub fn is_void_element(name: &str) -> bool {
+    VOID_ELEMENTS.contains(&name)
 }

@@ -181,8 +181,7 @@ where
         .find_map(|pair| {
             let is_key = pair
                 .key()
-                .ok()
-                .is_some_and(|key| key.syntax().text_trimmed_range().contains_range(range));
+                .is_ok_and(|key| key.syntax().text_trimmed_range().contains_range(range));
 
             if is_key {
                 return Some((pair, ScssMapRole::Key));

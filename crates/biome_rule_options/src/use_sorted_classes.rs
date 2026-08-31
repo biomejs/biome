@@ -1,6 +1,6 @@
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, TextRange,
+    DeserializationDiagnostic, DeserializationVisitor, MapMembers, TextRange,
 };
 use biome_rowan::Text;
 use serde::{Deserialize, Serialize};
@@ -65,7 +65,7 @@ const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
 impl Deserializable for UseSortedClassesOptions {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -81,8 +81,8 @@ impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
 
     fn visit_map(
         self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        ctx: &mut dyn DeserializationContext,
+        members: &mut MapMembers<'_>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

@@ -70,7 +70,7 @@ impl BiomePlugin {
         #[cfg(feature = "js_plugin")]
         if plugin_path
             .extension()
-            .is_some_and(|extension| extension == "js" || extension == "mjs")
+            .is_some_and(|extension| matches!(extension, "js" | "mjs" | "ts" | "mts"))
         {
             let plugin = AnalyzerJsPlugin::load(fs.clone(), &plugin_path, includes)?;
             return Ok((
@@ -235,11 +235,36 @@ mod test {
 
     #[cfg(feature = "js_plugin")]
     #[test]
+    fn load_single_rule_ts_plugin() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/my-plugin.ts".into(),
+            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            import type { AnyJsRoot } from "@biomejs/plugin-api";
+            export const useMyPlugin = defineRule({
+                query: ast("JS_MODULE"),
+                run(root: AnyJsRoot): void {},
+            });"#,
+        );
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.ts", Utf8Path::new("/"), None)
+            .expect("Couldn't load plugin");
+
+        assert_eq!(plugin.analyzer_plugins.len(), 1);
+    }
+
+    #[cfg(feature = "js_plugin")]
+    #[test]
     fn load_single_rule_js_plugin() {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin.js".into(),
-            r#"export default function useMyPlugin() {}"#,
+            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            export const useMyPlugin = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {},
+            });"#,
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;

@@ -994,7 +994,23 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
+export interface RuleDomains {
+	astro?: RuleDomainValue;
+	drizzle?: RuleDomainValue;
+	next?: RuleDomainValue;
+	playwright?: RuleDomainValue;
+	project?: RuleDomainValue;
+	qwik?: RuleDomainValue;
+	react?: RuleDomainValue;
+	reactNative?: RuleDomainValue;
+	solid?: RuleDomainValue;
+	svelte?: RuleDomainValue;
+	tailwind?: RuleDomainValue;
+	test?: RuleDomainValue;
+	turborepo?: RuleDomainValue;
+	types?: RuleDomainValue;
+	vue?: RuleDomainValue;
+}
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -1196,25 +1212,6 @@ export type JsTrailingCommas = "all" | "es5" | "none";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
 export type JsonTrailingCommas = "none" | "all";
-/**
- * Rule domains
- */
-export type RuleDomain =
-	| "astro"
-	| "drizzle"
-	| "react"
-	| "reactNative"
-	| "test"
-	| "solid"
-	| "next"
-	| "qwik"
-	| "svelte"
-	| "vue"
-	| "project"
-	| "tailwind"
-	| "turborepo"
-	| "playwright"
-	| "types";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -2358,6 +2355,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow the use of Astro's set:html directive.
+See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
+	 */
+	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
+	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
@@ -2432,6 +2434,11 @@ See https://biomejs.dev/linter/rules/no-implied-eval
 See https://biomejs.dev/linter/rules/no-inline-styles 
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
+	* Disallow invalid accept values on file inputs.
+See https://biomejs.dev/linter/rules/no-invalid-file-input-accept 
+	 */
+	noInvalidFileInputAccept?: NoInvalidFileInputAcceptConfiguration;
 	/**
 	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
 See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
@@ -2577,6 +2584,11 @@ See https://biomejs.dev/linter/rules/no-top-level-literals
 See https://biomejs.dev/linter/rules/no-undeclared-classes 
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
+	* Reports custom properties used with var() that have no visible declaration.
+See https://biomejs.dev/linter/rules/no-undeclared-custom-properties 
+	 */
+	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
 	/**
 	* Disallow unnecessary template expressions.
 See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
@@ -3470,7 +3482,7 @@ See https://biomejs.dev/linter/rules/use-vue-define-macros-order
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
 	/**
-	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+	* Disallow uppercase letters in Vue template attribute names.
 See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
 	 */
 	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
@@ -4696,6 +4708,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroSetHtmlDirectiveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroSetHtmlDirectiveOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -4741,6 +4756,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidFileInputAcceptConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidFileInputAcceptOptions;
 export type NoInvalidPropertyInitValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidPropertyInitValueOptions;
@@ -4828,6 +4846,9 @@ export type NoTopLevelLiteralsConfiguration =
 export type NoUndeclaredClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredClassesOptions;
+export type NoUndeclaredCustomPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredCustomPropertiesOptions;
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
@@ -6570,6 +6591,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroSetHtmlDirectiveOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroSetHtmlDirectiveOptions;
+}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
@@ -6631,6 +6656,11 @@ export interface RuleWithNoInlineStylesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
+}
+export interface RuleWithNoInvalidFileInputAcceptOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInvalidFileInputAcceptOptions;
 }
 export interface RuleWithNoInvalidPropertyInitValueOptions {
 	level: RulePlainConfiguration;
@@ -6755,6 +6785,10 @@ export interface RuleWithNoTopLevelLiteralsOptions {
 export interface RuleWithNoUndeclaredClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredClassesOptions;
+}
+export interface RuleWithNoUndeclaredCustomPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredCustomPropertiesOptions;
 }
 export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	fix?: FixKind;
@@ -8408,6 +8442,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -8457,6 +8492,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
@@ -8531,6 +8567,7 @@ export type NoTopLevelLiteralsOptions = {};
  * Options for the `noUndeclaredClasses` rule.
  */
 export type NoUndeclaredClassesOptions = {};
+export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
@@ -9132,11 +9169,11 @@ export interface UseVueDefineMacrosOrderOptions {
 }
 export interface UseVueHyphenatedAttributesOptions {
 	/**
-	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 * List of attribute names to ignore when checking for uppercase letters.
 	 */
 	ignore?: string[];
 	/**
-	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 * List of HTML tags whose attributes should not be checked for uppercase letters.
 	 */
 	ignoreTags?: string[];
 }
@@ -9929,6 +9966,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9946,6 +9984,7 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
@@ -9976,6 +10015,7 @@ export type Category =
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
+	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
@@ -10028,6 +10068,7 @@ export type Category =
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
@@ -10303,6 +10344,7 @@ export type Category =
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
 	| "syntax/correctness/noDuplicatePrivateClassMembers"
+	| "transformations/stripTypes"
 	| "files/missingHandler"
 	| "format"
 	| "check"

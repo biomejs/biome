@@ -1,10 +1,8 @@
 use biome_diagnostics::Applicability;
 use biome_rowan::{
-    AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, TextRange, WalkEvent,
+    AnySyntaxNode, Language, RawSyntaxKind, SyntaxKindSet, SyntaxNode, TextRange, WalkEvent,
 };
 use camino::{Utf8Path, Utf8PathBuf};
-use rustc_hash::{FxHashMap, FxHashSet};
-use std::hash::Hash;
 use std::{fmt::Debug, sync::Arc};
 
 use crate::matcher::SignalRuleKey;
@@ -70,6 +68,9 @@ pub enum PluginTargetLanguage {
     Json,
 }
 
+/// A plugin paired with the [SyntaxKindSet] it queries.
+type PluginWithQuery<L> = (Arc<Box<dyn AnalyzerPlugin>>, SyntaxKindSet<L>);
+
 /// Cached result of checking whether a plugin applies to the current file.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum FileApplicability {
@@ -81,10 +82,20 @@ enum FileApplicability {
     NotApplicable,
 }
 
+/// Collects the kinds queried by `plugin` into a [SyntaxKindSet].
+fn query_kind_set<L: Language>(plugin: &dyn AnalyzerPlugin) -> SyntaxKindSet<L> {
+    plugin
+        .query()
+        .into_iter()
+        .fold(SyntaxKindSet::EMPTY, |set, kind| {
+            set.union(SyntaxKindSet::from_raw(kind))
+        })
+}
+
 /// A syntax visitor that queries nodes and evaluates in a plugin.
 /// Based on [`crate::SyntaxVisitor`].
 pub struct PluginVisitor<L: Language> {
-    query: FxHashSet<L::Kind>,
+    query: SyntaxKindSet<L>,
     plugin: Arc<Box<dyn AnalyzerPlugin>>,
 
     /// When set, all nodes in this subtree are skipped until we leave it.
@@ -98,14 +109,13 @@ pub struct PluginVisitor<L: Language> {
 impl<L> PluginVisitor<L>
 where
     L: Language + 'static,
-    L::Kind: Eq + Hash,
 {
     /// Creates a syntax visitor from the plugin.
     ///
     /// # Safety
     /// Do not forget to check the plugin is targeted for the language `L`.
     pub unsafe fn new_unchecked(plugin: Arc<Box<dyn AnalyzerPlugin>>) -> Self {
-        let query = plugin.query().into_iter().map(L::Kind::from_raw).collect();
+        let query = query_kind_set(plugin.as_ref().as_ref());
 
         Self {
             query,
@@ -119,7 +129,6 @@ where
 impl<L> Visitor for PluginVisitor<L>
 where
     L: Language + 'static,
-    L::Kind: Eq + Hash,
 {
     type Language = L;
 
@@ -154,7 +163,7 @@ where
 
         // TODO: Integrate to [`VisitorContext::match_query`]?
         let kind = node.kind();
-        if !self.query.contains(&kind) {
+        if !self.query.matches(kind) {
             return;
         }
 
@@ -204,14 +213,15 @@ where
 /// A batched syntax visitor that evaluates multiple plugins in a single visitor.
 ///
 /// Instead of registering N separate `PluginVisitor` instances (one per plugin),
-/// this holds all plugins together and dispatches using a kind-to-plugin lookup
-/// map. This reduces visitor-dispatch overhead and enables O(1) kind matching
-/// per node instead of iterating all plugins.
+/// this holds all plugins together, each paired with the [SyntaxKindSet] it
+/// queries. Most nodes match no plugin at all, so they are rejected with a
+/// single bit test against the union of all queries.
 pub struct BatchPluginVisitor<L: Language> {
-    plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>>,
+    /// Each plugin paired with the kinds it queries.
+    plugins: Vec<PluginWithQuery<L>>,
 
-    /// Maps each syntax kind to the indices of plugins that query for it.
-    kind_to_plugins: FxHashMap<L::Kind, Vec<usize>>,
+    /// Union of all plugin queries.
+    any_query: SyntaxKindSet<L>,
 
     /// When set, all nodes in this subtree are skipped until we leave it.
     /// Used to skip subtrees that fall entirely outside the analysis range
@@ -226,32 +236,27 @@ pub struct BatchPluginVisitor<L: Language> {
 impl<L> BatchPluginVisitor<L>
 where
     L: Language + 'static,
-    L::Kind: Eq + Hash,
 {
     /// Creates a batched plugin visitor from a slice of plugins.
     ///
     /// # Safety
     /// Caller must ensure all plugins target language `L`. The `RawSyntaxKind`
-    /// values returned by each plugin's `query()` are converted to `L::Kind`
-    /// via `from_raw` without validation.
+    /// values returned by each plugin's `query()` are interpreted as `L::Kind`
+    /// without validation.
     pub unsafe fn new_unchecked(plugins: AnalyzerPluginSlice) -> Self {
-        let mut all_plugins = Vec::with_capacity(plugins.len());
-        let mut kind_to_plugins: FxHashMap<L::Kind, Vec<usize>> = FxHashMap::default();
-
-        for (idx, plugin) in plugins.iter().enumerate() {
-            all_plugins.push(Arc::clone(plugin));
-            let mut seen_kinds = FxHashSet::default();
-            for raw_kind in plugin.query() {
-                let kind = L::Kind::from_raw(raw_kind);
-                if seen_kinds.insert(kind) {
-                    kind_to_plugins.entry(kind).or_default().push(idx);
-                }
-            }
-        }
+        let mut any_query = SyntaxKindSet::EMPTY;
+        let plugins = plugins
+            .iter()
+            .map(|plugin| {
+                let query = query_kind_set(plugin.as_ref().as_ref());
+                any_query = any_query.union(query);
+                (Arc::clone(plugin), query)
+            })
+            .collect();
 
         Self {
-            plugins: all_plugins,
-            kind_to_plugins,
+            plugins,
+            any_query,
             skip_subtree: None,
             applicable: None,
         }
@@ -261,7 +266,6 @@ where
 impl<L> Visitor for BatchPluginVisitor<L>
 where
     L: Language + 'static,
-    L::Kind: Eq + Hash,
 {
     type Language = L;
 
@@ -296,23 +300,22 @@ where
 
         let kind = node.kind();
 
-        let Some(plugin_indices) = self.kind_to_plugins.get(&kind) else {
+        if !self.any_query.matches(kind) {
             return;
-        };
+        }
 
         let applicable = self.applicable.get_or_insert_with(|| {
             self.plugins
                 .iter()
-                .map(|p| p.applies_to_file(&ctx.options.file_path))
+                .map(|(plugin, _)| plugin.applies_to_file(&ctx.options.file_path))
                 .collect()
         });
 
-        for &idx in plugin_indices {
-            if !applicable[idx] {
+        for (idx, (plugin, query)) in self.plugins.iter().enumerate() {
+            if !query.matches(kind) || !applicable[idx] {
                 continue;
             }
 
-            let plugin = &self.plugins[idx];
             let rule_timer = profiling::start_plugin_rule(plugin.name());
             let eval_result = plugin.evaluate(node.clone().into(), ctx.options.file_path.clone());
             rule_timer.stop();

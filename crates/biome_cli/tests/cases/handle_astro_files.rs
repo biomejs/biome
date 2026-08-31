@@ -46,10 +46,33 @@ if (foo) {
 const ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "---\r\n  const a    = \"b\";\r\n---\r\n<div></div>";
 
+const ASTRO_COMMENT_ONLY_TEMPLATE: &str = r#"---
+const x = 5;
+---
+<div>{/* a note */}</div>
+<div class={/* a note */}>{x}</div>"#;
+
 const ASTRO_RETURN_IN_TEMPLATE: &str = r#"---
 const x = 5;
 ---
 <div>{ return x }</div>"#;
+
+const ASTRO_HTML_COMMENTS_IN_TEMPLATE: &str = r#"---
+const   cond = true;
+---
+
+<!-- top level -->
+<div>
+	{1   +   2}
+	{cond &&    <p>no comment</p>}
+	{cond &&    <section><!-- single --><p>hi</p></section>}
+	{cond && (
+	<section>
+	<!-- line one
+line two --><!---->
+	</section>
+	)}
+</div>"#;
 
 const ASTRO_FILE_CHECK_BEFORE: &str = r#"---
 import {a as a} from 'mod';
@@ -123,6 +146,34 @@ fn format_astro_files_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_astro_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_astro_html_comments_in_template_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_HTML_COMMENTS_IN_TEMPLATE.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_astro_html_comments_in_template_write",
         fs,
         console,
         result,
@@ -983,6 +1034,41 @@ fn return_in_template_expression_should_error() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "return_in_template_expression_should_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn comment_only_template_expression_formats() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_COMMENT_ONLY_TEMPLATE.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    // A comment-only expression must not cause the CLI to skip the Astro file.
+    assert!(result.is_ok(), "Expected no errors but got {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "comment_only_template_expression_formats",
         fs,
         console,
         result,

@@ -1,4 +1,4 @@
-use crate::lexer::HtmlLexer;
+use crate::lexer::{HtmlLexer, HtmlLexerOptions};
 use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -34,7 +34,10 @@ pub(crate) enum HtmlLexContext {
     /// expression (e.g. `Foo` / `Foo.Bar`), after the parser has already decided
     /// the name is a component. The tag-name token is always emitted as
     /// `HTML_COMPONENT_LITERAL`, and `.` is lexed as a token for member access.
-    /// When `svelte` is `true`, also recognizes `//` and `/* */` JS-style comments.
+    ///
+    /// `svelte` controls brace handling only. Whether `//` and `/* */` comments
+    /// are recognized follows [`HtmlLexerOptions::framework`], since Astro
+    /// accepts them too.
     InsideTagWithDirectives { svelte: bool },
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
@@ -179,10 +182,11 @@ pub(crate) enum HtmlEmbeddedLanguage {
     /// reproduce it byte for byte; splitting it into markup would lose the
     /// whitespace to trivia.
     Preformatted(PreformattedElement),
-    /// A top-level block of a Vue single-file component whose content is not
-    /// HTML: a custom block such as `<i18n>` or `<docs>`, or a `<template>`
-    /// written in another language. The tag name is arbitrary, so it is
-    /// carried as a range into the source rather than as a `&'static str`.
+    /// An element whose content is raw text because of how it was written
+    /// rather than because of its name: a custom block or non-HTML `<template>`
+    /// of a Vue single-file component, or an Astro element carrying `is:raw`.
+    /// The tag name is arbitrary, so it is carried as a range into the source
+    /// rather than as a `&'static str`.
     RawTextBlock {
         name: TextRange,
     },
@@ -245,6 +249,10 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current `{{` as a single `{`. Used where the file has
+    /// single text expressions, so `{{` opens an object literal rather than an
+    /// interpolation.
+    SingleCurly,
     /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
     /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
     /// speculatively parsed as a template but turned out to have no
@@ -256,8 +264,12 @@ pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind
 
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str, initial_context: HtmlLexContext) -> Self {
-        let lexer = HtmlLexer::from_str(source);
+    pub fn from_str(
+        source: &'source str,
+        initial_context: HtmlLexContext,
+        options: HtmlLexerOptions,
+    ) -> Self {
+        let lexer = HtmlLexer::from_str(source).with_options(options);
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 

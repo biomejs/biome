@@ -1,0 +1,30 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.astro`
+
+```astro
+---
+const cond = true;
+---
+
+<!-- top level -->
+<div>
+	{1   +   2}
+	{cond &&    <p>no comment</p>}
+	{cond &&    <section><!-- single --><p>hi</p></section>}
+	{cond && (
+	<section>
+	<!-- line one
+line two --><!---->
+	</section>
+	)}
+</div>
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

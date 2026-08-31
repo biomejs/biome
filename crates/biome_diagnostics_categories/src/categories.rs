@@ -200,6 +200,7 @@ define_categories! {
     "lint/correctness/useVueValidVPre": "https://biomejs.dev/linter/rules/use-vue-valid-v-pre",
     "lint/correctness/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
+    "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
@@ -217,6 +218,7 @@ define_categories! {
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noImpliedEval": "https://biomejs.dev/linter/rules/no-implied-eval",
     "lint/nursery/noInlineStyles": "https://biomejs.dev/linter/rules/no-inline-styles",
+    "lint/nursery/noInvalidFileInputAccept": "https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
     "lint/nursery/noInvalidPropertyInitValue": "https://biomejs.dev/linter/rules/no-invalid-property-init-value",
     "lint/nursery/noJsRestrictedProperties": "https://biomejs.dev/linter/rules/no-js-restricted-properties",
     "lint/nursery/noJsxLeakedDollar": "https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
@@ -247,6 +249,7 @@ define_categories! {
     "lint/nursery/noTailwindArbitraryValue": "https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
+    "lint/nursery/noUndeclaredCustomProperties": "https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
     "lint/nursery/noUnnecessaryTemplateExpression": "https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUnsafeTypeAssertion": "https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
@@ -299,6 +302,7 @@ define_categories! {
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useRegexpTest": "https://biomejs.dev/linter/rules/use-regexp-test",
     "lint/nursery/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
+    "lint/nursery/useSingleTopLevelHeading": "https://biomejs.dev/linter/rules/use-single-top-level-heading",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
@@ -579,6 +583,9 @@ define_categories! {
     "syntax/correctness/noInitializerWithDefinite",
     "syntax/correctness/noDuplicatePrivateClassMembers",
     // end syntax rules
+
+    // transformation categories
+    "transformations/stripTypes",
 
     // General categories
     "files/missingHandler",

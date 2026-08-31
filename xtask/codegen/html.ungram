@@ -75,6 +75,7 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
+	| AstroFragment
 	| AnyHtmlContent
 	| HtmlCdataSection
 	| HtmlProcessingInstruction
@@ -101,9 +102,10 @@ HtmlDoubleTextExpression =
 
 // {expression}
 // ^^^^^^^^^^^^
+// The expression is absent in Astro, where `{}` renders nothing
 HtmlSingleTextExpression =
 	'{'
-	expression: HtmlTextExpression
+	expression: HtmlTextExpression?
 	'}'
 
 HtmlTextExpression = 'html_literal'
@@ -121,6 +123,21 @@ HtmlElement =
 	opening_element: HtmlOpeningElement
 	children: HtmlElementList
 	closing_element: HtmlClosingElement
+
+// <>a</>, Astro's fragment shorthand
+AstroFragment =
+	opening_fragment: AstroOpeningFragment
+	children: HtmlElementList
+	closing_fragment: AstroClosingFragment
+
+AstroOpeningFragment =
+	'<'
+	'>'
+
+AstroClosingFragment =
+	'<'
+	'/'
+	'>'
 
 
 // <a href="">

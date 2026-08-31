@@ -82,7 +82,7 @@ MdRoot {
             },
             after: MdHashList [
                 MdHash {
-                    hash_token: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] [],
+                    hash_token: HASH@22..26 "#" [Whitespace("   ")] [],
                 },
             ],
         },
@@ -150,7 +150,7 @@ MdRoot {
             0: MD_TEXTUAL_LITERAL@16..22 "   foo" [] []
       3: MD_HASH_LIST@22..26
         0: MD_HASH@22..26
-          0: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] []
+          0: HASH@22..26 "#" [Whitespace("   ")] []
     5: MD_NEWLINE@26..27
       0: NEWLINE@26..27 "\n" [] []
     6: MD_PARAGRAPH@27..32

@@ -457,9 +457,7 @@ fn is_empty_string_expression(expression: &AnyJsExpression) -> bool {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
         ) => string_literal
-            .inner_string_text()
-            .ok()
-            .is_some_and(|text| text.is_empty()),
+            .inner_string_text().is_ok_and(|text| text.is_empty()),
         AnyJsExpression::JsTemplateExpression(template_expression) => {
             template_expression.elements().len() == 0
         }

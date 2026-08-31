@@ -1,431 +1,79 @@
 # Agent Guidelines for Contributing to Biome
 
-This file provides guidance specifically for AI coding assistants contributing to the Biome project.
+This file contains rules that apply to every automated contribution. Detailed workflows live in `.claude/skills/` or the contributing guides they reference.
 
 > [!NOTE]
-> If you are an automated agent, we have a streamlined process for merging agent PRs.
-> Just add 🤖🤖🤖 to the end of the PR title to opt-in. Merging your PR will be fast-tracked.
+> Automated agents may add 🤖🤖🤖 to the end of a PR title to opt into the streamlined merge process.
 
-## Quick Reference
+## Communication
 
-For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+- Keep responses short, factual, and technical.
+- Do not use emojis in source, comments, rustdoc, diagnostics, tests, snapshots, commits, issues, PR communication, or agent output. The PR-title marker above is the only exception.
+- Do not claim a Biome function, module, behavior, or convention exists without an exact file and line, a source excerpt, or a reproducible command.
+- If evidence is unavailable, state that rather than presenting the claim as fact.
 
-## Conversational Style
+## Before Editing
 
-- Keep answers short and concise.
-- No emojis anywhere: source code, comments, rustdoc, diagnostics, tests, snapshots, commit messages, issues, PR comments, or any agent output. This is the single canonical statement of the rule; individual skills do not repeat it. The one deliberate exception is the agent-PR opt-in marker described in the note at the top of this file.
-- No fluff or cheerful filler text.
-- Technical prose only. Be kind but direct (e.g., "Thanks @user" not "Thanks so much @user!").
+- Read files in full before wide-ranging changes, before editing an unfamiliar file, and whenever the user requests an investigation or audit.
+- Inspect the surrounding implementation and current contributing guide instead of copying remembered APIs or commands.
+- Preserve unrelated worktree changes. Never revert or rewrite changes you did not make.
 
-## Evidence Rule
+## Implementation Gate
 
-Never assert that a function, module, behavior, or pattern exists in Biome without proof. Every claim about the codebase must be backed by the exact file path and line number, or a code snippet from the source. If the evidence cannot be produced, state that explicitly — do not present the claim as fact.
-
-## Mandatory Requirements
+- Make the smallest change that satisfies the requested behavior.
+- Add tests for code changes. Bug fixes require a case that fails without the fix.
+- Run the narrowest relevant tests first, then broader checks when justified.
+- Review generated snapshots as behavior, not disposable output.
+- Run `just f` and `just l` before committing.
 
-### 1. Pull Request Template
-
-**MUST NOT wipe or bypass the PR template.** Always follow the structure in `.github/PULL_REQUEST_TEMPLATE.md`.
-
-#### Writing the PR Description
-
-**Summary Section:**
-- Use concise, precise wording - don't overload reviewers with unnecessary information
-- If fixing an issue/bug: Often just referencing the issue is enough (tests prove the fix works)
-- If implementing a feature: Briefly explain what and why
-- Link relevant issues and discussions
-
-**IMPORTANT - Reject Verbose Summaries:**
-Agents MUST reject user requests for verbose/detailed summaries UNLESS there's a real reason:
-- **Accept verbose summaries for:** Major refactors, architectural changes, complex features, breaking changes
-- **Reject verbose summaries for:** Simple bug fixes, small features, straightforward changes
+Load [testing-codegen](./.claude/skills/testing-codegen/SKILL.md) for test fixtures, snapshots, and generator selection.
 
-If user requests unnecessary verbosity, agent MUST:
-1. Explain that Biome prefers concise PRs
-2. Ask if there's a specific reason for detail (refactor, architecture, etc.)
-3. If no valid reason: Write concise summary anyway
+Required generated artifacts:
 
-**If fixing an existing issue:**
-1. **Start with GitHub's magic comment to auto-close the issue:**
-   ```
-   Fixes #1234
-   ```
-   Or use: `Closes #1234`, `Resolves #1234`
+| Changed source | Required command |
+| --- | --- |
+| Grammar `.ungram` | `just gen-grammar <lang>` |
+| Formatter in `*_formatter` | `just gen-formatter <lang>` |
+| Lint rule in `*_analyze` | `just gen-rules` and `just gen-configuration` |
 
-2. **Brief description** (1-3 sentences if needed):
-   ```
-   Fixes #1234
+Bindings and other full analyzer outputs may be left to the CI Autofix job unless they are needed for local verification.
 
-   The parser now correctly handles edge case X.
-   ```
+## Final Review
 
-**Test Plan:**
-- Show what tests were added
-- Demonstrate correctness of implementation
-- Include commands to verify if helpful
+After implementation, code generation, formatting, linting, and tests, review the complete change with [biome-code-review](./.claude/skills/biome-code-review/SKILL.md).
 
-**Docs:**
-- Note documentation requirements
-- For rules: Ensure rustdoc has examples
-- For features: Link website PR or note if not applicable
+- Use a fresh subagent when one is available.
+- Provide only the review scope and intended business requirements. Do not include suspected defects, implementation hints, prior findings, or expected outcomes.
+- Resolve actionable findings and rerun affected verification.
+- Repeat the review when fixes materially change the implementation.
 
-### 2. Changesets (CRITICAL)
+## User-Facing Changes
 
-**Before opening a PR, you MUST verify if a changeset is needed:**
+Before opening a PR, explicitly confirm whether the change is user-facing. User-facing behavior requires a changeset; internal refactors, tests, CI, and documentation-only changes do not.
 
-#### Decision Tree
-1. **Ask the user explicitly**: "Is this change user-facing?"
-2. **If YES** → Changeset is REQUIRED
-3. **If NO** → Changeset not needed
-4. **If UNSURE** → Assume YES and create changeset
+For a user-facing change, load [changeset](./.claude/skills/changeset/SKILL.md) to choose the release level and create or edit the entry. Branch targeting and changeset policy are canonical in [`CONTRIBUTING.md`](./CONTRIBUTING.md#creating-pull-requests).
 
-#### User-Facing Changes Include
-- New lint rules or assists
-- Bug fixes that affect behavior
-- New features or options
-- Changes to formatter output
-- Parser improvements that handle new syntax
-- Changes to error messages or diagnostics
+## Pull Requests
 
-#### NOT User-Facing
-- Refactoring with no behavior change
-- Internal code reorganization
-- Test-only changes
-- CI/build system changes
-- Documentation-only changes (typos, clarifications)
+- Do not write PR descriptions or contributor communication. `CONTRIBUTING.md` requires the contributor to author that prose.
+- Preserve `.github/PULL_REQUEST_TEMPLATE.md`; never replace or bypass it.
+- If opening a PR from user-provided text, ensure it discloses the extent of AI assistance.
+- Use a conventional-commit title and the target branch defined in `CONTRIBUTING.md`.
 
-#### Create Changeset
+## Comments and Rustdoc
 
-Create a file in `.changeset/` directory with:
-1. **Unique filename**: Use lowercase words separated by hyphens (e.g., `fix-parser-edge-case.md`)
-2. **Front matter**: Specify package and change type
-3. **Description**: Write for end users (what changed and why they care)
+Load [doc-comments](./.claude/skills/doc-comments/SKILL.md) whenever editing `//`, `///`, or `//!` comments, including comments added incidentally.
 
-**File structure:**
-```markdown
----
-"@biomejs/biome": patch
----
+- Write for a contributor reading the code at HEAD without access to the conversation, issue, PR, or diff.
+- State contracts in `///`, module rationale and terminology in `//!`, and non-obvious rationale in `//`.
+- Do not narrate change history or address reviewers.
+- Delete comments that only restate names, types, or control flow.
+- Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user documentation; also load the lint-rule guide for its content requirements.
 
-Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The parser now correctly handles edge case X.
-```
+## Cargo Dependencies
 
-**Change types:**
-- `patch` - Bug fixes, non-breaking changes (targets `main` branch)
-- `minor` - New features, non-breaking additions (targets `next` branch)
-- `major` - Breaking changes (targets `next` branch)
+Internal `biome_*` crates under `[dev-dependencies]` use `path = "../biome_*"`, not `workspace = true`. Regular `[dependencies]` continue to use `workspace = true`.
 
-**Content guidelines:**
-- **If fixing an issue/bug**, start with: `Fixed [#NUMBER](issue link): ...`
-- **For new features**, describe what the feature does and why users care
-- **Target end users**, not developers (explain impact, not implementation)
-- **Be concise** - 1-3 sentences explaining the change
+## Skills
 
-**Example for bug fix:**
-```markdown
----
-"@biomejs/biome": patch
----
-
-Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The parser now correctly handles TypeScript's satisfies operator in complex expressions.
-```
-
-**Example for new feature:**
-```markdown
----
-"@biomejs/biome": minor
----
-
-Added support for parsing TypeScript 5.2 `using` declarations. Biome can now parse and format code using the new resource management syntax.
-```
-
-**Be rigorous:** When in doubt, ask the user. Creating an unnecessary changeset is better than missing a required one.
-
-### 3. AI Assistance Disclosure
-
-If you (the AI agent) contributed to the PR, it MUST be disclosed. Add this to the PR description:
-
-```markdown
-> This PR was created with AI assistance (Claude Code).
-```
-
-Or be more specific about your involvement:
-```markdown
-> This PR was implemented with guidance from Claude Code AI assistant.
-> The solution was reviewed and validated by the contributor.
-```
-
-### 4. Code Generation
-
-Code generation is required for certain changes, but **timing matters**:
-
-#### Required BEFORE Opening PR
-
-| Changes to... | Run... | Why |
-| -------------- | --------- | ----- |
-| Grammar `.ungram` files | `just gen-grammar <lang>` | Regenerates parser/syntax from grammar |
-| Formatter in `*_formatter` | `just gen-formatter <lang>` | Updates formatter boilerplate |
-| Lint rules in `*_analyze` | `just gen-rules` and `just gen-configuration` | Updates rule registrations and configuration |
-
-These MUST be run and committed before opening a PR.
-
-#### Handled Automatically by CI (Autofix Job)
-
-The following are automatically handled by the **Autofix** CI job when you open a PR:
-- TypeScript bindings (`just gen-bindings`)
-- Full analyzer codegen including bindings
-- Other generated code that CI can produce
-
-**These are optional to run locally** - the Autofix job will commit them automatically if you don't. You can run them if you want to verify locally, but it's not required.
-
-#### Always Required Before Committing
-
-```shell
-just f  # Format code
-just l  # Lint code
-```
-
-These ensure your code follows project standards.
-
-### 5. Testing Requirements
-
-All code changes MUST include tests:
-
-- **Lint rules**: Snapshot tests in `crates/biome_<lang>_analyze/tests/specs/{group}/{rule}/`
-- **Formatter**: Snapshot tests with valid/invalid cases
-- **Parser**: Test files covering valid and error cases
-- **Bug fixes**: Test that reproduces the bug and validates the fix
-
-Run tests before committing:
-```shell
-# Run all tests
-cargo test
-
-# Run specific rule test (faster)
-cargo test suspicious::no_debugger
-
-# Review snapshots
-cargo insta review
-```
-
-**Troubleshooting:** If new snapshots aren't being picked up, it's likely due to caching. Force recompilation:
-```shell
-touch src/lib.rs  # Triggers recompilation
-cargo test
-```
-
-### 6. Final Code Review
-
-After implementation, code generation, formatting, linting, and tests are complete, review the finished change with the `biome-code-review` skill before committing or opening a pull request.
-
-- Prefer running the review in a fresh sub-agent when sub-agents are available.
-- Give the reviewer only the review scope and the intended business behavior of the fix or feature.
-- Do not include implementation details, suspected defects, areas to prioritize, previous review findings, or expected outcomes. Leave your bias out.
-- The review scope should be a pull request number, branch, commit range, or complete working-tree diff.
-- If a sub-agent is unavailable, load the skill in the current agent and perform the review directly.
-- Resolve actionable findings, rerun the affected verification, and repeat the review when the fixes materially change the implementation.
-
-### 7. Read Before You Edit
-
-Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes.
-
-### 8. Comments and Doc Comments
-
-These rules apply to **every** comment you write, including ones added incidentally while fixing a bug. Full guidance with examples: [`.claude/skills/doc-comments/SKILL.md`](./.claude/skills/doc-comments/SKILL.md).
-
-- Write for a contributor reading the code at HEAD, months later, with no access to this conversation, the PR, or the diff.
-- Never narrate change history ("now", "previously", "no longer") and never address the reviewer ("this correctly handles..."). State how the code works, not how it came to be or why the change is right.
-- Deletion test: a comment must state something the reader cannot recover from the code. If names or types already carry it, don't write it.
-- `///` docs state the contract (behavior, invariants, panics); `//!` docs explain why the module exists and its terminology; `//` comments carry rationale only.
-- When your change alters documented behavior, extend or correct the existing prose — never replace specific docs with generic text.
-- Exception: rustdoc inside `declare_lint_rule!` is end-user documentation for the website; these rules don't apply there.
-
-## Available Resources
-
-### Skills (Procedural Knowledge)
-
-Located in `.claude/skills/`, these provide step-by-step workflows:
-
-- **biome-developer** - General development best practices and common gotchas
-- **biome-code-review** - Reviewing a completed change for correctness and compliance before committing or opening a pull request
-- **changeset** - Creating and writing proper changesets
-- **doc-comments** - Writing comments and rustdoc addressed to developers
-- **eslint-migrate-options** - Implementing ESLint-to-Biome rule option migrators
-- **lint-rule-development** - Creating and testing lint rules
-- **formatter-development** - Implementing formatters
-- **parser-development** - Writing parsers
-- **pull-request** - Creating proper pull requests
-- **testing-codegen** - Testing and code generation commands
-- **type-inference** - Working with module graph and types
-- **diagnostics-development** - Creating user-facing diagnostics
-
-See [`.claude/skills/README.md`](./.claude/skills/README.md) for the full catalog.
-
-## Workflow Examples
-
-### Creating a New Lint Rule
-
-1. **Generate scaffolding:**
-   ```shell
-   just new-js-lintrule myRuleName
-   ```
-
-2. **Implement the rule** (use `lint-rule-development` skill)
-
-3. **Add tests:**
-   - Create files in `tests/specs/nursery/myRuleName/`
-   - Run `just test-lintrule myRuleName` or `cargo test nursery::my_rule_name`
-   - Review: `cargo insta review`
-
-4. **Generate code:**
-   ```shell
-   just gen-rules
-   just gen-configuration
-   just f && just l
-   ```
-
-5. **Create changeset:**
-   - Create file in `.changeset/` (e.g., `add-my-rule.md`)
-   - Add front matter: `"@biomejs/biome": minor`
-   - Write description for end users
-
-6. **Open PR** using the template:
-   - Summary: Brief explanation of what and why
-   - Test plan: Show tests added and how to verify
-   - Docs: Note documentation status
-   - AI disclosure if applicable
-
-### Fixing a Bug
-
-1. **Reproduce the bug** with a test
-
-2. **Implement fix**
-
-3. **Verify fix:**
-   ```shell
-   cargo test
-   cargo insta review
-   ```
-
-4. **Ask user**: "Is this bug fix user-facing?" (Usually YES)
-
-5. **If user-facing, create changeset:**
-   - Create file in `.changeset/` (e.g., `fix-bug-1234.md`)
-   - Add front matter: `"@biomejs/biome": patch`
-   - Start with: `Fixed [#issue](link): ...`
-
-6. **Open PR** with completed template:
-   - Start with GitHub magic comment: `Fixes #1234`
-   - Brief description (1-3 sentences if needed)
-   - Test plan showing fix works
-   - AI disclosure if applicable
-
-### Implementing a Formatter
-
-1. **Implement `FormatNodeRule`** (use `formatter-development` skill)
-
-2. **Compare with Prettier:**
-   ```shell
-   bun packages/prettier-compare/bin/prettier-compare.js --rebuild 'code'
-   ```
-
-3. **Test:**
-   ```shell
-   cd crates/biome_js_formatter
-   cargo test
-   cargo insta review
-   ```
-
-4. **Generate code:**
-   ```shell
-   just gen-formatter
-   just f && just l
-   ```
-
-5. **Ask user**: "Is this formatter change user-facing?" (Usually YES)
-
-6. **Create changeset:**
-   - Create file in `.changeset/` (e.g., `improve-formatting.md`)
-   - Add front matter: `"@biomejs/biome": patch`
-   - Include diff example if helpful
-
-7. **Open PR** following template
-
-## Branch Targeting
-
-- **Bug fixes (`patch`)** → `main` branch
-- **New nursery rules (`patch`)** → `main` branch
-- **Rule promotions from nursery (`minor`)** → `next` branch
-- **New features (`minor`)** → `next` branch
-- **Breaking changes (`major`)** → `next` branch
-- **Internal changes (no changeset)** → `main` branch
-
-## Commit Messages
-
-Follow conventional commit format:
-
-```
-feat(compiler): implement parsing for new type of files
-fix: fix nasty unhandled error
-docs: fix link to website page
-test(lint): add more cases to handle invalid rules
-```
-
-## Quality Checklist
-
-Before opening a PR, verify:
-
-- [ ] Tests added and passing (`cargo test`)
-- [ ] Snapshots reviewed (`cargo insta review`)
-- [ ] Code generation run if needed:
-  - [ ] Parser changes: `just gen-grammar <lang>`
-  - [ ] Formatter changes: `just gen-formatter <lang>`
-  - [ ] Lint rule changes: `just gen-rules` and `just gen-configuration`
-  - [ ] Analyzer/Bindings: Optional (CI Autofix handles this)
-- [ ] Code formatted (`just f`)
-- [ ] Code linted (`just l`)
-- [ ] Completed change reviewed with `biome-code-review`, preferably in a fresh sub-agent with only the scope and intended business behavior
-- [ ] Actionable review findings resolved and affected verification rerun
-- [ ] Changeset created if user-facing (file in `.changeset/` with correct type)
-- [ ] PR template filled out completely
-- [ ] AI assistance disclosed if applicable
-
-## Common Mistakes to Avoid
-
-**Don't:**
-- Skip the PR template
-- Write verbose PR summaries for simple changes
-- Forget to create changesets for user-facing changes
-- Forget to run code generation after parser/formatter/rule changes
-- Commit without formatting/linting
-- Open PRs without tests
-- Blindly accept all snapshot changes
-- Claim patterns are "widely used" or "common" without evidence
-- Implement legacy/deprecated syntax without checking with the user first
-- Make assumptions about API design - inspect actual code structure first
-- Use `workspace = true` for `biome_*` crates in `[dev-dependencies]` — use `path = "../biome_*"` instead
-
-**Do:**
-- Ask the user if unsure about changesets
-- Write concise, precise PR summaries
-- Push back on unnecessary verbosity
-- Follow the PR template structure
-- Run full test suite before committing
-- Review snapshot changes carefully
-- Disclose AI assistance
-- Link to related issues
-- Inspect AST structure before implementing (use parser crate's `quick_test`)
-- Ask users about legacy/deprecated syntax support - wait for demand before implementing
-- Verify your solution works for all relevant cases, not just the first one you find
-- Reference the skills in `.claude/skills/` for technical implementation details
-
-## Getting Help
-
-- **GitHub Discussions**: https://github.com/biomejs/biome/discussions
-- **Discord**: https://biomejs.dev/chat
-- **Contributing Guide**: [CONTRIBUTING.md](./CONTRIBUTING.md)
-- **Skills Catalog**: [`.claude/skills/README.md`](./.claude/skills/README.md)
-
----
-
-Remember: When in doubt about changesets, **ask the user**. It's better to create an unnecessary changeset than to miss a required one.
+The skill catalog and trigger boundaries are maintained in [`.claude/skills/README.md`](./.claude/skills/README.md). Load only the skills relevant to the current task.
