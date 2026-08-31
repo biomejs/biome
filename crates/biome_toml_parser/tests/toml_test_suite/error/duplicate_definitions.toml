@@ -1,0 +1,37 @@
+duplicate = 1
+duplicate = 2
+
+escaped = 1
+"\u0065scaped" = 2
+
+dotted.value = 1
+[dotted]
+
+inline = { key = 1, key = 2 }
+
+[repeated]
+value = 1
+[repeated]
+other = 2
+
+[standard]
+[[standard]]
+
+[[array]]
+[array]
+
+[header_defined.child]
+value = 1
+[header_defined]
+child.extra = 2
+
+[[array_parent.child]]
+value = 1
+[array_parent]
+child.extra = 2
+
+[implicit_parent.child.grandchild]
+value = 1
+[implicit_parent]
+child.value = 2
+[implicit_parent.child]

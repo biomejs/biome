@@ -1,0 +1,475 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+assertion_line: 86
+expression: snapshot
+---
+## Input
+```toml
+physical.color = "orange"
+physical.shape = "round"
+
+[fruit.apple]
+color = "red"
+
+[fruit]
+name = "tree"
+
+[[products]]
+name = "Hammer"
+
+[products.details]
+weight = 10
+
+[[products.tags]]
+name = "hardware"
+
+[[products.tags]]
+name = "tool"
+
+[[products]]
+name = "Nail"
+
+[products.details]
+weight = 1
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@0..8 "physical" [] [],
+                    },
+                    DOT@8..9 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@9..15 "color" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@15..17 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@17..25 "\"orange\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@25..34 "physical" [Newline("\n")] [],
+                    },
+                    DOT@34..35 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@35..41 "shape" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@41..43 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@43..50 "\"round\"" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@50..53 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@53..58 "fruit" [] [],
+                    },
+                    DOT@58..59 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@59..64 "apple" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@64..65 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@65..72 "color" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@72..74 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@74..79 "\"red\"" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@79..82 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@82..87 "fruit" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@87..88 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@88..94 "name" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@94..96 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@96..102 "\"tree\"" [] [],
+            },
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@102..105 "[" [Newline("\n"), Newline("\n")] [],
+            opening_inner_token: L_BRACK@105..106 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@106..114 "products" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@114..115 "]" [] [],
+            closing_outer_token: R_BRACK@115..116 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@116..122 "name" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@122..124 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@124..132 "\"Hammer\"" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@132..135 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@135..143 "products" [] [],
+                    },
+                    DOT@143..144 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@144..151 "details" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@151..152 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@152..160 "weight" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@160..162 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@162..164 "10" [] [],
+            },
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@164..167 "[" [Newline("\n"), Newline("\n")] [],
+            opening_inner_token: L_BRACK@167..168 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@168..176 "products" [] [],
+                    },
+                    DOT@176..177 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@177..181 "tags" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@181..182 "]" [] [],
+            closing_outer_token: R_BRACK@182..183 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@183..189 "name" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@189..191 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@191..201 "\"hardware\"" [] [],
+            },
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@201..204 "[" [Newline("\n"), Newline("\n")] [],
+            opening_inner_token: L_BRACK@204..205 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@205..213 "products" [] [],
+                    },
+                    DOT@213..214 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@214..218 "tags" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@218..219 "]" [] [],
+            closing_outer_token: R_BRACK@219..220 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@220..226 "name" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@226..228 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@228..234 "\"tool\"" [] [],
+            },
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@234..237 "[" [Newline("\n"), Newline("\n")] [],
+            opening_inner_token: L_BRACK@237..238 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@238..246 "products" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@246..247 "]" [] [],
+            closing_outer_token: R_BRACK@247..248 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@248..254 "name" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@254..256 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@256..262 "\"Nail\"" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@262..265 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@265..273 "products" [] [],
+                    },
+                    DOT@273..274 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@274..281 "details" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@281..282 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@282..290 "weight" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@290..292 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@292..293 "1" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@293..294 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..294
+  0: (empty)
+  1: TOML_ITEM_LIST@0..293
+    0: TOML_KEY_VALUE@0..25
+      0: TOML_KEY@0..15
+        0: TOML_KEY_SEGMENT_LIST@0..15
+          0: TOML_KEY_SEGMENT@0..8
+            0: TOML_BARE_KEY@0..8 "physical" [] []
+          1: DOT@8..9 "." [] []
+          2: TOML_KEY_SEGMENT@9..15
+            0: TOML_BARE_KEY@9..15 "color" [] [Whitespace(" ")]
+      1: EQ@15..17 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@17..25
+        0: TOML_BASIC_STRING@17..25 "\"orange\"" [] []
+    1: TOML_KEY_VALUE@25..50
+      0: TOML_KEY@25..41
+        0: TOML_KEY_SEGMENT_LIST@25..41
+          0: TOML_KEY_SEGMENT@25..34
+            0: TOML_BARE_KEY@25..34 "physical" [Newline("\n")] []
+          1: DOT@34..35 "." [] []
+          2: TOML_KEY_SEGMENT@35..41
+            0: TOML_BARE_KEY@35..41 "shape" [] [Whitespace(" ")]
+      1: EQ@41..43 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@43..50
+        0: TOML_BASIC_STRING@43..50 "\"round\"" [] []
+    2: TOML_TABLE@50..65
+      0: L_BRACK@50..53 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@53..64
+        0: TOML_KEY_SEGMENT_LIST@53..64
+          0: TOML_KEY_SEGMENT@53..58
+            0: TOML_BARE_KEY@53..58 "fruit" [] []
+          1: DOT@58..59 "." [] []
+          2: TOML_KEY_SEGMENT@59..64
+            0: TOML_BARE_KEY@59..64 "apple" [] []
+      2: R_BRACK@64..65 "]" [] []
+    3: TOML_KEY_VALUE@65..79
+      0: TOML_KEY@65..72
+        0: TOML_KEY_SEGMENT_LIST@65..72
+          0: TOML_KEY_SEGMENT@65..72
+            0: TOML_BARE_KEY@65..72 "color" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@72..74 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@74..79
+        0: TOML_BASIC_STRING@74..79 "\"red\"" [] []
+    4: TOML_TABLE@79..88
+      0: L_BRACK@79..82 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@82..87
+        0: TOML_KEY_SEGMENT_LIST@82..87
+          0: TOML_KEY_SEGMENT@82..87
+            0: TOML_BARE_KEY@82..87 "fruit" [] []
+      2: R_BRACK@87..88 "]" [] []
+    5: TOML_KEY_VALUE@88..102
+      0: TOML_KEY@88..94
+        0: TOML_KEY_SEGMENT_LIST@88..94
+          0: TOML_KEY_SEGMENT@88..94
+            0: TOML_BARE_KEY@88..94 "name" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@94..96 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@96..102
+        0: TOML_BASIC_STRING@96..102 "\"tree\"" [] []
+    6: TOML_ARRAY_TABLE@102..116
+      0: L_BRACK@102..105 "[" [Newline("\n"), Newline("\n")] []
+      1: L_BRACK@105..106 "[" [] []
+      2: TOML_KEY@106..114
+        0: TOML_KEY_SEGMENT_LIST@106..114
+          0: TOML_KEY_SEGMENT@106..114
+            0: TOML_BARE_KEY@106..114 "products" [] []
+      3: R_BRACK@114..115 "]" [] []
+      4: R_BRACK@115..116 "]" [] []
+    7: TOML_KEY_VALUE@116..132
+      0: TOML_KEY@116..122
+        0: TOML_KEY_SEGMENT_LIST@116..122
+          0: TOML_KEY_SEGMENT@116..122
+            0: TOML_BARE_KEY@116..122 "name" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@122..124 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@124..132
+        0: TOML_BASIC_STRING@124..132 "\"Hammer\"" [] []
+    8: TOML_TABLE@132..152
+      0: L_BRACK@132..135 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@135..151
+        0: TOML_KEY_SEGMENT_LIST@135..151
+          0: TOML_KEY_SEGMENT@135..143
+            0: TOML_BARE_KEY@135..143 "products" [] []
+          1: DOT@143..144 "." [] []
+          2: TOML_KEY_SEGMENT@144..151
+            0: TOML_BARE_KEY@144..151 "details" [] []
+      2: R_BRACK@151..152 "]" [] []
+    9: TOML_KEY_VALUE@152..164
+      0: TOML_KEY@152..160
+        0: TOML_KEY_SEGMENT_LIST@152..160
+          0: TOML_KEY_SEGMENT@152..160
+            0: TOML_BARE_KEY@152..160 "weight" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@160..162 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@162..164
+        0: TOML_INTEGER@162..164 "10" [] []
+    10: TOML_ARRAY_TABLE@164..183
+      0: L_BRACK@164..167 "[" [Newline("\n"), Newline("\n")] []
+      1: L_BRACK@167..168 "[" [] []
+      2: TOML_KEY@168..181
+        0: TOML_KEY_SEGMENT_LIST@168..181
+          0: TOML_KEY_SEGMENT@168..176
+            0: TOML_BARE_KEY@168..176 "products" [] []
+          1: DOT@176..177 "." [] []
+          2: TOML_KEY_SEGMENT@177..181
+            0: TOML_BARE_KEY@177..181 "tags" [] []
+      3: R_BRACK@181..182 "]" [] []
+      4: R_BRACK@182..183 "]" [] []
+    11: TOML_KEY_VALUE@183..201
+      0: TOML_KEY@183..189
+        0: TOML_KEY_SEGMENT_LIST@183..189
+          0: TOML_KEY_SEGMENT@183..189
+            0: TOML_BARE_KEY@183..189 "name" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@189..191 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@191..201
+        0: TOML_BASIC_STRING@191..201 "\"hardware\"" [] []
+    12: TOML_ARRAY_TABLE@201..220
+      0: L_BRACK@201..204 "[" [Newline("\n"), Newline("\n")] []
+      1: L_BRACK@204..205 "[" [] []
+      2: TOML_KEY@205..218
+        0: TOML_KEY_SEGMENT_LIST@205..218
+          0: TOML_KEY_SEGMENT@205..213
+            0: TOML_BARE_KEY@205..213 "products" [] []
+          1: DOT@213..214 "." [] []
+          2: TOML_KEY_SEGMENT@214..218
+            0: TOML_BARE_KEY@214..218 "tags" [] []
+      3: R_BRACK@218..219 "]" [] []
+      4: R_BRACK@219..220 "]" [] []
+    13: TOML_KEY_VALUE@220..234
+      0: TOML_KEY@220..226
+        0: TOML_KEY_SEGMENT_LIST@220..226
+          0: TOML_KEY_SEGMENT@220..226
+            0: TOML_BARE_KEY@220..226 "name" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@226..228 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@228..234
+        0: TOML_BASIC_STRING@228..234 "\"tool\"" [] []
+    14: TOML_ARRAY_TABLE@234..248
+      0: L_BRACK@234..237 "[" [Newline("\n"), Newline("\n")] []
+      1: L_BRACK@237..238 "[" [] []
+      2: TOML_KEY@238..246
+        0: TOML_KEY_SEGMENT_LIST@238..246
+          0: TOML_KEY_SEGMENT@238..246
+            0: TOML_BARE_KEY@238..246 "products" [] []
+      3: R_BRACK@246..247 "]" [] []
+      4: R_BRACK@247..248 "]" [] []
+    15: TOML_KEY_VALUE@248..262
+      0: TOML_KEY@248..254
+        0: TOML_KEY_SEGMENT_LIST@248..254
+          0: TOML_KEY_SEGMENT@248..254
+            0: TOML_BARE_KEY@248..254 "name" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@254..256 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@256..262
+        0: TOML_BASIC_STRING@256..262 "\"Nail\"" [] []
+    16: TOML_TABLE@262..282
+      0: L_BRACK@262..265 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@265..281
+        0: TOML_KEY_SEGMENT_LIST@265..281
+          0: TOML_KEY_SEGMENT@265..273
+            0: TOML_BARE_KEY@265..273 "products" [] []
+          1: DOT@273..274 "." [] []
+          2: TOML_KEY_SEGMENT@274..281
+            0: TOML_BARE_KEY@274..281 "details" [] []
+      2: R_BRACK@281..282 "]" [] []
+    17: TOML_KEY_VALUE@282..293
+      0: TOML_KEY@282..290
+        0: TOML_KEY_SEGMENT_LIST@282..290
+          0: TOML_KEY_SEGMENT@282..290
+            0: TOML_BARE_KEY@282..290 "weight" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@290..292 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@292..293
+        0: TOML_INTEGER@292..293 "1" [] []
+  2: EOF@293..294 "" [Newline("\n")] []
+
+```

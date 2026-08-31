@@ -2,13 +2,17 @@
 
 #![deny(clippy::use_self)]
 
-use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
+use biome_parser::{
+    AnyParse, NodeParse, diagnostic::merge_diagnostics, prelude::ParseDiagnostic,
+    tree_sink::LosslessTreeSink,
+};
 use biome_rowan::{AstNode, NodeCache};
 use biome_toml_factory::TomlSyntaxFactory;
 use biome_toml_syntax::{TomlLanguage, TomlRoot, TomlSyntaxNode};
 use parser::TomlParser;
 use syntax::parse_root;
 
+mod definitions;
 mod lexer;
 mod parser;
 mod syntax;
@@ -30,6 +34,9 @@ pub fn parse_toml_with_cache(source: &str, cache: &mut NodeCache) -> TomlParse {
     let mut tree_sink = TomlLosslessTreeSink::with_cache(source, &trivia, cache);
     biome_parser::event::process(&mut tree_sink, events, diagnostics);
     let (root, diagnostics) = tree_sink.finish();
+    let definition_diagnostics =
+        definitions::validate_definitions(&TomlRoot::unwrap_cast(root.clone()));
+    let diagnostics = merge_diagnostics(diagnostics, definition_diagnostics);
 
     TomlParse::new(root, diagnostics)
 }

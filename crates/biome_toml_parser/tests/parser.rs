@@ -216,3 +216,46 @@ fn malformed_inline_table_entry_preserves_the_typed_table() {
         1
     );
 }
+
+#[test]
+fn rejects_duplicate_definitions() {
+    for source in [
+        "key = 1\nkey = 2",
+        "key = 1\n[key]",
+        "key.value = 1\n[key]",
+        "[table]\n[table]",
+        "[table]\n[[table]]",
+        "[[table]]\n[table]",
+        "inline = { key = 1, key = 2 }",
+        "inline = { key = 1 }\ninline.key = 2",
+        "bare = 1\n\"\\u0062are\" = 2",
+        "[a.b.c]\nz = 9\n[a]\nb.c.t = 1",
+        "[[a.b]]\n[a]\nb.y = 2",
+        "[a.b.c]\n[a]\nb.x = 1\n[a.b]",
+    ] {
+        let parsed = parse_toml(source);
+        assert!(
+            parsed.has_errors(),
+            "expected duplicate definition diagnostic for {source:?}"
+        );
+    }
+}
+
+#[test]
+fn accepts_independent_definition_scopes() {
+    for source in [
+        "shared.first = 1\nshared.second = 2",
+        "[parent.child]\nvalue = 1\n[parent]\nvalue = 2",
+        "[first]\nvalue = 1\n[second]\nvalue = 2",
+        "[[items]]\nvalue = 1\n[[items]]\nvalue = 2",
+        "[[items]]\n[items.child]\nvalue = 1\n[[items]]\n[items.child]\nvalue = 2",
+        "[[items.children]]\nvalue = 1\n[[items.children]]\nvalue = 2",
+    ] {
+        let parsed = parse_toml(source);
+        assert!(
+            !parsed.has_errors(),
+            "unexpected definition diagnostic for {source:?}: {:?}",
+            parsed.diagnostics()
+        );
+    }
+}

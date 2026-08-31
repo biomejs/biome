@@ -1,0 +1,26 @@
+physical.color = "orange"
+physical.shape = "round"
+
+[fruit.apple]
+color = "red"
+
+[fruit]
+name = "tree"
+
+[[products]]
+name = "Hammer"
+
+[products.details]
+weight = 10
+
+[[products.tags]]
+name = "hardware"
+
+[[products.tags]]
+name = "tool"
+
+[[products]]
+name = "Nail"
+
+[products.details]
+weight = 1

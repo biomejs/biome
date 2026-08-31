@@ -1,0 +1,934 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+assertion_line: 86
+expression: snapshot
+---
+## Input
+```toml
+duplicate = 1
+duplicate = 2
+
+escaped = 1
+"\u0065scaped" = 2
+
+dotted.value = 1
+[dotted]
+
+inline = { key = 1, key = 2 }
+
+[repeated]
+value = 1
+[repeated]
+other = 2
+
+[standard]
+[[standard]]
+
+[[array]]
+[array]
+
+[header_defined.child]
+value = 1
+[header_defined]
+child.extra = 2
+
+[[array_parent.child]]
+value = 1
+[array_parent]
+child.extra = 2
+
+[implicit_parent.child.grandchild]
+value = 1
+[implicit_parent]
+child.value = 2
+[implicit_parent.child]
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@0..10 "duplicate" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@10..12 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@12..13 "1" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@13..24 "duplicate" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@24..26 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@26..27 "2" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@27..37 "escaped" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@37..39 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@39..40 "1" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BASIC_STRING@40..56 "\"\\u0065scaped\"" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@56..58 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@58..59 "2" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@59..67 "dotted" [Newline("\n"), Newline("\n")] [],
+                    },
+                    DOT@67..68 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@68..74 "value" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@74..76 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@76..77 "1" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@77..79 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@79..85 "dotted" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@85..86 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@86..95 "inline" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@95..97 "=" [] [Whitespace(" ")],
+            value: TomlInlineTable {
+                l_curly_token: L_CURLY@97..99 "{" [] [Whitespace(" ")],
+                elements: TomlInlineTableElementList [
+                    TomlKeyValue {
+                        key: TomlKey {
+                            segments: TomlKeySegmentList [
+                                TomlKeySegment {
+                                    value: TOML_BARE_KEY@99..103 "key" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        eq_token: EQ@103..105 "=" [] [Whitespace(" ")],
+                        value: TomlIntegerValue {
+                            value_token: TOML_INTEGER@105..106 "1" [] [],
+                        },
+                    },
+                    COMMA@106..108 "," [] [Whitespace(" ")],
+                    TomlKeyValue {
+                        key: TomlKey {
+                            segments: TomlKeySegmentList [
+                                TomlKeySegment {
+                                    value: TOML_BARE_KEY@108..112 "key" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        eq_token: EQ@112..114 "=" [] [Whitespace(" ")],
+                        value: TomlIntegerValue {
+                            value_token: TOML_INTEGER@114..116 "2" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@116..117 "}" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@117..120 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@120..128 "repeated" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@128..129 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@129..136 "value" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@136..138 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@138..139 "1" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@139..141 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@141..149 "repeated" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@149..150 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@150..157 "other" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@157..159 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@159..160 "2" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@160..163 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@163..171 "standard" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@171..172 "]" [] [],
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@172..174 "[" [Newline("\n")] [],
+            opening_inner_token: L_BRACK@174..175 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@175..183 "standard" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@183..184 "]" [] [],
+            closing_outer_token: R_BRACK@184..185 "]" [] [],
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@185..188 "[" [Newline("\n"), Newline("\n")] [],
+            opening_inner_token: L_BRACK@188..189 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@189..194 "array" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@194..195 "]" [] [],
+            closing_outer_token: R_BRACK@195..196 "]" [] [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@196..198 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@198..203 "array" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@203..204 "]" [] [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@204..207 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@207..221 "header_defined" [] [],
+                    },
+                    DOT@221..222 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@222..227 "child" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@227..228 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@228..235 "value" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@235..237 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@237..238 "1" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@238..240 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@240..254 "header_defined" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@254..255 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@255..261 "child" [Newline("\n")] [],
+                    },
+                    DOT@261..262 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@262..268 "extra" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@268..270 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@270..271 "2" [] [],
+            },
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@271..274 "[" [Newline("\n"), Newline("\n")] [],
+            opening_inner_token: L_BRACK@274..275 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@275..287 "array_parent" [] [],
+                    },
+                    DOT@287..288 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@288..293 "child" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@293..294 "]" [] [],
+            closing_outer_token: R_BRACK@294..295 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@295..302 "value" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@302..304 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@304..305 "1" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@305..307 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@307..319 "array_parent" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@319..320 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@320..326 "child" [Newline("\n")] [],
+                    },
+                    DOT@326..327 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@327..333 "extra" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@333..335 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@335..336 "2" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@336..339 "[" [Newline("\n"), Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@339..354 "implicit_parent" [] [],
+                    },
+                    DOT@354..355 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@355..360 "child" [] [],
+                    },
+                    DOT@360..361 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@361..371 "grandchild" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@371..372 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@372..379 "value" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@379..381 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@381..382 "1" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@382..384 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@384..399 "implicit_parent" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@399..400 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@400..406 "child" [Newline("\n")] [],
+                    },
+                    DOT@406..407 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@407..413 "value" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@413..415 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@415..416 "2" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@416..418 "[" [Newline("\n")] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@418..433 "implicit_parent" [] [],
+                    },
+                    DOT@433..434 "." [] [],
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@434..439 "child" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@439..440 "]" [] [],
+        },
+    ],
+    eof_token: EOF@440..441 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..441
+  0: (empty)
+  1: TOML_ITEM_LIST@0..440
+    0: TOML_KEY_VALUE@0..13
+      0: TOML_KEY@0..10
+        0: TOML_KEY_SEGMENT_LIST@0..10
+          0: TOML_KEY_SEGMENT@0..10
+            0: TOML_BARE_KEY@0..10 "duplicate" [] [Whitespace(" ")]
+      1: EQ@10..12 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@12..13
+        0: TOML_INTEGER@12..13 "1" [] []
+    1: TOML_KEY_VALUE@13..27
+      0: TOML_KEY@13..24
+        0: TOML_KEY_SEGMENT_LIST@13..24
+          0: TOML_KEY_SEGMENT@13..24
+            0: TOML_BARE_KEY@13..24 "duplicate" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@24..26 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@26..27
+        0: TOML_INTEGER@26..27 "2" [] []
+    2: TOML_KEY_VALUE@27..40
+      0: TOML_KEY@27..37
+        0: TOML_KEY_SEGMENT_LIST@27..37
+          0: TOML_KEY_SEGMENT@27..37
+            0: TOML_BARE_KEY@27..37 "escaped" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: EQ@37..39 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@39..40
+        0: TOML_INTEGER@39..40 "1" [] []
+    3: TOML_KEY_VALUE@40..59
+      0: TOML_KEY@40..56
+        0: TOML_KEY_SEGMENT_LIST@40..56
+          0: TOML_KEY_SEGMENT@40..56
+            0: TOML_BASIC_STRING@40..56 "\"\\u0065scaped\"" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@56..58 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@58..59
+        0: TOML_INTEGER@58..59 "2" [] []
+    4: TOML_KEY_VALUE@59..77
+      0: TOML_KEY@59..74
+        0: TOML_KEY_SEGMENT_LIST@59..74
+          0: TOML_KEY_SEGMENT@59..67
+            0: TOML_BARE_KEY@59..67 "dotted" [Newline("\n"), Newline("\n")] []
+          1: DOT@67..68 "." [] []
+          2: TOML_KEY_SEGMENT@68..74
+            0: TOML_BARE_KEY@68..74 "value" [] [Whitespace(" ")]
+      1: EQ@74..76 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@76..77
+        0: TOML_INTEGER@76..77 "1" [] []
+    5: TOML_TABLE@77..86
+      0: L_BRACK@77..79 "[" [Newline("\n")] []
+      1: TOML_KEY@79..85
+        0: TOML_KEY_SEGMENT_LIST@79..85
+          0: TOML_KEY_SEGMENT@79..85
+            0: TOML_BARE_KEY@79..85 "dotted" [] []
+      2: R_BRACK@85..86 "]" [] []
+    6: TOML_KEY_VALUE@86..117
+      0: TOML_KEY@86..95
+        0: TOML_KEY_SEGMENT_LIST@86..95
+          0: TOML_KEY_SEGMENT@86..95
+            0: TOML_BARE_KEY@86..95 "inline" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: EQ@95..97 "=" [] [Whitespace(" ")]
+      2: TOML_INLINE_TABLE@97..117
+        0: L_CURLY@97..99 "{" [] [Whitespace(" ")]
+        1: TOML_INLINE_TABLE_ELEMENT_LIST@99..116
+          0: TOML_KEY_VALUE@99..106
+            0: TOML_KEY@99..103
+              0: TOML_KEY_SEGMENT_LIST@99..103
+                0: TOML_KEY_SEGMENT@99..103
+                  0: TOML_BARE_KEY@99..103 "key" [] [Whitespace(" ")]
+            1: EQ@103..105 "=" [] [Whitespace(" ")]
+            2: TOML_INTEGER_VALUE@105..106
+              0: TOML_INTEGER@105..106 "1" [] []
+          1: COMMA@106..108 "," [] [Whitespace(" ")]
+          2: TOML_KEY_VALUE@108..116
+            0: TOML_KEY@108..112
+              0: TOML_KEY_SEGMENT_LIST@108..112
+                0: TOML_KEY_SEGMENT@108..112
+                  0: TOML_BARE_KEY@108..112 "key" [] [Whitespace(" ")]
+            1: EQ@112..114 "=" [] [Whitespace(" ")]
+            2: TOML_INTEGER_VALUE@114..116
+              0: TOML_INTEGER@114..116 "2" [] [Whitespace(" ")]
+        2: R_CURLY@116..117 "}" [] []
+    7: TOML_TABLE@117..129
+      0: L_BRACK@117..120 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@120..128
+        0: TOML_KEY_SEGMENT_LIST@120..128
+          0: TOML_KEY_SEGMENT@120..128
+            0: TOML_BARE_KEY@120..128 "repeated" [] []
+      2: R_BRACK@128..129 "]" [] []
+    8: TOML_KEY_VALUE@129..139
+      0: TOML_KEY@129..136
+        0: TOML_KEY_SEGMENT_LIST@129..136
+          0: TOML_KEY_SEGMENT@129..136
+            0: TOML_BARE_KEY@129..136 "value" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@136..138 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@138..139
+        0: TOML_INTEGER@138..139 "1" [] []
+    9: TOML_TABLE@139..150
+      0: L_BRACK@139..141 "[" [Newline("\n")] []
+      1: TOML_KEY@141..149
+        0: TOML_KEY_SEGMENT_LIST@141..149
+          0: TOML_KEY_SEGMENT@141..149
+            0: TOML_BARE_KEY@141..149 "repeated" [] []
+      2: R_BRACK@149..150 "]" [] []
+    10: TOML_KEY_VALUE@150..160
+      0: TOML_KEY@150..157
+        0: TOML_KEY_SEGMENT_LIST@150..157
+          0: TOML_KEY_SEGMENT@150..157
+            0: TOML_BARE_KEY@150..157 "other" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@157..159 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@159..160
+        0: TOML_INTEGER@159..160 "2" [] []
+    11: TOML_TABLE@160..172
+      0: L_BRACK@160..163 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@163..171
+        0: TOML_KEY_SEGMENT_LIST@163..171
+          0: TOML_KEY_SEGMENT@163..171
+            0: TOML_BARE_KEY@163..171 "standard" [] []
+      2: R_BRACK@171..172 "]" [] []
+    12: TOML_ARRAY_TABLE@172..185
+      0: L_BRACK@172..174 "[" [Newline("\n")] []
+      1: L_BRACK@174..175 "[" [] []
+      2: TOML_KEY@175..183
+        0: TOML_KEY_SEGMENT_LIST@175..183
+          0: TOML_KEY_SEGMENT@175..183
+            0: TOML_BARE_KEY@175..183 "standard" [] []
+      3: R_BRACK@183..184 "]" [] []
+      4: R_BRACK@184..185 "]" [] []
+    13: TOML_ARRAY_TABLE@185..196
+      0: L_BRACK@185..188 "[" [Newline("\n"), Newline("\n")] []
+      1: L_BRACK@188..189 "[" [] []
+      2: TOML_KEY@189..194
+        0: TOML_KEY_SEGMENT_LIST@189..194
+          0: TOML_KEY_SEGMENT@189..194
+            0: TOML_BARE_KEY@189..194 "array" [] []
+      3: R_BRACK@194..195 "]" [] []
+      4: R_BRACK@195..196 "]" [] []
+    14: TOML_TABLE@196..204
+      0: L_BRACK@196..198 "[" [Newline("\n")] []
+      1: TOML_KEY@198..203
+        0: TOML_KEY_SEGMENT_LIST@198..203
+          0: TOML_KEY_SEGMENT@198..203
+            0: TOML_BARE_KEY@198..203 "array" [] []
+      2: R_BRACK@203..204 "]" [] []
+    15: TOML_TABLE@204..228
+      0: L_BRACK@204..207 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@207..227
+        0: TOML_KEY_SEGMENT_LIST@207..227
+          0: TOML_KEY_SEGMENT@207..221
+            0: TOML_BARE_KEY@207..221 "header_defined" [] []
+          1: DOT@221..222 "." [] []
+          2: TOML_KEY_SEGMENT@222..227
+            0: TOML_BARE_KEY@222..227 "child" [] []
+      2: R_BRACK@227..228 "]" [] []
+    16: TOML_KEY_VALUE@228..238
+      0: TOML_KEY@228..235
+        0: TOML_KEY_SEGMENT_LIST@228..235
+          0: TOML_KEY_SEGMENT@228..235
+            0: TOML_BARE_KEY@228..235 "value" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@235..237 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@237..238
+        0: TOML_INTEGER@237..238 "1" [] []
+    17: TOML_TABLE@238..255
+      0: L_BRACK@238..240 "[" [Newline("\n")] []
+      1: TOML_KEY@240..254
+        0: TOML_KEY_SEGMENT_LIST@240..254
+          0: TOML_KEY_SEGMENT@240..254
+            0: TOML_BARE_KEY@240..254 "header_defined" [] []
+      2: R_BRACK@254..255 "]" [] []
+    18: TOML_KEY_VALUE@255..271
+      0: TOML_KEY@255..268
+        0: TOML_KEY_SEGMENT_LIST@255..268
+          0: TOML_KEY_SEGMENT@255..261
+            0: TOML_BARE_KEY@255..261 "child" [Newline("\n")] []
+          1: DOT@261..262 "." [] []
+          2: TOML_KEY_SEGMENT@262..268
+            0: TOML_BARE_KEY@262..268 "extra" [] [Whitespace(" ")]
+      1: EQ@268..270 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@270..271
+        0: TOML_INTEGER@270..271 "2" [] []
+    19: TOML_ARRAY_TABLE@271..295
+      0: L_BRACK@271..274 "[" [Newline("\n"), Newline("\n")] []
+      1: L_BRACK@274..275 "[" [] []
+      2: TOML_KEY@275..293
+        0: TOML_KEY_SEGMENT_LIST@275..293
+          0: TOML_KEY_SEGMENT@275..287
+            0: TOML_BARE_KEY@275..287 "array_parent" [] []
+          1: DOT@287..288 "." [] []
+          2: TOML_KEY_SEGMENT@288..293
+            0: TOML_BARE_KEY@288..293 "child" [] []
+      3: R_BRACK@293..294 "]" [] []
+      4: R_BRACK@294..295 "]" [] []
+    20: TOML_KEY_VALUE@295..305
+      0: TOML_KEY@295..302
+        0: TOML_KEY_SEGMENT_LIST@295..302
+          0: TOML_KEY_SEGMENT@295..302
+            0: TOML_BARE_KEY@295..302 "value" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@302..304 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@304..305
+        0: TOML_INTEGER@304..305 "1" [] []
+    21: TOML_TABLE@305..320
+      0: L_BRACK@305..307 "[" [Newline("\n")] []
+      1: TOML_KEY@307..319
+        0: TOML_KEY_SEGMENT_LIST@307..319
+          0: TOML_KEY_SEGMENT@307..319
+            0: TOML_BARE_KEY@307..319 "array_parent" [] []
+      2: R_BRACK@319..320 "]" [] []
+    22: TOML_KEY_VALUE@320..336
+      0: TOML_KEY@320..333
+        0: TOML_KEY_SEGMENT_LIST@320..333
+          0: TOML_KEY_SEGMENT@320..326
+            0: TOML_BARE_KEY@320..326 "child" [Newline("\n")] []
+          1: DOT@326..327 "." [] []
+          2: TOML_KEY_SEGMENT@327..333
+            0: TOML_BARE_KEY@327..333 "extra" [] [Whitespace(" ")]
+      1: EQ@333..335 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@335..336
+        0: TOML_INTEGER@335..336 "2" [] []
+    23: TOML_TABLE@336..372
+      0: L_BRACK@336..339 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@339..371
+        0: TOML_KEY_SEGMENT_LIST@339..371
+          0: TOML_KEY_SEGMENT@339..354
+            0: TOML_BARE_KEY@339..354 "implicit_parent" [] []
+          1: DOT@354..355 "." [] []
+          2: TOML_KEY_SEGMENT@355..360
+            0: TOML_BARE_KEY@355..360 "child" [] []
+          3: DOT@360..361 "." [] []
+          4: TOML_KEY_SEGMENT@361..371
+            0: TOML_BARE_KEY@361..371 "grandchild" [] []
+      2: R_BRACK@371..372 "]" [] []
+    24: TOML_KEY_VALUE@372..382
+      0: TOML_KEY@372..379
+        0: TOML_KEY_SEGMENT_LIST@372..379
+          0: TOML_KEY_SEGMENT@372..379
+            0: TOML_BARE_KEY@372..379 "value" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@379..381 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@381..382
+        0: TOML_INTEGER@381..382 "1" [] []
+    25: TOML_TABLE@382..400
+      0: L_BRACK@382..384 "[" [Newline("\n")] []
+      1: TOML_KEY@384..399
+        0: TOML_KEY_SEGMENT_LIST@384..399
+          0: TOML_KEY_SEGMENT@384..399
+            0: TOML_BARE_KEY@384..399 "implicit_parent" [] []
+      2: R_BRACK@399..400 "]" [] []
+    26: TOML_KEY_VALUE@400..416
+      0: TOML_KEY@400..413
+        0: TOML_KEY_SEGMENT_LIST@400..413
+          0: TOML_KEY_SEGMENT@400..406
+            0: TOML_BARE_KEY@400..406 "child" [Newline("\n")] []
+          1: DOT@406..407 "." [] []
+          2: TOML_KEY_SEGMENT@407..413
+            0: TOML_BARE_KEY@407..413 "value" [] [Whitespace(" ")]
+      1: EQ@413..415 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@415..416
+        0: TOML_INTEGER@415..416 "2" [] []
+    27: TOML_TABLE@416..440
+      0: L_BRACK@416..418 "[" [Newline("\n")] []
+      1: TOML_KEY@418..439
+        0: TOML_KEY_SEGMENT_LIST@418..439
+          0: TOML_KEY_SEGMENT@418..433
+            0: TOML_BARE_KEY@418..433 "implicit_parent" [] []
+          1: DOT@433..434 "." [] []
+          2: TOML_KEY_SEGMENT@434..439
+            0: TOML_BARE_KEY@434..439 "child" [] []
+      2: R_BRACK@439..440 "]" [] []
+  2: EOF@440..441 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+duplicate_definitions.toml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML key is already defined.
+  
+    1 │ duplicate = 1
+  > 2 │ duplicate = 2
+      │ ^^^^^^^^^
+    3 │ 
+    4 │ escaped = 1
+  
+  i The first definition is here.
+  
+  > 1 │ duplicate = 1
+      │ ^^^^^^^^^
+    2 │ duplicate = 2
+    3 │ 
+  
+duplicate_definitions.toml:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML key is already defined.
+  
+    4 │ escaped = 1
+  > 5 │ "\u0065scaped" = 2
+      │ ^^^^^^^^^^^^^^
+    6 │ 
+    7 │ dotted.value = 1
+  
+  i The first definition is here.
+  
+    2 │ duplicate = 2
+    3 │ 
+  > 4 │ escaped = 1
+      │ ^^^^^^^
+    5 │ "\u0065scaped" = 2
+    6 │ 
+  
+duplicate_definitions.toml:8:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML table is already defined.
+  
+     7 │ dotted.value = 1
+   > 8 │ [dotted]
+       │  ^^^^^^
+     9 │ 
+    10 │ inline = { key = 1, key = 2 }
+  
+  i The first definition is here.
+  
+    5 │ "\u0065scaped" = 2
+    6 │ 
+  > 7 │ dotted.value = 1
+      │ ^^^^^^^^^^^^
+    8 │ [dotted]
+    9 │ 
+  
+duplicate_definitions.toml:10:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML key is already defined.
+  
+     8 │ [dotted]
+     9 │ 
+  > 10 │ inline = { key = 1, key = 2 }
+       │                     ^^^
+    11 │ 
+    12 │ [repeated]
+  
+  i The first definition is here.
+  
+     8 │ [dotted]
+     9 │ 
+  > 10 │ inline = { key = 1, key = 2 }
+       │            ^^^
+    11 │ 
+    12 │ [repeated]
+  
+duplicate_definitions.toml:14:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML table is already defined.
+  
+    12 │ [repeated]
+    13 │ value = 1
+  > 14 │ [repeated]
+       │  ^^^^^^^^
+    15 │ other = 2
+    16 │ 
+  
+  i The first definition is here.
+  
+    10 │ inline = { key = 1, key = 2 }
+    11 │ 
+  > 12 │ [repeated]
+       │  ^^^^^^^^
+    13 │ value = 1
+    14 │ [repeated]
+  
+duplicate_definitions.toml:18:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML array table conflicts with a previous definition.
+  
+    17 │ [standard]
+  > 18 │ [[standard]]
+       │   ^^^^^^^^
+    19 │ 
+    20 │ [[array]]
+  
+  i The first definition is here.
+  
+    15 │ other = 2
+    16 │ 
+  > 17 │ [standard]
+       │  ^^^^^^^^
+    18 │ [[standard]]
+    19 │ 
+  
+duplicate_definitions.toml:21:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML table conflicts with a previous definition.
+  
+    20 │ [[array]]
+  > 21 │ [array]
+       │  ^^^^^
+    22 │ 
+    23 │ [header_defined.child]
+  
+  i The first definition is here.
+  
+    18 │ [[standard]]
+    19 │ 
+  > 20 │ [[array]]
+       │   ^^^^^
+    21 │ [array]
+    22 │ 
+  
+duplicate_definitions.toml:26:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML key conflicts with a previous table definition.
+  
+    24 │ value = 1
+    25 │ [header_defined]
+  > 26 │ child.extra = 2
+       │ ^^^^^^^^^^^
+    27 │ 
+    28 │ [[array_parent.child]]
+  
+  i The first definition is here.
+  
+    21 │ [array]
+    22 │ 
+  > 23 │ [header_defined.child]
+       │  ^^^^^^^^^^^^^^^^^^^^
+    24 │ value = 1
+    25 │ [header_defined]
+  
+duplicate_definitions.toml:31:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML key conflicts with a previous array table definition.
+  
+    29 │ value = 1
+    30 │ [array_parent]
+  > 31 │ child.extra = 2
+       │ ^^^^^^^^^^^
+    32 │ 
+    33 │ [implicit_parent.child.grandchild]
+  
+  i The first definition is here.
+  
+    26 │ child.extra = 2
+    27 │ 
+  > 28 │ [[array_parent.child]]
+       │   ^^^^^^^^^^^^^^^^^^
+    29 │ value = 1
+    30 │ [array_parent]
+  
+duplicate_definitions.toml:37:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This TOML table is already defined.
+  
+    35 │ [implicit_parent]
+    36 │ child.value = 2
+  > 37 │ [implicit_parent.child]
+       │  ^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+  
+  i The first definition is here.
+  
+    34 │ value = 1
+    35 │ [implicit_parent]
+  > 36 │ child.value = 2
+       │ ^^^^^^^^^^^
+    37 │ [implicit_parent.child]
+    38 │ 
+  
+```
