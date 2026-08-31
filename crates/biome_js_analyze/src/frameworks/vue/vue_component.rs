@@ -777,9 +777,13 @@ impl AnyVueSetupDeclaration {
 /// Checks if the node is a source of props: either the `defineProps()` call itself, or a
 /// reference to a variable that call was assigned to.
 fn is_props_source(node: &JsSyntaxNode, model: &SemanticModel) -> bool {
+    // Case 1: the `defineProps()` call itself, as in `const { foo } = defineProps(['foo'])`.
     if let Some(call) = JsCallExpression::cast_ref(node) {
         return is_vue_compiler_macro_call(&call, model, "defineProps");
     }
+
+    // Case 2: a reference to a variable the call was assigned to, as in
+    // `const props = defineProps(['foo'])` followed by `toRef(props, 'foo')`.
     let Some(reference) = JsReferenceIdentifier::cast_ref(node) else {
         return false;
     };
