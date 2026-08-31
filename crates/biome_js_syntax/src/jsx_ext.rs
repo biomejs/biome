@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
 use crate::{
-    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
-    AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement,
-    JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString, inner_string_text,
-    static_value::StaticValue,
+    AnyJsExpression, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild,
+    AnyJsxElementName, AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList,
+    JsxElement, JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
@@ -750,6 +750,9 @@ impl AnyJsxAttributeValue {
                 expression.expression().ok()?.as_static_value()
             }
             Self::JsxString(string) => Some(StaticValue::String(string.value_token().ok()?)),
+            Self::JsTemplateExpression(template) => {
+                AnyJsExpression::JsTemplateExpression(template.clone()).as_static_value()
+            }
         }
     }
 }

@@ -358,9 +358,17 @@ fn resolve_text_expression_language(
 
 fn resolve_directive_language(
     _candidate: &EmbedCandidate,
-    _file_source: &DocumentFileSource,
+    file_source: &DocumentFileSource,
 ) -> Option<GuestLanguage> {
-    Some(GuestLanguage::JsModule)
+    if file_source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_astro())
+    {
+        // Astro compiles `.astro` as TSX throughout, attribute positions included.
+        Some(GuestLanguage::Tsx)
+    } else {
+        Some(GuestLanguage::JsModule)
+    }
 }
 
 fn resolve_style_attribute_language(

@@ -1223,7 +1223,13 @@ impl Features {
         match language_hint {
             #[cfg(feature = "lang_js")]
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                JsEmbeddingKind::Astro { .. } => self.astro.capabilities(),
+                // Only whole-file frontmatter documents use the fence-slicing Astro handler.
+                JsEmbeddingKind::Astro {
+                    frontmatter: true, ..
+                } => self.astro.capabilities(),
+                JsEmbeddingKind::Astro {
+                    frontmatter: false, ..
+                } => self.js.capabilities(),
                 #[cfg(feature = "lang_html")]
                 JsEmbeddingKind::Vue { .. } => self.vue.capabilities(),
                 #[cfg(not(feature = "lang_html"))]
