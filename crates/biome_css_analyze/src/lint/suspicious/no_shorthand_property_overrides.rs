@@ -22,6 +22,12 @@ declare_lint_rule! {
     /// a { padding-left: 10px; padding: 20px; }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// @keyframes fade {
+    ///   from { margin-left: 1px; margin: 0; }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
@@ -32,6 +38,13 @@ declare_lint_rule! {
     /// a { transition-property: opacity; } a { transition: opacity 1s linear; }
     /// ```
     ///
+    /// ```css
+    /// body { font-size: var(--font-size); }
+    /// @supports (font: -apple-system-body) {
+    ///   body { font-size: -apple-system-body; }
+    /// }
+    /// ```
+    ///
     pub NoShorthandPropertyOverrides {
         version: "1.8.2",
         name: "noShorthandPropertyOverrides",
@@ -40,13 +53,6 @@ declare_lint_rule! {
         severity: Severity::Error,
         sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
     }
-}
-
-#[derive(Clone)]
-pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
-    property_node: AnyCssDeclarationName,
-    target_property: TokenText,
-    override_property: TokenText,
 }
 
 pub struct NoDeclarationBlockShorthandPropertyOverridesState {
@@ -88,6 +94,13 @@ impl Rule for NoShorthandPropertyOverrides {
             }),
         )
     }
+}
+
+#[derive(Clone)]
+pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
+    property_node: AnyCssDeclarationName,
+    target_property: TokenText,
+    override_property: TokenText,
 }
 
 fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
@@ -134,7 +147,7 @@ struct PriorProperty {
 
 #[derive(Default)]
 struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
-    prior_props_in_block: Vec<PriorProperty>,
+    prior_props_in_lists: Vec<Vec<PriorProperty>>,
 }
 
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
@@ -145,54 +158,85 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         mut ctx: VisitorContext<Self::Language>,
     ) {
-        if let WalkEvent::Enter(node) = event {
-            match node.kind() {
-                CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
-                    self.prior_props_in_block.clear();
-                }
+        match event {
+            WalkEvent::Enter(node) => match node.kind() {
                 CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                    if let Some(prop_node) = CssGenericProperty::cast_ref(node)
-                        .and_then(|property_node| property_node.name().ok())
-                        && let Some(prop) = prop_node.identifier_text()
-                    {
-                        #[expect(clippy::disallowed_methods)]
-                        let prop_lowercase = prop.to_lowercase();
-
-                        let prop_prefix = vender_prefix(&prop_lowercase);
-                        let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, prop_prefix);
-                        let override_props = get_override_props(unprefixed_prop);
-
-                        self.prior_props_in_block.iter().for_each(|prior_prop| {
-                            let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
-                            let unprefixed_prior_prop =
-                                remove_vendor_prefix(&prior_prop.lowercase, prior_prop_prefix);
-
-                            if prop_prefix == prior_prop_prefix
-                                && override_props.binary_search(&unprefixed_prior_prop).is_ok()
-                            {
-                                ctx.match_query(
-                                    NoDeclarationBlockShorthandPropertyOverridesQuery {
-                                        property_node: prop_node.clone(),
-                                        target_property: prop.clone(),
-                                        override_property: prior_prop.original.clone(),
-                                    },
-                                );
-                            }
-                        });
-
-                        self.prior_props_in_block.push(PriorProperty {
-                            original: prop,
-                            lowercase: prop_lowercase.into(),
-                        });
+                    if !is_declaration_in_list(node) {
+                        return;
                     }
+
+                    let Some(prior_props) = self.prior_props_in_lists.last_mut() else {
+                        return;
+                    };
+                    let Some((property_node, prop)) =
+                        CssGenericProperty::cast_ref(node).and_then(|property| {
+                            let property_node = property.name().ok()?;
+                            let prop = property_node.identifier_text()?;
+                            Some((property_node, prop))
+                        })
+                    else {
+                        return;
+                    };
+
+                    #[expect(clippy::disallowed_methods)]
+                    let prop_lowercase = prop.to_lowercase();
+
+                    let prop_prefix = vender_prefix(&prop_lowercase);
+                    let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, prop_prefix);
+                    let override_props = get_override_props(unprefixed_prop);
+
+                    for prior_prop in prior_props.iter() {
+                        let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
+                        let unprefixed_prior_prop =
+                            remove_vendor_prefix(&prior_prop.lowercase, prior_prop_prefix);
+
+                        if prop_prefix == prior_prop_prefix
+                            && override_props.binary_search(&unprefixed_prior_prop).is_ok()
+                        {
+                            ctx.match_query(NoDeclarationBlockShorthandPropertyOverridesQuery {
+                                property_node: property_node.clone(),
+                                target_property: prop.clone(),
+                                override_property: prior_prop.original.clone(),
+                            });
+                        }
+                    }
+
+                    prior_props.push(PriorProperty {
+                        original: prop,
+                        lowercase: prop_lowercase.into(),
+                    });
+                }
+
+                kind if is_declaration_list(kind) => {
+                    self.prior_props_in_lists.push(Vec::new());
                 }
                 _ => {}
+            },
+            WalkEvent::Leave(node) if is_declaration_list(node.kind()) => {
+                self.prior_props_in_lists.pop();
             }
+            WalkEvent::Leave(_) => {}
         }
     }
 }
 
+fn is_declaration_list(kind: CssSyntaxKind) -> bool {
+    matches!(
+        kind,
+        CssSyntaxKind::CSS_DECLARATION_LIST
+            | CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST
+            | CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
+            | CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST
+    )
+}
 
+fn is_declaration_in_list(node: &SyntaxNode<CssLanguage>) -> bool {
+    node.ancestors()
+        .skip(1)
+        .find(|ancestor| ancestor.kind() == CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON)
+        .and_then(|declaration| declaration.parent())
+        .is_some_and(|parent| is_declaration_list(parent.kind()))
+}
 
 impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
     fn text_range(&self) -> TextRange {
