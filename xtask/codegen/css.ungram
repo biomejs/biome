@@ -2340,6 +2340,29 @@ AnyCssUrlValue =
 	| CssString
 	| ScssExpression
 	| ScssInterpolatedString
+	| ScssInterpolatedUrlValue
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedUrlValue =
+	parts: ScssInterpolatedUrlValuePartList
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedUrlValuePartList =
+	AnyScssInterpolatedUrlValuePart*
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^
+//                            ^^^^^^^^
+AnyScssInterpolatedUrlValuePart =
+	ScssUrlText
+	| ScssInterpolation
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^        ^^^^
+ScssUrlText =
+	value: 'scss_url_content_literal'
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 

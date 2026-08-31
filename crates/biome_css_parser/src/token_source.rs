@@ -99,6 +99,18 @@ impl<'src> CssTokenSource<'src> {
         self.lexer.lexer().has_pending_scss_string_start()
     }
 
+    /// Returns the lexer context for the URL body following the current `(`
+    /// without consuming it.
+    pub(crate) fn url_body_lex_context(
+        &self,
+        scss_exclusive_syntax_allowed: bool,
+    ) -> CssLexContext {
+        let start = usize::from(self.current_range().end());
+        self.lexer
+            .lexer()
+            .url_body_lex_context(start, scss_exclusive_syntax_allowed)
+    }
+
     /// Delegates to the lexer-owned `CssScanCursor` helper without exposing
     /// cursor construction or current-token offset plumbing at the
     /// token-source layer.
@@ -217,10 +229,16 @@ impl<'src> CssTokenSource<'src> {
 
     /// Restores the token source to a previous state
     pub fn rewind(&mut self, checkpoint: CssTokenSourceCheckpoint) {
-        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
-        self.trivia_list.truncate(checkpoint.trivia_len as usize);
-        self.lexer.rewind(checkpoint.lexer_checkpoint);
-        self.scss_string_interpolation_quotes = checkpoint.scss_string_interpolation_quotes;
+        let CssTokenSourceCheckpoint {
+            lexer_checkpoint,
+            trivia_len,
+            scss_string_interpolation_quotes,
+        } = checkpoint;
+
+        assert!(self.trivia_list.len() >= trivia_len as usize);
+        self.trivia_list.truncate(trivia_len as usize);
+        self.lexer.rewind(lexer_checkpoint);
+        self.scss_string_interpolation_quotes = scss_string_interpolation_quotes;
     }
 }
 

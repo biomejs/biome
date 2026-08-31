@@ -3,17 +3,20 @@
 
 use super::{
     CssLexer, TextSize,
-    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
+    scan_cursor::{CssScanCursor, StringBodyScanStop},
     source_cursor::SourceCursor,
 };
 use crate::CssParserOptions;
 use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
+use crate::token_source::CssTokenSource;
 use biome_css_syntax::{
     CssSyntaxKind::{self, EOF},
     T, TextRange,
 };
 use biome_languages::CssFileSource;
 use biome_parser::lexer::{Lexer, LexerWithCheckpoint};
+use biome_parser::prelude::{BumpWithContext, TokenSource};
+use biome_parser::token_source::NthToken;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -72,6 +75,14 @@ macro_rules! assert_lex {
 
         assert_eq!($src, new_str, "Failed to reconstruct input");
     }};
+}
+
+fn url_body_lex_context(
+    lexer: &CssLexer<'_>,
+    scss_exclusive_syntax_allowed: bool,
+) -> CssLexContext {
+    lexer
+        .url_body_lex_context(lexer.position(), scss_exclusive_syntax_allowed)
 }
 
 // This is for testing if the lexer is truly lossless
@@ -162,8 +173,8 @@ fn custom_property_context_preserves_unknown_delimiters() {
 }
 
 #[test]
-fn url_body_context_emits_raw_url_value() {
-    let mut lexer = CssLexer::from_str("url(foo#{$x}.css)");
+fn url_body_classification_emits_raw_url_value() {
+    let mut lexer = CssLexer::from_str("url(foo.css)");
 
     assert_eq!(
         lexer.next_token(CssLexContext::Regular),
@@ -172,20 +183,239 @@ fn url_body_context_emits_raw_url_value() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(
         lexer.current_range(),
-        TextRange::new(TextSize::from(4), TextSize::from(16))
+        TextRange::new(TextSize::from(4), TextSize::from(11))
     );
     assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
 }
 
 #[test]
-fn url_body_context_falls_back_for_interpolated_function() {
+fn scss_url_value_scanner_classifies_structured_bodies() {
+    for source in [
+        "images/#{$name}.png)",
+        "#{$base}/#{$theme}/logo.svg)",
+        "fonts/#{$family}.woff2)",
+        r#"images/#{map.get($icons, \"logo\")}.svg)"#,
+        r"icons/\#{literal}-#{$name}.svg)",
+    ] {
+        let context = CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+            .url_body_lex_context(true);
+        assert!(matches!(
+            context,
+            CssLexContext::ScssUrlValue { .. }
+        ), "{source}: {context:?}");
+    }
+}
+
+#[test]
+fn scss_url_value_scanner_keeps_malformed_bodies_raw() {
+    for source in [
+        "images/#{$name.png)",
+        "images/#{$name}/#{$theme.png)",
+        "images/#{$name}.png",
+    ] {
+        assert!(matches!(
+            CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+                .url_body_lex_context(true),
+            CssLexContext::UrlRawValue(_)
+        ));
+    }
+}
+
+#[test]
+fn scss_url_value_scanner_preserves_malformed_raw_boundaries() {
+    for source in [
+        "fudge#{\"x)y\")",
+        "images/#{\"x)y\")",
+        "fudge#{/* ) */x)",
+        "fudge#{// )\nx)",
+    ] {
+        let first_close = source.find(')').unwrap();
+        let context = CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+            .url_body_lex_context(true);
+
+        assert!(matches!(
+            context,
+            CssLexContext::UrlRawValue(scan) if scan.end == first_close && scan.terminated
+        ), "{source}: {context:?}");
+    }
+
+    let source = r"fudge#{\)x)";
+    let context =
+        CssScanCursor::new(SourceCursor::new(source, 0), true, true).url_body_lex_context(true);
+    assert!(matches!(
+        context,
+        CssLexContext::UrlRawValue(scan) if scan.end == source.len() - 1 && scan.terminated
+    ));
+
+    let source = r#"fudge#{broken #{bar("x")}.css)"#;
+    let context =
+        CssScanCursor::new(SourceCursor::new(source, 0), true, true).url_body_lex_context(true);
+    assert!(matches!(
+        context,
+        CssLexContext::UrlRawValue(scan) if scan.end == source.len() - 1 && scan.terminated
+    ));
+}
+
+#[test]
+fn scss_url_value_scanner_preserves_plain_raw_body_ranges() {
+    for source in [
+        "data:image/svg+xml,%3Csvg%3E)",
+        r"images/foo\)bar.png)",
+        "images/foo.png  )",
+    ] {
+        let context = CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+            .url_body_lex_context(true);
+        assert!(matches!(
+            context,
+            CssLexContext::UrlRawValue(scan)
+                if scan.start == 0 && scan.end == source.len() - 1 && scan.terminated
+        ), "{source}: {context:?}");
+    }
+}
+
+#[test]
+fn scss_url_value_scanner_preserves_function_precedence() {
+    for source in [
+        "foo#{$name}(bar))",
+        "#{name}(bar))",
+        "#{prefix}-#{suffix}(bar))",
+    ] {
+        assert_eq!(
+            CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+                .url_body_lex_context(true),
+            CssLexContext::Regular
+        );
+    }
+}
+
+#[test]
+fn scss_url_value_lexes_content_and_interpolation_boundaries() {
+    let source = "url(images/#{$name}.png)";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, true);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::SCSS_URL_CONTENT_LITERAL);
+    assert_eq!(&source[lexer.current_range()], "images/");
+    assert_eq!(lexer.next_token(context), T![#]);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['{']);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![$]);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), CssSyntaxKind::IDENT);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['}']);
+    assert_eq!(
+        lexer.next_token(context),
+        CssSyntaxKind::SCSS_URL_CONTENT_LITERAL
+    );
+    assert_eq!(&source[lexer.current_range()], ".png");
+    assert_eq!(lexer.next_token(context), T![')']);
+}
+
+#[test]
+fn scss_url_value_uses_precomputed_classification_after_leading_trivia() {
+    let mut source = CssTokenSource::from_str(
+        "url( #{$name}.png)",
+        CssParserOptions::default(),
+        CssFileSource::scss(),
+    );
+
+    assert_eq!(source.current(), CssSyntaxKind::URL_KW);
+    source.bump_with_context(CssLexContext::Regular);
+    assert_eq!(source.current(), T!['(']);
+    let context = source.url_body_lex_context(true);
+    source.bump_with_context(context);
+    assert_eq!(source.current(), T![#]);
+}
+
+#[test]
+fn scss_url_value_checkpoint_restores_interpolation_boundary() {
+    let mut source = CssTokenSource::from_str(
+        "url( #{$name}.png)",
+        CssParserOptions::default(),
+        CssFileSource::scss(),
+    );
+
+    source.bump_with_context(CssLexContext::Regular);
+    let context = source.url_body_lex_context(true);
+    source.bump_with_context(context);
+    assert_eq!(source.current(), T![#]);
+
+    let checkpoint = source.checkpoint();
+    assert_eq!(source.nth(1), T!['{']);
+
+    source.bump_with_context(CssLexContext::Regular);
+    assert_eq!(source.current(), T!['{']);
+
+    source.rewind(checkpoint);
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.nth(1), T!['{']);
+    source.bump_with_context(CssLexContext::Regular);
+    assert_eq!(source.current(), T!['{']);
+}
+
+#[test]
+fn scss_url_value_lexes_leading_block_comment_before_structured_body() {
+    let source = "url(/* TODO(asset) */images/#{$name}.png)";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, true);
+
+    assert!(matches!(context, CssLexContext::ScssUrlValue { .. }));
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::COMMENT);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::SCSS_URL_CONTENT_LITERAL);
+    assert_eq!(&source[lexer.current_range()], "images/");
+}
+
+#[test]
+fn scss_url_value_lexes_leading_line_comment_before_structured_body() {
+    let source = "url(// TODO(asset)\nimages/#{$name}.png)";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, true);
+
+    assert!(matches!(context, CssLexContext::ScssUrlValue { .. }));
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::COMMENT);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::NEWLINE);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::SCSS_URL_CONTENT_LITERAL);
+    assert_eq!(&source[lexer.current_range()], "images/");
+}
+
+#[test]
+fn scss_url_value_keeps_escaped_interpolation_in_content() {
+    let source = "url(icons/\\#{literal}-#{$name}.svg)";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, true);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::SCSS_URL_CONTENT_LITERAL);
+    assert_eq!(&source[lexer.current_range()], r"icons/\#{literal}-");
+    assert_eq!(lexer.next_token(context), T![#]);
+}
+
+#[test]
+fn url_body_classification_falls_back_for_interpolated_function() {
     let mut lexer = CssLexer::from_str("url(#{name}(bar))");
 
     assert_eq!(
@@ -195,9 +425,7 @@ fn url_body_context_falls_back_for_interpolated_function() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         T![#]
     );
     assert_eq!(
@@ -221,7 +449,7 @@ fn url_body_context_falls_back_for_interpolated_function() {
 }
 
 #[test]
-fn url_body_context_reuses_pending_raw_scan_after_leading_trivia() {
+fn url_body_classification_reuses_precomputed_raw_scan_after_leading_trivia() {
     let mut lexer = CssLexer::from_str("url( foo)");
 
     assert_eq!(
@@ -229,18 +457,15 @@ fn url_body_context_reuses_pending_raw_scan_after_leading_trivia() {
         CssSyntaxKind::URL_KW
     );
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, false);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: false,
-        }),
+        lexer.next_token(context),
         CssSyntaxKind::WHITESPACE
     );
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: false,
-        }),
+        lexer.next_token(context),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(
@@ -252,7 +477,7 @@ fn url_body_context_reuses_pending_raw_scan_after_leading_trivia() {
 }
 
 #[test]
-fn url_body_context_drops_stale_pending_raw_scan_after_regular_fallback() {
+fn url_body_classification_falls_back_after_precomputed_raw_start() {
     let mut lexer = CssLexer::from_str("url( foo)");
 
     assert_eq!(
@@ -260,11 +485,10 @@ fn url_body_context_drops_stale_pending_raw_scan_after_regular_fallback() {
         CssSyntaxKind::URL_KW
     );
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, false);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: false,
-        }),
+        lexer.next_token(context),
         CssSyntaxKind::WHITESPACE
     );
 
@@ -273,16 +497,11 @@ fn url_body_context_drops_stale_pending_raw_scan_after_regular_fallback() {
         CssSyntaxKind::IDENT
     );
 
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: false,
-        }),
-        T![')']
-    );
+    assert_eq!(lexer.next_token(context), T![')']);
 }
 
 #[test]
-fn url_body_context_skips_scss_line_comment_trivia_before_interpolated_function() {
+fn url_body_classification_skips_scss_line_comment_trivia_before_interpolated_function() {
     let mut lexer =
         CssLexer::from_str("url(// comment\n#{name}(bar))").with_source_type(CssFileSource::scss());
 
@@ -291,29 +510,15 @@ fn url_body_context_skips_scss_line_comment_trivia_before_interpolated_function(
         CssSyntaxKind::URL_KW
     );
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, true);
 
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        CssSyntaxKind::COMMENT
-    );
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        CssSyntaxKind::NEWLINE
-    );
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        T![#]
-    );
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::COMMENT);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::NEWLINE);
+    assert_eq!(lexer.next_token(context), T![#]);
 }
 
 #[test]
-fn url_body_context_preserves_protocol_relative_url_in_scss() {
+fn url_body_classification_preserves_protocol_relative_url_in_scss() {
     let mut lexer = CssLexer::from_str("url(//cdn.example.com/app.css)\n")
         .with_source_type(CssFileSource::scss());
 
@@ -324,9 +529,7 @@ fn url_body_context_preserves_protocol_relative_url_in_scss() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(
@@ -337,7 +540,7 @@ fn url_body_context_preserves_protocol_relative_url_in_scss() {
 }
 
 #[test]
-fn url_body_context_handles_escaped_non_ascii_in_raw_url() {
+fn url_body_classification_handles_escaped_non_ascii_in_raw_url() {
     let mut lexer = CssLexer::from_str("url(foo\\ébar)").with_source_type(CssFileSource::scss());
 
     assert_eq!(
@@ -347,9 +550,7 @@ fn url_body_context_handles_escaped_non_ascii_in_raw_url() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(
@@ -360,7 +561,7 @@ fn url_body_context_handles_escaped_non_ascii_in_raw_url() {
 }
 
 #[test]
-fn url_body_context_keeps_interpolation_parentheses_in_raw_url() {
+fn url_body_classification_segments_interpolation_parentheses_in_url() {
     let source = r#"url(//fonts.googleapis.com/css?family=#{get-font-family("Roboto")}:100,300,500,700,900&display=swap)"#;
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -370,21 +571,17 @@ fn url_body_context_keeps_interpolation_parentheses_in_raw_url() {
     );
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
-    );
+    let context = url_body_lex_context(&lexer, true);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::SCSS_URL_CONTENT_LITERAL);
     assert_eq!(
         &source[lexer.current_range()],
-        r#"//fonts.googleapis.com/css?family=#{get-font-family("Roboto")}:100,300,500,700,900&display=swap"#
+        "//fonts.googleapis.com/css?family="
     );
-    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+    assert_eq!(lexer.next_token(context), T![#]);
 }
 
 #[test]
-fn url_body_context_keeps_protocol_relative_url_before_newline_as_raw_url() {
+fn url_body_classification_keeps_protocol_relative_url_before_newline_as_raw_url() {
     let source = "url(//cdn.example/a.css)\n.foo {}";
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -395,9 +592,7 @@ fn url_body_context_keeps_protocol_relative_url_before_newline_as_raw_url() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(&source[lexer.current_range()], "//cdn.example/a.css");
@@ -405,7 +600,7 @@ fn url_body_context_keeps_protocol_relative_url_before_newline_as_raw_url() {
 }
 
 #[test]
-fn url_body_context_keeps_variable_path_with_plus_as_raw_url() {
+fn url_body_classification_keeps_variable_path_with_plus_as_raw_url() {
     let source = "url($foo/path+file)";
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -416,9 +611,7 @@ fn url_body_context_keeps_variable_path_with_plus_as_raw_url() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(&source[lexer.current_range()], "$foo/path+file");
@@ -426,7 +619,7 @@ fn url_body_context_keeps_variable_path_with_plus_as_raw_url() {
 }
 
 #[test]
-fn url_body_context_skips_block_comment_before_scss_url_expression_plus() {
+fn url_body_classification_skips_block_comment_before_scss_url_expression_plus() {
     let source = r#"url($path /* c */ + "x")"#;
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -437,15 +630,13 @@ fn url_body_context_skips_block_comment_before_scss_url_expression_plus() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         T![$]
     );
 }
 
 #[test]
-fn url_body_context_skips_line_comment_with_parens_before_scss_url_expression_plus() {
+fn url_body_classification_skips_line_comment_with_parens_before_scss_url_expression_plus() {
     let source = "url(// TODO(asset)\n$path + 'x')";
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -454,29 +645,15 @@ fn url_body_context_skips_line_comment_with_parens_before_scss_url_expression_pl
         CssSyntaxKind::URL_KW
     );
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    let context = url_body_lex_context(&lexer, true);
 
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        CssSyntaxKind::COMMENT
-    );
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        CssSyntaxKind::NEWLINE
-    );
-    assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
-        T![$]
-    );
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::COMMENT);
+    assert_eq!(lexer.next_token(context), CssSyntaxKind::NEWLINE);
+    assert_eq!(lexer.next_token(context), T![$]);
 }
 
 #[test]
-fn url_body_context_stops_malformed_interpolation_raw_url_at_close() {
+fn url_body_classification_stops_malformed_interpolation_raw_url_at_close() {
     let source = "url(foo#{1 + 1(bar));";
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -487,9 +664,7 @@ fn url_body_context_stops_malformed_interpolation_raw_url_at_close() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(&source[lexer.current_range()], "foo#{1 + 1(bar");
@@ -497,7 +672,7 @@ fn url_body_context_stops_malformed_interpolation_raw_url_at_close() {
 }
 
 #[test]
-fn url_body_context_bounds_interpolated_function_probe_to_raw_url_close() {
+fn url_body_classification_bounds_interpolated_function_probe_to_raw_url_close() {
     let source = "url(foo#{bar));}(";
     let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
 
@@ -508,9 +683,7 @@ fn url_body_context_bounds_interpolated_function_probe_to_raw_url_close() {
     assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
 
     assert_eq!(
-        lexer.next_token(CssLexContext::UrlBody {
-            scss_exclusive_syntax_allowed: true,
-        }),
+        lexer.next_token(url_body_lex_context(&lexer, true)),
         CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
     );
     assert_eq!(&source[lexer.current_range()], "foo#{bar");
@@ -531,17 +704,30 @@ fn css_scan_cursor_respects_line_comment_config_in_url_body_scanning() {
     let scss_cursor = CssScanCursor::new(SourceCursor::new(source, 0), true, true);
     let css_cursor = CssScanCursor::new(SourceCursor::new(source, 0), false, false);
 
-    let scss_scan = scss_cursor.scan_url_body_start(false);
-    let css_scan = css_cursor.scan_url_body_start(false);
+    let scss_context = scss_cursor.url_body_lex_context(true);
+    let css_context = css_cursor.url_body_lex_context(false);
 
     assert!(matches!(
-        scss_scan,
-        UrlBodyStartScan::RawValue(scan) if scan.start == 11
+        scss_context,
+        CssLexContext::UrlRawValue(scan) if scan.start == 11
     ));
     assert!(matches!(
-        css_scan,
-        UrlBodyStartScan::RawValue(scan) if scan.start == 0
+        css_context,
+        CssLexContext::UrlRawValue(scan) if scan.start == 0
     ));
+}
+
+#[test]
+fn raw_url_classification_keeps_leading_comments_in_the_value() {
+    for source in ["/* comment */foo)", "// comment\nfoo)"] {
+        let context =
+            CssScanCursor::new(SourceCursor::new(source, 0), true, true).url_body_lex_context(false);
+
+        assert!(matches!(
+            context,
+            CssLexContext::UrlRawValue(scan) if scan.start == 0
+        ));
+    }
 }
 
 #[test]
@@ -885,9 +1071,11 @@ fn css_scan_cursor_consumes_identifier_escape_as_a_single_part() {
 }
 
 #[test]
-fn css_scan_cursor_scans_raw_url_value_until_closing_paren() {
+fn css_scan_cursor_classifies_raw_url_value_until_closing_paren() {
     let cursor = CssScanCursor::new(SourceCursor::new(r"foo\)bar)", 0), false, false);
-    let scan = cursor.scan_url_raw_value().expect("expected raw url scan");
+    let CssLexContext::UrlRawValue(scan) = cursor.url_body_lex_context(false) else {
+        panic!("expected raw URL classification");
+    };
 
     assert_eq!(scan.start, 0);
     assert_eq!(scan.end, 8);
