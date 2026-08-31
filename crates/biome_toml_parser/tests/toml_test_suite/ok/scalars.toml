@@ -1,0 +1,26 @@
+decimal = +1_000
+hexadecimal = 0xDEAD_BEEF
+octal = 0o755
+binary = 0b1101
+float = 6.626e-34
+positive_infinity = inf
+negative_infinity = -inf
+not_a_number = nan
+local_date = 1979-05-27
+local_time = 07:32:00.999999
+local_time_without_seconds = 07:32
+local_date_time = 1979-05-27T07:32:00
+local_date_time_without_seconds = 1979-05-27T07:32
+offset_date_time = 1979-05-27 07:32:00-07:00
+offset_date_time_without_seconds = 1979-05-27 07:32-07:00
+basic = "The quick brown fox jumps over the lazy dog.\e\x1B"
+literal = 'C:\Users\nodejs\templates'
+multiline_basic = """
+Roses are red
+Violets are blue"""
+multiline_literal = '''
+The first newline is trimmed in raw TOML semantics.'''
+multiline_inline = {
+  first = 1,
+  nested = { second = 2, },
+}

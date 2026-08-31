@@ -1,5 +1,8 @@
 toml-version = "v1.0.0"  # optional
 
+[files]
+exclude = ["crates/biome_toml_parser/tests/toml_test_suite/**/*.toml"]
+
 [format]
 [format.rules]
 key-value-equals-sign-alignment = true

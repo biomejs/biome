@@ -1,0 +1,19 @@
+[package]
+name                 = "biome_toml_factory"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to create TOML syntax trees"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[dependencies]
+biome_rowan       = { workspace = true }
+biome_toml_syntax = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,11 @@
+missing =
+valid = 1
+same_line = 1 next = 2
+invalid_value = nope
+array = [1 2, 3]
+malformed_inline = { a = 1, [b], c = 2 }
+key
+= 1
+[table
+]
+after = true

@@ -1,0 +1,26 @@
+# TOML 1.1 document
+title = "TOML Example"
+"quoted.key" = 'literal value'
+physical.color = "orange"
+
+[owner]
+name = "Tom Preston-Werner"
+dob = 1979-05-27T07:32:00Z
+
+[database]
+enabled = true
+ports = [
+  8000,
+  8001,
+  8002,
+]
+data = [["delta", "phi"], [3.14, -2e-2]]
+point = { x = 1, y = 2 }
+
+[[products]]
+name = "Hammer"
+sku = 738594937
+
+[[products]]
+name = "Nail"
+color = "gray"

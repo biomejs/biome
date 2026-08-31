@@ -1,0 +1,607 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+negative_hexadecimal = -0x1
+positive_octal = +0o7
+integer_overflow = 9223372036854775808
+integer_underflow = -9223372036854775809
+hexadecimal_overflow = 0x8000000000000000
+invalid_day = 1979-02-31
+invalid_leap_day = 1900-02-29
+signed_year = +001-01-01
+signed_hour = +1:00:00
+double_offset_sign = 1979-05-27T00:00:00++1:00
+surrogate_escape = "\uD800"
+malformed_date_time = 1979-05-27T00:00:00🦀abc
+short_hex_escape = "\x0"
+invalid_hex_escape = "\xGG"
+fractional_minute = 07:32.5
+fractional_minute_date_time = 1979-05-27T07:32.5
+after = true
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@0..21 "negative_hexadecimal" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@21..23 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@23..27 "-0x1" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@27..43 "positive_octal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@43..45 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@45..49 "+0o7" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@49..67 "integer_overflow" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@67..69 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@69..88 "9223372036854775808" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@88..107 "integer_underflow" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@107..109 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@109..129 "-9223372036854775809" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@129..151 "hexadecimal_overflow" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@151..153 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@153..171 "0x8000000000000000" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@171..184 "invalid_day" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@184..186 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@186..196 "1979-02-31" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@196..214 "invalid_leap_day" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@214..216 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@216..226 "1900-02-29" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@226..239 "signed_year" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@239..241 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@241..251 "+001-01-01" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@251..264 "signed_hour" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@264..266 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@266..274 "+1:00:00" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@274..294 "double_offset_sign" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@294..296 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@296..321 "1979-05-27T00:00:00++1:00" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@321..339 "surrogate_escape" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@339..341 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@341..349 "\"\\uD800\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@349..370 "malformed_date_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@370..372 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@372..398 "1979-05-27T00:00:00🦀abc" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@398..416 "short_hex_escape" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@416..418 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@418..423 "\"\\x0\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@423..443 "invalid_hex_escape" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@443..445 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@445..451 "\"\\xGG\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@451..470 "fractional_minute" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@470..472 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@472..479 "07:32.5" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@479..508 "fractional_minute_date_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@508..510 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@510..528 "1979-05-27T07:32.5" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@528..535 "after" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@535..537 "=" [] [Whitespace(" ")],
+            value: TomlBooleanValue {
+                value_token: TOML_BOOLEAN@537..541 "true" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@541..542 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..542
+  0: (empty)
+  1: TOML_ITEM_LIST@0..541
+    0: TOML_KEY_VALUE@0..27
+      0: TOML_KEY@0..21
+        0: TOML_KEY_SEGMENT_LIST@0..21
+          0: TOML_KEY_SEGMENT@0..21
+            0: TOML_BARE_KEY@0..21 "negative_hexadecimal" [] [Whitespace(" ")]
+      1: EQ@21..23 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@23..27
+        0: ERROR_TOKEN@23..27 "-0x1" [] []
+    1: TOML_KEY_VALUE@27..49
+      0: TOML_KEY@27..43
+        0: TOML_KEY_SEGMENT_LIST@27..43
+          0: TOML_KEY_SEGMENT@27..43
+            0: TOML_BARE_KEY@27..43 "positive_octal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@43..45 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@45..49
+        0: ERROR_TOKEN@45..49 "+0o7" [] []
+    2: TOML_KEY_VALUE@49..88
+      0: TOML_KEY@49..67
+        0: TOML_KEY_SEGMENT_LIST@49..67
+          0: TOML_KEY_SEGMENT@49..67
+            0: TOML_BARE_KEY@49..67 "integer_overflow" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@67..69 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@69..88
+        0: ERROR_TOKEN@69..88 "9223372036854775808" [] []
+    3: TOML_KEY_VALUE@88..129
+      0: TOML_KEY@88..107
+        0: TOML_KEY_SEGMENT_LIST@88..107
+          0: TOML_KEY_SEGMENT@88..107
+            0: TOML_BARE_KEY@88..107 "integer_underflow" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@107..109 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@109..129
+        0: ERROR_TOKEN@109..129 "-9223372036854775809" [] []
+    4: TOML_KEY_VALUE@129..171
+      0: TOML_KEY@129..151
+        0: TOML_KEY_SEGMENT_LIST@129..151
+          0: TOML_KEY_SEGMENT@129..151
+            0: TOML_BARE_KEY@129..151 "hexadecimal_overflow" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@151..153 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@153..171
+        0: ERROR_TOKEN@153..171 "0x8000000000000000" [] []
+    5: TOML_KEY_VALUE@171..196
+      0: TOML_KEY@171..184
+        0: TOML_KEY_SEGMENT_LIST@171..184
+          0: TOML_KEY_SEGMENT@171..184
+            0: TOML_BARE_KEY@171..184 "invalid_day" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@184..186 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@186..196
+        0: ERROR_TOKEN@186..196 "1979-02-31" [] []
+    6: TOML_KEY_VALUE@196..226
+      0: TOML_KEY@196..214
+        0: TOML_KEY_SEGMENT_LIST@196..214
+          0: TOML_KEY_SEGMENT@196..214
+            0: TOML_BARE_KEY@196..214 "invalid_leap_day" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@214..216 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@216..226
+        0: ERROR_TOKEN@216..226 "1900-02-29" [] []
+    7: TOML_KEY_VALUE@226..251
+      0: TOML_KEY@226..239
+        0: TOML_KEY_SEGMENT_LIST@226..239
+          0: TOML_KEY_SEGMENT@226..239
+            0: TOML_BARE_KEY@226..239 "signed_year" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@239..241 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@241..251
+        0: ERROR_TOKEN@241..251 "+001-01-01" [] []
+    8: TOML_KEY_VALUE@251..274
+      0: TOML_KEY@251..264
+        0: TOML_KEY_SEGMENT_LIST@251..264
+          0: TOML_KEY_SEGMENT@251..264
+            0: TOML_BARE_KEY@251..264 "signed_hour" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@264..266 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@266..274
+        0: ERROR_TOKEN@266..274 "+1:00:00" [] []
+    9: TOML_KEY_VALUE@274..321
+      0: TOML_KEY@274..294
+        0: TOML_KEY_SEGMENT_LIST@274..294
+          0: TOML_KEY_SEGMENT@274..294
+            0: TOML_BARE_KEY@274..294 "double_offset_sign" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@294..296 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@296..321
+        0: ERROR_TOKEN@296..321 "1979-05-27T00:00:00++1:00" [] []
+    10: TOML_KEY_VALUE@321..349
+      0: TOML_KEY@321..339
+        0: TOML_KEY_SEGMENT_LIST@321..339
+          0: TOML_KEY_SEGMENT@321..339
+            0: TOML_BARE_KEY@321..339 "surrogate_escape" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@339..341 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@341..349
+        0: TOML_BASIC_STRING@341..349 "\"\\uD800\"" [] []
+    11: TOML_KEY_VALUE@349..398
+      0: TOML_KEY@349..370
+        0: TOML_KEY_SEGMENT_LIST@349..370
+          0: TOML_KEY_SEGMENT@349..370
+            0: TOML_BARE_KEY@349..370 "malformed_date_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@370..372 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@372..398
+        0: ERROR_TOKEN@372..398 "1979-05-27T00:00:00🦀abc" [] []
+    12: TOML_KEY_VALUE@398..423
+      0: TOML_KEY@398..416
+        0: TOML_KEY_SEGMENT_LIST@398..416
+          0: TOML_KEY_SEGMENT@398..416
+            0: TOML_BARE_KEY@398..416 "short_hex_escape" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@416..418 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@418..423
+        0: TOML_BASIC_STRING@418..423 "\"\\x0\"" [] []
+    13: TOML_KEY_VALUE@423..451
+      0: TOML_KEY@423..443
+        0: TOML_KEY_SEGMENT_LIST@423..443
+          0: TOML_KEY_SEGMENT@423..443
+            0: TOML_BARE_KEY@423..443 "invalid_hex_escape" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@443..445 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@445..451
+        0: TOML_BASIC_STRING@445..451 "\"\\xGG\"" [] []
+    14: TOML_KEY_VALUE@451..479
+      0: TOML_KEY@451..470
+        0: TOML_KEY_SEGMENT_LIST@451..470
+          0: TOML_KEY_SEGMENT@451..470
+            0: TOML_BARE_KEY@451..470 "fractional_minute" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@470..472 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@472..479
+        0: ERROR_TOKEN@472..479 "07:32.5" [] []
+    15: TOML_KEY_VALUE@479..528
+      0: TOML_KEY@479..508
+        0: TOML_KEY_SEGMENT_LIST@479..508
+          0: TOML_KEY_SEGMENT@479..508
+            0: TOML_BARE_KEY@479..508 "fractional_minute_date_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@508..510 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@510..528
+        0: ERROR_TOKEN@510..528 "1979-05-27T07:32.5" [] []
+    16: TOML_KEY_VALUE@528..541
+      0: TOML_KEY@528..535
+        0: TOML_KEY_SEGMENT_LIST@528..535
+          0: TOML_KEY_SEGMENT@528..535
+            0: TOML_BARE_KEY@528..535 "after" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@535..537 "=" [] [Whitespace(" ")]
+      2: TOML_BOOLEAN_VALUE@537..541
+        0: TOML_BOOLEAN@537..541 "true" [] []
+  2: EOF@541..542 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+lexical_validation.toml:1:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+  > 1 │ negative_hexadecimal = -0x1
+      │                        ^^^^
+    2 │ positive_octal = +0o7
+    3 │ integer_overflow = 9223372036854775808
+  
+lexical_validation.toml:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    1 │ negative_hexadecimal = -0x1
+  > 2 │ positive_octal = +0o7
+      │                  ^^^^
+    3 │ integer_overflow = 9223372036854775808
+    4 │ integer_underflow = -9223372036854775809
+  
+lexical_validation.toml:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    1 │ negative_hexadecimal = -0x1
+    2 │ positive_octal = +0o7
+  > 3 │ integer_overflow = 9223372036854775808
+      │                    ^^^^^^^^^^^^^^^^^^^
+    4 │ integer_underflow = -9223372036854775809
+    5 │ hexadecimal_overflow = 0x8000000000000000
+  
+lexical_validation.toml:4:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    2 │ positive_octal = +0o7
+    3 │ integer_overflow = 9223372036854775808
+  > 4 │ integer_underflow = -9223372036854775809
+      │                     ^^^^^^^^^^^^^^^^^^^^
+    5 │ hexadecimal_overflow = 0x8000000000000000
+    6 │ invalid_day = 1979-02-31
+  
+lexical_validation.toml:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    3 │ integer_overflow = 9223372036854775808
+    4 │ integer_underflow = -9223372036854775809
+  > 5 │ hexadecimal_overflow = 0x8000000000000000
+      │                        ^^^^^^^^^^^^^^^^^^
+    6 │ invalid_day = 1979-02-31
+    7 │ invalid_leap_day = 1900-02-29
+  
+lexical_validation.toml:6:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    4 │ integer_underflow = -9223372036854775809
+    5 │ hexadecimal_overflow = 0x8000000000000000
+  > 6 │ invalid_day = 1979-02-31
+      │               ^^^^^^^^^^
+    7 │ invalid_leap_day = 1900-02-29
+    8 │ signed_year = +001-01-01
+  
+lexical_validation.toml:7:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    5 │ hexadecimal_overflow = 0x8000000000000000
+    6 │ invalid_day = 1979-02-31
+  > 7 │ invalid_leap_day = 1900-02-29
+      │                    ^^^^^^^^^^
+    8 │ signed_year = +001-01-01
+    9 │ signed_hour = +1:00:00
+  
+lexical_validation.toml:8:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+     6 │ invalid_day = 1979-02-31
+     7 │ invalid_leap_day = 1900-02-29
+   > 8 │ signed_year = +001-01-01
+       │               ^^^^^^^^^^
+     9 │ signed_hour = +1:00:00
+    10 │ double_offset_sign = 1979-05-27T00:00:00++1:00
+  
+lexical_validation.toml:9:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+     7 │ invalid_leap_day = 1900-02-29
+     8 │ signed_year = +001-01-01
+   > 9 │ signed_hour = +1:00:00
+       │               ^^^^^^^^
+    10 │ double_offset_sign = 1979-05-27T00:00:00++1:00
+    11 │ surrogate_escape = "\uD800"
+  
+lexical_validation.toml:10:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+     8 │ signed_year = +001-01-01
+     9 │ signed_hour = +1:00:00
+  > 10 │ double_offset_sign = 1979-05-27T00:00:00++1:00
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ surrogate_escape = "\uD800"
+    12 │ malformed_date_time = 1979-05-27T00:00:00🦀abc
+  
+lexical_validation.toml:11:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unicode escape does not encode a valid Unicode scalar value
+  
+     9 │ signed_hour = +1:00:00
+    10 │ double_offset_sign = 1979-05-27T00:00:00++1:00
+  > 11 │ surrogate_escape = "\uD800"
+       │                     ^^^^^^
+    12 │ malformed_date_time = 1979-05-27T00:00:00🦀abc
+    13 │ short_hex_escape = "\x0"
+  
+lexical_validation.toml:12:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    10 │ double_offset_sign = 1979-05-27T00:00:00++1:00
+    11 │ surrogate_escape = "\uD800"
+  > 12 │ malformed_date_time = 1979-05-27T00:00:00🦀abc
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ short_hex_escape = "\x0"
+    14 │ invalid_hex_escape = "\xGG"
+  
+lexical_validation.toml:13:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unicode escapes must contain 2 hexadecimal digits
+  
+    11 │ surrogate_escape = "\uD800"
+    12 │ malformed_date_time = 1979-05-27T00:00:00🦀abc
+  > 13 │ short_hex_escape = "\x0"
+       │                     ^^^
+    14 │ invalid_hex_escape = "\xGG"
+    15 │ fractional_minute = 07:32.5
+  
+lexical_validation.toml:14:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unicode escapes must contain 2 hexadecimal digits
+  
+    12 │ malformed_date_time = 1979-05-27T00:00:00🦀abc
+    13 │ short_hex_escape = "\x0"
+  > 14 │ invalid_hex_escape = "\xGG"
+       │                       ^^
+    15 │ fractional_minute = 07:32.5
+    16 │ fractional_minute_date_time = 1979-05-27T07:32.5
+  
+lexical_validation.toml:15:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    13 │ short_hex_escape = "\x0"
+    14 │ invalid_hex_escape = "\xGG"
+  > 15 │ fractional_minute = 07:32.5
+       │                     ^^^^^^^
+    16 │ fractional_minute_date_time = 1979-05-27T07:32.5
+    17 │ after = true
+  
+lexical_validation.toml:16:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid TOML value
+  
+    14 │ invalid_hex_escape = "\xGG"
+    15 │ fractional_minute = 07:32.5
+  > 16 │ fractional_minute_date_time = 1979-05-27T07:32.5
+       │                               ^^^^^^^^^^^^^^^^^^
+    17 │ after = true
+    18 │ 
+  
+```

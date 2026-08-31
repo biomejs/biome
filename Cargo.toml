@@ -106,6 +106,9 @@ biome_tailwind_syntax        = { path = "./crates/biome_tailwind_syntax", versio
 biome_test_utils             = { path = "./crates/biome_test_utils" }
 biome_text_edit              = { path = "./crates/biome_text_edit", version = "0.5.7" }
 biome_text_size              = { path = "./crates/biome_text_size", version = "0.5.7" }
+biome_toml_factory           = { path = "./crates/biome_toml_factory", version = "0.0.1" }
+biome_toml_parser            = { path = "./crates/biome_toml_parser", version = "0.0.1" }
+biome_toml_syntax            = { path = "./crates/biome_toml_syntax", version = "0.0.1" }
 biome_ungrammar              = { path = "./crates/biome_ungrammar", version = "0.3.1" }
 biome_unicode_table          = { path = "./crates/biome_unicode_table", version = "0.5.7" }
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.0.1" }

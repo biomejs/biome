@@ -1,0 +1,139 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+minimum_integer = -9223372036854775808
+maximum_integer = 9223372036854775807
+leap_day = 2000-02-29
+leap_second = 23:59:60
+offset_leap_second = 1990-12-31T23:59:60Z
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@0..16 "minimum_integer" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@16..18 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@18..38 "-9223372036854775808" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@38..55 "maximum_integer" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@55..57 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@57..76 "9223372036854775807" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@76..86 "leap_day" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@86..88 "=" [] [Whitespace(" ")],
+            value: TomlLocalDateValue {
+                value_token: TOML_LOCAL_DATE@88..98 "2000-02-29" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@98..111 "leap_second" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@111..113 "=" [] [Whitespace(" ")],
+            value: TomlLocalTimeValue {
+                value_token: TOML_LOCAL_TIME@113..121 "23:59:60" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@121..141 "offset_leap_second" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@141..143 "=" [] [Whitespace(" ")],
+            value: TomlOffsetDateTimeValue {
+                value_token: TOML_OFFSET_DATE_TIME@143..163 "1990-12-31T23:59:60Z" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@163..164 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..164
+  0: (empty)
+  1: TOML_ITEM_LIST@0..163
+    0: TOML_KEY_VALUE@0..38
+      0: TOML_KEY@0..16
+        0: TOML_KEY_SEGMENT_LIST@0..16
+          0: TOML_KEY_SEGMENT@0..16
+            0: TOML_BARE_KEY@0..16 "minimum_integer" [] [Whitespace(" ")]
+      1: EQ@16..18 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@18..38
+        0: TOML_INTEGER@18..38 "-9223372036854775808" [] []
+    1: TOML_KEY_VALUE@38..76
+      0: TOML_KEY@38..55
+        0: TOML_KEY_SEGMENT_LIST@38..55
+          0: TOML_KEY_SEGMENT@38..55
+            0: TOML_BARE_KEY@38..55 "maximum_integer" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@55..57 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@57..76
+        0: TOML_INTEGER@57..76 "9223372036854775807" [] []
+    2: TOML_KEY_VALUE@76..98
+      0: TOML_KEY@76..86
+        0: TOML_KEY_SEGMENT_LIST@76..86
+          0: TOML_KEY_SEGMENT@76..86
+            0: TOML_BARE_KEY@76..86 "leap_day" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@86..88 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_DATE_VALUE@88..98
+        0: TOML_LOCAL_DATE@88..98 "2000-02-29" [] []
+    3: TOML_KEY_VALUE@98..121
+      0: TOML_KEY@98..111
+        0: TOML_KEY_SEGMENT_LIST@98..111
+          0: TOML_KEY_SEGMENT@98..111
+            0: TOML_BARE_KEY@98..111 "leap_second" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@111..113 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_TIME_VALUE@113..121
+        0: TOML_LOCAL_TIME@113..121 "23:59:60" [] []
+    4: TOML_KEY_VALUE@121..163
+      0: TOML_KEY@121..141
+        0: TOML_KEY_SEGMENT_LIST@121..141
+          0: TOML_KEY_SEGMENT@121..141
+            0: TOML_BARE_KEY@121..141 "offset_leap_second" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@141..143 "=" [] [Whitespace(" ")]
+      2: TOML_OFFSET_DATE_TIME_VALUE@143..163
+        0: TOML_OFFSET_DATE_TIME@143..163 "1990-12-31T23:59:60Z" [] []
+  2: EOF@163..164 "" [Newline("\n")] []
+
+```

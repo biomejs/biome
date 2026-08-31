@@ -1,0 +1,5 @@
+minimum_integer = -9223372036854775808
+maximum_integer = 9223372036854775807
+leap_day = 2000-02-29
+leap_second = 23:59:60
+offset_leap_second = 1990-12-31T23:59:60Z

@@ -1,0 +1,5 @@
+[ [spaced_open]]
+[[spaced_close] ]
+leading_array_comma = [,]
+leading_inline_comma = {,}
+after = true

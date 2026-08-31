@@ -1,0 +1,97 @@
+// This grammar specifies the structure of TOML's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc. are out of scope).
+//
+// Legend:
+//
+//   //                    -- comment
+//   Name =                -- non-terminal definition
+//   'ident'               -- token (terminal)
+//   A B                   -- sequence
+//   A | B                 -- alternation
+//   A*                    -- zero or more repetition
+//   (A (',' A)* ','?)     -- comma-separated repetition allowing a trailing comma
+//   (A (',' A)*)          -- comma-separated repetition without a trailing comma
+//   A?                    -- zero or one repetition
+//   (A)                   -- same as A
+//   label:A               -- suggested name for field of AST node
+
+SyntaxElement = SyntaxElement
+
+TomlBogus = SyntaxElement*
+TomlBogusValue = SyntaxElement*
+
+TomlRoot =
+	bom: 'UNICODE_BOM'?
+	items: TomlItemList
+	eof: 'EOF'
+
+TomlItemList = AnyTomlItem*
+
+AnyTomlItem =
+	TomlKeyValue
+	| TomlTable
+	| TomlArrayTable
+	| TomlBogus
+
+TomlKeyValue =
+	key: TomlKey
+	'='
+	value: AnyTomlValue
+
+TomlTable =
+	'['
+	name: TomlKey
+	']'
+
+TomlArrayTable =
+	opening_outer: '['
+	opening_inner: '['
+	name: TomlKey
+	closing_inner: ']'
+	closing_outer: ']'
+
+TomlKey = segments: TomlKeySegmentList
+
+TomlKeySegmentList = (TomlKeySegment ('.' TomlKeySegment)*)
+
+TomlKeySegment = value: ('toml_bare_key' | 'toml_basic_string' | 'toml_literal_string')
+
+AnyTomlValue =
+	TomlStringValue
+	| TomlIntegerValue
+	| TomlFloatValue
+	| TomlBooleanValue
+	| TomlOffsetDateTimeValue
+	| TomlLocalDateTimeValue
+	| TomlLocalDateValue
+	| TomlLocalTimeValue
+	| TomlArray
+	| TomlInlineTable
+	| TomlBogusValue
+
+TomlStringValue = value: ('toml_basic_string' | 'toml_literal_string')
+TomlIntegerValue = value: 'toml_integer'
+TomlFloatValue = value: 'toml_float'
+TomlBooleanValue = value: 'toml_boolean'
+TomlOffsetDateTimeValue = value: 'toml_offset_date_time'
+TomlLocalDateTimeValue = value: 'toml_local_date_time'
+TomlLocalDateValue = value: 'toml_local_date'
+TomlLocalTimeValue = value: 'toml_local_time'
+
+TomlArray =
+	'['
+	elements: TomlArrayElementList
+	']'
+
+TomlArrayElementList = (AnyTomlValue (',' AnyTomlValue)* ','?)
+
+TomlInlineTable =
+	'{'
+	elements: TomlInlineTableElementList
+	'}'
+
+AnyTomlInlineTableElement =
+	TomlKeyValue
+	| TomlBogus
+
+TomlInlineTableElementList = (AnyTomlInlineTableElement (',' AnyTomlInlineTableElement)* ','?)

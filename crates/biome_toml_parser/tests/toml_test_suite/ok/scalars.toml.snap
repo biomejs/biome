@@ -1,0 +1,554 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+decimal = +1_000
+hexadecimal = 0xDEAD_BEEF
+octal = 0o755
+binary = 0b1101
+float = 6.626e-34
+positive_infinity = inf
+negative_infinity = -inf
+not_a_number = nan
+local_date = 1979-05-27
+local_time = 07:32:00.999999
+local_time_without_seconds = 07:32
+local_date_time = 1979-05-27T07:32:00
+local_date_time_without_seconds = 1979-05-27T07:32
+offset_date_time = 1979-05-27 07:32:00-07:00
+offset_date_time_without_seconds = 1979-05-27 07:32-07:00
+basic = "The quick brown fox jumps over the lazy dog.\e\x1B"
+literal = 'C:\Users\nodejs\templates'
+multiline_basic = """
+Roses are red
+Violets are blue"""
+multiline_literal = '''
+The first newline is trimmed in raw TOML semantics.'''
+multiline_inline = {
+  first = 1,
+  nested = { second = 2, },
+}
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@0..8 "decimal" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@10..16 "+1_000" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@16..29 "hexadecimal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@29..31 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@31..42 "0xDEAD_BEEF" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@42..49 "octal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@49..51 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@51..56 "0o755" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@56..64 "binary" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@64..66 "=" [] [Whitespace(" ")],
+            value: TomlIntegerValue {
+                value_token: TOML_INTEGER@66..72 "0b1101" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@72..79 "float" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@79..81 "=" [] [Whitespace(" ")],
+            value: TomlFloatValue {
+                value_token: TOML_FLOAT@81..90 "6.626e-34" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@90..109 "positive_infinity" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@109..111 "=" [] [Whitespace(" ")],
+            value: TomlFloatValue {
+                value_token: TOML_FLOAT@111..114 "inf" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@114..133 "negative_infinity" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@133..135 "=" [] [Whitespace(" ")],
+            value: TomlFloatValue {
+                value_token: TOML_FLOAT@135..139 "-inf" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@139..153 "not_a_number" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@153..155 "=" [] [Whitespace(" ")],
+            value: TomlFloatValue {
+                value_token: TOML_FLOAT@155..158 "nan" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@158..170 "local_date" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@170..172 "=" [] [Whitespace(" ")],
+            value: TomlLocalDateValue {
+                value_token: TOML_LOCAL_DATE@172..182 "1979-05-27" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@182..194 "local_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@194..196 "=" [] [Whitespace(" ")],
+            value: TomlLocalTimeValue {
+                value_token: TOML_LOCAL_TIME@196..211 "07:32:00.999999" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@211..239 "local_time_without_seconds" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@239..241 "=" [] [Whitespace(" ")],
+            value: TomlLocalTimeValue {
+                value_token: TOML_LOCAL_TIME@241..246 "07:32" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@246..263 "local_date_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@263..265 "=" [] [Whitespace(" ")],
+            value: TomlLocalDateTimeValue {
+                value_token: TOML_LOCAL_DATE_TIME@265..284 "1979-05-27T07:32:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@284..317 "local_date_time_without_seconds" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@317..319 "=" [] [Whitespace(" ")],
+            value: TomlLocalDateTimeValue {
+                value_token: TOML_LOCAL_DATE_TIME@319..335 "1979-05-27T07:32" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@335..353 "offset_date_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@353..355 "=" [] [Whitespace(" ")],
+            value: TomlOffsetDateTimeValue {
+                value_token: TOML_OFFSET_DATE_TIME@355..380 "1979-05-27 07:32:00-07:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@380..414 "offset_date_time_without_seconds" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@414..416 "=" [] [Whitespace(" ")],
+            value: TomlOffsetDateTimeValue {
+                value_token: TOML_OFFSET_DATE_TIME@416..438 "1979-05-27 07:32-07:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@438..445 "basic" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@445..447 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@447..499 "\"The quick brown fox jumps over the lazy dog.\\e\\x1B\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@499..508 "literal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@508..510 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_LITERAL_STRING@510..537 "'C:\\Users\\nodejs\\templates'" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@537..554 "multiline_basic" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@554..556 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_BASIC_STRING@556..593 "\"\"\"\nRoses are red\nViolets are blue\"\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@593..612 "multiline_literal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@612..614 "=" [] [Whitespace(" ")],
+            value: TomlStringValue {
+                value: TOML_LITERAL_STRING@614..672 "'''\nThe first newline is trimmed in raw TOML semantics.'''" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@672..690 "multiline_inline" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@690..692 "=" [] [Whitespace(" ")],
+            value: TomlInlineTable {
+                l_curly_token: L_CURLY@692..693 "{" [] [],
+                elements: TomlInlineTableElementList [
+                    TomlKeyValue {
+                        key: TomlKey {
+                            segments: TomlKeySegmentList [
+                                TomlKeySegment {
+                                    value: TOML_BARE_KEY@693..702 "first" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        eq_token: EQ@702..704 "=" [] [Whitespace(" ")],
+                        value: TomlIntegerValue {
+                            value_token: TOML_INTEGER@704..705 "1" [] [],
+                        },
+                    },
+                    COMMA@705..706 "," [] [],
+                    TomlKeyValue {
+                        key: TomlKey {
+                            segments: TomlKeySegmentList [
+                                TomlKeySegment {
+                                    value: TOML_BARE_KEY@706..716 "nested" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        eq_token: EQ@716..718 "=" [] [Whitespace(" ")],
+                        value: TomlInlineTable {
+                            l_curly_token: L_CURLY@718..720 "{" [] [Whitespace(" ")],
+                            elements: TomlInlineTableElementList [
+                                TomlKeyValue {
+                                    key: TomlKey {
+                                        segments: TomlKeySegmentList [
+                                            TomlKeySegment {
+                                                value: TOML_BARE_KEY@720..727 "second" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                    },
+                                    eq_token: EQ@727..729 "=" [] [Whitespace(" ")],
+                                    value: TomlIntegerValue {
+                                        value_token: TOML_INTEGER@729..730 "2" [] [],
+                                    },
+                                },
+                                COMMA@730..732 "," [] [Whitespace(" ")],
+                            ],
+                            r_curly_token: R_CURLY@732..733 "}" [] [],
+                        },
+                    },
+                    COMMA@733..734 "," [] [],
+                ],
+                r_curly_token: R_CURLY@734..736 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@736..737 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..737
+  0: (empty)
+  1: TOML_ITEM_LIST@0..736
+    0: TOML_KEY_VALUE@0..16
+      0: TOML_KEY@0..8
+        0: TOML_KEY_SEGMENT_LIST@0..8
+          0: TOML_KEY_SEGMENT@0..8
+            0: TOML_BARE_KEY@0..8 "decimal" [] [Whitespace(" ")]
+      1: EQ@8..10 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@10..16
+        0: TOML_INTEGER@10..16 "+1_000" [] []
+    1: TOML_KEY_VALUE@16..42
+      0: TOML_KEY@16..29
+        0: TOML_KEY_SEGMENT_LIST@16..29
+          0: TOML_KEY_SEGMENT@16..29
+            0: TOML_BARE_KEY@16..29 "hexadecimal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@29..31 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@31..42
+        0: TOML_INTEGER@31..42 "0xDEAD_BEEF" [] []
+    2: TOML_KEY_VALUE@42..56
+      0: TOML_KEY@42..49
+        0: TOML_KEY_SEGMENT_LIST@42..49
+          0: TOML_KEY_SEGMENT@42..49
+            0: TOML_BARE_KEY@42..49 "octal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@49..51 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@51..56
+        0: TOML_INTEGER@51..56 "0o755" [] []
+    3: TOML_KEY_VALUE@56..72
+      0: TOML_KEY@56..64
+        0: TOML_KEY_SEGMENT_LIST@56..64
+          0: TOML_KEY_SEGMENT@56..64
+            0: TOML_BARE_KEY@56..64 "binary" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@64..66 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER_VALUE@66..72
+        0: TOML_INTEGER@66..72 "0b1101" [] []
+    4: TOML_KEY_VALUE@72..90
+      0: TOML_KEY@72..79
+        0: TOML_KEY_SEGMENT_LIST@72..79
+          0: TOML_KEY_SEGMENT@72..79
+            0: TOML_BARE_KEY@72..79 "float" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@79..81 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT_VALUE@81..90
+        0: TOML_FLOAT@81..90 "6.626e-34" [] []
+    5: TOML_KEY_VALUE@90..114
+      0: TOML_KEY@90..109
+        0: TOML_KEY_SEGMENT_LIST@90..109
+          0: TOML_KEY_SEGMENT@90..109
+            0: TOML_BARE_KEY@90..109 "positive_infinity" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@109..111 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT_VALUE@111..114
+        0: TOML_FLOAT@111..114 "inf" [] []
+    6: TOML_KEY_VALUE@114..139
+      0: TOML_KEY@114..133
+        0: TOML_KEY_SEGMENT_LIST@114..133
+          0: TOML_KEY_SEGMENT@114..133
+            0: TOML_BARE_KEY@114..133 "negative_infinity" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@133..135 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT_VALUE@135..139
+        0: TOML_FLOAT@135..139 "-inf" [] []
+    7: TOML_KEY_VALUE@139..158
+      0: TOML_KEY@139..153
+        0: TOML_KEY_SEGMENT_LIST@139..153
+          0: TOML_KEY_SEGMENT@139..153
+            0: TOML_BARE_KEY@139..153 "not_a_number" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@153..155 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT_VALUE@155..158
+        0: TOML_FLOAT@155..158 "nan" [] []
+    8: TOML_KEY_VALUE@158..182
+      0: TOML_KEY@158..170
+        0: TOML_KEY_SEGMENT_LIST@158..170
+          0: TOML_KEY_SEGMENT@158..170
+            0: TOML_BARE_KEY@158..170 "local_date" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@170..172 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_DATE_VALUE@172..182
+        0: TOML_LOCAL_DATE@172..182 "1979-05-27" [] []
+    9: TOML_KEY_VALUE@182..211
+      0: TOML_KEY@182..194
+        0: TOML_KEY_SEGMENT_LIST@182..194
+          0: TOML_KEY_SEGMENT@182..194
+            0: TOML_BARE_KEY@182..194 "local_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@194..196 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_TIME_VALUE@196..211
+        0: TOML_LOCAL_TIME@196..211 "07:32:00.999999" [] []
+    10: TOML_KEY_VALUE@211..246
+      0: TOML_KEY@211..239
+        0: TOML_KEY_SEGMENT_LIST@211..239
+          0: TOML_KEY_SEGMENT@211..239
+            0: TOML_BARE_KEY@211..239 "local_time_without_seconds" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@239..241 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_TIME_VALUE@241..246
+        0: TOML_LOCAL_TIME@241..246 "07:32" [] []
+    11: TOML_KEY_VALUE@246..284
+      0: TOML_KEY@246..263
+        0: TOML_KEY_SEGMENT_LIST@246..263
+          0: TOML_KEY_SEGMENT@246..263
+            0: TOML_BARE_KEY@246..263 "local_date_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@263..265 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_DATE_TIME_VALUE@265..284
+        0: TOML_LOCAL_DATE_TIME@265..284 "1979-05-27T07:32:00" [] []
+    12: TOML_KEY_VALUE@284..335
+      0: TOML_KEY@284..317
+        0: TOML_KEY_SEGMENT_LIST@284..317
+          0: TOML_KEY_SEGMENT@284..317
+            0: TOML_BARE_KEY@284..317 "local_date_time_without_seconds" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@317..319 "=" [] [Whitespace(" ")]
+      2: TOML_LOCAL_DATE_TIME_VALUE@319..335
+        0: TOML_LOCAL_DATE_TIME@319..335 "1979-05-27T07:32" [] []
+    13: TOML_KEY_VALUE@335..380
+      0: TOML_KEY@335..353
+        0: TOML_KEY_SEGMENT_LIST@335..353
+          0: TOML_KEY_SEGMENT@335..353
+            0: TOML_BARE_KEY@335..353 "offset_date_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@353..355 "=" [] [Whitespace(" ")]
+      2: TOML_OFFSET_DATE_TIME_VALUE@355..380
+        0: TOML_OFFSET_DATE_TIME@355..380 "1979-05-27 07:32:00-07:00" [] []
+    14: TOML_KEY_VALUE@380..438
+      0: TOML_KEY@380..414
+        0: TOML_KEY_SEGMENT_LIST@380..414
+          0: TOML_KEY_SEGMENT@380..414
+            0: TOML_BARE_KEY@380..414 "offset_date_time_without_seconds" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@414..416 "=" [] [Whitespace(" ")]
+      2: TOML_OFFSET_DATE_TIME_VALUE@416..438
+        0: TOML_OFFSET_DATE_TIME@416..438 "1979-05-27 07:32-07:00" [] []
+    15: TOML_KEY_VALUE@438..499
+      0: TOML_KEY@438..445
+        0: TOML_KEY_SEGMENT_LIST@438..445
+          0: TOML_KEY_SEGMENT@438..445
+            0: TOML_BARE_KEY@438..445 "basic" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@445..447 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@447..499
+        0: TOML_BASIC_STRING@447..499 "\"The quick brown fox jumps over the lazy dog.\\e\\x1B\"" [] []
+    16: TOML_KEY_VALUE@499..537
+      0: TOML_KEY@499..508
+        0: TOML_KEY_SEGMENT_LIST@499..508
+          0: TOML_KEY_SEGMENT@499..508
+            0: TOML_BARE_KEY@499..508 "literal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@508..510 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@510..537
+        0: TOML_LITERAL_STRING@510..537 "'C:\\Users\\nodejs\\templates'" [] []
+    17: TOML_KEY_VALUE@537..593
+      0: TOML_KEY@537..554
+        0: TOML_KEY_SEGMENT_LIST@537..554
+          0: TOML_KEY_SEGMENT@537..554
+            0: TOML_BARE_KEY@537..554 "multiline_basic" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@554..556 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@556..593
+        0: TOML_BASIC_STRING@556..593 "\"\"\"\nRoses are red\nViolets are blue\"\"\"" [] []
+    18: TOML_KEY_VALUE@593..672
+      0: TOML_KEY@593..612
+        0: TOML_KEY_SEGMENT_LIST@593..612
+          0: TOML_KEY_SEGMENT@593..612
+            0: TOML_BARE_KEY@593..612 "multiline_literal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@612..614 "=" [] [Whitespace(" ")]
+      2: TOML_STRING_VALUE@614..672
+        0: TOML_LITERAL_STRING@614..672 "'''\nThe first newline is trimmed in raw TOML semantics.'''" [] []
+    19: TOML_KEY_VALUE@672..736
+      0: TOML_KEY@672..690
+        0: TOML_KEY_SEGMENT_LIST@672..690
+          0: TOML_KEY_SEGMENT@672..690
+            0: TOML_BARE_KEY@672..690 "multiline_inline" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@690..692 "=" [] [Whitespace(" ")]
+      2: TOML_INLINE_TABLE@692..736
+        0: L_CURLY@692..693 "{" [] []
+        1: TOML_INLINE_TABLE_ELEMENT_LIST@693..734
+          0: TOML_KEY_VALUE@693..705
+            0: TOML_KEY@693..702
+              0: TOML_KEY_SEGMENT_LIST@693..702
+                0: TOML_KEY_SEGMENT@693..702
+                  0: TOML_BARE_KEY@693..702 "first" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: EQ@702..704 "=" [] [Whitespace(" ")]
+            2: TOML_INTEGER_VALUE@704..705
+              0: TOML_INTEGER@704..705 "1" [] []
+          1: COMMA@705..706 "," [] []
+          2: TOML_KEY_VALUE@706..733
+            0: TOML_KEY@706..716
+              0: TOML_KEY_SEGMENT_LIST@706..716
+                0: TOML_KEY_SEGMENT@706..716
+                  0: TOML_BARE_KEY@706..716 "nested" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: EQ@716..718 "=" [] [Whitespace(" ")]
+            2: TOML_INLINE_TABLE@718..733
+              0: L_CURLY@718..720 "{" [] [Whitespace(" ")]
+              1: TOML_INLINE_TABLE_ELEMENT_LIST@720..732
+                0: TOML_KEY_VALUE@720..730
+                  0: TOML_KEY@720..727
+                    0: TOML_KEY_SEGMENT_LIST@720..727
+                      0: TOML_KEY_SEGMENT@720..727
+                        0: TOML_BARE_KEY@720..727 "second" [] [Whitespace(" ")]
+                  1: EQ@727..729 "=" [] [Whitespace(" ")]
+                  2: TOML_INTEGER_VALUE@729..730
+                    0: TOML_INTEGER@729..730 "2" [] []
+                1: COMMA@730..732 "," [] [Whitespace(" ")]
+              2: R_CURLY@732..733 "}" [] []
+          3: COMMA@733..734 "," [] []
+        2: R_CURLY@734..736 "}" [Newline("\n")] []
+  2: EOF@736..737 "" [Newline("\n")] []
+
+```

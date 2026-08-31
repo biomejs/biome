@@ -2097,6 +2097,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_toml_factory"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "biome_toml_syntax",
+]
+
+[[package]]
+name = "biome_toml_parser"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_parser",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_toml_factory",
+ "biome_toml_syntax",
+ "insta",
+ "tests_macros",
+]
+
+[[package]]
+name = "biome_toml_syntax"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_ungrammar"
 version = "0.3.1"
 

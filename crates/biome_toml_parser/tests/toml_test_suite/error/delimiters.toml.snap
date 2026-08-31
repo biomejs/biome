@@ -1,0 +1,223 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+[ [spaced_open]]
+[[spaced_close] ]
+leading_array_comma = [,]
+leading_inline_comma = {,}
+after = true
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlItemList [
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@0..2 "[" [] [Whitespace(" ")],
+            opening_inner_token: L_BRACK@2..3 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@3..14 "spaced_open" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@14..15 "]" [] [],
+            closing_outer_token: R_BRACK@15..16 "]" [] [],
+        },
+        TomlArrayTable {
+            opening_outer_token: L_BRACK@16..18 "[" [Newline("\n")] [],
+            opening_inner_token: L_BRACK@18..19 "[" [] [],
+            name: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@19..31 "spaced_close" [] [],
+                    },
+                ],
+            },
+            closing_inner_token: R_BRACK@31..33 "]" [] [Whitespace(" ")],
+            closing_outer_token: R_BRACK@33..34 "]" [] [],
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@34..55 "leading_array_comma" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@55..57 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@57..58 "[" [] [],
+                elements: TomlArrayElementList [
+                    missing element,
+                    COMMA@58..59 "," [] [],
+                ],
+                r_brack_token: R_BRACK@59..60 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@60..82 "leading_inline_comma" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@82..84 "=" [] [Whitespace(" ")],
+            value: TomlInlineTable {
+                l_curly_token: L_CURLY@84..85 "{" [] [],
+                elements: TomlInlineTableElementList [
+                    missing element,
+                    COMMA@85..86 "," [] [],
+                ],
+                r_curly_token: R_CURLY@86..87 "}" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                segments: TomlKeySegmentList [
+                    TomlKeySegment {
+                        value: TOML_BARE_KEY@87..94 "after" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@94..96 "=" [] [Whitespace(" ")],
+            value: TomlBooleanValue {
+                value_token: TOML_BOOLEAN@96..100 "true" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..101
+  0: (empty)
+  1: TOML_ITEM_LIST@0..100
+    0: TOML_ARRAY_TABLE@0..16
+      0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
+      1: L_BRACK@2..3 "[" [] []
+      2: TOML_KEY@3..14
+        0: TOML_KEY_SEGMENT_LIST@3..14
+          0: TOML_KEY_SEGMENT@3..14
+            0: TOML_BARE_KEY@3..14 "spaced_open" [] []
+      3: R_BRACK@14..15 "]" [] []
+      4: R_BRACK@15..16 "]" [] []
+    1: TOML_ARRAY_TABLE@16..34
+      0: L_BRACK@16..18 "[" [Newline("\n")] []
+      1: L_BRACK@18..19 "[" [] []
+      2: TOML_KEY@19..31
+        0: TOML_KEY_SEGMENT_LIST@19..31
+          0: TOML_KEY_SEGMENT@19..31
+            0: TOML_BARE_KEY@19..31 "spaced_close" [] []
+      3: R_BRACK@31..33 "]" [] [Whitespace(" ")]
+      4: R_BRACK@33..34 "]" [] []
+    2: TOML_KEY_VALUE@34..60
+      0: TOML_KEY@34..55
+        0: TOML_KEY_SEGMENT_LIST@34..55
+          0: TOML_KEY_SEGMENT@34..55
+            0: TOML_BARE_KEY@34..55 "leading_array_comma" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@55..57 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@57..60
+        0: L_BRACK@57..58 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@58..59
+          0: (empty)
+          1: COMMA@58..59 "," [] []
+        2: R_BRACK@59..60 "]" [] []
+    3: TOML_KEY_VALUE@60..87
+      0: TOML_KEY@60..82
+        0: TOML_KEY_SEGMENT_LIST@60..82
+          0: TOML_KEY_SEGMENT@60..82
+            0: TOML_BARE_KEY@60..82 "leading_inline_comma" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@82..84 "=" [] [Whitespace(" ")]
+      2: TOML_INLINE_TABLE@84..87
+        0: L_CURLY@84..85 "{" [] []
+        1: TOML_INLINE_TABLE_ELEMENT_LIST@85..86
+          0: (empty)
+          1: COMMA@85..86 "," [] []
+        2: R_CURLY@86..87 "}" [] []
+    4: TOML_KEY_VALUE@87..100
+      0: TOML_KEY@87..94
+        0: TOML_KEY_SEGMENT_LIST@87..94
+          0: TOML_KEY_SEGMENT@87..94
+            0: TOML_BARE_KEY@87..94 "after" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@94..96 "=" [] [Whitespace(" ")]
+      2: TOML_BOOLEAN_VALUE@96..100
+        0: TOML_BOOLEAN@96..100 "true" [] []
+  2: EOF@100..101 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+delimiters.toml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The brackets in a TOML array table delimiter must be adjacent
+  
+  > 1 │ [ [spaced_open]]
+      │  ^
+    2 │ [[spaced_close] ]
+    3 │ leading_array_comma = [,]
+  
+delimiters.toml:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The brackets in a TOML array table delimiter must be adjacent
+  
+    1 │ [ [spaced_open]]
+  > 2 │ [[spaced_close] ]
+      │                ^
+    3 │ leading_array_comma = [,]
+    4 │ leading_inline_comma = {,}
+  
+delimiters.toml:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a TOML value but instead found ','.
+  
+    1 │ [ [spaced_open]]
+    2 │ [[spaced_close] ]
+  > 3 │ leading_array_comma = [,]
+      │                        ^
+    4 │ leading_inline_comma = {,}
+    5 │ after = true
+  
+  i Expected a TOML value here.
+  
+    1 │ [ [spaced_open]]
+    2 │ [[spaced_close] ]
+  > 3 │ leading_array_comma = [,]
+      │                        ^
+    4 │ leading_inline_comma = {,}
+    5 │ after = true
+  
+delimiters.toml:4:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a TOML value but instead found ','.
+  
+    2 │ [[spaced_close] ]
+    3 │ leading_array_comma = [,]
+  > 4 │ leading_inline_comma = {,}
+      │                         ^
+    5 │ after = true
+    6 │ 
+  
+  i Expected a TOML value here.
+  
+    2 │ [[spaced_close] ]
+    3 │ leading_array_comma = [,]
+  > 4 │ leading_inline_comma = {,}
+      │                         ^
+    5 │ after = true
+    6 │ 
+  
+```

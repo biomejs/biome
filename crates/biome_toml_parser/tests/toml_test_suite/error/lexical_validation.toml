@@ -1,0 +1,17 @@
+negative_hexadecimal = -0x1
+positive_octal = +0o7
+integer_overflow = 9223372036854775808
+integer_underflow = -9223372036854775809
+hexadecimal_overflow = 0x8000000000000000
+invalid_day = 1979-02-31
+invalid_leap_day = 1900-02-29
+signed_year = +001-01-01
+signed_hour = +1:00:00
+double_offset_sign = 1979-05-27T00:00:00++1:00
+surrogate_escape = "\uD800"
+malformed_date_time = 1979-05-27T00:00:00🦀abc
+short_hex_escape = "\x0"
+invalid_hex_escape = "\xGG"
+fractional_minute = 07:32.5
+fractional_minute_date_time = 1979-05-27T07:32.5
+after = true
