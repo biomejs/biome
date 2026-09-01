@@ -1,4 +1,12 @@
 /* should not generate diagnostics */
 import type assert from "assert";
 import type * as assert2 from "assert";
-declare module "node:fs" {}
+declare module "node:fs" { }
+
+// Bun runtime built-ins are not Node.js modules, so they must not be flagged.
+import Bun from "bun";
+import { dlopen } from "bun:ffi";
+import { jsc } from "bun:jsc";
+import { Database } from "bun:sqlite";
+import { test } from "bun:test";
+import { feature } from "bun:bundle";

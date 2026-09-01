@@ -503,6 +503,7 @@ impl<'a> JsModuleVisitor<'a> {
             extensions: SUPPORTED_EXTENSIONS,
             extension_aliases: EXTENSION_ALIASES,
             resolve_node_builtins: true,
+            resolve_bun_builtins: true,
             resolve_types: true,
             ..Default::default()
         };
