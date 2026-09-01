@@ -27,24 +27,35 @@ pub(crate) struct FormatGfmTableRowOptions<'a> {
 
 impl FormatNodeRule<GfmTableRow> for FormatGfmTableRow {
     fn fmt_fields(&self, node: &GfmTableRow, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_gfm_table_row(node, None, f)
+        FormatGfmTableRowWithOptions::new(node, None).fmt(f)
     }
 }
 
-pub(crate) fn format_gfm_table_row(
-    node: &GfmTableRow,
-    options: Option<FormatGfmTableRowOptions<'_>>,
-    f: &mut MarkdownFormatter,
-) -> FormatResult<()> {
+pub(crate) struct FormatGfmTableRowWithOptions<'a> {
+    node: &'a GfmTableRow,
+    options: Option<FormatGfmTableRowOptions<'a>>,
+}
+
+impl<'a> FormatGfmTableRowWithOptions<'a> {
+    pub(crate) fn new(
+        node: &'a GfmTableRow,
+        options: Option<FormatGfmTableRowOptions<'a>>,
+    ) -> Self {
+        Self { node, options }
+    }
+}
+
+impl Format<MarkdownFormatContext> for FormatGfmTableRowWithOptions<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let GfmTableRowFields {
             quote_prefixes,
             l_pipe_token,
             cells,
             r_pipe_token,
             newline_token,
-        } = node.as_fields();
+        } = self.node.as_fields();
         let cell_count = cells.elements().count();
-        let options = options.filter(|options| {
+        let options = self.options.as_ref().filter(|options| {
             options.cells.len() == cell_count && options.widths.len() >= cell_count
         });
 
@@ -136,3 +147,4 @@ pub(crate) fn format_gfm_table_row(
         }
         Ok(())
     }
+}

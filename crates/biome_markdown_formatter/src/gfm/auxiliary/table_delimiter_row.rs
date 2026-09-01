@@ -29,24 +29,38 @@ impl FormatNodeRule<GfmTableDelimiterRow> for FormatGfmTableDelimiterRow {
         node: &GfmTableDelimiterRow,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        format_gfm_table_delimiter_row(node, None, f)
+        FormatGfmTableDelimiterRowWithOptions::new(node, None).fmt(f)
     }
 }
 
-pub(crate) fn format_gfm_table_delimiter_row(
-    node: &GfmTableDelimiterRow,
-    options: Option<FormatGfmTableDelimiterRowOptions<'_>>,
-    f: &mut MarkdownFormatter,
-) -> FormatResult<()> {
+pub(crate) struct FormatGfmTableDelimiterRowWithOptions<'a> {
+    node: &'a GfmTableDelimiterRow,
+    options: Option<FormatGfmTableDelimiterRowOptions<'a>>,
+}
+
+impl<'a> FormatGfmTableDelimiterRowWithOptions<'a> {
+    pub(crate) fn new(
+        node: &'a GfmTableDelimiterRow,
+        options: Option<FormatGfmTableDelimiterRowOptions<'a>>,
+    ) -> Self {
+        Self { node, options }
+    }
+}
+
+impl Format<MarkdownFormatContext> for FormatGfmTableDelimiterRowWithOptions<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let GfmTableDelimiterRowFields {
             quote_prefixes,
             l_pipe_token,
             cells,
             r_pipe_token,
             newline_token,
-        } = node.as_fields();
+        } = self.node.as_fields();
         let cell_count = cells.elements().count();
-        let options = options.filter(|options| options.widths.len() >= cell_count);
+        let options = self
+            .options
+            .as_ref()
+            .filter(|options| options.widths.len() >= cell_count);
 
         for prefix in quote_prefixes.iter() {
             write!(
@@ -92,3 +106,4 @@ pub(crate) fn format_gfm_table_delimiter_row(
         }
         Ok(())
     }
+}

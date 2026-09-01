@@ -10,9 +10,9 @@ use crate::{
     context::ProseWrap,
     gfm::auxiliary::{
         table_delimiter_row::{
-            FormatGfmTableDelimiterRowOptions, format_gfm_table_delimiter_row,
+            FormatGfmTableDelimiterRowOptions, FormatGfmTableDelimiterRowWithOptions,
         },
-        table_row::{FormatGfmTableRowOptions, format_gfm_table_row},
+        table_row::{FormatGfmTableRowOptions, FormatGfmTableRowWithOptions},
     },
 };
 use biome_formatter::{FormatOptions, GroupId, printer::Printer, write};
@@ -144,7 +144,6 @@ impl PreparedGfmTable {
             })
             .collect()
     }
-
 }
 
 impl FormatNodeRule<GfmTable> for FormatGfmTable {
@@ -172,19 +171,16 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
         };
 
         let content = format_with(|f| {
-            let header = format_with(|f| {
-                format_gfm_table_row(
-                    &header,
-                    Some(FormatGfmTableRowOptions {
-                        cells: &table.header,
-                        widths: &table.widths,
-                        alignments: &table.alignments,
-                        layout,
-                        preserve_quote_prefixes,
-                    }),
-                    f,
-                )
-            });
+            let header = FormatGfmTableRowWithOptions::new(
+                &header,
+                Some(FormatGfmTableRowOptions {
+                    cells: &table.header,
+                    widths: &table.widths,
+                    alignments: &table.alignments,
+                    layout,
+                    preserve_quote_prefixes,
+                }),
+            );
             match layout {
                 GfmTableLayout::Aligned => write!(f, [header])?,
                 GfmTableLayout::CompactWhenBroken(group_id) => {
@@ -192,28 +188,32 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
                 }
             }
             write!(f, [hard_line_break()])?;
-            format_gfm_table_delimiter_row(
-                &delimiter,
-                Some(FormatGfmTableDelimiterRowOptions {
-                    widths: &table.widths,
-                    layout,
-                    preserve_quote_prefixes,
-                }),
+            write!(
                 f,
+                [FormatGfmTableDelimiterRowWithOptions::new(
+                    &delimiter,
+                    Some(FormatGfmTableDelimiterRowOptions {
+                        widths: &table.widths,
+                        layout,
+                        preserve_quote_prefixes,
+                    }),
+                )]
             )?;
 
             for (row, cells) in body.iter().zip(&table.body) {
                 write!(f, [hard_line_break()])?;
-                format_gfm_table_row(
-                    &row,
-                    Some(FormatGfmTableRowOptions {
-                        cells,
-                        widths: &table.widths,
-                        alignments: &table.alignments,
-                        layout,
-                        preserve_quote_prefixes,
-                    }),
+                write!(
                     f,
+                    [FormatGfmTableRowWithOptions::new(
+                        &row,
+                        Some(FormatGfmTableRowOptions {
+                            cells,
+                            widths: &table.widths,
+                            alignments: &table.alignments,
+                            layout,
+                            preserve_quote_prefixes,
+                        }),
+                    )]
                 )?;
             }
 
