@@ -2713,6 +2713,11 @@ See https://biomejs.dev/linter/rules/use-explicit-type
 	 */
 	useExplicitType?: UseExplicitTypeConfiguration;
 	/**
+	* Prefer flat Math.min() and Math.max() calls over nested calls of the same method.
+See https://biomejs.dev/linter/rules/use-flat-math-min-max 
+	 */
+	useFlatMathMinMax?: UseFlatMathMinMaxConfiguration;
+	/**
 	* Enforce the 'sandbox' attribute for 'iframe' elements.
 See https://biomejs.dev/linter/rules/use-iframe-sandbox 
 	 */
@@ -4928,6 +4933,9 @@ export type UseExplicitReturnTypeConfiguration =
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
+export type UseFlatMathMinMaxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseFlatMathMinMaxOptions;
 export type UseIframeSandboxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIframeSandboxOptions;
@@ -6905,6 +6913,11 @@ export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitTypeOptions;
 }
+export interface RuleWithUseFlatMathMinMaxOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseFlatMathMinMaxOptions;
+}
 export interface RuleWithUseIframeSandboxOptions {
 	level: RulePlainConfiguration;
 	options?: UseIframeSandboxOptions;
@@ -8721,6 +8734,7 @@ When `true`, only declarations (function statements and class methods) are check
 	allowedNames?: string[];
 }
 export type UseExplicitTypeOptions = {};
+export type UseFlatMathMinMaxOptions = {};
 export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
 /**
@@ -10072,6 +10086,7 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
+	| "lint/nursery/useFlatMathMinMax"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
