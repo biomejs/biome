@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/type/issue_5091.ts
+---
+
+# Input
+
+```ts
+type Generic<T> = T
+
+declare const Namespace: {
+	Component: Generic<
+		// a comment
+		{
+			children: unknown;
+		}
+	>;
+}
+
+```
+
+
+# Formatted
+
+```ts
+type Generic<T> = T;
+
+declare const Namespace: {
+	Component: Generic<
+		// a comment
+		{
+			children: unknown;
+		}>;
+};
+
+```
