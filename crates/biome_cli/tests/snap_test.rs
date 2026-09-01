@@ -1,6 +1,6 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{BufferConsole, Markup, markup};
+use biome_console::{BufferConsole, Markup, Message, markup};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node as format_css_node;
 use biome_css_parser::{CssParserOptions, parse_css};
@@ -503,9 +503,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
         }
 
         for message in &console.out_buffer {
-            let content = markup_to_string(markup! {
-                {message.content}
-            });
+            let content = message_to_string(message);
             cli_snapshot.messages.push(content)
         }
 
@@ -520,6 +518,19 @@ pub fn markup_to_string(markup: Markup) -> String {
     fmt.write_markup(markup).unwrap();
 
     String::from_utf8(buffer).unwrap()
+}
+
+pub fn message_to_string(message: &Message) -> String {
+    if message.is_raw {
+        message
+            .content
+            .0
+            .iter()
+            .map(|node| node.content.as_str())
+            .collect()
+    } else {
+        markup_to_string(markup! {{message.content}})
+    }
 }
 
 pub struct SnapshotPayload<'a> {
