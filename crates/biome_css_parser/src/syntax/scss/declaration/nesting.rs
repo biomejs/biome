@@ -122,9 +122,7 @@ fn parse_scss_nesting_declaration_after_prefix(
 ) -> Option<ParsedSyntax> {
     if markers.is_custom_property {
         parse_custom_property_value(p, END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET);
-        return Some(complete_scss_nesting_regular_declaration(
-            p, markers, false,
-        ));
+        return Some(complete_scss_nesting_regular_declaration(p, markers, false));
     }
 
     let missing_value =
@@ -269,10 +267,9 @@ pub(crate) fn try_parse_scss_nesting_declaration(
             return Err(());
         }
 
-        let Some((syntax, could_be_selector)) = parse_scss_nesting_declaration_candidate(
-            p,
-            SelectorLikeBlockPolicy::RejectBeforeBlock,
-        ) else {
+        let Some((syntax, could_be_selector)) =
+            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::RejectBeforeBlock)
+        else {
             return Err(());
         };
 
@@ -293,10 +290,9 @@ pub(crate) fn try_parse_scss_nesting_declaration(
 #[inline]
 fn try_parse_scss_nested_property_declaration(p: &mut CssParser) -> Result<ParsedSyntax, ()> {
     try_parse(p, |p| {
-        let Some((syntax, could_be_selector)) = parse_scss_nesting_declaration_candidate(
-            p,
-            SelectorLikeBlockPolicy::RejectBeforeBlock,
-        ) else {
+        let Some((syntax, could_be_selector)) =
+            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::RejectBeforeBlock)
+        else {
             return Err(());
         };
 
