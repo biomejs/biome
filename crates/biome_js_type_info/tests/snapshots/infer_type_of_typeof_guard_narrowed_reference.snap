@@ -14,5 +14,5 @@ if (typeof x === "string") {
 ## Result
 
 ```
-Narrowed(typeof == "string", unresolved reference "x" (scope ID: 0))
+unresolved reference "x" (scope ID: 0)
 ```
