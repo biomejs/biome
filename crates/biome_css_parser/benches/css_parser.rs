@@ -90,7 +90,7 @@ fn bench_parser_suite(criterion: &mut Criterion, suite: ParserBenchmarkSuite) {
                     },
                 );
             }
-            Err(error) => suite.handle_load_error(lib, &error),
+            Err(error) => println!("{error:?}"),
         }
     }
     group.finish();
