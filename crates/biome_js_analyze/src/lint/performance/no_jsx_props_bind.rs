@@ -12,7 +12,7 @@ use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow `.bind()` or arrow functions in JSX props
+    /// Disallow `.bind()`, arrow functions, and function expressions in JSX props
     ///
     /// Using `.bind()` or creating a function inline in props creates a new function
     /// on every render, changing identity and defeating memoisation,
@@ -171,9 +171,7 @@ impl Rule for NoJsxPropsBind {
             }
         }
 
-        // handle ignoreDOMComponents — skip DOM elements like div, span, button
         if options.ignore_dom_components() {
-            // walk up to find the JSX element that owns this attribute
             let is_dom = ctx
                 .query()
                 .syntax()
