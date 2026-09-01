@@ -447,11 +447,23 @@ mod tests {
 
     #[test]
     fn deeply_nested_expression_reports_error() {
-        let source = format!("{}a;", "a+".repeat(2_500));
-        let parse = parse_script(&source, JsParserOptions::default());
+        let source = format!("{}a;", "a+".repeat(5_000));
 
-        assert_eq!(parse.syntax().text_with_trivia().to_string(), source);
-        assert_eq!(parse.diagnostics().len(), 1);
+        std::thread::Builder::new()
+            .stack_size(1536 * 1024)
+            .spawn(move || {
+                let parse = parse_script(&source, JsParserOptions::default());
+                let parsed_source = parse.syntax().text_with_trivia().to_string();
+                let diagnostics_len = parse.diagnostics().len();
+
+                drop(parse);
+
+                assert_eq!(parsed_source, source);
+                assert_eq!(diagnostics_len, 1);
+            })
+            .expect("must create constrained-stack thread")
+            .join()
+            .expect("constrained-stack parse must complete");
     }
 
     #[test]
