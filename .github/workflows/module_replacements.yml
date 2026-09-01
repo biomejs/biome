@@ -6,17 +6,13 @@ on:
     # This cron schedule runs the workflow at midnight (00:00) on Sundays.
     - cron: "0 0 * * 0"
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
-  update-module-replacements:
+  check-release:
     runs-on: depot-ubuntu-24.04-arm-16
+    outputs:
+      has_new_release: ${{ steps.release.outputs.has_new_release }}
+      version: ${{ steps.release.outputs.version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
       # Avoid the expensive Rust compilation below unless e18e published a new
       # release since the previous scheduled run. Manual runs always proceed.
       - name: Check for a new e18e release
@@ -44,12 +40,23 @@ jobs:
             echo "has_new_release=false" >> "$GITHUB_OUTPUT"
           fi
 
+  update-module-replacements:
+    needs: check-release
+    if: needs.check-release.outputs.has_new_release == 'true'
+    runs-on: depot-ubuntu-24.04-arm-16
+    permissions:
+      # Commit the generated data.
+      contents: write
+      # Open or edit the update generated data PR.
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
       - name: Install just
-        if: steps.release.outputs.has_new_release == 'true'
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
       - name: Install toolchain
-        if: steps.release.outputs.has_new_release == 'true'
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
           cache-base: main
@@ -57,11 +64,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate e18e module replacements data
-        if: steps.release.outputs.has_new_release == 'true'
         run: just gen-module-replacements
 
       - name: Check for changes
-        if: steps.release.outputs.has_new_release == 'true'
         id: changes
         run: |
           if git diff --quiet; then
@@ -86,7 +91,7 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          E18E_VERSION: ${{ steps.release.outputs.version }}
+          E18E_VERSION: ${{ needs.check-release.outputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
