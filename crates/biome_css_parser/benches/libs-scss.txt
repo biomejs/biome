@@ -1,0 +1,6 @@
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/full-spectrum.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-ambiguous-nested-rules.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-url-interpolation.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-interpolated-strings.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-tight-binary-expressions.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-lists-maps-arguments.scss
