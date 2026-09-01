@@ -122,6 +122,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_conditional_expression(test, consequent, alternate)
             }
             RawTypeofExpression::Destructure(expression) => {
+                if self.resolves_declarations_directly()
+                    && let RawDestructureField::Name(name) = &expression.destructure_field
+                    && let Some(ty) = self.resolve_namespace_import_member(&expression.ty, name)
+                {
+                    return Some(ty);
+                }
                 let subject = self.resolve(&expression.ty);
                 match &expression.destructure_field {
                     RawDestructureField::Index(index) => {
@@ -176,10 +182,22 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_nullish_coalescing_expression(left, right)
             }
             RawTypeofExpression::StaticMember(expression) => {
+                if self.resolves_declarations_directly()
+                    && let Some(ty) =
+                        self.resolve_namespace_import_member(&expression.object, &expression.member)
+                {
+                    return Some(ty);
+                }
                 let object = self.resolve_static_member_object(&expression.object);
                 self.resolve_static_member_expression(object, expression.member.text())
             }
             RawTypeofExpression::OptionalChainStaticMember(expression) => {
+                if self.resolves_declarations_directly()
+                    && let Some(ty) =
+                        self.resolve_namespace_import_member(&expression.object, &expression.member)
+                {
+                    return Some(ty);
+                }
                 let object = self.resolve_static_member_object(&expression.object);
                 self.resolve_static_member_expression(object, expression.member.text())
                     .map(|result| self.optional_chain_result(object, result))
