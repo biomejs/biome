@@ -213,6 +213,7 @@ output.
                               diagnostic.
         --no-errors-on-unmatched  Does not emit an error when no files are processed.
         --error-on-warnings   Exits with an error status if any warning diagnostics are emitted.
+        --error-on-infos      Exits with an error status if any information diagnostics are emitted.
   [--reporter=<default|concise|summary|json|json-pretty|github|gitlab|junit|checkstyle|rdjson|sarif>
   ] [--reporter-file=PATH]
         --reporter=
