@@ -16,6 +16,7 @@ inset-x-[20px] inset-y-[15px]
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -32,12 +33,13 @@ TwRoot {
                             unit_token: IDENT@11..13 "px" [] [],
                         },
                     ],
-                    r_brack_token: R_BRACKET@13..15 "]" [] [Whitespace(" ")],
+                    r_brack_token: R_BRACKET@13..14 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@14..15 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -59,8 +61,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@29..30 "\n" [] [],
     ],
-    eof_token: EOF@29..30 "" [Newline("\n")] [],
+    eof_token: EOF@30..30 "" [] [],
 }
 ```
 
@@ -69,24 +72,26 @@ TwRoot {
 ```
 0: TW_ROOT@0..30
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..29
-    0: TW_FULL_CANDIDATE@0..15
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..30
+    0: TW_FULL_CANDIDATE@0..14
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@0..15
+      3: TW_FUNCTIONAL_CANDIDATE@0..14
         0: TW_BASE@0..7 "inset-x" [] []
         1: DASH@7..8 "-" [] []
-        2: TW_ARBITRARY_VALUE@8..15
+        2: TW_ARBITRARY_VALUE@8..14
           0: L_BRACKET@8..9 "[" [] []
           1: CSS_GENERIC_COMPONENT_VALUE_LIST@9..13
             0: CSS_REGULAR_DIMENSION@9..13
               0: CSS_NUMBER_LITERAL@9..11 "20" [] []
               1: IDENT@11..13 "px" [] []
-          2: R_BRACKET@13..15 "]" [] [Whitespace(" ")]
+          2: R_BRACKET@13..14 "]" [] []
         3: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@15..29
+    1: WHITESPACE@14..15 " " [] []
+    2: TW_FULL_CANDIDATE@15..29
       0: TW_VARIANT_LIST@15..15
       1: (empty)
       2: (empty)
@@ -102,6 +107,7 @@ TwRoot {
           2: R_BRACKET@28..29 "]" [] []
         3: (empty)
       4: (empty)
-  2: EOF@29..30 "" [Newline("\n")] []
+    3: WHITESPACE@29..30 "\n" [] []
+  3: EOF@30..30 "" [] []
 
 ```

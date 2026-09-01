@@ -876,10 +876,17 @@ impl SyntaxFactory for TailwindSyntaxFactory {
             }
             TW_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![UNICODE_BOM]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![' ']
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -976,9 +983,13 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 T ! [,],
                 true,
             ),
-            TW_CANDIDATE_LIST => {
-                Self::make_node_list_syntax(kind, children, AnyTwFullCandidate::can_cast)
-            }
+            TW_CANDIDATE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyTwFullCandidate::can_cast,
+                T![' '],
+                true,
+            ),
             TW_VARIANT_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

@@ -124,7 +124,7 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
 
     segments.complete(p, TW_VARIANT_SEGMENT_LIST);
 
-    if p.at(T!['[']) && !p.source().had_trivia_before() {
+    if p.at(T!['[']) {
         // A bracketed value can glue directly to the last segment with no
         // `-` separator: `@[400px]:` is the container root plus an
         // arbitrary size. Whitespace before the `[` means it starts the

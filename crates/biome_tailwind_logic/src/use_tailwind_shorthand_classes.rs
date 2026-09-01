@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use biome_rowan::{
-    AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, TextRange, TokenText,
+    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, Direction, TextRange, TokenText,
     WalkEvent,
 };
 use biome_tailwind_factory::make;
@@ -112,6 +112,7 @@ fn find_static_class_candidate(
 ) -> Option<TwFullCandidate> {
     candidates
         .iter()
+        .flatten()
         .filter_map(|candidate| candidate.as_tw_full_candidate().cloned())
         .find(|candidate| {
             (candidate_matches(candidate, base, "")
@@ -144,6 +145,7 @@ fn check_truncate_shorthand(candidates: &TwCandidateList) -> Vec<TailwindShortha
     let (first_base, first_value) = TRUNCATE_PARTS[0];
     for first in candidates
         .iter()
+        .flatten()
         .filter_map(|candidate| candidate.as_tw_full_candidate().cloned())
     {
         if !candidate_matches(&first, first_base, first_value)
@@ -158,6 +160,7 @@ fn check_truncate_shorthand(candidates: &TwCandidateList) -> Vec<TailwindShortha
         for &(base, value) in TRUNCATE_PARTS {
             let Some(candidate) = candidates
                 .iter()
+                .flatten()
                 .filter_map(|candidate| candidate.as_tw_full_candidate().cloned())
                 .find(|candidate| {
                     candidate_matches(candidate, base, value)
@@ -281,6 +284,7 @@ pub fn analyze_tailwind_shorthand(candidates: &TwCandidateList) -> Vec<TailwindS
     let mut groups: FxHashMap<GroupKey, GroupCandidates> = FxHashMap::default();
     for candidate in candidates
         .iter()
+        .flatten()
         .filter_map(|candidate| candidate.as_tw_full_candidate().cloned())
     {
         let Some((key, base)) = extract_key_and_base(&candidate) else {
@@ -419,7 +423,7 @@ pub fn auto_fix(
     state: &TailwindShorthandViolation,
 ) -> Option<BatchMutation<TailwindLanguage>> {
     let mut mutation = root.clone().begin();
-    apply_auto_fix(&mut mutation, state)?;
+    apply_auto_fix(&mut mutation, state, &mut FxHashSet::default())?;
 
     Some(mutation)
 }
@@ -429,8 +433,9 @@ pub fn auto_fix_all(
     states: &[TailwindShorthandViolation],
 ) -> Option<BatchMutation<TailwindLanguage>> {
     let mut mutation = root.clone().begin();
+    let mut removed_separators = FxHashSet::default();
     for state in states {
-        apply_auto_fix(&mut mutation, state)?;
+        apply_auto_fix(&mut mutation, state, &mut removed_separators)?;
     }
 
     Some(mutation)
@@ -439,6 +444,7 @@ pub fn auto_fix_all(
 fn apply_auto_fix(
     mutation: &mut BatchMutation<TailwindLanguage>,
     state: &TailwindShorthandViolation,
+    removed_separators: &mut FxHashSet<TextRange>,
 ) -> Option<()> {
     let mut old_candidates = state.uncompressed_nodes.clone();
     old_candidates.extend(state.existing_replacement.iter().cloned());
@@ -524,6 +530,22 @@ fn apply_auto_fix(
     }
 
     for to_remove in old_candidates {
+        let syntax = to_remove.syntax();
+        let separator = [
+            syntax.prev_sibling_or_token(),
+            syntax.next_sibling_or_token(),
+        ]
+        .into_iter()
+        .flatten()
+        .filter_map(|element| element.into_token())
+        .find(|token| {
+            token.kind() == TailwindSyntaxKind::WHITESPACE
+                && removed_separators.insert(token.text_range())
+        });
+
+        if let Some(separator) = separator {
+            mutation.remove_token(separator);
+        }
         mutation.remove_node(to_remove);
     }
 
@@ -672,6 +694,8 @@ mod tests {
         "hover:overflow-hidden focus:overflow-hidden focus:text-ellipsis focus:whitespace-nowrap",
         "overflow-hidden! text-ellipsis! whitespace-nowrap!",
         "hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap focus:overflow-hidden focus:text-ellipsis focus:whitespace-nowrap",
+        "text-red-500 pl-2\npr-2",
+        "w-4 ml-2 h-4 mr-2",
     ];
 
     const VALID_CASES: &[&str] = &[

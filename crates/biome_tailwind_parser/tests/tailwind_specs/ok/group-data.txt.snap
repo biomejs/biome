@@ -16,6 +16,7 @@ group-data-[collapsible=icon]:hidden
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -48,8 +49,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@36..37 "\n" [] [],
     ],
-    eof_token: EOF@36..37 "" [Newline("\n")] [],
+    eof_token: EOF@37..37 "" [] [],
 }
 ```
 
@@ -58,7 +60,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..37
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..36
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..37
     0: TW_FULL_CANDIDATE@0..36
       0: TW_VARIANT_LIST@0..30
         0: TW_VARIANT_EXPRESSION@0..29
@@ -82,6 +85,7 @@ TwRoot {
         0: TW_BASE@30..36 "hidden" [] []
         1: (empty)
       4: (empty)
-  2: EOF@36..37 "" [Newline("\n")] []
+    1: WHITESPACE@36..37 "\n" [] []
+  3: EOF@37..37 "" [] []
 
 ```

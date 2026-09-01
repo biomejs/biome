@@ -16,6 +16,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -25,8 +26,9 @@ TwRoot {
                 base_token: TW_BASE@1..5 "flex" [] [],
                 modifier: missing (optional),
             },
-            excl_token: BANG@5..7 "!" [] [Whitespace(" ")],
+            excl_token: BANG@5..6 "!" [] [],
         },
+        WHITESPACE@6..7 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -35,12 +37,13 @@ TwRoot {
                 base_token: TW_BASE@7..8 "p" [] [],
                 minus_token: DASH@8..9 "-" [] [],
                 value: TwNumberValue {
-                    value_token: TW_NUMBER@9..11 "4" [] [Whitespace(" ")],
+                    value_token: TW_NUMBER@9..10 "4" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@10..11 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -60,8 +63,9 @@ TwRoot {
                 base_token: TW_BASE@15..19 "flex" [] [],
                 modifier: missing (optional),
             },
-            excl_token: BANG@19..21 "!" [] [Whitespace(" ")],
+            excl_token: BANG@19..20 "!" [] [],
         },
+        WHITESPACE@20..21 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -72,19 +76,32 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@25..26 "\n" [] [],
         TwFullCandidate {
             variants: TwVariantList [],
-            legacy_important_token: BANG@25..27 "!" [Newline("\n")] [],
+            legacy_important_token: BANG@26..27 "!" [] [],
             negative_token: missing (optional),
             candidate: TwBogusCandidate {
                 items: [
                     TW_BASE@27..32 "hover" [] [],
                     COLON@32..33 ":" [] [],
-                    TW_BASE@33..38 "flex" [] [Whitespace(" ")],
-                    TW_BASE@38..39 "p" [] [],
-                    DASH@39..40 "-" [] [],
-                    TW_NUMBER@40..41 "4" [] [],
+                    TW_BASE@33..37 "flex" [] [],
                 ],
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@37..38 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@38..39 "p" [] [],
+                minus_token: DASH@39..40 "-" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@40..41 "4" [] [],
+                },
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -98,27 +115,30 @@ TwRoot {
 ```
 0: TW_ROOT@0..41
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..41
-    0: TW_FULL_CANDIDATE@0..7
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..41
+    0: TW_FULL_CANDIDATE@0..6
       0: TW_VARIANT_LIST@0..0
       1: BANG@0..1 "!" [] []
       2: (empty)
       3: TW_STATIC_CANDIDATE@1..5
         0: TW_BASE@1..5 "flex" [] []
         1: (empty)
-      4: BANG@5..7 "!" [] [Whitespace(" ")]
-    1: TW_FULL_CANDIDATE@7..11
+      4: BANG@5..6 "!" [] []
+    1: WHITESPACE@6..7 " " [] []
+    2: TW_FULL_CANDIDATE@7..10
       0: TW_VARIANT_LIST@7..7
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@7..11
+      3: TW_FUNCTIONAL_CANDIDATE@7..10
         0: TW_BASE@7..8 "p" [] []
         1: DASH@8..9 "-" [] []
-        2: TW_NUMBER_VALUE@9..11
-          0: TW_NUMBER@9..11 "4" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@9..10
+          0: TW_NUMBER@9..10 "4" [] []
         3: (empty)
       4: (empty)
-    2: TW_FULL_CANDIDATE@11..21
+    3: WHITESPACE@10..11 " " [] []
+    4: TW_FULL_CANDIDATE@11..20
       0: TW_VARIANT_LIST@11..14
         0: TW_VARIANT_EXPRESSION@11..13
           0: TW_VARIANT_SEGMENT_LIST@11..13
@@ -132,8 +152,9 @@ TwRoot {
       3: TW_STATIC_CANDIDATE@15..19
         0: TW_BASE@15..19 "flex" [] []
         1: (empty)
-      4: BANG@19..21 "!" [] [Whitespace(" ")]
-    3: TW_FULL_CANDIDATE@21..25
+      4: BANG@19..20 "!" [] []
+    5: WHITESPACE@20..21 " " [] []
+    6: TW_FULL_CANDIDATE@21..25
       0: TW_VARIANT_LIST@21..21
       1: (empty)
       2: (empty)
@@ -141,19 +162,29 @@ TwRoot {
         0: TW_BASE@21..25 "flex" [] []
         1: (empty)
       4: (empty)
-    4: TW_FULL_CANDIDATE@25..41
-      0: TW_VARIANT_LIST@25..25
-      1: BANG@25..27 "!" [Newline("\n")] []
+    7: WHITESPACE@25..26 "\n" [] []
+    8: TW_FULL_CANDIDATE@26..37
+      0: TW_VARIANT_LIST@26..26
+      1: BANG@26..27 "!" [] []
       2: (empty)
-      3: TW_BOGUS_CANDIDATE@27..41
+      3: TW_BOGUS_CANDIDATE@27..37
         0: TW_BASE@27..32 "hover" [] []
         1: COLON@32..33 ":" [] []
-        2: TW_BASE@33..38 "flex" [] [Whitespace(" ")]
-        3: TW_BASE@38..39 "p" [] []
-        4: DASH@39..40 "-" [] []
-        5: TW_NUMBER@40..41 "4" [] []
+        2: TW_BASE@33..37 "flex" [] []
       4: (empty)
-  2: EOF@41..41 "" [] []
+    9: WHITESPACE@37..38 " " [] []
+    10: TW_FULL_CANDIDATE@38..41
+      0: TW_VARIANT_LIST@38..38
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@38..41
+        0: TW_BASE@38..39 "p" [] []
+        1: DASH@39..40 "-" [] []
+        2: TW_NUMBER_VALUE@40..41
+          0: TW_NUMBER@40..41 "4" [] []
+        3: (empty)
+      4: (empty)
+  3: EOF@41..41 "" [] []
 
 ```
 
@@ -182,16 +213,16 @@ duplicate-important.txt:1:20 parse ━━━━━━━━━━━━━━━
   
 duplicate-important.txt:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a candidate but instead found 'hover:flex p-4'.
+  × Expected a candidate but instead found 'hover:flex'.
   
     1 │ !flex! p-4 md:!flex! flex
   > 2 │ !hover:flex p-4
-      │  ^^^^^^^^^^^^^^
+      │  ^^^^^^^^^^
   
   i Expected a candidate here.
   
     1 │ !flex! p-4 md:!flex! flex
   > 2 │ !hover:flex p-4
-      │  ^^^^^^^^^^^^^^
+      │  ^^^^^^^^^^
   
 ```
