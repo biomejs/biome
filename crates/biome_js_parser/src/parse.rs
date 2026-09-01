@@ -451,7 +451,7 @@ mod tests {
         let source = format!("{}a;", "a+".repeat(50_000));
 
         std::thread::Builder::new()
-            .stack_size(4 * 1024 * 1024)
+            .stack_size(2 * 1024 * 1024)
             .spawn(move || {
                 let parse = parse_script(&source, JsParserOptions::default());
                 let parsed_source = parse.syntax().text_with_trivia().to_string();

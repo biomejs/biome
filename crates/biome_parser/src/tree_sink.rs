@@ -7,7 +7,7 @@ use biome_rowan::{
 
 /// Maximum depth of the green tree produced by the parser. This bounds the
 /// recursive `Drop` depth of syntax nodes on pathological input.
-const MAX_TREE_DEPTH: usize = 4096;
+const MAX_TREE_DEPTH: usize = 3072;
 
 /// An abstraction for syntax tree implementations
 pub trait TreeSink {
