@@ -2738,6 +2738,11 @@ See https://biomejs.dev/linter/rules/use-math-min-max
 	 */
 	useMathMinMax?: UseMathMinMaxConfiguration;
 	/**
+	* Use modern Math APIs for common mathematical operations.
+See https://biomejs.dev/linter/rules/use-modern-math-apis 
+	 */
+	useModernMathApis?: UseModernMathApisConfiguration;
+	/**
 	* Enforce using named capture groups in regular expression.
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
@@ -4948,6 +4953,9 @@ export type UseIncludesConfiguration =
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
+export type UseModernMathApisConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseModernMathApisOptions;
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
@@ -6936,6 +6944,11 @@ export interface RuleWithUseMathMinMaxOptions {
 	level: RulePlainConfiguration;
 	options?: UseMathMinMaxOptions;
 }
+export interface RuleWithUseModernMathApisOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseModernMathApisOptions;
+}
 export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
@@ -8742,6 +8755,7 @@ export type UseImportsFirstOptions = {};
  */
 export type UseIncludesOptions = {};
 export type UseMathMinMaxOptions = {};
+export type UseModernMathApisOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 export type UseNamedLayerOptions = {};
 /**
@@ -10095,6 +10109,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useModernMathApis"
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"

@@ -7280,6 +7280,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useModernMathApis": {
+					"description": "Use modern Math APIs for common mathematical operations.\nSee https://biomejs.dev/linter/rules/use-modern-math-apis",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseModernMathApisConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedCaptureGroup": {
 					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
 					"anyOf": [
@@ -12194,6 +12201,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseModernMathApisOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseModernMathApisOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamedCaptureGroupOptions": {
 			"type": "object",
 			"properties": {
@@ -16228,6 +16245,16 @@
 			]
 		},
 		"UseMediaCaptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseModernMathApisConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseModernMathApisOptions" }
+			]
+		},
+		"UseModernMathApisOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
