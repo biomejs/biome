@@ -185,12 +185,10 @@ pub trait RawTypeCollector {
     }
 
     /// Returns a scratch cache for memoizing guard-narrowing invalidation
-    /// checks, if this collector wants to provide one.
+    /// checks.
     fn narrowing_invalidation_cache(
         &mut self,
-    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>> {
-        None
-    }
+    ) -> &mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>;
 }
 
 /// Distinguishes the scans memoized in the

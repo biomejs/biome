@@ -3512,9 +3512,7 @@ impl<'a> GuardAnalysis<'a> {
             NarrowingInvalidationKind::Binding,
         );
 
-        if let Some(cache) = self.resolver.narrowing_invalidation_cache()
-            && let Some(&cached) = cache.get(&key)
-        {
+        if let Some(&cached) = self.resolver.narrowing_invalidation_cache().get(&key) {
             return cached;
         }
 
@@ -3530,9 +3528,9 @@ impl<'a> GuardAnalysis<'a> {
             name_token.is_ok_and(|token| token.text_trimmed() == name)
         });
 
-        if let Some(cache) = self.resolver.narrowing_invalidation_cache() {
-            cache.insert(key, invalidated);
-        }
+        self.resolver
+            .narrowing_invalidation_cache()
+            .insert(key, invalidated);
 
         invalidated
     }
@@ -3553,9 +3551,7 @@ impl<'a> GuardAnalysis<'a> {
             NarrowingInvalidationKind::MemberWrite,
         );
 
-        if let Some(cache) = self.resolver.narrowing_invalidation_cache()
-            && let Some(&cached) = cache.get(&key)
-        {
+        if let Some(&cached) = self.resolver.narrowing_invalidation_cache().get(&key) {
             return cached;
         }
 
@@ -3576,9 +3572,9 @@ impl<'a> GuardAnalysis<'a> {
                 .is_some_and(|object| is_reference_to(&object, name))
         });
 
-        if let Some(cache) = self.resolver.narrowing_invalidation_cache() {
-            cache.insert(key, invalidated);
-        }
+        self.resolver
+            .narrowing_invalidation_cache()
+            .insert(key, invalidated);
 
         invalidated
     }
