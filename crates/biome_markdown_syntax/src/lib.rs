@@ -17,6 +17,7 @@ pub use self::generated::*;
 use biome_rowan::{
     AstNode, RawSyntaxKind, SyntaxKind, TextRange, TextSize, TokenText, TriviaPieceKind,
 };
+pub use header_ext::AnyMdHeader;
 
 impl From<u16> for MarkdownSyntaxKind {
     fn from(d: u16) -> Self {

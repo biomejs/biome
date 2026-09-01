@@ -91,21 +91,14 @@ fn hash_node<H: std::hash::Hasher>(node: &TailwindSyntaxNode, state: &mut H) {
 fn candidate_matches(full: &TwFullCandidate, base: &str, value: &str) -> bool {
     match full.candidate().ok() {
         Some(AnyTwCandidate::TwFunctionalCandidate(func)) => {
-            func.base_token()
-                .ok()
-                .is_some_and(|t| t.text_trimmed() == base)
+            func.base_token().is_ok_and(|t| t.text_trimmed() == base)
                 && func
                     .value()
-                    .ok()
-                    .is_some_and(|v| v.syntax().text_trimmed() == value)
+                    .is_ok_and(|v| v.syntax().text_trimmed() == value)
         }
         Some(AnyTwCandidate::TwStaticCandidate(st)) => {
             // Static candidates have no value part; match when `value` is empty.
-            value.is_empty()
-                && st
-                    .base_token()
-                    .ok()
-                    .is_some_and(|t| t.text_trimmed() == base)
+            value.is_empty() && st.base_token().is_ok_and(|t| t.text_trimmed() == base)
         }
         _ => false,
     }
@@ -475,6 +468,9 @@ fn apply_auto_fix(
                 to_modify.variants(),
                 AnyTwCandidate::TwStaticCandidate(new_static),
             );
+            if let Some(legacy_important) = to_modify.legacy_important_token() {
+                new_full = new_full.with_legacy_important_token(legacy_important);
+            }
             if let Some(excl_token) = to_modify.excl_token() {
                 new_full = new_full.with_excl_token(excl_token);
             }
@@ -510,12 +506,17 @@ fn apply_auto_fix(
                         new_static = new_static.with_modifier(modifier);
                     }
                     let new_static = new_static.build();
-                    let new_full = make::tw_full_candidate(
+                    let mut new_full = make::tw_full_candidate(
                         to_modify.variants(),
                         AnyTwCandidate::TwStaticCandidate(new_static),
-                    )
-                    .build();
-                    mutation.replace_node(to_modify, new_full);
+                    );
+                    if let Some(legacy_important) = to_modify.legacy_important_token() {
+                        new_full = new_full.with_legacy_important_token(legacy_important);
+                    }
+                    if let Some(excl_token) = to_modify.excl_token() {
+                        new_full = new_full.with_excl_token(excl_token);
+                    }
+                    mutation.replace_node(to_modify, new_full.build());
                 }
                 _ => return None,
             }

@@ -5,11 +5,12 @@ use crate::token_source::{
     RestrictedExpressionStopAt, TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
-use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize};
+use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize, VOID_ELEMENTS};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
+use smallvec::SmallVec;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -27,6 +28,17 @@ pub(crate) struct HtmlLexer<'src> {
     /// consumed. Once set, the `Regular` context will no longer treat `---` as a
     /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
     after_frontmatter: bool,
+    /// Parse options, not state. The lexer cannot read them from the lex
+    /// context, because `bump()` passes [HtmlLexContext::default].
+    options: HtmlLexerOptions,
+}
+
+/// The parse options the lexer needs. Fixed for the whole file, unlike the
+/// lexer's position and flags.
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct HtmlLexerOptions {
+    pub(crate) framework: HtmlFramework,
+    pub(crate) text_expression: Option<TextExpressionKind>,
 }
 
 enum IdentifierContext {
@@ -88,7 +100,12 @@ impl<'src> HtmlLexer<'src> {
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
             after_frontmatter: false,
+            options: HtmlLexerOptions::default(),
         }
+    }
+
+    pub(crate) fn with_options(self, options: HtmlLexerOptions) -> Self {
+        Self { options, ..self }
     }
 
     /// Sets the `after_frontmatter` flag. When `true`, `---` in the `Regular`
@@ -165,7 +182,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => self.consume_byte(T![/]),
+            SLH => match self.consume_js_comment_in_tag() {
+                Some(comment) => comment,
+                None => self.consume_byte(T![/]),
+            },
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             // Handle colons as separate tokens for Astro directives
@@ -280,7 +300,9 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
-    /// When `svelte` is `true`, also handles `//` and `/* */` as JS-style comments.
+    ///
+    /// `svelte` controls brace handling only. `//` and `/* */` comments follow
+    /// [`HtmlLexerOptions::framework`], since Astro accepts them too.
     fn consume_token_inside_tag_directives(
         &mut self,
         current: u8,
@@ -293,16 +315,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => {
-                if svelte {
-                    match self.byte_at(1).map(lookup_byte) {
-                        Some(SLH) => return self.consume_js_line_comment(),
-                        Some(MUL) => return self.consume_js_block_comment(),
-                        _ => {}
-                    }
-                }
-                self.consume_byte(T![/])
-            }
+            SLH => match self.consume_js_comment_in_tag() {
+                Some(comment) => comment,
+                None => self.consume_byte(T![/]),
+            },
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
@@ -349,34 +365,10 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::VueDirectiveArgument] context.
     fn consume_token_vue_directive_argument(&mut self) -> HtmlSyntaxKind {
-        let start = self.text_position();
-        let mut brackets_stack = 0;
-        let mut quotes_seen = QuotesSeen::new();
+        let length = JsScanner::argument_length(&self.source.as_bytes()[self.position..]);
+        self.advance(length);
 
-        while let Some(byte) = self.current_byte() {
-            quotes_seen.check_byte(byte);
-            let char = biome_unicode_table::lookup_byte(byte);
-            use biome_unicode_table::Dispatch::*;
-
-            if quotes_seen.is_empty() {
-                match char {
-                    BTO => {
-                        brackets_stack += 1;
-                    }
-                    BTC => {
-                        if brackets_stack == 0 {
-                            break;
-                        }
-                        brackets_stack -= 1;
-                    }
-                    _ => {}
-                }
-            }
-
-            self.advance_byte_or_char(byte);
-        }
-
-        if self.text_position() != start {
+        if length > 0 {
             HTML_LITERAL
         } else {
             ERROR_TOKEN
@@ -393,11 +385,23 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            SLH => match self.byte_at(1).map(lookup_byte) {
-                Some(SLH) => return self.consume_js_line_comment(),
-                Some(MUL) => return self.consume_js_block_comment(),
-                _ => {}
-            },
+            LSS if self.at_start_comment() => {
+                let start = self.text_position();
+                let comment = self.consume_comment();
+                self.push_diagnostic(
+                    ParseDiagnostic::new(
+                        "HTML comments are not allowed here.",
+                        start..self.text_position(),
+                    )
+                    .with_hint(
+                        "Use a JavaScript `//` or `/* ... */` comment when inside a tag's attributes.",
+                    ),
+                );
+                return comment;
+            }
+            SLH if let Some(comment) = self.consume_js_comment_in_tag() => {
+                return comment;
+            }
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
@@ -450,7 +454,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
-    fn consume_token(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
+    fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -462,20 +466,7 @@ impl<'src> HtmlLexer<'src> {
                 self.consume_frontmatter_edge()
             }
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
-            BEO => {
-                if double_text_expressions && self.at_opening_double_text_expression() {
-                    self.consume_l_double_text_expression()
-                } else {
-                    self.consume_byte(T!['{'])
-                }
-            }
-            BEC => {
-                if self.at_closing_double_text_expression() {
-                    self.consume_r_double_text_expression()
-                } else {
-                    self.consume_byte(T!['}'])
-                }
-            }
+            BEO | BEC => self.consume_html_text(current),
             LSS => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -484,19 +475,23 @@ impl<'src> HtmlLexer<'src> {
                 }) {
                     self.consume_l_angle()
                 } else {
-                    self.push_diagnostic(
-                        ParseDiagnostic::new(
-                            "Unescaped `<` bracket character. Expected a tag or escaped character.",
-                            self.text_position()..self.text_position() + TextSize::from(1),
-                        )
-                        .with_hint("Replace this character with `&lt;` to escape it."),
-                    );
+                    // Astro keeps the HTML5 reading, where a `<` that cannot open
+                    // a tag is text and so needs no escaping.
+                    if self.options.framework != HtmlFramework::Astro {
+                        self.push_diagnostic(
+                            ParseDiagnostic::new(
+                                "Unescaped `<` bracket character. Expected a tag or escaped character.",
+                                self.text_position()..self.text_position() + TextSize::from(1),
+                            )
+                            .with_hint("Replace this character with `&lt;` to escape it."),
+                        );
+                    }
                     self.consume_byte(HTML_LITERAL)
                 }
             }
             IDT => self
                 .consume_language_identifier(current)
-                .unwrap_or_else(|| self.consume_html_text(current, double_text_expressions)),
+                .unwrap_or_else(|| self.consume_html_text(current)),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -504,7 +499,7 @@ impl<'src> HtmlLexer<'src> {
                     self.unicode_bom_length = bom_size;
                     return bom;
                 }
-                self.consume_html_text(current, double_text_expressions)
+                self.consume_html_text(current)
             }
         }
     }
@@ -520,6 +515,9 @@ impl<'src> HtmlLexer<'src> {
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             QOT => self.consume_string_literal(current),
+            TPL if self.options.framework == HtmlFramework::Astro => {
+                self.consume_template_literal_attribute_value()
+            }
             _ => self.consume_unquoted_string_literal(),
         }
     }
@@ -556,6 +554,38 @@ impl<'src> HtmlLexer<'src> {
         }
 
         HTML_TEMPLATE_CHUNK
+    }
+
+    /// Consume a `` ` ``-delimited attribute value, which only Astro allows.
+    ///
+    /// The token kind matches a quoted string so the existing initializer path
+    /// is reused; consumers that must tell the two apart check the leading byte.
+    fn consume_template_literal_attribute_value(&mut self) -> HtmlSyntaxKind {
+        let start = self.text_position();
+        self.advance(1);
+        while let Some(byte) = self.current_byte() {
+            match byte {
+                b'`' => {
+                    self.advance(1);
+                    return HTML_STRING_LITERAL;
+                }
+                b'\\' => {
+                    self.advance(1);
+                    if let Some(next) = self.current_byte() {
+                        self.advance_byte_or_char(next);
+                    }
+                }
+                _ => self.advance_byte_or_char(byte),
+            }
+        }
+        self.diagnostics.push(
+            ParseDiagnostic::new("Missing closing backtick", start..self.text_position())
+                .with_detail(
+                    self.source.text_len()..self.source.text_len(),
+                    "file ends here",
+                ),
+        );
+        HTML_STRING_LITERAL
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
@@ -601,36 +631,21 @@ impl<'src> HtmlLexer<'src> {
             .starts_with('>')
     }
 
-    /// Consume an embedded language in its entirety. Stops immediately:
-    /// - before the closing tag
-    /// - before the Astro fence, if applicable
+    /// Consume an embedded language in its entirety. Stops immediately before
+    /// the closing tag.
     fn consume_token_embedded_language(
         &mut self,
         _current: u8,
         lang: HtmlEmbeddedLanguage,
-        context: HtmlLexContext,
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
         let closing_tag_name = lang.closing_tag_name(self.source);
-        // double, single, template
-        let mut quotes_seen = QuotesSeen::new();
         self.assert_current_char_boundary();
         while let Some(byte) = self.current_byte() {
-            if context == HtmlLexContext::AstroFencedCodeBlock {
-                quotes_seen.check_byte(byte);
-            }
-
             if self.is_at_closing_tag(closing_tag_name) {
                 break;
             }
             self.advance_byte_or_char(byte);
-
-            if context == HtmlLexContext::AstroFencedCodeBlock
-                && self.at_frontmatter_edge()
-                && quotes_seen.is_empty()
-            {
-                return HTML_LITERAL;
-            }
         }
 
         if self.text_position() != start {
@@ -640,6 +655,18 @@ impl<'src> HtmlLexer<'src> {
             // we HAVE to consume something, so we start consuming the closing tag.
             self.consume_byte(T![<])
         }
+    }
+
+    /// Consume the Astro frontmatter body up to its closing `---` fence. A
+    /// closing tag does not end it: `</script>` inside frontmatter is ordinary
+    /// JavaScript, as it is in Astro.
+    fn consume_astro_frontmatter_body(&mut self) -> HtmlSyntaxKind {
+        self.assert_current_char_boundary();
+        let length = JsScanner::frontmatter_length(&self.source.as_bytes()[self.position..]);
+        // The lexer must make progress even if a fence sits at offset zero.
+        self.advance(length.max(1));
+
+        HTML_LITERAL
     }
 
     /// Consumes tokens within a double text expression ('{{...}}') until the closing
@@ -674,10 +701,11 @@ impl<'src> HtmlLexer<'src> {
             return self.consume_newline_or_whitespaces();
         }
 
-        let mut quotes_seen = QuotesSeen::new();
-        let expression_length =
-            quotes_seen.expression_length(&self.source.as_bytes()[self.position..]);
-        self.advance(expression_length);
+        let length = JsScanner::expression_length(
+            &self.source.as_bytes()[self.position..],
+            self.options.framework == HtmlFramework::Astro,
+        );
+        self.advance(length);
 
         HTML_LITERAL
     }
@@ -785,6 +813,23 @@ impl<'src> HtmlLexer<'src> {
         COMMENT
     }
 
+    /// Consumes a comment between attributes, which only Svelte and Astro
+    /// accept; elsewhere a `/` inside a tag can only open a self-closing tag.
+    fn consume_js_comment_in_tag(&mut self) -> Option<HtmlSyntaxKind> {
+        if !matches!(
+            self.options.framework,
+            HtmlFramework::Svelte | HtmlFramework::Astro
+        ) {
+            return None;
+        }
+
+        match self.byte_at(1).map(lookup_byte) {
+            Some(SLH) => Some(self.consume_js_line_comment()),
+            Some(MUL) => Some(self.consume_js_block_comment()),
+            _ => None,
+        }
+    }
+
     /// Consumes a `//` single-line comment, returning COMMENT.
     /// Does NOT consume the terminating newline — it must be emitted as a
     /// separate NEWLINE trivia token to preserve leading/trailing trivia boundaries.
@@ -848,27 +893,21 @@ impl<'src> HtmlLexer<'src> {
         }
     }
     /// Consume a token in the [HtmlLexContext::AstroFencedCodeBlock] context until
-    /// either the closing `---` fence is reached or a script tag is encountered.
-    fn consume_astro_frontmatter(
-        &mut self,
-        current: u8,
-        context: HtmlLexContext,
-    ) -> HtmlSyntaxKind {
+    /// the closing `---` fence is reached.
+    fn consume_astro_frontmatter(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
             LSS if self.at_start_cdata() => self.consume_cdata_start(),
+            // Frontmatter never starts with markup, so this is a missing fence.
             LSS => self.consume_byte(T![<]),
-            MIN => {
-                debug_assert!(self.at_frontmatter_edge());
+            MIN if self.at_frontmatter_edge() => {
                 self.advance(3);
                 self.after_frontmatter = true;
                 T![---]
             }
-            _ => {
-                self.consume_token_embedded_language(current, HtmlEmbeddedLanguage::Script, context)
-            }
+            _ => self.consume_astro_frontmatter_body(),
         }
     }
 
@@ -883,7 +922,7 @@ impl<'src> HtmlLexer<'src> {
             COM => self.consume_byte(T![,]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
-            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BEO if self.at_svelte_block_start() => self.consume_svelte_opening_block(),
             BEO => self.consume_byte(T!['{']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
@@ -1272,6 +1311,14 @@ impl<'src> HtmlLexer<'src> {
             match current {
                 // these characters safely terminate an unquoted attribute value
                 b'\n' | b'\r' | b'\t' | b' ' | b'>' => break,
+                // HTML5 makes these a parse error but not a terminator, which is
+                // the reading Astro takes.
+                b'?' | b'\'' | b'"' | b'=' | b'`'
+                    if self.options.framework == HtmlFramework::Astro =>
+                {
+                    self.advance(1);
+                    content_started = true;
+                }
                 // these characters are absolutely invalid in an unquoted attribute value
                 b'?' | b'\'' | b'"' | b'=' | b'<' | b'`' => {
                     encountered_invalid = true;
@@ -1340,7 +1387,7 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consumes a Svelte opening block token starting with '{' followed by @, #, : or /.
     fn consume_svelte_opening_block(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_svelte_opening_block());
+        debug_assert!(self.at_svelte_block_start());
         let next_byte = self.byte_at(1);
         let token = match next_byte {
             Some(b'@') => T!["{@"],
@@ -1423,12 +1470,16 @@ impl<'src> HtmlLexer<'src> {
     }
 
     #[inline(always)]
-    fn at_svelte_opening_block(&self) -> bool {
+    fn at_svelte_block_start(&self) -> bool {
         self.current_byte() == Some(b'{')
             && (self.byte_at(1) == Some(b'@')
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    fn at_svelte_opening_block(&self) -> bool {
+        self.options.framework == HtmlFramework::Svelte && self.at_svelte_block_start()
     }
 
     #[inline(always)]
@@ -1536,6 +1587,8 @@ impl<'src> HtmlLexer<'src> {
     /// We consider a "block" of text to be a sequence of words, with whitespace
     /// separating them. A block ends when there is 2 newlines, or when a special
     /// character (eg. `<`) is found.
+    /// When text expressions are disabled, a curly brace extends the current block
+    /// to the next `<`, even across blank lines.
     ///
     /// Spaces between words are treated the same as newlines between words in HTML,
     /// and we don't end a block when we encounter a newline. However, we do not
@@ -1548,9 +1601,10 @@ impl<'src> HtmlLexer<'src> {
     ///
     /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
-    fn consume_html_text(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
+    fn consume_html_text(&mut self, current: u8) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
         let mut seen_newlines = 0;
+        let mut contains_curly = false;
 
         let mut closing_expression = None;
         let mut was_escaped = false;
@@ -1558,14 +1612,16 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            BEO => {
-                if double_text_expressions && self.at_opening_double_text_expression() {
+            BEO if self.options.text_expression.is_some() => {
+                if self.options.text_expression == Some(TextExpressionKind::Double)
+                    && self.at_opening_double_text_expression()
+                {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
-            BEC => {
+            BEC if self.options.text_expression.is_some() => {
                 if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
@@ -1577,6 +1633,12 @@ impl<'src> HtmlLexer<'src> {
                     let dispatched = lookup_byte(current);
 
                     match dispatched {
+                        BEO | BEC if self.options.text_expression.is_none() => {
+                            contains_curly = true;
+                            whitespace_started = None;
+                            seen_newlines = 0;
+                            self.advance(1);
+                        }
                         BEO => {
                             if was_escaped {
                                 self.advance(1);
@@ -1612,7 +1674,7 @@ impl<'src> HtmlLexer<'src> {
                             }
                             self.after_newline = true;
                             seen_newlines += 1;
-                            if seen_newlines > 1 {
+                            if seen_newlines > 1 && !contains_curly {
                                 break;
                             }
                             self.advance(1);
@@ -1675,9 +1737,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         } else {
             match self.current_byte() {
                 Some(current) => match context {
-                    HtmlLexContext::Regular { framework } => {
-                        self.consume_token(current, framework != HtmlFramework::Svelte)
-                    }
+                    HtmlLexContext::Regular { .. } => self.consume_token(current),
                     HtmlLexContext::InsideTag { framework } => {
                         let mode = TagNameMode::for_inside_tag(framework);
                         match framework {
@@ -1720,7 +1780,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
-                        self.consume_token_embedded_language(current, lang, context)
+                        self.consume_token_embedded_language(current, lang)
                     }
                     HtmlLexContext::TextExpression(kind) => match kind {
                         TextExpressionKind::Double => self.consume_double_text_expression(current),
@@ -1730,9 +1790,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_restricted_single_text_expression(kind)
                     }
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
-                    HtmlLexContext::AstroFencedCodeBlock => {
-                        self.consume_astro_frontmatter(current, context)
-                    }
+                    HtmlLexContext::AstroFencedCodeBlock => self.consume_astro_frontmatter(current),
                     HtmlLexContext::Svelte => self.consume_svelte(current),
                     HtmlLexContext::SvelteBindingLiteral => self.consume_svelte_literal(),
                 },
@@ -1813,9 +1871,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
-                HtmlReLexContext::HtmlText { framework } => {
-                    self.consume_html_text(current, framework != HtmlFramework::Svelte)
-                }
+                HtmlReLexContext::HtmlText { .. } => self.consume_html_text(current),
                 // Re-lexing is only used mid-tag (e.g. to split `:`/`.`), never at the
                 // tag-name position, so the classification mode is irrelevant here.
                 HtmlReLexContext::InsideTag => {
@@ -1827,6 +1883,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTagSvelte => {
                     self.consume_token_inside_tag_svelte(current, TagNameMode::Html)
                 }
+                HtmlReLexContext::SingleCurly => self.consume_byte(T!['{']),
                 HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,
@@ -1946,652 +2003,789 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
     }
 }
 
-/// Tracks whether the lexer is currently inside an open string literal, regex
-/// literal, or comment while scanning embedded JavaScript. This distinguishes
-/// Astro closing fences and Svelte expression braces from the same characters
-/// inside JavaScript literals or comments.
+/// Scans embedded JavaScript for the delimiter that ends the construct holding
+/// it: the `}` of an Astro or Svelte expression, the `---` fence of Astro
+/// frontmatter, or the `]` of a Vue dynamic directive argument.
 ///
-/// ## Design
-///
-/// The tracker maintains:
-/// - The **currently open quote character** (`current_quote`): `None` when not
-///   inside any string, or `Some(b'"')` / `Some(b'\'')` / `Some(b'`')` when
-///   inside a string. A quote opens a string only when no other string is
-///   already open; it closes the string only when it **matches** the opening
-///   quote. For example, a `'` inside a `"…"` string is treated as a literal
-///   character, not as a new string opener.
-/// - The **regex flag** (`in_regex`): set when a `/` is encountered in a
-///   position where it starts a regex literal (determined by the previous
-///   non-whitespace byte). While set, all bytes are consumed until an
-///   unescaped `/` closes the regex. Quotes and dashes inside a regex are
-///   not treated as string delimiters or fence markers.
-/// - The **comment state** (`comment`): distinguishes single-line (`//`) from
-///   multi-line (`/* … */`) comments, so that quote characters inside comments
-///   are not counted as string delimiters.
-/// - The **escape flag** (`escaped`): set when the previous byte was an
-///   unescaped `\`, so that the immediately following quote character is not
-///   treated as a string delimiter. A double backslash resets the flag because
-///   the backslash itself is escaped.
-struct QuotesSeen {
-    /// The quote character that opened the current string, if any.
-    current_quote: Option<u8>,
-    /// Whether we are currently inside a regex literal (`/…/`).
-    in_regex: bool,
-    /// Current comment state.
-    comment: QuotesSeenComment,
-    /// Whether the previous byte was an unescaped backslash.
-    escaped: bool,
-    /// The previous byte, needed to detect `//` and `/* */` comment markers
-    /// and the `*/` block-comment terminator.
-    prev_byte: Option<u8>,
-    /// The previous non-whitespace byte, used for the regex-start heuristic.
-    prev_non_ws_byte: Option<u8>,
+/// The closing delimiter must be plain code: a `}`, `---`, or `]` that sits
+/// inside a string, a comment, a regex literal, a template literal, or JSX is
+/// ordinary content and does not end the construct. The scanner recognises
+/// those nested constructs with a stack of [`JsContext`] frames: opening one
+/// pushes a frame, its terminator pops the frame again, and the scan stops at
+/// the first stop delimiter found while no frame is open.
+const CODE_BYTES: u8 = 1 << 0;
+const TEMPLATE_BYTES: u8 = 1 << 1;
+const JSX_TAG_BYTES: u8 = 1 << 2;
+const TYPE_ARGUMENT_BYTES: u8 = 1 << 3;
+const JSX_CHILDREN_BYTES: u8 = 1 << 4;
+
+/// For each byte, the [`JsContext`]s whose [`JsScanner::run`] arm does more
+/// than advance past it.
+static INTERESTING_BYTES: [u8; 256] = {
+    let mut table = [0u8; 256];
+    let mut index = 0;
+    while index < 256 {
+        let byte = index as u8;
+        let mut mask = 0u8;
+        if matches!(
+            byte,
+            b'"' | b'\'' | b'`' | b'/' | b'{' | b'[' | b'}' | b']' | b'-' | b'<'
+        ) {
+            mask |= CODE_BYTES;
+        }
+        if matches!(byte, b'\\' | b'`' | b'$') {
+            mask |= TEMPLATE_BYTES;
+        }
+        if matches!(byte, b'"' | b'\'' | b'`' | b'{' | b'=' | b'>' | b',' | b'<')
+            || byte.is_ascii_whitespace()
+        {
+            mask |= JSX_TAG_BYTES;
+        }
+        if matches!(byte, b'"' | b'\'' | b'`' | b'<' | b'=' | b'>') {
+            mask |= TYPE_ARGUMENT_BYTES;
+        }
+        if matches!(byte, b'{' | b'<') {
+            mask |= JSX_CHILDREN_BYTES;
+        }
+        table[index] = mask;
+        index += 1;
+    }
+    table
+};
+
+const fn interest_mask(context: Option<JsContext>) -> u8 {
+    match context {
+        None | Some(JsContext::Code(_)) => CODE_BYTES,
+        Some(JsContext::Template) => TEMPLATE_BYTES,
+        Some(JsContext::JsxTag { .. }) => JSX_TAG_BYTES,
+        Some(JsContext::TypeArguments) => TYPE_ARGUMENT_BYTES,
+        Some(JsContext::JsxChildren) => JSX_CHILDREN_BYTES,
+    }
 }
 
-/// Distinguishes the kind of comment the lexer is currently inside.
+struct JsScanner<'src> {
+    source: &'src [u8],
+    /// The offset of the byte being classified.
+    position: usize,
+    /// The constructs the current position is nested in, innermost last; an
+    /// empty stack means plain code, the only place the stop delimiter ends
+    /// the scan. Eight inline frames cover typical nesting depths without a
+    /// heap allocation.
+    stack: SmallVec<[JsContext; 8]>,
+    /// Whether `<` in expression position may open a JSX element.
+    jsx: bool,
+    /// Whether the scan ever entered JSX from code position.
+    entered_jsx: bool,
+}
+
+/// One level of JavaScript nesting tracked by [`JsScanner`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum QuotesSeenComment {
-    /// Not inside any comment.
-    None,
-    /// Inside a `//` single-line comment; exits on `\n`.
-    SingleLine,
-    /// Inside a `/* … */` multi-line comment; exits on `*/`.
-    MultiLine,
+enum JsContext {
+    /// Code nested inside a delimiter, closed by the given byte.
+    Code(u8),
+    /// The body of a template literal, between backticks.
+    Template,
+    /// A JSX tag, between `<` and its `>`.
+    JsxTag {
+        /// Whether the tag opened with `</`, which never has children.
+        closing: bool,
+        /// The offset of the tag name, just past the `<` or `</`.
+        name_start: usize,
+        /// Whether the scan is inside an unquoted attribute value, where a `/`
+        /// is part of the value.
+        in_unquoted_value: bool,
+    },
+    /// A type argument list on a JSX tag, between `<` and its `>`.
+    TypeArguments,
+    /// The children of a JSX element, where quotes and braces are text.
+    JsxChildren,
 }
 
-impl QuotesSeen {
-    fn new() -> Self {
-        Self {
-            current_quote: None,
-            in_regex: false,
-            comment: QuotesSeenComment::None,
-            escaped: false,
-            prev_byte: None,
-            prev_non_ws_byte: None,
+impl JsContext {
+    /// A tag whose name starts at `name_start`, before any attribute is seen.
+    const fn jsx_tag(closing: bool, name_start: usize) -> Self {
+        Self::JsxTag {
+            closing,
+            name_start,
+            in_unquoted_value: false,
+        }
+    }
+}
+
+/// The delimiter a [`JsScanner`] run stops at.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum JsScanStop {
+    /// The `}` closing an Astro or Svelte text expression.
+    ExpressionEnd,
+    /// The `---` closing Astro frontmatter.
+    FrontmatterFence,
+    /// The `]` closing a Vue dynamic directive argument.
+    ArgumentEnd,
+}
+
+impl JsScanStop {
+    /// Returns whether `byte` on its own closes the construct for this stop.
+    /// [`Self::FrontmatterFence`] never matches here: its delimiter is the
+    /// three-byte `---`, which [`JsScanner::run`] matches separately.
+    const fn ends_at(self, byte: u8) -> bool {
+        matches!(
+            (self, byte),
+            (Self::ExpressionEnd, b'}') | (Self::ArgumentEnd, b']')
+        )
+    }
+}
+
+impl<'src> JsScanner<'src> {
+    /// Returns the offset of the `}` that closes a text expression, or
+    /// `source.len()` when the expression is unterminated.
+    fn expression_length(source: &'src [u8], jsx: bool) -> usize {
+        Self::scan(source, JsScanStop::ExpressionEnd, jsx)
+    }
+
+    /// Returns the offset of the `---` that closes Astro frontmatter, or
+    /// `source.len()` when the fence is missing. Astro's component script is
+    /// TypeScript, so `<` there opens a type assertion rather than JSX.
+    fn frontmatter_length(source: &'src [u8]) -> usize {
+        Self::scan(source, JsScanStop::FrontmatterFence, false)
+    }
+
+    /// Returns the offset of the `]` that closes a Vue dynamic directive
+    /// argument, or `source.len()` when the bracket is unbalanced.
+    fn argument_length(source: &'src [u8]) -> usize {
+        Self::scan(source, JsScanStop::ArgumentEnd, false)
+    }
+
+    fn scan(source: &'src [u8], stop: JsScanStop, jsx: bool) -> usize {
+        let mut scanner = Self {
+            source,
+            position: 0,
+            stack: SmallVec::new(),
+            jsx,
+            entered_jsx: false,
+        };
+        let length = scanner.run(stop);
+        if length < source.len() || !scanner.entered_jsx {
+            return length;
+        }
+
+        // Running off the end inside JSX means a `<` was really a comparison
+        // or a cast, misread as an element whose closing tag never comes;
+        // rescan reading `<` as an operator.
+        scanner.position = 0;
+        scanner.stack.clear();
+        scanner.jsx = false;
+        scanner.run(stop)
+    }
+
+    fn current_byte(&self) -> Option<u8> {
+        self.source.get(self.position).copied()
+    }
+
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        self.source.get(self.position + offset).copied()
+    }
+
+    /// Clamped to the source end, so an escape at the very end cannot step past it.
+    fn advance(&mut self, count: usize) {
+        self.position = (self.position + count).min(self.source.len());
+    }
+
+    fn scanned(&self) -> &[u8] {
+        &self.source[..self.position]
+    }
+
+    fn previous_non_whitespace(&self) -> Option<u8> {
+        self.scanned()
+            .iter()
+            .rev()
+            .copied()
+            .find(|byte| !byte.is_ascii_whitespace())
+    }
+
+    fn set_in_unquoted_value(&mut self, value: bool) {
+        if let Some(JsContext::JsxTag {
+            in_unquoted_value, ..
+        }) = self.stack.last_mut()
+        {
+            *in_unquoted_value = value;
         }
     }
 
-    fn expression_length(&mut self, source: &[u8]) -> usize {
-        let mut position = 0;
-        let mut brackets_stack = 0;
-
-        'expression: loop {
-            if self.is_empty() {
-                while let Some(&current) = source.get(position) {
-                    match current {
-                        b'}' => {
-                            if brackets_stack == 0 {
-                                break 'expression;
-                            }
-                            brackets_stack -= 1;
-                        }
-                        b'{' => brackets_stack += 1,
-                        b'"' | b'\'' | b'`' => {
-                            self.current_quote = Some(current);
-                            position += 1;
-                            break;
-                        }
-                        b'/' => {
-                            match source.get(position + 1) {
-                                Some(b'/') => self.comment = QuotesSeenComment::SingleLine,
-                                Some(b'*') => self.comment = QuotesSeenComment::MultiLine,
-                                Some(b'>') => {}
-                                _ => {
-                                    let expression = &source[..position];
-                                    let previous_non_whitespace = expression
-                                        .iter()
-                                        .rev()
-                                        .copied()
-                                        .find(|byte| !byte.is_ascii_whitespace());
-                                    self.in_regex = expression.last() != Some(&b'<')
-                                        && slash_starts_regex(previous_non_whitespace);
-                                }
-                            }
-                            position += 1;
-                            if !self.is_empty() {
-                                break;
-                            }
-                            continue;
-                        }
-                        _ => {}
-                    }
-                    position += 1;
-                }
-            } else if let Some(quote) = self.current_quote {
-                while let Some(&current) = source.get(position) {
-                    position += 1;
-                    if self.escaped {
-                        self.escaped = false;
-                    } else if current == b'\\' {
-                        self.escaped = true;
-                    } else if current == quote {
-                        self.current_quote = None;
-                        break;
-                    }
-                }
-            } else if self.in_regex {
-                while let Some(&current) = source.get(position) {
-                    position += 1;
-                    if self.escaped {
-                        self.escaped = false;
-                    } else if current == b'\\' {
-                        self.escaped = true;
-                    } else if current == b'/' {
-                        self.in_regex = false;
-                        break;
-                    }
-                }
-            } else {
-                match self.comment {
-                    QuotesSeenComment::SingleLine => {
-                        while let Some(&current) = source.get(position) {
-                            position += 1;
-                            if current == b'\n' {
-                                self.comment = QuotesSeenComment::None;
-                                break;
-                            }
-                        }
-                    }
-                    QuotesSeenComment::MultiLine => {
-                        let mut previous = b'/';
-                        while let Some(&current) = source.get(position) {
-                            position += 1;
-                            if previous == b'*' && current == b'/' {
-                                self.comment = QuotesSeenComment::None;
-                                break;
-                            }
-                            previous = current;
-                        }
-                    }
-                    QuotesSeenComment::None => unreachable!(),
-                }
+    /// Advances past every byte the current context handles with a plain
+    /// `advance(1)`, so the per-byte cost stays one table load and one add.
+    fn skip_uninteresting(&mut self, mask: u8) {
+        while let Some(&byte) = self.source.get(self.position) {
+            if INTERESTING_BYTES[byte as usize] & mask != 0 {
+                break;
             }
+            self.position += 1;
+        }
+    }
 
-            if position == source.len() {
+    fn run(&mut self, stop: JsScanStop) -> usize {
+        while let Some(byte) = self.current_byte() {
+            let context = self.stack.last().copied();
+            let mask = interest_mask(context);
+            if INTERESTING_BYTES[byte as usize] & mask == 0 {
+                self.skip_uninteresting(mask);
+                continue;
+            }
+            match context {
+                None | Some(JsContext::Code(_)) => match lookup_byte(byte) {
+                    QOT => self.skip_string(byte),
+                    TPL => {
+                        self.stack.push(JsContext::Template);
+                        self.advance(1);
+                    }
+                    SLH => self.skip_slash(),
+                    BEO => {
+                        self.stack.push(JsContext::Code(b'}'));
+                        self.advance(1);
+                    }
+                    BTO if stop == JsScanStop::ArgumentEnd => {
+                        self.stack.push(JsContext::Code(b']'));
+                        self.advance(1);
+                    }
+                    BEC | BTC => {
+                        if self.stack.last() == Some(&JsContext::Code(byte)) {
+                            self.stack.pop();
+                        } else if self.stack.is_empty() && stop.ends_at(byte) {
+                            return self.position;
+                        }
+                        self.advance(1);
+                    }
+                    MIN if stop == JsScanStop::FrontmatterFence
+                        && self.stack.is_empty()
+                        && self.source[self.position..].starts_with(b"---") =>
+                    {
+                        return self.position;
+                    }
+                    LSS if self.jsx && self.jsx_element_starts() => {
+                        self.entered_jsx = true;
+                        self.stack
+                            .push(JsContext::jsx_tag(false, self.position + 1));
+                        self.advance(1);
+                    }
+                    _ => self.advance(1),
+                },
+
+                Some(JsContext::Template) => match lookup_byte(byte) {
+                    BSL => self.advance(2),
+                    TPL => {
+                        self.stack.pop();
+                        self.advance(1);
+                    }
+                    DOL if self.byte_at(1) == Some(b'{') => {
+                        self.stack.push(JsContext::Code(b'}'));
+                        self.advance(2);
+                    }
+                    _ => self.advance(1),
+                },
+
+                Some(JsContext::JsxTag {
+                    closing,
+                    name_start,
+                    in_unquoted_value,
+                }) => match lookup_byte(byte) {
+                    QOT => self.skip_string(byte),
+                    TPL => {
+                        self.stack.push(JsContext::Template);
+                        self.advance(1);
+                    }
+                    BEO => {
+                        self.stack.push(JsContext::Code(b'}'));
+                        self.advance(1);
+                    }
+                    EQL => {
+                        self.set_in_unquoted_value(starts_unquoted_value(self.byte_at(1)));
+                        self.advance(1);
+                    }
+                    MOR => {
+                        self.stack.pop();
+                        let self_closing =
+                            !in_unquoted_value && self.previous_non_whitespace() == Some(b'/');
+                        if !closing && !self_closing && !is_void_element(self.tag_name(name_start))
+                        {
+                            self.stack.push(JsContext::JsxChildren);
+                        }
+                        self.advance(1);
+                    }
+                    // A `,` cannot appear in a JSX tag, so this was a type parameter list.
+                    COM => {
+                        self.stack.pop();
+                        self.advance(1);
+                    }
+                    LSS => {
+                        self.stack.push(JsContext::TypeArguments);
+                        self.advance(1);
+                    }
+                    _ if in_unquoted_value && byte.is_ascii_whitespace() => {
+                        self.set_in_unquoted_value(false);
+                        self.advance(1);
+                    }
+                    _ => self.advance(1),
+                },
+
+                Some(JsContext::TypeArguments) => match lookup_byte(byte) {
+                    QOT => self.skip_string(byte),
+                    TPL => {
+                        self.stack.push(JsContext::Template);
+                        self.advance(1);
+                    }
+                    LSS => {
+                        self.stack.push(JsContext::TypeArguments);
+                        self.advance(1);
+                    }
+                    // The `>` of a function type's arrow does not close the list.
+                    EQL if self.byte_at(1) == Some(b'>') => self.advance(2),
+                    MOR => {
+                        self.stack.pop();
+                        self.advance(1);
+                    }
+                    _ => self.advance(1),
+                },
+
+                Some(JsContext::JsxChildren) => match lookup_byte(byte) {
+                    BEO => {
+                        self.stack.push(JsContext::Code(b'}'));
+                        self.advance(1);
+                    }
+                    LSS => match self.byte_at(1) {
+                        Some(b'/') => {
+                            self.stack.pop();
+                            self.stack.push(JsContext::jsx_tag(true, self.position + 2));
+                            self.advance(2);
+                        }
+                        Some(next) if starts_tag_name(next) => {
+                            self.stack
+                                .push(JsContext::jsx_tag(false, self.position + 1));
+                            self.advance(1);
+                        }
+                        _ => self.advance(1),
+                    },
+                    _ => self.advance(1),
+                },
+            }
+        }
+
+        self.position
+    }
+
+    /// Skips the string literal whose opening `quote` is the current byte,
+    /// stopping just past the closing quote or at the end of the source.
+    fn skip_string(&mut self, quote: u8) {
+        self.advance(1);
+        while let Some(byte) = self.current_byte() {
+            self.advance(1);
+            if byte == b'\\' {
+                self.advance(1);
+            } else if byte == quote {
                 break;
             }
         }
-
-        position
     }
 
-    /// Processes one byte of frontmatter source and updates the tracking state.
-    fn check_byte(&mut self, byte: u8) {
-        match self.comment {
-            QuotesSeenComment::SingleLine => {
-                // Single-line comment ends at the newline.
-                if byte == b'\n' {
-                    self.comment = QuotesSeenComment::None;
-                }
-                self.prev_byte = Some(byte);
-                if !byte.is_ascii_whitespace() {
-                    self.prev_non_ws_byte = Some(byte);
-                }
-                // Quotes inside comments are ignored.
-                return;
+    /// Skips from a `/` in code position past the comment or regex literal it
+    /// opens, or past the slash alone.
+    fn skip_slash(&mut self) {
+        match self.byte_at(1) {
+            Some(b'/') => {
+                self.advance(2);
+                self.skip_line_comment();
             }
-            QuotesSeenComment::MultiLine => {
-                // Multi-line comment ends at `*/`.
-                if self.prev_byte == Some(b'*') && byte == b'/' {
-                    self.comment = QuotesSeenComment::None;
-                    // Use a neutral prev_byte so the closing `/` of `*/` is
-                    // not mistaken for a potential regex or comment opener.
-                    self.prev_byte = None;
-                    self.prev_non_ws_byte = Some(b'/');
-                    return;
-                }
-                self.prev_byte = Some(byte);
-                // Quotes inside comments are ignored.
-                return;
+            Some(b'*') => {
+                self.advance(2);
+                self.skip_block_comment();
             }
-            QuotesSeenComment::None => {}
-        }
-
-        // Inside a regex literal: consume bytes until an unescaped `/` closes it.
-        if self.in_regex {
-            if byte == b'\\' {
-                self.escaped = !self.escaped;
-                self.prev_byte = Some(byte);
-            } else if byte == b'/' && !self.escaped {
-                self.in_regex = false;
-                self.escaped = false;
-                // Use a neutral prev_byte so the closing `/` of the regex is
-                // not mistaken for a deferred slash (comment/regex opener).
-                self.prev_byte = None;
-                self.prev_non_ws_byte = Some(b'/');
-            } else {
-                self.escaped = false;
-                self.prev_byte = Some(byte);
+            // `/>` closes a tag that was not recognised as JSX; it never opens a regex.
+            Some(b'>') => self.advance(1),
+            _ if self.scanned().last() != Some(&b'<')
+                && slash_starts_regex(self.previous_non_whitespace()) =>
+            {
+                self.advance(1);
+                self.skip_regex();
             }
-            return;
-        }
-
-        // If the current byte is escaped, it cannot act as a string delimiter
-        // or comment opener.
-        let was_escaped = self.escaped;
-        self.escaped = false;
-
-        if was_escaped {
-            self.prev_byte = Some(byte);
-            if !byte.is_ascii_whitespace() {
-                self.prev_non_ws_byte = Some(byte);
-            }
-            return;
-        }
-
-        // Detect comment openers and regex literals — only valid outside of open strings.
-        if self.current_quote.is_none() && byte == b'/' {
-            // Check if the previous byte was also `/` → single-line comment.
-            if self.prev_byte == Some(b'/') {
-                self.comment = QuotesSeenComment::SingleLine;
-                self.prev_byte = Some(byte);
-                // Don't update prev_non_ws_byte — it was already preserved
-                // when we deferred the first `/`.
-                return;
-            }
-
-            // The `/` might start a comment (if followed by `/` or `*`), a
-            // regex literal, or be a division operator. We defer the decision:
-            // store it as prev_byte and decide on the *next* byte.
-            // Crucially, do NOT update prev_non_ws_byte here — we need to
-            // preserve the byte before the `/` for the regex heuristic.
-            self.prev_byte = Some(byte);
-            return;
-        }
-
-        // If the *previous* byte was `/` (outside a string), decide now whether
-        // it was a comment opener, a regex opener, or plain division.
-        if self.current_quote.is_none() && self.prev_byte == Some(b'/') {
-            if byte == b'*' {
-                self.comment = QuotesSeenComment::MultiLine;
-                self.prev_byte = Some(byte);
-                self.prev_non_ws_byte = Some(byte);
-                return;
-            }
-
-            // Not `//` or `/*`, so the previous `/` was either a regex opener
-            // or a division operator. Use the previous non-whitespace byte
-            // before the `/` to decide.
-            if self.slash_starts_regex() {
-                // The `/` opened a regex. The current byte is the first byte
-                // inside the regex body.
-                self.in_regex = true;
-                if byte == b'\\' {
-                    self.escaped = true;
-                }
-                self.prev_byte = Some(byte);
-                if !byte.is_ascii_whitespace() {
-                    self.prev_non_ws_byte = Some(byte);
-                }
-                return;
-            }
-            // It was division; update prev_non_ws_byte to `/` now.
-            self.prev_non_ws_byte = Some(b'/');
-        }
-
-        // Handle escape sequences: a `\` that is not itself escaped toggles the
-        // escape flag for the next character.
-        if byte == b'\\' {
-            self.escaped = !self.escaped;
-            self.prev_byte = Some(byte);
-            self.prev_non_ws_byte = Some(byte);
-            return;
-        }
-
-        // Track string delimiters.
-        match byte {
-            b'"' | b'\'' | b'`' => {
-                match self.current_quote {
-                    None => {
-                        // No string is open; this quote opens one.
-                        self.current_quote = Some(byte);
-                    }
-                    Some(open) if open == byte => {
-                        // The same quote that opened this string closes it.
-                        self.current_quote = None;
-                    }
-                    Some(_) => {
-                        // A different quote character inside an open string is
-                        // just a literal character — ignore it.
-                    }
-                }
-            }
-            _ => {}
-        }
-
-        self.prev_byte = Some(byte);
-        if !byte.is_ascii_whitespace() {
-            self.prev_non_ws_byte = Some(byte);
+            _ => self.advance(1),
         }
     }
 
-    /// Returns whether a deferred `/` starts a regex literal based on
-    /// `prev_non_ws_byte`. After an identifier character, closing
-    /// paren/bracket, number, or `++`/`--` suffix, `/` is division. In all
-    /// other positions `/` starts a regex.
-    fn slash_starts_regex(&self) -> bool {
-        slash_starts_regex(self.prev_non_ws_byte)
+    /// Skips the regex literal body, stopping just past the closing `/` or at
+    /// the end of the source. A `/` inside a `[…]` character class does not
+    /// close the literal.
+    fn skip_regex(&mut self) {
+        let mut in_character_class = false;
+
+        while let Some(byte) = self.current_byte() {
+            self.advance(1);
+            match byte {
+                b'\\' => self.advance(1),
+                b'[' => in_character_class = true,
+                b']' => in_character_class = false,
+                b'/' if !in_character_class => break,
+                _ => {}
+            }
+        }
     }
 
-    /// Returns `true` when the tracker is not currently inside an open string
-    /// literal, regex literal, or comment, and there is no pending deferred
-    /// slash that might open a regex. All conditions must be absent for a
-    /// `---` fence to be a valid frontmatter closing delimiter.
-    fn is_empty(&self) -> bool {
-        self.current_quote.is_none()
-            && !self.in_regex
-            && self.comment == QuotesSeenComment::None
-            && self.prev_byte != Some(b'/')
+    /// Skips just past the terminating newline, or to the end of the source.
+    fn skip_line_comment(&mut self) {
+        while let Some(byte) = self.current_byte() {
+            self.advance(1);
+            if byte == b'\n' {
+                break;
+            }
+        }
+    }
+
+    /// Skips just past the closing `*/`, or to the end of the source.
+    fn skip_block_comment(&mut self) {
+        while let Some(byte) = self.current_byte() {
+            if byte == b'*' && self.byte_at(1) == Some(b'/') {
+                self.advance(2);
+                return;
+            }
+            self.advance(1);
+        }
+    }
+
+    /// Returns whether the `<` at the current position opens a JSX element
+    /// rather than a comparison, a shift, or a TypeScript type argument list.
+    fn jsx_element_starts(&self) -> bool {
+        self.byte_at(1).is_some_and(starts_tag_name) && at_expression_position(self.scanned())
+    }
+
+    /// Returns the tag name starting at `start`, which is empty for a fragment.
+    fn tag_name(&self, start: usize) -> &[u8] {
+        let name = self.source.get(start..).unwrap_or_default();
+        let length = name
+            .iter()
+            .position(|byte| !is_tag_name_byte(*byte))
+            .unwrap_or(name.len());
+
+        &name[..length]
     }
 }
 
+/// Returns whether a byte can follow `<` in a JSX element, counting the `>` of
+/// a fragment.
+fn starts_tag_name(byte: u8) -> bool {
+    byte == b'>' || byte == b'_' || byte.is_ascii_alphabetic()
+}
+
+/// Returns whether `name` is a [void element](https://html.spec.whatwg.org/#void-elements),
+/// which never has children. The keyword lookup is exact because Astro matches
+/// the spec names case-sensitively: `<BR>` is a component, not a line break.
+fn is_void_element(name: &[u8]) -> bool {
+    std::str::from_utf8(name)
+        .ok()
+        .and_then(HtmlSyntaxKind::from_keyword)
+        .is_some_and(|kind| VOID_ELEMENTS.contains(kind))
+}
+
+/// Returns whether `byte`, the one right after an `=` in a tag, opens an
+/// unquoted attribute value.
+fn starts_unquoted_value(byte: Option<u8>) -> bool {
+    byte.is_some_and(|byte| {
+        !matches!(byte, b'"' | b'\'' | b'`' | b'{') && !byte.is_ascii_whitespace()
+    })
+}
+
+/// Returns whether the code scanned so far ends where an expression may start.
+/// After an operand (a non-keyword identifier, a literal, or a closing bracket),
+/// the next `<` is an operator instead.
+fn at_expression_position(scanned: &[u8]) -> bool {
+    let Some(index) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
+        return true;
+    };
+
+    if is_js_word_byte(scanned[index]) {
+        let start = scanned[..index]
+            .iter()
+            .rposition(|byte| !is_js_word_byte(*byte))
+            .map_or(0, |index| index + 1);
+        return matches!(
+            &scanned[start..=index],
+            b"await"
+                | b"case"
+                | b"delete"
+                | b"do"
+                | b"else"
+                | b"in"
+                | b"instanceof"
+                | b"new"
+                | b"of"
+                | b"return"
+                | b"throw"
+                | b"typeof"
+                | b"void"
+                | b"yield"
+        );
+    }
+
+    !matches!(scanned[index], b')' | b']' | b'"' | b'\'' | b'`')
+}
+
+fn is_js_word_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'$'
+}
+
 #[cfg(test)]
-mod quotes_seen {
-    use crate::lexer::QuotesSeen;
+mod js_scanner {
+    use crate::lexer::JsScanner;
 
-    fn track(source: &str, quotes_seen: &mut QuotesSeen) {
-        for char in source.as_bytes() {
-            quotes_seen.check_byte(*char);
-        }
+    /// The offset of the closing `---` fence, or `None` when the scan reaches
+    /// the end of the source without finding one.
+    fn fence(source: &str) -> Option<usize> {
+        let length = JsScanner::frontmatter_length(source.as_bytes());
+        (length < source.len()).then_some(length)
+    }
+
+    /// The offset of the `}` closing a text expression, or `None` when the
+    /// expression is unterminated.
+    fn expression(source: &str) -> Option<usize> {
+        let length = JsScanner::expression_length(source.as_bytes(), true);
+        (length < source.len()).then_some(length)
     }
 
     #[test]
-    fn is_not_empty() {
-        let source = r#"'"`"#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(!quotes_seen.is_empty());
-
-        let source = r#"`'""'"#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(!quotes_seen.is_empty());
-    }
-    #[test]
-    fn is_empty() {
-        let source = r#" '"``"' "#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
-    }
-
-    /// A single-line comment that has not yet been terminated (no trailing newline)
-    /// leaves the tracker inside the comment, so `is_empty()` returns `false`.
-    /// A `---` encountered in this state must not be treated as a closing fence.
-    #[test]
-    fn not_empty_inside_unterminated_single_line_comment() {
-        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh."#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(!quotes_seen.is_empty());
+    fn unterminated_quotes_hide_the_fence() {
+        assert_eq!(fence("'\"`\n---\n"), None);
+        assert_eq!(fence("`'\"\"'\n---\n"), None);
     }
 
     #[test]
-    fn empty_with_comments_outside_comments_1() {
-        let source = r#"// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
-const f = "something" "#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
+    fn balanced_quotes_leave_the_fence_visible() {
+        assert_eq!(fence(" '\"``\"' \n---\n"), Some(9));
     }
 
-    #[test]
-    fn empty_with_comments_outside_comments_2() {
-        let source = r#"/* Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh. */
-const f = "something" "#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
-    }
-
-    #[test]
-    fn empty_with_comments_outside_comments_3() {
-        let source = r#"/* "safe"
- 'safe'
- `safe`*/
-const f = "something" "#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(quotes_seen.is_empty());
-    }
-
-    // --- Tests for issue #9108: mixed quote types inside a string ---
-
-    /// A double-quoted string containing a single quote should be considered closed.
-    /// The apostrophe is a literal character inside the double-quoted string and
-    /// must not be treated as an opening single-quote delimiter.
     #[test]
     fn issue_9108_double_quoted_with_apostrophe() {
-        // "test'"  — double-quoted string that contains an apostrophe
-        let source = r#""test'""#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "double-quoted string containing apostrophe must be treated as closed"
-        );
+        assert!(fence("\"test'\"\n---\n").is_some());
     }
 
-    /// A single-quoted string containing a double quote should be considered closed.
     #[test]
     fn issue_9108_single_quoted_with_double_quote() {
-        // 'it"s'
-        let source = r#"'it"s'"#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "single-quoted string containing double quote must be treated as closed"
-        );
+        assert!(fence("'it\"s'\n---\n").is_some());
     }
 
-    /// A template literal containing both single and double quotes should close cleanly.
     #[test]
     fn issue_9108_template_with_mixed_quotes() {
-        // `it's a "test"`
-        let source = "`it's a \"test\"`";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "template literal containing single and double quotes must be treated as closed"
-        );
+        assert!(fence("`it's a \"test\"`\n---\n").is_some());
     }
 
-    /// Multiple complete strings with different quote types on the same line.
     #[test]
     fn issue_9108_multiple_strings_with_mixed_quotes() {
-        // const a = "it's"; const b = 'say "hi"';
-        let source = r#"const a = "it's"; const b = 'say "hi"';"#;
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "multiple complete string literals with mixed quote types must all be closed"
-        );
+        assert!(fence("const a = \"it's\"; const b = 'say \"hi\"';\n---\n").is_some());
     }
 
-    // --- Tests for issue #8882: multi-line block comments with quotes ---
-
-    /// A multi-line block comment containing an apostrophe must not leave the tracker
-    /// in a non-empty state. Quote characters inside block comments are not string
-    /// delimiters and must be ignored across all lines of the comment.
     #[test]
     fn issue_8882_multiline_block_comment_with_apostrophe() {
-        let source = "/*\n * Doesn't that stink?\n */";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "multi-line block comment with apostrophe must not leave an open quote"
-        );
+        assert!(fence("/*\n * Doesn't that stink?\n */\n---\n").is_some());
     }
 
-    /// JSDoc-style comment followed by real code — mirrors the exact pattern from #8882.
     #[test]
     fn issue_8882_jsdoc_comment_then_code() {
-        let source = "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show \n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink? \n */\nimport type { HTMLAttributes } from \"astro/types\";\nconst { class: className } = Astro.props;";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "JSDoc comment with apostrophes followed by real code must leave tracker empty"
-        );
+        let source = "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show \n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink? \n */\nimport type { HTMLAttributes } from \"astro/types\";\nconst { class: className } = Astro.props;\n---\n";
+        assert!(fence(source).is_some());
     }
 
-    /// Multi-line block comment with quotes on every line.
     #[test]
     fn issue_8882_multiline_block_comment_quotes_every_line() {
-        let source = "/* line one 'unclosed\n   line two `unclosed\n   line three \"unclosed */\nconst x = 1;";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "block comment with unclosed quote chars on every line must not affect tracker"
-        );
+        let source = "/* line one 'unclosed\n   line two `unclosed\n   line three \"unclosed */\nconst x = 1;\n---\n";
+        assert!(fence(source).is_some());
     }
 
-    // --- Tests for fence-inside-comment cases ---
-
-    /// A `---` sequence that appears after `//` on the same line must not close
-    /// the frontmatter, because it is inside a single-line comment.
     #[test]
-    fn fence_inside_single_line_comment_is_not_empty() {
-        // "// ---" — the dashes are inside a line comment, not a real fence
-        let source = "// ---";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            !quotes_seen.is_empty(),
-            "tracker must be non-empty while inside a single-line comment"
-        );
+    fn fence_inside_single_line_comment_is_not_a_fence() {
+        assert_eq!(fence("// ---"), None);
     }
 
-    /// A `---` sequence that appears inside a `/* */` block comment must not
-    /// close the frontmatter.
     #[test]
-    fn fence_inside_block_comment_is_not_empty() {
-        // "/*\n---\n" — the dashes are inside a block comment that has not yet closed
-        let source = "/*\n---\n";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            !quotes_seen.is_empty(),
-            "tracker must be non-empty while inside a multi-line block comment"
-        );
+    fn fence_inside_block_comment_is_not_a_fence() {
+        assert_eq!(fence("/*\n---\n"), None);
     }
 
-    // --- Tests for escape sequence handling ---
+    #[test]
+    fn a_line_comment_ends_at_its_newline() {
+        assert!(fence("// ---\nconst f = \"something\"\n---\n").is_some());
+    }
 
-    /// An escaped quote inside a double-quoted string must not close the string early.
-    /// In `"\""`, the inner `\"` is escaped, so only the final `"` closes the string.
     #[test]
     fn escaped_double_quote_inside_double_string() {
-        // "\""  — the backslash escapes the inner double quote
-        let source = "\"\\\"\"";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "escaped double quote inside double-quoted string must not close it prematurely"
-        );
+        assert!(fence("\"\\\"\"\n---\n").is_some());
     }
 
-    /// An escaped single quote inside a single-quoted string must not close it early.
-    /// In `'\''`, the inner `\'` is escaped, so only the final `'` closes the string.
     #[test]
     fn escaped_single_quote_inside_single_string() {
-        // '\''  — open single quote, escaped single quote, closing single quote
-        let source = r"'\''";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "escaped single quote inside single-quoted string must not close it prematurely"
-        );
+        assert!(fence("'\\''\n---\n").is_some());
     }
 
-    /// An escaped backtick inside a template literal must not close it early.
     #[test]
     fn escaped_backtick_inside_template() {
-        // `\``
-        let source = "`\\``";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "escaped backtick inside template literal must not close it prematurely"
-        );
+        assert!(fence("`\\``\n---\n").is_some());
     }
 
-    /// A double backslash before a closing quote means the backslash is itself escaped,
-    /// so the quote is a genuine string delimiter. `"\\"` opens with the first `"`,
-    /// contains an escaped backslash `\\`, and closes with the final `"`.
     #[test]
     fn double_backslash_then_quote() {
-        // "\\"  — opening quote, escaped backslash, closing quote
-        let source = "\"\\\\\"";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "double backslash followed by closing quote must close the string"
-        );
+        assert!(fence("\"\\\\\"\n---\n").is_some());
     }
 
-    // --- Tests for issue #9187: regex literals in frontmatter ---
-
-    /// A regex literal containing a single quote must not leave the tracker in a
-    /// non-empty state. The quote inside the regex is not a string delimiter.
     #[test]
     fn issue_9187_regex_with_single_quote() {
-        let source = "const test = /'/\n";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "regex literal containing single quote must not open a string"
-        );
+        assert!(fence("const test = /'/\n---\n").is_some());
     }
 
-    /// A regex literal containing a double quote must not leave the tracker in a
-    /// non-empty state.
     #[test]
     fn issue_9187_regex_with_double_quote() {
-        let source = "const test = /\"/\n";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "regex literal containing double quote must not open a string"
-        );
+        assert!(fence("const test = /\"/\n---\n").is_some());
     }
 
-    /// A regex literal containing `---` must not cause the tracker to misidentify
-    /// the fence. The tracker must remain empty after the regex closes.
     #[test]
     fn issue_9187_regex_with_dashes() {
-        let source = "const test = /---/\n";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "regex literal containing dashes must not confuse the tracker"
+        assert!(fence("const test = /---/\n---\n").is_some());
+    }
+
+    #[test]
+    fn issue_9187_regex_with_escape_and_quantifier() {
+        assert!(fence("const test = /\\d{4}/\n---\n").is_some());
+    }
+
+    #[test]
+    fn regex_character_class_may_contain_a_slash() {
+        assert!(fence("const a = /[/]'/;\n---\n").is_some());
+    }
+
+    #[test]
+    fn nested_template_interpolation_closes_the_fence() {
+        assert!(fence("const a = `x${`/y`}`;\n---\n").is_some());
+    }
+
+    #[test]
+    fn nested_template_interpolation_ends_the_expression() {
+        let source = "`/blog${n === 0 ? '' : `/${n + 1}`}`}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn apostrophe_in_jsx_text_ends_the_expression() {
+        let source = "items.map((i) => <li>it's {i}</li>)}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_self_closing_element_ends_the_expression() {
+        let source = "<Icon />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_void_element_has_no_children() {
+        let source = "cond && <span>It's<br>ok</span>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "open && <label><input type=\"text\">don't</label>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    /// Astro matches the void element names case-sensitively.
+    #[test]
+    fn an_uppercase_void_name_is_a_component() {
+        let source = "x && <BR>it's</BR>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_slash_in_an_unquoted_value_does_not_close_the_tag() {
+        let source = "x && <div a=4/>it's</div>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_slash_after_an_unquoted_value_closes_the_tag() {
+        let source = "x && <div a=4 />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_template_attribute_value_may_contain_an_angle_bracket() {
+        let source = "x && <C a=`b > c` />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn type_arguments_do_not_end_a_tag() {
+        let source = "x && <List<string>>it's</List>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "x && <Table<Map<string, number>>>it's</Table>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_function_type_argument_does_not_end_the_list() {
+        let source = "x && <C<(x: A) => B>>don't</C>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "x && <C<() => B> />}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_fragment_ends_the_expression() {
+        let source = "<><b>a</b></>}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn returned_jsx_ends_the_expression() {
+        let source = "() => { return <div>a</div>; }}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_comparison_does_not_start_jsx() {
+        let source = "a < c}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+        let source = "a<c}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_generic_call_does_not_start_jsx() {
+        let source = "new Map<string, number>()}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_type_parameter_list_does_not_start_jsx() {
+        let source = "<T,>(x: T) => x}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    /// A `<` that opens neither JSX nor a recognisably non-JSX construct
+    /// swallows the rest of the source; the scan retries without JSX rather
+    /// than letting the expression run away.
+    #[test]
+    fn a_runaway_element_falls_back_to_scanning_without_jsx() {
+        let source = "await <T extends U>(v)}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_trailing_escape_does_not_scan_past_the_input() {
+        let source = "`a\\";
+        assert_eq!(expression(source), None);
+        assert_eq!(
+            JsScanner::expression_length(source.as_bytes(), true),
+            source.len()
         );
     }
 
-    /// A regex literal containing an escaped character followed by a quantifier
-    /// must close cleanly. This mirrors `/\d{4}/`, which previously regressed
-    /// in Astro frontmatter scanning.
+    /// Astro's frontmatter is TypeScript, where `<` opens a type assertion.
     #[test]
-    fn issue_9187_regex_with_escape_and_quantifier() {
-        let source = r"const test = /\d{4}/
-";
-        let mut quotes_seen = QuotesSeen::new();
-        track(source, &mut quotes_seen);
-        assert!(
-            quotes_seen.is_empty(),
-            "regex literal containing an escape and quantifier must close cleanly"
-        );
+    fn a_type_assertion_in_frontmatter_closes_the_fence() {
+        assert_eq!(fence("const a = <string>x;\n---\n"), Some(21));
+    }
+
+    #[test]
+    fn a_closing_tag_in_frontmatter_does_not_open_a_regex() {
+        assert!(fence("const items = xs.map((x) => <li>{x}</li>);\n---\n").is_some());
     }
 }

@@ -59,8 +59,12 @@ TwCandidateList = AnyTwFullCandidate*
 AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 
 // A Candidate is essentially a CSS class from an end user perspective. It's what the end user puts inside the `class` attribute in their HTML, separated by spaces.
+// The important flag is written as a trailing `!` (`flex!`); the leading
+// form (`!flex`) is Tailwind's legacy spelling and is still accepted, but a
+// candidate can't carry both.
 TwFullCandidate =
 	variants: TwVariantList
+	legacy_important: '!'?
 	negative: '-'?
 	candidate: AnyTwCandidate
 	'!'?

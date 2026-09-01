@@ -3096,6 +3096,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroSetHtmlDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroSetHtmlDirectiveOptions" }
+			]
+		},
+		"NoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4522,6 +4532,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidFileInputAcceptConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidFileInputAcceptOptions" }
+			]
+		},
+		"NoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidGridAreasConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5774,6 +5794,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredCustomPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredCustomPropertiesOptions" }
+			]
+		},
+		"NoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6076,6 +6106,16 @@
 			]
 		},
 		"NoUnsafePlusOperandsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnsafeTypeAssertionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeTypeAssertionOptions" }
+			]
+		},
+		"NoUnsafeTypeAssertionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6697,6 +6737,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroSetHtmlDirective": {
+					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroSetHtmlDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBaseToString": {
 					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
@@ -6799,6 +6846,13 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidFileInputAccept": {
+					"description": "Disallow invalid accept values on file inputs.\nSee https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidFileInputAcceptConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7005,6 +7059,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredCustomProperties": {
+					"description": "Reports custom properties used with var() that have no visible declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnnecessaryTemplateExpression": {
 					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
 					"anyOf": [
@@ -7016,6 +7077,13 @@
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeTypeAssertion": {
+					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7076,6 +7144,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAstroClientOnlyDirectiveValue": {
+					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAwaitThenable": {
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
@@ -7094,6 +7169,13 @@
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentTestItConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useControlLabel": {
+					"description": "Enforce that interactive control elements have an accessible label.\nSee https://biomejs.dev/linter/rules/use-control-label",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseControlLabelConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7178,6 +7260,13 @@
 					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedLayer": {
+					"description": "Disallow anonymous cascade layers.\nSee https://biomejs.dev/linter/rules/use-named-layer",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedLayerConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7916,77 +8005,6 @@
 			},
 			"required": ["level", "options"]
 		},
-		"RuleDomain": {
-			"description": "Rule domains",
-			"oneOf": [
-				{
-					"description": "Drizzle ORM rules",
-					"type": "string",
-					"const": "drizzle"
-				},
-				{
-					"description": "React library rules",
-					"type": "string",
-					"const": "react"
-				},
-				{
-					"description": "React Native framework rules",
-					"type": "string",
-					"const": "reactNative"
-				},
-				{ "description": "Testing rules", "type": "string", "const": "test" },
-				{
-					"description": "Solid.js framework rules",
-					"type": "string",
-					"const": "solid"
-				},
-				{
-					"description": "Next.js framework rules",
-					"type": "string",
-					"const": "next"
-				},
-				{
-					"description": "Qwik framework rules",
-					"type": "string",
-					"const": "qwik"
-				},
-				{
-					"description": "Svelte framework rules",
-					"type": "string",
-					"const": "svelte"
-				},
-				{
-					"description": "Vue.js framework rules",
-					"type": "string",
-					"const": "vue"
-				},
-				{
-					"description": "For rules that require querying multiple files inside a project",
-					"type": "string",
-					"const": "project"
-				},
-				{
-					"description": "Tailwind CSS rules",
-					"type": "string",
-					"const": "tailwind"
-				},
-				{
-					"description": "Turborepo build system rules",
-					"type": "string",
-					"const": "turborepo"
-				},
-				{
-					"description": "Playwright testing framework rules",
-					"type": "string",
-					"const": "playwright"
-				},
-				{
-					"description": "Rules that require type inference",
-					"type": "string",
-					"const": "types"
-				}
-			]
-		},
 		"RuleDomainValue": {
 			"oneOf": [
 				{
@@ -8008,8 +8026,24 @@
 		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
+			"properties": {
+				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+				"next": { "$ref": "#/$defs/RuleDomainValue" },
+				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
+				"project": { "$ref": "#/$defs/RuleDomainValue" },
+				"qwik": { "$ref": "#/$defs/RuleDomainValue" },
+				"react": { "$ref": "#/$defs/RuleDomainValue" },
+				"reactNative": { "$ref": "#/$defs/RuleDomainValue" },
+				"solid": { "$ref": "#/$defs/RuleDomainValue" },
+				"svelte": { "$ref": "#/$defs/RuleDomainValue" },
+				"tailwind": { "$ref": "#/$defs/RuleDomainValue" },
+				"test": { "$ref": "#/$defs/RuleDomainValue" },
+				"turborepo": { "$ref": "#/$defs/RuleDomainValue" },
+				"types": { "$ref": "#/$defs/RuleDomainValue" },
+				"vue": { "$ref": "#/$defs/RuleDomainValue" }
+			},
+			"additionalProperties": false
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
@@ -8136,6 +8170,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroSetHtmlDirectiveOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9354,6 +9397,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidFileInputAcceptOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoInvalidGridAreasOptions": {
 			"type": "object",
 			"properties": {
@@ -10427,6 +10480,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredCustomPropertiesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
@@ -10632,6 +10694,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeTypeAssertionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeTypeAssertionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11250,6 +11321,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseAtIndexOptions": {
 			"type": "object",
 			"properties": {
@@ -11460,6 +11540,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConstOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseControlLabelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseControlLabelOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12060,6 +12149,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseNamedCaptureGroupOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseNamedLayerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedLayerOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13931,7 +14029,7 @@
 					]
 				},
 				"useVueHyphenatedAttributes": {
-					"description": "Enforce hyphenated (kebab-case) attribute names in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
+					"description": "Disallow uppercase letters in Vue template attribute names.\nSee https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueHyphenatedAttributesConfiguration" },
 						{ "type": "null" }
@@ -14931,6 +15029,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAstroClientOnlyDirectiveValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroClientOnlyDirectiveValueOptions" }
+			]
+		},
+		"UseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseAtIndexConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15291,6 +15399,17 @@
 			]
 		},
 		"UseConstOptions": { "type": "object", "additionalProperties": false },
+		"UseControlLabelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseControlLabelOptions" }
+			]
+		},
+		"UseControlLabelOptions": {
+			"description": "Configuration for the `useControlLabel` lint rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseDateNowConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16053,6 +16172,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseNamedLayerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedLayerOptions" }
+			]
+		},
+		"UseNamedLayerOptions": { "type": "object", "additionalProperties": false },
 		"UseNamespaceKeywordConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -17050,14 +17176,14 @@
 			"type": "object",
 			"properties": {
 				"ignore": {
-					"description": "List of attribute names to ignore when checking for hyphenated attributes.",
+					"description": "List of attribute names to ignore when checking for uppercase letters.",
 					"type": ["array", "null"],
 					"default": null,
 					"items": { "type": "string" },
 					"uniqueItems": true
 				},
 				"ignoreTags": {
-					"description": "List of HTML tags to ignore when checking for hyphenated attributes.",
+					"description": "List of HTML tags whose attributes should not be checked for uppercase letters.",
 					"type": ["array", "null"],
 					"default": null,
 					"items": { "type": "string" },

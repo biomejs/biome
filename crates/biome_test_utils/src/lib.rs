@@ -18,22 +18,20 @@ use biome_console::markup;
 use biome_css_parser::CssParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::AnyCssRoot;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use biome_db::ParsedSource;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 #[cfg(feature = "html_embeds")]
 use biome_fs::MemoryFileSystem;
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_parser::HtmlParserOptions;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_syntax::HtmlRoot;
+use biome_html_parser::{HtmlParse, HtmlParserOptions};
 #[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
 use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_module_graph::HtmlEmbeddedContent;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_module_graph::resolve_css_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
@@ -52,7 +50,7 @@ use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use biome_service::settings::ModuleGraphResolutionKind;
-use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 #[cfg(feature = "html_embeds")]
 use biome_service::test_utils::setup_workspace_and_open_project;
 #[cfg(feature = "html_embeds")]
@@ -121,17 +119,15 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             )
             .unwrap();
 
-        L::resolve_analyzer_options(
-            &settings,
-            &L::lookup_settings(&settings.languages).linter,
-            L::resolve_environment(&settings),
-            &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(
-                input_file,
-                settings.experimental_full_html_support_enabled(),
-            ),
-            None,
-        )
+        settings
+            .analyzer_options::<L>(
+                &settings.matching_override_indices(input_file),
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            )
+            .with_file_path(input_file)
     }
 }
 
@@ -211,8 +207,13 @@ pub fn create_parser_options<L: ServiceLanguage>(
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+        let language_settings = &L::lookup_settings(&settings.languages).parser;
+        Some(L::resolve_parse_options(
+            &settings.override_settings,
+            language_settings,
+            &input_file.into(),
+            &document_file_source,
+        ))
     }
 }
 
@@ -258,8 +259,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, Default::default());
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        let override_indices = settings.matching_override_indices(input_file);
+        settings.format_options::<L>(&override_indices, &document_file_source)
     }
 }
 
@@ -306,6 +307,27 @@ pub fn module_graph_for_test_file(
         let css_paths = get_css_like_paths_in_dir(&dir);
         let css_roots = get_css_added_paths(&fs, &css_paths);
         for (path, root) in css_roots {
+            let DocumentFileSource::Css(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                continue;
+            };
+            let content = fs.read_file_from_path(path).expect("CSS test file exists");
+            let options = if file_source.is_css_modules() {
+                CssParserOptions::default().allow_css_modules()
+            } else {
+                CssParserOptions::default()
+            };
+            let parsed = biome_css_parser::parse_css(&content, file_source, options);
+            let source_index = db.insert_source(file_source.into());
+            let parsed_source = ParsedSource::new(
+                &db,
+                path.as_path().to_path_buf(),
+                parsed.into(),
+                source_index,
+                Vec::new(),
+            );
+            db.insert_file(path.as_path(), parsed_source);
             let (module_info, _, _) =
                 resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
             let md = biome_module_graph::ModuleInfo::new(
@@ -340,6 +362,27 @@ pub fn module_graph_for_css_test_file(
     let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
     let css_roots = get_css_added_paths(&fs, &css_paths);
     for (path, root) in css_roots {
+        let DocumentFileSource::Css(file_source) =
+            DocumentFileSource::from_path(path.as_path(), false)
+        else {
+            continue;
+        };
+        let content = fs.read_file_from_path(path).expect("CSS test file exists");
+        let options = if file_source.is_css_modules() {
+            CssParserOptions::default().allow_css_modules()
+        } else {
+            CssParserOptions::default()
+        };
+        let parsed = biome_css_parser::parse_css(&content, file_source, options);
+        let source_index = db.insert_source(file_source.into());
+        let parsed_source = ParsedSource::new(
+            &db,
+            path.as_path().to_path_buf(),
+            parsed.into(),
+            source_index,
+            Vec::new(),
+        );
+        db.insert_file(path.as_path(), parsed_source);
         let (module_info, _, _) =
             resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
         let md = biome_module_graph::ModuleInfo::new(
@@ -352,7 +395,15 @@ pub fn module_graph_for_css_test_file(
 
     #[cfg(feature = "lang_js")]
     {
-        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
+        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir))
+            .into_iter()
+            .filter(|path| {
+                matches!(
+                    path.as_path().extension(),
+                    Some("cjs" | "cts" | "js" | "jsx" | "mjs" | "mts" | "ts" | "tsx")
+                )
+            })
+            .collect::<Vec<_>>();
         let js_roots = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_roots {
             let (module_info, _, _) = resolve_js_module(
@@ -561,7 +612,7 @@ pub fn get_css_added_paths<'a>(
 pub fn get_html_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, HtmlRoot, Vec<HtmlEmbeddedContent>)> {
+) -> Vec<(&'a BiomePath, HtmlParse, DocumentFileSource)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -570,7 +621,7 @@ pub fn get_html_added_paths<'a>(
             else {
                 return None;
             };
-            let root = fs.read_file_from_path(path).ok().map(|content| {
+            let parse = fs.read_file_from_path(path).ok().map(|content| {
                 let parsed =
                     biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
@@ -578,12 +629,9 @@ pub fn get_html_added_paths<'a>(
                     diagnostics.is_empty(),
                     "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
                 );
-                parsed.tree()
+                parsed
             })?;
-            // For test utilities, we don't parse embedded content in HTML files.
-            // In real scenarios, the workspace server handles this by parsing
-            // embedded blocks separately and passing them to update_graph_for_html_paths.
-            Some((path, root, Vec::<HtmlEmbeddedContent>::new()))
+            Some((path, parse, DocumentFileSource::Html(file_source)))
         })
         .collect()
 }
@@ -779,17 +827,19 @@ pub fn register_leak_checker() {
     });
 }
 
-pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
-
-    let output = text_edit.new_string(source);
-
-    let diff = TextDiff::from_lines(source, &output);
+pub fn unified_diff(before: &str, after: &str) -> String {
+    let diff = TextDiff::from_lines(before, after);
 
     let mut diff = diff.unified_diff();
     diff.context_radius(3);
 
     diff.to_string()
+}
+
+pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
+    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+
+    unified_diff(source, &text_edit.new_string(source))
 }
 
 /// The test runner for the analyzer is currently designed to have a
@@ -865,8 +915,8 @@ pub fn assert_errors_are_absent<L: biome_rowan::Language>(
         "There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
         path,
         std::str::from_utf8(buffer.as_slice()).unwrap(),
-        &program,
-        &program.to_string()
+        program,
+        program
     );
 }
 
@@ -918,6 +968,8 @@ pub fn write_transformation_snapshot(
     snapshot: &mut String,
     input_code: &str,
     transformations: &[String],
+    final_output: Option<&str>,
+    diagnostics: &[String],
     extension: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
@@ -929,8 +981,26 @@ pub fn write_transformation_snapshot(
     if !transformations.is_empty() {
         writeln!(snapshot, "# Transformations").unwrap();
         for transformation in transformations {
-            writeln!(snapshot, "```{extension}").unwrap();
+            writeln!(snapshot, "```diff").unwrap();
             writeln!(snapshot, "{transformation}").unwrap();
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot).unwrap();
+        }
+    }
+
+    if let Some(final_output) = final_output {
+        writeln!(snapshot, "# Final output").unwrap();
+        writeln!(snapshot, "```{extension}").unwrap();
+        writeln!(snapshot, "{final_output}").unwrap();
+        writeln!(snapshot, "```").unwrap();
+        writeln!(snapshot).unwrap();
+    }
+
+    if !diagnostics.is_empty() {
+        writeln!(snapshot, "# Diagnostics").unwrap();
+        for diagnostic in diagnostics {
+            writeln!(snapshot, "```").unwrap();
+            writeln!(snapshot, "{diagnostic}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }

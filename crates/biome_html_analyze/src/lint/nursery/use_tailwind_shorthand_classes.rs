@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// In Astro, bare strings inside `class:list` arrays are currently not checked unless they are passed
     /// to a recognized helper function such as `clsx`.
     pub UseTailwindShorthandClasses {
-        version: "next",
+        version: "2.5.9",
         name: "useTailwindShorthandClasses",
         language: "html",
         domains: &[RuleDomain::Tailwind],

@@ -138,12 +138,8 @@ impl SuppressionAction for JsSuppressionAction {
         } = apply_suppression;
 
         // we check if the token that has the newline is inside a JSX element: JsxOpeningElement or JsxSelfClosingElement
-        let current_jsx_element = token_to_apply_suppression.parent().and_then(|parent| {
-            if AnyJsxElement::can_cast(parent.kind()) || JsxText::can_cast(parent.kind()) {
-                Some(parent)
-            } else {
-                None
-            }
+        let current_jsx_element = token_to_apply_suppression.parent().filter(|parent| {
+            AnyJsxElement::can_cast(parent.kind()) || JsxText::can_cast(parent.kind())
         });
 
         // When inside a JSX element, we have to apply different logics when applying suppression comments.

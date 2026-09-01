@@ -4,12 +4,12 @@ expression: valid_issue_10840.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 import MyComponent from "./my-component.astro";
 
 const text = "abc";
 ---
+<!-- should not generate diagnostics -->
 
 <MyComponent {text} />
 

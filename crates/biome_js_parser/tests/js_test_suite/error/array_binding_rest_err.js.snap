@@ -53,7 +53,7 @@ JsModule {
         },
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         LET_KW@16..21 "let" [Newline("\n")] [Whitespace(" ")],
                         JsBogus {
@@ -99,7 +99,7 @@ JsModule {
         },
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         LET_KW@46..51 "let" [Newline("\n")] [Whitespace(" ")],
                         JsBogus {
@@ -182,7 +182,7 @@ JsModule {
                   0: IDENT@14..15 "a" [] []
       1: SEMICOLON@15..16 ";" [] []
     1: JS_BOGUS_STATEMENT@16..46
-      0: JS_BOGUS@16..45
+      0: JS_BOGUS_VARIABLE_DECLARATION@16..45
         0: LET_KW@16..21 "let" [Newline("\n")] [Whitespace(" ")]
         1: JS_BOGUS@21..45
           0: JS_BOGUS@21..45
@@ -203,7 +203,7 @@ JsModule {
                   0: IDENT@44..45 "a" [] []
       1: SEMICOLON@45..46 ";" [] []
     2: JS_BOGUS_STATEMENT@46..85
-      0: JS_BOGUS@46..84
+      0: JS_BOGUS_VARIABLE_DECLARATION@46..84
         0: LET_KW@46..51 "let" [Newline("\n")] [Whitespace(" ")]
         1: JS_BOGUS@51..84
           0: JS_BOGUS@51..84

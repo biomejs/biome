@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_formatter::{CstFormatContext, FormatRuleWithOptions};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, normalize_newlines};
 use biome_html_syntax::HtmlTextExpression;
 
 #[derive(Debug, Clone, Default)]
@@ -20,12 +20,13 @@ impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
 
         let token_text = token.text();
         let trimmed_text = token_text.trim_start().trim_end();
+        let normalized_text = normalize_newlines(trimmed_text, ['\r']);
 
         write!(
             f,
             [format_replaced(
                 &token,
-                &text(trimmed_text, Some(token.text_range().start()))
+                &text(&normalized_text, Some(token.text_range().start()))
             )]
         )
     }

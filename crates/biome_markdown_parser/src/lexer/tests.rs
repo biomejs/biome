@@ -422,6 +422,39 @@ fn hard_line_break_many_trailing_spaces() {
 }
 
 #[test]
+fn textual_long_whitespace() {
+    let source = format!("left{}right", " ".repeat(4096));
+
+    assert_lex! {
+        source.as_str(),
+        MD_TEXTUAL_LITERAL:4105,
+    }
+}
+
+#[test]
+fn closing_hashes_after_mixed_whitespace() {
+    assert_lex! {
+        MarkdownLexContext::HeadingContent,
+        "heading \t ##\n",
+        MD_TEXTUAL_LITERAL:7,
+        MD_TEXTUAL_LITERAL:3,
+        HASH:1,
+        HASH:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn hard_line_break_after_tab() {
+    assert_lex! {
+        "text\t  \nmore",
+        MD_TEXTUAL_LITERAL:5,
+        MD_HARD_LINE_LITERAL:3,
+        MD_TEXTUAL_LITERAL:4,
+    }
+}
+
+#[test]
 fn hard_line_break_backslash_newline() {
     // Backslash followed by newline is a hard line break
     assert_lex! {
@@ -569,6 +602,46 @@ fn setext_underline_dashes() {
         MD_THEMATIC_BREAK_LITERAL:3,
         NEWLINE:1,
     }
+}
+
+#[test]
+fn frontmatter_context_preserves_yaml_content() {
+    let source = "--- \r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n--- \t\r\n# Heading";
+    let mut lexer = MarkdownLexer::from_str(source);
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Regular),
+        MD_THEMATIC_BREAK_LITERAL
+    );
+    assert!(lexer.has_frontmatter_closing_fence());
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Frontmatter),
+        MD_FRONTMATTER_LITERAL
+    );
+    assert_eq!(
+        &source[lexer.current_range()],
+        "\r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n"
+    );
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Frontmatter),
+        FENCE
+    );
+    assert_eq!(&source[lexer.current_range()], "--- \t");
+    assert_eq!(lexer.next_token(MarkdownLexContext::Regular), NEWLINE);
+    assert_eq!(lexer.next_token(MarkdownLexContext::Regular), HASH);
+}
+
+#[test]
+fn frontmatter_requires_closing_fence() {
+    let mut lexer = MarkdownLexer::from_str("---\nvalue");
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Regular),
+        MD_THEMATIC_BREAK_LITERAL
+    );
+    assert!(!lexer.has_frontmatter_closing_fence());
 }
 
 #[test]

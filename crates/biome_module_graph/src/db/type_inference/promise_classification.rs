@@ -10,11 +10,13 @@
 //! value or instance side used for member lookup, and the unconsumed member
 //! path. Named-member traversal examines only members declared directly on the
 //! current type. A member available only from a base type is therefore
-//! indeterminate. Function-return classification has one narrower inheritance
-//! case: an interface with no call signature may follow its single base
-//! interface. Traversal visits at most 1024 distinct classification states.
-//! Unsupported expression forms, accessors, ambiguous exports, cycles, and an
-//! exhausted work limit are indeterminate.
+//! indeterminate. A pending member path may cross a non-generic concrete class
+//! created by `new` without inspecting its constructor arguments.
+//! Function-return classification has one narrower inheritance case: an
+//! interface with no call signature may follow its single base interface.
+//! Traversal visits at most 1024 distinct classification states. Unsupported
+//! expression forms, accessors, ambiguous exports, cycles, and an exhausted
+//! work limit are indeterminate.
 
 use super::{ImportResolution, ResolutionCtx, find_value_member_type_on_demand};
 use crate::db::queries::{
@@ -57,6 +59,38 @@ enum MemberLookupMode {
     Value,
     /// Selects instance members when the target is a class.
     Instance,
+    /// Selects a constructed instance after consuming its value-side members.
+    Constructed { remaining: usize },
+}
+
+impl MemberLookupMode {
+    fn prepend_constructed_members(self, count: usize) -> Self {
+        match self {
+            Self::Constructed { remaining } => Self::Constructed {
+                remaining: remaining.saturating_add(count),
+            },
+            mode @ (Self::Value | Self::Instance) => mode,
+        }
+    }
+
+    fn after_member(self) -> Self {
+        match self {
+            Self::Value | Self::Instance | Self::Constructed { remaining: 0 } => Self::Value,
+            Self::Constructed { remaining } => Self::Constructed {
+                remaining: remaining - 1,
+            },
+        }
+    }
+
+    fn after_namespace_member(self) -> Option<Self> {
+        match self {
+            Self::Constructed { remaining: 0 } => None,
+            Self::Constructed { remaining } => Some(Self::Constructed {
+                remaining: remaining - 1,
+            }),
+            mode @ (Self::Value | Self::Instance) => Some(mode),
+        }
+    }
 }
 
 /// The Promise-related property requested from the current target.
@@ -112,14 +146,15 @@ struct ClassificationState {
 /// Classifies a raw expression's Promise shape without inferring all module tables.
 ///
 /// The projection follows lexical bindings, imports, exports, aliases, `this`,
-/// calls, and own named members. Unsupported expression forms remain
-/// indeterminate instead of entering complete expression inference.
+/// calls, non-generic class instances created by `new`, and own named members.
+/// Unsupported expression forms remain indeterminate instead of entering
+/// complete expression inference.
 pub(in crate::db) fn classify_expression_promise(
     db: &dyn ModuleDb,
     module: ModuleInfo,
     reference: TypeReference,
 ) -> PromiseClassification {
-    classify_expression(db, module, reference, Projection::Promise)
+    classify_expression(db, module, reference, Projection::Promise, true)
 }
 
 /// Classifies whether a raw expression is an array of Promise-like values.
@@ -128,7 +163,7 @@ pub(in crate::db) fn classify_expression_array_promise(
     module: ModuleInfo,
     reference: TypeReference,
 ) -> PromiseClassification {
-    classify_expression(db, module, reference, Projection::ArrayPromise)
+    classify_expression(db, module, reference, Projection::ArrayPromise, true)
 }
 
 /// Classifies a raw expression's function return without inferring all module tables.
@@ -142,7 +177,7 @@ pub(in crate::db) fn classify_expression_function_return(
     module: ModuleInfo,
     reference: TypeReference,
 ) -> PromiseClassification {
-    classify_expression(db, module, reference, Projection::FunctionReturn)
+    classify_expression(db, module, reference, Projection::FunctionReturn, false)
 }
 
 fn classify_expression(
@@ -150,6 +185,7 @@ fn classify_expression(
     module: ModuleInfo,
     reference: TypeReference,
     projection: Projection,
+    allow_new_instance_members: bool,
 ) -> PromiseClassification {
     use PromiseClassification::{DoesNotReturnPromise, Indeterminate, ReturnsPromise};
 
@@ -258,6 +294,9 @@ fn classify_expression(
                     let Some(identifier) = qualifier_path.next() else {
                         return Indeterminate;
                     };
+                    let mode = state
+                        .mode
+                        .prepend_constructed_members(qualifier.path.len().saturating_sub(1));
                     let members: Box<[Text]> = qualifier_path
                         .cloned()
                         .chain(state.members.iter().cloned())
@@ -313,21 +352,20 @@ fn classify_expression(
                                         resolved_path: import.resolved_path.clone(),
                                         symbol: import.symbol.clone(),
                                     },
-                                    mode: state.mode,
+                                    mode,
                                     members: members.clone(),
                                     projection: state.projection,
                                 };
                             }
-                            let Some(reference) = js_info
-                                .raw_binding_types
-                                .get(&binding.syntax().text_trimmed_range())
+                            let binding_range = binding.syntax().text_trimmed_range();
+                            let Some(reference) = js_info.raw_binding_types.get(&binding_range)
                             else {
                                 return Indeterminate;
                             };
                             break ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(reference.clone()),
-                                mode: state.mode,
+                                mode,
                                 members: members.clone(),
                                 projection: state.projection,
                             };
@@ -337,6 +375,9 @@ fn classify_expression(
                             continue;
                         }
 
+                        if matches!(mode, MemberLookupMode::Constructed { .. }) {
+                            return Indeterminate;
+                        }
                         let mut ctx = ResolutionCtx::new(
                             db,
                             state.module,
@@ -441,6 +482,25 @@ fn classify_expression(
                 let Some(raw) = js_info.raw_types.get(type_id.index()) else {
                     return Indeterminate;
                 };
+                if matches!(state.mode, MemberLookupMode::Constructed { remaining: 0 })
+                    && !(matches!(
+                        raw,
+                        RawTypeData::Class(_)
+                            | RawTypeData::Reference(_)
+                            | RawTypeData::TypeofType(_)
+                            | RawTypeData::TypeofValue(_)
+                    ) || matches!(
+                        raw,
+                        RawTypeData::TypeofExpression(expression)
+                            if matches!(
+                                expression.as_ref(),
+                                TypeofExpression::StaticMember(_)
+                                    | TypeofExpression::OptionalChainStaticMember(_)
+                            )
+                    ))
+                {
+                    return Indeterminate;
+                }
 
                 match raw {
                     RawTypeData::Function(function) => {
@@ -574,12 +634,17 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(expression.object.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.prepend_constructed_members(1),
                                 members: std::iter::once(expression.member.clone())
                                     .chain(state.members.iter().cloned())
                                     .collect(),
                                 projection: state.projection,
                             }
+                        }
+                        TypeofExpression::This(_)
+                            if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>
+                        {
+                            return Indeterminate;
                         }
                         TypeofExpression::This(expression) => ClassificationState {
                             module: state.module,
@@ -636,6 +701,20 @@ fn classify_expression(
                                 },
                             }
                         }
+                        TypeofExpression::New(expression)
+                            if allow_new_instance_members && !state.members.is_empty() =>
+                        {
+                            if matches!(state.mode, MemberLookupMode::Constructed { .. }) {
+                                return Indeterminate;
+                            }
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(expression.callee.clone()),
+                                mode: MemberLookupMode::Constructed { remaining: 0 },
+                                members: state.members,
+                                projection: state.projection,
+                            }
+                        }
                         TypeofExpression::Addition(_)
                         | TypeofExpression::Await(_)
                         | TypeofExpression::BitwiseNot(_)
@@ -653,6 +732,11 @@ fn classify_expression(
                         | TypeofExpression::Typeof(_)
                         | TypeofExpression::UnaryMinus(_) => return Indeterminate,
                     },
+                    RawTypeData::InstanceOf(_)
+                        if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>
+                    {
+                        return Indeterminate;
+                    }
                     RawTypeData::InstanceOf(instance)
                         if !instance.type_parameters.is_empty()
                             && matches!(
@@ -741,6 +825,11 @@ fn classify_expression(
                         if matches!(state.projection, Projection::PromiseTarget) {
                             return DoesNotReturnPromise;
                         }
+                        if matches!(state.mode, MemberLookupMode::Constructed { remaining: 0 })
+                            && !class.type_parameters.is_empty()
+                        {
+                            return Indeterminate;
+                        }
                         let Some((name, remaining)) = state.members.split_first() else {
                             return DoesNotReturnPromise;
                         };
@@ -754,7 +843,7 @@ fn classify_expression(
                         ClassificationState {
                             module: state.module,
                             target: ClassificationTarget::Reference(member.ty.clone()),
-                            mode: MemberLookupMode::Value,
+                            mode: state.mode.after_member(),
                             members: remaining.into(),
                             projection: state.projection,
                         }
@@ -797,7 +886,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(member.ty.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
                             }
@@ -817,7 +906,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(member.ty.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
                             }
@@ -933,7 +1022,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(member.ty.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
                             }
@@ -951,20 +1040,25 @@ fn classify_expression(
                 let Some(module) = db.module_for_path(path) else {
                     return DoesNotReturnPromise;
                 };
-                let (name, members) = match symbol {
+                let (name, members, mode) = match symbol {
                     ImportSymbol::All => {
                         let Some((name, remaining)) = state.members.split_first() else {
                             return Indeterminate;
                         };
-                        (name.clone(), remaining.into())
+                        let Some(mode) = state.mode.after_namespace_member() else {
+                            return Indeterminate;
+                        };
+                        (name.clone(), remaining.into(), mode)
                     }
-                    ImportSymbol::Default => (Text::new_static("default"), state.members),
-                    ImportSymbol::Named(name) => (name, state.members),
+                    ImportSymbol::Default => {
+                        (Text::new_static("default"), state.members, state.mode)
+                    }
+                    ImportSymbol::Named(name) => (name, state.members, state.mode),
                 };
                 ClassificationState {
                     module,
                     target: ClassificationTarget::Export(name),
-                    mode: state.mode,
+                    mode,
                     members,
                     projection: state.projection,
                 }
@@ -1038,8 +1132,12 @@ fn find_own_member<'a>(
     members.iter().find(|member| {
         member.has_name(name.text())
             && mode.is_none_or(|mode| match mode {
-                MemberLookupMode::Value => member.is_static(),
-                MemberLookupMode::Instance => !member.is_static(),
+                MemberLookupMode::Value | MemberLookupMode::Constructed { remaining: 1.. } => {
+                    member.is_static()
+                }
+                MemberLookupMode::Instance | MemberLookupMode::Constructed { remaining: 0 } => {
+                    !member.is_static()
+                }
             })
     })
 }

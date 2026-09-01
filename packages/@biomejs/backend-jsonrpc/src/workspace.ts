@@ -994,7 +994,23 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
+export interface RuleDomains {
+	astro?: RuleDomainValue;
+	drizzle?: RuleDomainValue;
+	next?: RuleDomainValue;
+	playwright?: RuleDomainValue;
+	project?: RuleDomainValue;
+	qwik?: RuleDomainValue;
+	react?: RuleDomainValue;
+	reactNative?: RuleDomainValue;
+	solid?: RuleDomainValue;
+	svelte?: RuleDomainValue;
+	tailwind?: RuleDomainValue;
+	test?: RuleDomainValue;
+	turborepo?: RuleDomainValue;
+	types?: RuleDomainValue;
+	vue?: RuleDomainValue;
+}
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -1196,24 +1212,6 @@ export type JsTrailingCommas = "all" | "es5" | "none";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
 export type JsonTrailingCommas = "none" | "all";
-/**
- * Rule domains
- */
-export type RuleDomain =
-	| "drizzle"
-	| "react"
-	| "reactNative"
-	| "test"
-	| "solid"
-	| "next"
-	| "qwik"
-	| "svelte"
-	| "vue"
-	| "project"
-	| "tailwind"
-	| "turborepo"
-	| "playwright"
-	| "types";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -2357,6 +2355,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow the use of Astro's set:html directive.
+See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
+	 */
+	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
+	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
@@ -2431,6 +2434,11 @@ See https://biomejs.dev/linter/rules/no-implied-eval
 See https://biomejs.dev/linter/rules/no-inline-styles 
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
+	* Disallow invalid accept values on file inputs.
+See https://biomejs.dev/linter/rules/no-invalid-file-input-accept 
+	 */
+	noInvalidFileInputAccept?: NoInvalidFileInputAcceptConfiguration;
 	/**
 	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
 See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
@@ -2577,6 +2585,11 @@ See https://biomejs.dev/linter/rules/no-undeclared-classes
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
 	/**
+	* Reports custom properties used with var() that have no visible declaration.
+See https://biomejs.dev/linter/rules/no-undeclared-custom-properties 
+	 */
+	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
+	/**
 	* Disallow unnecessary template expressions.
 See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
 	 */
@@ -2586,6 +2599,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-template-expression
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
+	/**
+	* Disallow TypeScript type assertions other than const assertions.
+See https://biomejs.dev/linter/rules/no-unsafe-type-assertion 
+	 */
+	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
@@ -2630,6 +2648,11 @@ See https://biomejs.dev/linter/rules/use-array-some
 	 */
 	useArraySome?: UseArraySomeConfiguration;
 	/**
+	* Require a value for Astro's client:only directive.
+See https://biomejs.dev/linter/rules/use-astro-client-only-directive-value 
+	 */
+	useAstroClientOnlyDirectiveValue?: UseAstroClientOnlyDirectiveValueConfiguration;
+	/**
 	* Enforce that await is only used on Promise values.
 See https://biomejs.dev/linter/rules/use-await-thenable 
 	 */
@@ -2644,6 +2667,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
+	/**
+	* Enforce that interactive control elements have an accessible label.
+See https://biomejs.dev/linter/rules/use-control-label 
+	 */
+	useControlLabel?: UseControlLabelConfiguration;
 	/**
 	* Detects a disposable object assigned to a variable without using or await using syntax.
 See https://biomejs.dev/linter/rules/use-disposables 
@@ -2704,6 +2732,11 @@ See https://biomejs.dev/linter/rules/use-math-min-max
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
+	* Disallow anonymous cascade layers.
+See https://biomejs.dev/linter/rules/use-named-layer 
+	 */
+	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
 	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
@@ -3449,7 +3482,7 @@ See https://biomejs.dev/linter/rules/use-vue-define-macros-order
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
 	/**
-	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+	* Disallow uppercase letters in Vue template attribute names.
 See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
 	 */
 	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
@@ -4675,6 +4708,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroSetHtmlDirectiveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroSetHtmlDirectiveOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -4720,6 +4756,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidFileInputAcceptConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidFileInputAcceptOptions;
 export type NoInvalidPropertyInitValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidPropertyInitValueOptions;
@@ -4807,12 +4846,18 @@ export type NoTopLevelLiteralsConfiguration =
 export type NoUndeclaredClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredClassesOptions;
+export type NoUndeclaredCustomPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredCustomPropertiesOptions;
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
+export type NoUnsafeTypeAssertionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeTypeAssertionOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -4834,6 +4879,9 @@ export type NoVueVOnNumberValuesConfiguration =
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
+export type UseAstroClientOnlyDirectiveValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
@@ -4843,6 +4891,9 @@ export type UseBaselineConfiguration =
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
+export type UseControlLabelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseControlLabelOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
@@ -4879,6 +4930,9 @@ export type UseMathMinMaxConfiguration =
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNamedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedLayerOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -6537,6 +6591,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroSetHtmlDirectiveOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroSetHtmlDirectiveOptions;
+}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
@@ -6598,6 +6656,11 @@ export interface RuleWithNoInlineStylesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
+}
+export interface RuleWithNoInvalidFileInputAcceptOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInvalidFileInputAcceptOptions;
 }
 export interface RuleWithNoInvalidPropertyInitValueOptions {
 	level: RulePlainConfiguration;
@@ -6723,6 +6786,10 @@ export interface RuleWithNoUndeclaredClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredClassesOptions;
 }
+export interface RuleWithNoUndeclaredCustomPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredCustomPropertiesOptions;
+}
 export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6731,6 +6798,10 @@ export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
+}
+export interface RuleWithNoUnsafeTypeAssertionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeTypeAssertionOptions;
 }
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
@@ -6761,6 +6832,10 @@ export interface RuleWithUseArraySomeOptions {
 	level: RulePlainConfiguration;
 	options?: UseArraySomeOptions;
 }
+export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
+	level: RulePlainConfiguration;
+	options?: UseAstroClientOnlyDirectiveValueOptions;
+}
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
@@ -6773,6 +6848,10 @@ export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentTestItOptions;
+}
+export interface RuleWithUseControlLabelOptions {
+	level: RulePlainConfiguration;
+	options?: UseControlLabelOptions;
 }
 export interface RuleWithUseDisposablesOptions {
 	fix?: FixKind;
@@ -6827,6 +6906,10 @@ export interface RuleWithUseMathMinMaxOptions {
 export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
+}
+export interface RuleWithUseNamedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedLayerOptions;
 }
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
@@ -8359,6 +8442,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -8408,6 +8492,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
@@ -8482,8 +8567,10 @@ export type NoTopLevelLiteralsOptions = {};
  * Options for the `noUndeclaredClasses` rule.
  */
 export type NoUndeclaredClassesOptions = {};
+export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
+export type NoUnsafeTypeAssertionOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -8524,6 +8611,7 @@ export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVOnNumberValuesOptions = {};
 export type UseArraySomeOptions = {};
+export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 /**
  * Options for the `useBaseline` rule.
@@ -8573,6 +8661,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+/**
+ * Configuration for the `useControlLabel` lint rule.
+ */
+export type UseControlLabelOptions = {};
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export interface UseDomQuerySelectorOptions {
@@ -8612,6 +8704,7 @@ export type UseImportsFirstOptions = {};
 export type UseIncludesOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
+export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
  */
@@ -9076,11 +9169,11 @@ export interface UseVueDefineMacrosOrderOptions {
 }
 export interface UseVueHyphenatedAttributesOptions {
 	/**
-	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 * List of attribute names to ignore when checking for uppercase letters.
 	 */
 	ignore?: string[];
 	/**
-	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 * List of HTML tags whose attributes should not be checked for uppercase letters.
 	 */
 	ignoreTags?: string[];
 }
@@ -9873,6 +9966,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9890,6 +9984,7 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
@@ -9920,8 +10015,10 @@ export type Category =
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
+	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
+	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -9931,12 +10028,14 @@ export type Category =
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/useArraySome"
+	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
+	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useDomQuerySelector"
@@ -9955,6 +10054,7 @@ export type Category =
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikLoaderLocation"
@@ -9968,11 +10068,12 @@ export type Category =
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
-	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useTopLevelHeading"
@@ -10243,6 +10344,7 @@ export type Category =
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
 	| "syntax/correctness/noDuplicatePrivateClassMembers"
+	| "transformations/stripTypes"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -10497,6 +10599,7 @@ For example, if inside an Astro file, a top-level return statement is allowed.
 export interface JsonFileSource {
 	allowComments: boolean;
 	allowTrailingCommas: boolean;
+	kind: JsonSourceKind;
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
@@ -10583,6 +10686,7 @@ The versions are ordered in increasing order; The newest version comes last.
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
+export type JsonSourceKind = "regular" | "biomeJson" | "packageJson";
 /**
  * It represents the extension of the file
  */

@@ -76,15 +76,9 @@ fn correctly_computes_analyzer_options() {
     settings
         .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
-    let environment = JsLanguage::resolve_environment(&settings);
-    let language = JsLanguage::lookup_settings(&settings.languages);
-    let options = JsLanguage::resolve_analyzer_options(
-        &settings,
-        &language.linter,
-        environment,
-        &BiomePath::new(Utf8PathBuf::new()),
+    let options = settings.analyzer_options::<JsLanguage>(
+        &[],
         &DocumentFileSource::from_language_id("javascript", None),
-        None,
     );
 
     assert_eq!(
@@ -99,23 +93,14 @@ fn vue_template_expressions_get_instance_properties() {
     use biome_languages::javascript::JsEmbeddingKind;
 
     let settings = Settings::default();
-    let language = JsLanguage::lookup_settings(&settings.languages);
-    let environment = JsLanguage::resolve_environment(&settings);
-
     let template_source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
         setup: false,
         is_source: false,
         event_handler: false,
         allow_statements: false,
     });
-    let options = JsLanguage::resolve_analyzer_options(
-        &settings,
-        &language.linter,
-        environment,
-        &BiomePath::new(Utf8PathBuf::from("/test.vue")),
-        &DocumentFileSource::from(template_source),
-        None,
-    );
+    let options =
+        settings.analyzer_options::<JsLanguage>(&[], &DocumentFileSource::from(template_source));
 
     assert!(options.globals().contains(&"$slots".into()));
     assert!(!options.globals().contains(&"$event".into()));
@@ -127,9 +112,6 @@ fn vue_event_handlers_get_dollar_event() {
     use biome_languages::javascript::JsEmbeddingKind;
 
     let settings = Settings::default();
-    let language = JsLanguage::lookup_settings(&settings.languages);
-    let environment = JsLanguage::resolve_environment(&settings);
-
     let event_handler_source =
         JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
             setup: false,
@@ -137,14 +119,8 @@ fn vue_event_handlers_get_dollar_event() {
             event_handler: true,
             allow_statements: false,
         });
-    let options = JsLanguage::resolve_analyzer_options(
-        &settings,
-        &language.linter,
-        environment,
-        &BiomePath::new(Utf8PathBuf::from("/test.vue")),
-        &DocumentFileSource::from(event_handler_source),
-        None,
-    );
+    let options = settings
+        .analyzer_options::<JsLanguage>(&[], &DocumentFileSource::from(event_handler_source));
 
     assert!(options.globals().contains(&"$event".into()));
     assert!(options.globals().contains(&"$slots".into()));
@@ -153,16 +129,9 @@ fn vue_event_handlers_get_dollar_event() {
 #[test]
 fn vue_script_setup_does_not_get_instance_properties() {
     let settings = Settings::default();
-    let language = JsLanguage::lookup_settings(&settings.languages);
-    let environment = JsLanguage::resolve_environment(&settings);
-
-    let options = JsLanguage::resolve_analyzer_options(
-        &settings,
-        &language.linter,
-        environment,
-        &BiomePath::new(Utf8PathBuf::from("/test.vue")),
+    let options = settings.analyzer_options::<JsLanguage>(
+        &[],
         &DocumentFileSource::from(biome_languages::JsFileSource::vue_setup()),
-        None,
     );
 
     assert!(options.globals().contains(&"defineProps".into()));

@@ -12,10 +12,10 @@ use biome_languages::CssFileSource;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, module_graph_for_css_test_file, parse_test_path,
-    project_layout_for_test_file, register_leak_checker, scripts_from_json,
+    CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, create_parser_options,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, module_graph_for_css_test_file,
+    parse_test_path, project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
@@ -23,7 +23,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{css,scss,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{css,scss,json,jsonc,svelte,vue,html,astro}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{css,json,jsonc}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
@@ -92,48 +92,54 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         ..AnalysisFilter::default()
     };
 
-    let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
-    let mut diagnostics = vec![];
-    let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    if let Some(scripts) = scripts_from_json(extension, &input_code) {
-        for script in scripts {
+    let snapshot = if matches!(extension, "vue" | "svelte" | "astro" | "html") {
+        analyze_with_workspace(input_file, input_code, group, rule)
+    } else {
+        let mut snapshot = String::new();
+        let mut diagnostics = vec![];
+        let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
+
+        if let Some(scripts) = scripts_from_json(extension, &input_code) {
+            for script in scripts {
+                analyze_and_snap(
+                    &mut snapshot,
+                    &script,
+                    CssFileSource::css(),
+                    filter,
+                    file_name,
+                    input_file,
+                    CheckActionType::Lint,
+                    parser_options.unwrap_or_default(),
+                    &[],
+                );
+            }
+        } else {
+            let Ok(mut source_type): Result<CssFileSource, _> = input_file.try_into() else {
+                return;
+            };
+
+            let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
+
+            if parser_options.tailwind_directives {
+                source_type = source_type.with_tailwind_directives()
+            }
             analyze_and_snap(
                 &mut snapshot,
-                &script,
-                CssFileSource::css(),
+                &input_code,
+                source_type,
                 filter,
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                parser_options.unwrap_or_default(),
+                parser_options,
                 &[],
             );
-        }
-    } else {
-        let Ok(mut source_type): Result<CssFileSource, _> = input_file.try_into() else {
-            return;
         };
-
-        let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
-
-        if parser_options.tailwind_directives {
-            source_type = source_type.with_tailwind_directives()
-        }
-        analyze_and_snap(
-            &mut snapshot,
-            &input_code,
-            source_type,
-            filter,
-            file_name,
-            input_file,
-            CheckActionType::Lint,
-            parser_options,
-            &[],
-        );
+        snapshot
     };
 
     insta::with_settings!({
@@ -244,11 +250,6 @@ pub(crate) fn analyze_and_snap(
         "css",
         parsed.diagnostics().len(),
     );
-
-    if needs_module_graph {
-        // Normalize Windows paths.
-        *snapshot = snapshot.replace('\\', "/");
-    }
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }

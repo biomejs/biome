@@ -80,11 +80,11 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Install cargo-deny
-        uses: taiki-e/install-action@6c6fd71fe4fb72c3697d269963d0e15df8adedad # v2.85.10
+        uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
         with:
           tool: cargo-deny
-      - run: cargo deny check bans
-      - run: cargo deny check advisories
+      - name: Audit crates.io dependencies
+        run: cargo deny check bans advisories
 
   test:
     name: Test

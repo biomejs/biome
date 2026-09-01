@@ -31,6 +31,7 @@ use biome_js_syntax::{
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use rustc_hash::FxHashMap;
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
@@ -356,13 +357,8 @@ impl TypeData {
                             )
                         })
                         .unwrap_or_default(),
-                    members: decl
-                        .members()
-                        .into_iter()
-                        .filter_map(|member| {
-                            TypeMember::from_any_js_class_member(collector, scope_id, &member)
-                        })
-                        .collect(),
+                    members: TypeMember::collect_class_members(collector, scope_id, decl.members())
+                        .into_boxed_slice(),
                 }))
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(decl) => {
@@ -1457,7 +1453,8 @@ impl TypeData {
         let parent = decl.syntax().parent()?;
         let (is_awaited, ty) = if JsForInStatement::can_cast(parent.kind()) {
             (false, Self::string())
-        } else if let Some(for_of) = JsForOfStatement::cast(parent) {
+        } else {
+            let for_of = JsForOfStatement::cast(parent)?;
             let ty = Self::from(TypeofExpression::IterableValueOf(
                 TypeofIterableValueOfExpression {
                     ty: TypeReference::from_any_js_expression(
@@ -1468,8 +1465,6 @@ impl TypeData {
                 },
             ));
             (for_of.await_token().is_some(), ty)
-        } else {
-            return None;
         };
 
         let declarator = decl.declarator().ok()?;
@@ -1970,6 +1965,46 @@ impl TypeMember {
                     .any(|modifier| modifier.as_js_static_modifier().is_some());
                 Self::from_class_member_info(collector, scope_id, name, ty.into(), is_static, false)
             }),
+            AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+                member.name().ok().and_then(|name| {
+                    let is_async = member.async_token().is_some();
+                    let function = Function {
+                        is_async,
+                        type_parameters: generic_params_from_ts_type_params(
+                            collector,
+                            scope_id,
+                            member.type_parameters(),
+                        ),
+                        name: name.name().map(text_from_class_member_name),
+                        parameters: function_params_from_js_params(
+                            collector,
+                            scope_id,
+                            member.parameters(),
+                        ),
+                        return_type: function_return_type(
+                            collector,
+                            scope_id,
+                            is_async,
+                            member.return_type_annotation(),
+                            None,
+                        ),
+                    };
+                    let ty = collector.register_and_resolve(function.into());
+                    let is_static = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_js_static_modifier().is_some());
+                    let is_optional = member.question_mark_token().is_some();
+                    Self::from_class_member_info(
+                        collector,
+                        scope_id,
+                        name,
+                        ty.into(),
+                        is_static,
+                        is_optional,
+                    )
+                })
+            }
             AnyJsClassMember::JsPropertyClassMember(member) => {
                 member.name().ok().and_then(|name| {
                     let ty = match member
@@ -2416,10 +2451,7 @@ impl TypeMember {
         scope_id: ScopeId,
         member_list: JsClassMemberList,
     ) -> Box<[Self]> {
-        let mut members: Vec<_> = member_list
-            .into_iter()
-            .filter_map(|member| Self::from_any_js_class_member(collector, scope_id, &member))
-            .collect();
+        let mut members = Self::collect_class_members(collector, scope_id, member_list);
 
         // Extend members with those from constructor definitions:
         let num_members = members.len();
@@ -2448,6 +2480,95 @@ impl TypeMember {
         }
 
         members.into()
+    }
+
+    fn collect_class_members(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        member_list: JsClassMemberList,
+    ) -> Vec<Self> {
+        enum CollectedMember {
+            Direct(TypeMember),
+            MethodOverload {
+                member: TypeMember,
+                signatures: Vec<TypeReference>,
+            },
+        }
+
+        let mut collected = Vec::new();
+        let mut overloads_by_name = FxHashMap::default();
+        for syntax_member in member_list {
+            let is_method_signature = matches!(
+                &syntax_member,
+                AnyJsClassMember::TsMethodSignatureClassMember(_)
+            );
+            let is_method_implementation =
+                matches!(&syntax_member, AnyJsClassMember::JsMethodClassMember(_));
+            let Some(member) = Self::from_any_js_class_member(collector, scope_id, &syntax_member)
+            else {
+                continue;
+            };
+            if !is_method_signature && (!is_method_implementation || overloads_by_name.is_empty()) {
+                collected.push(CollectedMember::Direct(member));
+                continue;
+            }
+
+            let Some(name) = member.kind.name() else {
+                collected.push(CollectedMember::Direct(member));
+                continue;
+            };
+            let key = (name, member.is_static());
+
+            if is_method_signature {
+                if let Some(index) = overloads_by_name.get(&key).copied()
+                    && let CollectedMember::MethodOverload { signatures, .. } =
+                        &mut collected[index]
+                {
+                    signatures.push(member.ty);
+                } else {
+                    overloads_by_name.insert(key, collected.len());
+                    collected.push(CollectedMember::MethodOverload {
+                        signatures: vec![member.ty.clone()],
+                        member,
+                    });
+                }
+            } else if is_method_implementation
+                && let Some(index) = overloads_by_name.get(&key).copied()
+                && let CollectedMember::MethodOverload {
+                    member: representative,
+                    ..
+                } = &mut collected[index]
+            {
+                *representative = member;
+            } else {
+                collected.push(CollectedMember::Direct(member));
+            }
+        }
+
+        collected
+            .into_iter()
+            .map(|collected| match collected {
+                CollectedMember::Direct(member) => member,
+                CollectedMember::MethodOverload {
+                    mut member,
+                    signatures,
+                } => {
+                    member.ty = match signatures.as_slice() {
+                        [signature] => signature.clone(),
+                        _ => collector.reference_to_owned_data(TypeData::object_with_members(
+                            signatures
+                                .into_iter()
+                                .map(|ty| Self {
+                                    kind: TypeMemberKind::CallSignature,
+                                    ty,
+                                })
+                                .collect(),
+                        )),
+                    };
+                    member
+                }
+            })
+            .collect()
     }
 }
 
@@ -3023,7 +3144,7 @@ fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
     };
 
     reference_type.type_arguments().is_none()
-        && reference_type.name().ok().is_some_and(|name| {
+        && reference_type.name().is_ok_and(|name| {
             name.as_js_reference_identifier()
                 .and_then(|identifier| identifier.value_token().ok())
                 .is_some_and(|token| token.text_trimmed() == "const")

@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro_expr/html_comment_only.tsx
+---
+
+# Input
+
+```tsx
+<!-- only a comment -->
+
+```
+
+
+# Formatted
+
+```tsx
+<!-- only a comment -->
+
+```

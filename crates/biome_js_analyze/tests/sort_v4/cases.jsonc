@@ -269,6 +269,18 @@
 	"bg-red-500! flex p-4",         // theme value + important
 	"flex! block",                  // static bucket + important
 	"[display:block]! [color:red]", // arbitrary candidate + important
+
+	// The legacy leading `!` (`!flex`) still parses as important and,
+	// like everything else in a bucket, orders by the whole text — so
+	// `!` (0x21) puts it ahead of its plain twin and of every letter.
+	// Expected order cross-checked against tailwindcss 4.3.3.
+	"flex! !flex flex",                  // `!flex flex flex!`
+	"block !flex flex",                  // `!flex block flex`
+	"p-4 !p-2 p-2! !p-4",                // `!p-2 !p-4 p-2! p-4`
+	"hover:flex hover:!p-4 !flex md:p-4 md:!flex",
+	"!-m-4 -m-4 !m-4 m-4",               // sign after the `!`
+	"!bg-red-500/50 bg-red-500/50 ![color:red] [color:red]",
+	"!flex! flex !hover:flex",           // both `!`s or `!` before variants: unknown, front
 	"mt-4 -mt-2!",                  // negative + important
 	"not-a-class! flex",            // unknown base stays front even with `!`
 	// ─── variants ──────────────────────────────────────────────────
@@ -286,6 +298,13 @@
 	"dark:flex hover:flex flex",                          // dark mode
 	"md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex", // responsive, min/max
 	"md:hover:flex hover:flex flex md:flex",              // compound
+
+	// Variant stacks that weigh the same tie on the whole candidate
+	// text, so the variant spelling decides before the utility name.
+	// Expected order cross-checked against tailwindcss 4.3.3.
+	"sm:hover:block hover:sm:flex",     // `h` < `s` beats `block` < `flex`
+	"hover:sm:p-4 sm:hover:p-2",
+	"@sm:block @sm/main:flex",          // `/` < `:` beats `block` < `flex`
 
 	// ─── container-query and child variants ────────────────────────
 	// `@sm`/`@md` glue the container root to a size; `@max-*` descend,

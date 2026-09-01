@@ -506,6 +506,275 @@ fn test_infer_module_types_evaluates_await_expressions_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_evaluates_awaited_promise_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Response<T> { data: T }
+            interface Pair<Left, Right> { left: Left; right: Right }
+            interface Box<T> { value: T }
+
+            type PromiseAlias<T> = Promise<T>;
+            type AliasChain<T> = PromiseAlias<T>;
+            type ConcreteAlias = Promise<number>;
+            type StructuredAlias<T> = Promise<Response<T>>;
+            type ReorderedAlias<First, Second> = Promise<Pair<Second, First>>;
+            type UnusedAlias<Unused, Value> = Promise<Box<Value>>;
+            type DefaultAlias<T = string> = Promise<T>;
+            type DependentDefaultAlias<T, U = T> = Promise<U>;
+
+            declare function structuredCall(value: string, callback: () => void): void;
+            declare function structuredCall(value: string): StructuredAlias<string>;
+
+            export async function consume(
+                generic: AliasChain<string>,
+                concrete: ConcreteAlias,
+                reordered: ReorderedAlias<string, number>,
+                unused: UnusedAlias<boolean, string>,
+                defaulted: DefaultAlias,
+                dependentDefault: DependentDefaultAlias<string>,
+            ) {
+                const awaitedGeneric = await generic;
+                const awaitedConcrete = await concrete;
+                const awaitedStructured = await structuredCall("value");
+                const awaitedReordered = await reordered;
+                const awaitedUnused = await unused;
+                const awaitedDefaulted = await defaulted;
+                const awaitedDependentDefault = await dependentDefault;
+                return {
+                    awaitedGeneric,
+                    awaitedConcrete,
+                    awaitedStructured,
+                    awaitedReordered,
+                    awaitedUnused,
+                    awaitedDefaulted,
+                    awaitedDependentDefault,
+                };
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let awaited_generic =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedGeneric")
+            .expect("awaitedGeneric binding type must be inferred");
+    assert!(
+        is_inferred_string(&db, inferred.resolve_type(&db, awaited_generic)),
+        "awaitedGeneric must be string"
+    );
+
+    let awaited_concrete =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedConcrete")
+            .expect("awaitedConcrete binding type must be inferred");
+    let awaited_concrete = inferred.resolve_type(&db, awaited_concrete);
+    assert!(
+        is_inferred_number(&db, awaited_concrete),
+        "awaitedConcrete must be number, got {}",
+        format_inferred_type(&db, awaited_concrete)
+    );
+
+    let awaited_structured =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedStructured")
+            .expect("awaitedStructured binding type must be inferred");
+    let structured_data = inferred
+        .find_member_type(&db, inferred.resolve_type(&db, awaited_structured), "data")
+        .expect("awaitedStructured.data must be inferred");
+    assert!(
+        is_inferred_string(&db, structured_data),
+        "awaitedStructured.data must be string"
+    );
+
+    let awaited_reordered =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedReordered")
+            .expect("awaitedReordered binding type must be inferred");
+    let awaited_reordered = inferred.resolve_type(&db, awaited_reordered);
+    let reordered_left = inferred
+        .find_member_type(&db, awaited_reordered, "left")
+        .expect("awaitedReordered.left must be inferred");
+    let reordered_right = inferred
+        .find_member_type(&db, awaited_reordered, "right")
+        .expect("awaitedReordered.right must be inferred");
+    assert!(
+        is_inferred_number(&db, reordered_left),
+        "awaitedReordered.left must be number"
+    );
+    assert!(
+        is_inferred_string(&db, reordered_right),
+        "awaitedReordered.right must be string"
+    );
+
+    let awaited_unused = inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedUnused")
+        .expect("awaitedUnused binding type must be inferred");
+    let unused_value = inferred
+        .find_member_type(&db, inferred.resolve_type(&db, awaited_unused), "value")
+        .expect("awaitedUnused.value must be inferred");
+    assert!(
+        is_inferred_string(&db, unused_value),
+        "awaitedUnused.value must be string"
+    );
+
+    let awaited_defaulted =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedDefaulted")
+            .expect("awaitedDefaulted binding type must be inferred");
+    assert!(
+        is_inferred_string(&db, inferred.resolve_type(&db, awaited_defaulted)),
+        "awaitedDefaulted must be string"
+    );
+
+    let awaited_dependent_default =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "awaitedDependentDefault")
+            .expect("awaitedDependentDefault binding type must be inferred");
+    let awaited_dependent_default = inferred.resolve_type(&db, awaited_dependent_default);
+    assert!(
+        is_inferred_string(&db, awaited_dependent_default),
+        "awaitedDependentDefault must be string, got {}",
+        format_inferred_type(&db, awaited_dependent_default)
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_awaited_promise_alias_edge_cases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Box<T> { value: T }
+
+            type DefaultAlias<T = string> = Promise<T>;
+            type DependentDefaultAlias<T, U = T> = Promise<U>;
+            type ChainedDefaultAlias<T = string, U = T, V = Box<U>> = Promise<V>;
+            type DefaultAliasChain<T = boolean> = DefaultAlias<T>;
+            type NestedAlias<T> = Promise<Promise<T>>;
+            type UnionAlias<T> = Promise<T> | T;
+            type ValueAlias<T> = T;
+
+            declare function typedCall(value: number): void;
+            declare function typedCall(value: string): DefaultAlias<number>;
+
+            export async function consume<T = number>(
+                explicitDefault: DefaultAlias<boolean>,
+                overriddenDependent: DependentDefaultAlias<string, number>,
+                chainedDefault: ChainedDefaultAlias,
+                defaultChain: DefaultAliasChain,
+                nested: NestedAlias<string>,
+                union: UnionAlias<boolean>,
+                value: ValueAlias<string>,
+                outerGeneric: DefaultAlias<T>,
+            ) {
+                const awaitedExplicitDefault = await explicitDefault;
+                const awaitedOverriddenDependent = await overriddenDependent;
+                const awaitedChainedDefault = await chainedDefault;
+                const awaitedDefaultChain = await defaultChain;
+                const awaitedNested = await nested;
+                const awaitedUnion = await union;
+                const awaitedValue = await value;
+                const awaitedOuterGeneric = await outerGeneric;
+                const awaitedTypedOverload = await typedCall("value");
+                return {
+                    awaitedExplicitDefault,
+                    awaitedOverriddenDependent,
+                    awaitedChainedDefault,
+                    awaitedDefaultChain,
+                    awaitedNested,
+                    awaitedUnion,
+                    awaitedValue,
+                    awaitedOuterGeneric,
+                    awaitedTypedOverload,
+                };
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let resolved_binding = |name| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    let explicit_default = resolved_binding("awaitedExplicitDefault");
+    assert!(
+        is_inferred_boolean(&db, explicit_default),
+        "awaitedExplicitDefault must be boolean, got {}",
+        format_inferred_type(&db, explicit_default)
+    );
+
+    let overridden_dependent = resolved_binding("awaitedOverriddenDependent");
+    assert!(
+        is_inferred_number(&db, overridden_dependent),
+        "awaitedOverriddenDependent must be number, got {}",
+        format_inferred_type(&db, overridden_dependent)
+    );
+
+    let chained_default = resolved_binding("awaitedChainedDefault");
+    let chained_value = inferred
+        .find_member_type(&db, chained_default, "value")
+        .expect("awaitedChainedDefault.value must be inferred");
+    assert!(
+        is_inferred_string(&db, chained_value),
+        "awaitedChainedDefault.value must be string, got {}",
+        format_inferred_type(&db, chained_value)
+    );
+
+    let default_chain = resolved_binding("awaitedDefaultChain");
+    assert!(
+        is_inferred_boolean(&db, default_chain),
+        "awaitedDefaultChain must be boolean, got {}",
+        format_inferred_type(&db, default_chain)
+    );
+
+    let nested = resolved_binding("awaitedNested");
+    assert!(
+        is_inferred_string(&db, nested),
+        "awaitedNested must be string, got {}",
+        format_inferred_type(&db, nested)
+    );
+
+    let union = resolved_binding("awaitedUnion");
+    assert!(
+        is_inferred_boolean(&db, union),
+        "awaitedUnion must be boolean, got {}",
+        format_inferred_type(&db, union)
+    );
+
+    let value = resolved_binding("awaitedValue");
+    assert!(
+        is_inferred_string(&db, value),
+        "awaitedValue must be string, got {}",
+        format_inferred_type(&db, value)
+    );
+
+    let outer_generic = resolved_binding("awaitedOuterGeneric");
+    assert!(
+        matches!(outer_generic, InferredTypeData::Generic(_))
+            || matches!(
+                outer_generic,
+                InferredTypeData::InstanceOf(instance)
+                    if matches!(instance.ty(&db), InferredTypeData::Generic(_))
+            ),
+        "awaitedOuterGeneric must preserve T, got {}",
+        format_inferred_type(&db, outer_generic)
+    );
+
+    let typed_overload = resolved_binding("awaitedTypedOverload");
+    assert!(
+        is_inferred_number(&db, typed_overload),
+        "awaitedTypedOverload must be number, got {}",
+        format_inferred_type(&db, typed_overload)
+    );
+}
+
+#[test]
 fn test_infer_module_types_preserves_floating_promise_shapes() {
     let fs = MemoryFileSystem::default();
     fs.insert(

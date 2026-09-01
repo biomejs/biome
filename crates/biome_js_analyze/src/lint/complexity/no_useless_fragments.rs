@@ -398,7 +398,8 @@ impl Rule for NoUselessFragments {
                     _ => false,
                 });
 
-            if let Some(child) = child {
+            {
+                let child = child?;
                 match child {
                     AnyJsxChild::JsxElement(node) => replace_fragment_with_expression(
                         &mut mutation,
@@ -451,11 +452,6 @@ impl Rule for NoUselessFragments {
                         return None;
                     }
                 }
-            } else {
-                // can't apply a code action when there is no children because it will create invalid syntax
-                // for example `<div x-some-prop={<></>}` would become `<div x-some-prop=` which would produce
-                // a syntax error
-                return None;
             }
         } else if let Some(_parent) = node.parent::<JsxAttributeInitializerClause>() {
             return None;

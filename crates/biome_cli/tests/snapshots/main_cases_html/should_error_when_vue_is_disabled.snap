@@ -49,20 +49,6 @@ file.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-file.html:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Text expressions aren't supported.
-  
-  > 1 │ <div v-if="show">{{ message }}</div>
-      │                  ^^^^^^^^^^^^^
-    2 │ 
-  
-  i Remove it or enable the parsing using the html.parser.interpolation option.
-  
-
-```
-
-```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 ```

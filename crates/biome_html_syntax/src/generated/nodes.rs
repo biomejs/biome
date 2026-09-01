@@ -375,6 +375,51 @@ pub struct AstroClientDirectiveFields {
     pub value: SyntaxResult<AstroDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroClosingFragment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroClosingFragment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroClosingFragmentFields {
+        AstroClosingFragmentFields {
+            l_angle_token: self.l_angle_token(),
+            slash_token: self.slash_token(),
+            r_angle_token: self.r_angle_token(),
+        }
+    }
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AstroClosingFragment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroClosingFragmentFields {
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroDefineDirective {
     pub(crate) syntax: SyntaxNode,
 }
@@ -495,6 +540,51 @@ pub struct AstroEmbeddedContentFields {
     pub content_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroFragment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroFragment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroFragmentFields {
+        AstroFragmentFields {
+            opening_fragment: self.opening_fragment(),
+            children: self.children(),
+            closing_fragment: self.closing_fragment(),
+        }
+    }
+    pub fn opening_fragment(&self) -> SyntaxResult<AstroOpeningFragment> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn closing_fragment(&self) -> SyntaxResult<AstroClosingFragment> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AstroFragment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroFragmentFields {
+    pub opening_fragment: SyntaxResult<AstroOpeningFragment>,
+    pub children: HtmlElementList,
+    pub closing_fragment: SyntaxResult<AstroClosingFragment>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroFrontmatterElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -578,6 +668,46 @@ impl Serialize for AstroIsDirective {
 pub struct AstroIsDirectiveFields {
     pub is_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<AstroDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroOpeningFragment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroOpeningFragment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroOpeningFragmentFields {
+        AstroOpeningFragmentFields {
+            l_angle_token: self.l_angle_token(),
+            r_angle_token: self.r_angle_token(),
+        }
+    }
+    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AstroOpeningFragment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroOpeningFragmentFields {
+    pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroServerDirective {
@@ -1048,6 +1178,7 @@ impl HtmlDirective {
             l_angle_token: self.l_angle_token(),
             excl_token: self.excl_token(),
             doctype_token: self.doctype_token(),
+            name_token: self.name_token(),
             html_token: self.html_token(),
             quirk_token: self.quirk_token(),
             public_id_token: self.public_id_token(),
@@ -1064,20 +1195,23 @@ impl HtmlDirective {
     pub fn doctype_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn html_token(&self) -> Option<SyntaxToken> {
+    pub fn name_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 3usize)
     }
-    pub fn quirk_token(&self) -> Option<SyntaxToken> {
+    pub fn html_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 4usize)
     }
-    pub fn public_id_token(&self) -> Option<SyntaxToken> {
+    pub fn quirk_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 5usize)
     }
-    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+    pub fn public_id_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 6usize)
     }
+    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 7usize)
+    }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 7usize)
+        support::required_token(&self.syntax, 8usize)
     }
 }
 impl Serialize for HtmlDirective {
@@ -1093,6 +1227,7 @@ pub struct HtmlDirectiveFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub doctype_token: SyntaxResult<SyntaxToken>,
+    pub name_token: Option<SyntaxToken>,
     pub html_token: Option<SyntaxToken>,
     pub quirk_token: Option<SyntaxToken>,
     pub public_id_token: Option<SyntaxToken>,
@@ -1387,6 +1522,7 @@ impl HtmlRoot {
         HtmlRootFields {
             bom_token: self.bom_token(),
             frontmatter: self.frontmatter(),
+            processing_instruction: self.processing_instruction(),
             directive: self.directive(),
             html: self.html(),
             eof_token: self.eof_token(),
@@ -1398,14 +1534,17 @@ impl HtmlRoot {
     pub fn frontmatter(&self) -> Option<AnyAstroFrontmatterElement> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn directive(&self) -> Option<HtmlDirective> {
+    pub fn processing_instruction(&self) -> Option<HtmlProcessingInstruction> {
         support::node(&self.syntax, 2usize)
     }
+    pub fn directive(&self) -> Option<HtmlDirective> {
+        support::node(&self.syntax, 3usize)
+    }
     pub fn html(&self) -> HtmlElementList {
-        support::list(&self.syntax, 3usize)
+        support::list(&self.syntax, 4usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
 }
 impl Serialize for HtmlRoot {
@@ -1420,6 +1559,7 @@ impl Serialize for HtmlRoot {
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub frontmatter: Option<AnyAstroFrontmatterElement>,
+    pub processing_instruction: Option<HtmlProcessingInstruction>,
     pub directive: Option<HtmlDirective>,
     pub html: HtmlElementList,
     pub eof_token: SyntaxResult<SyntaxToken>,
@@ -1503,8 +1643,8 @@ impl HtmlSingleTextExpression {
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn expression(&self) -> Option<HtmlTextExpression> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -1521,7 +1661,7 @@ impl Serialize for HtmlSingleTextExpression {
 #[derive(Serialize)]
 pub struct HtmlSingleTextExpressionFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub expression: Option<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -5114,6 +5254,7 @@ impl AnyHtmlContent {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlElement {
     AnyHtmlContent(AnyHtmlContent),
+    AstroFragment(AstroFragment),
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
     HtmlElement(HtmlElement),
@@ -5124,6 +5265,12 @@ impl AnyHtmlElement {
     pub fn as_any_html_content(&self) -> Option<&AnyHtmlContent> {
         match &self {
             Self::AnyHtmlContent(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_astro_fragment(&self) -> Option<&AstroFragment> {
+        match &self {
+            Self::AstroFragment(item) => Some(item),
             _ => None,
         }
     }
@@ -6166,6 +6313,64 @@ impl From<AstroClientDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for AstroClosingFragment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_CLOSING_FRAGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_CLOSING_FRAGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroClosingFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroClosingFragment")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AstroClosingFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroClosingFragment> for SyntaxNode {
+    fn from(n: AstroClosingFragment) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroClosingFragment> for SyntaxElement {
+    fn from(n: AstroClosingFragment) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for AstroDefineDirective {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6322,6 +6527,61 @@ impl From<AstroEmbeddedContent> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for AstroFragment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_FRAGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_FRAGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroFragment")
+                .field(
+                    "opening_fragment",
+                    &support::DebugSyntaxResult(self.opening_fragment()),
+                )
+                .field("children", &self.children())
+                .field(
+                    "closing_fragment",
+                    &support::DebugSyntaxResult(self.closing_fragment()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AstroFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroFragment> for SyntaxNode {
+    fn from(n: AstroFragment) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroFragment> for SyntaxElement {
+    fn from(n: AstroFragment) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for AstroFrontmatterElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6422,6 +6682,60 @@ impl From<AstroIsDirective> for SyntaxNode {
 }
 impl From<AstroIsDirective> for SyntaxElement {
     fn from(n: AstroIsDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AstroOpeningFragment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_OPENING_FRAGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_OPENING_FRAGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroOpeningFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroOpeningFragment")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AstroOpeningFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroOpeningFragment> for SyntaxNode {
+    fn from(n: AstroOpeningFragment) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroOpeningFragment> for SyntaxElement {
+    fn from(n: AstroOpeningFragment) -> Self {
         n.syntax.into()
     }
 }
@@ -7038,6 +7352,10 @@ impl std::fmt::Debug for HtmlDirective {
                     &support::DebugSyntaxResult(self.doctype_token()),
                 )
                 .field(
+                    "name_token",
+                    &support::DebugOptionalElement(self.name_token()),
+                )
+                .field(
                     "html_token",
                     &support::DebugOptionalElement(self.html_token()),
                 )
@@ -7430,6 +7748,10 @@ impl std::fmt::Debug for HtmlRoot {
                     &support::DebugOptionalElement(self.frontmatter()),
                 )
                 .field(
+                    "processing_instruction",
+                    &support::DebugOptionalElement(self.processing_instruction()),
+                )
+                .field(
                     "directive",
                     &support::DebugOptionalElement(self.directive()),
                 )
@@ -7545,7 +7867,10 @@ impl std::fmt::Debug for HtmlSingleTextExpression {
                     "l_curly_token",
                     &support::DebugSyntaxResult(self.l_curly_token()),
                 )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field(
                     "r_curly_token",
                     &support::DebugSyntaxResult(self.r_curly_token()),
@@ -12213,6 +12538,11 @@ impl From<AnyHtmlContent> for SyntaxElement {
         node.into()
     }
 }
+impl From<AstroFragment> for AnyHtmlElement {
+    fn from(node: AstroFragment) -> Self {
+        Self::AstroFragment(node)
+    }
+}
 impl From<HtmlBogusElement> for AnyHtmlElement {
     fn from(node: HtmlBogusElement) -> Self {
         Self::HtmlBogusElement(node)
@@ -12241,6 +12571,7 @@ impl From<HtmlSelfClosingElement> for AnyHtmlElement {
 impl AstNode for AnyHtmlElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyHtmlContent::KIND_SET
+        .union(AstroFragment::KIND_SET)
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
         .union(HtmlElement::KIND_SET)
@@ -12248,7 +12579,8 @@ impl AstNode for AnyHtmlElement {
         .union(HtmlSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_BOGUS_ELEMENT
+            ASTRO_FRAGMENT
+            | HTML_BOGUS_ELEMENT
             | HTML_CDATA_SECTION
             | HTML_ELEMENT
             | HTML_PROCESSING_INSTRUCTION
@@ -12259,6 +12591,7 @@ impl AstNode for AnyHtmlElement {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            ASTRO_FRAGMENT => Self::AstroFragment(AstroFragment { syntax }),
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
@@ -12279,6 +12612,7 @@ impl AstNode for AnyHtmlElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::AstroFragment(it) => it.syntax(),
             Self::HtmlBogusElement(it) => it.syntax(),
             Self::HtmlCdataSection(it) => it.syntax(),
             Self::HtmlElement(it) => it.syntax(),
@@ -12289,6 +12623,7 @@ impl AstNode for AnyHtmlElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::AstroFragment(it) => it.into_syntax(),
             Self::HtmlBogusElement(it) => it.into_syntax(),
             Self::HtmlCdataSection(it) => it.into_syntax(),
             Self::HtmlElement(it) => it.into_syntax(),
@@ -12302,6 +12637,7 @@ impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyHtmlContent(it) => std::fmt::Debug::fmt(it, f),
+            Self::AstroFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
@@ -12314,6 +12650,7 @@ impl From<AnyHtmlElement> for SyntaxNode {
     fn from(n: AnyHtmlElement) -> Self {
         match n {
             AnyHtmlElement::AnyHtmlContent(it) => it.into_syntax(),
+            AnyHtmlElement::AstroFragment(it) => it.into_syntax(),
             AnyHtmlElement::HtmlBogusElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into_syntax(),
             AnyHtmlElement::HtmlElement(it) => it.into_syntax(),
@@ -14101,6 +14438,11 @@ impl std::fmt::Display for AstroClientDirective {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AstroClosingFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AstroDefineDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -14116,12 +14458,22 @@ impl std::fmt::Display for AstroEmbeddedContent {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AstroFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AstroIsDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroOpeningFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

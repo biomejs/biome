@@ -41,7 +41,7 @@ mod tests {
             PropertySyntaxResult, PropertySyntaxType,
         },
     };
-    use biome_languages::CssFileSource;
+    use biome_languages::{CssFileSource, css::CssEmbeddingKind};
     use biome_rowan::{AstNode, TextRange, TextSize};
 
     #[test]
@@ -455,6 +455,48 @@ or>";
         assert!(variable.is_at_property());
         assert!(variable.is_root());
         assert!(variable.at_property().is_some());
+    }
+
+    #[test]
+    fn test_custom_property_declarations() {
+        let source = r#":root {
+  --root: red;
+  \2d\2d escaped-leading: purple;
+}
+.local {
+  --local: blue;
+  .nested { --nested: green; }
+  color: red;
+}"#;
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let model = super::semantic_model(&parse.tree());
+        let declarations = model.custom_property_declarations().collect::<Vec<_>>();
+
+        assert_eq!(
+            declarations
+                .iter()
+                .map(|declaration| declaration.name().text())
+                .collect::<Vec<_>>(),
+            ["--root", r"\2d\2d escaped-leading", "--local", "--nested"]
+        );
+        assert!(declarations.iter().all(|declaration| {
+            source[declaration.range().start().into()..declaration.range().end().into()]
+                .starts_with(declaration.name().text())
+        }));
+
+        let parse = parse_css(
+            "--inline: red; color: blue",
+            CssFileSource::css().with_embedding_kind(CssEmbeddingKind::HtmlStyleAttribute),
+            CssParserOptions::default(),
+        );
+        let model = super::semantic_model(&parse.tree());
+        assert_eq!(
+            model
+                .custom_property_declarations()
+                .map(|declaration| declaration.name().text().to_string())
+                .collect::<Vec<_>>(),
+            ["--inline"]
+        );
     }
 
     #[test]

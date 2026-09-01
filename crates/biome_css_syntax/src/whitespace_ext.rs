@@ -32,7 +32,7 @@ mod tests {
 
     #[test]
     fn classifies_horizontal_css_whitespace() {
-        for byte in [b' ', b'\t'] {
+        for byte in *b" \t" {
             assert!(is_css_horizontal_whitespace_byte(byte));
             assert!(is_css_whitespace_byte(byte));
             assert!(!is_css_newline_byte(byte));
@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn rejects_other_bytes() {
-        for byte in [b'a', b'\x0b', b'\0'] {
+        for byte in *b"a\x0b\0" {
             assert!(!is_css_newline_byte(byte));
             assert!(!is_css_horizontal_whitespace_byte(byte));
             assert!(!is_css_whitespace_byte(byte));

@@ -314,6 +314,7 @@ pub fn tw_full_candidate(
     TwFullCandidateBuilder {
         variants,
         candidate,
+        legacy_important_token: None,
         negative_token: None,
         excl_token: None,
     }
@@ -321,10 +322,15 @@ pub fn tw_full_candidate(
 pub struct TwFullCandidateBuilder {
     variants: TwVariantList,
     candidate: AnyTwCandidate,
+    legacy_important_token: Option<SyntaxToken>,
     negative_token: Option<SyntaxToken>,
     excl_token: Option<SyntaxToken>,
 }
 impl TwFullCandidateBuilder {
+    pub fn with_legacy_important_token(mut self, legacy_important_token: SyntaxToken) -> Self {
+        self.legacy_important_token = Some(legacy_important_token);
+        self
+    }
     pub fn with_negative_token(mut self, negative_token: SyntaxToken) -> Self {
         self.negative_token = Some(negative_token);
         self
@@ -338,6 +344,8 @@ impl TwFullCandidateBuilder {
             TailwindSyntaxKind::TW_FULL_CANDIDATE,
             [
                 Some(SyntaxElement::Node(self.variants.into_syntax())),
+                self.legacy_important_token
+                    .map(|token| SyntaxElement::Token(token)),
                 self.negative_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.candidate.into_syntax())),
                 self.excl_token.map(|token| SyntaxElement::Token(token)),

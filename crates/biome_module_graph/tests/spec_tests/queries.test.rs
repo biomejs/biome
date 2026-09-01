@@ -393,6 +393,314 @@ fn test_callable_type_resolution_skips_interface_parameters_and_siblings() {
 }
 
 #[test]
+fn test_call_return_inference_skips_non_callable_object_argument_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        r#"
+            export interface SkippedNoise { field: string; }
+            export interface DirectNoise { field: string; }
+            export interface CallbackNoise { callback: () => string; }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { CallbackNoise, DirectNoise, SkippedNoise } from "./noise.ts";
+
+            declare const skippedNoise: SkippedNoise;
+            declare const directNoise: DirectNoise;
+            declare const callbackNoise: CallbackNoise;
+
+            type Options = { value: unknown } & { enabled?: boolean };
+            declare function createEnvLike<T = string>(options: Options): T;
+            declare function identity<T>(value: T): T;
+            declare function fromCallback<T>(callback: () => T): T;
+
+            export const skipped = createEnvLike({ value: skippedNoise.field });
+            export const direct = identity({ value: directNoise.field });
+            export const callbackResult = fromCallback(callbackNoise.callback);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/noise.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let local_input = |name| {
+        LocalTypeInput::new(
+            &db,
+            noise_module,
+            local_type_id_by_name(&db, noise_module, name),
+        )
+    };
+
+    db.clear_salsa_events();
+    let skipped = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            index_module,
+            binding_range_by_name(&db, index_module, "skipped"),
+        ),
+    )
+    .expect("skipped result must be inferred");
+    assert!(is_inferred_string(&db, skipped));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, local_input("SkippedNoise"), &events);
+
+    db.clear_salsa_events();
+    let direct = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            index_module,
+            binding_range_by_name(&db, index_module, "direct"),
+        ),
+    )
+    .expect("direct result must be inferred");
+    let value =
+        find_member_type(&db, direct, "value").expect("direct generic value must be inferred");
+    assert!(is_inferred_string(&db, value));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_local_type, local_input("DirectNoise"), &events);
+
+    db.clear_salsa_events();
+    let callback = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            index_module,
+            binding_range_by_name(&db, index_module, "callbackResult"),
+        ),
+    )
+    .expect("callback result must be inferred");
+    assert!(
+        is_inferred_string(&db, callback),
+        "callback generic return must remain inferred, got {}",
+        format_inferred_type(&db, callback)
+    );
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_local_type, local_input("CallbackNoise"), &events);
+}
+
+#[test]
+fn test_call_return_inference_preserves_relevant_argument_shapes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        r#"
+            export interface PositionalNoise { field: string; }
+            export interface DefaultNoise { field: string; }
+            export interface SpreadNoise { field: string; }
+            export interface TrailingNoise { field: string; }
+            export interface RestFirstNoise { field: string; }
+            export interface RestSecondNoise { field: string; }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type {
+                DefaultNoise,
+                PositionalNoise,
+                RestFirstNoise,
+                RestSecondNoise,
+                SpreadNoise,
+                TrailingNoise,
+            } from "./noise.ts";
+
+            declare const positionalNoise: PositionalNoise;
+            declare const defaultNoise: DefaultNoise;
+            declare const spreadNoise: SpreadNoise;
+            declare const trailingNoise: TrailingNoise;
+            declare const restFirstNoise: RestFirstNoise;
+            declare const restSecondNoise: RestSecondNoise;
+
+            type Options = { value: unknown };
+            type Callback<T> = () => T;
+            declare function select<T>(options: Options, value: T): T;
+            declare function fromCallback<T>(callback: Callback<T>): T;
+            declare function withDefaults<T = string, U = T>(options: Options): U;
+            declare function fixed(value: number): string;
+            declare function withRest(value: number, ...options: Options[]): string;
+
+            export const positionalResult = select(
+                { value: positionalNoise.field },
+                1,
+            );
+            export const callableResult = fromCallback(
+                {} as { (): string },
+            );
+            export const defaultResult = withDefaults({ value: defaultNoise.field });
+
+            export const spreadResult = select(
+                ...[{ value: spreadNoise.field }, true] as const,
+            );
+            export const trailingResult = fixed(1, { value: trailingNoise.field });
+            export const restResult = withRest(
+                1,
+                { value: restFirstNoise.field },
+                { value: restSecondNoise.field },
+            );
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/noise.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let local_input = |name| {
+        LocalTypeInput::new(
+            &db,
+            noise_module,
+            local_type_id_by_name(&db, noise_module, name),
+        )
+    };
+    let infer_result = |name| {
+        infer_binding_type(
+            &db,
+            BindingTypeInput::new(
+                &db,
+                index_module,
+                binding_range_by_name(&db, index_module, name),
+            ),
+        )
+        .unwrap_or_else(|| panic!("{name} result must be inferred"))
+    };
+
+    db.clear_salsa_events();
+    assert!(is_inferred_number(&db, infer_result("positionalResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(
+        &db,
+        infer_local_type,
+        local_input("PositionalNoise"),
+        &events,
+    );
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("callableResult")));
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("defaultResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, local_input("DefaultNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_boolean(&db, infer_result("spreadResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_local_type, local_input("SpreadNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("trailingResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, local_input("TrailingNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("restResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(
+        &db,
+        infer_local_type,
+        local_input("RestFirstNoise"),
+        &events,
+    );
+    assert_function_query_was_run(
+        &db,
+        infer_local_type,
+        local_input("RestSecondNoise"),
+        &events,
+    );
+}
+
+#[test]
+fn test_skipped_call_argument_dependencies_invalidate_when_the_callee_changes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/leaf.ts".into(),
+        "export interface Noise { field: string; }",
+    );
+    fs.insert(
+        "/src/callee.ts".into(),
+        r#"
+            type Options = { value: unknown };
+            export declare function choose<T = string>(options: Options): T;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Noise } from "./leaf.ts";
+            import { choose } from "./callee.ts";
+            declare const noise: Noise;
+            export const result = choose({ value: noise.field });
+        "#,
+    );
+
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/leaf.ts", "/src/callee.ts", "/src/index.ts"],
+        true,
+    );
+    let leaf_module = db
+        .module_for_path(Utf8Path::new("/src/leaf.ts"))
+        .expect("leaf module must exist");
+    let callee_module = db
+        .module_for_path(Utf8Path::new("/src/callee.ts"))
+        .expect("callee module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let result_range = binding_range_by_name(&db, index_module, "result");
+    {
+        let input = BindingTypeInput::new(&db, index_module, result_range);
+        let initial = infer_binding_type(&db, input).expect("initial result must be inferred");
+        assert!(is_inferred_string(&db, initial));
+    }
+
+    fs.insert(
+        "/src/leaf.ts".into(),
+        "export interface Noise { field: number; }",
+    );
+    let leaf_kind = resolve_js_module_kind_for_test(&fs, "/src/leaf.ts", true);
+    salsa::Setter::to(leaf_module.set_kind(&mut db), leaf_kind);
+
+    {
+        db.clear_salsa_events();
+        let input = BindingTypeInput::new(&db, index_module, result_range);
+        let after_leaf_edit =
+            infer_binding_type(&db, input).expect("fixed result after leaf edit must be inferred");
+        assert!(is_inferred_string(&db, after_leaf_edit));
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
+    }
+
+    fs.insert(
+        "/src/callee.ts".into(),
+        "export declare function choose<T>(options: T): T;",
+    );
+    let callee_kind = resolve_js_module_kind_for_test(&fs, "/src/callee.ts", true);
+    salsa::Setter::to(callee_module.set_kind(&mut db), callee_kind);
+
+    db.clear_salsa_events();
+    let input = BindingTypeInput::new(&db, index_module, result_range);
+    let after_callee_edit =
+        infer_binding_type(&db, input).expect("generic result after callee edit must be inferred");
+    let value = find_member_type(&db, after_callee_edit, "value")
+        .expect("generic result value must be inferred");
+    assert!(is_inferred_number(&db, value));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_binding_type, input, &events);
+}
+
+#[test]
 fn test_member_lookup_rejects_stale_local_handles_after_module_replacement() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -935,6 +1243,269 @@ fn test_expression_promise_queries_follow_imported_interface_members() {
 
     assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
     assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_expression_promise_queries_follow_new_class_instance_members() {
+    const SOURCE: &str = r#"
+        import type { Noise } from "./noise.ts";
+        import { Tracer } from "./tracer.ts";
+        import * as tracing from "./tracer.ts";
+        declare const request: Noise;
+        const tracer = new Tracer();
+        tracer.putAnnotation("Label", request.label);
+        tracer.returnsPromise(request.label);
+        const qualifiedTracer = new tracing.Tracer();
+        qualifiedTracer.putAnnotation("Qualified", request.label);
+
+        function traceLocally() {
+            class LocalTracer {
+                putAnnotation(_value: string): void {}
+                async returnsPromise(_value: string): Promise<void> {}
+            }
+            const localTracer = new LocalTracer();
+            localTracer.putAnnotation(request.label);
+            localTracer.returnsPromise(request.label);
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        "export interface Noise { label: string; }",
+    );
+    fs.insert(
+        "/src/tracer.ts".into(),
+        r#"
+            export class Tracer {
+                putAnnotation(_key: string, _value: string): void {}
+                async returnsPromise(_value: string): Promise<void> {}
+            }
+        "#,
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/noise.ts", "/src/tracer.ts", "/src/index.ts"],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let tracer_module = db
+        .module_for_path(Utf8Path::new("/src/tracer.ts"))
+        .expect("tracer module must exist");
+    let void_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "tracer.putAnnotation(\"Label\", request.label)",
+        ),
+    );
+    let promise_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "tracer.returnsPromise(request.label)"),
+    );
+    let callback_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "tracer.returnsPromise"),
+    );
+    let qualified_void_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "qualifiedTracer.putAnnotation(\"Qualified\", request.label)",
+        ),
+    );
+    let local_void_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "localTracer.putAnnotation(request.label)",
+        ),
+    );
+    let local_promise_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "localTracer.returnsPromise(request.label)",
+        ),
+    );
+    let noise = LocalTypeInput::new(
+        &db,
+        noise_module,
+        local_type_id_by_name(&db, noise_module, "Noise"),
+    );
+
+    db.clear_salsa_events();
+    assert_eq!(
+        infer_expression_is_promise(&db, void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, promise_expression),
+        TypeInferenceClassification::Match
+    );
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, callback_expression),
+        TypeInferenceClassification::Indeterminate
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, qualified_void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, qualified_void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, local_void_expression),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        infer_expression_is_promise(&db, local_promise_expression),
+        TypeInferenceClassification::Match
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, void_expression, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, promise_expression, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, callback_expression, &events);
+    assert_function_query_was_not_run(
+        &db,
+        infer_expression_type,
+        qualified_void_expression,
+        &events,
+    );
+    assert_function_query_was_not_run(&db, infer_expression_type, local_void_expression, &events);
+    assert_function_query_was_not_run(
+        &db,
+        infer_expression_type,
+        local_promise_expression,
+        &events,
+    );
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, noise_module, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, tracer_module, &events);
+}
+
+#[test]
+fn test_expression_promise_query_keeps_constructor_dependent_members_indeterminate() {
+    const SOURCE: &str = r#"
+        import * as factoryNamespace from "./factory.ts";
+
+        class Box<T extends object> {
+            constructor(readonly value: T) {}
+            get(): T { return this.value; }
+        }
+        const box = new Box(Promise.resolve());
+        box.get();
+
+        declare const Factory: {
+            new (): { task(): Promise<void> };
+            task(): void;
+        };
+        const instance = new Factory();
+        instance.task();
+
+        class Actual {
+            static async run(): Promise<void> {}
+            run(): void {}
+        }
+        class Registry { Ctor = Actual; }
+        const registry = new Registry();
+        const actual = new registry.Ctor();
+        actual.run();
+
+        interface RegistryShape { Ctor: typeof Actual; }
+        declare const typedRegistry: RegistryShape;
+        const typedActual = new typedRegistry.Ctor();
+        typedActual.run();
+
+        class ThisRegistry {
+            Ctor = Actual;
+            create() {
+                const thisActual = new this.Ctor();
+                thisActual.run();
+            }
+        }
+
+        class Handler {
+            run(_value: string): void;
+            run(_value: number): Promise<void>;
+            run(_value: string | number): void | Promise<void> {}
+        }
+        const handler = new Handler();
+        handler.run(1);
+
+        class PrivateHandler {
+            #run(_value: string): void;
+            #run(_value: number): Promise<void>;
+            #run(_value: string | number): void | Promise<void> {}
+            static test() {
+                const privateHandler = new PrivateHandler();
+                privateHandler.#run("text");
+            }
+        }
+
+        const namespaceValue = new factoryNamespace();
+        namespaceValue.Client.send();
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/factory.ts".into(),
+        "export class Client { async send(): Promise<void> {} }",
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/factory.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for expression in [
+        "box.get()",
+        "instance.task()",
+        "actual.run()",
+        "typedActual.run()",
+        "thisActual.run()",
+        "handler.run(1)",
+        "privateHandler.#run(\"text\")",
+        "namespaceValue.Client.send()",
+    ] {
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, SOURCE, expression),
+        );
+        assert_eq!(
+            infer_expression_is_promise(&db, input),
+            TypeInferenceClassification::Indeterminate,
+            "{expression}"
+        );
+    }
 }
 
 #[test]

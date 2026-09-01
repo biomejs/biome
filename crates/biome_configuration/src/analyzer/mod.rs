@@ -28,7 +28,7 @@ pub enum RuleConfiguration<T: Default + Merge> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
@@ -76,7 +76,7 @@ impl<T: Clone + Default + Merge> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static + Debug> RuleConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -137,7 +137,7 @@ impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
@@ -185,7 +185,7 @@ impl<T: Clone + Default + Merge> Merge for RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static> RuleFixConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static> RuleFixConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -305,7 +305,7 @@ pub enum RuleAssistConfiguration<T: Default> {
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -353,7 +353,7 @@ impl<T: Clone + Default> Merge for RuleAssistConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleAssistConfiguration<T> {
+impl<T: Clone + Default + Send + Sync + 'static> RuleAssistConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -575,13 +575,10 @@ pub enum AnalyzerSelector {
 }
 
 impl AnalyzerSelector {
-    pub fn match_rule<R>(&self) -> bool
-    where
-        R: Rule,
-    {
+    pub fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
         match self {
-            Self::Rule(rule) => rule.match_rule::<R>(),
-            Self::Domain(domain) => domain.match_rule::<R>(),
+            Self::Rule(rule) => rule.match_rule_name(group_name, rule_name),
+            Self::Domain(domain) => domain.match_rule_name(group_name, rule_name),
             Self::Plugin => false,
         }
     }
@@ -761,7 +758,14 @@ impl RuleSelector {
     where
         R: Rule,
     {
-        RuleFilter::from(*self).match_rule::<R>()
+        self.match_rule_name(
+            <R::Group as biome_analyze::RuleGroup>::NAME,
+            R::METADATA.name,
+        )
+    }
+
+    fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
+        RuleFilter::from(*self).match_rule_name(group_name, rule_name)
     }
 }
 
@@ -1196,7 +1200,7 @@ where
 
 impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

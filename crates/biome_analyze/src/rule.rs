@@ -601,6 +601,8 @@ impl RuleSourceKind {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
+    /// Astro framework rules
+    Astro,
     /// Drizzle ORM rules
     Drizzle,
     /// React library rules
@@ -635,6 +637,7 @@ impl Display for RuleDomain {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         // use lower case naming, it needs to match the name of the configuration
         match self {
+            Self::Astro => fmt.write_str("astro"),
             Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::ReactNative => fmt.write_str("reactNative"),
@@ -672,6 +675,7 @@ impl RuleDomain {
     /// If the array is empty, it means that the rules that belong to a certain domain won't enable themselves automatically.
     pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
         match self {
+            Self::Astro => &[&("astro", ">=1.0.0")],
             Self::React => &[&("react", ">=16.0.0")],
             Self::ReactNative => &[&("react-native", ">=0.60.0")],
             Self::Test => &[
@@ -700,6 +704,7 @@ impl RuleDomain {
     /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
+            Self::Astro => &[],
             Self::React => &[],
             Self::ReactNative => &[],
             Self::Test => &[
@@ -742,6 +747,7 @@ impl RuleDomain {
 
     pub const fn as_str(&self) -> &'static str {
         match self {
+            Self::Astro => "astro",
             Self::React => "react",
             Self::ReactNative => "reactNative",
             Self::Test => "test",
@@ -761,6 +767,9 @@ impl RuleDomain {
 
     pub const fn as_description(&self) -> &'static str {
         match self {
+            Self::Astro => {
+                "Use this domain inside Astro projects. This domain enables rules that are specific to Astro projects."
+            }
             Self::React => {
                 "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enables rules that might conflict with the Solid domain."
             }
@@ -808,6 +817,7 @@ impl FromStr for RuleDomain {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "astro" => Ok(Self::Astro),
             "react" => Ok(Self::React),
             "reactNative" => Ok(Self::ReactNative),
             "test" => Ok(Self::Test),
@@ -1442,43 +1452,13 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(
-            category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        ) {
-            let rule_category = format!(
-                "{}/{}/{}",
-                category.as_suppression_category(),
-                <Self::Group as RuleGroup>::NAME,
-                Self::METADATA.name
-            );
-            let suppression_text = format!("biome-ignore-all {rule_category}");
-            let root = ctx.root();
-
-            if let Some(first_token) = root.syntax().first_token() {
-                let mut mutation = root.begin();
-                let comment =
-                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
-                suppression_action.apply_top_level_suppression(
-                    &mut mutation,
-                    first_token,
-                    comment.as_str(),
-                );
-                let message = if category == RuleCategory::Action {
-                    "action"
-                } else {
-                    "rule"
-                };
-                return Some(SuppressAction {
-                    mutation,
-                    message:
-                        markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
-                            .to_owned(),
-                });
-            }
-        }
-        None
+        build_top_level_suppression(
+            ctx.root(),
+            <Self::Group as RuleGroup>::Category::CATEGORY,
+            <Self::Group as RuleGroup>::NAME,
+            Self::METADATA.name,
+            suppression_action,
+        )
     }
 
     /// Create a code action that allows you to suppress the rule. The function
@@ -1492,44 +1472,15 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
-        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(
-            category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        ) {
-            let rule_category = format!(
-                "{}/{}/{}",
-                category.as_suppression_category(),
-                <Self::Group as RuleGroup>::NAME,
-                Self::METADATA.name
-            );
-            let suppression_text = format!("biome-ignore {rule_category}");
-            let root = ctx.root();
-            let token = root.syntax().token_at_offset(text_range.start());
-            let mut mutation = root.begin();
-            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
-                suppression_text: suppression_text.as_str(),
-                mutation: &mut mutation,
-                token_offset: token,
-                diagnostic_text_range: text_range,
-                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
-            });
-
-            let message = if category == RuleCategory::Action {
-                "action"
-            } else {
-                "rule"
-            };
-
-            Some(SuppressAction {
-                mutation,
-                message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
-                    .to_owned(),
-            })
-        } else {
-            None
-        }
+        build_inline_suppression(
+            ctx.root(),
+            text_range,
+            <Self::Group as RuleGroup>::Category::CATEGORY,
+            <Self::Group as RuleGroup>::NAME,
+            Self::METADATA.name,
+            suppression_action,
+            suppression_reason,
+        )
     }
 
     /// Returns a mutation to apply to the code
@@ -1537,6 +1488,99 @@ pub trait Rule: RuleMeta + Sized {
         _ctx: &RuleContext<Self>,
         _state: &Self::State,
     ) -> Option<BatchMutation<RuleLanguage<Self>>> {
+        None
+    }
+}
+fn build_top_level_suppression<L: Language>(
+    root: L::Root,
+    category: RuleCategory,
+    group_name: &'static str,
+    rule_name: &'static str,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+) -> Option<SuppressAction<L>> {
+    if matches!(
+        category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    ) {
+        let rule_category = format!(
+            "{}/{}/{}",
+            category.as_suppression_category(),
+            group_name,
+            rule_name
+        );
+        let suppression_text = format!("biome-ignore-all {rule_category}");
+
+        if let Some(first_token) = root.syntax().first_token() {
+            let mut mutation = root.begin();
+            let comment =
+                suppression_action.suppression_top_level_comment(suppression_text.as_str());
+            suppression_action.apply_top_level_suppression(
+                &mut mutation,
+                first_token,
+                comment.as_str(),
+            );
+            let message = if category == RuleCategory::Action {
+                "action"
+            } else {
+                "rule"
+            };
+            return Some(SuppressAction {
+                mutation,
+                message:
+                    markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
+                        .to_owned(),
+            });
+        }
+    }
+    None
+}
+
+/// Body of [Rule::inline_suppression], kept outside the trait so it is
+/// monomorphized once per language instead of once per rule: the rule only
+/// contributes its category, group name, and rule name.
+fn build_inline_suppression<L: Language>(
+    root: L::Root,
+    text_range: &TextRange,
+    category: RuleCategory,
+    group_name: &'static str,
+    rule_name: &'static str,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+    suppression_reason: Option<&str>,
+) -> Option<SuppressAction<L>> {
+    // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
+    if matches!(
+        category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    ) {
+        let rule_category = format!(
+            "{}/{}/{}",
+            category.as_suppression_category(),
+            group_name,
+            rule_name
+        );
+        let suppression_text = format!("biome-ignore {rule_category}");
+        let token = root.syntax().token_at_offset(text_range.start());
+        let mut mutation = root.begin();
+        suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
+            suppression_text: suppression_text.as_str(),
+            mutation: &mut mutation,
+            token_offset: token,
+            diagnostic_text_range: text_range,
+            suppression_reason: suppression_reason.unwrap_or("<explanation>"),
+        });
+
+        let message = if category == RuleCategory::Action {
+            "action"
+        } else {
+            "rule"
+        };
+
+        Some(SuppressAction {
+            mutation,
+            message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
+                .to_owned(),
+        })
+    } else {
         None
     }
 }

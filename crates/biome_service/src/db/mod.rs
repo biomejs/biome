@@ -8,7 +8,7 @@ pub use state::DbState;
 
 use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
-use crate::settings::{Settings, VcsIgnoredPatterns};
+use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
 use biome_configuration::vcs::VcsClientKind;
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
@@ -28,7 +28,106 @@ use salsa::{Setter, Storage};
 use std::convert::Infallible;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::sync::RwLock;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
+
+const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
+type SettingsQueryEventHandler =
+    std::panic::AssertUnwindSafe<Arc<dyn Fn(salsa::Event) + Send + Sync>>;
+
+#[salsa::db]
+#[derive(Default)]
+pub(crate) struct SettingsQueryDb {
+    storage: Storage<Self>,
+}
+
+#[salsa::db]
+impl salsa::Database for SettingsQueryDb {}
+
+struct SettingsQueryCacheState {
+    storage: salsa::StorageHandle<SettingsQueryDb>,
+    interned_values: Arc<AtomicUsize>,
+}
+
+struct SettingsQueryCache {
+    state: RwLock<SettingsQueryCacheState>,
+    event_handler: Option<SettingsQueryEventHandler>,
+}
+
+impl Default for SettingsQueryCache {
+    fn default() -> Self {
+        Self {
+            state: RwLock::new(SettingsQueryCacheState::new(None)),
+            event_handler: None,
+        }
+    }
+}
+
+impl SettingsQueryCacheState {
+    fn new(event_handler: Option<SettingsQueryEventHandler>) -> Self {
+        let interned_values = Arc::new(AtomicUsize::new(0));
+        let counter = interned_values.clone();
+        let storage = Storage::new(Some(Box::new(move |event| {
+            if matches!(&event.kind, salsa::EventKind::DidInternValue { .. }) {
+                counter.fetch_add(1, Ordering::Relaxed);
+            }
+            if let Some(event_handler) = &event_handler {
+                (event_handler.0)(event);
+            }
+        })));
+        Self {
+            storage: storage.into_zalsa_handle(),
+            interned_values,
+        }
+    }
+
+    fn database(&self) -> SettingsQueryDb {
+        SettingsQueryDb {
+            storage: self.storage.clone().into_storage(),
+        }
+    }
+}
+
+impl SettingsQueryCache {
+    fn database(&self) -> SettingsQueryDb {
+        {
+            let state = self
+                .state
+                .read()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.interned_values.load(Ordering::Relaxed) < SETTINGS_QUERY_CACHE_CAPACITY {
+                return state.database();
+            }
+        }
+        let mut state = self
+            .state
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if state.interned_values.load(Ordering::Relaxed) >= SETTINGS_QUERY_CACHE_CAPACITY {
+            *state = SettingsQueryCacheState::new(
+                self.event_handler
+                    .as_ref()
+                    .map(|handler| std::panic::AssertUnwindSafe(handler.0.clone())),
+            );
+        }
+        state.database()
+    }
+
+    #[cfg(test)]
+    fn with_event_handler(handler: Box<dyn Fn(salsa::Event) + Send + Sync>) -> Self {
+        let event_handler: Option<SettingsQueryEventHandler> =
+            Some(std::panic::AssertUnwindSafe(Arc::from(handler)));
+        Self {
+            state: RwLock::new(SettingsQueryCacheState::new(
+                event_handler
+                    .as_ref()
+                    .map(|handler| std::panic::AssertUnwindSafe(handler.0.clone())),
+            )),
+            event_handler,
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ParsedSourceUpdateMode {
@@ -77,6 +176,7 @@ pub struct WorkspaceDb {
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     /// A map of projects loaded in the workspace.
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
+    settings_queries: Arc<SettingsQueryCache>,
     // NOTE: this must stay last as per salsa restrictions.
     storage: Storage<Self>,
 }
@@ -89,6 +189,7 @@ impl Default for WorkspaceDb {
             modules: Arc::default(),
             file_sources: Arc::default(),
             projects: Arc::default(),
+            settings_queries: Arc::default(),
             storage: Storage::default(),
         };
         #[cfg(feature = "module_graph")]
@@ -111,6 +212,7 @@ impl Default for WorkspaceDb {
 /// runs. This type is what makes that possible.
 #[derive(Clone)]
 pub struct WorkspaceDbData {
+    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -136,6 +238,11 @@ impl WorkspaceDbData {
         self.projects.pin().remove(&project_key);
     }
 
+    /// Removes the parsed source cached for `path`.
+    pub fn remove_file(&self, path: &Utf8Path) {
+        self.files.pin().remove(path);
+    }
+
     /// Checks whether the module data contains `path` without making Salsa
     /// track the read operation.
     ///
@@ -157,9 +264,19 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
-    /// Removes all modules that start with the given path. That's usually used
-    /// when removing a library or a folder from the project.
+    /// Removes all files and modules that start with the given path. That's
+    /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
+        let files = self.files.pin();
+        let to_remove: Vec<Utf8PathBuf> = files
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            files.remove(&p);
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let modules = self.modules.pin();
@@ -172,12 +289,14 @@ impl WorkspaceDbData {
                 modules.remove(&p);
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 }
 
 impl WorkspaceDb {
+    pub(crate) fn settings_query_db(&self) -> SettingsQueryDb {
+        self.settings_queries.database()
+    }
+
     /// Runs a write operation on the module data.
     ///
     /// The Salsa write starts before the data changes, so a read operation
@@ -196,10 +315,20 @@ impl WorkspaceDb {
         pending_setter.to(next);
     }
 
+    /// Advances the module graph generation without changing its entries.
+    ///
+    /// This publishes module changes already made through shared collections to
+    /// Salsa-tracked queries.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn invalidate_module_graph(&mut self) {
+        self.write_module_data(|_| {});
+    }
+
     /// Returns handles to the collections that this database shares with all
     /// its clones.
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -304,6 +433,15 @@ impl WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 
+    /// Returns the number of cached parsed sources.
+    ///
+    /// Only used by tests to check that eviction empties the collection,
+    /// rather than only the specific paths a test looks up.
+    #[cfg(test)]
+    pub(crate) fn parsed_sources_len(&self) -> usize {
+        self.files.pin().len()
+    }
+
     /// Returns a [Rc] to itself, cast to [ModuleDb]. This is used to send the service
     /// to the analyzer.
     #[cfg(feature = "module_graph")]
@@ -385,6 +523,18 @@ impl WorkspaceDb {
     }
 
     pub fn unload_path(&mut self, path: &Utf8Path) {
+        {
+            let files = self.files.pin();
+            let to_remove: Vec<Utf8PathBuf> = files
+                .keys()
+                .filter(|p| p.starts_with(path))
+                .cloned()
+                .collect();
+            for p in to_remove {
+                files.remove(&p);
+            }
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let to_remove = self
@@ -403,8 +553,6 @@ impl WorkspaceDb {
                 });
             }
         }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
     }
 
     // #region Project operations
@@ -464,7 +612,7 @@ impl WorkspaceDb {
         match mode {
             ProjectUpdateMode::Replace => {
                 let path = NestedPath::from(path);
-                let settings = Arc::new(settings);
+                let settings = SettingsIdentity::from(Arc::new(settings));
                 self.replace_project_with(project_key, |db, project| {
                     let mut nested_settings = project.nested_settings(db).clone();
                     nested_settings.insert(path.clone(), settings.clone());
@@ -482,7 +630,7 @@ impl WorkspaceDb {
                     return;
                 };
                 let mut nested_settings = project.nested_settings(self).clone();
-                nested_settings.insert(path.into(), Arc::new(settings));
+                nested_settings.insert(path.into(), Arc::new(settings).into());
                 project.set_nested_settings(self).to(nested_settings);
             }
         }
@@ -494,7 +642,7 @@ impl WorkspaceDb {
         settings: Settings,
         mode: ProjectUpdateMode,
     ) {
-        let root_settings = Arc::new(settings);
+        let root_settings = SettingsIdentity::from(Arc::new(settings));
         match mode {
             ProjectUpdateMode::Replace => {
                 self.replace_project_with(project_key, |db, project| {
@@ -538,7 +686,7 @@ impl WorkspaceDb {
                 self,
                 key,
                 path,
-                Arc::new(Settings::default()),
+                Arc::new(Settings::default()).into(),
                 Default::default(),
             ),
         );
@@ -557,8 +705,8 @@ impl WorkspaceDb {
         mode: ProjectUpdateMode,
     ) -> Result<(), WorkspaceError> {
         let update_root_settings =
-            |mut root_settings: Arc<Settings>| -> Result<Arc<Settings>, WorkspaceError> {
-                let git_ignores = match root_settings.vcs_settings.client_kind {
+            |mut root_settings: SettingsIdentity| -> Result<SettingsIdentity, WorkspaceError> {
+                let git_ignores = match root_settings.as_ref().vcs_settings.client_kind {
                     Some(VcsClientKind::Git) => payload
                         .iter()
                         .map(|(path, patterns)| {
@@ -569,7 +717,7 @@ impl WorkspaceDb {
                     None => Vec::new(),
                 };
 
-                let settings = Arc::make_mut(&mut root_settings);
+                let settings = root_settings.make_mut();
                 if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
                     for git_ignore in git_ignores {
                         ignore_matches.insert_git_match(git_ignore);
@@ -618,11 +766,22 @@ pub struct SharedWorkspaceDb {
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
+    settings_queries: Arc<SettingsQueryCache>,
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
 
 impl Default for SharedWorkspaceDb {
     fn default() -> Self {
+        Self::from_workspace_db(WorkspaceDb::default())
+    }
+}
+
+impl SharedWorkspaceDb {
+    /// Converts `db` into handles for creating operation-local forks.
+    ///
+    /// The resulting forks share Salsa storage and workspace collections with
+    /// `db`, but each fork has fresh Salsa local state.
+    pub(crate) fn from_workspace_db(db: WorkspaceDb) -> Self {
         let WorkspaceDb {
             files,
             #[cfg(feature = "module_graph")]
@@ -630,21 +789,22 @@ impl Default for SharedWorkspaceDb {
             file_sources,
             storage,
             projects,
-        } = WorkspaceDb::default();
+            settings_queries,
+        } = db;
         Self {
             files,
             #[cfg(feature = "module_graph")]
             modules,
             file_sources,
             projects,
+            settings_queries,
             storage: storage.into_zalsa_handle(),
         }
     }
-}
 
-impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
+            files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
@@ -659,6 +819,7 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             projects: self.projects.clone(),
+            settings_queries: self.settings_queries.clone(),
             storage: self.storage.clone().into_storage(),
         }
     }
@@ -751,18 +912,49 @@ impl LanguageDb for WorkspaceDb {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "lang_js")]
+    use crate::file_handlers::javascript::{
+        resolve_analyzer_options as resolve_js_analyzer_options,
+        resolve_format_options as resolve_js_format_options,
+    };
+    #[cfg(feature = "lang_js")]
+    use crate::file_handlers::{
+        AnalyzerVisitorBuilder, analyzer_input_count_for_test, resolved_manifest_visitor_for_test,
+    };
+    use crate::settings::{
+        SettingsEditorState, SettingsHandle, SettingsQuery, SettingsQuerySelection,
+        SettingsSelectionKey,
+    };
+    #[cfg(feature = "lang_js")]
+    use biome_analyze::AnalyzerOptions;
+    #[cfg(feature = "lang_js")]
+    use biome_configuration::analyzer::AnalyzerSelector;
+    #[cfg(feature = "lang_js")]
+    use biome_configuration::bool::Bool;
     use biome_db::Db;
+    use biome_db::testing::{Events, function_query_will_execute_count_by_name};
+    #[cfg(any(feature = "lang_js", feature = "module_graph"))]
+    use biome_fs::BiomePath;
     #[cfg(feature = "module_graph")]
-    use biome_fs::{BiomePath, MemoryFileSystem};
+    use biome_fs::MemoryFileSystem;
     #[cfg(feature = "module_graph")]
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::{JsParserOptions, parse};
+    #[cfg(feature = "lang_js")]
+    use biome_js_syntax::JsLanguage;
+    #[cfg(feature = "module_graph")]
+    use biome_languages::HtmlFileSource;
+    #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
     #[cfg(feature = "module_graph")]
     use biome_module_graph::{ModuleDb, PathInfoCache, resolve_html_module};
+    #[cfg(feature = "lang_js")]
+    use biome_package::{Dependencies, PackageJson};
     #[cfg(feature = "module_graph")]
     use biome_project_layout::ProjectLayout;
     use salsa::plumbing::{AsId, ZalsaDatabase};
+    #[cfg(feature = "lang_js")]
+    use std::str::FromStr;
     use std::sync::Barrier;
     #[cfg(feature = "module_graph")]
     use std::sync::atomic::{AtomicBool, Ordering};
@@ -771,6 +963,35 @@ mod tests {
 
     static SETTER_READER_STARTED: Barrier = Barrier::new(2);
 
+    #[salsa::interned]
+    struct TestSettingsQueryInput {
+        project: ProjectInput,
+        #[returns(ref)]
+        selection: SettingsQuerySelection,
+    }
+
+    #[salsa::interned]
+    struct TestSettingsCacheInput {
+        value: usize,
+    }
+
+    #[salsa::tracked(lru = 256)]
+    fn test_settings_query<'db>(
+        db: &'db dyn ProjectDb,
+        input: TestSettingsQueryInput<'db>,
+    ) -> bool {
+        input
+            .selection(db)
+            .selected_settings(db, input.project(db))
+            .as_ref()
+            .linter_recommended_enabled()
+    }
+
+    fn run_test_settings_query(db: &dyn ProjectDb, query: &SettingsQuery) -> bool {
+        let input = TestSettingsQueryInput::new(db, query.project(), query.selection().clone());
+        test_settings_query(db, input)
+    }
+
     fn parse_js(source: &str) -> AnyParse {
         parse(
             source,
@@ -778,6 +999,65 @@ mod tests {
             JsParserOptions::default(),
         )
         .into()
+    }
+
+    fn settings_query_test_db() -> (WorkspaceDb, Events) {
+        let events = Events::default();
+        let storage = Storage::new(Some(Box::new({
+            let events = events.clone();
+            move |event| events.0.lock().unwrap().push(event)
+        })));
+        let settings_queries = Arc::new(SettingsQueryCache::with_event_handler(Box::new({
+            let events = events.clone();
+            move |event| events.0.lock().unwrap().push(event)
+        })));
+        let db = WorkspaceDb {
+            files: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            modules: Arc::default(),
+            file_sources: Arc::default(),
+            projects: Arc::default(),
+            settings_queries,
+            storage,
+        };
+        #[cfg(feature = "module_graph")]
+        ModuleGraphGeneration::new(&db, 0);
+        (db, events)
+    }
+
+    #[test]
+    fn settings_query_cache_rotates_storage_at_capacity() {
+        let db = WorkspaceDb::default();
+        let first = db.settings_query_db();
+
+        for value in 0..SETTINGS_QUERY_CACHE_CAPACITY {
+            let current = db.settings_query_db();
+            assert!(std::ptr::eq(first.zalsa(), current.zalsa()));
+            TestSettingsCacheInput::new(&current, value);
+        }
+
+        let next = db.settings_query_db();
+        assert!(!std::ptr::eq(first.zalsa(), next.zalsa()));
+    }
+
+    #[test]
+    fn settings_query_cache_recovers_poisoned_lock() {
+        let cache = SettingsQueryCache::default();
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _state = cache.state.write().unwrap();
+            panic!("poison settings query cache");
+        }));
+        assert!(result.is_err());
+
+        cache.database();
+    }
+
+    fn take_events(events: &Events) -> Vec<salsa::Event> {
+        std::mem::take(&mut *events.0.lock().unwrap())
+    }
+
+    fn settings_query_execution_count(db: &WorkspaceDb, events: &Events) -> usize {
+        function_query_will_execute_count_by_name(db, "test_settings_query", &take_events(events))
     }
 
     fn assert_single_project_in_sync(db: &WorkspaceDb, project_key: ProjectKey) -> ProjectInput {
@@ -813,6 +1093,7 @@ mod tests {
             modules: Arc::default(),
             file_sources: Arc::default(),
             projects: Arc::default(),
+            settings_queries: Arc::default(),
             storage,
         };
         ModuleGraphGeneration::new(&db, 0);
@@ -820,18 +1101,20 @@ mod tests {
     }
 
     #[cfg(feature = "module_graph")]
-    fn test_module(db: &WorkspaceDb, path: &str) -> ModuleInfo {
+    fn test_module(db: &mut WorkspaceDb, path: &str) -> ModuleInfo {
         let path = BiomePath::new(path);
         let fs = MemoryFileSystem::default();
-        let root = parse_html("", HtmlParserOptions::default()).tree();
+        let source_index = db.insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
+        let parsed = parse_html("", HtmlParserOptions::default());
+        db.replace_file(path.as_path(), parsed.into(), source_index, vec![]);
         let (module, _, _) = resolve_html_module(
-            root,
-            &[],
+            db,
             &path,
             &fs,
             &ProjectLayout::default(),
             &PathInfoCache::default(),
-        );
+        )
+        .expect("the parsed HTML source was just inserted");
         ModuleInfo::new(
             db,
             path.as_path().to_path_buf(),
@@ -910,6 +1193,625 @@ mod tests {
     }
 
     #[test]
+    fn resolved_settings_query_tracks_owned_settings_updates() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        take_events(&events);
+
+        run_test_settings_query(&db, &query);
+        assert_eq!(settings_query_execution_count(&db, &events), 1);
+        run_test_settings_query(&db, &query);
+        assert_eq!(settings_query_execution_count(&db, &events), 0);
+
+        db.upsert_file(
+            Utf8Path::new("project/file.js"),
+            parse_js("let a = 1;"),
+            0,
+            vec![],
+        );
+        take_events(&events);
+        run_test_settings_query(&db, &query);
+        assert_eq!(settings_query_execution_count(&db, &events), 0);
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+        take_events(&events);
+        run_test_settings_query(&db, &query);
+        assert_eq!(settings_query_execution_count(&db, &events), 1);
+        run_test_settings_query(&db, &query);
+        assert_eq!(settings_query_execution_count(&db, &events), 0);
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn resolved_formatter_query_tracks_only_selected_settings() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        let handle = SettingsHandle::new(settings.as_ref(), SettingsEditorState::new(query));
+        let source = JsFileSource::js_module();
+        take_events(&events);
+
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_format_options",
+                &take_events(&events),
+            ),
+            1
+        );
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_format_options",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        db.upsert_file(
+            Utf8Path::new("project/file.js"),
+            parse_js("let a = 1;"),
+            0,
+            vec![],
+        );
+        take_events(&events);
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_format_options",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+        take_events(&events);
+        resolve_js_format_options(
+            &BiomePath::new("project/file.js"),
+            &DocumentFileSource::Js(source),
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_format_options",
+                &take_events(&events),
+            ),
+            1
+        );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn resolved_analyzer_options_query_tracks_only_selected_settings_and_source() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        let handle = SettingsHandle::new(settings.as_ref(), SettingsEditorState::new(query));
+        let source = DocumentFileSource::Js(JsFileSource::js_module());
+        take_events(&events);
+
+        let options = resolve_js_analyzer_options(
+            &BiomePath::new("project/file.js"),
+            None,
+            &source,
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(options.file_path, Utf8Path::new("project/file.js"));
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            1
+        );
+
+        let options = resolve_js_analyzer_options(
+            &BiomePath::new("project/other.js"),
+            Some(Utf8Path::new("project")),
+            &source,
+            Some("explanation"),
+            &handle,
+            &db,
+        );
+        assert_eq!(options.file_path, Utf8Path::new("project/other.js"));
+        assert_eq!(
+            options.working_directory.as_ref().as_deref(),
+            Some(Utf8Path::new("project"))
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        db.upsert_file(
+            Utf8Path::new("project/file.js"),
+            parse_js("let a = 1;"),
+            0,
+            vec![],
+        );
+        take_events(&events);
+        resolve_js_analyzer_options(
+            &BiomePath::new("project/file.js"),
+            None,
+            &source,
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        resolve_js_analyzer_options(
+            &BiomePath::new("project/file.tsx"),
+            None,
+            &DocumentFileSource::Js(JsFileSource::tsx()),
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            1
+        );
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+        take_events(&events);
+        resolve_js_analyzer_options(
+            &BiomePath::new("project/file.js"),
+            None,
+            &source,
+            None,
+            &handle,
+            &db,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_js_analyzer_options",
+                &take_events(&events),
+            ),
+            1
+        );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn resolved_analyzer_query_ignores_request_filters() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db).clone_arc();
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        let handle = SettingsHandle::new(settings.as_ref(), SettingsEditorState::new(query));
+        let no_debugger = AnalyzerSelector::from_str("lint/suspicious/noDebugger").unwrap();
+        let no_console = AnalyzerSelector::from_str("lint/suspicious/noConsole").unwrap();
+        let only_a = [no_debugger];
+        let skip_a = [no_console];
+        let enabled_a = [no_debugger];
+        let only_b = [no_console];
+        let skip_b = [no_debugger];
+        let enabled_b = [no_console];
+        let input_count = analyzer_input_count_for_test(&db);
+        take_events(&events);
+
+        let first = AnalyzerVisitorBuilder::new(&handle, &db, AnalyzerOptions::default())
+            .with_only(&only_a)
+            .with_skip(&skip_a)
+            .with_enabled_selectors(&enabled_a)
+            .finish();
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_analyzer_visitor",
+                &take_events(&events),
+            ),
+            1
+        );
+
+        let second = AnalyzerVisitorBuilder::new(&handle, &db, AnalyzerOptions::default())
+            .with_only(&only_b)
+            .with_skip(&skip_b)
+            .with_enabled_selectors(&enabled_b)
+            .finish();
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_analyzer_visitor",
+                &take_events(&events),
+            ),
+            0
+        );
+        assert_ne!(first.enabled_rules, second.enabled_rules);
+        assert_ne!(first.disabled_rules, second.disabled_rules);
+        assert_eq!(analyzer_input_count_for_test(&db), input_count + 1);
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn resolved_manifest_query_tracks_settings_and_manifest_dependencies() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        let manifest = PackageJson {
+            dev_dependencies: Dependencies(
+                vec![("vitest".into(), "^1.0.0".into())].into_boxed_slice(),
+            ),
+            ..PackageJson::default()
+        };
+        take_events(&events);
+
+        resolved_manifest_visitor_for_test(
+            &db,
+            query.selection().selected_settings(&db, query.project()),
+            query.override_indices().into(),
+            manifest.clone(),
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_manifest_visitor",
+                &take_events(&events),
+            ),
+            1
+        );
+        resolved_manifest_visitor_for_test(
+            &db,
+            query.selection().selected_settings(&db, query.project()),
+            query.override_indices().into(),
+            manifest.clone(),
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_manifest_visitor",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        db.upsert_file(
+            Utf8Path::new("project/file.js"),
+            parse_js("let a = 1;"),
+            0,
+            vec![],
+        );
+        take_events(&events);
+        resolved_manifest_visitor_for_test(
+            &db,
+            query.selection().selected_settings(&db, query.project()),
+            query.override_indices().into(),
+            manifest.clone(),
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_manifest_visitor",
+                &take_events(&events),
+            ),
+            0
+        );
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+        take_events(&events);
+        resolved_manifest_visitor_for_test(
+            &db,
+            query.selection().selected_settings(&db, query.project()),
+            query.override_indices().into(),
+            manifest,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_manifest_visitor",
+                &take_events(&events),
+            ),
+            1
+        );
+
+        let changed_manifest = PackageJson {
+            dev_dependencies: Dependencies(
+                vec![("jest".into(), "^30.0.0".into())].into_boxed_slice(),
+            ),
+            ..PackageJson::default()
+        };
+        resolved_manifest_visitor_for_test(
+            &db,
+            query.selection().selected_settings(&db, query.project()),
+            query.override_indices().into(),
+            changed_manifest,
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "resolved_manifest_visitor",
+                &take_events(&events),
+            ),
+            1
+        );
+    }
+
+    #[test]
+    fn resolved_settings_query_uses_replacement_project_identity() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        run_test_settings_query(&db, &query);
+        take_events(&events);
+
+        db.insert_root_settings_with_mode(
+            project_key,
+            Settings::default(),
+            ProjectUpdateMode::Replace,
+        );
+        let replacement = db.get_project(&project_key).unwrap();
+        assert_ne!(project.as_id(), replacement.as_id());
+        let settings = replacement.root_settings(&db);
+        let replacement_query = SettingsQuery::new(
+            replacement,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/file.js"),
+        );
+        take_events(&events);
+
+        run_test_settings_query(&db, &replacement_query);
+        assert_eq!(settings_query_execution_count(&db, &events), 1);
+        run_test_settings_query(&db, &replacement_query);
+        assert_eq!(settings_query_execution_count(&db, &events), 0);
+    }
+
+    #[test]
+    fn settings_context_records_root_and_deepest_nested_selection() {
+        let mut db = WorkspaceDb::default();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        db.insert_nested_setting_with_mode(
+            project_key,
+            Utf8PathBuf::from("project/packages"),
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+        db.insert_nested_setting_with_mode(
+            project_key,
+            Utf8PathBuf::from("project/packages/deep"),
+            Settings::default(),
+            ProjectUpdateMode::Setters,
+        );
+
+        let (project, selection, _, settings) = db
+            .get_settings_context_for_path(project_key, Utf8Path::new("project/root.js"))
+            .unwrap();
+        let root_query = SettingsQuery::new(
+            project,
+            selection,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/root.js"),
+        );
+        assert_eq!(root_query.selection().key(), SettingsSelectionKey::Root);
+
+        let (project, selection, working_directory, settings) = db
+            .get_settings_context_for_path(
+                project_key,
+                Utf8Path::new("project/packages/deep/file.js"),
+            )
+            .unwrap();
+        let nested_query = SettingsQuery::new(
+            project,
+            selection,
+            settings.as_ref(),
+            None,
+            Utf8Path::new("project/packages/deep/file.js"),
+        );
+        assert_eq!(working_directory, Utf8Path::new("project/packages/deep"));
+        assert_eq!(
+            nested_query.selection().key(),
+            SettingsSelectionKey::Nested(NestedPath::new("project/packages/deep"))
+        );
+        assert_ne!(root_query.selection(), nested_query.selection());
+
+        project.set_nested_settings(&mut db).to(Default::default());
+        assert_eq!(
+            nested_query
+                .selection()
+                .selected_settings(&db, nested_query.project()),
+            project.root_settings(&db)
+        );
+    }
+
+    #[test]
+    fn inline_settings_do_not_change_tracked_project_selection() {
+        let mut db = WorkspaceDb::default();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let mut inline_settings = Settings::default();
+        inline_settings.linter.rules = Some(biome_configuration::Rules {
+            recommended: Some(false),
+            ..Default::default()
+        });
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            settings.as_ref(),
+            Some(inline_settings),
+            Utf8Path::new("project/file.js"),
+        );
+
+        assert!(run_test_settings_query(&db, &query));
+        assert!(
+            !query
+                .inline_settings()
+                .unwrap()
+                .as_ref()
+                .linter_recommended_enabled()
+        );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn inline_settings_resolve_without_tracked_formatter_queries() {
+        let (mut db, events) = settings_query_test_db();
+        let project_key = db.insert_project(Utf8PathBuf::from("project"));
+        let project = db.get_project(&project_key).unwrap();
+        let settings = project.root_settings(&db);
+        let project_count = ProjectInput::ingredient(&db).entries(db.zalsa()).count();
+        let settings = settings.clone_arc();
+        take_events(&events);
+
+        for _ in 0..16 {
+            let mut inline_settings = Settings::default();
+            inline_settings
+                .languages
+                .javascript
+                .parser
+                .parse_class_parameter_decorators = Some(Bool(true));
+            let query = SettingsQuery::new(
+                project,
+                SettingsSelectionKey::Root,
+                settings.as_ref(),
+                Some(inline_settings),
+                Utf8Path::new("project/file.js"),
+            );
+            let handle = SettingsHandle::new(settings.as_ref(), SettingsEditorState::new(query));
+            let options = handle.parse_options::<JsLanguage>(
+                &BiomePath::new("project/file.js"),
+                &DocumentFileSource::Js(JsFileSource::js_module()),
+            );
+            resolve_js_format_options(
+                &BiomePath::new("project/file.js"),
+                &DocumentFileSource::Js(JsFileSource::js_module()),
+                &handle,
+                &db,
+            );
+            resolve_js_analyzer_options(
+                &BiomePath::new("project/file.js"),
+                None,
+                &DocumentFileSource::Js(JsFileSource::js_module()),
+                None,
+                &handle,
+                &db,
+            );
+
+            assert!(options.parse_class_parameter_decorators);
+        }
+
+        assert_eq!(
+            ProjectInput::ingredient(&db).entries(db.zalsa()).count(),
+            project_count
+        );
+        let events = take_events(&events);
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "resolved_js_format_options", &events,),
+            0
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "resolved_js_analyzer_options", &events,),
+            0
+        );
+    }
+
+    #[test]
     fn insert_root_settings_keeps_index_and_salsa_in_sync() {
         let mut db = WorkspaceDb::default();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
@@ -927,7 +1829,11 @@ mod tests {
         let updated_project = assert_single_project_in_sync(&db, project_key);
         assert_eq!(updated_project.as_id(), project.as_id());
         assert_eq!(
-            updated_project.root_settings(&db).vcs_settings.client_kind,
+            updated_project
+                .root_settings(&db)
+                .as_ref()
+                .vcs_settings
+                .client_kind,
             Some(VcsClientKind::Git)
         );
     }
@@ -974,7 +1880,7 @@ mod tests {
                 let writers_ready = writers_ready.clone();
                 scope.spawn(move || {
                     let path = NestedPath::new(path);
-                    let settings = Arc::new(Settings::default());
+                    let settings = SettingsIdentity::from(Arc::new(Settings::default()));
                     let mut first_attempt = true;
                     db.replace_project_with(project_key, |db, project| {
                         if first_attempt {
@@ -1028,7 +1934,7 @@ mod tests {
                             db,
                             project_key,
                             project.path(db).to_path_buf(),
-                            Arc::new(Settings::default()),
+                            Arc::new(Settings::default()).into(),
                             project.nested_settings(db).clone(),
                         )
                     })
@@ -1061,11 +1967,13 @@ mod tests {
         let nested_path = root_path.join("package");
         let ignored_path = nested_path.join("generated.js");
 
-        assert!(!project.root_settings(&db).vcs_settings.is_ignored(
-            ignored_path.as_path(),
-            false,
-            None
-        ));
+        assert!(
+            !project.root_settings(&db).as_ref().vcs_settings.is_ignored(
+                ignored_path.as_path(),
+                false,
+                None
+            )
+        );
 
         db.store_nested_ignore_patterns_with_mode(
             project_key,
@@ -1076,11 +1984,13 @@ mod tests {
 
         let updated_project = assert_single_project_in_sync(&db, project_key);
         assert_eq!(updated_project.as_id(), project.as_id());
-        assert!(updated_project.root_settings(&db).vcs_settings.is_ignored(
-            ignored_path.as_path(),
-            false,
-            None
-        ));
+        assert!(
+            updated_project
+                .root_settings(&db)
+                .as_ref()
+                .vcs_settings
+                .is_ignored(ignored_path.as_path(), false, None)
+        );
     }
 
     #[test]
@@ -1125,7 +2035,7 @@ mod tests {
         let armed = Arc::new(AtomicBool::new(false));
         let mut db = module_write_test_db(barrier.clone(), armed.clone());
         let path = Utf8PathBuf::from("inserted.html");
-        let module = test_module(&db, path.as_str());
+        let module = test_module(&mut db, path.as_str());
         let old_generation = db.module_graph_generation();
         let reader_db = db.clone();
         armed.store(true, Ordering::Release);
@@ -1159,7 +2069,7 @@ mod tests {
         let armed = Arc::new(AtomicBool::new(false));
         let mut db = module_write_test_db(barrier.clone(), armed.clone());
         let path = Utf8PathBuf::from("removed.html");
-        let module = test_module(&db, path.as_str());
+        let module = test_module(&mut db, path.as_str());
         db.insert_module(path.clone(), module);
         let old_generation = db.module_graph_generation();
         let reader_db = db.clone();
@@ -1198,9 +2108,9 @@ mod tests {
         let root = Utf8PathBuf::from("root/a.html");
         let nested = Utf8PathBuf::from("root/nested/b.html");
         let outside = Utf8PathBuf::from("other/c.html");
-        let root_module = test_module(&db, root.as_str());
-        let nested_module = test_module(&db, nested.as_str());
-        let outside_module = test_module(&db, outside.as_str());
+        let root_module = test_module(&mut db, root.as_str());
+        let nested_module = test_module(&mut db, nested.as_str());
+        let outside_module = test_module(&mut db, outside.as_str());
         db.insert_module(root.clone(), root_module);
         db.insert_module(nested.clone(), nested_module);
         db.insert_module(outside.clone(), outside_module);

@@ -1,5 +1,3 @@
-#![expect(clippy::disallowed_methods, reason = "This rule stores property syntax that can span multiple tokens.")]
-
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
@@ -8,8 +6,102 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent};
 use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
+
+declare_lint_rule! {
+    /// Disallow shorthand properties that override related longhand properties.
+    ///
+    /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```css,expect_diagnostic
+    /// a { padding-left: 10px; padding: 20px; }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// @keyframes fade {
+    ///   from { margin-left: 1px; margin: 0; }
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```css
+    /// a { padding: 10px; padding-left: 20px; }
+    /// ```
+    ///
+    /// ```css
+    /// a { transition-property: opacity; } a { transition: opacity 1s linear; }
+    /// ```
+    ///
+    /// ```css
+    /// body { font-size: var(--font-size); }
+    /// @supports (font: -apple-system-body) {
+    ///   body { font-size: -apple-system-body; }
+    /// }
+    /// ```
+    ///
+    pub NoShorthandPropertyOverrides {
+        version: "1.8.2",
+        name: "noShorthandPropertyOverrides",
+        language: "css",
+        recommended: true,
+        severity: Severity::Error,
+        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
+    }
+}
+
+pub struct NoDeclarationBlockShorthandPropertyOverridesState {
+    target_property: TokenText,
+    override_property: TokenText,
+    span: TextRange,
+}
+
+impl Rule for NoShorthandPropertyOverrides {
+    type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
+    type State = NoDeclarationBlockShorthandPropertyOverridesState;
+    type Signals = Option<Self::State>;
+    type Options = NoShorthandPropertyOverridesOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let query = ctx.query();
+
+        Some(NoDeclarationBlockShorthandPropertyOverridesState {
+            target_property: query.target_property.clone(),
+            override_property: query.override_property.clone(),
+            span: query.text_range(),
+        })
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.span,
+                markup! {
+                    "This shorthand property "<Emphasis>{state.target_property.text()}</Emphasis>" overrides the earlier "<Emphasis>{state.override_property.text()}</Emphasis>" declaration."
+                },
+            )
+            .note(markup! {
+                "Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly."
+            })
+            .note(markup! {
+                "Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit."
+            }),
+        )
+    }
+}
+
+#[derive(Clone)]
+pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
+    property_node: AnyCssDeclarationName,
+    target_property: TokenText,
+    override_property: TokenText,
+}
 
 fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
     if let Some(prop) = prop.strip_prefix(prefix) {
@@ -48,48 +140,14 @@ fn get_override_props(property: &str) -> Vec<&str> {
     merged
 }
 
-declare_lint_rule! {
-    /// Disallow shorthand properties that override related longhand properties.
-    ///
-    /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```css,expect_diagnostic
-    /// a { padding-left: 10px; padding: 20px; }
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```css
-    /// a { padding: 10px; padding-left: 20px; }
-    /// ```
-    ///
-    /// ```css
-    /// a { transition-property: opacity; } a { transition: opacity 1s linear; }
-    /// ```
-    ///
-    pub NoShorthandPropertyOverrides {
-        version: "1.8.2",
-        name: "noShorthandPropertyOverrides",
-        language: "css",
-        recommended: true,
-        severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides").same()],
-    }
-}
-
-#[derive(Default)]
 struct PriorProperty {
-    original: Box<str>,
+    original: TokenText,
     lowercase: Box<str>,
 }
 
 #[derive(Default)]
 struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
-    prior_props_in_block: Vec<PriorProperty>,
+    prior_props_in_lists: Vec<Vec<PriorProperty>>,
 }
 
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
@@ -100,56 +158,84 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         mut ctx: VisitorContext<Self::Language>,
     ) {
-        if let WalkEvent::Enter(node) = event {
-            match node.kind() {
-                CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
-                    self.prior_props_in_block.clear();
-                }
+        match event {
+            WalkEvent::Enter(node) => match node.kind() {
                 CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                    if let Some(prop_node) = CssGenericProperty::cast_ref(node)
-                        .and_then(|property_node| property_node.name().ok())
-                    {
-                        let prop = prop_node.to_trimmed_text();
-                        #[expect(clippy::disallowed_methods)]
-                        let prop_lowercase = prop.to_lowercase();
-
-                        let prop_prefix = vender_prefix(&prop_lowercase);
-                        let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, prop_prefix);
-                        let override_props = get_override_props(unprefixed_prop);
-
-                        self.prior_props_in_block.iter().for_each(|prior_prop| {
-                            let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
-                            let unprefixed_prior_prop =
-                                remove_vendor_prefix(&prior_prop.lowercase, prior_prop_prefix);
-
-                            if prop_prefix == prior_prop_prefix
-                                && override_props.binary_search(&unprefixed_prior_prop).is_ok()
-                            {
-                                ctx.match_query(
-                                    NoDeclarationBlockShorthandPropertyOverridesQuery {
-                                        property_node: prop_node.clone(),
-                                        override_property: prior_prop.original.clone(),
-                                    },
-                                );
-                            }
-                        });
-
-                        self.prior_props_in_block.push(PriorProperty {
-                            original: prop.into(),
-                            lowercase: prop_lowercase.into(),
-                        });
+                    if !is_declaration_in_list(node) {
+                        return;
                     }
+
+                    let Some(prior_props) = self.prior_props_in_lists.last_mut() else {
+                        return;
+                    };
+                    let Some((property_node, prop)) =
+                        CssGenericProperty::cast_ref(node).and_then(|property| {
+                            let property_node = property.name().ok()?;
+                            let prop = property_node.identifier_text()?;
+                            Some((property_node, prop))
+                        })
+                    else {
+                        return;
+                    };
+
+                    #[expect(clippy::disallowed_methods)]
+                    let prop_lowercase = prop.to_lowercase();
+
+                    let prop_prefix = vender_prefix(&prop_lowercase);
+                    let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, prop_prefix);
+                    let override_props = get_override_props(unprefixed_prop);
+
+                    for prior_prop in prior_props.iter() {
+                        let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
+                        let unprefixed_prior_prop =
+                            remove_vendor_prefix(&prior_prop.lowercase, prior_prop_prefix);
+
+                        if prop_prefix == prior_prop_prefix
+                            && override_props.binary_search(&unprefixed_prior_prop).is_ok()
+                        {
+                            ctx.match_query(NoDeclarationBlockShorthandPropertyOverridesQuery {
+                                property_node: property_node.clone(),
+                                target_property: prop.clone(),
+                                override_property: prior_prop.original.clone(),
+                            });
+                        }
+                    }
+
+                    prior_props.push(PriorProperty {
+                        original: prop,
+                        lowercase: prop_lowercase.into(),
+                    });
+                }
+
+                kind if is_declaration_list(kind) => {
+                    self.prior_props_in_lists.push(Vec::new());
                 }
                 _ => {}
+            },
+            WalkEvent::Leave(node) if is_declaration_list(node.kind()) => {
+                self.prior_props_in_lists.pop();
             }
+            WalkEvent::Leave(_) => {}
         }
     }
 }
 
-#[derive(Clone)]
-pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
-    property_node: AnyCssDeclarationName,
-    override_property: Box<str>,
+fn is_declaration_list(kind: CssSyntaxKind) -> bool {
+    matches!(
+        kind,
+        CssSyntaxKind::CSS_DECLARATION_LIST
+            | CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST
+            | CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
+            | CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST
+    )
+}
+
+fn is_declaration_in_list(node: &SyntaxNode<CssLanguage>) -> bool {
+    node.ancestors()
+        .skip(1)
+        .find(|ancestor| ancestor.kind() == CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON)
+        .and_then(|declaration| declaration.parent())
+        .is_some_and(|parent| is_declaration_list(parent.kind()))
 }
 
 impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
@@ -176,46 +262,5 @@ impl Queryable for NoDeclarationBlockShorthandPropertyOverridesQuery {
 
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.clone()
-    }
-}
-
-pub struct NoDeclarationBlockShorthandPropertyOverridesState {
-    target_property: Box<str>,
-    override_property: Box<str>,
-    span: TextRange,
-}
-
-impl Rule for NoShorthandPropertyOverrides {
-    type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
-    type State = NoDeclarationBlockShorthandPropertyOverridesState;
-    type Signals = Option<Self::State>;
-    type Options = NoShorthandPropertyOverridesOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let query = ctx.query();
-
-        Some(NoDeclarationBlockShorthandPropertyOverridesState {
-            target_property: query.property_node.to_trimmed_text().into(),
-            override_property: query.override_property.clone(),
-            span: query.text_range(),
-        })
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.span,
-                markup! {
-                    "This shorthand property "<Emphasis>{state.target_property}</Emphasis>" overrides the earlier "<Emphasis>{state.override_property}</Emphasis>" declaration."
-                },
-            )
-            .note(markup! {
-                "Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly."
-            })
-            .note(markup! {
-                "Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit."
-            }),
-        )
     }
 }

@@ -23,6 +23,7 @@ HtmlRoot {
         content: missing (required),
         r_fence_token: missing (required),
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -59,7 +60,8 @@ HtmlRoot {
     1: (empty)
     2: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@3..16
+  3: (empty)
+  4: HTML_ELEMENT_LIST@3..16
     0: HTML_ELEMENT@3..16
       0: HTML_OPENING_ELEMENT@3..10
         0: L_ANGLE@3..6 "<" [Newline("\n"), Newline("\n")] []
@@ -74,7 +76,7 @@ HtmlRoot {
         2: HTML_TAG_NAME@12..15
           0: DIV_KW@12..15 "div" [] []
         3: R_ANGLE@15..16 ">" [] []
-  4: EOF@16..17 "" [Newline("\n")] []
+  5: EOF@16..17 "" [Newline("\n")] []
 
 ```
 

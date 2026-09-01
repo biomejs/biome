@@ -1391,6 +1391,34 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "astro/missing-client-only-directive-value" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_astro_client_only_directive_value
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "astro/no-set-html-directive" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_astro_set_html_directive
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "barrel-files/avoid-barrel-files" => {
             if !options.include_inspired {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
@@ -1467,6 +1495,30 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "css/font-family-fallbacks" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.a11y.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_generic_font_names
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "css/no-duplicate-imports" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_duplicate_at_import_rules
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "css/no-duplicate-keyframe-selectors" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -1491,11 +1543,59 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "css/no-invalid-at-rule-placement" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_invalid_position_at_import_rule
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "css/no-invalid-at-rules" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_unknown_at_rules
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "css/no-invalid-named-grid-areas" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_invalid_grid_areas
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "css/no-invalid-properties" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_unknown_property
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "css/no-unmatchable-selectors" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_unmatchable_anb_selector
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -1512,6 +1612,22 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .use_baseline
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "css/use-layers" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_named_layer
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -2078,6 +2194,22 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .use_key_with_click_events
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "jsx-a11y/control-has-associated-label" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_control_label
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -4438,6 +4570,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .use_is_array
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "unicorn/no-invalid-file-input-accept" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_invalid_file_input_accept
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }

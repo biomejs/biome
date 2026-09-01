@@ -440,8 +440,9 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsParserOptions, parse_js_with_cache, parse_js_with_offset, parse_script};
+    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset, parse_script};
     use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
 
     use biome_rowan::TextSize;
 
@@ -532,5 +533,18 @@ mod tests {
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
         );
+    }
+
+    #[test]
+    fn comment_only_template_expression_is_an_error_outside_astro() {
+        let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+        });
+        let parse = parse("/* only a comment */", vue, JsParserOptions::default());
+
+        assert!(parse.has_errors(), "only Astro allows a comment-only body");
     }
 }

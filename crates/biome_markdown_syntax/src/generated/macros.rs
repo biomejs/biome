@@ -44,6 +44,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdFencedCodeBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_FRONTMATTER => {
+                    let $pattern = unsafe { $crate::MdFrontmatter::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_FRONTMATTER_CONTENT => {
+                    let $pattern = unsafe { $crate::MdFrontmatterContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_HARD_LINE => {
                     let $pattern = unsafe { $crate::MdHardLine::new_unchecked(node) };
                     $body

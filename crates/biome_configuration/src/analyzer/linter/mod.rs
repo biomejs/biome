@@ -48,7 +48,7 @@ pub struct LinterConfiguration {
 impl DeserializableValidator for LinterConfiguration {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: TextRange,
     ) -> bool {
@@ -99,17 +99,28 @@ impl schemars::JsonSchema for RuleDomains {
     }
 
     fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        let _names = generator.subschema_for::<RuleDomain>();
+        let domain_schema = <RuleDomain as schemars::JsonSchema>::json_schema(generator);
         let _values = generator.subschema_for::<RuleDomainValue>();
-        schemars::json_schema!({
+        let mut properties = schemars::json_schema!({});
+        for domain in domain_schema
+            .get("oneOf")
+            .and_then(|value| value.as_array())
+            .into_iter()
+            .flatten()
+            .filter_map(|schema| schema.get("const").and_then(|value| value.as_str()))
+        {
+            properties.insert(
+                domain.into(),
+                schemars::json_schema!({ "$ref": "#/$defs/RuleDomainValue" }).into(),
+            );
+        }
+
+        let mut schema = schemars::json_schema!({
             "type": "object",
-            "propertyNames": {
-                "$ref": "#/$defs/RuleDomain"
-            },
-            "additionalProperties": {
-                "$ref": "#/$defs/RuleDomainValue"
-            }
-        })
+            "additionalProperties": false
+        });
+        schema.insert("properties".into(), properties.into());
+        schema
     }
 }
 

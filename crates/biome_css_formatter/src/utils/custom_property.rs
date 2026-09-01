@@ -181,8 +181,7 @@ impl CustomPropertyContainer {
         let line_break_before_close = first.is_some()
             && close
                 .as_ref()
-                .ok()
-                .is_some_and(CssSyntaxToken::has_leading_newline);
+                .is_ok_and(CssSyntaxToken::has_leading_newline);
         let is_multiline = line_break_after_open
             || line_break_before_close
             || components

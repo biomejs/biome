@@ -127,6 +127,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_text_edit",
+ "biome_unicode_table",
  "camino",
  "either",
  "enumflags2",
@@ -136,6 +137,7 @@ dependencies = [
  "rustc-hash 2.1.3",
  "schemars",
  "serde",
+ "smallvec",
 ]
 
 [[package]]
@@ -503,7 +505,7 @@ name = "biome_deserialize_macros"
 version = "0.6.0"
 dependencies = [
  "biome_string_case",
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -548,7 +550,7 @@ dependencies = [
 name = "biome_diagnostics_macros"
 version = "0.5.7"
 dependencies = [
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -877,6 +879,9 @@ dependencies = [
  "biome_aria",
  "biome_aria_metadata",
  "biome_console",
+ "biome_css_parser",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -972,6 +977,7 @@ dependencies = [
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
+ "smallvec",
  "tests_macros",
  "tikv-jemallocator",
  "tracing",
@@ -1002,6 +1008,9 @@ dependencies = [
  "biome_aria_metadata",
  "biome_console",
  "biome_control_flow",
+ "biome_css_parser",
+ "biome_css_semantic",
+ "biome_css_syntax",
  "biome_db",
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -1143,11 +1152,17 @@ version = "0.0.1"
 dependencies = [
  "biome_analyze",
  "biome_diagnostics",
+ "biome_js_parser",
+ "biome_js_syntax",
+ "biome_js_transform",
+ "biome_languages",
  "biome_resolver",
+ "biome_rowan",
  "biome_text_size",
  "boa_engine",
  "camino",
  "rustc-hash 2.1.3",
+ "web-time",
 ]
 
 [[package]]
@@ -1185,6 +1200,7 @@ dependencies = [
  "enumflags2",
  "schemars",
  "serde",
+ "smallvec",
 ]
 
 [[package]]
@@ -1192,9 +1208,9 @@ name = "biome_js_transform"
 version = "0.5.7"
 dependencies = [
  "biome_analyze",
+ "biome_console",
  "biome_diagnostics",
  "biome_js_factory",
- "biome_js_formatter",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_languages",
@@ -1230,7 +1246,7 @@ dependencies = [
 name = "biome_js_type_info_macros"
 version = "0.0.1"
 dependencies = [
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -1372,6 +1388,7 @@ version = "0.1.0"
 dependencies = [
  "biome_console",
  "biome_db",
+ "biome_fs",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -1494,6 +1511,7 @@ dependencies = [
  "schemars",
  "serde",
  "similar-asserts",
+ "smallvec",
  "tests_macros",
 ]
 
@@ -1501,6 +1519,7 @@ dependencies = [
 name = "biome_markdown_parser"
 version = "0.0.1"
 dependencies = [
+ "biome_configuration",
  "biome_console",
  "biome_diagnostics",
  "biome_markdown_factory",
@@ -1541,7 +1560,7 @@ name = "biome_markup"
 version = "0.5.7"
 dependencies = [
  "biome_console",
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
 ]
@@ -1597,6 +1616,7 @@ dependencies = [
  "biome_json_value",
  "biome_languages",
  "biome_package",
+ "biome_parser",
  "biome_project_layout",
  "biome_resolver",
  "biome_rowan",
@@ -2235,6 +2255,7 @@ dependencies = [
  "futures-channel",
  "futures-concurrency",
  "futures-lite",
+ "getrandom 0.3.4",
  "hashbrown 0.16.1",
  "icu_normalizer 2.0.0",
  "indexmap",
@@ -2259,6 +2280,7 @@ dependencies = [
  "thin-vec",
  "thiserror 2.0.17",
  "time",
+ "web-time",
  "xsum",
 ]
 
@@ -2881,9 +2903,9 @@ dependencies = [
 
 [[package]]
 name = "defmt"
-version = "1.1.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6e524506490a1953d237cb87b1cfc1e46f88c18f10a22dfe0f507dc6bfc7f7f"
+checksum = "e2953bfe4f93bbd20cc71198842756f77d161884c99ebbabc41d80231ded88d1"
 dependencies = [
  "bitflags 1.3.2",
  "defmt-macros",
@@ -2891,12 +2913,11 @@ dependencies = [
 
 [[package]]
 name = "defmt-macros"
-version = "1.1.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0a27770e9c8f719a79d8b638281f4d828f77d8fd61e0bd94451b9b85e576a0b"
+checksum = "bad9c72e7ca2137e0dc3813245a0d282fd6daad32fd800af018306a9169b5fe8"
 dependencies = [
  "defmt-parser",
- "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -3215,7 +3236,7 @@ version = "0.10.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1657b4441c3403d9f7b3409e47575237dac27b1b5726df654a6ecbf92f0f7577"
 dependencies = [
- "spin 0.9.8",
+ "spin 0.9.9",
 ]
 
 [[package]]
@@ -3285,7 +3306,7 @@ dependencies = [
  "diatomic-waker",
  "futures-core",
  "pin-project-lite",
- "spin 0.10.0",
+ "spin 0.10.1",
 ]
 
 [[package]]
@@ -3420,21 +3441,21 @@ dependencies = [
  "cfg-if",
  "js-sys",
  "libc",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "wasm-bindgen",
 ]
 
 [[package]]
 name = "getrandom"
-version = "0.3.2"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73fea8450eea4bac3940448fb7ae50d91f034f941199fcd9d909a5a07aa455f0"
+checksum = "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd"
 dependencies = [
  "cfg-if",
  "js-sys",
  "libc",
  "r-efi 5.2.0",
- "wasi 0.14.2+wasi-0.2.4",
+ "wasip2",
  "wasm-bindgen",
 ]
 
@@ -3531,9 +3552,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.4.13"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f44da3a8150a6703ed5d34e164b875fd14c2cdab9af1252a9a1020bde2bdc54"
+checksum = "a9f37a958b41b3b19ee2707c06439c0e9e547e847223eb791ecb0cb821c65e27"
 dependencies = [
  "atomic-waker",
  "bytes",
@@ -4435,7 +4456,7 @@ checksum = "50b7e5b27aa02a74bac8c3f23f448f8d87ff11f92d3aac1a6ed369ee08cc56c1"
 dependencies = [
  "libc",
  "log",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "windows-sys 0.61.2",
 ]
 
@@ -4619,9 +4640,9 @@ checksum = "d211803b9b6b570f68772237e415a029d5a50c65d382910b879fb19d3271f94d"
 
 [[package]]
 name = "papaya"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "997ee03cd38c01469a7046643714f0ad28880bcb9e6679ff0666e24817ca19b7"
+checksum = "da2442474a9404698c42509b8967f437249dbc7b50493e83020333d3943ec0ae"
 dependencies = [
  "equivalent",
  "seize",
@@ -4895,25 +4916,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "proc-macro-error-attr2"
-version = "2.0.0"
+name = "proc-macro-error-attr3"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96de42df36bb9bba5542fe9f1a054b8cc87e172759a1868aa05c1f3acc89dfc5"
+checksum = "b0084e6206a967a2dad822180626b2f6b07a3b379325e8f1ec0438e33a469ba7"
 dependencies = [
  "proc-macro2",
  "quote",
 ]
 
 [[package]]
-name = "proc-macro-error2"
-version = "2.0.1"
+name = "proc-macro-error3"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11ec05c52be0a07b08061f7dd003e7d7092e0472bc731b4af7bb1ef876109802"
+checksum = "0cf066225f2373bc711684792b69bdeac0356019b007e721090c24d92d5d5a50"
 dependencies = [
- "proc-macro-error-attr2",
+ "proc-macro-error-attr3",
  "proc-macro2",
  "quote",
- "syn 2.0.106",
 ]
 
 [[package]]
@@ -5026,7 +5046,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fcb935c5bec503c2f0e306bdd3e58bb9029dcb14fa8d9ac76e3a5256ac0763e"
 dependencies = [
  "bytes",
- "getrandom 0.3.2",
+ "getrandom 0.3.4",
  "lru-slab",
  "rand 0.9.3",
  "ring",
@@ -5147,7 +5167,7 @@ version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99d9a13982dcf210057a8a78572b2217b667c3beacbf3a0d8b454f6f82837d38"
 dependencies = [
- "getrandom 0.3.2",
+ "getrandom 0.3.4",
 ]
 
 [[package]]
@@ -6002,18 +6022,18 @@ dependencies = [
 
 [[package]]
 name = "spin"
-version = "0.9.8"
+version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
+checksum = "3763264f6b73151db08c50ff20d7d8a0b8796e021cdea7ceedad07b80155fa0e"
 dependencies = [
  "lock_api",
 ]
 
 [[package]]
 name = "spin"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5fe4ccb98d9c292d56fec89a5e07da7fc4cf0dc11e156b41793132775d3e591"
+checksum = "023a211cb3138dbc438680b32560ad89f699977624c9f8dbb95a47d5b4c07dd3"
 
 [[package]]
 name = "stable_deref_trait"
@@ -6146,7 +6166,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d31c77bdf42a745371d260a26ca7163f1e0924b64afa0b688e61b5a9fa02f16"
 dependencies = [
  "fastrand",
- "getrandom 0.3.2",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
@@ -6178,7 +6198,7 @@ dependencies = [
  "biome_string_case",
  "case",
  "globwalk",
- "proc-macro-error2",
+ "proc-macro-error3",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -6267,6 +6287,7 @@ checksum = "743bd48c283afc0388f9b8827b976905fb217ad9e647fae3a379a9283c4def2c"
 dependencies = [
  "deranged",
  "itoa",
+ "js-sys",
  "libc",
  "num-conv",
  "num_threads",
@@ -6772,11 +6793,11 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "uuid"
-version = "1.18.1"
+version = "1.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f87b8aa10b915a06587d0dec516c282ff295b475d94abf425d62b57710070a2"
+checksum = "2cefc03fd367c0c6d4305de1b312cf00248c4114f4a0418ce6a6af769e3b0bd9"
 dependencies = [
- "getrandom 0.3.2",
+ "getrandom 0.4.2",
  "js-sys",
  "wasm-bindgen",
 ]
@@ -6832,15 +6853,6 @@ name = "wasi"
 version = "0.11.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
-
-[[package]]
-name = "wasi"
-version = "0.14.2+wasi-0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9683f9a5a998d873c0d21fcbe3c083009670149a8fab228644b8bd36b2c48cb3"
-dependencies = [
- "wit-bindgen-rt",
-]
 
 [[package]]
 name = "wasip2"
@@ -7493,15 +7505,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wit-bindgen-rt"
-version = "0.39.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f42320e61fe2cfd34354ecb597f86f413484a798ba44a8ca1165c58d42da6c1"
-dependencies = [
- "bitflags 2.9.3",
-]
-
-[[package]]
 name = "wit-bindgen-rust"
 version = "0.51.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7664,6 +7667,8 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
  "camino",
  "colored",
  "indicatif 0.18.4",

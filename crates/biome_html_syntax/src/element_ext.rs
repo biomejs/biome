@@ -3,10 +3,11 @@ use crate::HtmlSyntaxKind::{
     SCRIPT_KW, SOURCE_KW, STYLE_KW, TRACK_KW, WBR_KW,
 };
 use crate::{
-    AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
-    AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttributeList, HtmlElement,
-    HtmlEmbeddedContent, HtmlOpeningElement, HtmlProcessingInstruction, HtmlSelfClosingElement,
-    HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
+    AnyHtmlTextExpression, AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent,
+    HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement,
+    HtmlProcessingInstruction, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType,
+    inner_string_text,
 };
 use biome_aria::Attribute;
 use biome_parser::{TokenSet, token_set};
@@ -40,6 +41,7 @@ impl AnyHtmlElement {
     pub fn is_javascript_tag(&self) -> bool {
         match self {
             Self::AnyHtmlContent(_)
+            | Self::AstroFragment(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
             | Self::HtmlProcessingInstruction(_)
@@ -51,6 +53,7 @@ impl AnyHtmlElement {
     pub fn is_style_tag(&self) -> bool {
         match self {
             Self::AnyHtmlContent(_)
+            | Self::AstroFragment(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
             | Self::HtmlProcessingInstruction(_)
@@ -70,7 +73,10 @@ impl AnyHtmlElement {
                 element.find_attribute_by_name(name_to_lookup)
             }
             // Other variants don't have attributes
-            Self::AnyHtmlContent(_) | Self::HtmlBogusElement(_) | Self::HtmlCdataSection(_) => None,
+            Self::AnyHtmlContent(_)
+            | Self::AstroFragment(_)
+            | Self::HtmlBogusElement(_)
+            | Self::HtmlCdataSection(_) => None,
         }
     }
 
@@ -340,12 +346,37 @@ impl HtmlElement {
     }
 
     pub fn is_supported_script_tag(&self) -> bool {
-        self.get_script_type().is_some_and(ScriptType::is_supported)
+        self.get_script_type().is_some_and(ScriptType::is_supported) && !self.has_astro_is_raw()
     }
 
-    /// It's a style tag, and it doesn't contain `scss` as `lang`
+    /// Whether the content of a `<style>` should be handled as CSS.
+    ///
+    /// Excludes `lang="sass"`/`lang="scss"`, and Astro's `is:raw`, whose content
+    /// is emitted verbatim.
     pub fn is_supported_style_tag(&self) -> bool {
-        self.is_style_tag() && !self.is_sass_lang()
+        self.is_style_tag() && !self.is_sass_lang() && !self.has_astro_is_raw()
+    }
+
+    /// Whether the element carries Astro's `is:raw`, which tells Astro to emit
+    /// its children verbatim rather than process them as an embedded language.
+    pub fn has_astro_is_raw(&self) -> bool {
+        let Ok(opening) = self.opening_element() else {
+            return false;
+        };
+        opening.attributes().iter().any(|attribute| {
+            let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroIsDirective(
+                directive,
+            )) = attribute
+            else {
+                return false;
+            };
+            directive
+                .value()
+                .ok()
+                .and_then(|value| value.name().ok())
+                .and_then(|name| name.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "raw")
+        })
     }
 
     /// Returns the type of script for a `<script>` tag.
@@ -374,16 +405,16 @@ impl HtmlElement {
 
     pub fn is_style_tag(&self) -> bool {
         self.opening_element()
-            .and_then(|el| el.name())
             .ok()
+            .and_then(|el| el.name().ok())
             .and_then(|name| name.tag_name_kind())
             == Some(STYLE_KW)
     }
 
     pub fn is_script_tag(&self) -> bool {
         self.opening_element()
-            .and_then(|el| el.name())
             .ok()
+            .and_then(|el| el.name().ok())
             .and_then(|name| name.tag_name_kind())
             == Some(SCRIPT_KW)
     }
@@ -442,8 +473,8 @@ impl HtmlElement {
         self.is_style_tag() && self.find_attribute_by_name(attribute_name).is_some()
     }
 
-    pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
-        self.opening_element()?.name()
+    pub fn name(&self) -> Option<AnyHtmlTagName> {
+        self.opening_element().ok()?.name().ok()
     }
 }
 

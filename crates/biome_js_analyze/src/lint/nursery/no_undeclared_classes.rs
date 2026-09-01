@@ -230,6 +230,10 @@ fn extract_class_entries_from_jsx_impl(
             let expression = expr_attr.expression().ok()?.omit_parentheses();
             collect_class_names_from_expression(&expression, model, out);
         }
+        AnyJsxAttributeValue::JsTemplateExpression(template) => {
+            let expression = AnyJsExpression::JsTemplateExpression(template);
+            collect_class_names_from_expression(&expression, model, out);
+        }
         // JSX tags as attribute values cannot contain class names
         AnyJsxAttributeValue::AnyJsxTag(_) => return None,
     }
@@ -253,7 +257,7 @@ fn extract_class_entries_from_embedded(
     }
 
     let mut entries = Vec::new();
-    if let Ok(expression) = root.expression() {
+    if let Some(expression) = root.expression() {
         collect_class_names_from_expression(&expression.omit_parentheses(), model, &mut entries);
     }
     entries
@@ -272,7 +276,7 @@ fn run_without_semantic(
     }
 
     let mut entries = Vec::new();
-    if let Ok(expression) = root.expression() {
+    if let Some(expression) = root.expression() {
         collect_class_names_from_expression_no_semantic(
             &expression.omit_parentheses(),
             &mut entries,

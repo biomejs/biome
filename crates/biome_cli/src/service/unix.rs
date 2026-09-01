@@ -149,6 +149,10 @@ fn spawn_daemon(
         log_options.log_prefix_name.as_str()
     ));
 
+    cmd.arg(format!("--log-kind={}", log_options.log_kind));
+
+    cmd.arg(format!("--log-level={}", log_options.log_level));
+
     // Create a new session for the process and make it the leader, this will
     // ensures that the child process is fully detached from its parent and will
     // continue running in the background even after the parent process exits

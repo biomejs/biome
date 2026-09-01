@@ -852,6 +852,33 @@ mod tests {
     }
 
     #[test]
+    fn rewrites_metavariables_inside_quoted_strings() {
+        let query = compile_js_query(
+            r#"`"$value"` where {
+                $token = "my-old-css-variable",
+                $replacement = "my-new-css-variable",
+                $value <: r`(.*)(.*)-\\[--$token\\](.*)`($prefix, $class, $suffix) => `$prefix$class-[--$replacement]$suffix`
+            }"#,
+        );
+        let code = r#"const value = "bg-[--my-old-css-variable] text-sm";"#;
+        let expected = r#"const value = "bg-[--my-new-css-variable] text-sm";"#;
+
+        let results = [
+            query.execute(make_js_file(code)).expect("execute failed"),
+            query
+                .execute_optimized(make_js_file(code))
+                .expect("optimized failed"),
+        ];
+
+        for result in results {
+            let [GritQueryEffect::Rewrite(rewrite)] = result.effects.as_slice() else {
+                panic!("expected one rewrite effect, got {:?}", result.effects);
+            };
+            assert_eq!(rewrite.rewritten.content, expected);
+        }
+    }
+
+    #[test]
     fn execute_optimized_no_matches_when_pattern_absent() {
         let query = compile_js_query("`console.log($msg)`");
         let code = "const x = 42;";

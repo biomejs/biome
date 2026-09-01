@@ -59,6 +59,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
     ));
+    result.push(("nursery", "noAstroSetHtmlDirective", TypeId::of::<biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions>()));
     result.push((
         "suspicious",
         "noAsyncPromiseExecutor",
@@ -692,6 +693,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("correctness", "noInvalidDirectionInLinearGradient", TypeId::of::<biome_rule_options::no_invalid_direction_in_linear_gradient::NoInvalidDirectionInLinearGradientOptions>()));
     result.push((
+        "nursery",
+        "noInvalidFileInputAccept",
+        TypeId::of::<
+            biome_rule_options::no_invalid_file_input_accept::NoInvalidFileInputAcceptOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noInvalidGridAreas",
         TypeId::of::<biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions>(),
@@ -1231,6 +1239,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noUndeclaredClasses",
         TypeId::of::<biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions>(),
     ));
+    result.push(("nursery", "noUndeclaredCustomProperties", TypeId::of::<biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions>()));
     result.push(("correctness", "noUndeclaredDependencies", TypeId::of::<biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions>()));
     result.push((
         "suspicious",
@@ -1347,6 +1356,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noUnsafePlusOperands",
         TypeId::of::<biome_rule_options::no_unsafe_plus_operands::NoUnsafePlusOperandsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noUnsafeTypeAssertion",
+        TypeId::of::<biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions>(),
     ));
     result.push((
         "nursery",
@@ -1641,6 +1655,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useAsConstAssertion",
         TypeId::of::<biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions>(),
     ));
+    result.push(("nursery", "useAstroClientOnlyDirectiveValue", TypeId::of::<biome_rule_options::use_astro_client_only_directive_value::UseAstroClientOnlyDirectiveValueOptions>()));
     result.push((
         "style",
         "useAtIndex",
@@ -1736,6 +1751,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "useConst",
         TypeId::of::<biome_rule_options::use_const::UseConstOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useControlLabel",
+        TypeId::of::<biome_rule_options::use_control_label::UseControlLabelOptions>(),
     ));
     result.push((
         "complexity",
@@ -2064,6 +2084,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_named_capture_group::UseNamedCaptureGroupOptions>(),
     ));
     result.push((
+        "nursery",
+        "useNamedLayer",
+        TypeId::of::<biome_rule_options::use_named_layer::UseNamedLayerOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useNamespaceKeyword",
         TypeId::of::<biome_rule_options::use_namespace_keyword::UseNamespaceKeywordOptions>(),
@@ -2231,6 +2256,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useSingleJsDocAsterisk",
         TypeId::of::<biome_rule_options::use_single_js_doc_asterisk::UseSingleJsDocAsteriskOptions>(
         ),
+    ));
+    result.push((
+        "nursery",
+        "useSingleTopLevelHeading",
+        TypeId::of::<
+            biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOptions,
+        >(),
     ));
     result.push((
         "style",

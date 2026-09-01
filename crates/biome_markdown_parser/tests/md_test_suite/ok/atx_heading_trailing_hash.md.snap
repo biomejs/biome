@@ -19,6 +19,7 @@ expression: snapshot
 ```
 MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -81,7 +82,7 @@ MdRoot {
             },
             after: MdHashList [
                 MdHash {
-                    hash_token: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] [],
+                    hash_token: HASH@22..26 "#" [Whitespace("   ")] [],
                 },
             ],
         },
@@ -108,7 +109,8 @@ MdRoot {
 ```
 0: MD_ROOT@0..32
   0: (empty)
-  1: MD_BLOCK_LIST@0..32
+  1: (empty)
+  2: MD_BLOCK_LIST@0..32
     0: MD_HEADER@0..6
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -148,7 +150,7 @@ MdRoot {
             0: MD_TEXTUAL_LITERAL@16..22 "   foo" [] []
       3: MD_HASH_LIST@22..26
         0: MD_HASH@22..26
-          0: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] []
+          0: HASH@22..26 "#" [Whitespace("   ")] []
     5: MD_NEWLINE@26..27
       0: NEWLINE@26..27 "\n" [] []
     6: MD_PARAGRAPH@27..32
@@ -157,6 +159,6 @@ MdRoot {
           0: MD_TEXTUAL_LITERAL@27..31 "#foo" [] []
         1: MD_TEXTUAL@31..32
           0: MD_TEXTUAL_LITERAL@31..32 "\n" [] []
-  2: EOF@32..32 "" [] []
+  3: EOF@32..32 "" [] []
 
 ```

@@ -1,0 +1,97 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+&anchor - sequence entry
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [
+                    YamlAnchorProperty {
+                        value_token: ANCHOR_PROPERTY_LITERAL@0..8 "&anchor" [] [Whitespace(" ")],
+                    },
+                ],
+                content: YamlBlockSequence {
+                    sequence_start_token: SEQUENCE_START@8..8 "" [] [],
+                    entries: YamlBlockSequenceEntryList [
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@8..10 "-" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@10..10 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@10..24 "sequence entry" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@24..24 "" [] [],
+                            },
+                        },
+                    ],
+                    sequence_end_token: SEQUENCE_END@24..24 "" [] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..25
+  0: YAML_DOCUMENT_LIST@0..24
+    0: YAML_DOCUMENT@0..24
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..24
+        0: YAML_PROPERTY_LIST@0..8
+          0: YAML_ANCHOR_PROPERTY@0..8
+            0: ANCHOR_PROPERTY_LITERAL@0..8 "&anchor" [] [Whitespace(" ")]
+        1: YAML_BLOCK_SEQUENCE@8..24
+          0: SEQUENCE_START@8..8 "" [] []
+          1: YAML_BLOCK_SEQUENCE_ENTRY_LIST@8..24
+            0: YAML_BLOCK_SEQUENCE_ENTRY@8..24
+              0: DASH@8..10 "-" [] [Whitespace(" ")]
+              1: YAML_FLOW_IN_BLOCK_NODE@10..24
+                0: FLOW_START@10..10 "" [] []
+                1: YAML_FLOW_YAML_NODE@10..24
+                  0: YAML_PROPERTY_LIST@10..10
+                  1: YAML_PLAIN_SCALAR@10..24
+                    0: PLAIN_LITERAL@10..24 "sequence entry" [] []
+                2: FLOW_END@24..24 "" [] []
+          2: SEQUENCE_END@24..24 "" [] []
+      4: (empty)
+  1: EOF@24..25 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+anchor_before_sequence_on_same_line.yaml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block collections must start on a new line after node properties.
+  
+  > 1 │ &anchor - sequence entry
+      │ ^^^^^^^
+    2 │ 
+  
+  i Move the sequence or mapping to the line after the properties.
+  
+```
