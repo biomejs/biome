@@ -8,9 +8,12 @@
 //!
 //! A classification state identifies the module that owns a raw reference, the
 //! value or instance side used for member lookup, and the unconsumed member
-//! path. Named-member traversal examines only members declared directly on the
-//! current type. A member available only from a base type is therefore
-//! indeterminate. A pending member path may cross a non-generic concrete class
+//! path. Raw named-member traversal examines only members declared directly on
+//! the current type. A member available only from a base type is therefore
+//! indeterminate. Generic call results resolve the selected member after
+//! replacing unresolved call-derived type arguments with `unknown`. Concrete
+//! return-type arguments remain intact, and call arguments are not resolved. A
+//! pending member path may cross a non-generic concrete class
 //! created by `new` without inspecting its constructor arguments.
 //! Function-return classification has one narrower inheritance case: an
 //! interface with no call signature may follow its single base interface.
@@ -18,7 +21,10 @@
 //! expression forms, accessors, ambiguous exports, cycles, and an exhausted
 //! work limit are indeterminate.
 
-use super::{ImportResolution, ResolutionCtx, find_value_member_type_on_demand};
+use super::{
+    ImportResolution, ResolutionCtx, find_named_value_member_type_on_demand,
+    find_value_member_type_on_demand, resolve_local_type_on_demand,
+};
 use crate::db::queries::{
     function_returns_promise, is_array_of_promise_type, is_promise_type, resolved_export_origin,
 };
@@ -112,6 +118,20 @@ enum Projection {
     AwaitedArrayFunctionReturn,
 }
 
+impl Projection {
+    fn classify_async_function(self) -> Option<PromiseClassification> {
+        match self {
+            Self::FunctionReturn => Some(PromiseClassification::ReturnsPromise),
+            Self::ArrayFunctionReturn => Some(PromiseClassification::DoesNotReturnPromise),
+            Self::AwaitedArrayFunctionReturn
+            | Self::Promise
+            | Self::PromiseTarget
+            | Self::ArrayPromise
+            | Self::AwaitedArrayPromise => None,
+        }
+    }
+}
+
 /// A location in the raw type graph that has not yet been classified.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum ClassificationTarget {
@@ -141,6 +161,50 @@ struct ClassificationState {
     mode: MemberLookupMode,
     members: Box<[Text]>,
     projection: Projection,
+    members_are_call_result: CallResultMembers,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+enum CallResultMembers {
+    None,
+    Callee {
+        result_member_count: usize,
+    },
+    Return {
+        type_parameters: Box<[TypeReference]>,
+    },
+}
+
+impl CallResultMembers {
+    fn callee_is_resolved(&self, member_count: usize) -> bool {
+        matches!(
+            self,
+            Self::Callee {
+                result_member_count
+            } if *result_member_count == member_count
+        )
+    }
+}
+
+fn member_lookup_may_be_partial<'db>(db: &'db dyn ModuleDb, mut ty: InferredTypeData<'db>) -> bool {
+    let mut seen = FxHashSet::default();
+    loop {
+        ty = resolve_local_type_on_demand(db, ty);
+        if !seen.insert(ty) {
+            return true;
+        }
+        if matches!(
+            ty,
+            InferredTypeData::Union(_) | InferredTypeData::MergedReference(_)
+        ) {
+            return true;
+        }
+        if let InferredTypeData::InstanceOf(instance) = ty {
+            ty = instance.ty(db);
+        } else {
+            return false;
+        }
+    }
 }
 
 /// Classifies a raw expression's Promise shape without inferring all module tables.
@@ -195,6 +259,7 @@ fn classify_expression(
         mode: MemberLookupMode::Value,
         members: Box::default(),
         projection,
+        members_are_call_result: CallResultMembers::None,
     };
     let mut seen = FxHashSet::default();
 
@@ -304,6 +369,101 @@ fn classify_expression(
                     let ModuleInfoKind::Js(js_info) = state.module.kind(db) else {
                         return Indeterminate;
                     };
+                    if let CallResultMembers::Return { type_parameters } =
+                        &state.members_are_call_result
+                        && !type_parameters.is_empty()
+                        && !qualifier.type_parameters.is_empty()
+                        && !state.members.is_empty()
+                        && matches!(
+                            state.projection,
+                            Projection::FunctionReturn
+                                | Projection::ArrayFunctionReturn
+                                | Projection::AwaitedArrayFunctionReturn
+                        )
+                    {
+                        let mut ctx = ResolutionCtx::new(
+                            db,
+                            state.module,
+                            &js_info,
+                            ImportResolution::on_demand(),
+                        );
+                        let type_parameters: Box<[_]> = type_parameters
+                            .iter()
+                            .map(|parameter| ctx.resolve(parameter))
+                            .collect();
+                        let mut qualifier = (*qualifier).clone();
+                        qualifier.type_parameters = qualifier
+                            .type_parameters
+                            .iter()
+                            .map(|parameter| {
+                                let resolved = ctx.resolve(parameter);
+                                let is_call_type_parameter = type_parameters.contains(&resolved)
+                                    || matches!(resolved, InferredTypeData::Unknown)
+                                    || matches!(
+                                        resolved,
+                                        InferredTypeData::InstanceOf(instance)
+                                            if instance.type_parameters(db).is_empty()
+                                                && (type_parameters.contains(&instance.ty(db))
+                                                    || matches!(
+                                                        instance.ty(db),
+                                                        InferredTypeData::Unknown
+                                                    ))
+                                    );
+                                if is_call_type_parameter {
+                                    TypeReference::unknown()
+                                } else {
+                                    parameter.clone()
+                                }
+                            })
+                            .collect();
+                        let mut ty = ctx.resolve_qualifier(&qualifier);
+                        for member in &state.members {
+                            if member_lookup_may_be_partial(db, ty) {
+                                return Indeterminate;
+                            }
+                            let Some(member_ty) =
+                                find_named_value_member_type_on_demand(db, ty, member.text())
+                            else {
+                                return Indeterminate;
+                            };
+                            ty = member_ty;
+                        }
+                        if let InferredTypeData::GlobalType(id) = ty {
+                            ty = global_types(db).get(id);
+                        }
+                        let Some(function) = ty.callable_function(db) else {
+                            return Indeterminate;
+                        };
+                        if function.is_async(db)
+                            && let Some(classification) = state.projection.classify_async_function()
+                        {
+                            return classification;
+                        }
+                        let ReturnType::Type(return_ty) = function.return_type(db) else {
+                            return DoesNotReturnPromise;
+                        };
+                        let result = match state.projection {
+                            Projection::FunctionReturn => is_promise_type(db, *return_ty),
+                            Projection::ArrayFunctionReturn => {
+                                is_array_of_promise_type(db, *return_ty)
+                            }
+                            Projection::AwaitedArrayFunctionReturn => {
+                                let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
+                                    return Indeterminate;
+                                };
+                                is_array_of_promise_type(db, awaited)
+                            }
+                            Projection::Promise
+                            | Projection::PromiseTarget
+                            | Projection::ArrayPromise
+                            | Projection::AwaitedArrayPromise => return Indeterminate,
+                        };
+                        return match result {
+                            Some(true) => ReturnsPromise,
+                            Some(false) => DoesNotReturnPromise,
+                            None => Indeterminate,
+                        };
+                    }
                     let mut scope = js_info.semantic_model.scope_from_id(qualifier.scope_id);
 
                     loop {
@@ -355,6 +515,7 @@ fn classify_expression(
                                     mode,
                                     members: members.clone(),
                                     projection: state.projection,
+                                    members_are_call_result: state.members_are_call_result,
                                 };
                             }
                             let binding_range = binding.syntax().text_trimmed_range();
@@ -368,6 +529,7 @@ fn classify_expression(
                                 mode,
                                 members: members.clone(),
                                 projection: state.projection,
+                                members_are_call_result: state.members_are_call_result,
                             };
                         }
                         if let Some(parent) = scope.parent() {
@@ -473,6 +635,7 @@ fn classify_expression(
                     mode: state.mode,
                     members: state.members,
                     projection: state.projection,
+                    members_are_call_result: state.members_are_call_result,
                 },
             },
             ClassificationTarget::Local(type_id) => {
@@ -505,7 +668,32 @@ fn classify_expression(
                 match raw {
                     RawTypeData::Function(function) => {
                         if !state.members.is_empty() {
-                            return Indeterminate;
+                            if !state
+                                .members_are_call_result
+                                .callee_is_resolved(state.members.len())
+                                || !matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                )
+                            {
+                                return Indeterminate;
+                            }
+                            let Some(return_ty) = function.return_type.as_type() else {
+                                return DoesNotReturnPromise;
+                            };
+                            state = ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(return_ty.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: state.members,
+                                projection: state.projection,
+                                members_are_call_result: CallResultMembers::Return {
+                                    type_parameters: function.type_parameters.clone(),
+                                },
+                            };
+                            continue;
                         }
                         if matches!(
                             state.projection,
@@ -516,16 +704,10 @@ fn classify_expression(
                         ) {
                             return DoesNotReturnPromise;
                         }
-                        if function.is_async {
-                            match state.projection {
-                                Projection::FunctionReturn => return ReturnsPromise,
-                                Projection::ArrayFunctionReturn => return DoesNotReturnPromise,
-                                Projection::AwaitedArrayFunctionReturn => {}
-                                Projection::Promise
-                                | Projection::PromiseTarget
-                                | Projection::ArrayPromise
-                                | Projection::AwaitedArrayPromise => unreachable!(),
-                            };
+                        if function.is_async
+                            && let Some(classification) = state.projection.classify_async_function()
+                        {
+                            return classification;
                         }
                         let Some(return_ty) = function.return_type.as_type() else {
                             return DoesNotReturnPromise;
@@ -556,6 +738,7 @@ fn classify_expression(
                                 mode: MemberLookupMode::Value,
                                 members: Box::default(),
                                 projection,
+                                members_are_call_result: CallResultMembers::None,
                             }
                         } else {
                             let mut ctx = ResolutionCtx::new(
@@ -639,6 +822,7 @@ fn classify_expression(
                                     .chain(state.members.iter().cloned())
                                     .collect(),
                                 projection: state.projection,
+                                members_are_call_result: state.members_are_call_result,
                             }
                         }
                         TypeofExpression::This(_)
@@ -652,6 +836,7 @@ fn classify_expression(
                             mode: MemberLookupMode::Instance,
                             members: state.members,
                             projection: state.projection,
+                            members_are_call_result: state.members_are_call_result,
                         },
                         TypeofExpression::Await(_)
                             if matches!(state.projection, Projection::Promise) =>
@@ -672,6 +857,28 @@ fn classify_expression(
                                 mode: MemberLookupMode::Value,
                                 members: Box::default(),
                                 projection: Projection::AwaitedArrayPromise,
+                                members_are_call_result: state.members_are_call_result,
+                            }
+                        }
+                        TypeofExpression::Call(expression)
+                            if !state.members.is_empty()
+                                && matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                ) =>
+                        {
+                            let result_member_count = state.members.len();
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(expression.callee.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: state.members,
+                                projection: state.projection,
+                                members_are_call_result: CallResultMembers::Callee {
+                                    result_member_count,
+                                },
                             }
                         }
                         TypeofExpression::Call(expression)
@@ -699,6 +906,7 @@ fn classify_expression(
                                     | Projection::ArrayFunctionReturn
                                     | Projection::AwaitedArrayFunctionReturn => unreachable!(),
                                 },
+                                members_are_call_result: CallResultMembers::None,
                             }
                         }
                         TypeofExpression::New(expression)
@@ -713,6 +921,7 @@ fn classify_expression(
                                 mode: MemberLookupMode::Constructed { remaining: 0 },
                                 members: state.members,
                                 projection: state.projection,
+                                members_are_call_result: state.members_are_call_result,
                             }
                         }
                         TypeofExpression::Addition(_)
@@ -757,6 +966,7 @@ fn classify_expression(
                             mode: MemberLookupMode::Instance,
                             members: state.members,
                             projection: state.projection,
+                            members_are_call_result: state.members_are_call_result,
                         },
                         Projection::Promise if state.members.is_empty() => ClassificationState {
                             module: state.module,
@@ -764,6 +974,7 @@ fn classify_expression(
                             mode: MemberLookupMode::Instance,
                             members: Box::default(),
                             projection: Projection::PromiseTarget,
+                            members_are_call_result: state.members_are_call_result,
                         },
                         Projection::Promise => ClassificationState {
                             module: state.module,
@@ -771,6 +982,7 @@ fn classify_expression(
                             mode: MemberLookupMode::Instance,
                             members: state.members,
                             projection: Projection::Promise,
+                            members_are_call_result: state.members_are_call_result,
                         },
                         Projection::PromiseTarget => return DoesNotReturnPromise,
                         Projection::ArrayPromise if state.members.is_empty() => {
@@ -795,6 +1007,7 @@ fn classify_expression(
                             mode: MemberLookupMode::Instance,
                             members: state.members,
                             projection: state.projection,
+                            members_are_call_result: state.members_are_call_result,
                         },
                         Projection::AwaitedArrayPromise if state.members.is_empty() => {
                             let mut ctx = ResolutionCtx::new(
@@ -819,6 +1032,7 @@ fn classify_expression(
                             mode: MemberLookupMode::Instance,
                             members: state.members,
                             projection: state.projection,
+                            members_are_call_result: state.members_are_call_result,
                         },
                     },
                     RawTypeData::Class(class) => {
@@ -846,19 +1060,23 @@ fn classify_expression(
                             mode: state.mode.after_member(),
                             members: remaining.into(),
                             projection: state.projection,
+                            members_are_call_result: state.members_are_call_result,
                         }
                     }
                     RawTypeData::Object(object) => {
                         if matches!(state.projection, Projection::PromiseTarget) {
                             return DoesNotReturnPromise;
                         }
-                        if state.members.is_empty()
-                            && matches!(
-                                state.projection,
-                                Projection::FunctionReturn
-                                    | Projection::ArrayFunctionReturn
-                                    | Projection::AwaitedArrayFunctionReturn
-                            )
+                        if state
+                            .members_are_call_result
+                            .callee_is_resolved(state.members.len())
+                            || (state.members.is_empty()
+                                && matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                ))
                         {
                             match sole_call_signature(&object.members) {
                                 Ok(Some(call_signature)) => ClassificationState {
@@ -867,8 +1085,9 @@ fn classify_expression(
                                         call_signature.ty.clone(),
                                     ),
                                     mode: MemberLookupMode::Value,
-                                    members: Box::default(),
+                                    members: state.members,
                                     projection: state.projection,
+                                    members_are_call_result: state.members_are_call_result,
                                 },
                                 Ok(None) => return DoesNotReturnPromise,
                                 Err(()) => return Indeterminate,
@@ -889,6 +1108,7 @@ fn classify_expression(
                                 mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
+                                members_are_call_result: state.members_are_call_result,
                             }
                         }
                     }
@@ -909,6 +1129,7 @@ fn classify_expression(
                                 mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
+                                members_are_call_result: state.members_are_call_result,
                             }
                         }
                         Literal::BigInt(_)
@@ -977,13 +1198,16 @@ fn classify_expression(
                         };
                     }
                     RawTypeData::Interface(interface) => {
-                        if state.members.is_empty()
-                            && matches!(
-                                state.projection,
-                                Projection::FunctionReturn
-                                    | Projection::ArrayFunctionReturn
-                                    | Projection::AwaitedArrayFunctionReturn
-                            )
+                        if state
+                            .members_are_call_result
+                            .callee_is_resolved(state.members.len())
+                            || (state.members.is_empty()
+                                && matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                ))
                         {
                             match sole_call_signature(&interface.members) {
                                 Ok(Some(call_signature)) => ClassificationState {
@@ -992,16 +1216,18 @@ fn classify_expression(
                                         call_signature.ty.clone(),
                                     ),
                                     mode: MemberLookupMode::Value,
-                                    members: Box::default(),
+                                    members: state.members,
                                     projection: state.projection,
+                                    members_are_call_result: state.members_are_call_result,
                                 },
                                 Ok(None) => match interface.extends.as_ref() {
                                     [extends] => ClassificationState {
                                         module: state.module,
                                         target: ClassificationTarget::Reference(extends.clone()),
                                         mode: state.mode,
-                                        members: Box::default(),
+                                        members: state.members,
                                         projection: state.projection,
+                                        members_are_call_result: state.members_are_call_result,
                                     },
                                     [] => return DoesNotReturnPromise,
                                     [_, ..] => return Indeterminate,
@@ -1025,6 +1251,7 @@ fn classify_expression(
                                 mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
+                                members_are_call_result: state.members_are_call_result,
                             }
                         }
                     }
@@ -1061,6 +1288,7 @@ fn classify_expression(
                     mode,
                     members,
                     projection: state.projection,
+                    members_are_call_result: state.members_are_call_result,
                 }
             }
             ClassificationTarget::Export(name) => {
@@ -1091,6 +1319,7 @@ fn classify_expression(
                             mode: state.mode,
                             members: state.members,
                             projection: state.projection,
+                            members_are_call_result: state.members_are_call_result,
                         }
                     }
                     JsOwnExport::Type(resolved) => ClassificationState {
@@ -1101,6 +1330,7 @@ fn classify_expression(
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,
+                        members_are_call_result: state.members_are_call_result,
                     },
                     JsOwnExport::Namespace(reexport) => ClassificationState {
                         module,
@@ -1111,6 +1341,7 @@ fn classify_expression(
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,
+                        members_are_call_result: state.members_are_call_result,
                     },
                 }
             }

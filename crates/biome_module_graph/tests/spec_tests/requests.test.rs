@@ -42,6 +42,30 @@ fn expression_range_by_source(
         .unwrap_or_else(|| panic!("{expected} expression must exist"))
 }
 
+fn unique_expression_range_by_source(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    source: &str,
+    expected: &str,
+) -> TextRange {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let mut matches = js_info
+        .raw_expressions
+        .keys()
+        .filter(|range| source_snippet(source, **range) == expected)
+        .copied();
+    let range = matches
+        .next()
+        .unwrap_or_else(|| panic!("{expected} expression must exist"));
+    assert!(
+        matches.next().is_none(),
+        "{expected} expression must be unique"
+    );
+    range
+}
+
 #[test]
 fn normalized_expression_request_keeps_lookup_query_boundary() {
     let source = "const value = 1; value;";
@@ -347,6 +371,321 @@ fn classification_requests_preserve_conclusive_and_indeterminate_results() {
         ),
         TypeInferenceClassification::Indeterminate
     );
+}
+
+#[test]
+fn promise_classification_follows_members_of_generic_call_results() {
+    const DECLARATION_SOURCE: &str = r#"
+        interface EmptyAssertion {}
+        declare const computed: "computed";
+
+        interface Matchers<T, U> {
+            [name: string]: unknown;
+            [computed]: () => Promise<void>;
+            anything: any;
+            callback: T;
+            get getterTask(): () => Promise<void>;
+            task: (() => Promise<void>) | (() => void);
+            toBeDefined(): void;
+            value(): T;
+            fixed(): U;
+        }
+
+        export interface Assertion<T, U> extends EmptyAssertion, Matchers<T, U> {}
+
+        export interface ExpectStatic {
+            <T>(value: T): Assertion<T, Promise<void>>;
+        }
+
+        export interface Api {
+            expect: ExpectStatic;
+        }
+
+        export namespace Types {
+            export interface Assertion<T, U> extends EmptyAssertion, Matchers<T, U> {}
+        }
+
+        export interface QualifiedExpectStatic {
+            <T>(value: T): Types.Assertion<T, Promise<void>>;
+        }
+
+        export class AsyncAssertion<T> {
+            async task(): void {}
+        }
+
+        export interface AsyncExpectStatic {
+            <T>(value: T): AsyncAssertion<T>;
+        }
+
+        export type Maybe<T> = { fixed(): Promise<void> } | {};
+
+        export interface MaybeExpectStatic {
+            <T>(value: T): Maybe<T>;
+        }
+
+        export declare const assertion: Assertion<string, Promise<void>>;
+        export declare const api: Api;
+        export declare const asyncExpect: AsyncExpectStatic;
+        export declare const expect: ExpectStatic;
+        export declare const maybeExpect: MaybeExpectStatic;
+        export declare const qualifiedExpect: QualifiedExpectStatic;
+    "#;
+    const SOURCE: &str = r#"
+        import { api, assertion, asyncExpect, expect, maybeExpect, qualifiedExpect } from "./expect.ts";
+
+        declare function load(): Promise<unknown>;
+
+        const targetResult = await load();
+        expect(targetResult).toBeDefined();
+        const result = await load();
+        expect(result).value();
+        expect(result).fixed();
+        asyncExpect(result).task();
+        assertion.toBeDefined();
+        qualifiedExpect(result).fixed();
+        expect(load).callback();
+        expect(result).anything();
+        expect(result).task();
+        expect(result).computed();
+        expect(result).getterTask();
+        expect(result).indexedTask();
+        api.expect(result).fixed();
+        maybeExpect(result).fixed();
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/expect.ts".into(), DECLARATION_SOURCE);
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/expect.ts", "/src/index.ts"], true);
+    let declaration_module = db
+        .module_for_path(Utf8Path::new("/src/expect.ts"))
+        .expect("declaration module must exist");
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(targetResult).toBeDefined()");
+    let result = unique_expression_range_by_source(&db, module, SOURCE, "targetResult");
+    let generic_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(result).value()");
+    let fixed_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(result).fixed()");
+    let async_expression =
+        expression_range_by_source(&db, module, SOURCE, "asyncExpect(result).task()");
+    let direct_expression =
+        expression_range_by_source(&db, module, SOURCE, "assertion.toBeDefined()");
+    let qualified_expression =
+        expression_range_by_source(&db, module, SOURCE, "qualifiedExpect(result).fixed()");
+    let callback_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(load).callback()");
+    let any_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(result).anything()");
+    let union_expression = expression_range_by_source(&db, module, SOURCE, "expect(result).task()");
+    let computed_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(result).computed()");
+    let getter_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(result).getterTask()");
+    let index_expression =
+        expression_range_by_source(&db, module, SOURCE, "expect(result).indexedTask()");
+    let member_callee_expression =
+        expression_range_by_source(&db, module, SOURCE, "api.expect(result).fixed()");
+    let partial_union_expression =
+        expression_range_by_source(&db, module, SOURCE, "maybeExpect(result).fixed()");
+    let result_input = ExpressionTypeInput::new(&db, module, result);
+    let caller = TypeInferenceCaller::new("test", "genericCallResultMember");
+
+    db.clear_salsa_events();
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::NoMatch);
+    }
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, generic_expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, generic_expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+    }
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, fixed_expression),
+        ),
+        TypeInferenceClassification::Match
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, fixed_expression),
+        ),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, async_expression),
+        ),
+        TypeInferenceClassification::Match
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, async_expression),
+        ),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, member_callee_expression),
+        ),
+        TypeInferenceClassification::Match
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, member_callee_expression),
+        ),
+        TypeInferenceClassification::NoMatch
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, qualified_expression),
+        ),
+        TypeInferenceClassification::Match
+    );
+    assert_eq!(
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, qualified_expression),
+        ),
+        TypeInferenceClassification::NoMatch
+    );
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, direct_expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, direct_expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+    }
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, callback_expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, callback_expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+    }
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, any_expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, any_expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+    }
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, union_expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, union_expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+    }
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, partial_union_expression),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, partial_union_expression),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+    }
+    for (name, expression) in [
+        ("computed", computed_expression),
+        ("getter", getter_expression),
+        ("index", index_expression),
+    ] {
+        for classification in [
+            execute_type_inference_request(
+                &db,
+                caller,
+                PromiseClassificationRequest::new(module, expression),
+            ),
+            execute_type_inference_request(
+                &db,
+                caller,
+                ArrayOfPromisesClassificationRequest::new(module, expression),
+            ),
+        ] {
+            assert_eq!(
+                classification,
+                TypeInferenceClassification::Indeterminate,
+                "{name} member must remain indeterminate"
+            );
+        }
+    }
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, result_input, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, declaration_module, &events);
 }
 
 #[test]
