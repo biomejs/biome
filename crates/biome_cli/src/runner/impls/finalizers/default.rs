@@ -63,6 +63,7 @@ impl Finalizer for DefaultFinalizer {
         let skipped = summary.skipped;
         let processed = summary.changed + summary.unchanged;
         let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
+        let should_exit_on_infos = summary.infos > 0 && cli_options.error_on_infos;
         let diagnostics_payload = DiagnosticsPayload {
             diagnostic_level: cli_options.diagnostic_level,
             diagnostics,
@@ -139,13 +140,19 @@ impl Finalizer for DefaultFinalizer {
                 execution.as_diagnostic_category(),
                 paths,
             ))
-        } else if errors > 0 || should_exit_on_warnings {
+        } else if errors > 0 || should_exit_on_warnings || should_exit_on_infos {
             let category = execution.as_diagnostic_category();
             if should_exit_on_warnings {
                 if execution.is_safe_fixes_enabled() {
                     Err(CliDiagnostic::apply_warnings(category))
                 } else {
                     Err(CliDiagnostic::check_warnings(category))
+                }
+            } else if should_exit_on_infos && errors == 0 {
+                if execution.is_safe_fixes_enabled() {
+                    Err(CliDiagnostic::apply_infos(category))
+                } else {
+                    Err(CliDiagnostic::check_infos(category))
                 }
             } else if execution.is_safe_fixes_enabled() {
                 Err(CliDiagnostic::apply_error(category))

@@ -416,6 +416,19 @@ impl CliDiagnostic {
         })
     }
 
+    /// Emitted when information diagnostics were emitted while running `check` command
+    pub fn check_infos(category: &'static Category) -> Self {
+        Self::CheckError(CheckError {
+            category,
+            message: MessageAndDescription::from(
+                markup! {
+                    "Some "<Emphasis>"information diagnostics"</Emphasis>" were emitted while "<Emphasis>"running checks"</Emphasis>"."
+                }
+                .to_owned(),
+            ),
+        })
+    }
+
     /// Emitted when errors were emitted while apply code fixes
     pub fn apply_error(category: &'static Category) -> Self {
         Self::CheckError(CheckError {
@@ -435,6 +448,19 @@ impl CliDiagnostic {
             message: MessageAndDescription::from(
                 markup! {
                     "Some "<Emphasis>"warnings"</Emphasis>" were emitted while "<Emphasis>"running checks"</Emphasis>"."
+                }
+                .to_owned(),
+            ),
+        })
+    }
+
+    /// Emitted when information diagnostics were emitted while applying code fixes
+    pub fn apply_infos(category: &'static Category) -> Self {
+        Self::CheckError(CheckError {
+            category,
+            message: MessageAndDescription::from(
+                markup! {
+                    "Some "<Emphasis>"information diagnostics"</Emphasis>" were emitted while "<Emphasis>"applying fixes"</Emphasis>"."
                 }
                 .to_owned(),
             ),
