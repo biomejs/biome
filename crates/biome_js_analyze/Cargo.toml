@@ -68,15 +68,9 @@ serde                     = { workspace = true, features = ["derive"] }
 smallvec                  = { workspace = true }
 
 [dev-dependencies]
-biome_db        = { path = "../biome_db" }
-biome_fs        = { path = "../biome_fs" }
-biome_js_parser = { path = "../biome_js_parser", features = ["tests"] }
-# The rule specs cover type narrowing, which shipped builds leave out, so the
-# test build opts into it. Note: because this crate also depends on
-# biome_module_graph as a normal (non-dev) dependency, Cargo feature
-# unification turns type_narrowing on workspace-wide for any `cargo test
-# --workspace` run that includes this crate - the narrowing-off code paths
-# are only exercised by narrowly `-p`-scoped test invocations.
+biome_db            = { path = "../biome_db" }
+biome_fs            = { path = "../biome_fs" }
+biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_module_graph  = { path = "../biome_module_graph", features = ["type_narrowing"] }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }

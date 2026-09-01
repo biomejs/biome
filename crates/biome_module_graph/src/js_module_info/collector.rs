@@ -838,8 +838,8 @@ impl RawTypeCollector for JsModuleInfoCollector {
 
     fn narrowing_invalidation_cache(
         &mut self,
-    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>> {
-        Some(&mut self.narrowing_invalidation_cache)
+    ) -> &mut FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool> {
+        &mut self.narrowing_invalidation_cache
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
