@@ -3,14 +3,16 @@ use biome_analyze::{
 };
 use biome_diagnostics::Severity;
 use biome_js_semantic::Binding;
-use biome_js_syntax::{AnyJsExpression, JsxAttribute, binding_ext::AnyJsBindingDeclaration};
+use biome_js_syntax::{
+    AnyJsExpression, JsxAttribute, binding_ext::AnyJsBindingDeclaration, jsx_ext::AnyJsxElement,
+};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow .bind(), arrow functions, or function expressions in JSX props
+    /// Disallow `.bind()` or arrow functions in JSX props
     ///
     /// Using `.bind()` or creating a function inline in props creates a new function
     /// on every render, changing identity and defeating memoisation,
@@ -34,6 +36,88 @@ declare_lint_rule! {
     ///
     /// ```jsx
     /// <Foo onClick={this._handleClick}></Foo>
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `allowArrowFunctions`
+    ///
+    /// When `true`, arrow functions are allowed in JSX props.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allowArrowFunctions": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <Foo onClick={() => console.log('Hello!')} />
+    /// ```
+    ///
+    /// ### `allowFunctions`
+    ///
+    /// When `true`, function expressions are allowed.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allowFunctions": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <Foo onClick={function () { console.log('Hello!'); }} />
+    /// ```
+    ///
+    /// ### `allowBind`
+    ///
+    /// When `true`, `.bind()` is allowed.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allowBind": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <Foo onClick={this._handleClick.bind(this)} />
+    /// ```
+    ///
+    /// ### `ignoreDOMComponents`
+    ///
+    /// When `true`, DOM components like `<div>` are ignored.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreDOMComponents": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <div onClick={() => console.log('Hello!')} />
+    /// ```
+    ///
+    /// ### `ignoreRefs`
+    ///
+    /// When `true`, `ref` props are ignored.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreRefs": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <Foo ref={ref => this._div = ref} />
     /// ```
 
     pub NoJsxPropsBind {
@@ -74,6 +158,33 @@ impl Rule for NoJsxPropsBind {
     type Options = NoJsxPropsBindOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+
+        // handle ignoreRefs — bit of a hack but it works, just check attr name
+        if options.ignore_refs() {
+            if let Ok(name) = ctx.query().name() {
+                if let Ok(token) = name.name() {
+                    if token.text_trimmed() == "ref" {
+                        return None;
+                    }
+                }
+            }
+        }
+
+        // handle ignoreDOMComponents — skip DOM elements like div, span, button
+        if options.ignore_dom_components() {
+            // walk up to find the JSX element that owns this attribute
+            let is_dom = ctx
+                .query()
+                .syntax()
+                .ancestors()
+                .find_map(AnyJsxElement::cast)
+                .is_some_and(|el| !el.is_custom_component());
+            if is_dom {
+                return None;
+            }
+        }
+
         let expression: AnyJsExpression = ctx
             .query()
             .initializer()?
@@ -84,16 +195,29 @@ impl Rule for NoJsxPropsBind {
             .ok()?;
 
         match &expression {
-            AnyJsExpression::JsArrowFunctionExpression(_) => Some(NoJsxPropsBindState {
-                invalid_kind: InvalidKind::ArrowFunction,
-                attribute_range: expression.range(),
-            }),
+            AnyJsExpression::JsArrowFunctionExpression(_) => {
+                if options.allow_arrow_functions() {
+                    return None;
+                }
+                Some(NoJsxPropsBindState {
+                    invalid_kind: InvalidKind::ArrowFunction,
+                    attribute_range: expression.range(),
+                })
+            }
 
-            AnyJsExpression::JsFunctionExpression(_) => Some(NoJsxPropsBindState {
-                invalid_kind: InvalidKind::Function,
-                attribute_range: expression.range(),
-            }),
+            AnyJsExpression::JsFunctionExpression(_) => {
+                if options.allow_functions() {
+                    return None;
+                }
+                Some(NoJsxPropsBindState {
+                    invalid_kind: InvalidKind::Function,
+                    attribute_range: expression.range(),
+                })
+            }
             AnyJsExpression::JsCallExpression(call) => {
+                if options.allow_bind() {
+                    return None;
+                }
                 // TODO: This will still throw a false positive on e.g. window.bind()
                 let is_bind = call
                     .callee()
@@ -122,20 +246,38 @@ impl Rule for NoJsxPropsBind {
                         if declaration_is_global(&declaration) {
                             return None;
                         }
+                        if options.allow_functions() {
+                            return None;
+                        }
                         Some(NoJsxPropsBindState {
                             invalid_kind: InvalidKind::Function,
                             attribute_range: expression.range(),
                         })
                     }
                     AnyJsBindingDeclaration::JsVariableDeclarator(variable_declarator) => {
-                        match variable_declarator.initializer()?.expression().ok()? {
-                            AnyJsExpression::JsFunctionExpression(_)
-                            | AnyJsExpression::JsArrowFunctionExpression(_) => {
+                        let init_expr = variable_declarator.initializer()?.expression().ok()?;
+                        match init_expr {
+                            AnyJsExpression::JsFunctionExpression(_) => {
                                 if declaration_is_global(&declaration) {
+                                    return None;
+                                }
+                                if options.allow_functions() {
                                     return None;
                                 }
                                 Some(NoJsxPropsBindState {
                                     invalid_kind: InvalidKind::Function,
+                                    attribute_range: expression.range(),
+                                })
+                            }
+                            AnyJsExpression::JsArrowFunctionExpression(_) => {
+                                if declaration_is_global(&declaration) {
+                                    return None;
+                                }
+                                if options.allow_arrow_functions() {
+                                    return None;
+                                }
+                                Some(NoJsxPropsBindState {
+                                    invalid_kind: InvalidKind::ArrowFunction,
                                     attribute_range: expression.range(),
                                 })
                             }
