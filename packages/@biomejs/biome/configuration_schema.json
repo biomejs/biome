@@ -7316,6 +7316,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactNamingConvention": {
+					"description": "Enforces naming conventions for React createContext, useId, and useRef.\nSee https://biomejs.dev/linter/rules/use-react-naming-convention",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactNamingConventionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useReactNativePlatformComponents": {
 					"description": "Ensure that platform-specific React Native components are only imported in files named for that platform.\nSee https://biomejs.dev/linter/rules/use-react-native-platform-components",
 					"anyOf": [
@@ -12369,6 +12376,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactNamingConventionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactNamingConventionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReactNativePlatformComponentsOptions": {
 			"type": "object",
 			"properties": {
@@ -16474,6 +16490,16 @@
 			]
 		},
 		"UseReactFunctionComponentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactNamingConventionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactNamingConventionOptions" }
+			]
+		},
+		"UseReactNamingConventionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -10,10 +10,10 @@ use crate::{
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
     JsIfStatement, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
     JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
-    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
-    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence,
-    TsStringLiteralType, inner_string_text,
+    JsReferenceIdentifier, JsRegexLiteralExpression, JsSequenceExpression,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, JsWhileStatement,
+    OperatorPrecedence, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
@@ -1388,6 +1388,29 @@ impl AnyJsExpression {
         })
         .as_ref()
         .and_then(Self::inner_expression)
+    }
+
+    /// Returns the outermost expression, ignoring any parenthesized expressions or type assertions.
+    pub fn outer_expression(&self) -> Option<Self> {
+        iter::successors(Some(self.clone()), |expression| {
+            let parent = expression.syntax().parent()?;
+
+            if !is_transparent_expression_wrapper(&parent) {
+                return None;
+            }
+
+            // Only the right-hand side determines the value of a sequence expression.
+            if parent.kind() == JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+                && !JsSequenceExpression::cast(parent.clone())
+                    .and_then(|sequence| sequence.right().ok())
+                    .is_some_and(|right| right.syntax() == expression.syntax())
+            {
+                return None;
+            }
+
+            Self::cast(parent)
+        })
+        .last()
     }
 
     pub fn is_string_literal(&self) -> bool {
