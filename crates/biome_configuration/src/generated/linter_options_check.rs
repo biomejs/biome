@@ -2073,6 +2073,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useModernMathApis",
+        TypeId::of::<biome_rule_options::use_modern_math_apis::UseModernMathApisOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useNamedCaptureGroup",
         TypeId::of::<biome_rule_options::use_named_capture_group::UseNamedCaptureGroupOptions>(),
     ));
