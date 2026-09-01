@@ -2124,6 +2124,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_object_spread::UseObjectSpreadOptions>(),
     ));
     result.push((
+        "nursery",
+        "useObserverApi",
+        TypeId::of::<biome_rule_options::use_observer_api::UseObserverApiOptions>(),
+    ));
+    result.push((
         "complexity",
         "useOptionalChain",
         TypeId::of::<biome_rule_options::use_optional_chain::UseOptionalChainOptions>(),

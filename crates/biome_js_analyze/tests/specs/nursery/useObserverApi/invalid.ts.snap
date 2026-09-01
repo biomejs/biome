@@ -1,0 +1,399 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+window.addEventListener("resize" as const, () => element.offsetWidth);
+window.addEventListener(("scroll" satisfies string), () => element.getBoundingClientRect());
+window.addEventListener("resize", (() => element.clientWidth) as EventListener);
+
+const handler = (() => element.offsetHeight) as EventListener;
+window.addEventListener("resize", handler);
+
+window.addEventListener("resize", () => element[("offsetWidth" as const)]);
+window.addEventListener("scroll", () => element[("getClientRects" as const)]());
+
+window.addEventListener("resize", () => {
+    const { [("clientWidth" as const)]: width } = element;
+    return width;
+});
+
+function listenToElement(element: HTMLElement) {
+    window.addEventListener("resize", () => element.offsetWidth);
+}
+
+function listenToElementMethod(element: Element) {
+    window.addEventListener("scroll", () => element.getBoundingClientRect());
+}
+
+const typedElement: HTMLElement = element;
+window.addEventListener("resize", () => typedElement.offsetWidth);
+
+class CustomElement extends HTMLElement {}
+
+function listenToCustomElement(element: CustomElement) {
+    window.addEventListener("resize", () => element.offsetWidth);
+}
+
+class CustomElementWithMember extends HTMLElement {
+    customMethod() {}
+}
+
+function listenToCustomElementWithMember(element: CustomElementWithMember) {
+    window.addEventListener("resize", () => element.offsetWidth);
+}
+
+interface CustomSvgElement extends SVGElement {}
+
+function listenToCustomSvgElement(element: CustomSvgElement) {
+    window.addEventListener("resize", () => element.offsetWidth);
+}
+
+interface BaseElement extends HTMLElement {}
+interface IndirectElement extends BaseElement {}
+
+function listenToIndirectElement(element: IndirectElement) {
+    window.addEventListener("resize", () => element.offsetWidth);
+}
+
+type Size = {
+    offsetWidth: number;
+};
+
+function listenToSize(size: Size) {
+    window.addEventListener("resize", () => size.offsetWidth);
+}
+
+function listenToAssertedElement(size: Size) {
+    window.addEventListener("resize", () => (size as unknown as HTMLElement).offsetWidth);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ window.addEventListener("resize" as const, () => element.offsetWidth);
+      │                         ^^^^^^^^^^^^^^^^^
+    4 │ window.addEventListener(("scroll" satisfies string), () => element.getBoundingClientRect());
+    5 │ window.addEventListener("resize", (() => element.clientWidth) as EventListener);
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This scroll listener reads layout.
+  
+    3 │ window.addEventListener("resize" as const, () => element.offsetWidth);
+  > 4 │ window.addEventListener(("scroll" satisfies string), () => element.getBoundingClientRect());
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ window.addEventListener("resize", (() => element.clientWidth) as EventListener);
+    6 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use IntersectionObserver to react to element visibility changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    3 │ window.addEventListener("resize" as const, () => element.offsetWidth);
+    4 │ window.addEventListener(("scroll" satisfies string), () => element.getBoundingClientRect());
+  > 5 │ window.addEventListener("resize", (() => element.clientWidth) as EventListener);
+      │                         ^^^^^^^^
+    6 │ 
+    7 │ const handler = (() => element.offsetHeight) as EventListener;
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+     7 │ const handler = (() => element.offsetHeight) as EventListener;
+   > 8 │ window.addEventListener("resize", handler);
+       │                         ^^^^^^^^
+     9 │ 
+    10 │ window.addEventListener("resize", () => element[("offsetWidth" as const)]);
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+     8 │ window.addEventListener("resize", handler);
+     9 │ 
+  > 10 │ window.addEventListener("resize", () => element[("offsetWidth" as const)]);
+       │                         ^^^^^^^^
+    11 │ window.addEventListener("scroll", () => element[("getClientRects" as const)]());
+    12 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This scroll listener reads layout.
+  
+    10 │ window.addEventListener("resize", () => element[("offsetWidth" as const)]);
+  > 11 │ window.addEventListener("scroll", () => element[("getClientRects" as const)]());
+       │                         ^^^^^^^^
+    12 │ 
+    13 │ window.addEventListener("resize", () => {
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use IntersectionObserver to react to element visibility changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    11 │ window.addEventListener("scroll", () => element[("getClientRects" as const)]());
+    12 │ 
+  > 13 │ window.addEventListener("resize", () => {
+       │                         ^^^^^^^^
+    14 │     const { [("clientWidth" as const)]: width } = element;
+    15 │     return width;
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    18 │ function listenToElement(element: HTMLElement) {
+  > 19 │     window.addEventListener("resize", () => element.offsetWidth);
+       │                             ^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This scroll listener reads layout.
+  
+    22 │ function listenToElementMethod(element: Element) {
+  > 23 │     window.addEventListener("scroll", () => element.getBoundingClientRect());
+       │                             ^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use IntersectionObserver to react to element visibility changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:25 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    26 │ const typedElement: HTMLElement = element;
+  > 27 │ window.addEventListener("resize", () => typedElement.offsetWidth);
+       │                         ^^^^^^^^
+    28 │ 
+    29 │ class CustomElement extends HTMLElement {}
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    31 │ function listenToCustomElement(element: CustomElement) {
+  > 32 │     window.addEventListener("resize", () => element.offsetWidth);
+       │                             ^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    39 │ function listenToCustomElementWithMember(element: CustomElementWithMember) {
+  > 40 │     window.addEventListener("resize", () => element.offsetWidth);
+       │                             ^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:46:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    45 │ function listenToCustomSvgElement(element: CustomSvgElement) {
+  > 46 │     window.addEventListener("resize", () => element.offsetWidth);
+       │                             ^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:53:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    52 │ function listenToIndirectElement(element: IndirectElement) {
+  > 53 │     window.addEventListener("resize", () => element.offsetWidth);
+       │                             ^^^^^^^^
+    54 │ }
+    55 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:61:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    60 │ function listenToSize(size: Size) {
+  > 61 │     window.addEventListener("resize", () => size.offsetWidth);
+       │                             ^^^^^^^^
+    62 │ }
+    63 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:65:29 lint/nursery/useObserverApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This resize listener reads layout.
+  
+    64 │ function listenToAssertedElement(size: Size) {
+  > 65 │     window.addEventListener("resize", () => (size as unknown as HTMLElement).offsetWidth);
+       │                             ^^^^^^^^
+    66 │ }
+    67 │ 
+  
+  i Reading layout in a frequently fired event listener can make the browser recalculate layout for each event.
+  
+  i Use ResizeObserver to react to element size changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

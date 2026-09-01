@@ -289,6 +289,7 @@ define_categories! {
     "lint/nursery/useNamedCaptureGroup": "https://biomejs.dev/linter/rules/use-named-capture-group",
     "lint/nursery/useNamedLayer": "https://biomejs.dev/linter/rules/use-named-layer",
     "lint/nursery/useNullishCoalescing": "https://biomejs.dev/linter/rules/use-nullish-coalescing",
+    "lint/nursery/useObserverApi": "https://biomejs.dev/linter/rules/use-observer-api",
     "lint/nursery/usePlaywrightValidDescribeCallback": "https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
     "lint/nursery/useQwikLoaderLocation": "https://biomejs.dev/linter/rules/use-qwik-loader-location",
     "lint/nursery/useQwikMethodUsage": "https://biomejs.dev/linter/rules/use-qwik-method-usage",

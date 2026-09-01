@@ -1,10 +1,12 @@
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsTemplateElement, JsAssignmentOperator, JsLanguage, JsLogicalOperator, JsModule,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryOperator,
+    AnyJsTemplateElement, JsArrayExpression, JsArrowFunctionExpression, JsAssignmentOperator,
+    JsClassExpression, JsFunctionExpression, JsLanguage, JsLogicalOperator, JsModule,
+    JsObjectExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
+    JsUnaryOperator, static_value::StaticValue,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TriviaPiece};
 
 /// Add any leading and trailing trivia from given source node to the token.
 ///
@@ -63,6 +65,38 @@ fn add_trailing_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &
         text.push(' ');
         trivia.push(TriviaPiece::whitespace(1));
     }
+}
+
+const DEFINITELY_NOT_DOM_NODE_KINDS: SyntaxKindSet<JsLanguage> = AnyJsLiteralExpression::KIND_SET
+    .union(JsArrayExpression::KIND_SET)
+    .union(JsArrowFunctionExpression::KIND_SET)
+    .union(JsClassExpression::KIND_SET)
+    .union(JsFunctionExpression::KIND_SET)
+    .union(JsObjectExpression::KIND_SET)
+    .union(JsTemplateExpression::KIND_SET);
+
+/// Returns `true` when the object of a legacy DOM query call is syntactically
+/// incapable of being a DOM node. It's a mechanism to avoid obvious false positives.
+///
+/// This rule is supposed to report nearly any call shape like `value.getElementById(...)`
+/// and only excludes receivers whose syntax guarantees they are not DOM nodes,
+/// such as:
+///
+/// - literals like `"text"`, `null`, and `1`
+/// - array and object literals like `[]` and `{}`
+/// - function and class expressions
+/// - template literals like `` `text` ``
+/// - the global `undefined` value
+///
+/// Everything else is treated as potentially DOM-like, including identifiers,
+/// member expressions, and other unknown expressions.
+pub(crate) fn is_definitely_not_dom_node(expression: &AnyJsExpression) -> bool {
+    let expression = expression.clone().omit_parentheses();
+
+    DEFINITELY_NOT_DOM_NODE_KINDS.matches(expression.syntax().kind())
+        || expression
+            .as_static_value()
+            .is_some_and(|value| matches!(value, StaticValue::Undefined(_)))
 }
 
 pub fn is_constant_condition(

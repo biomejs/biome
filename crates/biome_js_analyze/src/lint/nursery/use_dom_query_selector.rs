@@ -1,4 +1,7 @@
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{
+    JsRuleAction, ast_utils::is_definitely_not_dom_node,
+    services::semantic::Semantic,
+};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
     options::PreferredQuote,
@@ -10,7 +13,7 @@ use biome_js_factory::make::{
 };
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsTemplateElement, JsCallExpression,
-    JsTemplateExpression, T, global_identifier, static_value::StaticValue,
+    JsTemplateExpression, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
 use biome_rule_options::use_dom_query_selector::UseDomQuerySelectorOptions;
@@ -245,38 +248,6 @@ fn first_and_only_argument(call: &JsCallExpression) -> Option<AnyJsExpression> {
     } else {
         None
     }
-}
-
-/// Returns `true` when the object of a legacy DOM query call is syntactically
-/// incapable of being a DOM node. It's a mechanism to avoid obvious false positives.
-///
-/// This rule is supposed to report nearly any call shape like `value.getElementById(...)`
-/// and only excludes receivers whose syntax guarantees they are not DOM nodes,
-/// such as:
-///
-/// - literals like `"text"`, `null`, and `1`
-/// - array and object literals like `[]` and `{}`
-/// - function and class expressions
-/// - template literals like `` `text` ``
-/// - the global `undefined` value
-///
-/// Everything else is treated as potentially DOM-like, including identifiers,
-/// member expressions, and other unknown expressions.
-fn is_definitely_not_dom_node(expr: &AnyJsExpression) -> bool {
-    let expr = expr.clone().omit_parentheses();
-
-    matches!(
-        expr,
-        AnyJsExpression::AnyJsLiteralExpression(_)
-            | AnyJsExpression::JsArrayExpression(_)
-            | AnyJsExpression::JsArrowFunctionExpression(_)
-            | AnyJsExpression::JsClassExpression(_)
-            | AnyJsExpression::JsFunctionExpression(_)
-            | AnyJsExpression::JsObjectExpression(_)
-            | AnyJsExpression::JsTemplateExpression(_)
-    ) || expr
-        .as_static_value()
-        .is_some_and(|value| matches!(value, StaticValue::Undefined(_)))
 }
 
 fn is_ignored(expr: &AnyJsExpression, options: &UseDomQuerySelectorOptions) -> bool {
