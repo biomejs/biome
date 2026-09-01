@@ -120,7 +120,7 @@ fn bench_index_d_ts_salsa_memoized(bencher: Bencher, name: &str) {
         });
 }
 
-#[divan::bench(name = "bench_normalize_terminal_type", sample_size = 1)]
+#[divan::bench(name = "bench_normalize_terminal_type")]
 fn bench_normalize_terminal_type(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -134,7 +134,7 @@ fn bench_normalize_terminal_type(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_normalize_local_alias", sample_size = 1)]
+#[divan::bench(name = "bench_normalize_local_alias")]
 fn bench_normalize_local_alias(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -161,7 +161,7 @@ fn bench_normalize_local_alias(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_infer_argument_type_many_overloads", sample_size = 1)]
+#[divan::bench(name = "bench_infer_argument_type_many_overloads")]
 fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -185,7 +185,7 @@ fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_binding_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_binding_lookup_queries")]
 fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -204,7 +204,7 @@ fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_local_type_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_local_type_lookup_queries")]
 fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -223,7 +223,7 @@ fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_export_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_export_lookup_queries")]
 fn bench_distinct_export_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -242,7 +242,7 @@ fn bench_distinct_export_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_expression_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_expression_lookup_queries")]
 fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| expression_query_inputs(128))
@@ -254,7 +254,7 @@ fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_selective_promise_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_selective_promise_queries")]
 fn bench_distinct_selective_promise_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| expression_query_inputs(128))
