@@ -7260,6 +7260,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useObserverApi": {
+					"description": "Reports resize and scroll listeners that read layout.\nSee https://biomejs.dev/linter/rules/use-observer-api",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseObserverApiConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePlaywrightValidDescribeCallback": {
 					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
 					"anyOf": [
@@ -12295,6 +12302,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseObserverApiOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseObserverApiOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseOptionalChainOptions": {
 			"type": "object",
 			"properties": {
@@ -16382,6 +16398,16 @@
 			]
 		},
 		"UseObjectSpreadOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseObserverApiConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseObserverApiOptions" }
+			]
+		},
+		"UseObserverApiOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
