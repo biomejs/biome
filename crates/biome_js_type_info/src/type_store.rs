@@ -185,12 +185,8 @@ pub trait RawTypeCollector {
     }
 
     /// Returns a scratch cache for memoizing `typeof`-guard narrowing
-    /// invalidation checks, if this collector wants to provide one.
-    fn narrowing_invalidation_cache(
-        &mut self,
-    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text), bool>> {
-        None
-    }
+    /// invalidation checks.
+    fn narrowing_invalidation_cache(&mut self) -> &mut FxHashMap<(JsSyntaxNode, Text), bool>;
 }
 
 #[derive(Default)]

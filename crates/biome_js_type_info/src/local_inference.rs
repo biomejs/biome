@@ -3293,9 +3293,10 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
 ///
 /// `typeof_guard_narrowed_tag` calls this once per reference identifier
 /// inside a guarded consequent, so a branch with many references would
-/// otherwise re-scan the same subtree repeatedly. When `resolver` provides a
-/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
-/// the result is memoized there for the lifetime of that cache.
+/// otherwise re-scan the same subtree repeatedly. The result is memoized in
+/// `resolver`'s
+/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache)
+/// for the lifetime of that cache.
 fn narrowing_invalidated_within(
     resolver: &mut dyn RawTypeCollector,
     node: &JsSyntaxNode,
@@ -3304,9 +3305,7 @@ fn narrowing_invalidated_within(
     let name = name_token.text();
     let key = (node.clone(), Text::from(name_token.clone()));
 
-    if let Some(cache) = resolver.narrowing_invalidation_cache()
-        && let Some(&cached) = cache.get(&key)
-    {
+    if let Some(&cached) = resolver.narrowing_invalidation_cache().get(&key) {
         return cached;
     }
 
@@ -3321,9 +3320,9 @@ fn narrowing_invalidated_within(
         name_token.is_ok_and(|token| token.text_trimmed() == name)
     });
 
-    if let Some(cache) = resolver.narrowing_invalidation_cache() {
-        cache.insert(key, invalidated);
-    }
+    resolver
+        .narrowing_invalidation_cache()
+        .insert(key, invalidated);
 
     invalidated
 }

@@ -104,9 +104,11 @@ use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
+#[cfg(feature = "type_inference")]
+use biome_rowan::Text;
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
-#[cfg(feature = "js_embeds")]
+#[cfg(any(feature = "js_embeds", feature = "type_inference"))]
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -1023,12 +1025,17 @@ fn debug_registered_types(
 #[derive(Default)]
 struct DebugTypeCollector {
     types: TypeStore,
+    narrowing_invalidation_cache: FxHashMap<(JsSyntaxNode, Text), bool>,
 }
 
 #[cfg(feature = "type_inference")]
 impl RawTypeCollector for DebugTypeCollector {
     fn narrowing_enabled(&self) -> bool {
         biome_module_graph::TYPE_NARROWING_ENABLED
+    }
+
+    fn narrowing_invalidation_cache(&mut self) -> &mut FxHashMap<(JsSyntaxNode, Text), bool> {
+        &mut self.narrowing_invalidation_cache
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
