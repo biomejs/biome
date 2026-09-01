@@ -1,0 +1,141 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```jsx
+delete<v l={{}i }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsUnaryExpression {
+                operator_token: DELETE_KW@0..6 "delete" [] [],
+                argument: JsxTagExpression {
+                    tag: JsxElement {
+                        opening_element: JsxOpeningElement {
+                            l_angle_token: L_ANGLE@6..7 "<" [] [],
+                            name: JsxName {
+                                value_token: JSX_IDENT@7..9 "v" [] [Whitespace(" ")],
+                            },
+                            type_arguments: missing (optional),
+                            attributes: JsxAttributeList [
+                                JsxAttribute {
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@9..10 "l" [] [],
+                                    },
+                                    initializer: JsxAttributeInitializerClause {
+                                        eq_token: EQ@10..11 "=" [] [],
+                                        value: JsxExpressionAttributeValue {
+                                            l_curly_token: L_CURLY@11..12 "{" [] [],
+                                            expression: JsObjectExpression {
+                                                l_curly_token: L_CURLY@12..13 "{" [] [],
+                                                members: JsObjectMemberList [],
+                                                r_curly_token: R_CURLY@13..14 "}" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@14..17 "}" [Skipped("i"), Whitespace(" ")] [],
+                                        },
+                                    },
+                                },
+                            ],
+                            r_angle_token: missing (required),
+                        },
+                        children: JsxChildList [],
+                        closing_element: JsxClosingElement {
+                            l_angle_token: missing (required),
+                            slash_token: missing (required),
+                            name: missing (required),
+                            r_angle_token: missing (required),
+                        },
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..18
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..17
+    0: JS_EXPRESSION_STATEMENT@0..17
+      0: JS_UNARY_EXPRESSION@0..17
+        0: DELETE_KW@0..6 "delete" [] []
+        1: JSX_TAG_EXPRESSION@6..17
+          0: JSX_ELEMENT@6..17
+            0: JSX_OPENING_ELEMENT@6..17
+              0: L_ANGLE@6..7 "<" [] []
+              1: JSX_NAME@7..9
+                0: JSX_IDENT@7..9 "v" [] [Whitespace(" ")]
+              2: (empty)
+              3: JSX_ATTRIBUTE_LIST@9..17
+                0: JSX_ATTRIBUTE@9..17
+                  0: JSX_NAME@9..10
+                    0: JSX_IDENT@9..10 "l" [] []
+                  1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@10..17
+                    0: EQ@10..11 "=" [] []
+                    1: JSX_EXPRESSION_ATTRIBUTE_VALUE@11..17
+                      0: L_CURLY@11..12 "{" [] []
+                      1: JS_OBJECT_EXPRESSION@12..14
+                        0: L_CURLY@12..13 "{" [] []
+                        1: JS_OBJECT_MEMBER_LIST@13..13
+                        2: R_CURLY@13..14 "}" [] []
+                      2: R_CURLY@14..17 "}" [Skipped("i"), Whitespace(" ")] []
+              4: (empty)
+            1: JSX_CHILD_LIST@17..17
+            2: JSX_CLOSING_ELEMENT@17..17
+              0: (empty)
+              1: (empty)
+              2: (empty)
+              3: (empty)
+      1: (empty)
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+unary_delete_rewrite_skipped_trivia.jsx:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `i`
+  
+  > 1 │ delete<v l={{}i }
+      │               ^
+    2 │ 
+  
+  i Remove i
+  
+unary_delete_rewrite_skipped_trivia.jsx:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead the file ends
+  
+    1 │ delete<v l={{}i }
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ delete<v l={{}i }
+  > 2 │ 
+      │ 
+  
+```
