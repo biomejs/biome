@@ -4613,6 +4613,41 @@ pub struct CssLayerReferenceFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssLegacyFilterValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssLegacyFilterValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssLegacyFilterValueFields {
+        CssLegacyFilterValueFields {
+            components: self.components(),
+        }
+    }
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssLegacyFilterValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssLegacyFilterValueFields {
+    pub components: CssCustomPropertyComponentList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssListOfComponentValuesExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15255,6 +15290,7 @@ impl AnyCssGenericComponentValue {
 pub enum AnyCssGenericPropertyValueOrExpression {
     CssCustomPropertyValue(CssCustomPropertyValue),
     CssGenericComponentValueList(CssGenericComponentValueList),
+    CssLegacyFilterValue(CssLegacyFilterValue),
     ScssExpression(ScssExpression),
 }
 impl AnyCssGenericPropertyValueOrExpression {
@@ -15267,6 +15303,12 @@ impl AnyCssGenericPropertyValueOrExpression {
     pub fn as_css_generic_component_value_list(&self) -> Option<&CssGenericComponentValueList> {
         match &self {
             Self::CssGenericComponentValueList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_legacy_filter_value(&self) -> Option<&CssLegacyFilterValue> {
+        match &self {
+            Self::CssLegacyFilterValue(item) => Some(item),
             _ => None,
         }
     }
@@ -23676,6 +23718,53 @@ impl From<CssLayerReference> for SyntaxNode {
 }
 impl From<CssLayerReference> for SyntaxElement {
     fn from(n: CssLayerReference) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssLegacyFilterValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LEGACY_FILTER_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LEGACY_FILTER_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssLegacyFilterValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssLegacyFilterValue")
+                .field("components", &self.components())
+                .finish()
+        } else {
+            f.debug_struct("CssLegacyFilterValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssLegacyFilterValue> for SyntaxNode {
+    fn from(n: CssLegacyFilterValue) -> Self {
+        n.syntax
+    }
+}
+impl From<CssLegacyFilterValue> for SyntaxElement {
+    fn from(n: CssLegacyFilterValue) -> Self {
         n.syntax.into()
     }
 }
@@ -38940,6 +39029,11 @@ impl From<CssGenericComponentValueList> for AnyCssGenericPropertyValueOrExpressi
         Self::CssGenericComponentValueList(node)
     }
 }
+impl From<CssLegacyFilterValue> for AnyCssGenericPropertyValueOrExpression {
+    fn from(node: CssLegacyFilterValue) -> Self {
+        Self::CssLegacyFilterValue(node)
+    }
+}
 impl From<ScssExpression> for AnyCssGenericPropertyValueOrExpression {
     fn from(node: ScssExpression) -> Self {
         Self::ScssExpression(node)
@@ -38949,11 +39043,15 @@ impl AstNode for AnyCssGenericPropertyValueOrExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssCustomPropertyValue::KIND_SET
         .union(CssGenericComponentValueList::KIND_SET)
+        .union(CssLegacyFilterValue::KIND_SET)
         .union(ScssExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_CUSTOM_PROPERTY_VALUE | CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION
+            CSS_CUSTOM_PROPERTY_VALUE
+                | CSS_GENERIC_COMPONENT_VALUE_LIST
+                | CSS_LEGACY_FILTER_VALUE
+                | SCSS_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -38964,6 +39062,7 @@ impl AstNode for AnyCssGenericPropertyValueOrExpression {
             CSS_GENERIC_COMPONENT_VALUE_LIST => {
                 Self::CssGenericComponentValueList(CssGenericComponentValueList::cast(syntax)?)
             }
+            CSS_LEGACY_FILTER_VALUE => Self::CssLegacyFilterValue(CssLegacyFilterValue { syntax }),
             SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             _ => return None,
         };
@@ -38973,6 +39072,7 @@ impl AstNode for AnyCssGenericPropertyValueOrExpression {
         match self {
             Self::CssCustomPropertyValue(it) => it.syntax(),
             Self::CssGenericComponentValueList(it) => it.syntax(),
+            Self::CssLegacyFilterValue(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
         }
     }
@@ -38980,6 +39080,7 @@ impl AstNode for AnyCssGenericPropertyValueOrExpression {
         match self {
             Self::CssCustomPropertyValue(it) => it.into_syntax(),
             Self::CssGenericComponentValueList(it) => it.into_syntax(),
+            Self::CssLegacyFilterValue(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
         }
     }
@@ -38989,6 +39090,7 @@ impl std::fmt::Debug for AnyCssGenericPropertyValueOrExpression {
         match self {
             Self::CssCustomPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssGenericComponentValueList(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssLegacyFilterValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -39000,6 +39102,7 @@ impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxNode {
             AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(it) => {
                 it.into_syntax()
             }
+            AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(it) => it.into_syntax(),
             AnyCssGenericPropertyValueOrExpression::ScssExpression(it) => it.into_syntax(),
         }
     }
@@ -48329,6 +48432,11 @@ impl std::fmt::Display for CssLayerDeclaration {
     }
 }
 impl std::fmt::Display for CssLayerReference {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssLegacyFilterValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

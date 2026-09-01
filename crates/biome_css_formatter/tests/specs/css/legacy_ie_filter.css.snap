@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/legacy_ie_filter.css
+---
+
+# Input
+
+```css
+.legacy {
+color:red; filter:progid:DXImageTransform.Microsoft.Alpha(Opacity = 40);-ms-filter:alpha( opacity=40 );background:blue
+}
+
+```
+
+
+# Formatted
+
+```css
+.legacy {
+	color: red;
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity = 40);
+	-ms-filter: alpha(opacity=40);
+	background: blue;
+}
+
+```

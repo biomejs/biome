@@ -1603,6 +1603,12 @@ pub fn css_layer_reference(
         ],
     ))
 }
+pub fn css_legacy_filter_value(components: CssCustomPropertyComponentList) -> CssLegacyFilterValue {
+    CssLegacyFilterValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LEGACY_FILTER_VALUE,
+        [Some(SyntaxElement::Node(components.into_syntax()))],
+    ))
+}
 pub fn css_list_of_component_values_expression(
     css_component_value_list: CssComponentValueList,
 ) -> CssListOfComponentValuesExpression {

@@ -79,6 +79,7 @@ pub(crate) mod keyframes_scope_prefix;
 pub(crate) mod keyframes_scoped_name;
 pub(crate) mod layer_declaration;
 pub(crate) mod layer_reference;
+pub(crate) mod legacy_filter_value;
 pub(crate) mod list_of_component_values_expression;
 pub(crate) mod media_and_condition;
 pub(crate) mod media_and_type_query;

@@ -65,10 +65,23 @@ pub(crate) fn parse_custom_property_value(
     p: &mut CssParser,
     end_set: TokenSet<CssSyntaxKind>,
 ) -> CompletedMarker {
-    parse_custom_property_value_with_mode(
+    parse_raw_property_value_with_mode(
         p,
         end_set,
         CssCustomPropertyCommentMode::PreserveDoubleSlash,
+        CSS_CUSTOM_PROPERTY_VALUE,
+    )
+}
+
+pub(crate) fn parse_legacy_filter_value(
+    p: &mut CssParser,
+    end_set: TokenSet<CssSyntaxKind>,
+) -> CompletedMarker {
+    parse_raw_property_value_with_mode(
+        p,
+        end_set,
+        CssCustomPropertyCommentMode::PreserveDoubleSlash,
+        CSS_LEGACY_FILTER_VALUE,
     )
 }
 
@@ -79,22 +92,24 @@ pub(crate) fn parse_supports_custom_property_value(
     p: &mut CssParser,
     end_set: TokenSet<CssSyntaxKind>,
 ) -> CompletedMarker {
-    parse_custom_property_value_with_mode(
+    parse_raw_property_value_with_mode(
         p,
         end_set,
         CssCustomPropertyCommentMode::ScssLineComments,
+        CSS_CUSTOM_PROPERTY_VALUE,
     )
 }
 
 /// Parses a raw custom-property value with the caller's `//` policy.
-fn parse_custom_property_value_with_mode(
+fn parse_raw_property_value_with_mode(
     p: &mut CssParser,
     end_set: TokenSet<CssSyntaxKind>,
     comment_mode: CssCustomPropertyCommentMode,
+    kind: CssSyntaxKind,
 ) -> CompletedMarker {
     let value = p.start();
     CustomPropertyComponentList::value(end_set, comment_mode).parse_list(p);
-    value.complete(p, CSS_CUSTOM_PROPERTY_VALUE)
+    value.complete(p, kind)
 }
 
 struct CustomPropertyComponentList {

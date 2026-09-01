@@ -1,10 +1,10 @@
 use biome_css_syntax::{
     AnyCssRoot, AnyCssSelector, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
-    CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
-    CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
-    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
-    decode_css_identifier, property_syntax::PropertySyntaxResult,
+    CssGenericComponentValueList, CssIdentifier, CssLegacyFilterValue, CssMediaAtRule,
+    CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule,
+    CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssExpression,
+    ScssPartialCombinatorSelector, decode_css_identifier, property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
@@ -846,6 +846,8 @@ pub enum CssPropertyInitialValueKind {
     GenericComponent(AstPtr<CssGenericComponentValueList>),
     /// A custom-property value.
     CustomProperty(AstPtr<CssCustomPropertyValue>),
+    /// A legacy Internet Explorer filter value.
+    LegacyFilter(AstPtr<CssLegacyFilterValue>),
     /// A CSS Modules `composes` value.
     Composes(AstPtr<CssComposesPropertyValue>),
     /// An SCSS expression.
@@ -864,6 +866,12 @@ impl CssPropertyInitialValueKind {
                 semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
             }
             (Self::CustomProperty(a), Self::CustomProperty(b)) => {
+                let a = a.to_node(self_root.syntax());
+                let b = b.to_node(other_root.syntax());
+                semantic_custom_property_tokens(a.syntax())
+                    == semantic_custom_property_tokens(b.syntax())
+            }
+            (Self::LegacyFilter(a), Self::LegacyFilter(b)) => {
                 let a = a.to_node(self_root.syntax());
                 let b = b.to_node(other_root.syntax());
                 semantic_custom_property_tokens(a.syntax())
@@ -928,6 +936,12 @@ impl From<CssGenericComponentValueList> for CssPropertyInitialValueKind {
 impl From<CssCustomPropertyValue> for CssPropertyInitialValueKind {
     fn from(value: CssCustomPropertyValue) -> Self {
         Self::CustomProperty(AstPtr::new(&value))
+    }
+}
+
+impl From<CssLegacyFilterValue> for CssPropertyInitialValueKind {
+    fn from(value: CssLegacyFilterValue) -> Self {
+        Self::LegacyFilter(AstPtr::new(&value))
     }
 }
 
