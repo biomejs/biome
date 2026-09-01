@@ -199,7 +199,7 @@ const VALID_REACT_API: [&str; 41] = [
 ];
 
 /// Checks if the current [JsCallExpression] is a potential [`React` API].
-/// The function has accepts a `api_name` to check against
+/// The function accepts an API name to check against.
 ///
 /// [`React` API]: https://react.dev/reference/react/apis
 ///
