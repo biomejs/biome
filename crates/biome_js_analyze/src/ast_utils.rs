@@ -1,10 +1,14 @@
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsTemplateElement, JsAssignmentOperator, JsLanguage, JsLogicalOperator, JsModule,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryOperator,
+    AnyJsTemplateElement, JsAssignmentOperator, JsAwaitExpression, JsCaseClause,
+    JsDoWhileStatement, JsElseClause, JsExportDefaultExpressionClause, JsExpressionStatement,
+    JsForInStatement, JsForOfStatement, JsInExpression, JsInstanceofExpression, JsLanguage,
+    JsLogicalOperator, JsModule, JsNewExpression, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsUnaryOperator, JsYieldArgument,
+    JsYieldExpression,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TriviaPiece};
 
 /// Add any leading and trailing trivia from given source node to the token.
 ///
@@ -64,6 +68,58 @@ fn add_trailing_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &
         trivia.push(TriviaPiece::whitespace(1));
     }
 }
+
+/// Returns whether an identifier-like replacement needs leading whitespace at this expression.
+///
+/// JavaScript permits punctuation-prefixed expressions to touch a preceding keyword, as in
+/// `return!value`. If a replacement starts with an identifier-like token, omitting the whitespace
+/// would instead produce a different token such as `returnvalue`. This also applies to keyword
+/// operators and to expression positions following `yield`, `else`, `do`, or `case`.
+pub(crate) fn needs_space_before_identifier_expression_replacement(
+    expression: &AnyJsExpression,
+) -> bool {
+    let Some(parent) = expression.syntax().parent() else {
+        return false;
+    };
+
+    if EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS.matches(parent.kind())
+        || JsUnaryExpression::cast_ref(&parent).is_some_and(|expression| {
+            matches!(
+                expression.operator(),
+                Ok(JsUnaryOperator::Typeof | JsUnaryOperator::Void | JsUnaryOperator::Delete)
+            )
+        })
+    {
+        return true;
+    }
+
+    if let Some(argument) = JsYieldArgument::cast_ref(&parent) {
+        return argument.star_token().is_none()
+            && parent.parent().is_some_and(|parent| {
+                EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS.matches(parent.kind())
+            });
+    }
+
+    JsExpressionStatement::can_cast(parent.kind())
+        && parent.parent().is_some_and(|parent| {
+            EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS.matches(parent.kind())
+        })
+}
+
+const EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS: SyntaxKindSet<JsLanguage> =
+    JsExportDefaultExpressionClause::KIND_SET
+        .union(JsInstanceofExpression::KIND_SET)
+        .union(JsYieldExpression::KIND_SET)
+        .union(JsReturnStatement::KIND_SET)
+        .union(JsThrowStatement::KIND_SET)
+        .union(JsNewExpression::KIND_SET)
+        .union(JsAwaitExpression::KIND_SET)
+        .union(JsInExpression::KIND_SET)
+        .union(JsForOfStatement::KIND_SET)
+        .union(JsForInStatement::KIND_SET)
+        .union(JsDoWhileStatement::KIND_SET)
+        .union(JsElseClause::KIND_SET)
+        .union(JsCaseClause::KIND_SET);
 
 pub fn is_constant_condition(
     test: AnyJsExpression,
