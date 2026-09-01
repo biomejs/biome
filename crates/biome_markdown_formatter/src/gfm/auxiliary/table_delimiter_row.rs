@@ -3,24 +3,20 @@ use crate::gfm::auxiliary::{
 };
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
-use biome_formatter::{FormatRuleWithOptions, write};
+use biome_formatter::write;
 use biome_markdown_syntax::{GfmTableDelimiterRow, GfmTableDelimiterRowFields};
-use std::rc::Rc;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatGfmTableDelimiterRow {
-    options: Option<FormatGfmTableDelimiterRowOptions>,
-}
+pub(crate) struct FormatGfmTableDelimiterRow;
 
 /// Prepared column data and output policy for a table delimiter row.
 ///
 /// `widths` must contain an entry for every delimiter cell. Delimiter rows fall
 /// back to unaligned structured formatting when the widths do not cover all
 /// source cells.
-#[derive(Clone, Debug)]
-pub(crate) struct FormatGfmTableDelimiterRowOptions {
+pub(crate) struct FormatGfmTableDelimiterRowOptions<'a> {
     /// Cell width of each column, excluding padding and pipes.
-    pub(crate) widths: Rc<[usize]>,
+    pub(crate) widths: &'a [usize],
     /// How columns are padded.
     pub(crate) layout: GfmTableLayout,
     /// Whether to emit quote prefixes stored on the row.
@@ -33,6 +29,15 @@ impl FormatNodeRule<GfmTableDelimiterRow> for FormatGfmTableDelimiterRow {
         node: &GfmTableDelimiterRow,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
+        format_gfm_table_delimiter_row(node, None, f)
+    }
+}
+
+pub(crate) fn format_gfm_table_delimiter_row(
+    node: &GfmTableDelimiterRow,
+    options: Option<FormatGfmTableDelimiterRowOptions<'_>>,
+    f: &mut MarkdownFormatter,
+) -> FormatResult<()> {
         let GfmTableDelimiterRowFields {
             quote_prefixes,
             l_pipe_token,
@@ -41,16 +46,15 @@ impl FormatNodeRule<GfmTableDelimiterRow> for FormatGfmTableDelimiterRow {
             newline_token,
         } = node.as_fields();
         let cell_count = cells.elements().count();
-        let options = self
-            .options
-            .as_ref()
-            .filter(|options| options.widths.len() >= cell_count);
+        let options = options.filter(|options| options.widths.len() >= cell_count);
 
         for prefix in quote_prefixes.iter() {
             write!(
                 f,
                 [prefix.format().with_options(FormatMdQuotePrefixOptions {
-                    should_remove: options.is_some_and(|options| !options.preserve_quote_prefixes),
+                    should_remove: options
+                        .as_ref()
+                        .is_some_and(|options| !options.preserve_quote_prefixes),
                 })]
             )?;
         }
@@ -88,13 +92,3 @@ impl FormatNodeRule<GfmTableDelimiterRow> for FormatGfmTableDelimiterRow {
         }
         Ok(())
     }
-}
-
-impl FormatRuleWithOptions<GfmTableDelimiterRow> for FormatGfmTableDelimiterRow {
-    type Options = FormatGfmTableDelimiterRowOptions;
-
-    fn with_options(mut self, options: Self::Options) -> Self {
-        self.options = Some(options);
-        self
-    }
-}

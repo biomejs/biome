@@ -9,12 +9,14 @@ use crate::prelude::*;
 use crate::{
     context::ProseWrap,
     gfm::auxiliary::{
-        table_delimiter_row::FormatGfmTableDelimiterRowOptions, table_row::FormatGfmTableRowOptions,
+        table_delimiter_row::{
+            FormatGfmTableDelimiterRowOptions, format_gfm_table_delimiter_row,
+        },
+        table_row::{FormatGfmTableRowOptions, format_gfm_table_row},
     },
 };
 use biome_formatter::{FormatOptions, GroupId, printer::Printer, write};
 use biome_markdown_syntax::{GfmTable, GfmTableDelimiterRow, GfmTableRow};
-use std::rc::Rc;
 use unicode_width::UnicodeWidthStr;
 
 /// Minimum cell width in display columns, excluding padding and pipes.
@@ -24,7 +26,7 @@ pub(crate) const MIN_GFM_TABLE_CELL_WIDTH: usize = 3;
 pub(crate) struct FormatGfmTable;
 
 /// Formatted table-cell content cached for measurement and final emission.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub(crate) struct CachedGfmTableCell {
     /// The interned content, or `None` when the cell is empty.
     pub(crate) content: Option<FormatElement>,
@@ -58,16 +60,15 @@ pub(crate) enum GfmTableLayout {
 ///
 /// Every computed width is at least [`MIN_GFM_TABLE_CELL_WIDTH`], so an
 /// unaligned delimiter cell contains at least three dashes.
-#[derive(Clone)]
 struct PreparedGfmTable {
     /// Preformatted header cells in source order.
-    header: Rc<[CachedGfmTableCell]>,
+    header: Vec<CachedGfmTableCell>,
     /// Preformatted body cells grouped by source row.
-    body: Vec<Rc<[CachedGfmTableCell]>>,
+    body: Vec<Vec<CachedGfmTableCell>>,
     /// Maximum cell width required by each column, excluding padding and pipes.
-    widths: Rc<[usize]>,
+    widths: Vec<usize>,
     /// Alignment requested by each delimiter cell.
-    alignments: Rc<[GfmTableAlignment]>,
+    alignments: Vec<GfmTableAlignment>,
 }
 
 impl PreparedGfmTable {
@@ -116,10 +117,10 @@ impl PreparedGfmTable {
             .collect::<FormatResult<Vec<_>>>()?;
 
         Ok(Self {
-            header: header.into(),
-            body: body.into_iter().map(Rc::from).collect(),
-            widths: widths.into(),
-            alignments: alignments.into(),
+            header,
+            body,
+            widths,
+            alignments,
         })
     }
 
@@ -144,46 +145,6 @@ impl PreparedGfmTable {
             .collect()
     }
 
-    fn header_row_options(
-        &self,
-        layout: GfmTableLayout,
-        preserve_quote_prefixes: bool,
-    ) -> FormatGfmTableRowOptions {
-        FormatGfmTableRowOptions {
-            cells: Rc::clone(&self.header),
-            widths: Rc::clone(&self.widths),
-            alignments: Rc::clone(&self.alignments),
-            layout,
-            preserve_quote_prefixes,
-        }
-    }
-
-    fn body_row_options(
-        &self,
-        cells: &Rc<[CachedGfmTableCell]>,
-        layout: GfmTableLayout,
-        preserve_quote_prefixes: bool,
-    ) -> FormatGfmTableRowOptions {
-        FormatGfmTableRowOptions {
-            cells: Rc::clone(cells),
-            widths: Rc::clone(&self.widths),
-            alignments: Rc::clone(&self.alignments),
-            layout,
-            preserve_quote_prefixes,
-        }
-    }
-
-    fn delimiter_options(
-        &self,
-        layout: GfmTableLayout,
-        preserve_quote_prefixes: bool,
-    ) -> FormatGfmTableDelimiterRowOptions {
-        FormatGfmTableDelimiterRowOptions {
-            widths: Rc::clone(&self.widths),
-            layout,
-            preserve_quote_prefixes,
-        }
-    }
 }
 
 impl FormatNodeRule<GfmTable> for FormatGfmTable {
@@ -200,8 +161,7 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
 
-        let body_rows = body.iter().collect::<Vec<_>>();
-        let table = PreparedGfmTable::build(&header, &delimiter, body_rows.clone().into_iter(), f)?;
+        let table = PreparedGfmTable::build(&header, &delimiter, body.iter(), f)?;
 
         let prose_wrap = f.options().prose_wrap();
         let preserve_quote_prefixes = prose_wrap == ProseWrap::Preserve;
@@ -212,9 +172,19 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
         };
 
         let content = format_with(|f| {
-            let header = header
-                .format()
-                .with_options(table.header_row_options(layout, preserve_quote_prefixes));
+            let header = format_with(|f| {
+                format_gfm_table_row(
+                    &header,
+                    Some(FormatGfmTableRowOptions {
+                        cells: &table.header,
+                        widths: &table.widths,
+                        alignments: &table.alignments,
+                        layout,
+                        preserve_quote_prefixes,
+                    }),
+                    f,
+                )
+            });
             match layout {
                 GfmTableLayout::Aligned => write!(f, [header])?,
                 GfmTableLayout::CompactWhenBroken(group_id) => {
@@ -222,22 +192,28 @@ impl FormatNodeRule<GfmTable> for FormatGfmTable {
                 }
             }
             write!(f, [hard_line_break()])?;
-            write!(
+            format_gfm_table_delimiter_row(
+                &delimiter,
+                Some(FormatGfmTableDelimiterRowOptions {
+                    widths: &table.widths,
+                    layout,
+                    preserve_quote_prefixes,
+                }),
                 f,
-                [delimiter
-                    .format()
-                    .with_options(table.delimiter_options(layout, preserve_quote_prefixes))]
             )?;
 
-            for (row, cells) in body_rows.iter().zip(&table.body) {
+            for (row, cells) in body.iter().zip(&table.body) {
                 write!(f, [hard_line_break()])?;
-                write!(
-                    f,
-                    [row.format().with_options(table.body_row_options(
+                format_gfm_table_row(
+                    &row,
+                    Some(FormatGfmTableRowOptions {
                         cells,
+                        widths: &table.widths,
+                        alignments: &table.alignments,
                         layout,
                         preserve_quote_prefixes,
-                    ))]
+                    }),
+                    f,
                 )?;
             }
 

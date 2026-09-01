@@ -1,28 +1,24 @@
 use crate::gfm::auxiliary::table::{CachedGfmTableCell, GfmTableAlignment, GfmTableLayout};
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
-use biome_formatter::{FormatRuleWithOptions, write};
+use biome_formatter::write;
 use biome_markdown_syntax::{GfmTableRow, GfmTableRowFields};
-use std::rc::Rc;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatGfmTableRow {
-    options: Option<FormatGfmTableRowOptions>,
-}
+pub(crate) struct FormatGfmTableRow;
 
 /// Prepared column data and output policy for formatting one table row.
 ///
 /// `cells` must correspond one-to-one with the row's source cells, and `widths`
 /// must contain an entry for every source cell. Rows fall back to unaligned
 /// structured formatting when either condition is not met.
-#[derive(Clone, Debug)]
-pub(crate) struct FormatGfmTableRowOptions {
+pub(crate) struct FormatGfmTableRowOptions<'a> {
     /// Preformatted cells in source order.
-    pub(crate) cells: Rc<[CachedGfmTableCell]>,
+    pub(crate) cells: &'a [CachedGfmTableCell],
     /// Cell width of each column, excluding padding and pipes.
-    pub(crate) widths: Rc<[usize]>,
+    pub(crate) widths: &'a [usize],
     /// Alignment encoded by each delimiter cell.
-    pub(crate) alignments: Rc<[GfmTableAlignment]>,
+    pub(crate) alignments: &'a [GfmTableAlignment],
     /// How columns are padded.
     pub(crate) layout: GfmTableLayout,
     /// Whether to emit quote prefixes stored on the row.
@@ -31,6 +27,15 @@ pub(crate) struct FormatGfmTableRowOptions {
 
 impl FormatNodeRule<GfmTableRow> for FormatGfmTableRow {
     fn fmt_fields(&self, node: &GfmTableRow, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        format_gfm_table_row(node, None, f)
+    }
+}
+
+pub(crate) fn format_gfm_table_row(
+    node: &GfmTableRow,
+    options: Option<FormatGfmTableRowOptions<'_>>,
+    f: &mut MarkdownFormatter,
+) -> FormatResult<()> {
         let GfmTableRowFields {
             quote_prefixes,
             l_pipe_token,
@@ -39,7 +44,7 @@ impl FormatNodeRule<GfmTableRow> for FormatGfmTableRow {
             newline_token,
         } = node.as_fields();
         let cell_count = cells.elements().count();
-        let options = self.options.as_ref().filter(|options| {
+        let options = options.filter(|options| {
             options.cells.len() == cell_count && options.widths.len() >= cell_count
         });
 
@@ -47,7 +52,9 @@ impl FormatNodeRule<GfmTableRow> for FormatGfmTableRow {
             write!(
                 f,
                 [prefix.format().with_options(FormatMdQuotePrefixOptions {
-                    should_remove: options.is_some_and(|options| !options.preserve_quote_prefixes),
+                    should_remove: options
+                        .as_ref()
+                        .is_some_and(|options| !options.preserve_quote_prefixes),
                 })]
             )?;
         }
@@ -129,13 +136,3 @@ impl FormatNodeRule<GfmTableRow> for FormatGfmTableRow {
         }
         Ok(())
     }
-}
-
-impl FormatRuleWithOptions<GfmTableRow> for FormatGfmTableRow {
-    type Options = FormatGfmTableRowOptions;
-
-    fn with_options(mut self, options: Self::Options) -> Self {
-        self.options = Some(options);
-        self
-    }
-}
