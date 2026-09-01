@@ -6012,6 +6012,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnmodifiedLoopConditionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnmodifiedLoopConditionOptions" }
+			]
+		},
+		"NoUnmodifiedLoopConditionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnnecessaryConditionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7063,6 +7073,13 @@
 					"description": "Reports custom properties used with var() that have no visible declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnmodifiedLoopCondition": {
+					"description": "Disallow loop conditions whose variables are never modified in the loop.\nSee https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnmodifiedLoopConditionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10609,6 +10626,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnmatchableAnbSelectorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnmodifiedLoopConditionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnmodifiedLoopConditionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

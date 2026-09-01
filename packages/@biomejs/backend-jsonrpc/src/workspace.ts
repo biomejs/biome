@@ -2590,6 +2590,11 @@ See https://biomejs.dev/linter/rules/no-undeclared-custom-properties
 	 */
 	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
 	/**
+	* Disallow loop conditions whose variables are never modified in the loop.
+See https://biomejs.dev/linter/rules/no-unmodified-loop-condition 
+	 */
+	noUnmodifiedLoopCondition?: NoUnmodifiedLoopConditionConfiguration;
+	/**
 	* Disallow unnecessary template expressions.
 See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
 	 */
@@ -4854,6 +4859,9 @@ export type NoUndeclaredClassesConfiguration =
 export type NoUndeclaredCustomPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredCustomPropertiesOptions;
+export type NoUnmodifiedLoopConditionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnmodifiedLoopConditionOptions;
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
@@ -6798,6 +6806,10 @@ export interface RuleWithNoUndeclaredCustomPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredCustomPropertiesOptions;
 }
+export interface RuleWithNoUnmodifiedLoopConditionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnmodifiedLoopConditionOptions;
+}
 export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8580,6 +8592,7 @@ export type NoTopLevelLiteralsOptions = {};
  */
 export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
+export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
@@ -10029,6 +10042,7 @@ export type Category =
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
+	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
