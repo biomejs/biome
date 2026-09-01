@@ -765,30 +765,31 @@ impl AnyVueSetupDeclaration {
             && let Some(initializer) = declarator.initializer()
             && let Ok(expression) = initializer.expression()
         {
-            return expression
-                .syntax()
-                .descendants()
-                .any(|node| is_props_source(&node, model));
+            return expression.syntax().descendants().any(|node| {
+                // Case 1: the `defineProps()` call itself, as in
+                // `const { foo } = defineProps(['foo'])`.
+                if let Some(call) = JsCallExpression::cast_ref(&node) {
+                    return is_vue_compiler_macro_call(&call, model, "defineProps");
+                }
+
+                // Case 2: a reference to a variable the call was assigned to, as in
+                // `const props = defineProps(['foo'])` followed by `toRef(props, 'foo')`.
+                if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
+                    return is_props_reference(&reference, model);
+                }
+
+                false
+            });
         }
         false
     }
 }
 
-/// Checks if the node is a source of props: either the `defineProps()` call itself, or a
-/// reference to a variable that call was assigned to.
-fn is_props_source(node: &JsSyntaxNode, model: &SemanticModel) -> bool {
-    // Case 1: the `defineProps()` call itself, as in `const { foo } = defineProps(['foo'])`.
-    if let Some(call) = JsCallExpression::cast_ref(node) {
-        return is_vue_compiler_macro_call(&call, model, "defineProps");
-    }
-
-    // Case 2: a reference to a variable the call was assigned to, as in
-    // `const props = defineProps(['foo'])` followed by `toRef(props, 'foo')`.
-    let Some(reference) = JsReferenceIdentifier::cast_ref(node) else {
-        return false;
-    };
+/// Checks if the reference resolves to a variable initialized by a `defineProps()` call,
+/// as in `const props = defineProps(['foo'])`.
+fn is_props_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) -> bool {
     model
-        .binding(&reference)
+        .binding(reference)
         .and_then(|binding| {
             binding
                 .syntax()
