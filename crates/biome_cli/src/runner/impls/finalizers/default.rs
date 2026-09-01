@@ -148,7 +148,7 @@ impl Finalizer for DefaultFinalizer {
                 } else {
                     Err(CliDiagnostic::check_warnings(category))
                 }
-            } else if should_exit_on_infos && errors == 0 {
+            } else if should_exit_on_infos {
                 if execution.is_safe_fixes_enabled() {
                     Err(CliDiagnostic::apply_infos(category))
                 } else {
