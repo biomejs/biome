@@ -75,9 +75,8 @@ impl FormatNodeRule<TsTypeArguments> for FormatTsTypeArguments {
         let should_inline = !is_arrow_function_variables
             && (ts_type_argument_list.len() == 0 || first_argument_can_be_hugged_or_is_null_type);
 
-        let first_argument_has_leading_line_comment = ts_type_argument_list
-            .first()
-            .is_some_and(|first_argument| {
+        let first_argument_has_leading_line_comment =
+            ts_type_argument_list.first().is_some_and(|first_argument| {
                 first_argument.is_ok_and(|argument| {
                     f.comments()
                         .leading_comments(argument.syntax())
@@ -93,7 +92,10 @@ impl FormatNodeRule<TsTypeArguments> for FormatTsTypeArguments {
                 f,
                 [group(&format_args![
                     l_angle_token.format(),
-                    indent(&format_args![hard_line_break(), ts_type_argument_list.format()]),
+                    indent(&format_args![
+                        hard_line_break(),
+                        ts_type_argument_list.format()
+                    ]),
                     r_angle_token.format()
                 ])]
             )
