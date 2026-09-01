@@ -133,6 +133,26 @@ fn parse_error() {
 }
 
 #[test]
+fn utf16_file_returns_error() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(
+        file_path.into(),
+        b"\xff\xfec\0o\0n\0s\0t\0 \0a\0 \0=\0 \01\0;\0",
+    );
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+}
+
+#[test]
 fn lint_error() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
