@@ -16,6 +16,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -55,11 +56,12 @@ TwRoot {
                         r_paren_token: R_PAREN@23..24 ")" [] [],
                     },
                 ],
-                r_brack_token: R_BRACKET@24..26 "]" [] [Whitespace(" ")],
+                r_brack_token: R_BRACKET@24..25 "]" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@25..26 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -78,11 +80,12 @@ TwRoot {
                         r_paren_token: R_PAREN@66..67 ")" [] [],
                     },
                 ],
-                r_brack_token: R_BRACKET@67..69 "]" [] [Whitespace(" ")],
+                r_brack_token: R_BRACKET@67..68 "]" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@68..69 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -121,11 +124,12 @@ TwRoot {
                         r_paren_token: R_PAREN@89..90 ")" [] [],
                     },
                 ],
-                r_brack_token: R_BRACKET@90..92 "]" [] [Whitespace(" ")],
+                r_brack_token: R_BRACKET@90..91 "]" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@91..92 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -187,8 +191,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@141..142 "\n" [] [],
     ],
-    eof_token: EOF@141..142 "" [Newline("\n")] [],
+    eof_token: EOF@142..142 "" [] [],
 }
 ```
 
@@ -197,12 +202,13 @@ TwRoot {
 ```
 0: TW_ROOT@0..142
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..141
-    0: TW_FULL_CANDIDATE@0..26
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..142
+    0: TW_FULL_CANDIDATE@0..25
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_ARBITRARY_CANDIDATE@0..26
+      3: TW_ARBITRARY_CANDIDATE@0..25
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..6 "width" [] []
         2: COLON@6..7 ":" [] []
@@ -225,14 +231,15 @@ TwRoot {
                       0: CSS_NUMBER_LITERAL@19..20 "1" [] []
                       1: IDENT@20..23 "rem" [] []
             3: R_PAREN@23..24 ")" [] []
-        4: R_BRACKET@24..26 "]" [] [Whitespace(" ")]
+        4: R_BRACKET@24..25 "]" [] []
         5: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@26..69
+    1: WHITESPACE@25..26 " " [] []
+    2: TW_FULL_CANDIDATE@26..68
       0: TW_VARIANT_LIST@26..26
       1: (empty)
       2: (empty)
-      3: TW_ARBITRARY_CANDIDATE@26..69
+      3: TW_ARBITRARY_CANDIDATE@26..68
         0: L_BRACKET@26..27 "[" [] []
         1: TW_PROPERTY@27..43 "background-image" [] []
         2: COLON@43..44 ":" [] []
@@ -243,14 +250,15 @@ TwRoot {
             2: CSS_URL_VALUE_RAW@48..66
               0: CSS_URL_VALUE_RAW_LITERAL@48..66 "/img/mountains.jpg" [] []
             3: R_PAREN@66..67 ")" [] []
-        4: R_BRACKET@67..69 "]" [] [Whitespace(" ")]
+        4: R_BRACKET@67..68 "]" [] []
         5: (empty)
       4: (empty)
-    2: TW_FULL_CANDIDATE@69..92
+    3: WHITESPACE@68..69 " " [] []
+    4: TW_FULL_CANDIDATE@69..91
       0: TW_VARIANT_LIST@69..69
       1: (empty)
       2: (empty)
-      3: TW_ARBITRARY_CANDIDATE@69..92
+      3: TW_ARBITRARY_CANDIDATE@69..91
         0: L_BRACKET@69..70 "[" [] []
         1: TW_PROPERTY@70..75 "color" [] []
         2: COLON@75..76 ":" [] []
@@ -273,10 +281,11 @@ TwRoot {
                     2: CSS_NUMBER@86..89
                       0: CSS_NUMBER_LITERAL@86..89 "0.5" [] []
             3: R_PAREN@89..90 ")" [] []
-        4: R_BRACKET@90..92 "]" [] [Whitespace(" ")]
+        4: R_BRACKET@90..91 "]" [] []
         5: (empty)
       4: (empty)
-    3: TW_FULL_CANDIDATE@92..141
+    5: WHITESPACE@91..92 " " [] []
+    6: TW_FULL_CANDIDATE@92..141
       0: TW_VARIANT_LIST@92..92
       1: (empty)
       2: (empty)
@@ -317,6 +326,7 @@ TwRoot {
         4: R_BRACKET@140..141 "]" [] []
         5: (empty)
       4: (empty)
-  2: EOF@141..142 "" [Newline("\n")] []
+    7: WHITESPACE@141..142 "\n" [] []
+  3: EOF@142..142 "" [] []
 
 ```

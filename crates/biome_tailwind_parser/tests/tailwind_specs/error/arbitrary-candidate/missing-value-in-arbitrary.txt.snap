@@ -16,6 +16,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -26,11 +27,12 @@ TwRoot {
                 property_token: TW_PROPERTY@1..6 "width" [] [],
                 colon_token: COLON@6..7 ":" [] [],
                 value: CssGenericComponentValueList [],
-                r_brack_token: R_BRACKET@7..9 "]" [] [Whitespace(" ")],
+                r_brack_token: R_BRACKET@7..8 "]" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@8..9 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -45,8 +47,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@12..13 "\n" [] [],
     ],
-    eof_token: EOF@12..13 "" [Newline("\n")] [],
+    eof_token: EOF@13..13 "" [] [],
 }
 ```
 
@@ -55,20 +58,22 @@ TwRoot {
 ```
 0: TW_ROOT@0..13
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..12
-    0: TW_FULL_CANDIDATE@0..9
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..13
+    0: TW_FULL_CANDIDATE@0..8
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_ARBITRARY_CANDIDATE@0..9
+      3: TW_ARBITRARY_CANDIDATE@0..8
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..6 "width" [] []
         2: COLON@6..7 ":" [] []
         3: CSS_GENERIC_COMPONENT_VALUE_LIST@7..7
-        4: R_BRACKET@7..9 "]" [] [Whitespace(" ")]
+        4: R_BRACKET@7..8 "]" [] []
         5: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@9..12
+    1: WHITESPACE@8..9 " " [] []
+    2: TW_FULL_CANDIDATE@9..12
       0: TW_VARIANT_LIST@9..9
       1: (empty)
       2: (empty)
@@ -79,7 +84,8 @@ TwRoot {
           0: TW_NUMBER@11..12 "5" [] []
         3: (empty)
       4: (empty)
-  2: EOF@12..13 "" [Newline("\n")] []
+    3: WHITESPACE@12..13 "\n" [] []
+  3: EOF@13..13 "" [] []
 
 ```
 

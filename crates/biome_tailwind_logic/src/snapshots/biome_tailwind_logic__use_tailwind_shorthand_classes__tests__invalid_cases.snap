@@ -533,3 +533,35 @@ Violations: 2
   replacements: ["truncate"]
   static replacements: ["truncate"]
 Fixed: `hover:truncate focus:truncate`
+
+## Input
+
+```text
+text-red-500 pl-2
+pr-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-2", "pr-2"]
+  replacements: ["px"]
+  static replacements: []
+Fixed: `text-red-500
+px-2`
+
+## Input
+
+```text
+w-4 ml-2 h-4 mr-2
+```
+
+Violations: 2
+- Violation 1
+  nodes: ["w-4", "h-4"]
+  replacements: ["size"]
+  static replacements: []
+- Violation 2
+  nodes: ["ml-2", "mr-2"]
+  replacements: ["mx"]
+  static replacements: []
+Fixed: `size-4 mx-2`

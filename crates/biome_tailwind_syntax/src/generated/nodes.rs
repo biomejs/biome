@@ -1287,6 +1287,7 @@ impl TwRoot {
     pub fn as_fields(&self) -> TwRootFields {
         TwRootFields {
             bom_token: self.bom_token(),
+            leading_whitespace_token: self.leading_whitespace_token(),
             candidates: self.candidates(),
             eof_token: self.eof_token(),
         }
@@ -1294,11 +1295,14 @@ impl TwRoot {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn leading_whitespace_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn candidates(&self) -> TwCandidateList {
-        support::list(&self.syntax, 1usize)
+        support::list(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwRoot {
@@ -1312,6 +1316,7 @@ impl Serialize for TwRoot {
 #[derive(Serialize)]
 pub struct TwRootFields {
     pub bom_token: Option<SyntaxToken>,
+    pub leading_whitespace_token: Option<SyntaxToken>,
     pub candidates: TwCandidateList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
@@ -3410,6 +3415,10 @@ impl std::fmt::Debug for TwRoot {
                     "bom_token",
                     &support::DebugOptionalElement(self.bom_token()),
                 )
+                .field(
+                    "leading_whitespace_token",
+                    &support::DebugOptionalElement(self.leading_whitespace_token()),
+                )
                 .field("candidates", &self.candidates())
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
@@ -5483,7 +5492,7 @@ impl Serialize for TwCandidateList {
         seq.end()
     }
 }
-impl AstNodeList for TwCandidateList {
+impl AstSeparatedList for TwCandidateList {
     type Language = Language;
     type Node = AnyTwFullCandidate;
     fn syntax_list(&self) -> &SyntaxList {
@@ -5496,19 +5505,19 @@ impl AstNodeList for TwCandidateList {
 impl Debug for TwCandidateList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("TwCandidateList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        f.debug_list().entries(self.elements()).finish()
     }
 }
-impl IntoIterator for &TwCandidateList {
-    type Item = AnyTwFullCandidate;
-    type IntoIter = AstNodeListIterator<Language, AnyTwFullCandidate>;
+impl IntoIterator for TwCandidateList {
+    type Item = SyntaxResult<AnyTwFullCandidate>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwFullCandidate>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for TwCandidateList {
-    type Item = AnyTwFullCandidate;
-    type IntoIter = AstNodeListIterator<Language, AnyTwFullCandidate>;
+impl IntoIterator for &TwCandidateList {
+    type Item = SyntaxResult<AnyTwFullCandidate>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwFullCandidate>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

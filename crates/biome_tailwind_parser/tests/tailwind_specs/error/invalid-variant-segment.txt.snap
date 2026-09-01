@@ -16,6 +16,7 @@ group-%:flex
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -33,8 +34,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@12..13 "\n" [] [],
     ],
-    eof_token: EOF@12..13 "" [Newline("\n")] [],
+    eof_token: EOF@13..13 "" [] [],
 }
 ```
 
@@ -43,7 +45,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..13
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..12
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..13
     0: TW_FULL_CANDIDATE@0..12
       0: TW_VARIANT_LIST@0..0
       1: (empty)
@@ -56,7 +59,8 @@ TwRoot {
         4: COLON@7..8 ":" [] []
         5: TW_BASE@8..12 "flex" [] []
       4: (empty)
-  2: EOF@12..13 "" [Newline("\n")] []
+    1: WHITESPACE@12..13 "\n" [] []
+  3: EOF@13..13 "" [] []
 
 ```
 
