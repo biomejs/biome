@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup-use-vmodel.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import { useVModel } from '@vueuse/core';
+const props = defineProps<{ modelValue?: string | number }>();
+const modelValue = useVModel(props, 'modelValue');
+</script>
+
+```
