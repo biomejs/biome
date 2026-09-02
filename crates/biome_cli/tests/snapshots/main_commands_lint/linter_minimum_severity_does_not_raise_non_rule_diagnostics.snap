@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+  "linter": {
+    "minimumSeverity": "error"
+  }
+}
+```
+
+## `file.js`
+
+```js
+export const a = 1;
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration schema version does not match the CLI version 0.0.0
+  
+    1 │ {
+  > 2 │   "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │   "linter": {
+    4 │     "minimumSeverity": "error"
+  
+  i   Expected:                     0.0.0
+      Found:                        1.0.0
+  
+  
+  i Run the command biome migrate to migrate the configuration file.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

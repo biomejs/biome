@@ -1,5 +1,6 @@
 mod rules;
 
+use crate::analyzer::MinimumSeverity;
 use crate::bool::Bool;
 use biome_analyze::RuleDomain;
 use biome_console::markup;
@@ -43,6 +44,11 @@ pub struct LinterConfiguration {
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<RuleDomains>,
+
+    /// The minimum severity of the diagnostics emitted by lint rules. Rules with a lower severity are raised to it. `info` by default.
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub minimum_severity: Option<MinimumSeverity>,
 }
 
 impl DeserializableValidator for LinterConfiguration {

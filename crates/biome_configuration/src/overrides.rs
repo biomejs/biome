@@ -1,5 +1,5 @@
 use crate::analyzer::assist::AssistEnabled;
-use crate::analyzer::{LinterEnabled, RuleDomains};
+use crate::analyzer::{LinterEnabled, MinimumSeverity, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 #[cfg(feature = "lang_html")]
 use crate::html::HtmlConfiguration;
@@ -729,6 +729,11 @@ pub struct OverrideLinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     pub domains: Option<RuleDomains>,
+
+    /// The minimum severity of the diagnostics emitted by lint rules
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
+    pub minimum_severity: Option<MinimumSeverity>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

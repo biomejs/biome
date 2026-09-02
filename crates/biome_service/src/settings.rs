@@ -15,7 +15,7 @@ use biome_configuration::JsConfiguration;
 #[cfg(feature = "lang_md")]
 use biome_configuration::MarkdownConfiguration;
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
-use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
+use biome_configuration::analyzer::{LinterEnabled, MinimumSeverity, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
@@ -429,6 +429,22 @@ impl Settings {
         result
     }
 
+    pub(crate) fn as_linter_minimum_severity_by_indices(
+        &self,
+        indices: &[usize],
+    ) -> Option<MinimumSeverity> {
+        let mut result = self.linter.minimum_severity;
+        for &index in indices {
+            let Some(pattern) = self.override_settings.patterns.get(index) else {
+                continue;
+            };
+            if let Some(minimum_severity) = pattern.linter.minimum_severity {
+                result = Some(minimum_severity);
+            }
+        }
+        result
+    }
+
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
     pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<'_, RuleDomains>> {
         let indices = self
@@ -768,6 +784,12 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
             .as_linter_rules_by_indices(self.query().override_indices())
     }
 
+    pub(crate) fn linter_minimum_severity(&self) -> MinimumSeverity {
+        self.effective_settings()
+            .as_linter_minimum_severity_by_indices(self.query().override_indices())
+            .unwrap_or_default()
+    }
+
     /// Whether the linter is enabled for this file path
     pub fn linter_enabled_for_file_path<L>(&self, path: &Utf8Path) -> bool
     where
@@ -893,6 +915,9 @@ pub struct LinterSettings {
 
     /// Rule domains
     pub domains: Option<RuleDomains>,
+
+    /// Minimum severity of lint rules
+    pub minimum_severity: Option<MinimumSeverity>,
 }
 
 impl LinterSettings {
@@ -934,6 +959,9 @@ pub struct OverrideLinterSettings {
 
     /// List of domains
     pub domains: Option<RuleDomains>,
+
+    /// Minimum severity of lint rules
+    pub minimum_severity: Option<MinimumSeverity>,
 }
 
 /// Linter settings for the entire workspace
@@ -2351,6 +2379,9 @@ pub fn to_override_settings(
                 enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
+                minimum_severity: linter
+                    .minimum_severity
+                    .or(current_settings.linter.minimum_severity),
             })
             .unwrap_or_default();
         let assist = pattern
@@ -2643,6 +2674,7 @@ pub fn to_linter_settings(
         rules: conf.rules,
         includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
+        minimum_severity: conf.minimum_severity,
     })
 }
 
@@ -2655,6 +2687,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             rules: conf.rules,
             includes: Default::default(),
             domains: conf.domains,
+            minimum_severity: conf.minimum_severity,
         })
     }
 }

@@ -373,6 +373,10 @@ match these patterns.
 	 */
 	includes?: NormalizedGlob[];
 	/**
+	 * The minimum severity of the diagnostics emitted by lint rules. Rules with a lower severity are raised to it. `info` by default.
+	 */
+	minimumSeverity?: MinimumSeverity;
+	/**
 	 * List of rules
 	 */
 	rules?: Rules;
@@ -1016,6 +1020,10 @@ export interface JsonParserConfiguration {
 	allowTrailingCommas?: Bool;
 }
 export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
+/**
+ * The minimum severity of the diagnostics emitted by lint rules.
+ */
+export type MinimumSeverity = "info" | "warn" | "error";
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -1425,6 +1433,10 @@ export interface OverrideLinterConfiguration {
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
 	enabled?: Bool;
+	/**
+	 * The minimum severity of the diagnostics emitted by lint rules
+	 */
+	minimumSeverity?: MinimumSeverity;
 	/**
 	 * List of rules
 	 */
