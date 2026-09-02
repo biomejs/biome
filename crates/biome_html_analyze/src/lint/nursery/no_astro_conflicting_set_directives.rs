@@ -78,18 +78,9 @@ impl SetDirectiveKind {
     }
 }
 
-enum Conflict {
-    Directive {
-        kind: SetDirectiveKind,
-        directive: AstroSetDirective,
-    },
-    ChildContent {
-        range: TextRange,
-    },
-}
-
-pub struct State {
-    conflicts: Box<[Conflict]>,
+pub enum ContentSource {
+    SetDirective(AstroSetDirective),
+    ChildContent(TextRange),
 }
 
 fn is_js_trivia_only(mut source: &str) -> bool {
@@ -135,7 +126,7 @@ fn meaningful_child_range(content: &AnyHtmlContent) -> Option<TextRange> {
 
 impl Rule for NoAstroConflictingSetDirectives {
     type Query = Ast<AstroSetDirective>;
-    type State = State;
+    type State = Box<[ContentSource]>;
     type Signals = Option<Self::State>;
     type Options = NoAstroConflictingSetDirectivesOptions;
 
@@ -151,7 +142,7 @@ impl Rule for NoAstroConflictingSetDirectives {
             .syntax()
             .ancestors()
             .find_map(AnyHtmlTagElement::cast)?;
-        let mut conflicts = Vec::new();
+        let mut conflicting_sources = Vec::new();
 
         for attribute in element.attributes().iter() {
             let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroSetDirective(
@@ -163,13 +154,10 @@ impl Rule for NoAstroConflictingSetDirectives {
             if sibling.syntax() == directive.syntax() {
                 continue;
             }
-            let Some(kind) = SetDirectiveKind::from_directive(&sibling) else {
+            if SetDirectiveKind::from_directive(&sibling).is_none() {
                 continue;
-            };
-            conflicts.push(Conflict::Directive {
-                kind,
-                directive: sibling,
-            });
+            }
+            conflicting_sources.push(ContentSource::SetDirective(sibling));
         }
 
         if let AnyHtmlTagElement::HtmlOpeningElement(opening_element) = element {
@@ -184,15 +172,14 @@ impl Rule for NoAstroConflictingSetDirectives {
 
             if let Some(first) = child_ranges.next() {
                 let last = child_ranges.next_back().unwrap_or(first);
-                conflicts.push(Conflict::ChildContent {
-                    range: TextRange::new(first.start(), last.end()),
-                });
+                conflicting_sources.push(ContentSource::ChildContent(TextRange::new(
+                    first.start(),
+                    last.end(),
+                )));
             }
         }
 
-        (!conflicts.is_empty()).then(|| State {
-            conflicts: conflicts.into_boxed_slice(),
-        })
+        (!conflicting_sources.is_empty()).then(|| conflicting_sources.into_boxed_slice())
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
@@ -204,8 +191,8 @@ impl Rule for NoAstroConflictingSetDirectives {
         state: &Self::State,
         suppressions: &mut RuleSuppressions<HtmlLanguage>,
     ) {
-        for conflict in &state.conflicts {
-            if let Conflict::Directive { directive, .. } = conflict {
+        for source in state.iter() {
+            if let ContentSource::SetDirective(directive) = source {
                 suppressions.suppress_node(directive.syntax().clone());
             }
         }
@@ -222,15 +209,18 @@ impl Rule for NoAstroConflictingSetDirectives {
             },
         );
 
-        for conflict in &state.conflicts {
-            diagnostic = match conflict {
-                Conflict::Directive { kind, directive } => diagnostic.detail(
-                    directive.range(),
-                    markup! {
-                        "The "<Emphasis>{kind.name()}</Emphasis>" directive defines the element content here."
-                    },
-                ),
-                Conflict::ChildContent { range } => diagnostic.detail(
+        for source in state.iter() {
+            diagnostic = match source {
+                ContentSource::SetDirective(directive) => {
+                    let kind = SetDirectiveKind::from_directive(directive)?;
+                    diagnostic.detail(
+                        directive.range(),
+                        markup! {
+                            "The "<Emphasis>{kind.name()}</Emphasis>" directive defines the element content here."
+                        },
+                    )
+                }
+                ContentSource::ChildContent(range) => diagnostic.detail(
                     *range,
                     markup! {
                         "Child content defines the element content here."
