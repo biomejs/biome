@@ -11,7 +11,7 @@ use crate::{
 };
 use biome_aria::Attribute;
 use biome_parser::{TokenSet, token_set};
-use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TokenText, declare_node_union};
+use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
 
 /// [Void elements](https://html.spec.whatwg.org/#void-elements): they never have
@@ -188,27 +188,6 @@ impl AnyHtmlElement {
             Self::HtmlSelfClosingElement(element) => Some(element.attributes()),
             // Other variants don't have attributes
             _ => None,
-        }
-    }
-}
-
-impl AnyHtmlContent {
-    pub fn trimmed_range(&self) -> Option<TextRange> {
-        match self {
-            Self::HtmlContent(content) => {
-                let token = content.value_token().ok()?;
-                let text = token.token_text_trimmed().trim_token();
-                (!text.is_empty()).then(|| text.source_range(token.text_range()))
-            }
-            Self::HtmlEmbeddedContent(content) => {
-                let token = content.value_token().ok()?;
-                let text = token.token_text_trimmed().trim_token();
-                (!text.is_empty()).then(|| text.source_range(token.text_range()))
-            }
-            Self::AnyHtmlTextExpression(AnyHtmlTextExpression::HtmlSingleTextExpression(
-                expression,
-            )) => expression.expression().map(|_| expression.range()),
-            Self::AnyHtmlTextExpression(expression) => Some(expression.range()),
         }
     }
 }
@@ -710,9 +689,9 @@ pub fn is_css_style_attribute_value(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use biome_html_factory::syntax::{AnyHtmlContent, HtmlAttribute, HtmlElement};
+    use biome_html_factory::syntax::{HtmlAttribute, HtmlElement};
     use biome_html_parser::{HtmlParserOptions, parse_html};
-    use biome_rowan::{AstNode, TextRange};
+    use biome_rowan::AstNode;
 
     fn first_element(html: &str) -> HtmlElement {
         parse_html(html, HtmlParserOptions::default())
@@ -731,61 +710,6 @@ mod tests {
             .unwrap()
             .text_trimmed()
             .to_string()
-    }
-
-    fn first_content(html: &str, options: HtmlParserOptions) -> AnyHtmlContent {
-        parse_html(html, options)
-            .syntax()
-            .descendants()
-            .find_map(AnyHtmlContent::cast)
-            .unwrap()
-    }
-
-    #[test]
-    fn html_content_trimmed_range_excludes_unicode_whitespace() {
-        let content = first_content("<div>\u{2003}text\u{2003}</div>", Default::default());
-
-        assert_eq!(
-            content.trimmed_range(),
-            Some(TextRange::new(8.into(), 12.into()))
-        );
-
-        let content = first_content("<div>\u{2003}</div>", Default::default());
-        assert_eq!(content.trimmed_range(), None);
-    }
-
-    #[test]
-    fn html_embedded_content_trimmed_range_excludes_unicode_whitespace() {
-        let content = first_content("<script>\u{2003}raw\u{2003}</script>", Default::default());
-
-        assert_eq!(
-            content.trimmed_range(),
-            Some(TextRange::new(11.into(), 14.into()))
-        );
-    }
-
-    #[test]
-    fn html_expression_content_uses_node_range_and_ignores_empty_expression() {
-        let content = first_content(
-            "<div>{value}</div>",
-            HtmlParserOptions::default()
-                .with_single_text_expression()
-                .with_frontmatter(),
-        );
-
-        assert_eq!(
-            content.trimmed_range(),
-            Some(TextRange::new(5.into(), 12.into()))
-        );
-
-        let content = first_content(
-            "<div>{   }</div>",
-            HtmlParserOptions::default()
-                .with_single_text_expression()
-                .with_frontmatter(),
-        );
-
-        assert_eq!(content.trimmed_range(), None);
     }
 
     #[test]

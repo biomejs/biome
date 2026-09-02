@@ -18,10 +18,12 @@ expression: valid.astro
     <!-- comment -->
 </div>
 <div set:html={html}>   </div>
+<div set:html={html}> </div>
 <div set:text={text}>
     <!-- comment -->
 </div>
 <script set:html={html}>   </script>
+<script set:html={html}> </script>
 <style set:text={text}>
 
 </style>

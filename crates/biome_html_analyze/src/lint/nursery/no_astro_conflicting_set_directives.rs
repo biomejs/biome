@@ -112,16 +112,25 @@ fn is_js_trivia_only(mut source: &str) -> bool {
 }
 
 fn meaningful_child_range(content: &AnyHtmlContent) -> Option<TextRange> {
-    let range = content.trimmed_range()?;
-    let AnyHtmlContent::AnyHtmlTextExpression(
-        AnyHtmlTextExpression::HtmlSingleTextExpression(expression),
-    ) = content
-    else {
-        return Some(range);
-    };
-    let token = expression.expression()?.html_literal_token().ok()?;
-
-    (!is_js_trivia_only(token.text_trimmed())).then_some(range)
+    match content {
+        AnyHtmlContent::HtmlContent(content) => {
+            let token = content.value_token().ok()?;
+            let text = token.token_text_trimmed().trim_token();
+            (!text.is_empty()).then(|| text.source_range(token.text_range()))
+        }
+        AnyHtmlContent::HtmlEmbeddedContent(content) => {
+            let token = content.value_token().ok()?;
+            let text = token.token_text_trimmed().trim_token();
+            (!text.is_empty()).then(|| text.source_range(token.text_range()))
+        }
+        AnyHtmlContent::AnyHtmlTextExpression(
+            AnyHtmlTextExpression::HtmlSingleTextExpression(expression),
+        ) => {
+            let token = expression.expression()?.html_literal_token().ok()?;
+            (!is_js_trivia_only(token.text_trimmed())).then(|| expression.range())
+        }
+        AnyHtmlContent::AnyHtmlTextExpression(expression) => Some(expression.range()),
+    }
 }
 
 impl Rule for NoAstroConflictingSetDirectives {
