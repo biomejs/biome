@@ -14,14 +14,14 @@ import { test } from "bun:test";
 import { feature } from "bun:bundle";
 
 // dynamic import
-import "bun";
+import("bun");
 
 // with bun: protocol
-import "bun:ffi";
-import "bun:jsc";
-import "bun:sqlite";
-import "bun:test";
-import "bun:bundle";
+import("bun:ffi");
+import("bun:jsc");
+import("bun:sqlite");
+import("bun:test");
+import("bun:bundle");
 
 ```
 
@@ -29,16 +29,16 @@ import "bun:bundle";
 ```
 invalid-esm.js:1:17 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
   > 1 │ import Bun from "bun";
       │                 ^^^^^
     2 │ 
     3 │ // with bun: protocol
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -48,7 +48,7 @@ invalid-esm.js:1:17 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:4:24 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     3 │ // with bun: protocol
   > 4 │ import { dlopen } from "bun:ffi";
@@ -56,9 +56,9 @@ invalid-esm.js:4:24 lint/nursery/noBunModules ━━━━━━━━━━━�
     5 │ import { jsc } from "bun:jsc";
     6 │ import { Database } from "bun:sqlite";
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -68,7 +68,7 @@ invalid-esm.js:4:24 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:5:21 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     3 │ // with bun: protocol
     4 │ import { dlopen } from "bun:ffi";
@@ -77,9 +77,9 @@ invalid-esm.js:5:21 lint/nursery/noBunModules ━━━━━━━━━━━�
     6 │ import { Database } from "bun:sqlite";
     7 │ import { test } from "bun:test";
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -89,7 +89,7 @@ invalid-esm.js:5:21 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:6:26 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     4 │ import { dlopen } from "bun:ffi";
     5 │ import { jsc } from "bun:jsc";
@@ -98,9 +98,9 @@ invalid-esm.js:6:26 lint/nursery/noBunModules ━━━━━━━━━━━�
     7 │ import { test } from "bun:test";
     8 │ import { feature } from "bun:bundle";
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -110,7 +110,7 @@ invalid-esm.js:6:26 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:7:22 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     5 │ import { jsc } from "bun:jsc";
     6 │ import { Database } from "bun:sqlite";
@@ -119,9 +119,9 @@ invalid-esm.js:7:22 lint/nursery/noBunModules ━━━━━━━━━━━�
     8 │ import { feature } from "bun:bundle";
     9 │ 
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -131,7 +131,7 @@ invalid-esm.js:7:22 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:8:25 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
      6 │ import { Database } from "bun:sqlite";
      7 │ import { test } from "bun:test";
@@ -140,9 +140,9 @@ invalid-esm.js:8:25 lint/nursery/noBunModules ━━━━━━━━━━━�
      9 │ 
     10 │ // dynamic import
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -152,17 +152,17 @@ invalid-esm.js:8:25 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:11:8 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     10 │ // dynamic import
-  > 11 │ import "bun";
+  > 11 │ import("bun");
        │        ^^^^^
     12 │ 
     13 │ // with bun: protocol
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -172,17 +172,17 @@ invalid-esm.js:11:8 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:14:8 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     13 │ // with bun: protocol
-  > 14 │ import "bun:ffi";
+  > 14 │ import("bun:ffi");
        │        ^^^^^^^^^
-    15 │ import "bun:jsc";
-    16 │ import "bun:sqlite";
+    15 │ import("bun:jsc");
+    16 │ import("bun:sqlite");
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -192,18 +192,18 @@ invalid-esm.js:14:8 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:15:8 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
     13 │ // with bun: protocol
-    14 │ import "bun:ffi";
-  > 15 │ import "bun:jsc";
+    14 │ import("bun:ffi");
+  > 15 │ import("bun:jsc");
        │        ^^^^^^^^^
-    16 │ import "bun:sqlite";
-    17 │ import "bun:test";
+    16 │ import("bun:sqlite");
+    17 │ import("bun:test");
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -213,18 +213,18 @@ invalid-esm.js:15:8 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:16:8 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
-    14 │ import "bun:ffi";
-    15 │ import "bun:jsc";
-  > 16 │ import "bun:sqlite";
+    14 │ import("bun:ffi");
+    15 │ import("bun:jsc");
+  > 16 │ import("bun:sqlite");
        │        ^^^^^^^^^^^^
-    17 │ import "bun:test";
-    18 │ import "bun:bundle";
+    17 │ import("bun:test");
+    18 │ import("bun:bundle");
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -234,18 +234,18 @@ invalid-esm.js:16:8 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:17:8 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
-    15 │ import "bun:jsc";
-    16 │ import "bun:sqlite";
-  > 17 │ import "bun:test";
+    15 │ import("bun:jsc");
+    16 │ import("bun:sqlite");
+  > 17 │ import("bun:test");
        │        ^^^^^^^^^^
-    18 │ import "bun:bundle";
+    18 │ import("bun:bundle");
     19 │ 
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -255,17 +255,17 @@ invalid-esm.js:17:8 lint/nursery/noBunModules ━━━━━━━━━━━�
 ```
 invalid-esm.js:18:8 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Bun modules is forbidden.
+  ! This import references a Bun builtin module.
   
-    16 │ import "bun:sqlite";
-    17 │ import "bun:test";
-  > 18 │ import "bun:bundle";
+    16 │ import("bun:sqlite");
+    17 │ import("bun:test");
+  > 18 │ import("bun:bundle");
        │        ^^^^^^^^^^^^
     19 │ 
   
-  i Can be useful for client-side web projects that do not have access to those modules.
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
   
-  i Remove the import module.
+  i Remove this import or replace it with a runtime-agnostic alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

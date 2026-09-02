@@ -8,11 +8,11 @@ import { test } from "bun:test";
 import { feature } from "bun:bundle";
 
 // dynamic import
-import "bun";
+import("bun");
 
 // with bun: protocol
-import "bun:ffi";
-import "bun:jsc";
-import "bun:sqlite";
-import "bun:test";
-import "bun:bundle";
+import("bun:ffi");
+import("bun:jsc");
+import("bun:sqlite");
+import("bun:test");
+import("bun:bundle");

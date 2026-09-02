@@ -1,4 +1,4 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, inner_string_text};
@@ -35,7 +35,6 @@ declare_lint_rule! {
         version: "next",
         name: "noBunModules",
         language: "js",
-        sources: &[RuleSource::EslintImport("no-nodejs-modules").inspired()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -79,13 +78,13 @@ impl Rule for NoBunModules {
                 rule_category!(),
                 range,
                 markup! {
-                    "Using Bun modules is forbidden."
+                    "This import references a Bun builtin module."
                 },
             )
             .note(markup! {
-                "Can be useful for client-side web projects that do not have access to those modules."
+                "Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments."
             }).note(markup!{
-                "Remove the import module."
+                "Remove this import or replace it with a runtime-agnostic alternative."
             }),
         )
     }

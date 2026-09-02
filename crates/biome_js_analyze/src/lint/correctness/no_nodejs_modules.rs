@@ -87,13 +87,13 @@ impl Rule for NoNodejsModules {
                 rule_category!(),
                 range,
                 markup! {
-                    "Using Node.js modules is forbidden."
+                    "This import references a Node.js builtin module."
                 },
             )
             .note(markup! {
-                "Can be useful for client-side web projects that do not have access to those modules."
+                "Node.js builtin modules are unavailable outside the Node.js runtime, so this import breaks client-side and other non-Node.js environments."
             }).note(markup!{
-                "Remove the import module."
+                "Remove this import or replace it with a runtime-agnostic alternative."
             }),
         )
     }
