@@ -23,6 +23,7 @@ This file contains rules that apply to every automated contribution. Detailed wo
 - Make the smallest change that satisfies the requested behavior.
 - Add tests for code changes. Bug fixes require a case that fails without the fix.
 - Run the narrowest relevant tests first, then broader checks when justified.
+- Run the tests of the current crate to check possible regressions.
 - Review generated snapshots as behavior, not disposable output.
 - Run `just f` and `just l` before committing.
 
