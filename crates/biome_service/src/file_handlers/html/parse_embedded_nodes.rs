@@ -287,26 +287,23 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 if let Some(directive) = VueDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
-                    let is_v_on = directive
-                        .name_token()
-                        .is_ok_and(|t| t.text_trimmed() == "v-on" && directive.arg().is_some());
-                    let is_class_attribute = directive
-                        .name_token()
-                        .is_ok_and(|name| name.text_trimmed() == "v-bind")
+                    let name_token = directive.name_token().ok();
+                    let name = name_token.as_ref().map(|t| t.text_trimmed());
+                    let is_v_on = name.is_some_and(|n| n == "v-on") && directive.arg().is_some();
+                    let is_slot = name.is_some_and(|n| n.eq_ignore_ascii_case("v-slot"));
+                    let is_class_attribute = name.is_some_and(|n| n == "v-bind")
                         && directive
                             .arg()
                             .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|arg| arg.name_token().ok())
                             .is_some_and(|name| name.text_trimmed() == "class");
-                    if let Some(candidate) =
-                        build_vue_directive_candidate(
-                            &initializer,
-                            is_v_on,
-                            is_class_attribute,
-                            directive.is_slot(),
-                        )
-                    {
+                    if let Some(candidate) = build_vue_directive_candidate(
+                        &initializer,
+                        is_v_on,
+                        is_class_attribute,
+                        is_slot,
+                    ) {
                         ctx.parse_and_push(
                             &candidate,
                             &doc_file_source,
