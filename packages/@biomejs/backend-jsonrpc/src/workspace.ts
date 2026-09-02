@@ -2758,6 +2758,11 @@ See https://biomejs.dev/linter/rules/use-nullish-coalescing
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
 	/**
+	* Reports resize and scroll listeners that read layout.
+See https://biomejs.dev/linter/rules/use-observer-api 
+	 */
+	useObserverApi?: UseObserverApiConfiguration;
+	/**
 	* Enforce valid describe() callback.
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
@@ -4965,6 +4970,9 @@ export type UseNamedLayerConfiguration =
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
+export type UseObserverApiConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseObserverApiOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -6962,6 +6970,10 @@ export interface RuleWithUseNullishCoalescingOptions {
 	level: RulePlainConfiguration;
 	options?: UseNullishCoalescingOptions;
 }
+export interface RuleWithUseObserverApiOptions {
+	level: RulePlainConfiguration;
+	options?: UseObserverApiOptions;
+}
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
@@ -8787,6 +8799,7 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreTernaryTests?: boolean;
 }
+export type UseObserverApiOptions = {};
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
@@ -10113,6 +10126,7 @@ export type Category =
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/useObserverApi"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
