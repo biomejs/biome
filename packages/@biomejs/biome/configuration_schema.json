@@ -7438,6 +7438,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueBaseImport": {
+					"description": "Enforce importing Vue's public entry point instead of internal Vue packages.\nSee https://biomejs.dev/linter/rules/use-vue-base-import",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueBaseImportConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentDefinePropsDeclaration": {
 					"description": "Enforce consistent defineProps declaration style.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
 					"anyOf": [
@@ -12842,6 +12849,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueBaseImportOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueBaseImportOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -17149,6 +17166,16 @@
 			]
 		},
 		"UseVarsOnTopOptions": { "type": "object", "additionalProperties": false },
+		"UseVueBaseImportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueBaseImportOptions" }
+			]
+		},
+		"UseVueBaseImportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueConsistentDefinePropsDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
