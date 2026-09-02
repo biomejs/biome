@@ -1,19 +1,20 @@
-use crate::services::manifest::Manifest;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportLike, inner_string_text};
-use biome_resolver::is_builtin_node_module;
+use biome_resolver::is_builtin_bun_module;
 use biome_rowan::TextRange;
-use biome_rule_options::no_nodejs_modules::NoNodejsModulesOptions;
+use biome_rule_options::no_bun_modules::NoBunModulesOptions;
+
+use crate::services::manifest::Manifest;
 
 declare_lint_rule! {
-    /// Forbid the use of Node.js builtin modules.
+    /// Forbid the use of Bun builtin modules.
     ///
     /// This can be useful for client-side web projects that don't have access to those modules.
     ///
     /// The rule doesn't trigger if there are dependencies declared in the `package.json` that match
-    /// the name of a built-in Node.js module.
+    /// the name of a built-in Bun module.
     ///
     /// Type-only imports are ignored.
     ///
@@ -22,37 +23,32 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// import fs from "fs";
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// import path from "node:path";
+    /// import { Database } from "bun:sqlite";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// import fs from "fs-custom";
+    /// import { Database } from "custom-sqlite";
     /// ```
     ///
     /// ```ts
-    /// import type path from "node:path";
+    /// import type { DatabaseOptions } from "bun:sqlite";
     /// ```
-    pub NoNodejsModules {
-        version: "1.5.0",
-        name: "noNodejsModules",
+    pub NoBunModules {
+        version: "next",
+        name: "noBunModules",
         language: "js",
-        sources: &[RuleSource::EslintImport("no-nodejs-modules").same()],
         recommended: false,
         severity: Severity::Warning,
     }
 }
 
-impl Rule for NoNodejsModules {
+impl Rule for NoBunModules {
     type Query = Manifest<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = NoNodejsModulesOptions;
+    type Options = NoBunModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -75,7 +71,7 @@ impl Rule for NoNodejsModules {
         {
             return None;
         }
-        is_builtin_node_module(module_name_text).then_some(module_name.text_trimmed_range())
+        is_builtin_bun_module(module_name_text).then_some(module_name.text_trimmed_range())
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -84,11 +80,11 @@ impl Rule for NoNodejsModules {
                 rule_category!(),
                 range,
                 markup! {
-                    "This import references a Node.js builtin module."
+                    "This import references a Bun builtin module."
                 },
             )
             .note(markup! {
-                "Node.js builtin modules are unavailable outside the Node.js runtime, so this import breaks client-side and other non-Node.js environments."
+                "Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments."
             }).note(markup!{
                 "Remove this import or replace it with a runtime-agnostic alternative."
             }),

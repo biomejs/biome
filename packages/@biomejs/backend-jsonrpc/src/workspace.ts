@@ -2365,6 +2365,11 @@ See https://biomejs.dev/linter/rules/no-base-to-string
 	 */
 	noBaseToString?: NoBaseToStringConfiguration;
 	/**
+	* Forbid the use of Bun builtin modules.
+See https://biomejs.dev/linter/rules/no-bun-modules 
+	 */
+	noBunModules?: NoBunModulesConfiguration;
+	/**
 	* Disallows defining React components or custom hooks inside other functions.
 See https://biomejs.dev/linter/rules/no-component-hook-factories 
 	 */
@@ -4744,6 +4749,9 @@ export type NoAstroSetHtmlDirectiveConfiguration =
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
+export type NoBunModulesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBunModulesOptions;
 export type NoComponentHookFactoriesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoComponentHookFactoriesOptions;
@@ -6647,6 +6655,10 @@ export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
 }
+export interface RuleWithNoBunModulesOptions {
+	level: RulePlainConfiguration;
+	options?: NoBunModulesOptions;
+}
 export interface RuleWithNoComponentHookFactoriesOptions {
 	level: RulePlainConfiguration;
 	options?: NoComponentHookFactoriesOptions;
@@ -8521,6 +8533,7 @@ export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
+export type NoBunModulesOptions = {};
 export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
 export interface NoDrizzleDeleteWithoutWhereOptions {
@@ -10049,6 +10062,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
+	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"

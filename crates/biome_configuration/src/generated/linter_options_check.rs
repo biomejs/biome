@@ -108,6 +108,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_blank_target::NoBlankTargetOptions>(),
     ));
     result.push((
+        "nursery",
+        "noBunModules",
+        TypeId::of::<biome_rule_options::no_bun_modules::NoBunModulesOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noCatchAssign",
         TypeId::of::<biome_rule_options::no_catch_assign::NoCatchAssignOptions>(),

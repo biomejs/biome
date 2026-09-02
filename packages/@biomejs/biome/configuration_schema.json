@@ -3223,6 +3223,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoBunModulesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBunModulesOptions" }
+			]
+		},
+		"NoBunModulesOptions": { "type": "object", "additionalProperties": false },
 		"NoCatchAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6781,6 +6788,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBunModules": {
+					"description": "Forbid the use of Bun builtin modules.\nSee https://biomejs.dev/linter/rules/no-bun-modules",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBunModulesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noComponentHookFactories": {
 					"description": "Disallows defining React components or custom hooks inside other functions.\nSee https://biomejs.dev/linter/rules/no-component-hook-factories",
 					"anyOf": [
@@ -8347,6 +8361,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBlankTargetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBunModulesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBunModulesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
