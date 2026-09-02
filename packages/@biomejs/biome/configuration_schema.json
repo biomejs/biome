@@ -6612,6 +6612,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedScopedSlotsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedScopedSlotsOptions" }
+			]
+		},
+		"NoVueDeprecatedScopedSlotsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDuplicateKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7122,6 +7132,13 @@
 					"description": "Disallow type conversions that do not change the type of an expression.\nSee https://biomejs.dev/linter/rules/no-useless-type-conversion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessTypeConversionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedScopedSlots": {
+					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11149,6 +11166,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDataObjectDeclarationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedScopedSlotsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedScopedSlotsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

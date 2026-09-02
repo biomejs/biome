@@ -2625,6 +2625,11 @@ See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	* Disallow the deprecated Vue $scopedSlots API.
+See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots 
+	 */
+	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
+	/**
 	* Disallow importing Vue compiler macros.
 See https://biomejs.dev/linter/rules/no-vue-import-compiler-macros 
 	 */
@@ -4890,6 +4895,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoVueDeprecatedScopedSlotsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedScopedSlotsOptions;
 export type NoVueImportCompilerMacrosConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueImportCompilerMacrosOptions;
@@ -6851,6 +6859,11 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedScopedSlotsOptions;
+}
 export interface RuleWithNoVueImportCompilerMacrosOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueImportCompilerMacrosOptions;
@@ -8658,6 +8671,7 @@ Defaults to `false`.
 }
 export type NoUnusedClassesOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVOnNumberValuesOptions = {};
@@ -10079,6 +10093,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVOnNumberValues"
