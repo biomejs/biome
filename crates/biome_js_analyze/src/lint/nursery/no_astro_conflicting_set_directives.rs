@@ -4,11 +4,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{
-    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression,
-    AstroSetDirective, HtmlElement, HtmlLanguage, element_ext::AnyHtmlTagElement,
+use biome_js_syntax::{
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxChild, JsLanguage, JsxAttribute, JsxElement,
+    JsxNamespaceName, jsx_ext::AnyJsxElement,
 };
-use biome_languages::HtmlFileSource;
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::no_astro_conflicting_set_directives::NoAstroConflictingSetDirectivesOptions;
 
@@ -24,18 +24,13 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```astro,expect_diagnostic
-    /// <div set:html={content}>Fallback content</div>
-    /// ```
-    ///
-    /// ```astro,expect_diagnostic
-    /// <div set:html={html} set:text={text}></div>
+    /// <div>{items.map((item) => <span set:html={item.html}>Fallback content</span>)}</div>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```astro
-    /// <div set:html={content}></div>
-    /// <div>Fallback content</div>
+    /// <div>{items.map((item) => <span set:html={item.html} />)}</div>
     /// ```
     ///
     /// ## References
@@ -44,7 +39,7 @@ declare_lint_rule! {
     pub NoAstroConflictingSetDirectives {
         version: "next",
         name: "noAstroConflictingSetDirectives",
-        language: "html",
+        language: "jsx",
         severity: Severity::Error,
         recommended: true,
         domains: &[RuleDomain::Astro],
@@ -59,11 +54,19 @@ enum SetDirectiveKind {
 }
 
 impl SetDirectiveKind {
-    fn from_directive(directive: &AstroSetDirective) -> Option<Self> {
-        let value = directive.value().ok()?;
-        let name = value.name().ok()?.token_text_trimmed()?;
+    fn from_name(name: &JsxNamespaceName) -> Option<Self> {
+        if name
+            .namespace()
+            .ok()?
+            .value_token()
+            .ok()?
+            .text_trimmed()
+            != "set"
+        {
+            return None;
+        }
 
-        match name.text() {
+        match name.name().ok()?.value_token().ok()?.text_trimmed() {
             "html" => Some(Self::Html),
             "text" => Some(Self::Text),
             _ => None,
@@ -81,7 +84,8 @@ impl SetDirectiveKind {
 enum Conflict {
     Directive {
         kind: SetDirectiveKind,
-        directive: AstroSetDirective,
+        name: JsxNamespaceName,
+        range: TextRange,
     },
     ChildContent {
         range: TextRange,
@@ -92,84 +96,65 @@ pub struct State {
     conflicts: Box<[Conflict]>,
 }
 
-fn is_js_trivia_only(mut source: &str) -> bool {
-    loop {
-        source = source.trim_start_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
-        if source.is_empty() {
-            return true;
-        }
-
-        if let Some(rest) = source.strip_prefix("//") {
-            source = rest
-                .find(['\n', '\r', '\u{2028}', '\u{2029}'])
-                .map_or("", |index| &rest[index..]);
-        } else if let Some(rest) = source.strip_prefix("/*") {
-            source = rest.find("*/").map_or("", |index| &rest[index + 2..]);
-        } else {
-            return false;
-        }
-    }
-}
-
-fn meaningful_child_range(content: &AnyHtmlContent) -> Option<TextRange> {
-    let range = content.trimmed_range()?;
-    let AnyHtmlContent::AnyHtmlTextExpression(
-        AnyHtmlTextExpression::HtmlSingleTextExpression(expression),
-    ) = content
-    else {
-        return Some(range);
-    };
-    let token = expression.expression()?.html_literal_token().ok()?;
-
-    (!is_js_trivia_only(token.text_trimmed())).then_some(range)
-}
-
 impl Rule for NoAstroConflictingSetDirectives {
-    type Query = Ast<AstroSetDirective>;
+    type Query = Ast<JsxNamespaceName>;
     type State = State;
     type Signals = Option<Self::State>;
     type Options = NoAstroConflictingSetDirectivesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<HtmlFileSource>().is_astro() {
+        if !ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro()
+        {
             return None;
         }
 
-        let directive = ctx.query();
-        SetDirectiveKind::from_directive(directive)?;
-
-        let element = directive
+        let name = ctx.query();
+        SetDirectiveKind::from_name(name)?;
+        let attribute = name.syntax().parent().and_then(JsxAttribute::cast)?;
+        let element = attribute
             .syntax()
             .ancestors()
-            .find_map(AnyHtmlTagElement::cast)?;
+            .find_map(AnyJsxElement::cast)?;
         let mut conflicts = Vec::new();
 
-        for attribute in element.attributes().iter() {
-            let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroSetDirective(
-                sibling,
-            )) = attribute
-            else {
+        for sibling in element.attributes().iter() {
+            let AnyJsxAttribute::JsxAttribute(attribute) = sibling else {
                 continue;
             };
-            if sibling.syntax() == directive.syntax() {
+            let range = attribute.range();
+            let Ok(AnyJsxAttributeName::JsxNamespaceName(sibling_name)) = attribute.name() else {
+                continue;
+            };
+            if sibling_name.syntax() == name.syntax() {
                 continue;
             }
-            let Some(kind) = SetDirectiveKind::from_directive(&sibling) else {
+            let Some(kind) = SetDirectiveKind::from_name(&sibling_name) else {
                 continue;
             };
             conflicts.push(Conflict::Directive {
                 kind,
-                directive: sibling,
+                name: sibling_name,
+                range,
             });
         }
 
-        if let AnyHtmlTagElement::HtmlOpeningElement(opening_element) = element {
+        if let AnyJsxElement::JsxOpeningElement(opening_element) = element {
             let element = opening_element
                 .syntax()
                 .parent()
-                .and_then(HtmlElement::cast)?;
+                .and_then(JsxElement::cast)?;
             let mut child_ranges = element.children().iter().filter_map(|child| match child {
-                AnyHtmlElement::AnyHtmlContent(content) => meaningful_child_range(&content),
+                AnyJsxChild::JsxText(text) => {
+                    let token = text.value_token().ok()?;
+                    let text = token.token_text_trimmed().trim_token();
+                    (!text.is_empty()).then(|| text.source_range(token.text_range()))
+                }
+                AnyJsxChild::JsxExpressionChild(expression) if expression.expression().is_none() => {
+                    None
+                }
                 child => Some(child.range()),
             });
 
@@ -187,27 +172,32 @@ impl Rule for NoAstroConflictingSetDirectives {
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        Some(ctx.query().range())
+        ctx.query()
+            .syntax()
+            .parent()
+            .and_then(JsxAttribute::cast)
+            .map(|attribute| attribute.range())
     }
 
     fn suppressed_nodes(
         _ctx: &RuleContext<Self>,
         state: &Self::State,
-        suppressions: &mut RuleSuppressions<HtmlLanguage>,
+        suppressions: &mut RuleSuppressions<JsLanguage>,
     ) {
         for conflict in &state.conflicts {
-            if let Conflict::Directive { directive, .. } = conflict {
-                suppressions.suppress_node(directive.syntax().clone());
+            if let Conflict::Directive { name, .. } = conflict {
+                suppressions.suppress_node(name.syntax().clone());
             }
         }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let directive = ctx.query();
-        let kind = SetDirectiveKind::from_directive(directive)?;
+        let name = ctx.query();
+        let kind = SetDirectiveKind::from_name(name)?;
+        let attribute = name.syntax().parent().and_then(JsxAttribute::cast)?;
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            directive.range(),
+            attribute.range(),
             markup! {
                 "The "<Emphasis>{kind.name()}</Emphasis>" directive conflicts with another content source."
             },
@@ -215,8 +205,8 @@ impl Rule for NoAstroConflictingSetDirectives {
 
         for conflict in &state.conflicts {
             diagnostic = match conflict {
-                Conflict::Directive { kind, directive } => diagnostic.detail(
-                    directive.range(),
+                Conflict::Directive { kind, range, .. } => diagnostic.detail(
+                    *range,
                     markup! {
                         "The "<Emphasis>{kind.name()}</Emphasis>" directive defines the element content here."
                     },

@@ -37,8 +37,6 @@ invalid_children.astro:3:6 lint/nursery/noAstroConflictingSetDirectives ━━�
     4 │ <div set:text={text}>{expression}</div>
     5 │ <div set:html={html}><span>nested element</span></div>
   
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -64,8 +62,6 @@ invalid_children.astro:4:6 lint/nursery/noAstroConflictingSetDirectives ━━�
       │                      ^^^^^^^^^^^^
     5 │ <div set:html={html}><span>nested element</span></div>
     6 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
   
   i Choose only one content source for this element.
   
@@ -95,8 +91,6 @@ invalid_children.astro:5:6 lint/nursery/noAstroConflictingSetDirectives ━━�
     6 │ 
     7 │ <script set:html={html}>alert(1)</script>
   
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -125,8 +119,6 @@ invalid_children.astro:7:9 lint/nursery/noAstroConflictingSetDirectives ━━�
     8 │ <style set:text={text}>body { color: red; }</style>
     9 │ 
   
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -150,8 +142,6 @@ invalid_children.astro:8:8 lint/nursery/noAstroConflictingSetDirectives ━━�
   > 8 │ <style set:text={text}>body { color: red; }</style>
       │                        ^^^^^^^^^^^^^^^^^^^^
     9 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
   
   i Choose only one content source for this element.
   

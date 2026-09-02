@@ -38,8 +38,6 @@ invalid.astro:3:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
     4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
     5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
   
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -65,8 +63,6 @@ invalid.astro:4:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
       │                                                      ^^^^^^^^^^^^
     5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
     6 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
   
   i Choose only one content source for this element.
   
@@ -96,8 +92,6 @@ invalid.astro:5:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
     6 │ 
     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
   
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -125,8 +119,6 @@ invalid.astro:7:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
       │                                          ^^^^^^^^^^^^^^^
     8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
     9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
   
   i Choose only one content source for this element.
   
@@ -162,8 +154,6 @@ invalid.astro:8:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
      9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
     10 │ 
   
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
-  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -197,8 +187,6 @@ invalid.astro:9:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
    > 9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
        │                                                    ^^^^^^^^^^^^
     10 │ 
-  
-  i The set:html directive, the set:text directive, and child content are three ways to define an element's content.
   
   i Choose only one content source for this element.
   

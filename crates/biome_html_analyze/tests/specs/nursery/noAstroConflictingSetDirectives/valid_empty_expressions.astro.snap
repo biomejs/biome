@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_empty_expressions.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+
+<div set:html={html}>{}</div>
+<div set:text={text}>{   }</div>
+<div set:html={html}>{/* only a comment */}</div>
+<div set:text={text}>{
+    // only a comment
+}</div>
+<div set:html={html}>{/* first comment */ /* second comment */}</div>
+
+```
