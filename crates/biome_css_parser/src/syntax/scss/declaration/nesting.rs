@@ -43,8 +43,13 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
         return Absent;
     }
 
-    parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Parse)
-        .map_or(Absent, |(syntax, _)| syntax)
+    let Some((syntax, _)) =
+        parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Allow)
+    else {
+        return Absent;
+    };
+
+    syntax
 }
 
 #[inline]
@@ -76,19 +81,19 @@ struct ScssNestingMarkers {
 /// following block before the caller decides its final classification.
 #[derive(Clone, Copy)]
 enum SelectorLikeBlockPolicy {
-    /// Complete the candidate as nested-property syntax when a block follows.
-    Parse,
-    /// Stop before the block so an enclosing speculative parse can rewind and
-    /// retry the construct as a nested qualified rule.
-    RejectBeforeBlock,
+    /// Allow the candidate to complete as nested-property syntax when a block follows.
+    Allow,
+    /// Reject the candidate before its block so an enclosing speculative parse
+    /// can rewind and retry the construct as a nested qualified rule.
+    Reject,
 }
 
 /// Parses a SCSS nested-property/declaration candidate.
 ///
-/// With `RejectBeforeBlock`, this returns `None` after abandoning a parsed
-/// source-tight selector-like prefix and value immediately before `{`. That
-/// policy must only be used inside `try_parse`, which rewinds the consumed
-/// parser context and token-source state.
+/// With [`SelectorLikeBlockPolicy::Reject`], this returns `None` after
+/// abandoning a parsed source-tight selector-like prefix and value immediately
+/// before `{`. That policy must only be used inside `try_parse`, which rewinds
+/// the consumed parser context and token-source state.
 #[inline]
 fn parse_scss_nesting_declaration_candidate(
     p: &mut CssParser,
@@ -111,8 +116,8 @@ fn parse_scss_nesting_declaration_candidate(
 
 /// Parses the remainder of a SCSS nesting candidate after its `name:` prefix.
 ///
-/// Returns `None` only when `RejectBeforeBlock` stops a source-tight
-/// selector-like candidate immediately before its block.
+/// Returns `None` only when [`SelectorLikeBlockPolicy::Reject`] stops a
+/// source-tight selector-like candidate immediately before its block.
 #[inline]
 fn parse_scss_nesting_declaration_after_prefix(
     p: &mut CssParser,
@@ -133,10 +138,7 @@ fn parse_scss_nesting_declaration_after_prefix(
 
     if could_be_selector
         && p.at(T!['{'])
-        && matches!(
-            selector_like_block_policy,
-            SelectorLikeBlockPolicy::RejectBeforeBlock
-        )
+        && matches!(selector_like_block_policy, SelectorLikeBlockPolicy::Reject)
     {
         markers.property.abandon(p);
         markers.declaration.abandon(p);
@@ -268,7 +270,7 @@ pub(crate) fn try_parse_scss_nesting_declaration(
         }
 
         let Some((syntax, could_be_selector)) =
-            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::RejectBeforeBlock)
+            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Reject)
         else {
             return Err(());
         };
@@ -291,7 +293,7 @@ pub(crate) fn try_parse_scss_nesting_declaration(
 fn try_parse_scss_nested_property_declaration(p: &mut CssParser) -> Result<ParsedSyntax, ()> {
     try_parse(p, |p| {
         let Some((syntax, could_be_selector)) =
-            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::RejectBeforeBlock)
+            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Reject)
         else {
             return Err(());
         };
