@@ -475,9 +475,9 @@ fn is_implemented_overload_type_parameter(
         }
 
         signatures.iter().any(|id| {
-            model.binding_by_id(*id).is_some_and(|binding| {
-                binding.syntax().text_trimmed_range() == signature_range
-            })
+            model
+                .binding_by_id(*id)
+                .is_some_and(|binding| binding.syntax().text_trimmed_range() == signature_range)
         })
     })
 }
@@ -735,6 +735,9 @@ fn is_declaration_merged_with_used(
 ) -> Option<bool> {
     let decl = binding.declaration()?;
     match decl {
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => {
+            is_interface_merged_with_used(model, binding)
+        }
         AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
             is_namespace_merged_with_used_value(model, binding)
         }
@@ -743,6 +746,30 @@ fn is_declaration_merged_with_used(
         }
         _ => None,
     }
+}
+
+fn is_interface_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let scope = model.scope_hoisted_to(binding.syntax())?;
+
+    Some(scope.bindings().any(|scope_binding| {
+        let other = scope_binding.tree();
+        let Some(other_declaration) = other.declaration() else {
+            return false;
+        };
+        matches!(
+            other_declaration,
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        ) && other
+            .name_token()
+            .is_ok_and(|other_name| other_name.text_trimmed() == name)
+            && (model.is_exported(&other)
+                || !is_unused_by_references(model, &other, other_declaration.syntax()))
+    }))
 }
 
 /// Returns `true` if `call` is a call to a simple identifier named `name`.
@@ -889,8 +916,7 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
     let Some(declaration) = binding.declaration() else {
         return false;
     };
-    let declaration = declaration.syntax();
-    if !is_unused_by_references(model, binding, declaration) {
+    if !is_unused_by_references(model, binding, declaration.syntax()) {
         return false;
     }
     !is_declaration_merged_with_used(model, binding).unwrap_or(false)
