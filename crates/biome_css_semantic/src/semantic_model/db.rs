@@ -63,11 +63,10 @@ pub fn css_property_definitions_from_snippet(
 }
 
 fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
-    let root = model.root();
     let mut definitions = model
         .custom_property_declarations()
         .map(|declaration| {
-            let property = declaration.property(&root);
+            let property = declaration.property();
             CssPropertyDefinition {
                 name: declaration.name().clone(),
                 range: declaration.range(),

@@ -143,7 +143,6 @@ impl Rule for NoDescendingSpecificity {
             }
 
             find_descending_selector(
-                &root,
                 &rule,
                 at_rule_context,
                 &mut visited_selectors,
@@ -227,7 +226,6 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
-    root: &AnyCssRoot,
     rule: &CssSemanticRule,
     at_rule_context: Option<RuleId>,
     visited_selectors: &mut SelectorContexts,
@@ -236,8 +234,7 @@ fn find_descending_selector(
     let visited_selectors = visited_selectors.entry(at_rule_context).or_default();
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node(root).syntax().clone())
-        else {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
@@ -250,15 +247,15 @@ fn find_descending_selector(
             if last_specificity > specificity {
                 descending_selectors.push(DescendingSelector {
                     high: (last_text_range, last_specificity),
-                    low: (selector.range(root), specificity),
+                    low: (selector.range(), specificity),
                 });
             } else if specificity > last_specificity {
-                *seen = (selector.range(root), specificity);
+                *seen = (selector.range(), specificity);
             }
         } else {
             visited_selectors.insert(
                 tail_selector_str,
-                (selector.range(root), selector.specificity()),
+                (selector.range(), selector.specificity()),
             );
         }
     }

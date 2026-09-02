@@ -640,7 +640,7 @@ impl PartialEq for Selector {
 }
 
 impl Selector {
-    pub fn node(&self, _root: &AnyCssRoot) -> AnyCssSelectorLike {
+    pub fn node(&self) -> AnyCssSelectorLike {
         self.node.to_node(self.data.root().syntax())
     }
 
@@ -649,7 +649,7 @@ impl Selector {
         &self.resolved
     }
 
-    pub fn range(&self, _root: &AnyCssRoot) -> TextRange {
+    pub fn range(&self) -> TextRange {
         self.node
             .to_node(self.data.root().syntax())
             .syntax()
@@ -798,11 +798,11 @@ impl CssModelDeclaration {
         Self::from_data(data.clone(), declaration)
     }
 
-    pub fn declaration(&self, _root: &AnyCssRoot) -> CssDeclaration {
+    pub fn declaration(&self) -> CssDeclaration {
         self.declaration.to_node(self.data.root().syntax())
     }
 
-    pub fn property(&self, _root: &AnyCssRoot) -> CssProperty {
+    pub fn property(&self) -> CssProperty {
         self.property.to_node(self.data.root().syntax())
     }
 
