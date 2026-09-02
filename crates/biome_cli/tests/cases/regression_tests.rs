@@ -5,7 +5,7 @@ use biome_console::BufferConsole;
 use biome_fs::{MemoryFileSystem, TemporaryFs};
 
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
-use crate::{run_cli, run_cli_with_dyn_fs};
+use crate::{run_cli, run_cli_with_dyn_fs, run_cli_with_server_workspace};
 
 /// Regression test for https://github.com/biomejs/biome/issues/9180
 ///
@@ -198,6 +198,57 @@ fn issue_9196() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "issue_9196",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn issue_6427() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_file = Utf8Path::new("biome.json");
+    fs.insert(
+        config_file.into(),
+        br#"{
+    "plugins": ["noDirectReactComponentCall.grit"],
+    "formatter": {
+        "enabled": false
+    }
+}"#,
+    );
+
+    let plugin_file = Utf8Path::new("noDirectReactComponentCall.grit");
+    fs.insert(
+        plugin_file.into(),
+        br#"language js
+
+call_expression(function=$f) where {
+    $f <: r"[A-Z].*",
+    register_diagnostic(
+        span = $f,
+        message = "Don't call React Components directly"
+    )
+}
+"#,
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(js_file.into(), br#"Component();"#);
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_6427",
         fs,
         console,
         result,

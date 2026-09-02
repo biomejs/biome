@@ -22,12 +22,14 @@ GritRoot {
             },
             l_paren_token: L_PAREN@4..5 "(" [] [],
             named_args: GritNamedArgList [
-                GritBogusNamedArg {
-                    items: [
-                        FUNCTION_KW@5..13 "function" [] [],
-                        EQ@13..14 "=" [] [],
-                        GRIT_STRING@14..23 "\"unknown\"" [] [],
-                    ],
+                GritNamedArg {
+                    name: GritName {
+                        value_token: GRIT_NAME@5..13 "function" [] [],
+                    },
+                    eq_token: EQ@13..14 "=" [] [],
+                    pattern: GritStringLiteral {
+                        value_token: GRIT_STRING@14..23 "\"unknown\"" [] [],
+                    },
                 },
             ],
             r_paren_token: R_PAREN@23..24 ")" [] [],
@@ -50,26 +52,13 @@ GritRoot {
         0: GRIT_NAME@0..4 "stmt" [] []
       1: L_PAREN@4..5 "(" [] []
       2: GRIT_NAMED_ARG_LIST@5..23
-        0: GRIT_BOGUS_NAMED_ARG@5..23
-          0: FUNCTION_KW@5..13 "function" [] []
+        0: GRIT_NAMED_ARG@5..23
+          0: GRIT_NAME@5..13
+            0: GRIT_NAME@5..13 "function" [] []
           1: EQ@13..14 "=" [] []
-          2: GRIT_STRING@14..23 "\"unknown\"" [] []
+          2: GRIT_STRING_LITERAL@14..23
+            0: GRIT_STRING@14..23 "\"unknown\"" [] []
       3: R_PAREN@23..24 ")" [] []
   4: EOF@24..25 "" [Newline("\n")] []
 
-```
-
-## Diagnostics
-
-```
-invalid_node_argument.grit:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected node argument.
-  
-  > 1 │ stmt(function="unknown")
-      │      ^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
-  i Node arguments must be patterns, optionally preceded by a name and an equal sign.
-  
 ```
