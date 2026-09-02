@@ -3581,6 +3581,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssLayerReference {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssLegacyFilterValue>
+    for crate::css::auxiliary::legacy_filter_value::FormatCssLegacyFilterValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssLegacyFilterValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssLegacyFilterValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssLegacyFilterValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssLegacyFilterValue,
+        crate::css::auxiliary::legacy_filter_value::FormatCssLegacyFilterValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::legacy_filter_value::FormatCssLegacyFilterValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssLegacyFilterValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssLegacyFilterValue,
+        crate::css::auxiliary::legacy_filter_value::FormatCssLegacyFilterValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::legacy_filter_value::FormatCssLegacyFilterValue::default(),
+        )
+    }
+}
 impl FormatRule < biome_css_syntax :: CssListOfComponentValuesExpression > for crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssListOfComponentValuesExpression , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssListOfComponentValuesExpression > :: fmt (self , node , f) } }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssListOfComponentValuesExpression {
     type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssListOfComponentValuesExpression , crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression > ;

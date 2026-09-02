@@ -143,6 +143,9 @@ impl SemanticEventExtractor {
                                     AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(
                                         value,
                                     ) => CssPropertyInitialValueKind::from(value),
+                                    AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(
+                                        value,
+                                    ) => CssPropertyInitialValueKind::from(value),
                                     AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
                                         list,
                                     ) => CssPropertyInitialValueKind::from(list),
@@ -258,6 +261,9 @@ impl SemanticEventExtractor {
                 if prop_name.eq_ignore_ascii_case("initial-value") {
                     initial_value = prop.value().ok().map(|value| match value {
                         AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(value) => {
+                            CssPropertyInitialValueKind::from(value)
+                        }
+                        AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(value) => {
                             CssPropertyInitialValueKind::from(value)
                         }
                         AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(

@@ -742,10 +742,14 @@ CssGenericProperty =
 AnyCssGenericPropertyValueOrExpression =
 	CssGenericComponentValueList
 	| CssCustomPropertyValue
+	| CssLegacyFilterValue
 	| ScssExpression
 
 // https://www.w3.org/TR/css-variables-1/#syntax
 CssCustomPropertyValue =
+	components: CssCustomPropertyComponentList
+
+CssLegacyFilterValue =
 	components: CssCustomPropertyComponentList
 
 CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*

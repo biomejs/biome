@@ -1,6 +1,6 @@
 ---
 name: formatter-development
-description: Use this skill when implementing or debugging Biome formatter behavior, IR composition, node rules, layout selection, source-comment handling, verbatim formatting, idempotency, internal specs, or Prettier comparison. Do not use for generic snapshot commands or parser changes.
+description: Use this skill whenever implementing or debugging Biome formatter behavior, IR composition, node rules, layout selection, source-comment handling, verbatim formatting, idempotency, internal specs, or Prettier comparison. Do not use it for generic snapshot commands or parser changes.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -15,7 +15,7 @@ Use `crates/biome_formatter/CONTRIBUTING.md` and the language formatter's guide 
 3. Implement the smallest layout change using formatter IR.
 4. Run focused formatter tests and inspect snapshots.
 5. Compare with Prettier when compatibility is relevant.
-6. Run formatter codegen for the language, then format and lint.
+6. Format and lint before committing.
 
 ## Node Rules
 
@@ -27,7 +27,19 @@ Generated node rules implement `FormatNodeRule`. In `fmt_fields`:
 - preserve every token and comment unless the formatter contract intentionally replaces it;
 - keep layout decisions near the type that owns them.
 
-`format_verbatim_node` preserves a node's source text. Replace verbatim formatting with structured formatting only when tests cover valid, malformed, and commented forms of the node.
+`format_verbatim_*` methods preserve a node's source text. Replace verbatim formatting with structured formatting only when tests cover valid, malformed, and commented forms of the node.
+
+## Token Rules
+
+Format, replace, or remove every token. Formatter tests panic when a token is not handled, preventing accidental source loss.
+
+Use `format_replaced` when substituting a token and `format_removed` when removing one.
+
+## Ad-Hoc Formatting
+
+Format a node through `node.format()` when possible. Its regular rule checks formatter-suppression comments as part of normal formatting.
+
+When a helper formats a node or its tokens outside `FormatNodeRule`, run the formatter tests. If the suppression-check assertion reports a node, call `f.context().comments().mark_suppression_checked(node.syntax())` for that reported node. The assertion shows that the helper bypasses the node's normal suppression check.
 
 ## IR Composition
 
@@ -75,15 +87,11 @@ Treat differences as input to design, not automatic bugs. Biome may intentionall
 
 ## Generation and Verification
 
-After changing a language formatter:
+After changing source in a language formatter crate:
 
-```shell
-just gen-formatter <lang>
-just f
-just l
-```
-
-Run the narrowest formatter crate or spec test first. Review snapshots before accepting them.
+1. Run the narrowest formatter crate or spec test and review snapshots before accepting them.
+2. Compare against Prettier when compatibility is relevant; retain reviewed intentional divergences.
+3. Run `just f` and `just l` before committing.
 
 ## Review Checklist
 
@@ -94,7 +102,6 @@ Run the narrowest formatter crate or spec test first. Review snapshots before ac
 - Error and bogus syntax remains representable without formatter panics.
 - Internal specs cover the changed behavior.
 - Reformatting converges in one test invocation.
-- Required formatter generation is checked in.
 
 ## References
 

@@ -1,0 +1,10 @@
+.legacy {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+    -ms-filter: alpha(opacity=40);
+}
+
+@supports (filter: alpha(opacity=40)) {
+    .legacy {
+        color: blue;
+    }
+}

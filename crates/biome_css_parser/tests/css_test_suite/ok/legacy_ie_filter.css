@@ -1,0 +1,13 @@
+div {
+    -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+    filter: alpha(opacity=40);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#4d000000", endColorstr="#00000000", GradientType=1);
+    f\ilter: pro\gid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+    filter: \61 lpha(opacity=40);
+}
+
+@supports (filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40)) {
+}
+
+@supports (-ms-filter: alpha(opacity=40)) {
+}

@@ -76,6 +76,7 @@ impl Rule for NoDuplicateFontNames {
         let value_list = match node.value() {
             Ok(value) => match value {
                 AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
+                AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => return None,
                 AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
                 AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
             },
