@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-cjs.cjs
+---
+# Input
+```cjs
+const Bun = require('bun');
+const { Database } = require('bun:sqlite');
+const { suffix } = require('bun:ffi');
+
+```
+
+# Diagnostics
+```
+invalid-cjs.cjs:1:21 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using Bun modules is forbidden.
+  
+  > 1 │ const Bun = require('bun');
+      │                     ^^^^^
+    2 │ const { Database } = require('bun:sqlite');
+    3 │ const { suffix } = require('bun:ffi');
+  
+  i Can be useful for client-side web projects that do not have access to those modules.
+  
+  i Remove the import module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-cjs.cjs:2:30 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using Bun modules is forbidden.
+  
+    1 │ const Bun = require('bun');
+  > 2 │ const { Database } = require('bun:sqlite');
+      │                              ^^^^^^^^^^^^
+    3 │ const { suffix } = require('bun:ffi');
+    4 │ 
+  
+  i Can be useful for client-side web projects that do not have access to those modules.
+  
+  i Remove the import module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-cjs.cjs:3:28 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using Bun modules is forbidden.
+  
+    1 │ const Bun = require('bun');
+    2 │ const { Database } = require('bun:sqlite');
+  > 3 │ const { suffix } = require('bun:ffi');
+      │                            ^^^^^^^^^
+    4 │ 
+  
+  i Can be useful for client-side web projects that do not have access to those modules.
+  
+  i Remove the import module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
