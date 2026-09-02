@@ -33,7 +33,6 @@ Required generated artifacts:
 | Changed source | Required command |
 | --- | --- |
 | Grammar `.ungram` | `just gen-grammar <lang>` |
-| Formatter in `*_formatter` | `just gen-formatter <lang>` |
 | Lint rule in `*_analyze` | `just gen-rules` and `just gen-configuration` |
 
 Bindings and other full analyzer outputs may be left to the CI Autofix job unless they are needed for local verification.
