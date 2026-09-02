@@ -2560,6 +2560,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow the use of Svelte's {@html} tag.
+See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
+	 */
+	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
+	/**
 	* Disallow legacy Svelte {@const} tags.
 See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
 	 */
@@ -4851,6 +4856,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoSvelteAtHtmlTagsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAtHtmlTagsOptions;
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
@@ -6797,6 +6805,10 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoSvelteAtHtmlTagsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteAtHtmlTagsOptions;
+}
 export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteLegacyConstOptions;
@@ -8586,6 +8598,7 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
@@ -10064,6 +10077,7 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
