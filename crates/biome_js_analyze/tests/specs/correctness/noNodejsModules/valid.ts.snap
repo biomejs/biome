@@ -7,6 +7,8 @@ expression: valid.ts
 /* should not generate diagnostics */
 import type assert from "assert";
 import type * as assert2 from "assert";
+import type { AssertionErrorOptions } from "assert";
+import { type AssertionErrorOptions } from "assert";
 declare module "node:fs" { }
 
 // Bun runtime built-ins are not Node.js modules, so they must not be flagged.

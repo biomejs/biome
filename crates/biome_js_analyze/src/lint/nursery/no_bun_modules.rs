@@ -1,9 +1,9 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, inner_string_text};
+use biome_js_syntax::{AnyJsImportLike, inner_string_text};
 use biome_resolver::is_builtin_bun_module;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::TextRange;
 use biome_rule_options::no_bun_modules::NoBunModulesOptions;
 
 use crate::services::manifest::Manifest;
@@ -13,7 +13,7 @@ declare_lint_rule! {
     ///
     /// This can be useful for client-side web projects that don't have access to those modules.
     ///
-    /// The rule also isn't triggered if there are dependencies declared in the `package.json` that match
+    /// The rule doesn't trigger if there are dependencies declared in the `package.json` that match
     /// the name of a built-in Bun module.
     ///
     /// Type-only imports are ignored.
@@ -30,6 +30,10 @@ declare_lint_rule! {
     ///
     /// ```js
     /// import { Database } from "custom-sqlite";
+    /// ```
+    ///
+    /// ```ts
+    /// import type { DatabaseOptions } from "bun:sqlite";
     /// ```
     pub NoBunModules {
         version: "next",
@@ -52,10 +56,8 @@ impl Rule for NoBunModules {
             return None;
         }
         if let AnyJsImportLike::JsModuleSource(module_source) = &node
-            && let Some(import_clause) = module_source.parent::<AnyJsImportClause>()
-            && import_clause.type_token().is_some()
+            && module_source.imports_only_types()
         {
-            // Ignore type-only imports
             return None;
         }
         let module_name = node.module_name_token()?;
