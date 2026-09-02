@@ -401,7 +401,9 @@ fn parse_generic_property_with_value_end_set(
     } else {
         p.expect(T![:]);
     }
-    let use_raw_value_parser = is_legacy_ie_filter_property && is_at_legacy_ie_filter_value(p);
+    let use_raw_value_parser = !CssSyntaxFeatures::Scss.is_supported(p)
+        && is_legacy_ie_filter_property
+        && is_at_legacy_ie_filter_value(p);
     parse_property_value_with_end_set(
         p,
         is_custom_property,
@@ -422,7 +424,7 @@ pub(crate) fn parse_property_value_with_end_set(
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) -> CompletedMarker {
     if is_legacy_filter_value {
-        parse_legacy_filter_value(p, value_end_set)
+        parse_legacy_filter_value(p, value_end_set, recovery_end_set)
     } else if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
         parse_custom_property_value(p, value_end_set)
     } else if CssSyntaxFeatures::Scss.is_supported(p) {

@@ -76,13 +76,11 @@ pub(crate) fn parse_custom_property_value(
 pub(crate) fn parse_legacy_filter_value(
     p: &mut CssParser,
     end_set: TokenSet<CssSyntaxKind>,
+    nested_end_set: TokenSet<CssSyntaxKind>,
 ) -> CompletedMarker {
-    parse_raw_property_value_with_mode(
-        p,
-        end_set,
-        CssCustomPropertyCommentMode::PreserveDoubleSlash,
-        CSS_LEGACY_FILTER_VALUE,
-    )
+    let value = p.start();
+    CustomPropertyComponentList::legacy_filter_value(end_set, nested_end_set).parse_list(p);
+    value.complete(p, CSS_LEGACY_FILTER_VALUE)
 }
 
 /// Parses an SCSS custom-property value in an `@supports` declaration.
@@ -115,6 +113,8 @@ fn parse_raw_property_value_with_mode(
 struct CustomPropertyComponentList {
     boundary: CustomPropertyListBoundary,
     comment_mode: CssCustomPropertyCommentMode,
+    nested_end_set: Option<TokenSet<CssSyntaxKind>>,
+    legacy_filter_recovery: bool,
 }
 
 /// Controls which tokens terminate a raw custom-property component list.
@@ -128,14 +128,41 @@ impl CustomPropertyComponentList {
         Self {
             boundary: CustomPropertyListBoundary::Value(end_set),
             comment_mode,
+            nested_end_set: None,
+            legacy_filter_recovery: false,
         }
     }
 
-    fn block(comment_mode: CssCustomPropertyCommentMode) -> Self {
+    fn legacy_filter_value(
+        end_set: TokenSet<CssSyntaxKind>,
+        nested_end_set: TokenSet<CssSyntaxKind>,
+    ) -> Self {
+        Self {
+            boundary: CustomPropertyListBoundary::Value(end_set),
+            comment_mode: CssCustomPropertyCommentMode::PreserveDoubleSlash,
+            nested_end_set: Some(nested_end_set),
+            legacy_filter_recovery: true,
+        }
+    }
+
+    fn block(
+        comment_mode: CssCustomPropertyCommentMode,
+        nested_end_set: Option<TokenSet<CssSyntaxKind>>,
+        legacy_filter_recovery: bool,
+    ) -> Self {
         Self {
             boundary: CustomPropertyListBoundary::Block,
             comment_mode,
+            nested_end_set,
+            legacy_filter_recovery,
         }
+    }
+
+    fn is_at_legacy_filter_recovery_boundary(&self, p: &mut CssParser) -> bool {
+        self.legacy_filter_recovery
+            && (p.at(T!['{'])
+                || (p.has_preceding_line_break()
+                    && (crate::syntax::property::is_at_generic_property(p) || p.at(T![@]))))
     }
 }
 
@@ -145,7 +172,12 @@ impl ParseNodeList for CustomPropertyComponentList {
     const LIST_KIND: Self::Kind = CSS_CUSTOM_PROPERTY_COMPONENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_custom_property_component(p, self.comment_mode)
+        parse_custom_property_component(
+            p,
+            self.comment_mode,
+            self.nested_end_set,
+            self.legacy_filter_recovery,
+        )
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -155,10 +187,14 @@ impl ParseNodeList for CustomPropertyComponentList {
                     p.source()
                         .is_at_final_custom_property_important(self.comment_mode)
                 } else {
-                    p.at_ts(end_set)
+                    p.at_ts(end_set) || self.is_at_legacy_filter_recovery_boundary(p)
                 }
             }
-            CustomPropertyListBoundary::Block => p.at_ts(CUSTOM_PROPERTY_BLOCK_END_SET),
+            CustomPropertyListBoundary::Block => {
+                p.at_ts(CUSTOM_PROPERTY_BLOCK_END_SET)
+                    || self.nested_end_set.is_some_and(|end_set| p.at_ts(end_set))
+                    || self.is_at_legacy_filter_recovery_boundary(p)
+            }
         }
     }
 
@@ -193,6 +229,8 @@ impl ParseNodeList for CustomPropertyComponentList {
 fn parse_custom_property_component(
     p: &mut CssParser,
     comment_mode: CssCustomPropertyCommentMode,
+    nested_end_set: Option<TokenSet<CssSyntaxKind>>,
+    legacy_filter_recovery: bool,
 ) -> ParsedSyntax {
     let context = CssLexContext::CustomPropertyValue(comment_mode);
 
@@ -203,13 +241,13 @@ fn parse_custom_property_component(
     } else if p.at(CSS_STRING_LITERAL) {
         parse_custom_property_string(p, context)
     } else if is_at_custom_property_function(p) {
-        parse_custom_property_function(p, comment_mode)
+        parse_custom_property_function(p, comment_mode, nested_end_set, legacy_filter_recovery)
     } else if is_at_any_dimension(p) {
         parse_any_dimension(p, context)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_number(p, context)
     } else if p.at_ts(CUSTOM_PROPERTY_BLOCK_START_SET) {
-        parse_custom_property_block(p, comment_mode)
+        parse_custom_property_block(p, comment_mode, nested_end_set, legacy_filter_recovery)
     } else if is_at_identifier(p) {
         parse_custom_identifier_with_keywords(p, context, true)
     } else {
@@ -229,6 +267,8 @@ fn is_at_custom_property_function(p: &mut CssParser) -> bool {
 fn parse_custom_property_function(
     p: &mut CssParser,
     comment_mode: CssCustomPropertyCommentMode,
+    nested_end_set: Option<TokenSet<CssSyntaxKind>>,
+    legacy_filter_recovery: bool,
 ) -> ParsedSyntax {
     if !is_at_custom_property_function(p) {
         return Absent;
@@ -255,7 +295,8 @@ fn parse_custom_property_function(
         T!['('],
         CssLexContext::CustomPropertyValue(body_comment_mode),
     );
-    CustomPropertyComponentList::block(body_comment_mode).parse_list(p);
+    CustomPropertyComponentList::block(body_comment_mode, nested_end_set, legacy_filter_recovery)
+        .parse_list(p);
     p.expect_with_context(T![')'], context);
     Present(function.complete(p, CSS_CUSTOM_PROPERTY_FUNCTION))
 }
@@ -264,6 +305,8 @@ fn parse_custom_property_function(
 fn parse_custom_property_block(
     p: &mut CssParser,
     comment_mode: CssCustomPropertyCommentMode,
+    nested_end_set: Option<TokenSet<CssSyntaxKind>>,
+    legacy_filter_recovery: bool,
 ) -> ParsedSyntax {
     let (open, close, kind) = match p.cur() {
         T!['('] => (T!['('], T![')'], CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK),
@@ -275,7 +318,8 @@ fn parse_custom_property_block(
     let block = p.start();
     let context = CssLexContext::CustomPropertyValue(comment_mode);
     p.bump_with_context(open, context);
-    CustomPropertyComponentList::block(comment_mode).parse_list(p);
+    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery)
+        .parse_list(p);
     p.expect_with_context(close, context);
     Present(block.complete(p, kind))
 }

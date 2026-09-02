@@ -1,3 +1,3 @@
 .legacy {
-color:red; filter:progid:DXImageTransform.Microsoft.Alpha(Opacity = 40);-ms-filter:alpha( opacity=40 );background:blue
+color:red; filter:progid:DXImageTransform.Microsoft.Alpha(Opacity = 40);-ms-filter:alpha( /* first */ opacity /* middle */ = 40 /* last */ );background:blue
 }

@@ -367,7 +367,9 @@ fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
     } else {
         p.expect(T![:])
     };
-    let is_legacy_filter_value = is_legacy_ie_filter_property && is_at_legacy_ie_filter_value(p);
+    let is_legacy_filter_value = !CssSyntaxFeatures::Scss.is_supported(p)
+        && is_legacy_ie_filter_property
+        && is_at_legacy_ie_filter_value(p);
     let value = parse_supports_property_value(p, is_scss_custom_property, is_legacy_filter_value);
 
     if has_colon
