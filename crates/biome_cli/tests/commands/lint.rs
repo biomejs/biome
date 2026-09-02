@@ -4587,3 +4587,173 @@ fn only_per_plugin_selector_is_rejected() {
         result,
     ));
 }
+
+#[test]
+fn linter_minimum_severity_raises_info_rules_to_warning() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        r#"{
+  "linter": {
+    "minimumSeverity": "warn"
+  }
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"array.flatMap((x) => x);");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", file_path].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_minimum_severity_raises_info_rules_to_warning",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_minimum_severity_error_raises_info_rules_to_error() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        r#"{
+  "linter": {
+    "minimumSeverity": "error"
+  }
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"array.flatMap((x) => x);");
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_minimum_severity_error_raises_info_rules_to_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_minimum_severity_does_not_raise_non_rule_diagnostics() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // The schema mismatch info isn't emitted by a rule, so it must not be raised.
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        r#"{
+  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+  "linter": {
+    "minimumSeverity": "error"
+  }
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"export const a = 1;\n");
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_minimum_severity_does_not_raise_non_rule_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_minimum_severity_keeps_higher_severities() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        r#"{
+  "linter": {
+    "minimumSeverity": "warn",
+    "rules": {
+      "complexity": {
+        "noFlatMapIdentity": "error"
+      }
+    }
+  }
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"array.flatMap((x) => x);");
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_minimum_severity_keeps_higher_severities",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_minimum_severity_can_be_set_per_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        r#"{
+  "overrides": [
+    {
+      "includes": ["strict/**"],
+      "linter": {
+        "minimumSeverity": "error"
+      }
+    }
+  ]
+}"#,
+    );
+
+    fs.insert("strict/file.js".into(), b"array.flatMap((x) => x);");
+    fs.insert("lax/file.js".into(), b"array.flatMap((x) => x);");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "strict/file.js", "lax/file.js"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_minimum_severity_can_be_set_per_override",
+        fs,
+        console,
+        result,
+    ));
+}

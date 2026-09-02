@@ -299,6 +299,50 @@ pub enum RulePlainConfiguration {
     Error,
 }
 
+/// The minimum severity of the diagnostics emitted by lint rules.
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserializable,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Deserialize,
+    serde::Serialize,
+    Merge,
+)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum MinimumSeverity {
+    /// Rules keep their configured severity
+    #[default]
+    Info,
+    /// Rules emit diagnostics with at least warning severity
+    Warn,
+    /// Rules emit diagnostics with error severity
+    Error,
+}
+
+impl From<MinimumSeverity> for Severity {
+    fn from(value: MinimumSeverity) -> Self {
+        match value {
+            MinimumSeverity::Info => Self::Information,
+            MinimumSeverity::Warn => Self::Warning,
+            MinimumSeverity::Error => Self::Error,
+        }
+    }
+}
+
+impl MinimumSeverity {
+    pub fn raise(self, severity: Severity) -> Severity {
+        severity.max(self.into())
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleAssistConfiguration<T: Default> {

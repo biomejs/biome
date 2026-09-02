@@ -2939,6 +2939,10 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
+				"minimumSeverity": {
+					"description": "The minimum severity of the diagnostics emitted by lint rules. Rules with a lower severity are raised to it. `info` by default.",
+					"anyOf": [{ "$ref": "#/$defs/MinimumSeverity" }, { "type": "null" }]
+				},
 				"rules": {
 					"description": "List of rules",
 					"anyOf": [{ "$ref": "#/$defs/Rules" }, { "type": "null" }]
@@ -3043,6 +3047,26 @@
 					"description": "Enforce use of method-style signatures (`methodName(args): returnType`).",
 					"type": "string",
 					"const": "method"
+				}
+			]
+		},
+		"MinimumSeverity": {
+			"description": "The minimum severity of the diagnostics emitted by lint rules.",
+			"oneOf": [
+				{
+					"description": "Rules keep their configured severity",
+					"type": "string",
+					"const": "info"
+				},
+				{
+					"description": "Rules emit diagnostics with at least warning severity",
+					"type": "string",
+					"const": "warn"
+				},
+				{
+					"description": "Rules emit diagnostics with error severity",
+					"type": "string",
+					"const": "error"
 				}
 			]
 		},
@@ -7670,6 +7694,10 @@
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"minimumSeverity": {
+					"description": "The minimum severity of the diagnostics emitted by lint rules",
+					"anyOf": [{ "$ref": "#/$defs/MinimumSeverity" }, { "type": "null" }]
 				},
 				"rules": {
 					"description": "List of rules",

@@ -58,7 +58,9 @@ use biome_analyze::{
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::assist::Actions;
-use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomains};
+use biome_configuration::analyzer::{
+    AnalyzerSelector, MinimumSeverity, RuleDomainValue, RuleDomains,
+};
 #[cfg(feature = "lang_css")]
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
@@ -508,6 +510,7 @@ pub(crate) struct ProcessLint<'a> {
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
+    minimum_severity: MinimumSeverity,
     pull_code_actions: bool,
     diagnostic_offset: Option<TextSize>,
     max_diagnostics: Option<u32>,
@@ -531,6 +534,7 @@ impl<'a> ProcessLint<'a> {
                 || !params.only.is_empty()
                 || !params.skip.is_empty(),
             rules: params.settings.linter_rules(),
+            minimum_severity: params.settings.linter_minimum_severity(),
             pull_code_actions: params.pull_code_actions,
             diagnostic_offset: params.parsed_source.diagnostic_offset(&params.workspace_db),
             max_diagnostics: params.max_diagnostics,
@@ -552,10 +556,12 @@ impl<'a> ProcessLint<'a> {
 
             // Resolve the final severity for this diagnostic:
             // 1. Lint rules may have configured severity overrides.
-            // 2. Assist diagnostics are promoted to Error when enforce_assist is set.
+            // 2. Lint rules are raised to the configured minimum severity.
+            // 3. Assist diagnostics are promoted to Error when enforce_assist is set.
             let category = diagnostic.category();
+            let is_lint_rule = category.is_some_and(|cat| cat.name().starts_with("lint/"));
             let mut severity = category
-                .filter(|cat| cat.name().starts_with("lint/"))
+                .filter(|_| is_lint_rule)
                 .and_then(|cat| {
                     self.rules.as_ref().and_then(|rules| {
                         rules.get_severity_from_category(cat, diagnostic.severity())
@@ -563,6 +569,10 @@ impl<'a> ProcessLint<'a> {
                 })
                 .or_else(|| Some(diagnostic.severity()))
                 .unwrap_or(Severity::Warning);
+
+            if is_lint_rule {
+                severity = self.minimum_severity.raise(severity);
+            }
 
             if self.enforce_assist && category.is_some_and(|cat| cat.name().starts_with("assist/"))
             {
@@ -664,6 +674,7 @@ pub(crate) struct ProcessFixAll<'a> {
     fix_file_mode: &'a FixFileMode,
     errors: usize,
     rules: Option<Cow<'a, Rules>>,
+    minimum_severity: MinimumSeverity,
     skipped_suggested_fixes: u32,
     actions: Vec<FixAction>,
     growth_guard: GrowthGuard,
@@ -675,6 +686,7 @@ impl<'a> ProcessFixAll<'a> {
             fix_file_mode: &params.fix_file_mode,
             errors: 0,
             rules: params.settings.linter_rules(),
+            minimum_severity: params.settings.linter_minimum_severity(),
             skipped_suggested_fixes: 0,
             actions: Vec::new(),
             growth_guard: GrowthGuard::new(syntax_len),
@@ -691,7 +703,7 @@ impl<'a> ProcessFixAll<'a> {
         let current_diagnostic = signal.diagnostic();
 
         if let Some(diagnostic) = current_diagnostic.as_ref()
-            && is_diagnostic_error(diagnostic, self.rules.as_deref())
+            && is_diagnostic_error(diagnostic, self.rules.as_deref(), self.minimum_severity)
         {
             self.errors += 1;
         }
@@ -781,7 +793,7 @@ impl<'a> ProcessFixAll<'a> {
         signal: &dyn AnalyzerSignal<L>,
     ) -> ControlFlow<Never> {
         if let Some(diagnostic) = signal.diagnostic().as_ref()
-            && is_diagnostic_error(diagnostic, self.rules.as_deref())
+            && is_diagnostic_error(diagnostic, self.rules.as_deref(), self.minimum_severity)
         {
             self.errors += 1;
         }
@@ -1307,6 +1319,7 @@ impl Features {
 pub(crate) fn is_diagnostic_error(
     diagnostic: &'_ AnalyzerDiagnostic,
     rules: Option<&'_ Rules>,
+    minimum_severity: MinimumSeverity,
 ) -> bool {
     let severity = diagnostic
         .category()
@@ -1314,11 +1327,12 @@ pub(crate) fn is_diagnostic_error(
         .map_or_else(
             || diagnostic.severity(),
             |category| {
-                rules
+                let severity = rules
                     .and_then(|rules| {
                         rules.get_severity_from_category(category, diagnostic.severity())
                     })
-                    .unwrap_or(Severity::Warning)
+                    .unwrap_or(Severity::Warning);
+                minimum_severity.raise(severity)
             },
         );
 

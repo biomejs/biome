@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "minimumSeverity": "error"
+  }
+}
+```
+
+## `file.js`
+
+```js
+array.flatMap((x) => x);
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:1:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unnecessary callback in flatMap call.
+  
+  > 1 │ array.flatMap((x) => x);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i You can just use flat to flatten the array.
+  
+  i Unsafe fix: Replace unnecessary flatMap call to flat instead.
+  
+  - array.flatMap((x)·=>·x);
+  + array.flat();
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```
