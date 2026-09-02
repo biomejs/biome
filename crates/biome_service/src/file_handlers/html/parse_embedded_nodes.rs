@@ -275,11 +275,12 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 if let Some(directive) = VueDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
-                    let is_v_on = directive
-                        .name_token()
-                        .is_ok_and(|t| t.text_trimmed() == "v-on" && directive.arg().is_some());
+                    let name_token = directive.name_token().ok();
+                    let name = name_token.as_ref().map(|t| t.text_trimmed());
+                    let is_v_on = name.is_some_and(|n| n == "v-on") && directive.arg().is_some();
+                    let is_slot = name.is_some_and(|n| n.eq_ignore_ascii_case("v-slot"));
                     if let Some(candidate) =
-                        build_vue_directive_candidate(&initializer, is_v_on, directive.is_slot())
+                        build_vue_directive_candidate(&initializer, is_v_on, is_slot)
                     {
                         ctx.parse_and_push(
                             &candidate,

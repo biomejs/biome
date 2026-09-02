@@ -321,32 +321,25 @@ fn block_kind_for_snippet(root: &HtmlRoot, content_range: TextRange) -> Option<E
     None
 }
 fn owning_element_content_range(root: &HtmlRoot, content_range: TextRange) -> Option<TextRange> {
-    root.syntax()
-        .descendants()
-        .filter_map(|node| {
+    let root = root.syntax();
+    if !root.text_trimmed_range().contains_range(content_range) {
+        return None;
+    }
+    root.covering_element(content_range)
+        .ancestors()
+        .find_map(|node| {
             if let Some(element) = HtmlElement::cast_ref(&node) {
-                let range = element.range();
-                if !range.contains_range(content_range) {
-                    return None;
-                }
                 let start = element.opening_element().ok()?.range().end();
                 let end = element
                     .closing_element()
                     .ok()
-                    .map_or_else(|| range.end(), |closing| closing.range().start());
-                (start <= end).then(|| (range, TextRange::new(start, end)))
+                    .map_or_else(|| element.range().end(), |closing| closing.range().start());
+                (start <= end).then(|| TextRange::new(start, end))
             } else {
                 let element = HtmlSelfClosingElement::cast_ref(&node)?;
-                let range = element.range();
-                range
-                    .contains_range(content_range)
-                    .then(|| (range, TextRange::empty(range.end())))
+                Some(TextRange::empty(element.range().end()))
             }
         })
-        // Innermost element wins, compared on the full element range: the content
-        // ranges of an element and its parent are not nested in general.
-        .min_by_key(|(element_range, _)| element_range.len())
-        .map(|(_, content)| content)
 }
 
 fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool {

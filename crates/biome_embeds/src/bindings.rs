@@ -41,22 +41,6 @@ pub struct InternedBindingText {
 }
 
 #[salsa::tracked(returns(ref))]
-pub fn get_binding_by_name<'db>(
-    db: &'db dyn LanguageDb,
-    binding_name: InternedBindingTokenText<'db>,
-) -> Option<EmbeddedBinding> {
-    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
-
-    for bindings in embedded_bindings_from_source(db, parsed_source) {
-        for binding in bindings {
-            if binding.text.text() == *binding_name.name(db) {
-                return Some(binding.clone());
-            }
-        }
-    }
-    None
-}
-#[salsa::tracked(returns(ref))]
 pub fn get_bindings_by_name<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
@@ -71,6 +55,17 @@ pub fn get_bindings_by_name<'db>(
         .filter(|binding| binding.text.text() == *binding_name.name(db))
         .cloned()
         .collect()
+}
+
+/// Returns the first binding named `binding_name`, if any.
+///
+/// Thin wrapper over the memoized [`get_bindings_by_name`] so both entry
+/// points share one salsa query and one scan of the source's bindings.
+pub fn get_binding_by_name<'db>(
+    db: &'db dyn LanguageDb,
+    binding_name: InternedBindingTokenText<'db>,
+) -> Option<&'db EmbeddedBinding> {
+    get_bindings_by_name(db, binding_name).first()
 }
 
 #[salsa::tracked(returns(ref))]
@@ -294,7 +289,6 @@ mod tests {
             &db,
             InternedBindingTokenText::new(&db, path, token_text("Local")),
         )
-        .as_ref()
         .expect("binding should exist");
 
         assert_eq!(found.text.text(), "Local");
@@ -313,7 +307,6 @@ mod tests {
                     &db,
                     InternedBindingTokenText::new(&db, path.clone(), token_text(name))
                 )
-                .as_ref()
                 .is_some_and(|binding| binding.text.text() == name),
                 "expected Vue slot binding {name}"
             );
