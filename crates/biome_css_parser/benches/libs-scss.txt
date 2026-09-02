@@ -4,3 +4,9 @@ https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c4
 https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-interpolated-strings.scss
 https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-tight-binary-expressions.scss
 https://raw.githubusercontent.com/biomejs/benchmark-fixtures/b5812cb1bd3cbbe79c485b28c721a43fc3bbda9d/generated/hot-lists-maps-arguments.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/9d39a3333a9f097205eb781663adf0d21708f9b1/generated/hot-tight-operators.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/9d39a3333a9f097205eb781663adf0d21708f9b1/generated/hot-operator-precedence.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/9d39a3333a9f097205eb781663adf0d21708f9b1/generated/hot-lists.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/9d39a3333a9f097205eb781663adf0d21708f9b1/generated/hot-maps.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/9d39a3333a9f097205eb781663adf0d21708f9b1/generated/hot-arguments.scss
+https://raw.githubusercontent.com/biomejs/benchmark-fixtures/9d39a3333a9f097205eb781663adf0d21708f9b1/generated/hot-url-interpolation-direct.scss
