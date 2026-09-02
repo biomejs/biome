@@ -2575,6 +2575,11 @@ See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
+	* Disallow this outside of classes.
+See https://biomejs.dev/linter/rules/no-this-outside-of-class 
+	 */
+	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
+	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
 	 */
@@ -4865,6 +4870,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoThisOutsideOfClassConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoThisOutsideOfClassOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
@@ -6818,6 +6826,10 @@ export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
 }
+export interface RuleWithNoThisOutsideOfClassOptions {
+	level: RulePlainConfiguration;
+	options?: NoThisOutsideOfClassOptions;
+}
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
@@ -8625,6 +8637,7 @@ export interface NoTailwindArbitraryValueOptions {
 	 */
 	functions?: string[];
 }
+export type NoThisOutsideOfClassOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -10081,6 +10094,7 @@ export type Category =
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
