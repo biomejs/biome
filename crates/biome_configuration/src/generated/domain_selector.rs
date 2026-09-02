@@ -189,6 +189,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useVueValidVOnce"),
         RuleFilter::Rule("correctness", "useVueValidVPre"),
         RuleFilter::Rule("correctness", "useVueValidVText"),
+        RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
         RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
         RuleFilter::Rule("nursery", "noVueVOnNumberValues"),
