@@ -160,6 +160,18 @@ const BUILTIN_NODE_MODULES: &[&str] = &[
     "zlib",
 ];
 
+/// Sorted array of Bun builtin modules
+///
+/// Source: <https://bun.com/reference>
+const BUILTIN_BUN_MODULES: &[&str] = &[
+    "bun",
+    "bun:bundle",
+    "bun:ffi",
+    "bun:jsc",
+    "bun:sqlite",
+    "bun:test",
+];
+
 /// Returns `true` if `name` is a built-in Node.js module.
 ///
 /// ```
@@ -171,9 +183,24 @@ pub fn is_builtin_node_module(name: &str) -> bool {
     BUILTIN_NODE_MODULES.binary_search(&name).is_ok()
 }
 
+/// Returns `true` if `name` is a built-in Bun module.
+///
+/// ```
+/// use biome_resolver::is_builtin_bun_module;
+///
+/// assert!(is_builtin_bun_module(&"bun:sqlite"));
+/// ```
+pub fn is_builtin_bun_module(name: &str) -> bool {
+    BUILTIN_BUN_MODULES.binary_search(&name).is_ok()
+}
+
 #[test]
 fn test_order() {
     for items in BUILTIN_NODE_MODULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+
+    for items in BUILTIN_BUN_MODULES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }
