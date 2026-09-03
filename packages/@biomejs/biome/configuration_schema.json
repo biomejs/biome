@@ -7142,7 +7142,7 @@
 					]
 				},
 				"noUnsafeIframeSandbox": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
+					"description": "Disallow an unsafe combination of the sandbox attribute.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeIframeSandboxConfiguration" },
 						{ "type": "null" }

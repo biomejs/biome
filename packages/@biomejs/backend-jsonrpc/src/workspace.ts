@@ -2610,7 +2610,7 @@ See https://biomejs.dev/linter/rules/no-unnecessary-template-expression
 	 */
 	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow an unsafe combination of the sandbox attribute.
 See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox 
 	 */
 	noUnsafeIframeSandbox?: NoUnsafeIframeSandboxConfiguration;
