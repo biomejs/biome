@@ -11,7 +11,7 @@ categories.workspace = true
 
 [[bench]]
 harness = false
-name = "md_analyze"
+name    = "md_analyze"
 
 [dependencies]
 biome_analyze            = { workspace = true }
@@ -35,7 +35,7 @@ biome_analyze         = { workspace = true }
 biome_markdown_parser = { path = "../biome_markdown_parser" }
 biome_rowan           = { path = "../biome_rowan" }
 biome_test_utils      = { path = "../biome_test_utils", features = ["lang_md"] }
-criterion              = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta                 = { workspace = true }
 mimalloc              = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
