@@ -1,7 +1,13 @@
-use super::{imports::MAX_NAMESPACE_IMPORT_MEMBER_STEPS, resolver::ResolutionCtx};
-use crate::js_module_info::TsBindingReferenceExt;
+use super::{
+    ImportResolution, imports::MAX_NAMESPACE_IMPORT_MEMBER_STEPS, resolver::ResolutionCtx,
+};
+use crate::db::queries::inference_module_sccs;
+use crate::{
+    ModuleGraphGeneration, js_module_info::TsBindingReferenceExt, module_for_key,
+    module_graph::ModuleInfoKind,
+};
 use biome_js_type_info::{
-    Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    Path, TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     global_type_id_for_qualifier,
     interned_types::{
         Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, TypeData as InferredTypeData,
@@ -446,6 +452,65 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         target: InferredTypeData<'db>,
     ) -> Option<Box<[InferredTypeData<'db>]>> {
+        if let InferredTypeData::Local(local) = target {
+            let module_key = local.module(self.db);
+            let type_id = TypeId::new(local.type_id(self.db).index());
+            if module_key == self.module_key {
+                if let Some(parameters) = self
+                    .js_info
+                    .raw_types
+                    .get(type_id.index())
+                    .and_then(|raw| raw.type_parameters())
+                    .map(<[_]>::to_vec)
+                {
+                    return Some(
+                        parameters
+                            .iter()
+                            .map(|parameter| self.resolve(parameter))
+                            .collect(),
+                    );
+                }
+            } else if let Some(module) = module_for_key(self.db, module_key)
+                && let ModuleInfoKind::Js(js_info) = module.kind(self.db)
+                && js_info.infer_types
+                && let Some(parameters) = js_info
+                    .raw_types
+                    .get(type_id.index())
+                    .and_then(|raw| raw.type_parameters())
+                    .map(<[_]>::to_vec)
+            {
+                let mut ctx = match self.import_resolution {
+                    ImportResolution::OnDemand { remaining } => {
+                        let resolve_declarations_directly = if self.resolves_declarations_directly()
+                        {
+                            let sccs =
+                                inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
+                            module == self.module
+                                || sccs.contains_cycle_between(self.module, module)
+                        } else {
+                            false
+                        };
+                        self.for_on_demand_import(
+                            module,
+                            &js_info,
+                            remaining,
+                            resolve_declarations_directly,
+                        )
+                    }
+                    import_resolution @ (ImportResolution::FromTables { .. }
+                    | ImportResolution::CycleFallback(_)) => {
+                        ResolutionCtx::new(self.db, module, &js_info, import_resolution)
+                    }
+                };
+                return Some(
+                    parameters
+                        .iter()
+                        .map(|parameter| ctx.resolve(parameter))
+                        .collect(),
+                );
+            }
+        }
+
         match self.resolve_inferred_type(target) {
             InferredTypeData::Class(class) => Some(class.type_parameters(self.db).to_vec().into()),
             InferredTypeData::Function(function) => {

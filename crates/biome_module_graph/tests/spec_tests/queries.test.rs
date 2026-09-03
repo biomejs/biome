@@ -384,6 +384,56 @@ fn test_namespace_query_keeps_named_exports_symbolic() {
 }
 
 #[test]
+fn test_imported_generic_arguments_skip_full_declaration_inference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            export interface Wrapper<T> {
+                value: T;
+                unrelated: Noise;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Wrapper } from "./source.ts";
+            export declare const wrapped: Wrapper<string>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let source_module = db
+        .module_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("source module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let wrapper = LocalTypeInput::new(
+        &db,
+        source_module,
+        local_type_id_by_name(&db, source_module, "Wrapper"),
+    );
+    let wrapped = BindingTypeInput::new(
+        &db,
+        index_module,
+        binding_range_by_name(&db, index_module, "wrapped"),
+    );
+
+    db.clear_salsa_events();
+    let wrapped = infer_binding_type(&db, wrapped).expect("wrapped type must be inferred");
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, wrapper, &events);
+
+    let value = find_member_type(&db, wrapped, "value").expect("value type must be inferred");
+    assert!(is_inferred_string(&db, value));
+}
+
+#[test]
 fn test_member_lookup_resolves_local_types_without_complete_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
