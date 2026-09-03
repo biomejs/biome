@@ -36,10 +36,14 @@ biome_service         = { path = "../biome_service", features = ["lang_md"] }
 camino                = { workspace = true }
 countme               = { workspace = true, features = ["enable"] }
 criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
-mimalloc              = { workspace = true }
 similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
-tikv-jemallocator     = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "serde"]

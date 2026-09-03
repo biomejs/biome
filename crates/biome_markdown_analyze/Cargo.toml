@@ -37,12 +37,16 @@ biome_rowan           = { path = "../biome_rowan" }
 biome_test_utils      = { path = "../biome_test_utils", features = ["lang_md"] }
 criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta                 = { workspace = true }
-mimalloc              = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
-tikv-jemallocator     = { workspace = true }
 
 [build-dependencies]
 filetime = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [lints]
 workspace = true
