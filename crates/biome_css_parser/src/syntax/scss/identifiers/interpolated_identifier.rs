@@ -3,8 +3,9 @@ use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::is_nth_at_scss_interpolation;
 use biome_css_syntax::CssSyntaxKind::{
-    EOF, SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN,
-    SCSS_INTERPOLATED_IDENTIFIER_PART_LIST, SCSS_INTERPOLATION,
+    CSS_DIMENSION_VALUE, CSS_NUMBER, CSS_NUMBER_LITERAL, EOF, SCSS_INTERPOLATED_IDENTIFIER,
+    SCSS_INTERPOLATED_IDENTIFIER_HYPHEN, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+    SCSS_INTERPOLATION,
 };
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
@@ -166,4 +167,50 @@ pub(super) fn parse_identifier_hyphen_part(
     let m = p.start();
     p.bump_with_context(T![-], context);
     Present(m.complete(p, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN))
+}
+
+/// Returns whether the current token is a number or dimension identifier part.
+/// Callers decide whether it is source-tight and can continue the identifier.
+///
+/// ```scss
+/// .item-#{$index}00 {}
+/// ```
+#[inline]
+pub(crate) fn is_at_identifier_number_part(p: &mut CssParser) -> bool {
+    is_nth_at_identifier_number_part(p, 0)
+}
+
+/// Returns whether the token at `n` is a number or dimension identifier part.
+/// This predicate does not check source adjacency.
+///
+/// ```scss
+/// .button {
+///   &-100\.200 {}
+/// }
+/// ```
+#[inline]
+pub(crate) fn is_nth_at_identifier_number_part(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, CSS_DIMENSION_VALUE) || p.nth_at(n, CSS_NUMBER_LITERAL)
+}
+
+/// Parses a numeric identifier part and resumes lexing with `context`.
+/// Callers must establish that the part belongs to the current identifier.
+///
+/// ```scss
+/// .column-#{$prefix}1-of-12 {}
+/// ```
+#[inline]
+pub(crate) fn parse_identifier_number_part(
+    p: &mut CssParser,
+    context: CssLexContext,
+) -> ParsedSyntax {
+    if !is_at_identifier_number_part(p) {
+        return Absent;
+    }
+
+    let number = p.start();
+    // `&-100\.200`: `-100` can lex as a dimension head, but the suffix
+    // owns it as a number and leaves `\.200` as the next suffix part.
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, context);
+    Present(number.complete(p, CSS_NUMBER))
 }
