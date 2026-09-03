@@ -33,35 +33,33 @@ fn bench_parser_suite(criterion: &mut Criterion, suite: ParserBenchmarkSuite) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
+                let parsed = parse_css(code, suite.source_type, CssParserOptions::default());
                 if suite.require_clean_parse {
-                    let parsed = parse_css(code, suite.source_type, CssParserOptions::default());
                     let syntax = parsed.syntax();
                     validate_eof_token(syntax.clone());
                     assert_errors_are_absent(&syntax, parsed.diagnostics(), test_case.path());
                 }
+                for diagnostic in parsed.into_diagnostics() {
+                    let diagnostic = diagnostic
+                        .with_file_source_code(code)
+                        .with_file_path(test_case.filename());
+                    println!("{}", print_diagnostic_to_string(&diagnostic));
+                }
 
-                let mut diagnostics = vec![];
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::new(test_case.filename(), "uncached"),
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(biome_css_parser::parse_css(
+                            black_box(parse_css(
                                 code,
                                 suite.source_type,
                                 CssParserOptions::default(),
                             ));
-                            diagnostics.extend(result.into_diagnostics());
                         })
                     },
                 );
-                for diagnostic in diagnostics {
-                    let diagnostic = diagnostic
-                        .with_file_source_code(code)
-                        .with_file_path(test_case.filename());
-                    println!("{}", print_diagnostic_to_string(&diagnostic));
-                }
                 group.bench_with_input(
                     BenchmarkId::new(test_case.filename(), "cached"),
                     &code,
