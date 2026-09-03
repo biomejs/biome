@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnmodifiedLoopCondition {
-        version: "next",
+        version: "2.5.12",
         name: "noUnmodifiedLoopCondition",
         language: "js",
         sources: &[RuleSource::Eslint("no-unmodified-loop-condition").same()],

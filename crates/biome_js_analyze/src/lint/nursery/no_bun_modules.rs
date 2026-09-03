@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// import type { DatabaseOptions } from "bun:sqlite";
     /// ```
     pub NoBunModules {
-        version: "next",
+        version: "2.5.12",
         name: "noBunModules",
         language: "js",
         recommended: false,

@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidFileInputAccept {
-        version: "next",
+        version: "2.5.12",
         name: "noInvalidFileInputAccept",
         language: "html",
         recommended: false,
