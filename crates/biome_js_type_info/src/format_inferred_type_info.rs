@@ -741,6 +741,24 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     token(")")
                 ]]
             ),
+            Self::CallbackParameter(param) => write!(
+                f,
+                [&format_args![
+                    token("CallbackParameter"),
+                    space(),
+                    &param.callee,
+                    token("("),
+                    group(&soft_block_indent(&FmtInferredCallArgumentTypes(
+                        &param.arguments
+                    ))),
+                    token(")"),
+                    token("["),
+                    text(&param.argument_index.to_string(), None),
+                    token("]"),
+                    token("."),
+                    text(&param.parameter_index.to_string(), None),
+                ]]
+            ),
             Self::Conditional(expr) => write!(
                 f,
                 [&group(&format_args![

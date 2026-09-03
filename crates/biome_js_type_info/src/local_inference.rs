@@ -15,13 +15,14 @@ use biome_js_syntax::{
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
-    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
-    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
+    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsClassMemberList, JsConstructorParameters, JsExtendsClause,
+    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
+    JsInitializerClause, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
     JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
     JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
@@ -30,7 +31,7 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 
 use crate::globals::{
@@ -46,11 +47,12 @@ use crate::{
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
     TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    TypeofCallExpression, TypeofCallbackParameterExpression, TypeofConditionalExpression,
+    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
+    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
+    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -480,7 +482,7 @@ impl TypeData {
             }
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => Self::from(TypeofExpression::Call(TypeofCallExpression {
-                    callee: collector.reference_to_resolved_expression(scope_id, &callee),
+                    callee: callee_reference(collector, scope_id, &callee, expr.type_arguments()),
                     arguments: CallArgumentType::types_from_js_call_arguments(
                         collector,
                         scope_id,
@@ -1128,13 +1130,117 @@ impl TypeData {
         expr: &JsNewExpression,
     ) -> Option<Self> {
         Some(Self::from(TypeofExpression::New(TypeofNewExpression {
-            callee: collector.reference_to_resolved_expression(scope_id, &expr.callee().ok()?),
+            callee: callee_reference(
+                collector,
+                scope_id,
+                &expr.callee().ok()?,
+                expr.type_arguments(),
+            ),
             arguments: CallArgumentType::types_from_js_call_arguments(
                 collector,
                 scope_id,
                 expr.arguments(),
             ),
         })))
+    }
+
+    /// Types parameter `parameter_index` (not counting `this`) of the
+    /// callback `function` from the signature it is passed to. Returns `None`
+    /// when the callback is not a direct argument of a call or `new`
+    /// expression. The callback's own argument slot is left unknown so the
+    /// result does not depend on the callback's type.
+    pub fn from_contextual_callback_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        function: &JsSyntaxNode,
+        parameter_index: usize,
+    ) -> Option<Self> {
+        let mut argument = function.clone();
+        let mut parent = argument.parent()?;
+        while JsParenthesizedExpression::can_cast(parent.kind()) {
+            argument = parent;
+            parent = argument.parent()?;
+        }
+        let argument_list = JsCallArgumentList::cast(parent)?;
+        let argument_range = argument.text_trimmed_range();
+        let argument_index = argument_list.iter().position(|item| {
+            item.is_ok_and(|item| item.syntax().text_trimmed_range() == argument_range)
+        })?;
+        let call_like = argument_list
+            .parent::<JsCallArguments>()?
+            .syntax()
+            .parent()?;
+        let (callee, type_arguments, is_constructor) =
+            if let Some(call) = JsCallExpression::cast_ref(&call_like) {
+                (call.callee().ok()?, call.type_arguments(), false)
+            } else {
+                let new = JsNewExpression::cast_ref(&call_like)?;
+                (new.callee().ok()?, new.type_arguments(), true)
+            };
+
+        let callee = callee_reference(collector, scope_id, &callee, type_arguments);
+        let arguments = argument_list
+            .iter()
+            .enumerate()
+            .map(|(index, item)| match item {
+                Ok(item) if index != argument_index => {
+                    CallArgumentType::from_any_js_call_argument(collector, scope_id, &item)
+                }
+                _ => CallArgumentType::Argument(TypeReference::unknown()),
+            })
+            .collect();
+
+        Some(Self::from(TypeofExpression::CallbackParameter(
+            TypeofCallbackParameterExpression {
+                callee,
+                arguments,
+                argument_index: argument_index.try_into().ok()?,
+                parameter_index: parameter_index.try_into().ok()?,
+                is_constructor,
+            },
+        )))
+    }
+
+    /// Contextual type of an unannotated parameter of a function expression
+    /// or arrow function; see [`Self::from_contextual_callback_parameter`].
+    pub fn from_contextual_js_formal_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        param: &JsFormalParameter,
+    ) -> Option<Self> {
+        if param.type_annotation().is_some() {
+            return None;
+        }
+        let param_range = param.syntax().text_trimmed_range();
+        let parameter_list = param.parent::<JsParameterList>()?;
+        let parameter_index = parameter_list
+            .iter()
+            .filter_map(Result::ok)
+            .filter(|item| !matches!(item, AnyJsParameter::TsThisParameter(_)))
+            .position(|item| item.syntax().text_trimmed_range() == param_range)?;
+        let function = parameter_list.parent::<JsParameters>()?.syntax().parent()?;
+        if !matches!(
+            function.kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+        ) {
+            return None;
+        }
+        Self::from_contextual_callback_parameter(collector, scope_id, &function, parameter_index)
+    }
+
+    /// Contextual type of the single unparenthesised arrow parameter, as in
+    /// `run(value => value)`; see [`Self::from_contextual_callback_parameter`].
+    pub fn from_contextual_js_arrow_function_binding(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        expr: &JsArrowFunctionExpression,
+    ) -> Option<Self> {
+        match expr.parameters().ok()? {
+            AnyJsArrowFunctionParameters::AnyJsBinding(_) => {
+                Self::from_contextual_callback_parameter(collector, scope_id, expr.syntax(), 0)
+            }
+            AnyJsArrowFunctionParameters::JsParameters(_) => None,
+        }
     }
 
     pub fn from_ts_instantiation_expression(
@@ -2931,6 +3037,26 @@ fn constructor_params_from_js_params(
                 .collect()
         })
         .unwrap_or_default()
+}
+
+/// Callee reference of a call or `new` expression, instantiated with its
+/// explicit type arguments when present.
+fn callee_reference(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    callee: &AnyJsExpression,
+    type_arguments: Option<TsTypeArguments>,
+) -> TypeReference {
+    let callee = collector.reference_to_resolved_expression(scope_id, callee);
+    let type_parameters =
+        TypeReference::types_from_ts_type_arguments(collector, scope_id, type_arguments);
+    if type_parameters.is_empty() {
+        return callee;
+    }
+    collector.reference_to_owned_data(TypeData::instance_of(TypeInstance {
+        ty: callee,
+        type_parameters,
+    }))
 }
 
 #[inline]

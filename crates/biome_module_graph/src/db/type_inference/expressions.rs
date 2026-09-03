@@ -8,7 +8,9 @@ use super::{
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{
-    ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
+    CallArgumentTypeInput, ResolvedCallArgument, infer_call_argument_type,
+    infer_call_expression_return_type_from_args, infer_constructor_argument_type,
+    resolve_callable_function,
 };
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
@@ -114,6 +116,28 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::Call(expression) => {
                 let callee = self.resolve(&expression.callee);
                 Some(self.resolve_call_expression(callee, &expression.arguments))
+            }
+            RawTypeofExpression::CallbackParameter(expression) => {
+                let callee = self.resolve(&expression.callee);
+                let arguments = expression
+                    .arguments
+                    .iter()
+                    .map(|argument| match argument {
+                        RawCallArgumentType::Argument(ty) => {
+                            InferredCallArgumentType::Argument(self.resolve(ty))
+                        }
+                        RawCallArgumentType::Spread(ty) => {
+                            InferredCallArgumentType::Spread(self.resolve(ty))
+                        }
+                    })
+                    .collect();
+                self.resolve_callback_parameter(
+                    callee,
+                    arguments,
+                    expression.argument_index,
+                    expression.parameter_index,
+                    expression.is_constructor,
+                )
             }
             RawTypeofExpression::Conditional(expression) => {
                 let test = self.resolve(&expression.test);
@@ -238,6 +262,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::Call(expression) => Some(
                 self.resolve_inferred_call_expression(expression.callee, &expression.arguments),
             ),
+            InferredTypeofExpression::CallbackParameter(expression) => self
+                .resolve_callback_parameter(
+                    expression.callee,
+                    expression.arguments.clone(),
+                    expression.argument_index,
+                    expression.parameter_index,
+                    expression.is_constructor,
+                ),
             InferredTypeofExpression::Conditional(expression) => self
                 .resolve_conditional_expression(
                     expression.test,
@@ -581,6 +613,35 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::VoidKeyword => Vec::new(),
         };
         InferredTypeData::instance_of(self.db, parent, type_parameters.into_boxed_slice())
+    }
+
+    /// Resolves an unannotated callback parameter from the expected type of
+    /// the callback's argument position. Returns `None` when no signature can
+    /// be selected, the expected type is not one callable type, or
+    /// `parameter_index` has no positional parameter (rest parameters are not
+    /// expanded).
+    fn resolve_callback_parameter(
+        &mut self,
+        callee: InferredTypeData<'db>,
+        arguments: Box<[InferredCallArgumentType<'db>]>,
+        argument_index: u16,
+        parameter_index: u16,
+        is_constructor: bool,
+    ) -> Option<InferredTypeData<'db>> {
+        let callee = self.resolve_call_callee(callee);
+        let input = CallArgumentTypeInput::new(self.db, callee, arguments, argument_index as usize);
+        let expected = if is_constructor {
+            infer_constructor_argument_type(self.db, input)?
+        } else {
+            infer_call_argument_type(self.db, input)?
+        };
+        let function = resolve_callable_function(self.db, expected)?;
+        let parameter = function
+            .parameters(self.db)
+            .iter()
+            .filter(|parameter| !parameter.is_this())
+            .nth(parameter_index as usize)?;
+        (!parameter.is_rest()).then(|| parameter.ty())
     }
 
     fn resolve_inferred_call_expression(

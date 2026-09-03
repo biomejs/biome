@@ -434,6 +434,24 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::CallbackParameter(param) => {
+                write!(
+                    f,
+                    [&format_args![
+                        token("CallbackParameter"),
+                        space(),
+                        param.callee,
+                        token("("),
+                        group(&soft_block_indent(&FmtCallArgumentType(&param.arguments))),
+                        token(")"),
+                        token("["),
+                        text(&param.argument_index.to_string(), None),
+                        token("]"),
+                        token("."),
+                        text(&param.parameter_index.to_string(), None),
+                    ]]
+                )
+            }
             Self::Conditional(conditional) => {
                 write!(
                     f,

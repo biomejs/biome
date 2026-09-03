@@ -73,7 +73,7 @@ pub fn infer_call_expression_type<'db>(
 /// declare function consume(value: string, callback: () => void): void;
 /// consume("value", async () => {});
 /// ```
-#[salsa::tracked]
+#[salsa::tracked(cycle_result=infer_argument_type_cycle_result)]
 pub fn infer_call_argument_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallArgumentTypeInput<'db>,
@@ -105,7 +105,7 @@ pub fn infer_call_argument_type<'db>(
 /// }
 /// new Job(async () => {});
 /// ```
-#[salsa::tracked]
+#[salsa::tracked(cycle_result=infer_argument_type_cycle_result)]
 pub fn infer_constructor_argument_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallArgumentTypeInput<'db>,
@@ -125,6 +125,21 @@ pub fn infer_constructor_argument_type<'db>(
             })
         },
     )
+}
+
+// #endregion
+
+// #region CYCLE RESULTS
+
+/// A callback parameter typed from its call re-enters argument inference when
+/// a sibling argument depends on that parameter; the expected type is then
+/// unknown.
+fn infer_argument_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: CallArgumentTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    None
 }
 
 // #endregion

@@ -637,6 +637,19 @@ impl Default for FunctionParameter {
 }
 
 impl FunctionParameter {
+    /// Returns the type of the binding named `name`, or unknown when this
+    /// parameter does not declare it.
+    pub fn binding_type(&self, name: &Text) -> TypeReference {
+        match self {
+            Self::Named(named) => named.ty.clone(),
+            Self::Pattern(pattern) => pattern
+                .bindings
+                .iter()
+                .find_map(|binding| (binding.name == *name).then(|| binding.ty.clone()))
+                .unwrap_or_default(),
+        }
+    }
+
     pub fn ty(&self) -> &TypeReference {
         match self {
             Self::Named(named) => &named.ty,
@@ -1303,6 +1316,7 @@ pub enum TypeofExpression {
     Await(TypeofAwaitExpression),
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
+    CallbackParameter(TypeofCallbackParameterExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
@@ -1340,6 +1354,26 @@ pub struct TypeofBitwiseNotExpression {
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
+}
+
+/// Type of an unannotated parameter of a callback passed directly as a call
+/// or `new` argument, deferred until the callee's signature is selected.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofCallbackParameterExpression {
+    pub callee: TypeReference,
+
+    /// Source arguments of the call. The callback's own slot is unknown so
+    /// the expression does not depend on the callback's type.
+    pub arguments: Box<[CallArgumentType]>,
+
+    /// Source index of the callback, before spreads are expanded.
+    pub argument_index: u16,
+
+    /// Index of the parameter in the callback, not counting a `this`
+    /// parameter.
+    pub parameter_index: u16,
+
+    pub is_constructor: bool,
 }
 
 /// Represents the type of a ternary expression.

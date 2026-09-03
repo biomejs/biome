@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+assertion_line: 50
+expression: content
+---
+## Input
+
+```ts
+new Job((value) => value);
+
+```
+
+## Result
+
+```
+CallbackParameter unresolved reference "Job" (scope ID: 0)(unknown)[0].0
+```

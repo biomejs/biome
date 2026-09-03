@@ -719,6 +719,7 @@ fn classify_expression(
                         | TypeofExpression::Await(_)
                         | TypeofExpression::BitwiseNot(_)
                         | TypeofExpression::Call(_)
+                        | TypeofExpression::CallbackParameter(_)
                         | TypeofExpression::Conditional(_)
                         | TypeofExpression::Destructure(_)
                         | TypeofExpression::Index(_)
