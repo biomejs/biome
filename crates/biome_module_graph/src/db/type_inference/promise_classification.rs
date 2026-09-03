@@ -18,7 +18,7 @@
 //! expression forms, accessors, ambiguous exports, cycles, and an exhausted
 //! work limit are indeterminate.
 
-use super::{ImportResolution, ResolutionCtx, find_value_member_type_on_demand};
+use super::{ResolutionCtx, find_value_member_type_on_demand};
 use crate::db::queries::{
     function_returns_promise, is_array_of_promise_type, is_promise_type, resolved_export_origin,
 };
