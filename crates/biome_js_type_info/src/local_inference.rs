@@ -3493,7 +3493,7 @@ impl<'a> GuardAnalysis<'a> {
     /// somewhere inside `node`: either a `JsIdentifierBinding` with that name
     /// is declared there, or the name is assigned to (written) within `node`.
     ///
-    /// The scan is deliberately coarse: a write anywhere in `node` invalidates
+    /// The scan is deliberately conservative: a write anywhere in `node` invalidates
     /// every reference in it, even ones that precede the write. It also keys on
     /// syntax kind rather than on scopes, so `enum name {}` counts (its id is a
     /// `JsIdentifierBinding`) while `namespace name {}` does not (its name is a
@@ -3539,7 +3539,7 @@ impl<'a> GuardAnalysis<'a> {
     /// to within `node`, e.g. `name.member = 1` or `name[key] = 1`.
     ///
     /// Like [`Self::narrowing_invalidated_within`], the scan is deliberately
-    /// coarse: a member write anywhere in `node` counts, even one that cannot
+    /// conservative: a member write anywhere in `node` counts, even one that cannot
     /// execute before the reference being narrowed. Results are memoized in the
     /// resolver's narrowing invalidation cache, under
     /// [`NarrowingInvalidationKind::MemberWrite`].
