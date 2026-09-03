@@ -113,12 +113,16 @@ fn is_nth_at_function_with_context(
     n: usize,
     context: ValueParsingContext,
 ) -> bool {
+    if !is_nth_at_identifier(p, n) {
+        return false;
+    }
+
     let is_function_paren = match context.function_call_context() {
         FunctionCallContext::LooseRecovery => p.nth_at(n + 1, T!['(']),
         FunctionCallContext::SourceTight => is_nth_at_source_tight_l_paren(p, n + 1),
     };
 
-    is_nth_at_identifier(p, n) && is_function_paren
+    is_function_paren
         || (context.is_scss_qualified_function_recovery_allowed()
             // Sass module calls are always source-tight: `math.pow(...)`.
             && is_nth_at_scss_module_member_access(p, n)
