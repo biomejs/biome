@@ -10,6 +10,10 @@ keywords.workspace   = true
 categories.workspace = true
 include              = ["src/**/*"]
 
+[[bench]]
+harness = false
+name    = "md_formatter"
+
 [dependencies]
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
@@ -31,8 +35,11 @@ biome_parser          = { path = "../biome_parser" }
 biome_service         = { path = "../biome_service", features = ["lang_md"] }
 camino                = { workspace = true }
 countme               = { workspace = true, features = ["enable"] }
+criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+mimalloc              = { workspace = true }
 similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
+tikv-jemallocator     = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "serde"]

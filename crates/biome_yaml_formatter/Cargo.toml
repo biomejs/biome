@@ -18,6 +18,10 @@ publish              = true
 [package.metadata.workspaces]
 independent = true
 
+[[bench]]
+harness = false
+name    = "yaml_formatter"
+
 [dependencies]
 biome_deserialize = { workspace = true }
 biome_diagnostics = { workspace = true }
@@ -36,11 +40,15 @@ biome_formatter_test = { path = "../biome_formatter_test", features = ["lang_yam
 biome_fs             = { path = "../biome_fs" }
 biome_languages      = { path = "../biome_languages", features = ["lang_yaml"] }
 biome_service        = { path = "../biome_service", features = ["lang_yaml"] }
+biome_test_utils     = { path = "../biome_test_utils", features = ["lang_yaml"] }
 biome_yaml_parser    = { path = "../biome_yaml_parser" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
+criterion            = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+mimalloc             = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
+tikv-jemallocator    = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "serde"]
