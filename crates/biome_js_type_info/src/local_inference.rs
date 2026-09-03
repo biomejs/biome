@@ -3284,7 +3284,7 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
 /// inside `node`: either a `JsIdentifierBinding` named `name` is declared
 /// there, or `name` is assigned to (written) within `node`.
 ///
-/// The scan is deliberately coarse: a write anywhere in `node` invalidates
+/// The scan is deliberately conservative: a write anywhere in `node` invalidates
 /// every reference in it, even ones that precede the write. It also keys on
 /// syntax kind rather than on scopes, so `enum name {}` counts (its id is a
 /// `JsIdentifierBinding`) while `namespace name {}` does not (its name is a
