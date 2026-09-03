@@ -434,21 +434,23 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
-            Self::CallbackParameter(param) => {
+            Self::CallArgument(argument) => {
+                write!(f, [token("CallArgument"), space()])?;
+                if argument.is_constructor {
+                    write!(f, [token("new"), space()])?;
+                }
                 write!(
                     f,
                     [&format_args![
-                        token("CallbackParameter"),
-                        space(),
-                        param.callee,
+                        argument.callee,
                         token("("),
-                        group(&soft_block_indent(&FmtCallArgumentType(&param.arguments))),
+                        group(&soft_block_indent(&FmtCallArgumentType(
+                            &argument.arguments
+                        ))),
                         token(")"),
                         token("["),
-                        text(&param.argument_index.to_string(), None),
+                        text(&argument.index.to_string(), None),
                         token("]"),
-                        token("."),
-                        text(&param.parameter_index.to_string(), None),
                     ]]
                 )
             }
@@ -562,6 +564,19 @@ impl Format<FormatTypeContext> for TypeofExpression {
             }
             Self::New(expr) => {
                 write!(f, [&format_args![token("new"), space(), &expr.callee]])
+            }
+            Self::Parameter(parameter) => {
+                write!(
+                    f,
+                    [&format_args![
+                        token("Parameter"),
+                        space(),
+                        parameter.function,
+                        token("["),
+                        text(&parameter.index.to_string(), None),
+                        token("]"),
+                    ]]
+                )
             }
             Self::NullishCoalescing(expr) => {
                 write!(

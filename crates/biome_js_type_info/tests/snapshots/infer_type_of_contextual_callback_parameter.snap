@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_type_info/tests/utils.rs
-assertion_line: 50
 expression: content
 ---
 ## Input
@@ -13,7 +12,7 @@ run<Context>("kind", (first, second) => second);
 ## Result
 
 ```
-CallbackParameter Local TypeId(1)(Local TypeId(2)unknown)[1].1
+Parameter Local TypeId(3)[1]
 ```
 
 ## Registered types
@@ -24,4 +23,6 @@ Module TypeId(0) => instanceof unresolved reference "Context" (scope ID: 0)
 Module TypeId(1) => instanceof unresolved reference "run" (scope ID: 0)<Local TypeId(0)>
 
 Module TypeId(2) => string: kind
+
+Module TypeId(3) => CallArgument Local TypeId(1)(Local TypeId(2)unknown)[1]
 ```

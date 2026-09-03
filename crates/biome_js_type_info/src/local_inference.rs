@@ -47,12 +47,12 @@ use crate::{
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
     TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofCallbackParameterExpression, TypeofConditionalExpression,
+    TypeofCallArgumentExpression, TypeofCallExpression, TypeofConditionalExpression,
     TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
     TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
-    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
-    Union,
+    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofParameterExpression,
+    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
+    TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -1145,10 +1145,9 @@ impl TypeData {
     }
 
     /// Types parameter `parameter_index` (not counting `this`) of the
-    /// callback `function` from the signature it is passed to. Returns `None`
-    /// when the callback is not a direct argument of a call or `new`
-    /// expression. The callback's own argument slot is left unknown so the
-    /// result does not depend on the callback's type.
+    /// callback `function` as the corresponding parameter of the type
+    /// expected for its argument position. Returns `None` when the callback
+    /// is not a direct argument of a call or `new` expression.
     pub fn from_contextual_callback_parameter(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
@@ -1190,13 +1189,18 @@ impl TypeData {
             })
             .collect();
 
-        Some(Self::from(TypeofExpression::CallbackParameter(
-            TypeofCallbackParameterExpression {
+        let expected = collector.reference_to_owned_data(Self::from(
+            TypeofExpression::CallArgument(TypeofCallArgumentExpression {
                 callee,
                 arguments,
-                argument_index: argument_index.try_into().ok()?,
-                parameter_index: parameter_index.try_into().ok()?,
+                index: argument_index.try_into().ok()?,
                 is_constructor,
+            }),
+        ));
+        Some(Self::from(TypeofExpression::Parameter(
+            TypeofParameterExpression {
+                function: expected,
+                index: parameter_index.try_into().ok()?,
             },
         )))
     }

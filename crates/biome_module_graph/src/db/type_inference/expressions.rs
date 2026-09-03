@@ -117,7 +117,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let callee = self.resolve(&expression.callee);
                 Some(self.resolve_call_expression(callee, &expression.arguments))
             }
-            RawTypeofExpression::CallbackParameter(expression) => {
+            RawTypeofExpression::CallArgument(expression) => {
                 let callee = self.resolve(&expression.callee);
                 let arguments = expression
                     .arguments
@@ -131,13 +131,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                         }
                     })
                     .collect();
-                self.resolve_callback_parameter(
+                self.resolve_call_argument(
                     callee,
                     arguments,
-                    expression.argument_index,
-                    expression.parameter_index,
+                    expression.index,
                     expression.is_constructor,
                 )
+            }
+            RawTypeofExpression::Parameter(expression) => {
+                let function = self.resolve(&expression.function);
+                self.resolve_parameter(function, expression.index)
             }
             RawTypeofExpression::Conditional(expression) => {
                 let test = self.resolve(&expression.test);
@@ -262,14 +265,15 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::Call(expression) => Some(
                 self.resolve_inferred_call_expression(expression.callee, &expression.arguments),
             ),
-            InferredTypeofExpression::CallbackParameter(expression) => self
-                .resolve_callback_parameter(
-                    expression.callee,
-                    expression.arguments.clone(),
-                    expression.argument_index,
-                    expression.parameter_index,
-                    expression.is_constructor,
-                ),
+            InferredTypeofExpression::CallArgument(expression) => self.resolve_call_argument(
+                expression.callee,
+                expression.arguments.clone(),
+                expression.index,
+                expression.is_constructor,
+            ),
+            InferredTypeofExpression::Parameter(expression) => {
+                self.resolve_parameter(expression.function, expression.index)
+            }
             InferredTypeofExpression::Conditional(expression) => self
                 .resolve_conditional_expression(
                     expression.test,
@@ -615,32 +619,40 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::instance_of(self.db, parent, type_parameters.into_boxed_slice())
     }
 
-    /// Resolves an unannotated callback parameter from the expected type of
-    /// the callback's argument position. Returns `None` when no signature can
-    /// be selected, the expected type is not one callable type, or
-    /// `parameter_index` has no positional parameter (rest parameters are not
-    /// expanded).
-    fn resolve_callback_parameter(
+    /// Resolves the type expected for the argument at `index` of a call, or
+    /// `None` when no signature can be selected.
+    fn resolve_call_argument(
         &mut self,
         callee: InferredTypeData<'db>,
         arguments: Box<[InferredCallArgumentType<'db>]>,
-        argument_index: u16,
-        parameter_index: u16,
+        index: u16,
         is_constructor: bool,
     ) -> Option<InferredTypeData<'db>> {
         let callee = self.resolve_call_callee(callee);
-        let input = CallArgumentTypeInput::new(self.db, callee, arguments, argument_index as usize);
-        let expected = if is_constructor {
-            infer_constructor_argument_type(self.db, input)?
+        let input = CallArgumentTypeInput::new(self.db, callee, arguments, index as usize);
+        if is_constructor {
+            infer_constructor_argument_type(self.db, input)
         } else {
-            infer_call_argument_type(self.db, input)?
-        };
-        let function = resolve_callable_function(self.db, expected)?;
+            infer_call_argument_type(self.db, input)
+        }
+    }
+
+    /// Resolves the type of the parameter at `index` of `function`, not
+    /// counting a `this` parameter. Returns `None` when `function` is not one
+    /// callable type or has no positional parameter at `index` (rest
+    /// parameters are not expanded).
+    fn resolve_parameter(
+        &mut self,
+        function: InferredTypeData<'db>,
+        index: u16,
+    ) -> Option<InferredTypeData<'db>> {
+        let function = self.resolve_inferred_type(function);
+        let function = resolve_callable_function(self.db, function)?;
         let parameter = function
             .parameters(self.db)
             .iter()
             .filter(|parameter| !parameter.is_this())
-            .nth(parameter_index as usize)?;
+            .nth(index as usize)?;
         (!parameter.is_rest()).then(|| parameter.ty())
     }
 

@@ -1316,7 +1316,7 @@ pub enum TypeofExpression {
     Await(TypeofAwaitExpression),
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
-    CallbackParameter(TypeofCallbackParameterExpression),
+    CallArgument(TypeofCallArgumentExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
@@ -1326,6 +1326,7 @@ pub enum TypeofExpression {
     LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
     NullishCoalescing(TypeofNullishCoalescingExpression),
+    Parameter(TypeofParameterExpression),
     StaticMember(TypeofStaticMemberExpression),
     OptionalChainStaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
@@ -1356,24 +1357,28 @@ pub struct TypeofCallExpression {
     pub arguments: Box<[CallArgumentType]>,
 }
 
-/// Type of an unannotated parameter of a callback passed directly as a call
-/// or `new` argument, deferred until the callee's signature is selected.
+/// Type expected for the argument at `index` of a call or `new` expression,
+/// according to the signature selected for `callee` and `arguments`.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct TypeofCallbackParameterExpression {
+pub struct TypeofCallArgumentExpression {
     pub callee: TypeReference,
 
-    /// Source arguments of the call. The callback's own slot is unknown so
-    /// the expression does not depend on the callback's type.
+    /// Source arguments of the call. The slot at `index` is unknown so the
+    /// expression does not depend on that argument's own type.
     pub arguments: Box<[CallArgumentType]>,
 
-    /// Source index of the callback, before spreads are expanded.
-    pub argument_index: u16,
-
-    /// Index of the parameter in the callback, not counting a `this`
-    /// parameter.
-    pub parameter_index: u16,
+    /// Source index of the argument, before spreads are expanded.
+    pub index: u16,
 
     pub is_constructor: bool,
+}
+
+/// Type of the parameter at `index` of a callable type, not counting a
+/// `this` parameter.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofParameterExpression {
+    pub function: TypeReference,
+    pub index: u16,
 }
 
 /// Represents the type of a ternary expression.
