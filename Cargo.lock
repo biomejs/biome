@@ -1480,11 +1480,14 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "filetime",
  "insta",
+ "mimalloc",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1513,12 +1516,15 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "similar-asserts",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -2156,14 +2162,18 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "biome_test_utils",
  "biome_yaml_parser",
  "biome_yaml_syntax",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "similar-asserts",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
