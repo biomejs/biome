@@ -6106,6 +6106,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeIframeSandboxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeIframeSandboxOptions" }
+			]
+		},
+		"NoUnsafeIframeSandboxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnsafeNegationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7128,6 +7138,13 @@
 					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeIframeSandbox": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeIframeSandboxConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10786,6 +10803,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeFinallyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeIframeSandboxOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeIframeSandboxOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
