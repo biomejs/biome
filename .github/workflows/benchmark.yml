@@ -82,6 +82,8 @@ jobs:
             yaml:
               - '.github/workflows/benchmark.yml'
               - 'Cargo.lock'
+              - 'crates/biome_yaml_parser/Cargo.toml'
+              - 'crates/biome_yaml_parser/benches/**/*'
               - 'crates/biome_yaml_formatter/Cargo.toml'
               - 'crates/biome_yaml_formatter/benches/**/*'
               - 'crates/biome_yaml_formatter/**/*.rs'
