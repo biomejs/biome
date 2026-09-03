@@ -17768,6 +17768,7 @@ impl AnyScssIncludeTarget {
 pub enum AnyScssInterpolatedIdentifierPart {
     CssCustomIdentifier(CssCustomIdentifier),
     CssIdentifier(CssIdentifier),
+    CssNumber(CssNumber),
     ScssInterpolatedIdentifierHyphen(ScssInterpolatedIdentifierHyphen),
     ScssInterpolation(ScssInterpolation),
 }
@@ -17781,6 +17782,12 @@ impl AnyScssInterpolatedIdentifierPart {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            Self::CssNumber(item) => Some(item),
             _ => None,
         }
     }
@@ -45920,6 +45927,11 @@ impl From<CssIdentifier> for AnyScssInterpolatedIdentifierPart {
         Self::CssIdentifier(node)
     }
 }
+impl From<CssNumber> for AnyScssInterpolatedIdentifierPart {
+    fn from(node: CssNumber) -> Self {
+        Self::CssNumber(node)
+    }
+}
 impl From<ScssInterpolatedIdentifierHyphen> for AnyScssInterpolatedIdentifierPart {
     fn from(node: ScssInterpolatedIdentifierHyphen) -> Self {
         Self::ScssInterpolatedIdentifierHyphen(node)
@@ -45934,6 +45946,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssCustomIdentifier::KIND_SET
         .union(CssIdentifier::KIND_SET)
+        .union(CssNumber::KIND_SET)
         .union(ScssInterpolatedIdentifierHyphen::KIND_SET)
         .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -45941,6 +45954,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
             kind,
             CSS_CUSTOM_IDENTIFIER
                 | CSS_IDENTIFIER
+                | CSS_NUMBER
                 | SCSS_INTERPOLATED_IDENTIFIER_HYPHEN
                 | SCSS_INTERPOLATION
         )
@@ -45949,6 +45963,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
         let res = match syntax.kind() {
             CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER_HYPHEN => {
                 Self::ScssInterpolatedIdentifierHyphen(ScssInterpolatedIdentifierHyphen { syntax })
             }
@@ -45961,6 +45976,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
         match self {
             Self::CssCustomIdentifier(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
+            Self::CssNumber(it) => it.syntax(),
             Self::ScssInterpolatedIdentifierHyphen(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
         }
@@ -45969,6 +45985,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
         match self {
             Self::CssCustomIdentifier(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssNumber(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifierHyphen(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
         }
@@ -45979,6 +45996,7 @@ impl std::fmt::Debug for AnyScssInterpolatedIdentifierPart {
         match self {
             Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifierHyphen(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -45989,6 +46007,7 @@ impl From<AnyScssInterpolatedIdentifierPart> for SyntaxNode {
         match n {
             AnyScssInterpolatedIdentifierPart::CssCustomIdentifier(it) => it.into_syntax(),
             AnyScssInterpolatedIdentifierPart::CssIdentifier(it) => it.into_syntax(),
+            AnyScssInterpolatedIdentifierPart::CssNumber(it) => it.into_syntax(),
             AnyScssInterpolatedIdentifierPart::ScssInterpolatedIdentifierHyphen(it) => {
                 it.into_syntax()
             }
