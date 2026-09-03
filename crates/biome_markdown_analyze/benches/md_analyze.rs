@@ -3,7 +3,6 @@ use biome_analyze::{
 };
 use biome_markdown_analyze::analyze;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
-use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 #[cfg(target_os = "windows")]
