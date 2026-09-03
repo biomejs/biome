@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   merge_group:
   pull_request:
-    types: [opened, synchronize]
+    types: [ opened, synchronize ]
     branches:
       - main
       - next
@@ -82,7 +82,10 @@ jobs:
             yaml:
               - '.github/workflows/benchmark.yml'
               - 'Cargo.lock'
-              - 'crates/biome_yaml_parser/**/*'
+              - 'crates/biome_yaml_formatter/Cargo.toml'
+              - 'crates/biome_yaml_formatter/benches/**/*'
+              - 'crates/biome_yaml_formatter/**/*.rs'
+              - 'crates/biome_yaml_parser/**/*.rs'
               - 'crates/biome_yaml_*/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
@@ -122,9 +125,12 @@ jobs:
             markdown:
               - '.github/workflows/benchmark.yml'
               - 'Cargo.lock'
+              - 'crates/biome_markdown_analyze/Cargo.toml'
+              - 'crates/biome_markdown_formatter/Cargo.toml'
               - 'crates/biome_markdown_parser/Cargo.toml'
-              - 'crates/biome_markdown_parser/benches/**/*.md'
+              - 'crates/biome_markdown_*/benches/**/*'
               - 'crates/biome_markdown_parser/**/*.rs'
+              - 'crates/biome_markdown_formatter/**/*.rs'
               - 'crates/biome_markdown_*/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
@@ -352,6 +358,7 @@ jobs:
       matrix:
         package:
           - biome_yaml_parser
+          - biome_yaml_formatter
     steps: *bench_steps
 
   css:
@@ -407,8 +414,14 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench Markdown
+    name: Bench Markdown / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_markdown_parser
+          - biome_markdown_formatter
+          - biome_markdown_analyze
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -427,7 +440,7 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p biome_markdown_parser
+        run: cargo codspeed build -p ${{ matrix.package }}
         env:
           CARGO_BUILD_JOBS: 3
 
@@ -436,7 +449,7 @@ jobs:
         timeout-minutes: 50
         with:
           mode: simulation
-          run: cargo codspeed run -p biome_markdown_parser --bench markdown_parser
+          run: cargo codspeed run -p ${{ matrix.package }}
           token: ${{ secrets.CODSPEED_TOKEN }}
 
   grit:
