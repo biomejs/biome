@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseFlatMathMinMax {
-        version: "next",
+        version: "2.5.12",
         name: "useFlatMathMinMax",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-flat-math-min-max").same()],

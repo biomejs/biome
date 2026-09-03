@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoThisOutsideOfClass {
-        version: "next",
+        version: "2.5.12",
         name: "noThisOutsideOfClass",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-this-outside-of-class").same()],

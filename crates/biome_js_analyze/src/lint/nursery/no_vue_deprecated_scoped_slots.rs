@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// </script>
     /// ```
     pub NoVueDeprecatedScopedSlots {
-        version: "next",
+        version: "2.5.12",
         name: "noVueDeprecatedScopedSlots",
         language: "js",
         sources: &[RuleSource::EslintVueJs("no-deprecated-dollar-scopedslots-api").same()],

@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseReactNamingConvention {
-        version: "next",
+        version: "2.5.12",
         name: "useReactNamingConvention",
         language: "jsx",
         recommended: false,

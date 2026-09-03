@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseModernMathApis {
-        version: "next",
+        version: "2.5.12",
         name: "useModernMathApis",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-modern-math-apis").same()],

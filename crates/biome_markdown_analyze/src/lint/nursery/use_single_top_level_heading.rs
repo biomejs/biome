@@ -80,7 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSingleTopLevelHeading {
-        version: "next",
+        version: "2.5.12",
         name: "useSingleTopLevelHeading",
         language: "md",
         recommended: true,
