@@ -455,3 +455,54 @@ fn infer_type_of_typeof_guard_narrowed_reference() {
         "infer_type_of_typeof_guard_narrowed_reference",
     );
 }
+
+/// `x++`/`x--` reuse `JsIdentifierAssignment`, already caught by `narrowing_invalidated_within`.
+#[test]
+fn declines_assignment_narrowing_after_pre_or_post_update() {
+    const CODE: &str = r#"x = "a";
+x++;
+x;"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .filter_map(JsExpressionStatement::cast)
+        .last()
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+
+    assert!(
+        !matches!(ty, TypeData::TypeofExpression(_)),
+        "assignment narrowing must be declined after x++, got {ty:?}"
+    );
+}
+
+/// Same, for `x.member++`, via `member_write_invalidated_within`.
+#[test]
+fn declines_member_equals_narrowing_after_pre_or_post_update_on_member() {
+    const CODE: &str = r#"if (x.member === "a") {
+    x.member++;
+    x;
+}"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .filter_map(JsExpressionStatement::cast)
+        .last()
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+
+    assert!(
+        !matches!(ty, TypeData::TypeofExpression(_)),
+        "member-equals narrowing must be declined after x.member++, got {ty:?}"
+    );
+}
