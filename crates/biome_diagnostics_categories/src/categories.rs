@@ -325,6 +325,7 @@ define_categories! {
     "lint/nursery/useUniqueInputFieldNames": "https://biomejs.dev/linter/rules/use-unique-input-field-names",
     "lint/nursery/useUniqueVariableNames": "https://biomejs.dev/linter/rules/use-unique-variable-names",
     "lint/nursery/useVarsOnTop": "https://biomejs.dev/linter/rules/use-vars-on-top",
+    "lint/nursery/useVueBaseImport": "https://biomejs.dev/linter/rules/use-vue-base-import",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",

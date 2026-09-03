@@ -603,6 +603,7 @@ pub enum RuleName {
     UseValidLang,
     UseValidTypeof,
     UseVarsOnTop,
+    UseVueBaseImport,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentVBindStyle,
     UseVueConsistentVOnStyle,
@@ -1148,6 +1149,7 @@ impl RuleName {
             Self::UseValidLang => "useValidLang",
             Self::UseValidTypeof => "useValidTypeof",
             Self::UseVarsOnTop => "useVarsOnTop",
+            Self::UseVueBaseImport => "useVueBaseImport",
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
             }
@@ -1689,6 +1691,7 @@ impl RuleName {
             Self::UseValidLang => RuleGroup::A11y,
             Self::UseValidTypeof => RuleGroup::Correctness,
             Self::UseVarsOnTop => RuleGroup::Nursery,
+            Self::UseVueBaseImport => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Style,
             Self::UseVueConsistentVOnStyle => RuleGroup::Style,
@@ -2239,6 +2242,7 @@ impl std::str::FromStr for RuleName {
             "useValidLang" => Ok(Self::UseValidLang),
             "useValidTypeof" => Ok(Self::UseValidTypeof),
             "useVarsOnTop" => Ok(Self::UseVarsOnTop),
+            "useVueBaseImport" => Ok(Self::UseVueBaseImport),
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
             }

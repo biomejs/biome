@@ -2873,6 +2873,11 @@ See https://biomejs.dev/linter/rules/use-vars-on-top
 	 */
 	useVarsOnTop?: UseVarsOnTopConfiguration;
 	/**
+	* Enforce importing Vue's public entry point instead of internal Vue packages.
+See https://biomejs.dev/linter/rules/use-vue-base-import 
+	 */
+	useVueBaseImport?: UseVueBaseImportConfiguration;
+	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
 	 */
@@ -5049,6 +5054,9 @@ export type UseUnicodeRegexConfiguration =
 export type UseVarsOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVarsOnTopOptions;
+export type UseVueBaseImportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueBaseImportOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -7088,6 +7096,11 @@ export interface RuleWithUseVarsOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseVarsOnTopOptions;
 }
+export interface RuleWithUseVueBaseImportOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueBaseImportOptions;
+}
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
@@ -8901,6 +8914,7 @@ Defaults to `false`.
 }
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
+export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -10185,6 +10199,7 @@ export type Category =
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVarsOnTop"
+	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueValidVFor"
