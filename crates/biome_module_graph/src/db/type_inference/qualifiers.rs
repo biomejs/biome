@@ -7,7 +7,7 @@ use crate::{
     module_graph::ModuleInfoKind,
 };
 use biome_js_type_info::{
-    Path, TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     global_type_id_for_qualifier,
     interned_types::{
         Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, TypeData as InferredTypeData,
@@ -454,7 +454,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<Box<[InferredTypeData<'db>]>> {
         if let InferredTypeData::Local(local) = target {
             let module_key = local.module(self.db);
-            let type_id = TypeId::new(local.type_id(self.db).index());
+            let type_id = local.type_id(self.db);
             if module_key == self.module_key {
                 if let Some(parameters) = self
                     .js_info
@@ -485,8 +485,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         {
                             let sccs =
                                 inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
-                            module == self.module
-                                || sccs.contains_cycle_between(self.module, module)
+                            sccs.contains_cycle_between(self.module, module)
                         } else {
                             false
                         };
