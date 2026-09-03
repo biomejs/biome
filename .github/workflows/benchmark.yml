@@ -242,14 +242,23 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench JS / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Bench JS / ${{ matrix.package }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_js_parser
-          - biome_js_formatter
-          - biome_js_analyze
+        include:
+          - package: biome_js_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_js_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_js_analyze
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: &bench_steps
       - name: Checkout PR Branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -268,7 +277,7 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p ${{ matrix.package }}
+        run: cargo codspeed build -m ${{ matrix.mode }} -p ${{ matrix.package }} ${{ matrix.bench }} ${{ matrix.build_args }}
         env:
           CARGO_BUILD_JOBS: 3 # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
@@ -276,8 +285,8 @@ jobs:
         uses: CodSpeedHQ/action@f22792bfac16f3e14eb9fbea76f4a48e9cc22b93 # v4.19.1
         timeout-minutes: 50
         with:
-          mode: simulation
-          run: cargo codspeed run
+          mode: ${{ matrix.mode }}
+          run: cargo codspeed run -m ${{ matrix.mode }} -p ${{ matrix.package }} ${{ matrix.bench }}
           token: ${{ secrets.CODSPEED_TOKEN }}
 
   service:
@@ -286,37 +295,17 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench Service
-    runs-on: depot-ubuntu-24.04-arm-16
-    steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
-        with:
-          channel: stable
-          cache-target: release
-          bins: cargo-codspeed
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compile
-        timeout-minutes: 20
-        run: cargo codspeed build -p biome_service --bench pull_diagnostics --features type_inference
-        env:
-          CARGO_BUILD_JOBS: 3
-
-      - name: Run the benchmarks
-        uses: CodSpeedHQ/action@f22792bfac16f3e14eb9fbea76f4a48e9cc22b93 # v4.19.1
-        timeout-minutes: 50
-        with:
-          mode: simulation
-          run: cargo codspeed run -p biome_service --bench pull_diagnostics
-          token: ${{ secrets.CODSPEED_TOKEN }}
+    name: Bench Service / ${{ matrix.package }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - package: biome_service
+            bench: --bench pull_diagnostics
+            build_args: --features type_inference
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+    steps: *bench_steps
 
   console:
     needs: changes
@@ -325,11 +314,14 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench Console
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_console
+        include:
+          - package: biome_console
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   json:
@@ -338,14 +330,23 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench JSON / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Bench JSON / ${{ matrix.package }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_json_parser
-          - biome_json_formatter
-          - biome_json_analyze
+        include:
+          - package: biome_json_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_json_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_json_analyze
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   yaml:
@@ -355,12 +356,18 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench YAML
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_yaml_parser
-          - biome_yaml_formatter
+        include:
+          - package: biome_yaml_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_yaml_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   css:
@@ -369,14 +376,23 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench CSS / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Bench CSS / ${{ matrix.package }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_css_parser
-          - biome_css_formatter
-          - biome_css_analyze
+        include:
+          - package: biome_css_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_css_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_css_analyze
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   html:
@@ -385,14 +401,31 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench HTML / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Bench HTML / ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_html_parser
-          - biome_html_formatter
-          - biome_html_analyze
+        include:
+          - name: parser
+            package: biome_html_parser
+            bench: --bench html_parser
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - name: formatter
+            package: biome_html_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - name: analyzer
+            package: biome_html_analyze
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - name: parser walltime
+            package: biome_html_parser
+            bench: --bench html_parser_walltime
+            mode: walltime
+            runner: codspeed-macro
     steps: *bench_steps
 
   graphql:
@@ -401,13 +434,19 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench GraphQL / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Bench GraphQL / ${{ matrix.package }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_graphql_parser
-          - biome_graphql_formatter
+        include:
+          - package: biome_graphql_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_graphql_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   markdown:
@@ -416,43 +455,24 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench Markdown / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Bench Markdown / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_markdown_parser
-          - biome_markdown_formatter
-          - biome_markdown_analyze
-    steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
-        with:
-          channel: stable
-          cache-target: release
-          bins: cargo-codspeed
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compile
-        timeout-minutes: 20
-        run: cargo codspeed build -p ${{ matrix.package }}
-        env:
-          CARGO_BUILD_JOBS: 3
-
-      - name: Run the benchmarks
-        uses: CodSpeedHQ/action@f22792bfac16f3e14eb9fbea76f4a48e9cc22b93 # v4.19.1
-        timeout-minutes: 50
-        with:
-          mode: simulation
-          run: cargo codspeed run -p ${{ matrix.package }}
-          token: ${{ secrets.CODSPEED_TOKEN }}
+        include:
+          - package: biome_markdown_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_markdown_formatter
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+          - package: biome_markdown_analyze
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
+    steps: *bench_steps
 
   grit:
     needs: changes
@@ -461,11 +481,14 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench GritQL
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_grit_patterns
+        include:
+          - package: biome_grit_patterns
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   tailwind:
@@ -475,11 +498,14 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench Tailwind
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_tailwind_parser
+        include:
+          - package: biome_tailwind_parser
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   configuration:
@@ -489,11 +515,14 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench Configuration
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_configuration
+        include:
+          - package: biome_configuration
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   manifests:
@@ -503,11 +532,14 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench Manifests
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_package
+        include:
+          - package: biome_package
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
 
   module-graph:
@@ -517,9 +549,12 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench Module Graph
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        package:
-          - biome_module_graph
+        include:
+          - package: biome_module_graph
+            bench: ''
+            mode: simulation
+            runner: depot-ubuntu-24.04-arm-16
     steps: *bench_steps
