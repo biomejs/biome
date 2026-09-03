@@ -329,8 +329,11 @@ pub(in crate::db) fn resolve_export_type_on_demand<'db>(
         return None;
     }
 
-    let ctx = ResolutionCtx::new(db, module, &js_info, super::ImportResolution::on_demand());
-    Some(ctx.resolve_export_name_on_demand(module, name))
+    let (_, ty) =
+        ResolutionCtx::resolve_on_demand_with_cycle_recovery(db, module, &js_info, |ctx| {
+            ctx.resolve_export_name_on_demand(module, name)
+        });
+    Some(ty)
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -398,21 +401,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let reference = js_info.raw_binding_types.get(range)?.clone();
                 let mut ctx = match self.import_resolution {
                     super::ImportResolution::OnDemand { remaining } => {
-                        let resolve_declarations_directly = if self.resolves_declarations_directly()
-                        {
-                            let sccs =
-                                inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
-                            *module == self.module
-                                || sccs.contains_cycle_between(self.module, *module)
-                        } else {
-                            false
-                        };
-                        self.for_on_demand_import(
-                            *module,
-                            &js_info,
-                            remaining,
-                            resolve_declarations_directly,
-                        )
+                        self.for_on_demand_import(*module, &js_info, remaining)
                     }
                     import_resolution @ (super::ImportResolution::FromTables { .. }
                     | super::ImportResolution::CycleFallback(_)) => {
@@ -499,7 +488,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let in_same_cycle = sccs.contains_cycle_between(self.module, module);
                 let resolve_declarations_directly = module == self.module || in_same_cycle;
                 if resolve_declarations_directly && !self.resolves_declarations_directly() {
+                    // Crossing into the active import component without a
+                    // declaration evaluator is the first pass of a lookup.
+                    // Report the cycle so the root retries with one shared
+                    // evaluator instead of building a throwaway declaration
+                    // graph for every cyclic edge reached from here.
                     self.mark_inference_cycle();
+                    return InferredTypeData::Unknown;
                 }
                 if remaining == 0 && !resolve_declarations_directly {
                     return infer_module_types_bottom_up_for_import_depth(self.db, module)
@@ -518,12 +513,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else {
                     remaining - 1
                 };
-                let ctx = self.for_on_demand_import(
-                    module,
-                    &js_info,
-                    remaining,
-                    resolve_declarations_directly,
-                );
+                let ctx = self.for_on_demand_import(module, &js_info, remaining);
                 ctx.resolve_import_symbol_on_demand(module, symbol)
             }
         }
@@ -965,7 +955,7 @@ fn inferred_type_from_binding_on_demand<'db>(
     let input = BindingTypeInput::new(db, module, range);
     match resolution_ctx.import_resolution {
         super::ImportResolution::OnDemand { remaining } if resolve_declaration_directly => {
-            let mut ctx = resolution_ctx.for_on_demand_import(module, js_info, remaining, true);
+            let mut ctx = resolution_ctx.for_on_demand_import(module, js_info, remaining);
             ctx.resolve_local_binding(range)
         }
         super::ImportResolution::OnDemand { remaining } => {
@@ -1040,7 +1030,7 @@ fn inferred_type_from_resolved_id_on_demand<'db>(
                         if resolve_declaration_directly =>
                     {
                         let mut ctx =
-                            resolution_ctx.for_on_demand_import(module, js_info, remaining, true);
+                            resolution_ctx.for_on_demand_import(module, js_info, remaining);
                         ctx.resolve_local_declaration(resolved_id.id())
                     }
                     super::ImportResolution::OnDemand { remaining } => {

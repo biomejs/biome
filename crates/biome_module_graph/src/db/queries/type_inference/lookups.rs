@@ -54,8 +54,12 @@ pub fn infer_expression_type<'db>(
             }
 
             let reference = js_info.raw_expressions.get(&expression)?.clone();
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::on_demand());
-            Some(ctx.resolve(&reference))
+            let (_, ty) =
+                ResolutionCtx::resolve_on_demand_with_cycle_recovery(db, module, &js_info, |ctx| {
+                    ctx.resolve(&reference)
+                });
+
+            Some(ty)
         },
     )
 }

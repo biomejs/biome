@@ -254,13 +254,14 @@ fn classify_expression(
                                 let ModuleInfoKind::Js(js_info) = state.module.kind(db) else {
                                     return Indeterminate;
                                 };
-                                let mut ctx = ResolutionCtx::new(
-                                    db,
-                                    state.module,
-                                    &js_info,
-                                    ImportResolution::on_demand(),
-                                );
-                                let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
+                                let (_, awaited) =
+                                    ResolutionCtx::resolve_on_demand_with_cycle_recovery(
+                                        db,
+                                        state.module,
+                                        &js_info,
+                                        |ctx| ctx.resolve_await_expression(*return_ty),
+                                    );
+                                let Some(awaited) = awaited else {
                                     return Indeterminate;
                                 };
                                 return match is_array_of_promise_type(db, awaited) {
@@ -378,13 +379,13 @@ fn classify_expression(
                         if matches!(mode, MemberLookupMode::Constructed { .. }) {
                             return Indeterminate;
                         }
-                        let mut ctx = ResolutionCtx::new(
-                            db,
-                            state.module,
-                            &js_info,
-                            ImportResolution::on_demand(),
-                        );
-                        let mut ty = ctx.resolve_qualifier(&qualifier);
+                        let (mut ctx, mut ty) =
+                            ResolutionCtx::resolve_on_demand_with_cycle_recovery(
+                                db,
+                                state.module,
+                                &js_info,
+                                |ctx| ctx.resolve_qualifier(&qualifier),
+                            );
                         for member in &members {
                             let Some(member_ty) =
                                 find_value_member_type_on_demand(db, ty, member.text())
@@ -558,13 +559,13 @@ fn classify_expression(
                                 projection,
                             }
                         } else {
-                            let mut ctx = ResolutionCtx::new(
-                                db,
-                                state.module,
-                                &js_info,
-                                ImportResolution::on_demand(),
-                            );
-                            let ty = ctx.resolve(return_ty);
+                            let (mut ctx, ty) =
+                                ResolutionCtx::resolve_on_demand_with_cycle_recovery(
+                                    db,
+                                    state.module,
+                                    &js_info,
+                                    |ctx| ctx.resolve(return_ty),
+                                );
                             let result = match state.projection {
                                 Projection::FunctionReturn => is_promise_type(db, ty),
                                 Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
@@ -774,16 +775,14 @@ fn classify_expression(
                         },
                         Projection::PromiseTarget => return DoesNotReturnPromise,
                         Projection::ArrayPromise if state.members.is_empty() => {
-                            let mut ctx = ResolutionCtx::new(
+                            let (_, ty) = ResolutionCtx::resolve_on_demand_with_cycle_recovery(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::on_demand(),
+                                |ctx| ctx.resolve_raw_type_id(type_id),
                             );
-                            return match is_array_of_promise_type(
-                                db,
-                                ctx.resolve_raw_type_id(type_id),
-                            ) {
+
+                            return match is_array_of_promise_type(db, ty) {
                                 Some(true) => ReturnsPromise,
                                 Some(false) => DoesNotReturnPromise,
                                 None => Indeterminate,
@@ -797,16 +796,20 @@ fn classify_expression(
                             projection: state.projection,
                         },
                         Projection::AwaitedArrayPromise if state.members.is_empty() => {
-                            let mut ctx = ResolutionCtx::new(
+                            let (_, awaited) = ResolutionCtx::resolve_on_demand_with_cycle_recovery(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::on_demand(),
+                                |ctx| {
+                                    let ty = ctx.resolve_raw_type_id(type_id);
+                                    ctx.resolve_await_expression(ty)
+                                },
                             );
-                            let ty = ctx.resolve_raw_type_id(type_id);
-                            let Some(awaited) = ctx.resolve_await_expression(ty) else {
+
+                            let Some(awaited) = awaited else {
                                 return Indeterminate;
                             };
+
                             return match is_array_of_promise_type(db, awaited) {
                                 Some(true) => ReturnsPromise,
                                 Some(false) => DoesNotReturnPromise,
@@ -962,13 +965,12 @@ fn classify_expression(
                         if interface.name.text() != "PromiseLike" {
                             return DoesNotReturnPromise;
                         }
-                        let mut ctx = ResolutionCtx::new(
+                        let (_, target) = ResolutionCtx::resolve_on_demand_with_cycle_recovery(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::on_demand(),
+                            |ctx| ctx.resolve_raw_type_id(type_id),
                         );
-                        let target = ctx.resolve_raw_type_id(type_id);
                         let instance = InferredTypeData::instance_of(db, target, Box::default());
                         return match is_promise_type(db, instance) {
                             Some(true) => ReturnsPromise,

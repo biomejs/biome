@@ -211,7 +211,7 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
-    encountered_inference_cycle: Cell<bool>,
+    encountered_inference_cycle: Rc<Cell<bool>>,
     on_demand_declarations: Option<SharedOnDemandDeclarationEvaluator<'db>>,
 }
 
@@ -262,7 +262,29 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         js_info: &'a JsModuleInfo,
         import_resolution: ImportResolution<'a>,
     ) -> Self {
-        Self::new_with_declarations(db, module, js_info, import_resolution, None)
+        Self::new_with_declarations(db, module, js_info, import_resolution, None, None)
+    }
+
+    /// Creates a root context that resolves declarations in import cycles
+    /// through a fresh declaration evaluator.
+    ///
+    /// Use this for the retry of a lookup whose first pass reported an
+    /// inference cycle. The evaluator is shared with every context derived
+    /// from this one for the lifetime of the lookup.
+    pub(in crate::db) fn new_with_declaration_evaluator(
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+        js_info: &'a JsModuleInfo,
+        import_resolution: ImportResolution<'a>,
+    ) -> Self {
+        Self::new_with_declarations(
+            db,
+            module,
+            js_info,
+            import_resolution,
+            Some(Rc::default()),
+            None,
+        )
     }
 
     fn new_with_declarations(
@@ -271,6 +293,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         js_info: &'a JsModuleInfo,
         import_resolution: ImportResolution<'a>,
         on_demand_declarations: Option<SharedOnDemandDeclarationEvaluator<'db>>,
+        encountered_inference_cycle: Option<Rc<Cell<bool>>>,
     ) -> Self {
         Self {
             db,
@@ -281,32 +304,61 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             resolved: FxHashMap::default(),
             in_progress: FxHashSet::default(),
             resolution_depth: Cell::new(0),
-            encountered_inference_cycle: Cell::new(false),
+            encountered_inference_cycle: encountered_inference_cycle.unwrap_or_default(),
             on_demand_declarations,
         }
     }
 
+    /// Resolves with a fresh on-demand context, retrying with a declaration
+    /// evaluator when the first pass crosses an import cycle.
+    ///
+    /// The first pass stays on the cheap tracked-query path and reports
+    /// cyclic imports as `Unknown`. Only a lookup that actually crossed a
+    /// cycle pays for the declaration graph, and it builds exactly one.
+    ///
+    /// Returns the context that produced the result so callers can continue
+    /// resolving related references with the same cycle handling.
+    pub(in crate::db) fn resolve_on_demand_with_cycle_recovery<T>(
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+        js_info: &'a JsModuleInfo,
+        mut resolve: impl FnMut(&mut Self) -> T,
+    ) -> (Self, T) {
+        let import_resolution = ImportResolution::on_demand();
+
+        let mut ctx = ResolutionCtx::new(db, module, js_info, import_resolution);
+        let result = resolve(&mut ctx);
+        if !ctx.encountered_inference_cycle() {
+            return (ctx, result);
+        }
+
+        let mut ctx =
+            ResolutionCtx::new_with_declaration_evaluator(db, module, js_info, import_resolution);
+
+        let result = resolve(&mut ctx);
+
+        (ctx, result)
+    }
+
+    /// Creates the context for an imported module reached on demand.
+    ///
+    /// The derived context shares the declaration evaluator, when one is
+    /// active, and reports inference cycles to the same root. A context
+    /// without an evaluator never creates one here: the root lookup decides
+    /// whether a retry with a declaration graph is needed.
     pub(super) fn for_on_demand_import<'info>(
         &self,
         module: ModuleInfo,
         js_info: &'info JsModuleInfo,
         remaining: u8,
-        resolve_declarations_directly: bool,
     ) -> ResolutionCtx<'db, 'info> {
-        // Contexts inside the active import component must contribute to the
-        // same declaration graph. An ordinary imported lookup keeps its own
-        // tracked-query boundary and does not need this shared state.
-        let on_demand_declarations = resolve_declarations_directly.then(|| {
-            self.on_demand_declarations
-                .as_ref()
-                .map_or_else(Rc::default, Rc::clone)
-        });
         ResolutionCtx::new_with_declarations(
             self.db,
             module,
             js_info,
             ImportResolution::OnDemand { remaining },
-            on_demand_declarations,
+            self.on_demand_declarations.clone(),
+            Some(Rc::clone(&self.encountered_inference_cycle)),
         )
     }
 
@@ -555,7 +607,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         let ImportResolution::OnDemand { remaining } = self.import_resolution else {
             return InferredTypeData::Unknown;
         };
-        let mut ctx = self.for_on_demand_import(module, &js_info, remaining, true);
+        let mut ctx = self.for_on_demand_import(module, &js_info, remaining);
         match declaration {
             OnDemandDeclaration::Binding { range, .. } => js_info
                 .raw_binding_types
