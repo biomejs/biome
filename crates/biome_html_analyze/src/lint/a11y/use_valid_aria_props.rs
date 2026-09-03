@@ -7,7 +7,7 @@ use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rowan::{BatchMutationExt, TokenText};
 use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
 use biome_string_case::StrLikeExtension;
 

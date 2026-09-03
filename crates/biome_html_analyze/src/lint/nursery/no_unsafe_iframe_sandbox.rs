@@ -14,6 +14,8 @@ declare_lint_rule! {
     /// This rule reports cases where the attribute contains `allow-scripts` and `allow-same-origin` at the same time,
     /// as this combination allows the embedded document to remove the sandbox attribute and bypass the restrictions.
     ///
+    /// See [Play safely in sandboxed IFrames](https://web.dev/articles/sandboxed-iframes) for more details.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -55,8 +57,12 @@ impl Rule for NoUnsafeIframeSandbox {
         let value = attr.as_static_value()?;
         let text = value.text();
 
-        let has_scripts = text.split(' ').any(|token| token == "allow-scripts");
-        let has_same_origin = text.split(' ').any(|token| token == "allow-same-origin");
+        let has_scripts = text
+            .split_ascii_whitespace()
+            .any(|token| token == "allow-scripts");
+        let has_same_origin = text
+            .split_ascii_whitespace()
+            .any(|token| token == "allow-same-origin");
 
         if has_scripts && has_same_origin {
             return Some(attr.range());

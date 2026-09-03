@@ -7,7 +7,7 @@ use biome_html_syntax::{
     AnyHtmlAttribute, SVG_EXCLUSIVE_TAG_NAMES, element_ext::AnyHtmlTagElement,
 };
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, AstNodeList, TokenText};
+use biome_rowan::{AstNodeList, TokenText};
 use biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions;
 use biome_string_case::Case;
 

@@ -7,7 +7,6 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::static_value::StaticValue;
-use biome_rowan::AstNode;
 use biome_rule_options::use_aria_props_for_role::UseAriaPropsForRoleOptions;
 
 declare_lint_rule! {
