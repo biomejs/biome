@@ -104,10 +104,10 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
+use biome_rowan::Text;
+#[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
-#[cfg(feature = "type_inference")]
-use biome_rowan::Text;
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 #[cfg(any(feature = "js_embeds", feature = "type_inference"))]
@@ -1843,18 +1843,12 @@ fn search(
 #[cfg(test)]
 #[cfg(feature = "module_graph")]
 mod tests {
-    /// This crate declares `type_narrowing` for the aggregate feature sets, but
-    /// the flag itself lives in the module graph. This pins the forwarding
-    /// between the two.
-    ///
-    /// Only one direction is asserted: another crate in the same build may
-    /// enable the module graph's feature on its own, and Cargo's feature
-    /// unification then turns the flag on here as well.
+    /// Pins that this crate's `type_narrowing` feature forwards to the module
+    /// graph, where the flag actually lives. Only that direction is checked:
+    /// Cargo feature unification can turn the flag on here even when this
+    /// crate doesn't enable it itself.
     #[test]
     fn type_narrowing_feature_reaches_the_module_graph() {
-        // `panic!` instead of `assert!` here: clippy's assertions_on_constants
-        // lint fires on a bare `assert!` over this compile-time-known bool, but
-        // not on an equivalent `if`/`panic!`.
         if cfg!(feature = "type_narrowing") && !biome_module_graph::TYPE_NARROWING_ENABLED {
             panic!("type_narrowing is enabled here but not in biome_module_graph");
         }

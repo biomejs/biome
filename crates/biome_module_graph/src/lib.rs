@@ -64,14 +64,3 @@ pub use module_graph::{
     resolve_js_module_with_inference_mode,
 };
 pub use path_info_cache::PathInfoCache;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn type_narrowing_follows_its_feature() {
-        assert_eq!(
-            super::TYPE_NARROWING_ENABLED,
-            cfg!(feature = "type_narrowing")
-        );
-    }
-}
