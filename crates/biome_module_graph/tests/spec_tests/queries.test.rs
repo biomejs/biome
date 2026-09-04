@@ -384,6 +384,114 @@ fn test_namespace_query_keeps_named_exports_symbolic() {
 }
 
 #[test]
+fn test_imported_generic_arguments_skip_full_declaration_inference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            export interface Wrapper<T> {
+                value: T;
+                unrelated: Noise;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Wrapper } from "./source.ts";
+            export declare const wrapped: Wrapper<string>;
+        "#,
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const unrelated = 1;");
+
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/source.ts", "/src/index.ts", "/src/unrelated.ts"],
+        true,
+    );
+    let source_module = db
+        .module_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("source module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let wrapped_range = binding_range_by_name(&db, index_module, "wrapped");
+
+    {
+        let wrapper = LocalTypeInput::new(
+            &db,
+            source_module,
+            local_type_id_by_name(&db, source_module, "Wrapper"),
+        );
+        let wrapped = BindingTypeInput::new(&db, index_module, wrapped_range);
+
+        db.clear_salsa_events();
+        let wrapped_ty = infer_binding_type(&db, wrapped).expect("wrapped type must be inferred");
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_local_type, wrapper, &events);
+        let value =
+            find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+        assert!(is_inferred_string(&db, value));
+
+        db.clear_salsa_events();
+        let wrapped_ty =
+            infer_binding_type(&db, wrapped).expect("cached wrapped type must be inferred");
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, wrapped, &events);
+        let value =
+            find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+        assert!(is_inferred_string(&db, value));
+    }
+
+    let unrelated = db
+        .module_for_path(Utf8Path::new("/src/unrelated.ts"))
+        .expect("unrelated module must exist");
+    fs.insert(
+        "/src/unrelated.ts".into(),
+        "export const unrelated = 'changed';",
+    );
+    let unrelated_kind = resolve_js_module_kind_for_test(&fs, "/src/unrelated.ts", true);
+    salsa::Setter::to(unrelated.set_kind(&mut db), unrelated_kind);
+    {
+        let wrapped = BindingTypeInput::new(&db, index_module, wrapped_range);
+        db.clear_salsa_events();
+        let wrapped_ty =
+            infer_binding_type(&db, wrapped).expect("wrapped type must remain inferred");
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, wrapped, &events);
+        let value =
+            find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+        assert!(is_inferred_string(&db, value));
+    }
+
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            export interface Wrapper<T> {
+                value: number;
+                unrelated: Noise;
+            }
+        "#,
+    );
+    let source_kind = resolve_js_module_kind_for_test(&fs, "/src/source.ts", true);
+    salsa::Setter::to(source_module.set_kind(&mut db), source_kind);
+    let wrapped = BindingTypeInput::new(&db, index_module, wrapped_range);
+    db.clear_salsa_events();
+    let wrapped_ty =
+        infer_binding_type(&db, wrapped).expect("changed wrapped type must be inferred");
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_binding_type, wrapped, &events);
+    let value = find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+    assert!(is_inferred_number(&db, value));
+}
+
+#[test]
 fn test_member_lookup_resolves_local_types_without_complete_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
