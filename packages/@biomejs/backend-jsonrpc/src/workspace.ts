@@ -2655,6 +2655,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-on-number-values
 	 */
 	noVueVOnNumberValues?: NoVueVOnNumberValuesConfiguration;
 	/**
+	* Disallow the bitwise XOR operator where exponentiation was likely intended.
+See https://biomejs.dev/linter/rules/no-xor-as-exponentiation 
+	 */
+	noXorAsExponentiation?: NoXorAsExponentiationConfiguration;
+	/**
 	 * Enables a particular rule preset
 	 */
 	preset?: PresetConfig;
@@ -4928,6 +4933,9 @@ export type NoVueRefAsOperandConfiguration =
 export type NoVueVOnNumberValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVOnNumberValuesOptions;
+export type NoXorAsExponentiationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoXorAsExponentiationOptions;
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
@@ -6908,6 +6916,11 @@ export interface RuleWithNoVueVOnNumberValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVOnNumberValuesOptions;
 }
+export interface RuleWithNoXorAsExponentiationOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoXorAsExponentiationOptions;
+}
 export interface RuleWithUseArraySomeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8714,6 +8727,7 @@ export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVOnNumberValuesOptions = {};
+export type NoXorAsExponentiationOptions = {};
 export type UseArraySomeOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
@@ -10139,6 +10153,7 @@ export type Category =
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVOnNumberValues"
+	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"

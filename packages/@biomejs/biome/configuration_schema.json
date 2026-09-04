@@ -6736,6 +6736,16 @@
 			]
 		},
 		"NoWithOptions": { "type": "object", "additionalProperties": false },
+		"NoXorAsExponentiationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoXorAsExponentiationOptions" }
+			]
+		},
+		"NoXorAsExponentiationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoYodaExpressionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7191,6 +7201,13 @@
 					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVOnNumberValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noXorAsExponentiation": {
+					"description": "Disallow the bitwise XOR operator where exponentiation was likely intended.\nSee https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoXorAsExponentiationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11322,6 +11339,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoWithOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoXorAsExponentiationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoXorAsExponentiationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
