@@ -3,9 +3,8 @@ use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
     MergedReference, NamedFunctionParameter, Object, ObjectLiteral, PatternFunctionParameter,
-    RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance,
-    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofAwaitExpression,
-    TypeofExpression, Union,
+    RawTypeId, ReturnType, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind,
+    TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{

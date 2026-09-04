@@ -95,7 +95,14 @@ pub fn assert_typed_bindings_snapshot(
 #[derive(Default)]
 pub struct TestTypeCollector {
     pub types: TypeStore,
-    narrowing_invalidation_cache: rustc_hash::FxHashMap<(biome_js_syntax::JsSyntaxNode, Text, biome_js_type_info::NarrowingInvalidationKind), bool>,
+    narrowing_invalidation_cache: rustc_hash::FxHashMap<
+        (
+            biome_js_syntax::JsSyntaxNode,
+            Text,
+            biome_js_type_info::NarrowingInvalidationKind,
+        ),
+        bool,
+    >,
 }
 
 impl RawTypeCollector for TestTypeCollector {
@@ -107,7 +114,14 @@ impl RawTypeCollector for TestTypeCollector {
 
     fn narrowing_invalidation_cache(
         &mut self,
-    ) -> &mut rustc_hash::FxHashMap<(biome_js_syntax::JsSyntaxNode, Text, biome_js_type_info::NarrowingInvalidationKind), bool> {
+    ) -> &mut rustc_hash::FxHashMap<
+        (
+            biome_js_syntax::JsSyntaxNode,
+            Text,
+            biome_js_type_info::NarrowingInvalidationKind,
+        ),
+        bool,
+    > {
         &mut self.narrowing_invalidation_cache
     }
 
