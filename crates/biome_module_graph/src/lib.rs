@@ -19,10 +19,11 @@ pub mod type_inference;
 /// Whether flow-sensitive type narrowing is compiled into this build.
 ///
 /// Narrowing is still under development, so it is gated behind the
-/// `type_narrowing` Cargo feature and stays off in the builds shipped by the
-/// CLI, the LSP and WASM. This is the only place where the feature is read:
-/// everything downstream, including `biome_js_type_info`, takes it as a plain
-/// runtime flag.
+/// `type_narrowing` Cargo feature, off by default and not part of the
+/// default features shipped by the CLI, the LSP and WASM (an `unstable`
+/// WASM build can opt it in). This is the only place where the feature is
+/// read: everything downstream, including `biome_js_type_info`, takes it as
+/// a plain runtime flag.
 pub const TYPE_NARROWING_ENABLED: bool = cfg!(feature = "type_narrowing");
 
 pub use biome_js_type_info::{
