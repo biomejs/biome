@@ -626,7 +626,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // SCSS
         "SCSS_AT_ROOT_AT_RULE",
         "SCSS_AT_ROOT_QUERY",
-        "SCSS_AT_ROOT_QUERY_LIST",
+        "SCSS_AT_ROOT_QUERY_CLAUSE",
         "SCSS_AT_ROOT_SELECTOR",
         "SCSS_MEDIA_QUERY",
         "SCSS_EACH_AT_RULE",

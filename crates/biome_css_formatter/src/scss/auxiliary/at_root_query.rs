@@ -9,9 +9,7 @@ impl FormatNodeRule<ScssAtRootQuery> for FormatScssAtRootQuery {
     fn fmt_fields(&self, node: &ScssAtRootQuery, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssAtRootQueryFields {
             l_paren_token,
-            modifier,
-            colon_token,
-            queries,
+            query,
             r_paren_token,
         } = node.as_fields();
 
@@ -19,10 +17,7 @@ impl FormatNodeRule<ScssAtRootQuery> for FormatScssAtRootQuery {
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                modifier.format()?.with_text_case(CssCase::Preserve),
-                colon_token.format(),
-                space(),
-                group(&indent(&queries.format())),
+                soft_block_indent(&query.format()),
                 r_paren_token.format()
             ])]
         )

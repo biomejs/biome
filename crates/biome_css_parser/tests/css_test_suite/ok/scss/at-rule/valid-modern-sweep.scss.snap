@@ -1182,16 +1182,26 @@ CssRoot {
                             at_root_token: AT_ROOT_KW@1130..1138 "at-root" [] [Whitespace(" ")],
                             query: ScssAtRootQuery {
                                 l_paren_token: L_PAREN@1138..1139 "(" [] [],
-                                modifier: WITH_KW@1139..1143 "with" [] [],
-                                colon_token: COLON@1143..1145 ":" [] [Whitespace(" ")],
-                                queries: ScssAtRootQueryList [
-                                    CssCustomIdentifier {
-                                        value_token: IDENT@1145..1151 "media" [] [Whitespace(" ")],
+                                query: ScssAtRootQueryClause {
+                                    modifier: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1139..1143 "with" [] [],
+                                            },
+                                        ],
                                     },
-                                    CssCustomIdentifier {
-                                        value_token: IDENT@1151..1155 "rule" [] [],
+                                    colon_token: COLON@1143..1145 ":" [] [Whitespace(" ")],
+                                    rules: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1145..1151 "media" [] [Whitespace(" ")],
+                                            },
+                                            CssIdentifier {
+                                                value_token: IDENT@1151..1155 "rule" [] [],
+                                            },
+                                        ],
                                     },
-                                ],
+                                },
                                 r_paren_token: R_PAREN@1155..1157 ")" [] [Whitespace(" ")],
                             },
                             selector: missing (optional),
@@ -1999,14 +2009,19 @@ CssRoot {
               0: AT_ROOT_KW@1130..1138 "at-root" [] [Whitespace(" ")]
               1: SCSS_AT_ROOT_QUERY@1138..1157
                 0: L_PAREN@1138..1139 "(" [] []
-                1: WITH_KW@1139..1143 "with" [] []
-                2: COLON@1143..1145 ":" [] [Whitespace(" ")]
-                3: SCSS_AT_ROOT_QUERY_LIST@1145..1155
-                  0: CSS_CUSTOM_IDENTIFIER@1145..1151
-                    0: IDENT@1145..1151 "media" [] [Whitespace(" ")]
-                  1: CSS_CUSTOM_IDENTIFIER@1151..1155
-                    0: IDENT@1151..1155 "rule" [] []
-                4: R_PAREN@1155..1157 ")" [] [Whitespace(" ")]
+                1: SCSS_AT_ROOT_QUERY_CLAUSE@1139..1155
+                  0: SCSS_EXPRESSION@1139..1143
+                    0: SCSS_EXPRESSION_ITEM_LIST@1139..1143
+                      0: CSS_IDENTIFIER@1139..1143
+                        0: IDENT@1139..1143 "with" [] []
+                  1: COLON@1143..1145 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@1145..1155
+                    0: SCSS_EXPRESSION_ITEM_LIST@1145..1155
+                      0: CSS_IDENTIFIER@1145..1151
+                        0: IDENT@1145..1151 "media" [] [Whitespace(" ")]
+                      1: CSS_IDENTIFIER@1151..1155
+                        0: IDENT@1151..1155 "rule" [] []
+                2: R_PAREN@1155..1157 ")" [] [Whitespace(" ")]
               2: (empty)
               3: CSS_DECLARATION_OR_RULE_BLOCK@1157..1208
                 0: L_CURLY@1157..1158 "{" [] []

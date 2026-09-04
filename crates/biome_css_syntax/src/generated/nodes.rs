@@ -9624,26 +9624,18 @@ impl ScssAtRootQuery {
     pub fn as_fields(&self) -> ScssAtRootQueryFields {
         ScssAtRootQueryFields {
             l_paren_token: self.l_paren_token(),
-            modifier: self.modifier(),
-            colon_token: self.colon_token(),
-            queries: self.queries(),
+            query: self.query(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn modifier(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn queries(&self) -> ScssAtRootQueryList {
-        support::list(&self.syntax, 3usize)
+    pub fn query(&self) -> SyntaxResult<AnyScssAtRootQuery> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssAtRootQuery {
@@ -9657,10 +9649,53 @@ impl Serialize for ScssAtRootQuery {
 #[derive(Serialize)]
 pub struct ScssAtRootQueryFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub modifier: SyntaxResult<SyntaxToken>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub queries: ScssAtRootQueryList,
+    pub query: SyntaxResult<AnyScssAtRootQuery>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssAtRootQueryClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssAtRootQueryClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssAtRootQueryClauseFields {
+        ScssAtRootQueryClauseFields {
+            modifier: self.modifier(),
+            colon_token: self.colon_token(),
+            rules: self.rules(),
+        }
+    }
+    pub fn modifier(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn rules(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for ScssAtRootQueryClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssAtRootQueryClauseFields {
+    pub modifier: SyntaxResult<ScssExpression>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub rules: SyntaxResult<ScssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssAtRootSelector {
@@ -17751,6 +17786,25 @@ impl AnyCssValueAtRuleProperty {
     pub fn as_css_value_at_rule_generic_property(&self) -> Option<&CssValueAtRuleGenericProperty> {
         match &self {
             Self::CssValueAtRuleGenericProperty(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssAtRootQuery {
+    ScssAtRootQueryClause(ScssAtRootQueryClause),
+    ScssExpression(ScssExpression),
+}
+impl AnyScssAtRootQuery {
+    pub fn as_scss_at_root_query_clause(&self) -> Option<&ScssAtRootQueryClause> {
+        match &self {
+            Self::ScssAtRootQueryClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -30104,12 +30158,7 @@ impl std::fmt::Debug for ScssAtRootQuery {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("modifier", &support::DebugSyntaxResult(self.modifier()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("queries", &self.queries())
+                .field("query", &support::DebugSyntaxResult(self.query()))
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -30129,6 +30178,58 @@ impl From<ScssAtRootQuery> for SyntaxNode {
 }
 impl From<ScssAtRootQuery> for SyntaxElement {
     fn from(n: ScssAtRootQuery) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssAtRootQueryClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_AT_ROOT_QUERY_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_AT_ROOT_QUERY_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssAtRootQueryClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssAtRootQueryClause")
+                .field("modifier", &support::DebugSyntaxResult(self.modifier()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("rules", &support::DebugSyntaxResult(self.rules()))
+                .finish()
+        } else {
+            f.debug_struct("ScssAtRootQueryClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssAtRootQueryClause> for SyntaxNode {
+    fn from(n: ScssAtRootQueryClause) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssAtRootQueryClause> for SyntaxElement {
+    fn from(n: ScssAtRootQueryClause) -> Self {
         n.syntax.into()
     }
 }
@@ -45983,6 +46084,68 @@ impl From<AnyCssValueAtRuleProperty> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssAtRootQueryClause> for AnyScssAtRootQuery {
+    fn from(node: ScssAtRootQueryClause) -> Self {
+        Self::ScssAtRootQueryClause(node)
+    }
+}
+impl From<ScssExpression> for AnyScssAtRootQuery {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl AstNode for AnyScssAtRootQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        ScssAtRootQueryClause::KIND_SET.union(ScssExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SCSS_AT_ROOT_QUERY_CLAUSE | SCSS_EXPRESSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_AT_ROOT_QUERY_CLAUSE => {
+                Self::ScssAtRootQueryClause(ScssAtRootQueryClause { syntax })
+            }
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssAtRootQueryClause(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssAtRootQueryClause(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssAtRootQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssAtRootQueryClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssAtRootQuery> for SyntaxNode {
+    fn from(n: AnyScssAtRootQuery) -> Self {
+        match n {
+            AnyScssAtRootQuery::ScssAtRootQueryClause(it) => it.into_syntax(),
+            AnyScssAtRootQuery::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssAtRootQuery> for SyntaxElement {
+    fn from(n: AnyScssAtRootQuery) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssDeclarationOrRuleBlock> for AnyScssElseClauseBody {
     fn from(node: CssDeclarationOrRuleBlock) -> Self {
         Self::CssDeclarationOrRuleBlock(node)
@@ -48455,6 +48618,11 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyScssAtRootQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyScssElseClauseBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -49711,6 +49879,11 @@ impl std::fmt::Display for ScssAtRootAtRule {
     }
 }
 impl std::fmt::Display for ScssAtRootQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssAtRootQueryClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -55293,88 +55466,6 @@ impl IntoIterator for CssValueAtRulePropertyList {
 impl IntoIterator for &CssValueAtRulePropertyList {
     type Item = SyntaxResult<AnyCssValueAtRuleProperty>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleProperty>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct ScssAtRootQueryList {
-    syntax_list: SyntaxList,
-}
-impl ScssAtRootQueryList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for ScssAtRootQueryList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_AT_ROOT_QUERY_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SCSS_AT_ROOT_QUERY_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for ScssAtRootQueryList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for ScssAtRootQueryList {
-    type Language = Language;
-    type Node = AnyCssCustomIdentifier;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for ScssAtRootQueryList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("ScssAtRootQueryList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &ScssAtRootQueryList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for ScssAtRootQueryList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
