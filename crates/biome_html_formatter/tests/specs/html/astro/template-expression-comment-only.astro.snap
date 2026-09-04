@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/template-expression-comment-only.astro
+---
+
+# Input
+
+```astro
+---
+const x = 5;
+---
+<div>{/* a note */}</div>
+<div class={/* a note */}>{x}</div>
+<div>{// a line note
+}</div>
+<p>{x /* trailing */}</p>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const x = 5;
+---
+
+<div>{/* a note */}</div>
+<div class={/* a note */}>{x}</div>
+<div>
+	{// a line note
+	}
+</div>
+<p>{x /* trailing */}</p>
+
+```

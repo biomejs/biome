@@ -14,7 +14,12 @@ pub struct FormatJsxTagExpression;
 
 impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
     fn fmt_fields(&self, node: &JsxTagExpression, f: &mut JsFormatter) -> FormatResult<()> {
-        let wrap = get_wrap_state(node);
+        // Astro reads `<!-- -->` as trivia only where a tag may start, never after a `(`.
+        let wrap = if has_leading_html_comment(node, f) {
+            WrapState::NoWrap
+        } else {
+            get_wrap_state(node)
+        };
 
         match wrap {
             WrapState::NoWrap => {
@@ -70,6 +75,13 @@ impl FormatNodeRule<JsxTagExpression> for FormatJsxTagExpression {
         // handled as part of `fmt_fields`
         Ok(())
     }
+}
+
+fn has_leading_html_comment(node: &JsxTagExpression, f: &JsFormatter) -> bool {
+    f.comments()
+        .leading_comments(node.syntax())
+        .iter()
+        .any(|comment| comment.piece().text().starts_with("<!--"))
 }
 
 /// This is a very special situation where we're returning a JsxElement

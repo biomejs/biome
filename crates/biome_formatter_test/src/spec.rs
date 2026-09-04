@@ -309,7 +309,10 @@ impl<'a> SpecSnapshot<'a> {
                 inline_config: None,
             }) {
                 Ok(printed) => printed,
-                Err(_) => return, // Re-formatting failed (e.g., file with errors), skip check
+                Err(error) => panic!(
+                    "The input parsed without errors but its formatted output does not: \
+                     the formatter produced invalid syntax.\n\n{output_code}\n\n{error}"
+                ),
             };
 
             if re_printed.as_code() != output_code && !re_printed.as_code().is_empty() {

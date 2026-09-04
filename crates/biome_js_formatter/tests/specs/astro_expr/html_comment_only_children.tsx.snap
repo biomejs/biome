@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro_expr/html_comment_only_children.tsx
+---
+
+# Input
+
+```tsx
+x && <section><!-- line one
+line two --><!----></section>
+
+```
+
+
+# Formatted
+
+```tsx
+x && (
+	<section>
+		<!-- line one
+line two -->
+		<!---->
+	</section>
+)
+```

@@ -48,7 +48,9 @@ use biome_db::AnyParsedSource;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::FormatElement;
 #[cfg(feature = "html_embeds")]
-use biome_formatter::format_element::{Interned, LineMode};
+use biome_formatter::format_element::{Interned, LineMode, TextWidth};
+#[cfg(feature = "html_embeds")]
+use biome_formatter::normalize_newlines;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -605,89 +607,109 @@ fn format_embedded(
 
     let tree = parse.syntax(&workspace_db);
     let indent_script_and_style = options.indent_script_and_style().value();
+    let indent_width = options.indent_width();
+    let source = tree.to_string();
     let mut formatted = format_node(options, &tree, true)?;
     formatted.format_embedded(move |range| {
-        let mut iter = embedded_nodes.iter();
-        let snippet = iter.find(|node| node.content_range(&workspace_db) == range)?;
-        let snippet_file_source = snippet.file_source(&workspace_db)?;
+        let format_snippet = |range: TextRange| {
+            let mut iter = embedded_nodes.iter();
+            let snippet = iter.find(|node| node.content_range(&workspace_db) == range)?;
+            let snippet_file_source = snippet.file_source(&workspace_db)?;
 
-        let wrap_document = |document: Document, should_indent: bool| {
-            if indent_script_and_style && should_indent {
-                let elements = vec![
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Tag(Tag::StartIndent),
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Interned(Interned::new(document.into_elements())),
-                    FormatElement::Tag(Tag::EndIndent),
-                ];
+            let wrap_document = |document: Document, should_indent: bool| {
+                if indent_script_and_style && should_indent {
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Tag(Tag::StartIndent),
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(document.into_elements())),
+                        FormatElement::Tag(Tag::EndIndent),
+                        FormatElement::Line(LineMode::Hard),
+                    ];
 
-                Document::new(elements)
-            } else {
-                let elements = vec![
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Interned(Interned::new(document.into_elements())),
-                ];
-                Document::new(elements)
+                    Document::new(elements)
+                } else {
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(document.into_elements())),
+                        FormatElement::Line(LineMode::Hard),
+                    ];
+                    Document::new(elements)
+                }
+            };
+
+            match snippet_file_source {
+                DocumentFileSource::Js(file_source) => {
+                    let js_options = javascript::resolve_format_options(
+                        biome_path,
+                        &snippet_file_source,
+                        settings,
+                        &workspace_db,
+                    );
+                    let node = snippet
+                        .parsed_origin()
+                        .parse(&workspace_db)
+                        .embedded_syntax::<JsLanguage>();
+                    let formatted =
+                        biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
+
+                    let document = formatted.into_document();
+                    if file_source.is_svelte_declaration() {
+                        Some(Document::new(vec![
+                            FormatElement::Token { text: "{" },
+                            FormatElement::Interned(Interned::new(document.into_elements())),
+                            FormatElement::Token { text: "}" },
+                            FormatElement::Line(LineMode::Hard),
+                        ]))
+                    } else if file_source.as_embedding_kind().is_astro_template() {
+                        // An Astro `{expression}` already sits between braces in the markup.
+                        Some(document)
+                    } else {
+                        Some(wrap_document(
+                            document,
+                            !file_source.as_embedding_kind().is_astro_frontmatter(),
+                        ))
+                    }
+                }
+                DocumentFileSource::Json(_) => {
+                    let json_options =
+                        json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
+                    let node = snippet
+                        .parsed_origin()
+                        .parse(&workspace_db)
+                        .embedded_syntax::<JsonLanguage>();
+                    let formatted =
+                        biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
+                    Some(wrap_document(formatted.into_document(), true))
+                }
+                DocumentFileSource::Css(_) => {
+                    let css_options = css::resolve_format_options(
+                        biome_path,
+                        &snippet_file_source,
+                        settings,
+                        &workspace_db,
+                    );
+                    let node = snippet
+                        .parsed_origin()
+                        .parse(&workspace_db)
+                        .embedded_syntax::<CssLanguage>();
+                    let formatted =
+                        biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
+                    Some(wrap_document(formatted.into_document(), true))
+                }
+                _ => None,
             }
         };
 
-        match snippet_file_source {
-            DocumentFileSource::Js(file_source) => {
-                let js_options = javascript::resolve_format_options(
-                    biome_path,
-                    &snippet_file_source,
-                    settings,
-                    &workspace_db,
-                );
-                let node = snippet
-                    .parsed_origin()
-                    .parse(&workspace_db)
-                    .embedded_syntax::<JsLanguage>();
-                let formatted =
-                    biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
-
-                let document = formatted.into_document();
-                if file_source.is_svelte_declaration() {
-                    Some(Document::new(vec![
-                        FormatElement::Token { text: "{" },
-                        FormatElement::Interned(Interned::new(document.into_elements())),
-                        FormatElement::Token { text: "}" },
-                    ]))
-                } else {
-                    Some(wrap_document(
-                        document,
-                        !file_source.as_embedding_kind().is_astro_frontmatter(),
-                    ))
-                }
-            }
-            DocumentFileSource::Json(_) => {
-                let json_options =
-                    json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
-                let node = snippet
-                    .parsed_origin()
-                    .parse(&workspace_db)
-                    .embedded_syntax::<JsonLanguage>();
-                let formatted =
-                    biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
-            }
-            DocumentFileSource::Css(_) => {
-                let css_options = css::resolve_format_options(
-                    biome_path,
-                    &snippet_file_source,
-                    settings,
-                    &workspace_db,
-                );
-                let node = snippet
-                    .parsed_origin()
-                    .parse(&workspace_db)
-                    .embedded_syntax::<CssLanguage>();
-                let formatted =
-                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
-            }
-            _ => None,
-        }
+        // An unresolved embed prints nothing, so a turned-down snippet must come back as text.
+        format_snippet(range).or_else(|| {
+            let text = source.get(std::ops::Range::<usize>::from(range))?;
+            let text = normalize_newlines(text.trim(), ['\r']);
+            Some(Document::new(vec![FormatElement::Text {
+                text: text.as_ref().into(),
+                text_width: TextWidth::from_text(text.as_ref(), indent_width),
+            }]))
+        })
     });
 
     // Propagate expand flags again after inserting embedded content,
