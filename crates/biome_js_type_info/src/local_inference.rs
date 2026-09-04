@@ -3726,8 +3726,8 @@ fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
 ///
 /// Returns `false` for the contradicting cases above, without touching
 /// `found`. Otherwise returns `true`: `found` is set to `predicate` if it
-/// was empty, and left as-is (keeping the outermost, more specific guard)
-/// if a non-contradicting predicate was already found.
+/// was empty, and left as-is (keeping the innermost, more specific guard
+/// already found) otherwise.
 fn record_guard_predicate(
     found: &mut Option<NarrowingPredicate>,
     predicate: NarrowingPredicate,
