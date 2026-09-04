@@ -449,15 +449,12 @@ version = "0.0.0"
 dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
- "biome_db",
  "biome_formatter",
  "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
- "camino",
  "rustc-hash 2.1.3",
- "salsa",
 ]
 
 [[package]]
@@ -567,20 +564,13 @@ dependencies = [
 name = "biome_embeds"
 version = "0.1.0"
 dependencies = [
- "biome_db",
- "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_languages",
- "biome_module_graph",
  "biome_parser",
- "biome_project_layout",
  "biome_rowan",
- "camino",
- "papaya",
- "salsa",
 ]
 
 [[package]]

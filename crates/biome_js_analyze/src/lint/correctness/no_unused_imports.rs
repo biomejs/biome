@@ -703,7 +703,7 @@ fn is_unused(
     // Used in the template, as a value or a type, which the script's semantic
     // model can't see.
     if let Some(token) = binding_name.as_ref()
-        && embedded.is_used(token.token_text_trimmed())
+        && embedded.is_used(&token.token_text_trimmed())
     {
         return false;
     }
@@ -713,7 +713,7 @@ fn is_unused(
     // check above can't see because the spellings differ (kebab vs. camel).
     if let Some(token) = binding_name.as_ref()
         && matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
-        && embedded.is_vue_directive_used(token.token_text_trimmed())
+        && embedded.is_vue_directive_used(&token.token_text_trimmed())
     {
         return false;
     }
@@ -728,7 +728,7 @@ fn is_unused(
     let is_defined_in_embed = !file_source.is_embedded_source()
         && binding_name
             .as_ref()
-            .is_some_and(|token| embedded.contains_binding(token.token_text_trimmed()));
+            .is_some_and(|token| embedded.contains_binding(&token.token_text_trimmed()));
     if is_defined_in_embed {
         return false;
     }

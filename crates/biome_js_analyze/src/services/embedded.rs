@@ -1,130 +1,47 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
-use biome_embeds::{EmbeddedData, EmbeddedSourceData};
-use biome_embeds::bindings::{
-    InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
-};
-use biome_embeds::references::{
-    InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
-    is_value_reference_used, is_vue_directive_reference_used,
-};
-use biome_languages::LanguageDb;
+use biome_embeds::EmbeddedData;
 use biome_rowan::TokenText;
-use camino::Utf8PathBuf;
-use std::rc::Rc;
 use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct EmbeddedService {
-    source: EmbeddedSource,
-}
-
-#[derive(Clone)]
-enum EmbeddedSource {
-    Workspace {
-        db: Rc<dyn LanguageDb>,
-        path: Utf8PathBuf,
-        source: EmbeddedSourceData,
-    },
-    Direct(Arc<EmbeddedData>),
+    data: Arc<EmbeddedData>,
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(
-        db: Rc<dyn LanguageDb>,
-        path: Utf8PathBuf,
-        source: EmbeddedSourceData,
-    ) -> Self {
-        Self {
-            source: EmbeddedSource::Workspace { db, path, source },
-        }
+    pub(crate) fn new(data: Arc<EmbeddedData>) -> Self {
+        Self { data }
     }
 
-    pub(crate) fn from_data(data: Arc<EmbeddedData>) -> Self {
-        Self {
-            source: EmbeddedSource::Direct(data),
-        }
-    }
-
-    pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => get_binding_by_name(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedBindingTokenText::new(db.as_ref(), path.clone(), binding),
-            )
-            .is_some(),
-            EmbeddedSource::Direct(data) => data.contains_binding(binding.text()),
-        }
+    pub(crate) fn contains_binding(&self, binding: &TokenText) -> bool {
+        self.data.binding(binding.text()).is_some()
     }
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => get_binding_by_text(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedBindingText::new(db.as_ref(), path.clone(), binding.to_string()),
-            )
-            .is_some(),
-            EmbeddedSource::Direct(data) => data.contains_binding(binding),
-        }
+        self.data.binding(binding).is_some()
     }
 
-    pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => is_value_reference_used(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
-            ),
-            EmbeddedSource::Direct(data) => data.is_used_as_value(identifier.text()),
-        }
+    pub(crate) fn is_used_as_value(&self, identifier: &TokenText) -> bool {
+        self.data.is_used_as_value(identifier.text())
     }
 
-    pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => is_type_reference_used(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
-            ),
-            EmbeddedSource::Direct(data) => data.is_used_as_type(identifier.text()),
-        }
+    pub(crate) fn is_used_as_type(&self, identifier: &TokenText) -> bool {
+        self.data.is_used_as_type(identifier.text())
     }
 
-    pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => is_reference_used(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
-            ),
-            EmbeddedSource::Direct(data) => data.is_used(identifier.text()),
-        }
+    pub(crate) fn is_used(&self, identifier: &TokenText) -> bool {
+        self.data.is_used(identifier.text())
     }
 
     /// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
     ///
     /// See also: https://svelte.dev/docs/svelte/stores
-    pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => is_svelte_store_reference_used(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
-            ),
-            EmbeddedSource::Direct(data) => data.is_svelte_store_used(identifier.text()),
-        }
+    pub(crate) fn is_svelte_store_used(&self, identifier: &TokenText) -> bool {
+        self.data.is_svelte_store_used(identifier.text())
     }
 
-    pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
-        match &self.source {
-            EmbeddedSource::Workspace { db, path, source } => is_vue_directive_reference_used(
-                db.as_ref(),
-                source.intern(db.as_ref()),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
-            ),
-            EmbeddedSource::Direct(data) => data.is_vue_directive_used(identifier.text()),
-        }
+    pub(crate) fn is_vue_directive_used(&self, identifier: &TokenText) -> bool {
+        self.data.is_vue_directive_used(identifier.text())
     }
 }
 

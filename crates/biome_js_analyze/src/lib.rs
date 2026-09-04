@@ -19,7 +19,7 @@ use biome_analyze::{
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
-use biome_embeds::{EmbeddedData, EmbeddedSourceData};
+use biome_embeds::EmbeddedData;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
@@ -62,7 +62,6 @@ pub struct JsAnalyzerServices<'a> {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
     embedded_data: Option<Arc<EmbeddedData>>,
-    embedded_source: Option<EmbeddedSourceData>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     semantic_model: Option<&'a SemanticModel>,
@@ -80,7 +79,6 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             module_db: Some(module_db),
             language_db: None,
             embedded_data: None,
-            embedded_source: None,
             project_layout,
             source_type,
             semantic_model: None,
@@ -94,7 +92,6 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
             module_db: None,
             language_db: None,
             embedded_data: None,
-            embedded_source: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             semantic_model: None,
@@ -125,11 +122,6 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
         self.embedded_data = embedded_data;
-        self
-    }
-
-    pub fn with_embedded_source(mut self, source: EmbeddedSourceData) -> Self {
-        self.embedded_source = Some(source);
         self
     }
 
@@ -190,9 +182,8 @@ where
 
     let JsAnalyzerServices {
         module_db,
-        language_db: embedded_db,
+        language_db: _,
         embedded_data,
-        embedded_source,
         project_layout,
         source_type,
         semantic_model,
@@ -258,15 +249,7 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    if let Some(embedded_data) = embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data));
-    } else if let (Some(embedded_db), Some(embedded_source)) = (embedded_db, embedded_source) {
-        services.insert_service(EmbeddedService::new(
-            embedded_db,
-            options.file_path.clone(),
-            embedded_source,
-        ));
-    }
+    services.insert_service(EmbeddedService::new(embedded_data.unwrap_or_default()));
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
     // interleaved with the analyzer's syntax-phase traversal (single pass).

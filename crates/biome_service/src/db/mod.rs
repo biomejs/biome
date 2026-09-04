@@ -218,6 +218,14 @@ pub struct WorkspaceDbData {
 }
 
 impl WorkspaceDbData {
+    pub fn file_paths(&self) -> Vec<Utf8PathBuf> {
+        self.files.pin().keys().cloned().collect()
+    }
+
+    pub fn files_len(&self) -> usize {
+        self.files.pin().len()
+    }
+
     /// Inserts a file source so that it can be retrieved by index later.
     ///
     /// Returns the index at which the file source can be retrieved using
@@ -911,11 +919,8 @@ mod tests {
     use biome_fs::MemoryFileSystem;
     #[cfg(feature = "module_graph")]
     use biome_html_parser::{HtmlParserOptions, parse_html};
-    use biome_js_parser::{JsParserOptions, parse};
     #[cfg(feature = "lang_js")]
     use biome_js_syntax::JsLanguage;
-    #[cfg(feature = "module_graph")]
-    use biome_languages::HtmlFileSource;
     #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
     #[cfg(feature = "module_graph")]
@@ -1067,7 +1072,6 @@ mod tests {
     fn test_module(db: &mut WorkspaceDb, path: &str) -> ModuleInfo {
         let path = BiomePath::new(path);
         let fs = MemoryFileSystem::default();
-        let source_index = db.insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
         let root = parse_html("", HtmlParserOptions::default()).tree();
         let (module, _, _) = resolve_html_module(
             root,
@@ -1118,10 +1122,7 @@ mod tests {
         let updated_file = db.replace_file(path, "let b = 2;".to_string(), 0, None);
 
         assert_ne!(file.as_id(), updated_file.as_id());
-        assert_eq!(
-            db.get_file(path).unwrap().as_id(),
-            updated_file.as_id()
-        );
+        assert_eq!(db.get_file(path).unwrap().as_id(), updated_file.as_id());
     }
 
     #[test]

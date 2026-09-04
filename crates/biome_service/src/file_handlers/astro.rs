@@ -180,14 +180,21 @@ fn parse_detached(
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: super::ParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(biome_path, document_file_source, parse, settings)
+    javascript::format(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        workspace_db,
+    )
 }
 pub(crate) fn format_range(
     biome_path: &BiomePath,
@@ -195,8 +202,16 @@ pub(crate) fn format_range(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(biome_path, document_file_source, parse, settings, range)
+    javascript::format_range(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        range,
+        workspace_db,
+    )
 }
 
 pub(crate) fn format_on_type(
@@ -205,8 +220,16 @@ pub(crate) fn format_on_type(
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
+    javascript::format_on_type(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        offset,
+        workspace_db,
+    )
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

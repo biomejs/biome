@@ -1,7 +1,7 @@
 use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
-use crate::workspace::{FixFileMode, UpdateSettingsParams};
+use crate::workspace::{FixFileMode, NoopQueryProvider, UpdateSettingsParams};
 use biome_analyze::{RuleCategories, RuleCategoriesBuilder};
 use biome_configuration::{
     FormatterConfiguration, HtmlConfiguration, JsConfiguration,
@@ -14,9 +14,9 @@ use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::TrailingCommas;
-use biome_languages::css::CssEmbeddingKind;
 #[cfg(feature = "lang_html")]
 use biome_languages::HtmlFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use salsa::plumbing::AsId;
@@ -91,7 +91,6 @@ fn assert_settings_query_routes(db_state: DbState) {
             path: BiomePath::new(PATH),
             content: FileContent::from_client(SOURCE),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -277,7 +276,6 @@ fn json_language_hint_preserves_path_specific_sources() {
                 path: BiomePath::new(path),
                 content: FileContent::FromServer,
                 document_file_source: Some(JsonFileSource::json().into()),
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })
@@ -369,7 +367,6 @@ fn settings_query_preserves_sequential_analyzer_rule_options() {
             path: BiomePath::new(PATH),
             content: FileContent::from_client(SOURCE),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -441,7 +438,6 @@ fn settings_query_uses_inline_analyzer_override_indices() {
             path: BiomePath::new(PATH),
             content: FileContent::from_client(SOURCE),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -485,9 +481,20 @@ fn settings_query_uses_inline_analyzer_override_indices() {
 fn parse_capability_returns_not_found_for_unregistered_file() {
     const PATH: &str = "/project/missing.json";
 
-    let (workspace, _) = setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
-    let settings = Settings::default();
-    let settings = SettingsHandle::new(&settings, (None, EditorFeatures::default()));
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let (_, settings, query) = {
+        let db = workspace.as_workspace().get_db();
+        workspace
+            .as_workspace()
+            .project_get_settings_query(&db, project_key, Utf8Path::new(PATH), None)
+            .expect("project settings must exist")
+    };
+    let settings = workspace.as_workspace().settings_handle_with_query(
+        &settings,
+        EditorFeatures::default(),
+        query,
+    );
     let parse = workspace
         .features
         .get_deprecated_capabilities(JsonFileSource::json().into())
@@ -597,7 +604,7 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
         .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new(PATH),
-            content: FileContent::from_client(SOURCE),
+            content: FileContent::from_client(STORED_SOURCE),
             document_file_source: None,
             inline_config: None,
             editor_features: None,
@@ -651,13 +658,10 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     );
 }
 
-/// Closing a file evicts its own cached parsed source through
-/// `DbState::remove_file`, and closing a project evicts the cached parsed
-/// sources of the files still open under its root through
-/// `DbState::unload_path`. Neither operation touches parsed sources that
-/// belong to a different project.
+/// Closing a file removes its registered source, and closing a project removes
+/// the registered sources under its root without affecting other projects.
 #[test]
-fn close_file_and_close_project_evict_cached_parsed_sources() {
+fn close_file_and_close_project_remove_registered_file_sources() {
     const PATH_A: &str = "/project/file_a.js";
     const PATH_B: &str = "/project/nested/file_b.js";
     const OTHER_PATH: &str = "/other/file_c.js";
@@ -687,7 +691,6 @@ fn close_file_and_close_project_evict_cached_parsed_sources() {
                 path: BiomePath::new(path),
                 content: FileContent::from_client(SOURCE),
                 document_file_source: None,
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })
@@ -695,9 +698,9 @@ fn close_file_and_close_project_evict_cached_parsed_sources() {
     }
 
     assert_eq!(
-        workspace.get_db().parsed_sources_len(),
+        workspace.get_db().file_sources_len(),
         3,
-        "opening all three files must add three entries to the parsed source cache"
+        "opening all three files must register three file sources"
     );
 
     workspace
@@ -708,23 +711,17 @@ fn close_file_and_close_project_evict_cached_parsed_sources() {
         .unwrap();
 
     assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH_A))
-            .is_none(),
-        "closing a file must evict its cached parsed source"
+        workspace.get_db().get_file(Utf8Path::new(PATH_A)).is_none(),
+        "closing a file must remove its registered source"
     );
     assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH_B))
-            .is_some(),
-        "closing a file must not evict the cached parsed source of a file that is still open"
+        workspace.get_db().get_file(Utf8Path::new(PATH_B)).is_some(),
+        "closing a file must not remove another open file"
     );
     assert_eq!(
-        workspace.get_db().parsed_sources_len(),
+        workspace.get_db().file_sources_len(),
         2,
-        "closing a file must remove only its own entry from the parsed source cache"
+        "closing a file must remove only its own source"
     );
 
     workspace
@@ -732,23 +729,20 @@ fn close_file_and_close_project_evict_cached_parsed_sources() {
         .unwrap();
 
     assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH_B))
-            .is_none(),
-        "closing a project must evict cached parsed sources still open under its root"
+        workspace.get_db().get_file(Utf8Path::new(PATH_B)).is_none(),
+        "closing a project must remove registered sources under its root"
     );
     assert!(
         workspace
             .get_db()
-            .get_parsed_source(Utf8Path::new(OTHER_PATH))
+            .get_file(Utf8Path::new(OTHER_PATH))
             .is_some(),
-        "closing a project must not evict cached parsed sources outside its root"
+        "closing a project must not remove sources outside its root"
     );
     assert_eq!(
-        workspace.get_db().parsed_sources_len(),
+        workspace.get_db().file_sources_len(),
         1,
-        "closing a project must remove only the entries under its root from the parsed source cache"
+        "closing a project must remove only sources under its root"
     );
 }
 
@@ -1089,15 +1083,9 @@ fn owned_scan_uses_replacement_updates() {
     };
 
     scan();
-    let first = workspace
-        .get_db()
-        .get_parsed_source(Utf8Path::new(PATH))
-        .unwrap();
+    let first = workspace.get_db().get_file(Utf8Path::new(PATH)).unwrap();
     scan();
-    let second = workspace
-        .get_db()
-        .get_parsed_source(Utf8Path::new(PATH))
-        .unwrap();
+    let second = workspace.get_db().get_file(Utf8Path::new(PATH)).unwrap();
 
     assert_ne!(first.as_id(), second.as_id());
 }
@@ -1331,12 +1319,7 @@ fn incremental_index_retries_pending_write() {
     assert!(retry_observed, "incremental indexing was not retried");
     assert!(matches!(update_result, Ok(Ok(_))));
     assert!(matches!(index_result, Some(Ok(Ok(_)))));
-    assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
-            .is_some()
-    );
+    assert!(workspace.get_db().get_file(Utf8Path::new(PATH)).is_some());
 }
 
 #[test]
@@ -2222,7 +2205,6 @@ const total = 1;
             path: BiomePath::new("/project/file.astro"),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -2350,7 +2332,6 @@ const Empty = <div style />;"#;
             path: BiomePath::new(FILE_PATH),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -2361,7 +2342,7 @@ const Empty = <div style />;"#;
     let style_snippets = snippets
         .iter()
         .filter(|snippet| {
-            db.source_from_index(snippet.document_source_index(&db))
+            db.source_from_index(snippet.document_source_index())
                 .and_then(|source| source.to_css_file_source())
                 .is_some_and(|source| {
                     matches!(
@@ -2375,7 +2356,7 @@ const Empty = <div style />;"#;
     assert_eq!(style_snippets.len(), 1);
     assert_eq!(
         style_snippets[0]
-            .parsed(&db)
+            .parsed()
             .clone()
             .embedded_syntax::<CssLanguage>()
             .text_with_trivia()

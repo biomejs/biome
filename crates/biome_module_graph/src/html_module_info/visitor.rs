@@ -11,8 +11,8 @@ use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
-use biome_languages::css::EmbeddingStyleApplicability;
 use biome_languages::CssFileSource;
+use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -91,18 +91,20 @@ impl<'a> HtmlModuleVisitor<'a> {
                         continue;
                     }
                     collect_css_classes(css_root, &mut style_classes, file_source, *content_offset);
-                    property_registrations.extend(css_property_definitions(css_root).into_iter().map(
-                        |definition| HtmlCssPropertyRegistration {
-                            name: definition.name_token().clone(),
-                            range: definition.range() + *content_offset,
-                            applicability: if definition.is_globally_scoped() {
-                                EmbeddingStyleApplicability::Global
-                            } else {
-                                file_source.embedding_applicability()
-                            },
-                            globally_scoped: definition.is_globally_scoped(),
-                        },
-                    ));
+                    property_registrations.extend(
+                        css_property_definitions(css_root)
+                            .into_iter()
+                            .map(|definition| HtmlCssPropertyRegistration {
+                                name: definition.name_token().clone(),
+                                range: definition.range() + *content_offset,
+                                applicability: if definition.is_globally_scoped() {
+                                    EmbeddingStyleApplicability::Global
+                                } else {
+                                    file_source.embedding_applicability()
+                                },
+                                globally_scoped: definition.is_globally_scoped(),
+                            }),
+                    );
                     let css_info =
                         CssModuleVisitor::new(css_root.clone(), self.directory, self.fs_proxy)
                             .visit();

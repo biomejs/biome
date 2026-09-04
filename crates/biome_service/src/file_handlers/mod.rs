@@ -65,7 +65,7 @@ use biome_css_syntax::CssLanguage;
 use biome_db::FileSource;
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
-use biome_embeds::{EmbeddedData, EmbeddedSourceData};
+use biome_embeds::EmbeddedData;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
@@ -131,8 +131,6 @@ pub struct FixAllParams<'a> {
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
     pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
-    #[cfg(feature = "html_embeds")]
-    pub(crate) embedded_source: Option<EmbeddedSourceData>,
     #[cfg(feature = "module_graph")]
     pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -287,6 +285,7 @@ type DebugFormatterIR = fn(
     &DocumentFileSource,
     AnyParsedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
 type DebugTypeInfo = fn(AnyParsedSource) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(AnyParsedSource) -> Result<String, WorkspaceError>;
@@ -320,8 +319,6 @@ pub(crate) struct LintParams<'a> {
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
     pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
-    #[cfg(feature = "html_embeds")]
-    pub(crate) embedded_source: Option<EmbeddedSourceData>,
     #[cfg(feature = "module_graph")]
     pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -346,7 +343,7 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
-    pub(crate) embedded_source: Option<EmbeddedSourceData>,
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -842,7 +839,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
-    pub(crate) embedded_source: Option<EmbeddedSourceData>,
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -900,6 +897,7 @@ type Format = fn(
     &DocumentFileSource,
     ParsedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
@@ -907,6 +905,7 @@ type FormatRange = fn(
     AnyParsedSource,
     &SettingsWithEditor,
     TextRange,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
@@ -914,6 +913,7 @@ type FormatOnType = fn(
     AnyParsedSource,
     &SettingsWithEditor,
     TextSize,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
 pub(crate) fn format_on_type_noop(offset: TextSize) -> Printed {
@@ -984,7 +984,7 @@ pub(crate) struct ResolveBindingParams {
     pub(crate) workspace_db: WorkspaceDb,
     pub(crate) path: Utf8PathBuf,
     #[cfg(feature = "html_embeds")]
-    pub(crate) embedded_source: Option<EmbeddedSourceData>,
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
 }
 
 pub(crate) struct ResolveDefinitionParams<'a> {

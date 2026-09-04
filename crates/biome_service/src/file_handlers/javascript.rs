@@ -6,9 +6,9 @@ use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FixedFileResult, FormatterCapabilities, LintParams, LintResults,
-    ParseEmbedResult, ParseEmbeddedParams, ParseOrigin, ParseResult, ParsedSource,
-    ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
-    SearchCapabilities, UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
+    ParseEmbedResult, ParseEmbeddedParams, ParseResult, ParsedSource, ParserCapabilities,
+    ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint, SearchCapabilities,
+    UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
@@ -47,6 +47,8 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 #[cfg(feature = "js_embeds")]
 use biome_css_syntax::CssLanguage;
 use biome_db::{Db, FileSource};
+#[cfg(feature = "html_embeds")]
+use biome_embeds::EmbeddedData;
 #[cfg(feature = "js_embeds")]
 use biome_formatter::FormatElement;
 #[cfg(feature = "js_embeds")]
@@ -55,8 +57,6 @@ use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatError,
     IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
 };
-#[cfg(feature = "html_embeds")]
-use biome_embeds::EmbeddedSourceData;
 use biome_fs::BiomePath;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
@@ -74,7 +74,8 @@ use biome_js_formatter::context::{
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{
-    SVELTE_RUNES, SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model,
+    SVELTE_RUNES, SemanticModel, SemanticModelOptions,
+    js_semantic_model as direct_js_semantic_model, semantic_model,
 };
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
@@ -726,6 +727,7 @@ pub fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool 
 }
 
 #[salsa::interned]
+#[derive(Debug)]
 struct ParseJsInput {
     file: FileSource,
     document_source: JsFileSource,
@@ -740,6 +742,15 @@ fn parse_js_file<'db>(db: &'db dyn Db, input: ParseJsInput<'db>) -> AnyParse {
         input.options(db),
     )
     .into()
+}
+
+#[salsa::tracked(returns(ref))]
+fn js_semantic_model<'db>(db: &'db dyn Db, input: ParseJsInput<'db>) -> SemanticModel {
+    let parse = parse_js_file(db, input);
+    semantic_model(
+        &parse.tree(),
+        SemanticModelOptions::from(&input.document_source(db)),
+    )
 }
 
 fn parse(
@@ -1088,6 +1099,7 @@ fn debug_formatter_ir(
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
     let tree: AnyJsRoot = parse.tree();
@@ -1237,23 +1249,34 @@ fn debug_semantic_model(
     let file = workspace_db
         .file_source_for_path(path.as_path())
         .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-    let model = js_semantic_model(&workspace_db, file, &parse);
+    let model = direct_js_semantic_model(&workspace_db, file, &parse);
     Ok(model.to_string())
 }
 
 fn analyzer_semantic_model(
     parsed_source: &ParsedSource,
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
     workspace_db: &WorkspaceDb,
     source_type: &JsFileSource,
 ) -> SemanticModel {
-    match parsed_source.origin() {
-        ParseOrigin::Workspace(file) if parsed_source.as_snippet().is_none() => {
-            js_semantic_model(workspace_db, file, parsed_source).clone()
-        }
-        ParseOrigin::Workspace(_) | ParseOrigin::Stateless => semantic_model(
+    if let Some(file) = parsed_source
+        .workspace_file()
+        .filter(|_| parsed_source.as_snippet().is_none())
+    {
+        let input = ParseJsInput::new(
+            workspace_db,
+            file,
+            *source_type,
+            settings.parse_options::<JsLanguage>(path, document_file_source),
+        );
+        js_semantic_model(workspace_db, input).clone()
+    } else {
+        semantic_model(
             &parsed_source.tree::<AnyJsRoot>(),
             SemanticModelOptions::from(source_type),
-        ),
+        )
     }
 }
 
@@ -1263,7 +1286,7 @@ fn js_analyzer_services<'a>(
     #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-    #[cfg(feature = "html_embeds")] embedded_source: Option<EmbeddedSourceData>,
+    #[cfg(feature = "html_embeds")] embedded_data: Option<Arc<EmbeddedData>>,
 ) -> JsAnalyzerServices<'a> {
     #[cfg(feature = "module_graph")]
     let services = {
@@ -1277,11 +1300,7 @@ fn js_analyzer_services<'a>(
 
     let services = services.with_language_db(workspace_db.rc_language_db());
     #[cfg(feature = "html_embeds")]
-    let services = if let Some(embedded_source) = embedded_source {
-        services.with_embedded_source(embedded_source)
-    } else {
-        services
-    };
+    let services = services.with_embedded_data(embedded_data);
     services
 }
 
@@ -1291,20 +1310,7 @@ fn js_analyzer_services_for_fix<'a>(
     params: &FixAllParams,
     source_type: JsFileSource,
 ) -> JsAnalyzerServices<'a> {
-    #[cfg(feature = "module_graph")]
-    {
-        js_analyzer_services(
-            root,
-            &params.workspace_db,
-            params.module_db.clone(),
-            params.project_layout.clone(),
-            source_type,
-        )
-        .with_semantic_model(semantic_model)
-    }
-
-    #[cfg(not(feature = "module_graph"))]
-    js_analyzer_services(
+    let services = js_analyzer_services(
         root,
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
@@ -1312,10 +1318,8 @@ fn js_analyzer_services_for_fix<'a>(
         params.project_layout.clone(),
         source_type,
         #[cfg(feature = "html_embeds")]
-        params.embedded_source.clone(),
+        params.embedded_data.clone(),
     );
-    #[cfg(feature = "html_embeds")]
-    let services = services.with_embedded_data(params.embedded_data.clone());
 
     services.with_semantic_model(semantic_model)
 }
@@ -1360,8 +1364,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let semantic_model =
-        analyzer_semantic_model(&params.parsed_source, &params.workspace_db, &files_source);
+    let semantic_model = analyzer_semantic_model(
+        &params.parsed_source,
+        params.path,
+        &params.language,
+        params.settings,
+        &params.workspace_db,
+        &files_source,
+    );
     let services = js_analyzer_services(
         &tree,
         &params.workspace_db,
@@ -1370,10 +1380,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         params.project_layout.clone(),
         files_source,
         #[cfg(feature = "html_embeds")]
-        params.embedded_source.clone(),
+        params.embedded_data.clone(),
     );
-    #[cfg(feature = "html_embeds")]
-    let services = services.with_embedded_data(params.embedded_data.clone());
     let services = services.with_semantic_model(&semantic_model);
 
     let (_, analyze_diagnostics) = analyze(
@@ -1400,7 +1408,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         workspace_db,
         #[cfg(feature = "html_embeds")]
-        embedded_source,
+        embedded_data,
         project_layout,
         language,
         only,
@@ -1452,7 +1460,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let semantic_model = analyzer_semantic_model(&parsed_source, &workspace_db, &source_type);
+    let semantic_model = analyzer_semantic_model(
+        &parsed_source,
+        path,
+        &language,
+        settings,
+        &workspace_db,
+        &source_type,
+    );
     let action_offset = parsed_source.diagnostic_offset();
     let services = js_analyzer_services(
         &tree,
@@ -1462,7 +1477,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         project_layout,
         source_type,
         #[cfg(feature = "html_embeds")]
-        embedded_source,
+        embedded_data,
     )
     .with_semantic_model(&semantic_model);
 
@@ -1554,13 +1569,24 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         return Ok(None);
     };
 
+    let mut initial_semantic_model = Some(analyzer_semantic_model(
+        &params.parsed_source,
+        params.biome_path,
+        &params.document_file_source,
+        params.settings,
+        &params.workspace_db,
+        &file_source,
+    ));
+
     let mut process_fix_all =
         ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
+            let semantic_model = initial_semantic_model
+                .take()
+                .unwrap_or_else(|| semantic_model(&tree, SemanticModelOptions::from(&file_source)));
             let services =
                 js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
 
@@ -1607,7 +1633,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
+        let semantic_model = initial_semantic_model
+            .take()
+            .unwrap_or_else(|| semantic_model(&tree, SemanticModelOptions::from(&file_source)));
         let services = js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
 
         let mut pending_actions = Vec::new();
@@ -1684,6 +1712,7 @@ pub(crate) fn format(
     document_file_source: &DocumentFileSource,
     parse: super::ParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
@@ -1698,13 +1727,17 @@ pub(crate) fn format(
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, document_file_source))]
+#[tracing::instrument(
+    level = "debug",
+    skip(parse, settings, document_file_source, workspace_db)
+)]
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
@@ -1713,13 +1746,17 @@ pub(crate) fn format_range(
     Ok(printed)
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings, document_file_source))]
+#[tracing::instrument(
+    level = "debug",
+    skip(parse, settings, document_file_source, workspace_db)
+)]
 pub(crate) fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
@@ -1878,7 +1915,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         categories,
         workspace_db,
         #[cfg(feature = "html_embeds")]
-        embedded_source,
+        embedded_data,
         project_layout,
         suppression_reason,
         enabled_selectors,
@@ -1922,7 +1959,14 @@ pub(crate) fn pull_diagnostics_and_actions(
             diagnostics: Vec::new(),
         };
     };
-    let semantic_model = analyzer_semantic_model(&parsed_source, &workspace_db, &source_type);
+    let semantic_model = analyzer_semantic_model(
+        &parsed_source,
+        path,
+        &language,
+        settings,
+        &workspace_db,
+        &source_type,
+    );
     let services = js_analyzer_services(
         &tree,
         &workspace_db,
@@ -1931,7 +1975,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         project_layout,
         source_type,
         #[cfg(feature = "html_embeds")]
-        embedded_source,
+        embedded_data,
     )
     .with_semantic_model(&semantic_model);
     let mut process_pull_diagnostics_and_actions =
@@ -2031,4 +2075,149 @@ fn search(
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let any_parse = parsed.any_parse();
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_db::testing::{
+        Events, assert_function_query_was_not_run, assert_function_query_was_run,
+    };
+    use camino::{Utf8Path, Utf8PathBuf};
+
+    #[salsa::db]
+    struct TestDb {
+        events: Events,
+        storage: salsa::Storage<Self>,
+    }
+
+    impl TestDb {
+        fn new() -> Self {
+            let events = Events::default();
+            Self {
+                storage: salsa::Storage::new(Some(Box::new({
+                    let events = events.clone();
+                    move |event| events.0.lock().unwrap().push(event)
+                }))),
+                events,
+            }
+        }
+
+        fn clear_salsa_events(&self) {
+            self.take_salsa_events();
+        }
+
+        fn take_salsa_events(&self) -> Vec<salsa::Event> {
+            std::mem::take(&mut *self.events.0.lock().unwrap())
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl Db for TestDb {
+        fn file_source_for_path(&self, _path: &Utf8Path) -> Option<FileSource> {
+            None
+        }
+
+        fn for_each_file_source(&self, _f: &mut dyn FnMut(FileSource)) {}
+    }
+
+    fn make_file(db: &TestDb, source: &str) -> FileSource {
+        FileSource::new(
+            db,
+            Utf8PathBuf::from("test.js"),
+            source.to_string(),
+            0,
+            None,
+        )
+    }
+
+    #[salsa::tracked]
+    fn js_binding_count<'db>(db: &'db dyn Db, input: ParseJsInput<'db>) -> usize {
+        js_semantic_model(db, input)
+            .global_scope()
+            .bindings()
+            .count()
+    }
+
+    #[test]
+    fn js_semantic_query_reuses_unchanged_input() {
+        let db = TestDb::new();
+        let file = make_file(&db, "let value = 1;");
+        let input = ParseJsInput::new(
+            &db,
+            file,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let _ = js_semantic_model(&db, input);
+
+        db.clear_salsa_events();
+        let _ = js_semantic_model(&db, input);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_not_run(&db, js_semantic_model, input, &events);
+    }
+
+    #[test]
+    fn js_semantic_query_invalidates_binding_projection() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, "let first = 1;");
+        let input = ParseJsInput::new(
+            &db,
+            file,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        assert_eq!(js_binding_count(&db, input), 1);
+
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            "let first = 1; let second = 2;".to_string(),
+        );
+        let input = ParseJsInput::new(
+            &db,
+            file,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        db.clear_salsa_events();
+        assert_eq!(js_binding_count(&db, input), 2);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, js_semantic_model, input, &events);
+        assert_function_query_was_run(&db, js_binding_count, input, &events);
+    }
+
+    #[test]
+    fn js_semantic_query_backdates_equal_body_change() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, "function value() { return 1; }");
+        let input = ParseJsInput::new(
+            &db,
+            file,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        assert_eq!(js_binding_count(&db, input), 1);
+
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            "function value() { return 2; }".to_string(),
+        );
+        let input = ParseJsInput::new(
+            &db,
+            file,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        db.clear_salsa_events();
+        assert_eq!(js_binding_count(&db, input), 1);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, js_semantic_model, input, &events);
+        assert_function_query_was_not_run(&db, js_binding_count, input, &events);
+    }
 }

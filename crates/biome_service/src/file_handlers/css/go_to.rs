@@ -47,7 +47,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         }
 
         let diagnostic_offset = params.parsed_source.diagnostic_offset();
-        let semantic_model = css_semantic_model(&params.workspace_db, file, &params.parsed_source);
+        let semantic_model = css_semantic_model(&params.parsed_source);
         for rule in semantic_model.rules() {
             for selector in rule.selectors() {
                 let node = selector.node();

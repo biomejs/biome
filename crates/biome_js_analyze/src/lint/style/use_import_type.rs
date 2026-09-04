@@ -829,7 +829,7 @@ fn is_only_used_as_type(
     // Used as a value in the template → not type-only.
     if name
         .as_ref()
-        .is_some_and(|name| references.is_used_as_value(name.clone()))
+        .is_some_and(|name| references.is_used_as_value(name))
     {
         return false;
     }
@@ -851,7 +851,7 @@ fn is_only_used_as_type(
     }
 
     // No script references: type-only if the template uses it as a type.
-    name.is_some_and(|name| references.is_used_as_type(name))
+    name.is_some_and(|name| references.is_used_as_type(&name))
 }
 
 #[derive(Debug)]

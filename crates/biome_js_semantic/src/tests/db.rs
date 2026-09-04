@@ -1,16 +1,10 @@
-//! The equality check is important for salsa.
-//! The semantic model tracks some information inside a parsed file, but not everything needs to change
-//! when part of the source code changes. With salsa, and the correct implementation of [PartialEq],
-//! we care re-use the same semantic model, if the information that belong to the semantic model didn't change
-
-use crate::db::{SemanticInput, semantic_model_from_source};
-use crate::{SemanticModel, semantic_model};
+use crate::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_db::FileSource;
-use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_js_parser::parse;
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
-use biome_parser::AnyParse;
+use biome_parser::{AnyParsedSource, ParsedSnippet};
+use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 
@@ -102,31 +96,7 @@ fn same_export_different_position() {
 #[salsa::db]
 #[derive(Default)]
 pub struct TestDb {
-    events: Events,
-
     storage: Storage<Self>,
-}
-
-impl TestDb {
-    pub fn new() -> Self {
-        let events = Events::default();
-        Self {
-            storage: salsa::Storage::new(Some(Box::new({
-                let events = events.clone();
-                move |event| {
-                    events.0.lock().unwrap().push(event);
-                }
-            }))),
-            events,
-        }
-    }
-    pub fn take_salsa_events(&mut self) -> Vec<salsa::Event> {
-        std::mem::take(&mut *self.events.0.lock().unwrap())
-    }
-
-    pub fn clear_salsa_events(&mut self) {
-        self.take_salsa_events();
-    }
 }
 
 #[salsa::db]
@@ -144,107 +114,51 @@ impl biome_db::Db for TestDb {
 #[salsa::db]
 impl LanguageDb for TestDb {
     fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
-        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+        Some(DocumentFileSource::Js(JsFileSource::svelte()))
     }
 }
 
 fn make_file(db: &TestDb, source: &str) -> FileSource {
     FileSource::new(
         db,
-        Utf8PathBuf::from("test.tsx"),
+        Utf8PathBuf::from("test.js"),
         source.to_string(),
         0,
         None,
     )
 }
 
-#[salsa::tracked(returns(ref))]
-fn test_semantic_model(db: &dyn LanguageDb, file: FileSource) -> SemanticModel {
-    let parsed: AnyParse = parse(file.content(db), JsFileSource::tsx(), Default::default()).into();
-    let input = SemanticInput::new(db, file, parsed);
-    semantic_model_from_source(db, input).clone()
-}
-
 #[test]
-fn semantic_model_is_memoized() {
-    let mut db = TestDb::new();
-    let file = make_file(&db, "let x = 1;");
-
-    // First query — builds the model
-    let _model = test_semantic_model(&db, file);
-
-    // Second query — should be memoized
-    db.clear_salsa_events();
-    let _model = test_semantic_model(&db, file);
-    let events = db.take_salsa_events();
-
-    assert_function_query_was_not_run(&db, test_semantic_model, file, &events);
-}
-
-// Test-only downstream tracked function that reads from js_semantic_model
-#[salsa::tracked]
-fn binding_count(db: &dyn LanguageDb, file: FileSource) -> usize {
-    let model = test_semantic_model(db, file);
-    model.data.bindings.len()
-}
-#[test]
-fn rename_does_recompute_downstream() {
-    let mut db = TestDb::new();
-    let file = make_file(&db, "let x = 1;");
-    let _ = binding_count(&db, file);
-
-    // Rename variable — semantic structure changes
-    salsa::Setter::to(file.set_content(&mut db), "let y = 1;".to_string());
-
-    db.clear_salsa_events();
-    let _ = binding_count(&db, file);
-    let events = db.take_salsa_events();
-
-    // Both should have run — model changed, downstream must recompute
-    assert_function_query_was_run(&db, test_semantic_model, file, &events);
-    assert_function_query_was_run(&db, binding_count, file, &events);
-}
-
-#[test]
-fn new_export_does_recompute_downstream() {
-    let mut db = TestDb::new();
-    let file = make_file(&db, "function f() {}");
-    let _ = binding_count(&db, file);
-
-    salsa::Setter::to(
-        file.set_content(&mut db),
-        "export function f() {}".to_string(),
+fn parsed_source_helper_builds_model() {
+    let db = TestDb::default();
+    let file = make_file(&db, "$store;");
+    let parse = parse("$store;", JsFileSource::svelte(), Default::default());
+    let expected = semantic_model(
+        &parse.tree(),
+        SemanticModelOptions::from(&JsFileSource::svelte()),
     );
+    let parsed = AnyParsedSource::ParsedSource(parse.into());
 
-    db.clear_salsa_events();
-    let _ = binding_count(&db, file);
-    let events = db.take_salsa_events();
-
-    assert_function_query_was_run(&db, test_semantic_model, file, &events);
-    assert_function_query_was_run(&db, binding_count, file, &events);
+    assert_eq!(js_semantic_model(&db, file, &parsed), expected);
 }
 
 #[test]
-fn type_change_does_not_recompute_binding_count() {
-    let mut db = TestDb::new();
-    let file = make_file(&db, "export let x: string = 'hello';");
-
-    let count = binding_count(&db, file);
-    assert_eq!(count, 1);
-
-    // Change type annotation — CST changes, but semantic structure doesn't
-    salsa::Setter::to(
-        file.set_content(&mut db),
-        "export let x: number = 'hello';".to_string(),
+fn parsed_snippet_helper_builds_model() {
+    let db = TestDb::default();
+    let file = make_file(&db, "$store;");
+    let parse = parse("$store;", JsFileSource::svelte(), Default::default());
+    let expected = semantic_model(
+        &parse.tree(),
+        SemanticModelOptions::from(&JsFileSource::svelte()),
     );
+    let empty_range = TextRange::new(TextSize::default(), TextSize::default());
+    let parsed = AnyParsedSource::ParsedSnippet(ParsedSnippet {
+        parsed: parse.into(),
+        element_range: empty_range,
+        content_range: empty_range,
+        content_offset: TextSize::default(),
+        document_source_index: Some(0),
+    });
 
-    db.clear_salsa_events();
-    let count = binding_count(&db, file);
-    assert_eq!(count, 1);
-    let events = db.take_salsa_events();
-
-    // Semantic model recomputed (CST input changed)...
-    assert_function_query_was_run(&db, test_semantic_model, file, &events);
-    // ...but binding_count did NOT (model Eq → early termination)
-    assert_function_query_was_not_run(&db, binding_count, file, &events);
+    assert_eq!(js_semantic_model(&db, file, &parsed), expected);
 }

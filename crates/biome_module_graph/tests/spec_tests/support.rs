@@ -18,12 +18,7 @@ use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::Utf8PathBuf;
 
-type HtmlTestFile<'a> = (
-    &'a str,
-    &'a str,
-    HtmlFileSource,
-    Vec<HtmlEmbeddedContent>,
-);
+type HtmlTestFile<'a> = (&'a str, &'a str, HtmlFileSource, Vec<HtmlEmbeddedContent>);
 
 pub fn add_js_modules(
     db: &mut WorkspaceDb,
@@ -111,14 +106,8 @@ pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> Works
     for (path, source, file_source, embedded) in files {
         let path = BiomePath::new(*path);
         let root = biome_html_parser::parse_html(source, file_source.into()).tree();
-        let (info, _, _) = resolve_html_module(
-            root,
-            embedded,
-            &path,
-            fs,
-            &ProjectLayout::default(),
-            &cache,
-        );
+        let (info, _, _) =
+            resolve_html_module(root, embedded, &path, fs, &ProjectLayout::default(), &cache);
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
     }
     db

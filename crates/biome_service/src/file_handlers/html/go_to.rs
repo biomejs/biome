@@ -5,10 +5,6 @@ use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 #[cfg(feature = "html_embeds")]
 use crate::workspace::LocalEmbeddedLanguage;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
-#[cfg(feature = "html_embeds")]
-use biome_embeds::bindings::{
-    InternedBindingTokenText, get_binding_by_token_text, get_binding_with_source,
-};
 #[cfg(feature = "module_graph")]
 use biome_fs::BiomePath;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlRoot};
@@ -24,10 +20,7 @@ use camino::Utf8Path;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
     #[cfg(feature = "html_embeds")]
-    let embedded_source = params
-        .embedded_source
-        .as_ref()
-        .map(|source| source.intern(&params.workspace_db));
+    let embedded_data = params.embedded_data.as_deref();
     let root: HtmlRoot = params.parsed_source.tree();
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {
@@ -91,15 +84,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
         #[cfg(feature = "html_embeds")]
         if let Some(element) = HtmlComponentName::cast_ref(&ancestor)
             && let Some(element_value) = element.value_token().ok()
-            && let Some(binding) = get_binding_with_source(
-                &params.workspace_db,
-                embedded_source?,
-                InternedBindingTokenText::new(
-                    &params.workspace_db,
-                    params.path.clone(),
-                    element_value.token_text_trimmed(),
-                ),
-            )
+            && let Some(binding) = embedded_data?.binding_with_source(element_value.text_trimmed())
             && let Some(source) = binding.source.as_ref()
         {
             return Some(DefinitionReference::HtmlComponent {
@@ -111,15 +96,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
         #[cfg(feature = "html_embeds")]
         if let Some(element) = HtmlTextExpression::cast_ref(&ancestor)
             && let Some(element_value) = element.html_literal_token().ok()
-            && let Some(binding) = get_binding_by_token_text(
-                &params.workspace_db,
-                embedded_source?,
-                InternedBindingTokenText::new(
-                    &params.workspace_db,
-                    params.path.clone(),
-                    element_value.token_text_trimmed(),
-                ),
-            )
+            && let Some(binding) = embedded_data?.binding(element_value.text_trimmed())
         {
             return Some(DefinitionReference::LocalEmbedded {
                 range: binding.range,
