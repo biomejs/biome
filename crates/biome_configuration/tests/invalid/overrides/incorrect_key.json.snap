@@ -23,6 +23,7 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   - grit
   - html
   - markdown
+  - yaml
   - formatter
   - linter
   - assist

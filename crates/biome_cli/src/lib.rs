@@ -255,6 +255,7 @@ impl<'app> CliSession<'app> {
                 log_options,
                 watch,
                 markdown_formatter,
+                yaml_formatter,
             } => run_command(
                 self,
                 &log_options,
@@ -269,6 +270,7 @@ impl<'app> CliSession<'app> {
                     vcs_configuration,
                     files_configuration,
                     markdown_formatter,
+                    yaml_formatter,
                     json_formatter,
                     css_formatter,
                     graphql_formatter,
