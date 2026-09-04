@@ -335,20 +335,22 @@ impl SyntaxNode {
             let (left, right) = match (left, right) {
                 (Some(left), right) => (left, right),
                 (None, Some(right)) => (right, None),
-                (None, None) => unreachable!("non-empty node must have a child at its offset"),
+                (None, None) => return TokenAtOffset::None,
             };
-            let to_syntax_element = |child: Child<'_>| {
-                SyntaxElement::new(
-                    child.element(),
-                    node.clone().into_owned(),
-                    child.slot(),
-                    node.offset() + child.rel_offset(),
-                )
-            };
-            let left = to_syntax_element(left);
-            let right = right.map(to_syntax_element);
+            let left = SyntaxElement::new(
+                left.element(),
+                node.clone().into_owned(),
+                left.slot(),
+                node.offset() + left.rel_offset(),
+            );
 
             if let Some(right) = right {
+                let right = SyntaxElement::new(
+                    right.element(),
+                    node.clone().into_owned(),
+                    right.slot(),
+                    node.offset() + right.rel_offset(),
+                );
                 let token_at_offset =
                     |node: NodeOrToken<Self, SyntaxToken>| -> TokenAtOffset<SyntaxToken> {
                         match node {

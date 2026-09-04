@@ -215,9 +215,24 @@ impl GreenNodeData {
         Some((idx, slot.rel_offset(), slot))
     }
 
-    /// Returns the non-empty child containing `offset` on the left and, at an
-    /// inclusive boundary, the non-empty child starting at `offset` on the right.
-    /// Zero-width slots are skipped.
+    /// Returns a pair of optional children around `offset`:
+    ///
+    /// - Left: starts before `offset` and ends at or after it.
+    /// - Right: starts exactly at `offset`.
+    ///
+    /// Missing slots and children with zero-length text ranges are skipped,
+    /// including zero-length tokens and nodes with no source text.
+    ///
+    /// For the JavaScript call `foo(1)`, the callee child `foo` covers `0..3`
+    /// and the arguments child `(1)` covers `3..6`:
+    ///
+    /// ```text
+    /// offset 0 → (None, Some(callee))
+    /// offset 2 → (Some(callee), None)
+    /// offset 3 → (Some(callee), Some(arguments))
+    /// offset 4 → (Some(arguments), None)
+    /// offset 6 → (Some(arguments), None)
+    /// ```
     pub(crate) fn children_at_offset(
         &self,
         offset: TextSize,
