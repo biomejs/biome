@@ -12,6 +12,8 @@ impl FormatNodeRule<ScssAtRootQuery> for FormatScssAtRootQuery {
             query,
             r_paren_token,
         } = node.as_fields();
+        let l_paren_token = l_paren_token?;
+        let query = query?;
 
         write!(
             f,
