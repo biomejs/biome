@@ -215,6 +215,51 @@ impl GreenNodeData {
         Some((idx, slot.rel_offset(), slot))
     }
 
+    /// Returns a pair of optional children around `offset`:
+    ///
+    /// - Left: starts before `offset` and ends at or after it.
+    /// - Right: starts exactly at `offset`.
+    ///
+    /// Missing slots and children with zero-length text ranges are skipped,
+    /// including zero-length tokens and nodes with no source text.
+    ///
+    /// For the JavaScript call `foo(1)`, the two children cover `foo` (`0..3`)
+    /// and `(1)` (`3..6`). The pairs below show each child's source text:
+    ///
+    /// ```text
+    /// offset 0 → (None, Some("foo"))
+    /// offset 2 → (Some("foo"), None)
+    /// offset 3 → (Some("foo"), Some("(1)"))
+    /// offset 4 → (Some("(1)"), None)
+    /// offset 6 → (Some("(1)"), None)
+    /// ```
+    pub(crate) fn children_at_offset(
+        &self,
+        offset: TextSize,
+    ) -> (Option<Child<'_>>, Option<Child<'_>>) {
+        let slots = self.slice();
+        let offset_index = slots.partition_point(|slot| slot.rel_offset() < offset);
+        let is_at_offset = |slot: &Slot| {
+            let range = slot.rel_range();
+            !range.is_empty() && range.contains_inclusive(offset)
+        };
+
+        let left = slots[..offset_index]
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, slot)| is_at_offset(slot))
+            .and_then(|(index, slot)| Child::try_from((index, slot)).ok());
+        let right = slots[offset_index..]
+            .iter()
+            .enumerate()
+            .take_while(|(_, slot)| slot.rel_offset() == offset)
+            .find(|(_, slot)| is_at_offset(slot))
+            .and_then(|(index, slot)| Child::try_from((offset_index + index, slot)).ok());
+
+        (left, right)
+    }
+
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub(crate) fn splice_slots<R, I>(&self, range: R, replace_with: I) -> GreenNode
     where
