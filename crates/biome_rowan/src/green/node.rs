@@ -223,15 +223,15 @@ impl GreenNodeData {
     /// Missing slots and children with zero-length text ranges are skipped,
     /// including zero-length tokens and nodes with no source text.
     ///
-    /// For the JavaScript call `foo(1)`, the callee child `foo` covers `0..3`
-    /// and the arguments child `(1)` covers `3..6`:
+    /// For the JavaScript call `foo(1)`, the two children cover `foo` (`0..3`)
+    /// and `(1)` (`3..6`). The pairs below show each child's source text:
     ///
     /// ```text
-    /// offset 0 → (None, Some(callee))
-    /// offset 2 → (Some(callee), None)
-    /// offset 3 → (Some(callee), Some(arguments))
-    /// offset 4 → (Some(arguments), None)
-    /// offset 6 → (Some(arguments), None)
+    /// offset 0 → (None, Some("foo"))
+    /// offset 2 → (Some("foo"), None)
+    /// offset 3 → (Some("foo"), Some("(1)"))
+    /// offset 4 → (Some("(1)"), None)
+    /// offset 6 → (Some("(1)"), None)
     /// ```
     pub(crate) fn children_at_offset(
         &self,
