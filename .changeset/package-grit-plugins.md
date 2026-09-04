@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added support for distributing named Grit rules, rule presets, and configurations through `biome-manifest.json` or `biome-manifest.jsonc`.
+Added support for distributing named Grit rules, rule presets, and configurations through packages that have a manifest file.
 
 The field `plugins` is used to export named Grit plugins, and `configs` is used to export named configurations.
 Package entries must select a named export: `package/rule`, `package/presets/preset`, or `package/configs/config`. Bare package entries aren't supported.
@@ -10,6 +10,7 @@ Rules consumed from another package are exposed under the consuming package's na
 Configurations consumed from another package are also exposed under the consuming package's name.
 
 ```json5
+// biome-manifest.json
 {
   "$schema": "./node_modules/@biomejs/biome/manifest_schema.json",
   "version": 1,
@@ -51,6 +52,7 @@ Plugin authors can expose their manifest through the `biome` condition with `./b
 And then, you can load the rules in your `biome.json`:
 
 ```json
+// biome.json
 {
   "plugins": [
     "@org/biome-plugin/useCompanyLogger",
