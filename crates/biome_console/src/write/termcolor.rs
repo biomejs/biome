@@ -181,7 +181,7 @@ where
             let width = UnicodeWidthStr::width(grapheme);
             let is_whitespace = grapheme_is_whitespace(grapheme);
 
-            if !is_whitespace && width == 0 {
+            if !is_whitespace && (width == 0 || grapheme.chars().any(char::is_control)) {
                 self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
                 self.write_character(char::REPLACEMENT_CHARACTER, &mut buffer)?;
                 segment_start = offset + grapheme.len();

@@ -26,12 +26,21 @@ pub struct MarkdownParserOptions {
     /// This limits recursion on pathological input to avoid stack overflow.
     pub max_nesting_depth: usize,
     pub(crate) frontmatter: bool,
+
+    /// Enables GitHub Flavored Markdown extensions.
+    pub(crate) gfm: bool,
 }
 
 impl MarkdownParserOptions {
     /// Controls whether a complete `---` pair at the start of the document is parsed as frontmatter.
     pub fn with_frontmatter(mut self, frontmatter: bool) -> Self {
         self.frontmatter = frontmatter;
+        self
+    }
+
+    /// Controls whether GitHub Flavored Markdown extensions are parsed.
+    pub fn with_gfm(mut self, gfm: bool) -> Self {
+        self.gfm = gfm;
         self
     }
 }
@@ -41,8 +50,17 @@ impl Default for MarkdownParserOptions {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
             frontmatter: false,
+            gfm: false,
         }
     }
+}
+
+/// Lexing modes that persist across ordinary parser token consumption.
+#[derive(Debug, Default, Clone, Copy)]
+enum MarkdownLexMode {
+    #[default]
+    Regular,
+    Table,
 }
 
 /// Internal parser state for tracking nesting and context.
@@ -64,6 +82,8 @@ impl Default for MarkdownParserOptions {
 ///   requires tracking list context during parsing.
 #[derive(Default, Debug)]
 pub(crate) struct MarkdownParserState {
+    /// Table mode is active only while consuming a recognized GFM table row.
+    lex_mode: MarkdownLexMode,
     /// Block quote nesting depth for lazy continuation and depth limits.
     /// See CommonMark §5.1 for block quote continuation rules.
     pub(crate) block_quote_depth: usize,
@@ -104,9 +124,12 @@ pub(crate) struct MarkdownParserState {
     pub(crate) virtual_line_start: Option<TextSize>,
     /// Flag to unwind quote parsing when nesting exceeds the maximum depth.
     pub(crate) quote_depth_exceeded: bool,
+    /// Whether the next paragraph is the first block of a list item.
+    pub(crate) task_list_item_allowed: bool,
 }
 
 struct MarkdownParserStateCheckpoint {
+    lex_mode: MarkdownLexMode,
     block_quote_depth: usize,
     list_nesting_depth: usize,
     list_item_required_indent: usize,
@@ -123,11 +146,13 @@ struct MarkdownParserStateCheckpoint {
     last_list_ends_with_blank: bool,
     virtual_line_start: Option<TextSize>,
     quote_depth_exceeded: bool,
+    task_list_item_allowed: bool,
 }
 
 impl MarkdownParserState {
     fn checkpoint(&self) -> MarkdownParserStateCheckpoint {
         MarkdownParserStateCheckpoint {
+            lex_mode: self.lex_mode,
             block_quote_depth: self.block_quote_depth,
             list_nesting_depth: self.list_nesting_depth,
             list_item_required_indent: self.list_item_required_indent,
@@ -144,10 +169,12 @@ impl MarkdownParserState {
             last_list_ends_with_blank: self.last_list_ends_with_blank,
             virtual_line_start: self.virtual_line_start,
             quote_depth_exceeded: self.quote_depth_exceeded,
+            task_list_item_allowed: self.task_list_item_allowed,
         }
     }
 
     fn rewind(&mut self, checkpoint: MarkdownParserStateCheckpoint) {
+        self.lex_mode = checkpoint.lex_mode;
         self.block_quote_depth = checkpoint.block_quote_depth;
         self.list_nesting_depth = checkpoint.list_nesting_depth;
         self.list_item_required_indent = checkpoint.list_item_required_indent;
@@ -168,6 +195,7 @@ impl MarkdownParserState {
         self.last_list_ends_with_blank = checkpoint.last_list_ends_with_blank;
         self.virtual_line_start = checkpoint.virtual_line_start;
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
+        self.task_list_item_allowed = checkpoint.task_list_item_allowed;
     }
 }
 
@@ -215,9 +243,11 @@ pub(crate) struct MarkdownParserOutput {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DeferredInlineFlavor {
     /// An `MdInlineItemList` that is already enclosed by its block node.
-    Paragraph,
+    Paragraph { task_list_item_allowed: bool },
     /// An ATX heading's `MdParagraph`, including its inline item list.
     AtxParagraph,
+    /// A table cell's `MdInlineItemList`, bounded to the cell's source range.
+    TableCell,
 }
 
 /// Identifies a provisional inline subtree and the parser state needed to
@@ -414,6 +444,7 @@ pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
     source: MarkdownTokenSource<'source>,
     options: MarkdownParserOptions,
+    table_cell_inline: bool,
     known_link_reference_definitions: Option<&'source LinkReferenceDefinitions>,
     state: MarkdownParserState,
     /// Single-entry memo for `absolute_column_at` queries. Most callers ask
@@ -440,6 +471,7 @@ impl<'source> MarkdownParser<'source> {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
             options,
+            table_cell_inline: false,
             known_link_reference_definitions: None,
             state: MarkdownParserState::default(),
             abs_col_cache: Cell::new(None),
@@ -453,6 +485,7 @@ impl<'source> MarkdownParser<'source> {
         options: MarkdownParserOptions,
         context: InlineContainerContext,
         definitions: &'source LinkReferenceDefinitions,
+        table_cell_inline: bool,
     ) -> Option<Self> {
         let state = MarkdownParserState {
             block_quote_depth: context.block_quote_depth,
@@ -469,6 +502,7 @@ impl<'source> MarkdownParser<'source> {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_range(source, range)?,
             options,
+            table_cell_inline,
             known_link_reference_definitions: Some(definitions),
             state,
             abs_col_cache: Cell::new(None),
@@ -496,6 +530,10 @@ impl<'source> MarkdownParser<'source> {
     /// Returns parser options. Reserved for GFM extensions.
     pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
+    }
+
+    pub(crate) fn is_table_cell_inline(&self) -> bool {
+        self.table_cell_inline
     }
 
     /// Returns immutable state reference for nesting depth checks.
@@ -587,7 +625,19 @@ impl<'source> MarkdownParser<'source> {
         }
     }
 
+    pub(crate) fn take_task_list_item_allowed(&mut self) -> bool {
+        std::mem::take(&mut self.state.task_list_item_allowed)
+    }
+
     pub(crate) fn finish_deferred_inline(&mut self, start: DeferredInlineStart) {
+        self.finish_deferred_inline_at(start, self.cur_range().start());
+    }
+
+    pub(crate) fn finish_deferred_inline_at(
+        &mut self,
+        start: DeferredInlineStart,
+        source_end: TextSize,
+    ) {
         let event_end = self.context.events().len();
         let Some(events) = self.context.events().get(start.event_start..event_end) else {
             return;
@@ -598,9 +648,10 @@ impl<'source> MarkdownParser<'source> {
         {
             return;
         }
+        debug_assert!(start.source_start <= source_end);
         self.state.deferred_inlines.push(DeferredInline {
             event_range: start.event_start..event_end,
-            source_range: TextRange::new(start.source_start, self.cur_range().start()),
+            source_range: TextRange::new(start.source_start, source_end),
             flavor: start.flavor,
             context: start.context,
             definitions_len: start.definitions_len,
@@ -696,8 +747,27 @@ impl<'source> MarkdownParser<'source> {
     /// Use this when switching from LinkDefinition context back to Regular context,
     /// e.g., when entering title content where whitespace should not split tokens.
     pub(crate) fn force_relex_regular(&mut self) {
+        self.state.lex_mode = MarkdownLexMode::Regular;
         self.source
             .force_relex_in_context(MarkdownLexContext::Regular);
+    }
+
+    /// Switches ordinary token consumption to table lexing and re-lexes the current token.
+    pub(crate) fn enter_table_lex_mode(&mut self) {
+        self.state.lex_mode = MarkdownLexMode::Table;
+        self.source
+            .force_relex_in_context(MarkdownLexContext::Table);
+        if self.at(MarkdownSyntaxKind::WHITESPACE) {
+            self.source.skip_as_trivia_of_kind_with_context(
+                TriviaPieceKind::Whitespace,
+                MarkdownLexContext::Table,
+            );
+        }
+    }
+
+    /// Restores regular lexing before the row-ending newline advances to the next line.
+    pub(crate) fn leave_table_lex_mode(&mut self) {
+        self.state.lex_mode = MarkdownLexMode::Regular;
     }
 
     /// Re-lex the current token in Regular context, treating the position as
@@ -1147,6 +1217,23 @@ impl<'source> Parser for MarkdownParser<'source> {
 
     fn source_mut(&mut self) -> &mut Self::Source {
         &mut self.source
+    }
+
+    fn do_bump(&mut self, kind: Self::Kind) {
+        let end = self.cur_range().end();
+        let skipping = self.context.is_skipping();
+        self.context.push_token(kind, end);
+
+        match (self.state.lex_mode, skipping) {
+            (MarkdownLexMode::Regular, false) => self.source.bump(),
+            (MarkdownLexMode::Regular, true) => self.source.skip_as_trivia(),
+            (MarkdownLexMode::Table, false) => {
+                self.source.bump_with_context(MarkdownLexContext::Table)
+            }
+            (MarkdownLexMode::Table, true) => self
+                .source
+                .skip_as_trivia_with_context(MarkdownLexContext::Table),
+        }
     }
 }
 

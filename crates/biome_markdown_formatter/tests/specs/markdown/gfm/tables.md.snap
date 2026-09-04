@@ -1,0 +1,88 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/tables.md
+---
+
+# Input
+
+```md
+left|right
+:--|--:
+one|two
+
+left|center|right|default
+:--|:-:|--:|-
+one|two|three|four
+
+code `a\|b`|escaped \| pipe
+---|---
+one|two
+
+| empty | |
+| --- | --- |
+| value | |
+
+a|b
+---|---
+👩‍🔬|x
+xx|y
+
+> quoted|table
+> ---|---
+> one|two
+
+- list table
+
+  a|b
+  ---|---
+  one|two
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+| left | right |
+| :--- | ----: |
+| one  |   two |
+
+| left | center | right | default |
+| :--- | :----: | ----: | ------- |
+| one  |  two   | three | four    |
+
+| code `a\|b` | escaped \| pipe |
+| ----------- | --------------- |
+| one         | two             |
+
+| empty |     |
+| ----- | --- |
+| value |     |
+
+| a   | b   |
+| --- | --- |
+| 👩‍🔬  | x   |
+| xx  | y   |
+
+> | quoted | table |
+> | ------ | ----- |
+> | one    | two   |
+- list table
+
+  | a   | b   |
+  | --- | --- |
+  | one | two |
+
+```

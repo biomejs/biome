@@ -328,7 +328,7 @@ dependencies = [
  "termcolor",
  "trybuild",
  "unicode-segmentation",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -539,7 +539,7 @@ dependencies = [
  "termcolor",
  "terminal_size",
  "trybuild",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -610,7 +610,7 @@ dependencies = [
  "rustc-hash 2.1.3",
  "schemars",
  "serde",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -1113,7 +1113,7 @@ dependencies = [
  "smallvec",
  "tests_macros",
  "tikv-jemallocator",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -1525,6 +1525,7 @@ dependencies = [
  "smallvec",
  "tests_macros",
  "tikv-jemallocator",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]

@@ -1,7 +1,7 @@
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
 use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
-use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
+use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, WHITESPACE};
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
@@ -67,12 +67,28 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     fn next_non_trivia_token(&mut self, context: MarkdownLexContext, first_token: bool) {
+        match context {
+            MarkdownLexContext::Table => {
+                self.next_non_trivia_token_impl::<true>(context, first_token)
+            }
+            _ => self.next_non_trivia_token_impl::<false>(context, first_token),
+        }
+    }
+
+    fn next_non_trivia_token_impl<const TABLE: bool>(
+        &mut self,
+        context: MarkdownLexContext,
+        first_token: bool,
+    ) {
         let mut trailing = !first_token;
 
         loop {
             let kind = self.lexer.next_token(context);
-
-            let trivia_kind = TriviaPieceKind::try_from(kind);
+            let trivia_kind = if TABLE && kind == WHITESPACE {
+                Ok(TriviaPieceKind::Whitespace)
+            } else {
+                TriviaPieceKind::try_from(kind)
+            };
 
             match trivia_kind {
                 Err(_) => {

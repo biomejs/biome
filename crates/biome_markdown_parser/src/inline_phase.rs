@@ -25,7 +25,7 @@ use crate::parser::{
     MarkdownParserOutput,
 };
 use crate::syntax::header::parse_header_content;
-use crate::syntax::parse_inline_item_list;
+use crate::syntax::parse_inline_item_list_with_task_list_item;
 
 /// Resolves deferred inline subtrees into an event stream ready for the
 /// lossless tree sink.
@@ -126,6 +126,13 @@ fn should_reparse_deferred_inline(
     deferred: &DeferredInline,
     definitions_len: usize,
 ) -> Option<bool> {
+    if matches!(deferred.flavor(), DeferredInlineFlavor::TableCell) {
+        let range = deferred.source_range();
+        return source
+            .get(usize::from(range.start())..usize::from(range.end()))
+            .map(|_| true);
+    }
+
     if deferred.definitions_len() == definitions_len {
         return Some(false);
     }
@@ -150,8 +157,9 @@ fn validate_deferred_inlines(source: &str, output: &MarkdownParserOutput) -> boo
         let event_range = deferred.event_range();
         let source_range = deferred.source_range();
         let expected_kind = match deferred.flavor() {
-            DeferredInlineFlavor::Paragraph => MD_INLINE_ITEM_LIST,
+            DeferredInlineFlavor::Paragraph { .. } => MD_INLINE_ITEM_LIST,
             DeferredInlineFlavor::AtxParagraph => MD_PARAGRAPH,
+            DeferredInlineFlavor::TableCell => MD_INLINE_ITEM_LIST,
         };
         if event_range.start < previous_event_end {
             return false;
@@ -260,19 +268,31 @@ fn parse_inline_fragment<'source>(
     definitions: &'source LinkReferenceDefinitions,
 ) -> Option<MarkdownParserOutput> {
     let source_end = TextSize::try_from(source.len()).ok()?;
+    let parser_range = match deferred.flavor() {
+        DeferredInlineFlavor::TableCell => deferred.source_range(),
+        DeferredInlineFlavor::Paragraph { .. } | DeferredInlineFlavor::AtxParagraph => {
+            TextRange::new(deferred.source_range().start(), source_end)
+        }
+    };
     let mut parser = MarkdownParser::new_range(
         source,
-        TextRange::new(deferred.source_range().start(), source_end),
+        parser_range,
         options,
         deferred.context(),
         definitions,
+        matches!(deferred.flavor(), DeferredInlineFlavor::TableCell),
     )?;
 
     let wrapper = parser.start();
 
     match deferred.flavor() {
-        DeferredInlineFlavor::Paragraph => parse_inline_item_list(&mut parser),
+        DeferredInlineFlavor::Paragraph {
+            task_list_item_allowed,
+        } => parse_inline_item_list_with_task_list_item(&mut parser, task_list_item_allowed),
         DeferredInlineFlavor::AtxParagraph => parse_header_content(&mut parser),
+        DeferredInlineFlavor::TableCell => {
+            parse_inline_item_list_with_task_list_item(&mut parser, false)
+        }
     }
 
     if parser.cur_range().start() != deferred.source_range().end() {
@@ -361,7 +381,9 @@ mod tests {
         DeferredInline::for_test(
             event_range,
             source_range,
-            DeferredInlineFlavor::Paragraph,
+            DeferredInlineFlavor::Paragraph {
+                task_list_item_allowed: false,
+            },
             context(),
             0,
             false,
@@ -375,7 +397,9 @@ mod tests {
         DeferredInline::for_test(
             event_range,
             source_range,
-            DeferredInlineFlavor::Paragraph,
+            DeferredInlineFlavor::Paragraph {
+                task_list_item_allowed: false,
+            },
             context(),
             0,
             true,
