@@ -1207,7 +1207,7 @@ impl TypeData {
             "undefined" => Self::Undefined,
             _ => {
                 let predicate = if resolver.narrowing_enabled() {
-                    narrowing_predicate(resolver, scope_id, id, name.clone())
+                    resolver.narrowing_predicate_mut(scope_id, id, name.clone())
                 } else {
                     None
                 };
@@ -3212,8 +3212,14 @@ fn plain_assignment_rhs(node: &JsSyntaxNode, name: &str) -> Option<AnyJsExpressi
 /// establish for it, e.g. `Typeof(String)` for `x` inside the consequent of
 /// `if (typeof x === "string")`, or `Truthy` inside the consequent of
 /// `if (x)`.
-fn narrowing_predicate(
-    resolver: &mut dyn RawTypeCollector,
+///
+/// This backs [`RawTypeCollector::narrowing_predicate_mut`]'s default body.
+/// It takes `resolver` generically, rather than as `&mut dyn RawTypeCollector`,
+/// so that default method can call it on `self` directly: coercing `&mut
+/// Self` to a trait object requires `Self: Sized`, which a default method
+/// callable through `&mut dyn RawTypeCollector` can't require.
+pub(crate) fn narrowing_predicate<C: RawTypeCollector + ?Sized>(
+    resolver: &mut C,
     scope_id: ScopeId,
     id: &JsReferenceIdentifier,
     name_token: TokenText,
@@ -3232,18 +3238,14 @@ fn narrowing_predicate(
 /// that reference resolves in. Both are fixed for the whole analysis, as is
 /// the resolver whose invalidation cache the scans share, so they live here
 /// instead of being threaded through every check.
-struct GuardAnalysis<'a> {
-    resolver: &'a mut dyn RawTypeCollector,
+struct GuardAnalysis<'a, C: RawTypeCollector + ?Sized> {
+    resolver: &'a mut C,
     scope_id: ScopeId,
     name_token: TokenText,
 }
 
-impl<'a> GuardAnalysis<'a> {
-    fn new(
-        resolver: &'a mut dyn RawTypeCollector,
-        scope_id: ScopeId,
-        name_token: TokenText,
-    ) -> Self {
+impl<'a, C: RawTypeCollector + ?Sized> GuardAnalysis<'a, C> {
+    fn new(resolver: &'a mut C, scope_id: ScopeId, name_token: TokenText) -> Self {
         Self {
             resolver,
             scope_id,
@@ -3274,15 +3276,17 @@ impl<'a> GuardAnalysis<'a> {
                     .is_ok_and(|consequent| consequent.syntax() == &child)
                     && let Some(predicate) = self.guard_predicate(&if_stmt)
                     && !self.narrowing_invalidated_within(&child, self.name_token.clone())
+                    && !record_guard_predicate(&mut found, predicate)
                 {
-                    record_guard_predicate(&mut found, predicate)?;
+                    return None;
                 }
             } else if let Some(case_clause) = JsCaseClause::cast_ref(&ancestor) {
                 if case_clause.test().is_ok_and(|test| test.syntax() != &child)
                     && let Some(predicate) = self.switch_case_predicate(&case_clause)
                     && !self.narrowing_invalidated_within(&ancestor, self.name_token.clone())
+                    && !record_guard_predicate(&mut found, predicate)
                 {
-                    record_guard_predicate(&mut found, predicate)?;
+                    return None;
                 }
             } else if is_narrowing_boundary(&ancestor) {
                 break;
@@ -3592,9 +3596,8 @@ impl<'a> GuardAnalysis<'a> {
     ///
     /// This runs once per reference identifier inside a guarded consequent, so
     /// a branch with many references would otherwise re-scan the same subtree
-    /// repeatedly. When the resolver provides a
-    /// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
-    /// the result is memoized there for the lifetime of that cache.
+    /// repeatedly. The result is memoized in the resolver's
+    /// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache).
     fn narrowing_invalidated_within(&mut self, node: &JsSyntaxNode, name_token: TokenText) -> bool {
         let key = (
             node.clone(),
@@ -3721,34 +3724,36 @@ fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
 /// }
 /// ```
 ///
-/// Returns `Some(())` after recording, and `None` for the contradicting
-/// cases above.
+/// Returns `false` for the contradicting cases above, without touching
+/// `found`. Otherwise returns `true`: `found` is set to `predicate` if it
+/// was empty, and left as-is (keeping the outermost, more specific guard)
+/// if a non-contradicting predicate was already found.
 fn record_guard_predicate(
     found: &mut Option<NarrowingPredicate>,
     predicate: NarrowingPredicate,
-) -> Option<()> {
+) -> bool {
     match (&found, &predicate) {
         (Some(NarrowingPredicate::Typeof(existing)), NarrowingPredicate::Typeof(tag))
             if existing != tag =>
         {
-            return None;
+            return false;
         }
         (
             Some(NarrowingPredicate::StringEquals(existing)),
             NarrowingPredicate::StringEquals(value),
         ) if existing != value => {
-            return None;
+            return false;
         }
         (
             Some(NarrowingPredicate::MemberEquals(existing)),
             NarrowingPredicate::MemberEquals(next),
         ) if existing.member == next.member && existing.value != next.value => {
-            return None;
+            return false;
         }
         (Some(_), _) => {}
         (None, _) => *found = Some(predicate),
     }
-    Some(())
+    true
 }
 
 /// Returns the string of a `<name> === "<value>"` comparison, if the given

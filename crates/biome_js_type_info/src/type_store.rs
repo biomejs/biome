@@ -7,12 +7,12 @@ use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::{FxHashMap, FxHasher};
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
-use biome_rowan::Text;
+use biome_js_syntax::{AnyJsExpression, JsReferenceIdentifier, JsSyntaxNode};
+use biome_rowan::{Text, TokenText};
 
 use crate::{
-    RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
-    type_data::UNKNOWN_DATA,
+    NarrowingPredicate, RawTypeId, TypeData, TypeId, TypeReference, Union,
+    globals::GLOBAL_UNDEFINED_ID, type_data::UNKNOWN_DATA,
 };
 
 /// Collector-side type table with indexed access and deduplicated insertion.
@@ -121,6 +121,19 @@ pub trait RawTypeCollector {
     /// narrowing existed.
     fn narrowing_enabled(&self) -> bool {
         false
+    }
+
+    /// Returns the narrowing predicate that the guards enclosing a reference
+    /// establish for it, e.g. `Typeof(String)` for `x` inside the consequent
+    /// of `if (typeof x === "string")`, or `Truthy` inside the consequent of
+    /// `if (x)`.
+    fn narrowing_predicate_mut(
+        &mut self,
+        scope_id: ScopeId,
+        id: &JsReferenceIdentifier,
+        name_token: TokenText,
+    ) -> Option<NarrowingPredicate> {
+        crate::local_inference::narrowing_predicate(self, scope_id, id, name_token)
     }
 
     fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
