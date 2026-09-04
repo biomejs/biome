@@ -254,3 +254,61 @@ call_expression(function=$f) where {
         result,
     ));
 }
+
+#[test]
+fn issue_6571() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["detectButtonLinkImport.grit"],
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "detectButtonLinkImport.grit".into(),
+        br#"language js
+
+`import { $imports } from "geist/components"` as $import where {
+    $imports <: contains `ButtonLink`,
+    register_diagnostic(
+        span = $import,
+        message = "ButtonLink import matched",
+        severity = "error"
+    )
+}
+"#,
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        br#"import { ButtonLink } from "geist/components";
+import { Button, ButtonLink, Card } from "geist/components";
+import { Button } from "geist/components";
+import { ButtonLink } from "other/components";
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_6571",
+        fs,
+        console,
+        result,
+    ));
+}
