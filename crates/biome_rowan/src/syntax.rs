@@ -495,10 +495,28 @@ mod tests {
         }
         builder.finish_node();
 
-        let root = builder.finish();
+        let mut root = builder.finish();
 
-        assert_eq!(root.first_token().unwrap().text(), "edge");
-        assert_eq!(root.last_token().unwrap().text(), "edge");
+        // Keep cleanup iterative so this test isolates lookup stack usage.
+        let texts = [root.first_token(), root.last_token()].map(|token| {
+            let token = token?;
+            let text = token.text().to_owned();
+            let mut parent = token.parent();
+            drop(token);
+
+            while let Some(node) = parent {
+                parent = node.parent();
+            }
+
+            Some(text)
+        });
+
+        while let Some(child) = root.first_child() {
+            root = child.detach();
+        }
+
+        assert_eq!(texts[0].as_deref(), Some("edge"));
+        assert_eq!(texts[1].as_deref(), Some("edge"));
     }
 
     #[test]
