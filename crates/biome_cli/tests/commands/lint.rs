@@ -600,6 +600,66 @@ fn downgrade_severity_info() {
 }
 
 #[test]
+fn does_error_with_only_infos() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO.as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-infos", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_error_with_only_infos",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_error_with_only_infos_without_flag() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO.as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_error_with_only_infos_without_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn upgrade_severity() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
