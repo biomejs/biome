@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: angle-const.ts
+---
+# Input
+```ts
+const asserted = value + <const>31;
+
+```
+
+# Diagnostics
+```
+angle-const.ts:1:33 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+  > 1 │ const asserted = value + <const>31;
+      │                                 ^^
+    2 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```

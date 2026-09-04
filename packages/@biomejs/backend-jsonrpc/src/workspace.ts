@@ -7205,6 +7205,7 @@ export interface RuleWithUseSolidForComponentOptions {
 	options?: UseSolidForComponentOptions;
 }
 export interface RuleWithUseTopLevelRegexOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseTopLevelRegexOptions;
 }
@@ -7301,6 +7302,7 @@ export interface RuleWithNoJsxLiteralsOptions {
 	options?: NoJsxLiteralsOptions;
 }
 export interface RuleWithNoMagicNumbersOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMagicNumbersOptions;
 }

@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: legacy-octal.cjs
+---
+# Input
+```cjs
+console.log(071);
+
+with (scope) {
+	console.log(31);
+}
+console.log(31);
+
+```
+
+# Diagnostics
+```
+legacy-octal.cjs:1:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+  > 1 │ console.log(071);
+      │             ^^^
+    2 │ 
+    3 │ with (scope) {
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into LOG_071.
+  
+    1   │ - console.log(071);
+      1 │ + const·LOG_071·=·071;
+      2 │ + console.log(LOG_071);
+    2 3 │   
+    3 4 │   with (scope) {
+  
+
+```
+
+```
+legacy-octal.cjs:4:14 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    3 │ with (scope) {
+  > 4 │ 	console.log(31);
+      │ 	            ^^
+    5 │ }
+    6 │ console.log(31);
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+legacy-octal.cjs:6:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    4 │ 	console.log(31);
+    5 │ }
+  > 6 │ console.log(31);
+      │             ^^
+    7 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into LOG_31.
+  
+      1 │ + const·LOG_31·=·31;
+    1 2 │   console.log(071);
+    2 3 │   
+    ··· │ 
+    4 5 │   	console.log(31);
+    5 6 │   }
+    6   │ - console.log(31);
+      7 │ + console.log(LOG_31);
+    7 8 │   
+  
+
+```
