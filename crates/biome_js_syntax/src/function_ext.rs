@@ -13,16 +13,7 @@ declare_node_union! {
 /// function, method, constructor, getter, setter, or static initialization
 /// block.
 pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
-    matches!(
-        kind,
-        JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_FUNCTION_DECLARATION
-            | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
-            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-            | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-            | JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER
-    ) || is_sync_only_function_boundary(kind)
+    AnyFunctionLike::can_cast(kind) || is_sync_only_function_boundary(kind)
 }
 
 /// Returns `true` if the node kind is a function-like scope boundary that can
