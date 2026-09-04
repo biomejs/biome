@@ -215,6 +215,36 @@ impl GreenNodeData {
         Some((idx, slot.rel_offset(), slot))
     }
 
+    /// Returns the non-empty child containing `offset` on the left and, at an
+    /// inclusive boundary, the non-empty child starting at `offset` on the right.
+    /// Zero-width slots are skipped.
+    pub(crate) fn children_at_offset(
+        &self,
+        offset: TextSize,
+    ) -> (Option<Child<'_>>, Option<Child<'_>>) {
+        let slots = self.slice();
+        let offset_index = slots.partition_point(|slot| slot.rel_offset() < offset);
+        let is_at_offset = |slot: &Slot| {
+            let range = slot.rel_range();
+            !range.is_empty() && range.contains_inclusive(offset)
+        };
+
+        let left = slots[..offset_index]
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, slot)| is_at_offset(slot))
+            .and_then(|(index, slot)| Child::try_from((index, slot)).ok());
+        let right = slots[offset_index..]
+            .iter()
+            .enumerate()
+            .take_while(|(_, slot)| slot.rel_offset() == offset)
+            .find(|(_, slot)| is_at_offset(slot))
+            .and_then(|(index, slot)| Child::try_from((offset_index + index, slot)).ok());
+
+        (left, right)
+    }
+
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub(crate) fn splice_slots<R, I>(&self, range: R, replace_with: I) -> GreenNode
     where
