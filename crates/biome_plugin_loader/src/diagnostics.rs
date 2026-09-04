@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 
 use biome_console::fmt::Display;
@@ -21,7 +21,7 @@ pub enum PluginDiagnostic {
     /// Error compiling the plugin
     Compile(CompileDiagnostic),
 
-    /// Error thrown when deserializing a plugin manifest, such as:
+    /// Error thrown when deserializing a Biome manifest, such as:
     /// - syntax error
     /// - incorrect fields
     /// - incorrect values
@@ -99,12 +99,27 @@ impl PluginDiagnostic {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the plugin manifest from "
+                   "Failed to resolve the Biome manifest from "
                    <Emphasis>{path.to_string()}</Emphasis>
                 }
                 .to_owned(),
             ),
             source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
+        })
+    }
+
+    pub fn cant_resolve_package(package: &str, base_path: &Utf8Path, kind: ResolveError) -> Self {
+        let package_path = Utf8PathBuf::from(package);
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                   "Failed to resolve plugin package "
+                   <Emphasis>{package}</Emphasis>
+                   " from "<Emphasis>{base_path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+            source: Some(ResolveErrorDiagnostic::new(kind, package_path).into()),
         })
     }
 
@@ -221,11 +236,10 @@ pub struct NotLoaded {
 
 #[cfg(test)]
 mod test {
-    use crate::plugin_manifest::PluginManifest;
-
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_json_parser::JsonParserOptions;
+    use biome_manifest::BiomeManifest;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -239,9 +253,14 @@ mod test {
 
     #[test]
     fn deserialization_error() {
-        let content = "{}";
+        let content = r#"{
+            "plugins": {
+                "rules": [{ "one": "rules/1.grit" }],
+                "presets": { "recommended": ["one"] }
+            }
+        }"#;
         let result =
-            deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "");
+            deserialize_from_json_str::<BiomeManifest>(content, JsonParserOptions::default(), "");
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
@@ -253,12 +272,13 @@ mod test {
     fn deserialization_quick_check() {
         let content = r#"{
     "version": 1,
-    "rules": [
-        "./rules/my-rule.grit"
-    ]
+    "plugins": {
+        "rules": [{ "myRule": "./rules/my-rule.grit" }],
+        "presets": { "recommended": ["myRule"] }
+    }
 }"#;
         let _result =
-            deserialize_from_json_str::<PluginManifest>(content, JsonParserOptions::default(), "")
+            deserialize_from_json_str::<BiomeManifest>(content, JsonParserOptions::default(), "")
                 .into_deserialized()
                 .unwrap_or_default();
     }

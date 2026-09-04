@@ -722,6 +722,97 @@ fn plugins_are_loaded_and_used_during_analysis() {
 }
 
 #[test]
+fn failed_plugin_updates_preserve_loaded_plugins() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/plugin.grit"),
+        br#"`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.assign")
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/node_modules/broken-plugin/package.json"),
+        br#"{ "name": "broken-plugin" }"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/node_modules/broken-plugin/biome-manifest.json"),
+        br#"{
+            "version": 1,
+            "plugins": {
+                "rules": [{ "missing": "rules/missing.grit" }],
+                "presets": { "recommended": ["missing"] }
+            }
+        }"#,
+    );
+    fs.insert(Utf8PathBuf::from("/project/a.ts"), b"Object.assign({});");
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "./plugin.grit".to_string(),
+                )])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let result = workspace.update_settings(UpdateSettingsParams {
+        project_key,
+        configuration: Configuration {
+            plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                "broken-plugin/missing".to_string(),
+            )])),
+            ..Default::default()
+        },
+        workspace_directory: Some(BiomePath::new("/project")),
+        extended_configurations: Default::default(),
+        module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+    });
+    assert!(matches!(result, Err(WorkspaceError::PluginErrors(_))));
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            include_code_fix: true,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.errors, 1);
+}
+
+#[test]
 fn plugins_can_use_custom_severity() {
     const PLUGIN_CONTENT: &[u8] = br#"
 language css;
@@ -1062,6 +1153,7 @@ fn correctly_scope_plugin_with_includes() {
                             biome_glob::NormalizedGlob::from_str("!**/*.test.ts").unwrap(),
                         ]),
                         resolution_kind: None,
+                        resolved_package_specifier: None,
                     },
                 )])),
                 ..Default::default()

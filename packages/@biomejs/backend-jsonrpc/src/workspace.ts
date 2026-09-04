@@ -1155,12 +1155,13 @@ match these patterns.
 /**
 	* Configuration for a single plugin entry.
 
-Can be either a plain path string or an object with path and options:
+Can be either a path or package name string, or an object with options:
 
 ```json
 {
   "plugins": [
     "simple-plugin.grit",
+    "@scope/biome-plugin",
     { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] },
     { "path": "./local-plugin.grit", "includes": ["src/**\/*.ts"], "resolutionKind": "config" }
   ]
@@ -1431,7 +1432,7 @@ export interface OverrideLinterConfiguration {
 	rules?: Rules;
 }
 /**
- * Plugin path with additional options.
+ * Plugin reference with additional options.
  */
 export interface PluginWithOptions {
 	/**
@@ -1440,7 +1441,7 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 	 */
 	includes?: NormalizedGlob[];
 	/**
-	 * The path to the plugin.
+	 * The path or installed package name.
 	 */
 	path: string;
 	/**
@@ -1449,8 +1450,8 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 This only affects plugin resolution. It does not change how `includes`
 are interpreted.
 
-When omitted, relative plugin paths are resolved from the consuming
-project. 
+When omitted, relative paths and package names are resolved from the
+consuming project. 
 	 */
 	resolutionKind?: PluginResolvePath;
 }

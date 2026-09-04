@@ -62,6 +62,7 @@ biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_json"] }
+biome_manifest           = { workspace = true }
 biome_markdown_analyze   = { workspace = true, optional = true }
 biome_markdown_formatter = { workspace = true, optional = true }
 biome_markdown_parser    = { workspace = true, optional = true }

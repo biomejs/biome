@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["plugin/noAssign"] }
+```
+
+## `node_modules/plugin/package.json`
+
+```json
+{
+    "name": "plugin",
+    "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `outside/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": { "rules": [{ "noAssign": "noAssign.grit" }] }
+}
+```
+
+## `outside/noAssign.grit`
+
+```grit
+`Object.assign($args)`
+```
+
+## `test.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Error(s) during loading of plugins:
+    Biome manifest path <TEMP_DIR>/rejects_package_plugin_manifest_outside_package/outside/biome-manifest.json must stay within the package directory.
+  
+
+
+```

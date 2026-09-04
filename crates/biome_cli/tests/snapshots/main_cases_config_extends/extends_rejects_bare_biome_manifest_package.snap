@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@org/config"] }
+```
+
+## `node_modules/@org/config/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}
+```
+
+## `node_modules/@org/config/package.json`
+
+```json
+{
+    "name": "@org/config",
+    "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `test.js`
+
+```js
+const value = 1;
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome manifests must select a named configuration with the configs/ subpath.
+  
+
+
+```

@@ -34,6 +34,7 @@ use biome_formatter::{
     BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
     LineWidth, Printed, TrailingNewline,
 };
+use biome_fs::ManifestName;
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
@@ -41,6 +42,7 @@ use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
+use biome_manifest::BiomeManifest;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -683,10 +685,21 @@ fn lint(params: LintParams) -> LintResults {
     let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
-    if params.path.ends_with(ConfigName::biome_json())
-        || params.path.ends_with(ConfigName::biome_jsonc())
-    {
+    if ConfigName::is_manifest_file(params.path.as_path()) {
         let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(biome_diagnostics::serde::Diagnostic::new)
+                .collect::<Vec<_>>(),
+        );
+    }
+
+    // if we're parsing the `biome-manifest.json` file, we deserialize it, so we can emit diagnostics for
+    // malformed configuration
+    if ManifestName::is_manifest_file(params.path.as_path()) {
+        let deserialized = deserialize_from_json_ast::<BiomeManifest>(&root, "");
         diagnostics.extend(
             deserialized
                 .into_diagnostics()

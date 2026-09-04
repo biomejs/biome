@@ -62,6 +62,106 @@ pub fn resolve(
     resolve_module(specifier, base_dir, fs, options)
 }
 
+/// Resolves the root directory of an installed package.
+///
+/// Unlike [`resolve`], this ignores package entry points and `exports`. The
+/// `specifier` must be an unscoped or scoped package name without a subpath.
+///
+/// # Errors
+///
+/// Returns an error when the specifier is invalid, the package cannot be
+/// found, its symlink is broken, or its `package.json` cannot be loaded.
+pub fn resolve_package_root(
+    specifier: &str,
+    base_dir: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+) -> Result<Utf8PathBuf, ResolveError> {
+    let package_name = parse_package_name(specifier)?;
+
+    for dir in base_dir.ancestors() {
+        let node_modules_path = dir.join("node_modules");
+        let node_modules_path = match fs.path_info(&node_modules_path) {
+            Ok(PathInfo::Directory) => Cow::Borrowed(&node_modules_path),
+            Ok(PathInfo::Symlink {
+                canonicalized_target,
+            }) => Cow::Owned(canonicalized_target),
+            Ok(PathInfo::File) | Err(ResolveError::NotFound) => continue,
+            Err(error) => return Err(error),
+        };
+
+        let package_path = join_package_name(&node_modules_path, package_name);
+        let package_path = match fs.path_info(&package_path) {
+            Ok(PathInfo::Directory) => package_path,
+            Ok(PathInfo::Symlink {
+                canonicalized_target,
+            }) => canonicalized_target,
+            Ok(PathInfo::File) | Err(ResolveError::NotFound) => continue,
+            Err(error) => return Err(error),
+        };
+
+        fs.read_package_json_in_directory(&package_path)?;
+        return Ok(package_path);
+    }
+
+    Err(ResolveError::NotFound)
+}
+
+fn join_package_name(base_path: &Utf8Path, package_name: &str) -> Utf8PathBuf {
+    let mut path = base_path.to_path_buf();
+    for component in package_name.split('/') {
+        path.push(component);
+    }
+    path
+}
+
+/// Returns whether an installed package defines an exact or pattern export for `subpath`.
+///
+/// A matching export is reported even when its target is `null`, invalid, or points to a missing
+/// file.
+///
+/// # Errors
+///
+/// Returns an error when the package cannot be found or its `package.json` cannot be loaded.
+pub fn package_has_exported_subpath(
+    package: &str,
+    subpath: &str,
+    base_dir: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+) -> Result<bool, ResolveError> {
+    let package_path = resolve_package_root(package, base_dir, fs)?;
+    let package_json = fs.read_package_json_in_directory(&package_path)?;
+    let Some(JsonValue::Object(exports)) = package_json.exports.as_ref() else {
+        return Ok(false);
+    };
+    Ok(matching_target_mapping(subpath, exports).is_some())
+}
+
+/// Returns whether `specifier` is an unscoped or scoped package name without a subpath.
+pub fn is_package_name(specifier: &str) -> bool {
+    parse_package_name(specifier).is_ok()
+}
+
+/// Splits a valid package specifier into its package name and optional subpath.
+///
+/// # Errors
+///
+/// Returns an error when the package name or subpath is malformed.
+pub fn package_specifier_parts(specifier: &str) -> Result<(&str, &str), ResolveError> {
+    let (package_name, subpath) = parse_package_specifier(specifier)?;
+    parse_package_name(package_name)?;
+    if specifier.ends_with('/')
+        || (!subpath.is_empty()
+            && subpath.split('/').any(|component| {
+                component.is_empty()
+                    || matches!(component, "." | "..")
+                    || component.contains(['\\', '%'])
+            }))
+    {
+        return Err(ResolveError::InvalidPackageSpecifier);
+    }
+    Ok((package_name, subpath))
+}
+
 /// Resolves the given absolute `path` with the extension aliases specified in the options.
 fn resolve_absolute_path_with_extension_aliases(
     path: Utf8PathBuf,
@@ -359,13 +459,22 @@ fn resolve_target_mapping(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
+    let (target, glob_replacement) =
+        matching_target_mapping(subpath, mapping).ok_or(ResolveError::NotFound)?;
+    resolve_target_value(target, glob_replacement, package_path, fs, options)
+}
+
+fn matching_target_mapping<'a>(
+    subpath: &'a str,
+    mapping: &'a JsonObject,
+) -> Option<(&'a JsonValue, Option<&'a str>)> {
     let subpath = normalize_subpath(subpath);
 
     // Step 1: Try exact matches first (keys without '*').
     for (key, target) in mapping.iter() {
         let key = normalize_subpath(key.as_str());
         if !key.contains('*') && key == subpath {
-            return resolve_target_value(target, None, package_path, fs, options);
+            return Some((target, None));
         }
     }
 
@@ -390,11 +499,11 @@ fn resolve_target_mapping(
         {
             let glob_replacement =
                 &subpath[pattern_base.len()..subpath.len() - pattern_trailer.len()];
-            return resolve_target_value(target, Some(glob_replacement), package_path, fs, options);
+            return Some((target, Some(glob_replacement)));
         }
     }
 
-    Err(ResolveError::NotFound)
+    None
 }
 
 /// Compares two pattern keys for sorting in descending order of specificity.
@@ -568,7 +677,7 @@ fn resolve_dependency(
     let (package_name, subpath) = parse_package_specifier(specifier)?;
 
     for type_root in options.type_roots.explicit_roots() {
-        let package_path = base_dir.join(type_root).join(package_name);
+        let package_path = join_package_name(&base_dir.join(type_root), package_name);
         match resolve_package_path(&package_path, subpath, fs, options) {
             Ok(path) => return Ok(path),
             Err(ResolveError::NotFound) => { /* continue */ }
@@ -608,12 +717,7 @@ fn resolve_dependency(
         };
 
         if options.resolve_types_in_node_modules() {
-            let package_path = {
-                let mut path = node_module_path.to_path_buf();
-                path.push("@types");
-                path.push(package_name);
-                path
-            };
+            let package_path = join_package_name(&node_module_path.join("@types"), package_name);
 
             match resolve_package_path(&package_path, subpath, fs, options) {
                 Ok(path) => return Ok(path),
@@ -622,7 +726,8 @@ fn resolve_dependency(
             }
         }
 
-        match resolve_package_path(&node_module_path.join(package_name), subpath, fs, options) {
+        let package_path = join_package_name(&node_module_path, package_name);
+        match resolve_package_path(&package_path, subpath, fs, options) {
             Ok(path) => return Ok(path),
             Err(ResolveError::NotFound) => { /* continue */ }
             Err(error) => return Err(error),
@@ -803,6 +908,22 @@ fn parse_package_specifier(specifier: &str) -> Result<(&str, &str), ResolveError
     let package_subpath =
         separator_index.map_or("", |separator_index| &specifier[separator_index + 1..]);
     Ok((package_name, package_subpath))
+}
+
+fn parse_package_name(specifier: &str) -> Result<&str, ResolveError> {
+    let (package_name, subpath) = parse_package_specifier(specifier)?;
+    if !subpath.is_empty()
+        || specifier.ends_with('/')
+        || package_name
+            .strip_prefix('@')
+            .is_some_and(|name| !name.contains('/') || name.starts_with('/'))
+        || package_name
+            .split('/')
+            .any(|component| matches!(component, "." | ".."))
+    {
+        return Err(ResolveError::InvalidPackageSpecifier);
+    }
+    Ok(package_name)
 }
 
 fn strip_query_and_fragment(specifier: &str) -> &str {

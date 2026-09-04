@@ -1,0 +1,171 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["config-0/configs/recommended"] }
+```
+
+## `node_modules/config-0/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-1/configs/recommended"] }
+```
+
+## `node_modules/config-0/package.json`
+
+```json
+{ "name": "config-0" }
+```
+
+## `node_modules/config-1/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-2/configs/recommended"] }
+```
+
+## `node_modules/config-1/package.json`
+
+```json
+{ "name": "config-1" }
+```
+
+## `node_modules/config-10/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-11/configs/recommended"] }
+```
+
+## `node_modules/config-10/package.json`
+
+```json
+{ "name": "config-10" }
+```
+
+## `node_modules/config-11/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }
+```
+
+## `node_modules/config-11/package.json`
+
+```json
+{ "name": "config-11" }
+```
+
+## `node_modules/config-2/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-3/configs/recommended"] }
+```
+
+## `node_modules/config-2/package.json`
+
+```json
+{ "name": "config-2" }
+```
+
+## `node_modules/config-3/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-4/configs/recommended"] }
+```
+
+## `node_modules/config-3/package.json`
+
+```json
+{ "name": "config-3" }
+```
+
+## `node_modules/config-4/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-5/configs/recommended"] }
+```
+
+## `node_modules/config-4/package.json`
+
+```json
+{ "name": "config-4" }
+```
+
+## `node_modules/config-5/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-6/configs/recommended"] }
+```
+
+## `node_modules/config-5/package.json`
+
+```json
+{ "name": "config-5" }
+```
+
+## `node_modules/config-6/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-7/configs/recommended"] }
+```
+
+## `node_modules/config-6/package.json`
+
+```json
+{ "name": "config-6" }
+```
+
+## `node_modules/config-7/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-8/configs/recommended"] }
+```
+
+## `node_modules/config-7/package.json`
+
+```json
+{ "name": "config-7" }
+```
+
+## `node_modules/config-8/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-9/configs/recommended"] }
+```
+
+## `node_modules/config-8/package.json`
+
+```json
+{ "name": "config-8" }
+```
+
+## `node_modules/config-9/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": ["config-10/configs/recommended"] }
+```
+
+## `node_modules/config-9/package.json`
+
+```json
+{ "name": "config-9" }
+```
+
+## `test.js`
+
+```js
+const value = 1;
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome manifest imports must not exceed 10 levels.
+  
+
+
+```

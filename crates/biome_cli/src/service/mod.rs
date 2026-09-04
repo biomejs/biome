@@ -284,7 +284,10 @@ where
         if let Some(channel) = channel {
             let response = match (response.result, response.error) {
                 (Some(result), None) => Ok(result),
-                (None, Some(err)) => Err(TransportError::RPCError(err.message)),
+                (None, Some(err)) => match err.data.and_then(|data| from_str(data.get()).ok()) {
+                    Some(diagnostic) => Err(TransportError::RemoteDiagnostic(Box::new(diagnostic))),
+                    None => Err(TransportError::RPCError(err.message)),
+                },
 
                 // Both result and error will be None if the request
                 // returns a null-ish result, in this case create a
@@ -443,7 +446,6 @@ struct JsonRpcError {
     #[expect(dead_code)]
     code: i64,
     message: String,
-    #[expect(dead_code)]
     data: Option<Box<RawValue>>,
 }
 

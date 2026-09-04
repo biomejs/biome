@@ -3414,6 +3414,62 @@ fn check_json_plugin() {
 }
 
 #[test]
+fn check_plugin_from_package_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["@scope/biome-plugin/noAssign"],
+    "formatter": { "enabled": false }
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("node_modules/@scope/biome-plugin/package.json"),
+        br#"{
+    "name": "@scope/biome-plugin",
+    "exports": "./index.js"
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("node_modules/@scope/biome-plugin/biome-manifest.json"),
+        br#"{
+    "version": 1,
+    "plugins": {
+        "rules": [{ "noAssign": "rules/noAssign.grit" }],
+        "presets": { "recommended": ["noAssign"] }
+    }
+}"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("node_modules/@scope/biome-plugin/rules/noAssign.grit"),
+        br#"`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}"#,
+    );
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"Object.assign({});");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_from_package_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_js_plugin_with_native_field_names() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

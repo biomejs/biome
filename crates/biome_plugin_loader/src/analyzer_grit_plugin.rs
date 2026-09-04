@@ -25,6 +25,7 @@ use std::{borrow::Cow, fmt::Debug, str::FromStr};
 #[derive(Debug)]
 pub struct AnalyzerGritPlugin {
     grit_query: GritQuery,
+    name: Option<Box<str>>,
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
@@ -55,14 +56,23 @@ impl AnalyzerGritPlugin {
 
         Ok(Self {
             grit_query,
+            name: None,
             includes: includes.map(Into::into),
         })
+    }
+
+    pub(crate) fn with_name(mut self, name: impl Into<Box<str>>) -> Self {
+        self.name = Some(name.into());
+        self
     }
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
     fn name(&self) -> &str {
-        self.grit_query.name.as_deref().unwrap_or("anonymous")
+        self.name
+            .as_deref()
+            .or(self.grit_query.name.as_deref())
+            .unwrap_or("anonymous")
     }
 
     fn language(&self) -> PluginTargetLanguage {

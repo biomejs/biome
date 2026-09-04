@@ -34,6 +34,7 @@ mod overrides_formatter;
 mod overrides_linter;
 mod overrides_max_file_size;
 mod overrides_organize_imports;
+mod plugins;
 mod preset;
 mod protected_files;
 mod regression_tests;

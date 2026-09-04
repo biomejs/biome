@@ -4,7 +4,7 @@ expression: content
 ---
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Cannot load plugin manifest /my-plugin/biome-manifest.jsonc
+  × Cannot load Biome manifest /my-plugin/biome-manifest.jsonc.
     
     Caused by:
-      version must be 1
+      version must be 1.
