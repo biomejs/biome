@@ -102,10 +102,10 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
+use biome_rowan::Text;
+#[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
-#[cfg(feature = "type_inference")]
-use biome_rowan::Text;
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 #[cfg(any(feature = "js_embeds", feature = "type_inference"))]
