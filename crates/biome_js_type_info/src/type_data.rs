@@ -637,6 +637,19 @@ impl Default for FunctionParameter {
 }
 
 impl FunctionParameter {
+    /// Returns the type of the binding named `name`, or unknown when this
+    /// parameter does not declare it.
+    pub fn binding_type(&self, name: &Text) -> TypeReference {
+        match self {
+            Self::Named(named) => named.ty.clone(),
+            Self::Pattern(pattern) => pattern
+                .bindings
+                .iter()
+                .find_map(|binding| (binding.name == *name).then(|| binding.ty.clone()))
+                .unwrap_or_default(),
+        }
+    }
+
     pub fn ty(&self) -> &TypeReference {
         match self {
             Self::Named(named) => &named.ty,
@@ -1303,6 +1316,7 @@ pub enum TypeofExpression {
     Await(TypeofAwaitExpression),
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
+    CallArgument(TypeofCallArgumentExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
@@ -1312,6 +1326,7 @@ pub enum TypeofExpression {
     LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
     NullishCoalescing(TypeofNullishCoalescingExpression),
+    Parameter(TypeofParameterExpression),
     StaticMember(TypeofStaticMemberExpression),
     OptionalChainStaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
@@ -1340,6 +1355,30 @@ pub struct TypeofBitwiseNotExpression {
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
+}
+
+/// Type expected for the argument at `index` of a call or `new` expression,
+/// according to the signature selected for `callee` and `arguments`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofCallArgumentExpression {
+    pub callee: TypeReference,
+
+    /// Source arguments of the call. The slot at `index` is unknown so the
+    /// expression does not depend on that argument's own type.
+    pub arguments: Box<[CallArgumentType]>,
+
+    /// Source index of the argument, before spreads are expanded.
+    pub index: u16,
+
+    pub is_constructor: bool,
+}
+
+/// Type of the parameter at `index` of a callable type, not counting a
+/// `this` parameter.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofParameterExpression {
+    pub function: TypeReference,
+    pub index: u16,
 }
 
 /// Represents the type of a ternary expression.
