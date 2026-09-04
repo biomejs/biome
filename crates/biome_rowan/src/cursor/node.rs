@@ -252,17 +252,53 @@ impl SyntaxNode {
     }
 
     pub fn first_token(&self) -> Option<SyntaxToken> {
-        self.descendants_with_tokens(Direction::Next)
-            .find_map(|x| x.into_token())
+        self.edge_token(Direction::Next)
     }
 
     pub fn last_token(&self) -> Option<SyntaxToken> {
-        PreorderWithTokens::new(self.clone(), Direction::Prev)
-            .filter_map(|event| match event {
-                WalkEvent::Enter(it) => Some(it),
-                WalkEvent::Leave(_) => None,
-            })
-            .find_map(|x| x.into_token())
+        self.edge_token(Direction::Prev)
+    }
+
+    fn edge_token(&self, direction: Direction) -> Option<SyntaxToken> {
+        let start: SyntaxElement = self.clone().into();
+        let mut current = start.clone();
+
+        loop {
+            match current {
+                NodeOrToken::Token(token) => return Some(token),
+                NodeOrToken::Node(node) => {
+                    let child = match direction {
+                        Direction::Next => node.first_child_or_token(),
+                        Direction::Prev => node.last_child_or_token(),
+                    };
+
+                    if let Some(child) = child {
+                        current = child;
+                        continue;
+                    }
+
+                    current = node.into();
+                }
+            }
+
+            loop {
+                if current == start {
+                    return None;
+                }
+
+                let sibling = match direction {
+                    Direction::Next => current.next_sibling_or_token(),
+                    Direction::Prev => current.prev_sibling_or_token(),
+                };
+
+                if let Some(sibling) = sibling {
+                    current = sibling;
+                    break;
+                }
+
+                current = current.parent()?.into();
+            }
+        }
     }
 
     #[inline]
