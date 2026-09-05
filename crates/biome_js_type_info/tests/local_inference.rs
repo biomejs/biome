@@ -1,7 +1,9 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{JsArrowFunctionExpression, JsFormalParameter, TsTypeAliasDeclaration};
+use biome_js_syntax::{
+    JsArrowFunctionExpression, JsExpressionStatement, JsFormalParameter, TsTypeAliasDeclaration,
+};
 use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
 use biome_rowan::AstNode;
 
@@ -506,4 +508,28 @@ fn contextual_callback_parameter_requires_direct_call_argument() {
             "{param:?} must not be contextually typed"
         );
     }
+}
+
+#[test]
+fn infer_type_of_typeof_guard_narrowed_reference() {
+    const CODE: &str = r#"if (typeof x === "string") {
+    x;
+}"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .find_map(JsExpressionStatement::cast)
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_typeof_guard_narrowed_reference",
+    );
 }
