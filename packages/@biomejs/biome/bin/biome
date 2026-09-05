@@ -34,6 +34,10 @@ const PLATFORMS = {
 		x64: "@biomejs/cli-linux-x64-musl/biome",
 		arm64: "@biomejs/cli-linux-arm64-musl/biome",
 	},
+	android: {
+		x64: "@biomejs/cli-android-x64/biome",
+		arm64: "@biomejs/cli-android-arm64/biome",
+	},
 };
 
 const binPath = env.BIOME_BINARY ||
