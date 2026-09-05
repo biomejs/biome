@@ -10156,6 +10156,7 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useFencedCodeLanguage"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useFlatMathMinMax"
 	| "lint/nursery/useGlobalThis"
