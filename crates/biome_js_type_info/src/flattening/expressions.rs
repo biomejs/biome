@@ -188,6 +188,13 @@ pub(super) fn flattened_expression(
                 None
             }
         }
+        TypeofExpression::Narrowed(expr) => {
+            // The legacy engine does not implement narrowing; fall back to
+            // the un-narrowed type.
+            resolver
+                .resolve_and_get(&expr.ty)
+                .map(ResolvedTypeData::to_data)
+        }
         TypeofExpression::New(expr) => flattened_new(expr, resolver),
         TypeofExpression::NullishCoalescing(expr) => {
             let left = resolver.resolve_and_get(&expr.left)?;

@@ -95,9 +95,23 @@ pub fn assert_typed_bindings_snapshot(
 #[derive(Default)]
 pub struct TestTypeCollector {
     pub types: TypeStore,
+    narrowing_invalidation_cache:
+        rustc_hash::FxHashMap<(biome_js_syntax::JsSyntaxNode, Text), bool>,
 }
 
 impl RawTypeCollector for TestTypeCollector {
+    /// These tests exercise the narrowing algorithms directly, so they always
+    /// opt in regardless of how the shipped builds are configured.
+    fn narrowing_enabled(&self) -> bool {
+        true
+    }
+
+    fn narrowing_invalidation_cache(
+        &mut self,
+    ) -> &mut rustc_hash::FxHashMap<(biome_js_syntax::JsSyntaxNode, Text), bool> {
+        &mut self.narrowing_invalidation_cache
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }
