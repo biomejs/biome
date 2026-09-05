@@ -259,6 +259,9 @@ impl SyntaxNode {
         self.edge_token(Direction::Prev)
     }
 
+    /// Starts at this node and searches its subtree left to right (`Next`) or
+    /// right to left (`Prev`), returning the first token found, if any.
+    /// For the whole `a + b` expression, `Next` finds `a` and `Prev` finds `b`.
     fn edge_token(&self, direction: Direction) -> Option<SyntaxToken> {
         let start: SyntaxElement = self.clone().into();
         let mut current = start.clone();
