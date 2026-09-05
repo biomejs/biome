@@ -1,7 +1,9 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
+use biome_js_syntax::JsExpressionStatement;
 use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
+use biome_rowan::AstNode;
 
 use utils::{
     TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
@@ -398,4 +400,28 @@ fn infer_type_of_dynamic_import() {
         &decl,
     );
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_dynamic_import");
+}
+
+#[test]
+fn infer_type_of_typeof_guard_narrowed_reference() {
+    const CODE: &str = r#"if (typeof x === "string") {
+    x;
+}"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .find_map(JsExpressionStatement::cast)
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_typeof_guard_narrowed_reference",
+    );
 }

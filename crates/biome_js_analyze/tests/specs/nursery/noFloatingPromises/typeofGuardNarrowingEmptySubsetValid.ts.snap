@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowingEmptySubsetValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Each guard contradicts its parameter's declared type, so narrowing has no
+// candidate left and `x` is `never` inside the `if`. Neither `never` nor the
+// `unknown` that calling it yields is promise-like.
+function impossibleGuard(x: Promise<void>) {
+	if (typeof x === "number") {
+		x;
+	}
+}
+
+function impossibleGuardMultiMemberUnion(x: string | Promise<void>) {
+	if (typeof x === "boolean") {
+		x;
+	}
+}
+
+function impossibleGuardOnCallable(x: (() => Promise<void>) | (() => void)) {
+	if (typeof x === "object") {
+		x();
+	}
+}
+
+```
