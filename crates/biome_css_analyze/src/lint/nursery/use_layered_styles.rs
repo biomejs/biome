@@ -84,9 +84,9 @@ declare_lint_rule! {
     ///
     /// ```json,options
     /// {
-    ///     "options": {
-    ///         "requireImportLayers": false
-    ///     }
+    ///   "options": {
+    ///     "requireImportLayers": false
+    ///   }
     /// }
     /// ```
     ///
