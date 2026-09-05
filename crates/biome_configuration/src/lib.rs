@@ -136,7 +136,7 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 
 pub type RootEnabled = Bool<true>;
 
-/// The configuration contained in `biome.json`.
+/// The configuration contained in `biome.json` or `biome.jsonc`.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -144,19 +144,30 @@ pub type RootEnabled = Bool<true>;
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 #[deserializable(with_validator)]
 pub struct Configuration {
-    /// A field for the JSON schema specification: https://json-schema.org/
+    /// The JSON Schema used to validate the configuration and provide editor completion. Biome
+    /// emits a diagnostic when a `biomejs.dev` schema URL specifies a version that differs from the
+    /// running CLI version.
     #[serde(rename = "$schema")]
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema: Option<Schema>,
 
-    /// Indicates whether this configuration file is at the root of a Biome
-    /// project. By default, this is `true`.
+    /// Marks whether this file is the root configuration for a Biome project. The root configuration
+    /// establishes the project's base settings, while `false` marks a configuration found inside the
+    /// project as nested rather than a second project root.
+    ///
+    /// Defaults to `true`. Biome implicitly treats `root` as `false` when a nested configuration uses
+    /// `"extends": "//"`. All other nested configurations must explicitly set `root` to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide, hide_usage))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<RootEnabled>,
 
-    /// A list of paths to other JSON files, used to extend the current configuration.
+    /// Extends the current configuration with settings from one or more other Biome configurations.
+    /// Use `"//"` in a nested configuration to extend the root configuration at any nesting depth.
+    /// Use an array to extend configurations by relative path or installed package specifier.
+    ///
+    /// Biome merges configurations from left to right. Later configurations take precedence for
+    /// single-value options, list entries are combined, and the current file is applied last.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extends: Option<Extends>,
@@ -169,7 +180,7 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vcs: Option<VcsConfiguration>,
 
-    /// The file handling configuration.
+    /// Configures which files Biome can discover and process.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(files_configuration), optional, hide_usage)
@@ -177,7 +188,7 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<FilesConfiguration>,
 
-    /// The formatter configuration.
+    /// Configures formatting for selected files.
     #[cfg_attr(feature = "cli", bpaf(external(formatter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<FormatterConfiguration>,
@@ -246,12 +257,13 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
 
-    /// A list of granular patterns applied only to a subset of files.
+    /// Configures settings for files selected by each override. When multiple overrides configure
+    /// the same single-value setting, the last matching override takes precedence.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub overrides: Option<Overrides>,
 
-    /// List of plugins to load.
+    /// A list of GritQL plugins to load.
     #[cfg(feature = "plugins")]
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
@@ -643,12 +655,13 @@ pub type FilesIgnoreUnknownEnabled = Bool<false>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
-    /// The maximum source file size in bytes. Biome ignores larger files. Defaults to `1 MiB`.
+    /// The maximum source-file size in bytes. Biome skips larger files and emits a warning
+    /// diagnostic. Defaults to `1 MiB`.
     #[cfg_attr(feature = "cli", bpaf(long("files-max-size"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 
-    /// Prevents Biome from emitting diagnostics for unrecognized file types.
+    /// Prevents Biome from emitting diagnostics for unrecognized file types. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("files-ignore-unknown"), argument("true|false"), optional)
@@ -656,8 +669,16 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 
-    /// A list of glob patterns. Biome handles only files and directories that match these
-    /// patterns.
+    /// A list of glob patterns selecting which files and directories Biome can process. If omitted,
+    /// this option does not further restrict the supported files Biome can process. An empty list
+    /// selects no files. Biome ignores files under `node_modules` even when they match a pattern.
+    ///
+    /// The scanner uses these patterns and, when enabled, VCS ignore files while discovering nested
+    /// configuration and ignore files. When enabled rules use the `project` or `types` domains, it
+    /// also indexes source files and project dependencies. It may still discover required metadata or
+    /// index excluded source files needed for analysis. A pattern beginning with `!!` prevents the
+    /// scanner from indexing matching paths. Patterns are evaluated in order, and a pattern beginning
+    /// with `!` excludes matches.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
@@ -665,8 +686,9 @@ pub struct FilesConfiguration {
     /// **Deprecated:** Please use _force-ignore syntax_ in `files.includes`
     /// instead: <https://biomejs.dev/reference/configuration/#filesincludes>
     ///
-    /// Set of file and folder names that should be unconditionally ignored by
-    /// Biome's scanner.
+    /// File or directory names that the scanner ignores unconditionally while crawling. Each value
+    /// matches a complete path component, not a glob. Ignored files are not added to the module graph,
+    /// so types are not inferred from them.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_scanner_ignores: Option<Vec<String>>,

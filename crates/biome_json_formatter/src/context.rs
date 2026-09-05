@@ -76,6 +76,7 @@ pub struct JsonFormatOptions {
     _file_source: JsonFileSource,
 }
 
+/// Controls trailing commas in multiline JSON arrays and objects.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -84,9 +85,11 @@ pub struct JsonFormatOptions {
 )]
 pub enum TrailingCommas {
     #[default]
-    /// The formatter will remove the trailing commas.
+    /// Removes trailing commas.
     None,
-    /// The trailing commas are allowed and advised in JSON and JSONC files.
+    /// Adds trailing commas wherever the JSON formatter supports them. Use this only for JSON
+    /// variants that allow trailing commas, and ensure `json.parser.allowTrailingCommas` is enabled
+    /// or automatically detected for those files.
     All,
 }
 
@@ -121,7 +124,7 @@ impl schemars::JsonSchema for TrailingCommas {
         schemars::json_schema!({
             "type": "string",
             "enum": ["none", "all"],
-            "description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files."
+            "description": "Controls trailing commas in multiline JSON arrays and objects. Use `all` only for JSON variants that allow trailing commas, and ensure `json.parser.allowTrailingCommas` is enabled or automatically detected for those files."
         })
     }
 }

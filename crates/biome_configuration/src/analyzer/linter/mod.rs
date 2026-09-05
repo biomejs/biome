@@ -23,23 +23,27 @@ pub type LinterEnabled = Bool<true>;
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[deserializable(with_validator)]
 pub struct LinterConfiguration {
-    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+    /// Enables or disables the linter. Defaults to `true`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<LinterEnabled>,
 
-    /// List of rules
+    /// The lint-rule configuration.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Rules>,
 
-    /// A list of glob patterns. The analyzer will handle only those files/folders that will
-    /// match these patterns.
+    /// A list of glob patterns selecting files to lint. If omitted, all files selected by
+    /// `files.includes` remain eligible for linting. An empty list selects no files. This option can
+    /// only narrow the files selected by `files.includes`.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
-    /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
+    /// Configures rules associated with a framework, library, project-wide analysis, or type
+    /// analysis. Keys are domain names and values are `all`, `recommended`, or `none`.
+    /// Enabling rules from the `project` or `types` domains activates project and dependency
+    /// scanning. The `types` domain also enables type-aware resolution.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<RuleDomains>,
@@ -73,11 +77,11 @@ impl DeserializableValidator for LinterConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum RuleDomainValue {
-    /// Enables all the rules that belong to this domain
+    /// Enables all rules in the domain.
     All,
-    /// Disables all the rules that belong to this domain
+    /// Disables the domain.
     None,
-    /// Enables only the recommended rules for this domain
+    /// Enables the domain's recommended non-nursery rules.
     Recommended,
 }
 
