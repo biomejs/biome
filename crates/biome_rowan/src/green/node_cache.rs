@@ -11,7 +11,7 @@ use crate::green::Slot;
 use crate::syntax::{TriviaPiece, TriviaPieceKind};
 use crate::{
     GreenNode, GreenNodeData, GreenToken, GreenTokenData, NodeOrToken, RawSyntaxKind,
-    green::GreenElementRef,
+    green::{GreenElementFlags, GreenElementRef},
 };
 
 use super::element::GreenElement;
@@ -306,10 +306,12 @@ impl NodeCache {
                 entry.key().0.value().to_owned()
             }
             RawEntryMut::Vacant(entry) => {
-                let leading = self.trivia.get(self.generation, leading);
-                let trailing = self.trivia.get(self.generation, trailing);
+                let (leading, leading_flags) = self.trivia.get(self.generation, leading);
+                let (trailing, trailing_flags) = self.trivia.get(self.generation, trailing);
 
-                let token = GreenToken::with_trivia(kind, text, leading, trailing);
+                let mut flags = leading_flags;
+                flags.insert(trailing_flags);
+                let token = GreenToken::with_trivia_and_flags(kind, text, leading, trailing, flags);
                 let key = CachedToken(GenerationalPointer::new(token.clone(), self.generation));
                 entry.insert_with_hasher(hash, key, (), |t| token_hash(t.0.value()));
                 token
@@ -459,18 +461,24 @@ impl Default for TriviaCache {
 impl TriviaCache {
     /// Tries to retrieve a [GreenTrivia] with the given pieces from the cache or creates a new one and caches
     /// it for further calls.
-    fn get(&mut self, generation: Generation, pieces: &[TriviaPiece]) -> GreenTrivia {
+    fn get(
+        &mut self,
+        generation: Generation,
+        pieces: &[TriviaPiece],
+    ) -> (GreenTrivia, GreenElementFlags) {
         match pieces {
-            [] => GreenTrivia::empty(),
+            [] => (GreenTrivia::empty(), GreenElementFlags::default()),
             [
                 TriviaPiece {
                     kind: TriviaPieceKind::Whitespace,
                     length,
                 },
-            ] if *length == TextSize::from(1) => self.whitespace.clone(),
+            ] if *length == TextSize::from(1) => {
+                (self.whitespace.clone(), GreenElementFlags::default())
+            }
 
             _ => {
-                let hash = Self::trivia_hash_of(pieces);
+                let (hash, flags) = Self::trivia_hash::<true>(pieces);
 
                 let entry = self
                     .cache
@@ -480,7 +488,7 @@ impl TriviaCache {
                 match entry {
                     RawEntryMut::Occupied(mut entry) => {
                         entry.key_mut().0.set_generation(generation);
-                        entry.key().0.value().to_owned()
+                        (entry.key().0.value().to_owned(), flags)
                     }
                     RawEntryMut::Vacant(entry) => {
                         let trivia = GreenTrivia::new(pieces.iter().copied());
@@ -488,25 +496,29 @@ impl TriviaCache {
                             hash,
                             CachedTrivia(GenerationalPointer::new(trivia.clone(), generation)),
                             (),
-                            |cached| Self::trivia_hash_of(cached.0.value().pieces()),
+                            |cached| Self::trivia_hash::<false>(cached.0.value().pieces()).0,
                         );
-                        trivia
+                        (trivia, flags)
                     }
                 }
             }
         }
     }
 
-    fn trivia_hash_of(pieces: &[TriviaPiece]) -> u64 {
+    fn trivia_hash<const COMPUTE_FLAGS: bool>(pieces: &[TriviaPiece]) -> (u64, GreenElementFlags) {
         let mut h = FxHasher::default();
+        let mut flags = GreenElementFlags::default();
 
         pieces.len().hash(&mut h);
 
         for piece in pieces {
             piece.hash(&mut h);
+            if COMPUTE_FLAGS && !flags.contains_all(GreenElementFlags::HAS_COMMENTS_AND_SKIPPED) {
+                flags.insert(GreenElementFlags::from_trivia_kind(piece.kind()));
+            }
         }
 
-        h.finish()
+        (h.finish(), flags)
     }
 }
 
@@ -514,9 +526,10 @@ impl TriviaCache {
 mod tests {
     use std::mem::size_of;
 
-    use crate::green::node_cache::{CachedNode, CachedToken, CachedTrivia, token_hash};
+    use crate::green::GreenElementFlags;
+    use crate::green::node_cache::{CachedNode, CachedToken, CachedTrivia, NodeCache, token_hash};
     use crate::green::trivia::GreenTrivia;
-    use crate::{GreenToken, RawSyntaxKind};
+    use crate::{GreenToken, GreenTokenData, RawSyntaxKind, TriviaPiece, TriviaPieceKind};
     use biome_text_size::TextSize;
 
     #[test]
@@ -548,6 +561,21 @@ mod tests {
             GreenTrivia::whitespace(1),
         );
         assert_ne!(token_hash(&t1), token_hash(&t4));
+    }
+
+    #[test]
+    fn cached_token_preserves_trivia_flags() {
+        let mut cache = NodeCache::default();
+        let kind = RawSyntaxKind(0);
+        let leading = [TriviaPiece::new(TriviaPieceKind::Skipped, 1)];
+        let trailing = [TriviaPiece::single_line_comment(2)];
+
+        let (_, token) = cache.token_with_trivia(kind, "?value//", &leading, &trailing);
+        let (_, cached) = cache.token_with_trivia(kind, "?value//", &leading, &trailing);
+
+        assert!(std::ptr::eq::<GreenTokenData>(&*token, &*cached));
+        assert!(cached.flags().contains(GreenElementFlags::HAS_COMMENTS));
+        assert!(cached.flags().contains(GreenElementFlags::HAS_SKIPPED));
     }
 
     #[test]

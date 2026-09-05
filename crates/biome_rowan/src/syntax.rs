@@ -129,8 +129,8 @@ mod tests {
     use biome_text_size::TextRange;
 
     use crate::Direction;
-    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::syntax::TriviaPiece;
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::syntax::{SyntaxNode, SyntaxToken, TriviaPiece, TriviaPieceKind};
 
     #[test]
     fn empty_list() {
@@ -518,5 +518,36 @@ mod tests {
         assert_eq!(2, pieces_rev.len());
         assert_eq!("/**/", pieces_rev[0].text());
         assert_eq!("\n\t ", pieces_rev[1].text());
+    }
+
+    #[test]
+    fn replacing_trivia_clears_descendant_flags() {
+        let token = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::STRING_TOKEN,
+            "?value//",
+            [TriviaPiece::new(TriviaPieceKind::Skipped, 1)],
+            [TriviaPiece::single_line_comment(2)],
+        );
+        let root =
+            SyntaxNode::<RawLanguage>::new_detached(RawLanguageKind::ROOT, [Some(token.into())]);
+
+        assert!(root.has_comments_descendants());
+        assert!(root.has_skipped_descendants());
+
+        let token = root.first_token().unwrap();
+        let replacement = token.with_leading_trivia([]);
+        let root = root
+            .replace_child(token.into(), replacement.into())
+            .unwrap();
+        assert!(root.has_comments_descendants());
+        assert!(!root.has_skipped_descendants());
+
+        let token = root.first_token().unwrap();
+        let replacement = token.with_trailing_trivia([]);
+        let root = root
+            .replace_child(token.into(), replacement.into())
+            .unwrap();
+        assert!(!root.has_comments_descendants());
+        assert!(!root.has_skipped_descendants());
     }
 }

@@ -1,10 +1,9 @@
 use super::flow_map_implicit_entry::FormatCollectionKeyEntry;
 use crate::comments::{FormatEntryDanglingComments, subtree_has_comments};
 use crate::prelude::*;
-use crate::utils::needs_space_before_colon;
+use crate::utils::{flow_scalar_has_line_break, needs_space_before_colon};
 use biome_formatter::format_args;
 use biome_formatter::write;
-use biome_rowan::Direction;
 use biome_yaml_syntax::{
     AnyYamlBlockNode, YamlBlockMapImplicitEntry, YamlBlockMapImplicitEntryFields,
 };
@@ -152,7 +151,7 @@ impl Format<YamlFormatContext> for FormatEntryValue<'_> {
                     ]))]
                 )
             }
-        } else if matches!(value, AnyYamlBlockNode::YamlFlowInBlockNode(_)) {
+        } else if let AnyYamlBlockNode::YamlFlowInBlockNode(flow_in_block) = value {
             // The continuation lines of a multiline flow scalar are
             // indented past the key:
             //
@@ -176,10 +175,7 @@ impl Format<YamlFormatContext> for FormatEntryValue<'_> {
             // is inside the scalar's own token: the properties and the
             // content of the value are joined onto one line, so the breaks
             // in the trivia between them don't reach the output
-            let is_multiline = value
-                .syntax()
-                .descendants_tokens(Direction::Next)
-                .any(|token| token.text_trimmed().contains(['\n', '\r']));
+            let is_multiline = flow_scalar_has_line_break(flow_in_block);
             if is_multiline {
                 let value = value.format().memoized();
                 write!(

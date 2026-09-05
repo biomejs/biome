@@ -15,16 +15,22 @@ use crate::utility_types::static_assert;
 use crate::{
     GreenToken, NodeOrToken, TextRange, TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
-    green::{GreenElement, GreenElementRef, RawSyntaxKind},
+    green::{GreenElement, GreenElementFlags, GreenElementRef, RawSyntaxKind},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: RawSyntaxKind,
+    flags: GreenElementFlags,
     text_len: TextSize,
     #[cfg(feature = "countme")]
     _c: countme::Count<GreenNode>,
 }
+
+#[cfg(target_pointer_width = "64")]
+static_assert!(mem::size_of::<GreenElementFlags>() == 1);
+#[cfg(target_pointer_width = "64")]
+static_assert!(mem::size_of::<GreenNodeHead>() == 8);
 
 #[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
@@ -181,6 +187,21 @@ impl GreenNodeData {
         self.header().text_len
     }
 
+    #[inline]
+    pub(crate) fn has_comments(&self) -> bool {
+        self.flags().contains(GreenElementFlags::HAS_COMMENTS)
+    }
+
+    #[inline]
+    pub(crate) fn has_skipped(&self) -> bool {
+        self.flags().contains(GreenElementFlags::HAS_SKIPPED)
+    }
+
+    #[inline]
+    pub(crate) fn flags(&self) -> GreenElementFlags {
+        self.header().flags
+    }
+
     /// Children of this node.
     #[inline]
     pub fn children(&self) -> Children<'_> {
@@ -302,11 +323,20 @@ impl GreenNode {
         I::IntoIter: ExactSizeIterator,
     {
         let mut text_len: TextSize = 0.into();
+        let mut flags = GreenElementFlags::default();
         let slots = slots.into_iter().map(|el| {
             let rel_offset = text_len;
             match el {
                 Some(el) => {
                     text_len += el.text_len();
+                    match &el {
+                        NodeOrToken::Node(node) => {
+                            flags.insert(node.flags());
+                        }
+                        NodeOrToken::Token(token) => {
+                            flags.insert(token.flags());
+                        }
+                    }
                     match el {
                         NodeOrToken::Node(node) => Slot::Node { rel_offset, node },
                         NodeOrToken::Token(token) => Slot::Token { rel_offset, token },
@@ -319,6 +349,7 @@ impl GreenNode {
         let data = ThinArc::from_header_and_iter(
             GreenNodeHead {
                 kind,
+                flags: GreenElementFlags::default(),
                 text_len: 0.into(),
                 #[cfg(feature = "countme")]
                 _c: countme::Count::new(),
@@ -326,11 +357,14 @@ impl GreenNode {
             slots,
         );
 
-        // XXX: fixup `text_len` after construction, because we can't iterate
-        // `slots` twice.
+        // XXX: fix up aggregate data after construction, because we can't
+        // iterate `slots` twice.
         let data = {
             let mut data = Arc::from_thin(data);
-            Arc::get_mut(&mut data).unwrap().header.text_len = text_len;
+            debug_assert!(data.is_unique());
+            let head = &mut Arc::get_mut(&mut data).unwrap().header;
+            head.text_len = text_len;
+            head.flags = flags;
             Arc::into_thin(data)
         };
 
@@ -546,8 +580,9 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::GreenNode;
+    use crate::green::{GreenElement, GreenTrivia};
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::{GreenNode, GreenToken, RawSyntaxKind, TriviaPiece, TriviaPieceKind};
 
     fn build_test_list() -> GreenNode {
         let mut builder: RawSyntaxTreeBuilder = RawSyntaxTreeBuilder::new();
@@ -607,5 +642,40 @@ mod tests {
 
         // Has 3 slots, one is missing
         assert_eq!(root.slots().len(), 3);
+    }
+
+    #[test]
+    fn propagates_trivia_flags() {
+        let comment_token = GreenToken::with_trivia(
+            RawSyntaxKind(0),
+            "//value",
+            GreenTrivia::new([TriviaPiece::single_line_comment(2)]),
+            GreenTrivia::empty(),
+        );
+        let comment_node =
+            GreenNode::new(RawSyntaxKind(0), [Some(GreenElement::Token(comment_token))]);
+        assert!(comment_node.has_comments());
+        assert!(!comment_node.has_skipped());
+
+        let skipped_token = GreenToken::with_trivia(
+            RawSyntaxKind(0),
+            "?value",
+            GreenTrivia::new([TriviaPiece::new(TriviaPieceKind::Skipped, 1)]),
+            GreenTrivia::empty(),
+        );
+        let skipped_node =
+            GreenNode::new(RawSyntaxKind(0), [Some(GreenElement::Token(skipped_token))]);
+        assert!(!skipped_node.has_comments());
+        assert!(skipped_node.has_skipped());
+
+        let root = GreenNode::new(
+            RawSyntaxKind(0),
+            [
+                Some(GreenElement::Node(comment_node)),
+                Some(GreenElement::Node(skipped_node)),
+            ],
+        );
+        assert!(root.has_comments());
+        assert!(root.has_skipped());
     }
 }

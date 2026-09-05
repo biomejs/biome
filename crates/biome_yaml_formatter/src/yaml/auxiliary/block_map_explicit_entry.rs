@@ -1,10 +1,11 @@
 use crate::comments::{FormatCommentsSlice, SourceColumn};
 use crate::prelude::*;
+use crate::utils::flow_scalar_has_line_break;
 use crate::yaml::auxiliary::block_map_implicit_entry::FormatEntryValue;
 use crate::yaml::auxiliary::flow_map_implicit_entry::FormatCollectionKeyEntry;
 use biome_formatter::comments::SourceComment;
 use biome_formatter::{format_args, write};
-use biome_rowan::{AstNode, Direction, TextSize};
+use biome_rowan::{AstNode, TextSize};
 use biome_yaml_syntax::{
     AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlMappingImplicitKey, YamlBlockMapExplicitEntry,
     YamlBlockMapExplicitEntryFields, YamlLanguage,
@@ -56,16 +57,12 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
         // the `? key` form that makes them recognizable as set members
         let keep_explicit = match &key {
             None => false,
-            Some(key_node @ AnyYamlBlockNode::YamlFlowInBlockNode(_)) => {
+            Some(key_node @ AnyYamlBlockNode::YamlFlowInBlockNode(flow_in_block)) => {
                 // Only a break inside a token keeps the key off a single
                 // line, as in a multiline scalar. The properties and the
                 // content of the key are joined onto one line, so the breaks
                 // in the trivia between them don't reach the output
-                !key_node.is_flow_collection()
-                    && key_node
-                        .syntax()
-                        .descendants_tokens(Direction::Next)
-                        .any(|token| token.text_trimmed().contains(['\n', '\r']))
+                !key_node.is_flow_collection() && flow_scalar_has_line_break(flow_in_block)
             }
             Some(_) => true,
         };
