@@ -831,6 +831,23 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     &expr.right
                 ])]]
             ),
+            Self::Narrowed(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        token("Narrowed(typeof"),
+                        space(),
+                        token("=="),
+                        space(),
+                        token("\""),
+                        text(expr.tag.as_str(), None),
+                        token("\","),
+                        space(),
+                        &expr.ty,
+                        token(")")
+                    ]]
+                )
+            }
             Self::New(expr) => write!(
                 f,
                 [&format_args![
@@ -1142,5 +1159,58 @@ impl<'a, 'db> Format<FormatInferredTypeContext<'db>> for FmtNames<'a> {
             joiner.finish()
         });
         write!(f, [&format_args![&names]])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::interned_types::TypeofNarrowedExpression;
+    use crate::type_data::TypeofTag;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    #[test]
+    fn formats_narrowed_types() {
+        let db = TestDb::default();
+
+        let formatted = [TypeofTag::String, TypeofTag::Function, TypeofTag::Undefined]
+            .into_iter()
+            .map(|tag| {
+                format_inferred_type(
+                    &db,
+                    TypeData::TypeofExpression(InternedTypeofExpression::new(
+                        &db,
+                        TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                            ty: TypeData::Unknown,
+                            tag,
+                        }),
+                    )),
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        insta::assert_snapshot!(formatted);
     }
 }

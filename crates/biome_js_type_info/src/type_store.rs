@@ -4,10 +4,11 @@ use std::{
 };
 
 use hashbrown::{HashTable, hash_table::Entry};
-use rustc_hash::FxHasher;
+use rustc_hash::{FxHashMap, FxHasher};
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
+use biome_rowan::Text;
 
 use crate::{
     RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
@@ -111,6 +112,17 @@ pub trait RawTypeCollector {
         expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData>;
 
+    /// Returns whether guard-based narrowing should be applied while
+    /// collecting types.
+    ///
+    /// Narrowing is still under development, so the collector that feeds the
+    /// module graph decides at construction time whether to enable it.
+    /// Collectors that do not opt in observe the same types as before
+    /// narrowing existed.
+    fn narrowing_enabled(&self) -> bool {
+        false
+    }
+
     fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
         let TypeReference::Resolved(RawTypeId::Local(id)) = ty else {
             return None;
@@ -171,6 +183,10 @@ pub trait RawTypeCollector {
             GLOBAL_UNDEFINED_ID.into(),
         ]))))))
     }
+
+    /// Returns a scratch cache for memoizing `typeof`-guard narrowing
+    /// invalidation checks.
+    fn narrowing_invalidation_cache(&mut self) -> &mut FxHashMap<(JsSyntaxNode, Text), bool>;
 }
 
 #[derive(Default)]
