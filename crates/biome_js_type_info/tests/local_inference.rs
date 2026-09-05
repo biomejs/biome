@@ -3,7 +3,8 @@ mod utils;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::JsExpressionStatement;
 use biome_js_type_info::{
-    RawTypeCollector, ReturnType, TypeData, TypeReference, TypeofExpression, TypeofTag,
+    NarrowingPredicate, RawTypeCollector, ReturnType, TypeData, TypeReference, TypeofExpression,
+    TypeofTag,
 };
 use biome_rowan::AstNode;
 
@@ -429,7 +430,10 @@ fn infer_type_of_typeof_guard_narrowed_reference() {
     let TypeofExpression::Narrowed(narrowed) = expression.as_ref() else {
         panic!("expected a narrowed reference, got {expression:?}");
     };
-    assert_eq!(narrowed.tag, TypeofTag::String);
+    assert_eq!(
+        narrowed.predicate,
+        NarrowingPredicate::Typeof(TypeofTag::String)
+    );
     assert!(
         matches!(&narrowed.ty, TypeReference::Qualifier(qualifier) if qualifier.path.identifier().is_some_and(|name| name.text() == "x")),
         "the narrowed type must be the reference to `x`, got {:?}",
