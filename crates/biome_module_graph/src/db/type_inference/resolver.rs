@@ -78,6 +78,10 @@ impl ImportResolution<'_> {
             remaining: MAX_ON_DEMAND_IMPORT_DEPTH,
         }
     }
+
+    pub(super) const fn is_on_demand(self) -> bool {
+        matches!(self, Self::OnDemand { .. })
+    }
 }
 
 /// Identifies one declaration in the dependency graph for a selected lookup.

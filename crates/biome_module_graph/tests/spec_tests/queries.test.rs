@@ -384,6 +384,219 @@ fn test_namespace_query_keeps_named_exports_symbolic() {
 }
 
 #[test]
+fn test_namespace_member_inference_skips_unrelated_exports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/schema.ts".into(),
+        r#"
+            export interface Result<T> { success: boolean; error: T; }
+            export declare function safeParse(value: unknown): Result<string>;
+            export * as unrelated from "./unrelated.ts";
+        "#,
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const value = 1;");
+
+    for (declaration, expression, expected) in [
+        ("", "z.safeParse('').error", InferredTypeData::String),
+        ("", "z.safeParse('').success", InferredTypeData::Boolean),
+        ("", "z?.safeParse('').error", InferredTypeData::String),
+        (
+            "const alias = z;",
+            "alias.safeParse('').error",
+            InferredTypeData::String,
+        ),
+        (
+            "const { safeParse } = z;",
+            "safeParse('').error",
+            InferredTypeData::String,
+        ),
+        (
+            "declare const result: z.Result<string>;",
+            "result.error",
+            InferredTypeData::String,
+        ),
+    ] {
+        let source = format!(
+            "import * as z from './schema.ts'; {declaration} export const value = {expression};"
+        );
+        fs.insert("/src/index.ts".into(), source.as_str());
+        let db = build_js_test_module_db(
+            &fs,
+            &["/src/schema.ts", "/src/unrelated.ts", "/src/index.ts"],
+            true,
+        );
+        let module = db
+            .module_for_path(Utf8Path::new("/src/index.ts"))
+            .expect("index module must exist");
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, &source, expression),
+        );
+
+        db.clear_salsa_events();
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        let ty = normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty));
+        assert_eq!(ty, expected, "{expression}");
+        let events = db.take_salsa_events();
+        for query in [
+            "namespace_export_names",
+            "infer_module_types",
+            IMPORT_DEPTH_PREPARATION_QUERY,
+        ] {
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query, &events),
+                0,
+                "{expression} must not execute {query}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_namespace_member_inference_tracks_only_selected_dependencies() {
+    const SOURCE: &str = "import { schema } from './barrel.ts'; schema.value;";
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    fs.insert(
+        "/src/barrel.ts".into(),
+        "export * as schema from './schema.ts';",
+    );
+    fs.insert(
+        "/src/schema.ts".into(),
+        "export declare const value: string; export * as unrelated from './unrelated.ts';",
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const unused = 1;");
+    let mut db = build_js_test_module_db(
+        &fs,
+        &[
+            "/src/index.ts",
+            "/src/barrel.ts",
+            "/src/schema.ts",
+            "/src/unrelated.ts",
+        ],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let range = expression_range_by_source(&db, module, SOURCE, "schema.value");
+    let input = ExpressionTypeInput::new(&db, module, range);
+    let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+    assert_eq!(
+        normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty)),
+        InferredTypeData::String
+    );
+
+    for (path, source, expected, executions) in [
+        (
+            "/src/unrelated.ts",
+            "export const unused = 2;",
+            InferredTypeData::String,
+            0,
+        ),
+        (
+            "/src/schema.ts",
+            "export declare const value: number; export * as unrelated from './unrelated.ts';",
+            InferredTypeData::Number,
+            1,
+        ),
+    ] {
+        fs.insert(path.into(), source);
+        let changed = db
+            .module_for_path(Utf8Path::new(path))
+            .expect("module must exist");
+        let kind = resolve_js_module_kind_for_test(&fs, path, true);
+        salsa::Setter::to(changed.set_kind(&mut db), kind);
+
+        db.clear_salsa_events();
+        let input = ExpressionTypeInput::new(&db, module, range);
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        assert_eq!(
+            normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty)),
+            expected
+        );
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_expression_type", &events),
+            executions,
+            "edit to {path}"
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "namespace_export_names", &events),
+            0
+        );
+    }
+}
+
+#[test]
+fn test_namespace_member_inference_preserves_export_semantics() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/left.ts".into(),
+        "declare const value: string; export { value, value as default };",
+    );
+    fs.insert(
+        "/src/right.ts".into(),
+        "export declare const value: number;",
+    );
+
+    for (exports, member, expected) in [
+        (
+            "export * from './left.ts';",
+            "default",
+            InferredTypeData::Unknown,
+        ),
+        (
+            "export * from './left.ts';",
+            "missing",
+            InferredTypeData::Unknown,
+        ),
+        (
+            "export { default } from './left.ts';",
+            "default",
+            InferredTypeData::String,
+        ),
+        (
+            "export * from './left.ts'; export * from './right.ts';",
+            "value",
+            InferredTypeData::Unknown,
+        ),
+        (
+            "export * from './left.ts'; export { value } from './right.ts';",
+            "value",
+            InferredTypeData::Number,
+        ),
+    ] {
+        fs.insert("/src/barrel.ts".into(), exports);
+        let expression = format!("namespace.{member}");
+        let source = format!("import * as namespace from './barrel.ts'; {expression};");
+        fs.insert("/src/index.ts".into(), source.as_str());
+        let db = build_js_test_module_db(
+            &fs,
+            &[
+                "/src/left.ts",
+                "/src/right.ts",
+                "/src/barrel.ts",
+                "/src/index.ts",
+            ],
+            true,
+        );
+        let module = db
+            .module_for_path(Utf8Path::new("/src/index.ts"))
+            .expect("index module must exist");
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, &source, &expression),
+        );
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        let ty = normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty));
+        assert_eq!(ty, expected, "{exports} {expression}");
+    }
+}
+
+#[test]
 fn test_imported_generic_arguments_skip_full_declaration_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
