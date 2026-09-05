@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/function-first-param/function_expression.js
+---
+
+# Input
+
+```js
+//https://github.com/prettier/prettier/issues/3002
+beep.boop().baz("foo",
+{
+  some: {
+    thing: {
+      nested: true
+    }
+  }
+},
+{ another: { thing: true } },
+() => {});
+
+
+//https://github.com/prettier/prettier/issues/2984
+db.collection('indexOptionDefault').createIndex({ a: 1 }, {
+  indexOptionDefaults: true,
+  w: 2,
+  wtimeout: 1000
+}, function(err) {
+  test.equal(null, err);
+  test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+  client.close();
+  done();
+});
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,18 @@
+ //https://github.com/prettier/prettier/issues/3002
+-beep.boop().baz(
+-  "foo",
+-  {
+-    some: {
+-      thing: {
+-        nested: true,
++beep
++  .boop()
++  .baz(
++    "foo",
++    {
++      some: {
++        thing: {
++          nested: true,
++        },
+       },
+     },
+-  },
+-  { another: { thing: true } },
+-  () => {},
+-);
++    { another: { thing: true } },
++    () => {},
++  );
+ 
+ //https://github.com/prettier/prettier/issues/2984
+ db.collection("indexOptionDefault").createIndex(
+```
+
+# Output
+
+```js
+//https://github.com/prettier/prettier/issues/3002
+beep
+  .boop()
+  .baz(
+    "foo",
+    {
+      some: {
+        thing: {
+          nested: true,
+        },
+      },
+    },
+    { another: { thing: true } },
+    () => {},
+  );
+
+//https://github.com/prettier/prettier/issues/2984
+db.collection("indexOptionDefault").createIndex(
+  { a: 1 },
+  {
+    indexOptionDefaults: true,
+    w: 2,
+    wtimeout: 1000,
+  },
+  function (err) {
+    test.equal(null, err);
+    test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+
+    client.close();
+    done();
+  },
+);
+```
