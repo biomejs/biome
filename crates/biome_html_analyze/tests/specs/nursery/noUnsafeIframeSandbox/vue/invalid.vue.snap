@@ -16,7 +16,7 @@ expression: invalid.vue
 ```
 invalid.vue:2:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
+  × Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <iframe sandbox="allow-scripts allow-same-origin"></iframe>
@@ -28,6 +28,8 @@ invalid.vue:2:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
   
   i Remove allow-scripts or allow-same-origin from the sandbox attribute.
   
+  i See Play safely in sandboxed IFrames or this Stack Overflow answer for more details.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -36,7 +38,7 @@ invalid.vue:2:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
 ```
 invalid.vue:3:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
+  × Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <iframe sandbox="allow-scripts allow-same-origin"></iframe>
@@ -49,6 +51,8 @@ invalid.vue:3:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
   
   i Remove allow-scripts or allow-same-origin from the sandbox attribute.
   
+  i See Play safely in sandboxed IFrames or this Stack Overflow answer for more details.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -57,7 +61,7 @@ invalid.vue:3:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
 ```
 invalid.vue:4:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
+  × Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
   
     2 │ <iframe sandbox="allow-scripts allow-same-origin"></iframe>
     3 │ <iframe sandbox="allow-downloads allow-scripts allow-forms allow-same-origin"></iframe>
@@ -70,6 +74,8 @@ invalid.vue:4:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
   
   i Remove allow-scripts or allow-same-origin from the sandbox attribute.
   
+  i See Play safely in sandboxed IFrames or this Stack Overflow answer for more details.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -78,7 +84,7 @@ invalid.vue:4:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
 ```
 invalid.vue:5:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
+  × Unsafe combination of allow-scripts and allow-same-origin in the sandbox attribute.
   
     3 │ <iframe sandbox="allow-downloads allow-scripts allow-forms allow-same-origin"></iframe>
     4 │ <iframe :sandbox="'allow-scripts allow-same-origin'"></iframe>
@@ -89,6 +95,8 @@ invalid.vue:5:9 lint/nursery/noUnsafeIframeSandbox ━━━━━━━━━�
   i This lets the embedded document run scripts in the origin of the embedding page, so it can remove its own sandbox attribute and escape the restrictions.
   
   i Remove allow-scripts or allow-same-origin from the sandbox attribute.
+  
+  i See Play safely in sandboxed IFrames or this Stack Overflow answer for more details.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

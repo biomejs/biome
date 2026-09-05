@@ -9,12 +9,12 @@ use biome_rowan::TextRange;
 use biome_rule_options::no_unsafe_iframe_sandbox::NoUnsafeIframeSandboxOptions;
 
 declare_lint_rule! {
-    /// Disallow an unsafe combination of the sandbox attribute.
+    /// Disallow an unsafe combination of the `sandbox` attribute.
     ///
-    /// This rule reports cases where the attribute contains `allow-scripts` and `allow-same-origin` at the same time,
-    /// as this combination allows the embedded document to remove the sandbox attribute and bypass the restrictions.
+    /// This rule reports cases where the attribute may contain `allow-scripts` and `allow-same-origin` at the same time,
+    /// as this combination allows the embedded document to remove the `sandbox` attribute and bypass the restrictions.
     ///
-    /// See [Play safely in sandboxed IFrames](https://web.dev/articles/sandboxed-iframes) for more details.
+    /// See [Play safely in sandboxed IFrames](https://web.dev/articles/sandboxed-iframes) or [this Stack Overflow answer](https://stackoverflow.com/a/62431584) for more details.
     ///
     /// ## Examples
     ///
@@ -34,8 +34,8 @@ declare_lint_rule! {
         version: "next",
         name: "noUnsafeIframeSandbox",
         language: "html",
-        recommended: false,
-        severity: Severity::Warning,
+        recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintReactDom("no-unsafe-iframe-sandbox").inspired(), RuleSource::EslintReactXyz("dom-no-unsafe-iframe-sandbox").inspired()],
     }
 }
@@ -57,15 +57,19 @@ impl Rule for NoUnsafeIframeSandbox {
         let value = attr.as_static_value()?;
         let text = value.text();
 
-        let has_scripts = text
-            .split_ascii_whitespace()
-            .any(|token| token == "allow-scripts");
-        let has_same_origin = text
-            .split_ascii_whitespace()
-            .any(|token| token == "allow-same-origin");
-
-        if has_scripts && has_same_origin {
-            return Some(attr.range());
+        let mut has_scripts = false;
+        let mut has_same_origin = false;
+        for token in text.split_ascii_whitespace() {
+            if token.eq_ignore_ascii_case("allow-scripts") {
+                has_scripts = true;
+            } else if token.eq_ignore_ascii_case("allow-same-origin") {
+                has_same_origin = true;
+            } else {
+                continue;
+            }
+            if has_scripts && has_same_origin {
+                return Some(attr.range());
+            }
         }
 
         None
@@ -85,6 +89,9 @@ impl Rule for NoUnsafeIframeSandbox {
             })
             .note(markup! {
                 "Remove "<Emphasis>"allow-scripts"</Emphasis>" or "<Emphasis>"allow-same-origin"</Emphasis>" from the "<Emphasis>"sandbox"</Emphasis>" attribute."
+            })
+            .note(markup!{
+                "See "<Hyperlink href="https://web.dev/articles/sandboxed-iframes">"Play safely in sandboxed IFrames"</Hyperlink>" or "<Hyperlink href="https://stackoverflow.com/a/62431584">"this Stack Overflow answer"</Hyperlink>" for more details."
             }),
         )
     }
