@@ -1,0 +1,110 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function typeofThenTruthy(x: string | undefined) {
+	if (typeof x === "undefined") {
+		if (x) {
+			x;
+		}
+	}
+}
+
+export function typeofThenTruthyKeepsSubset(y: string | Promise<void>) {
+	if (typeof y === "string") {
+		if (y) {
+			y;
+		}
+	}
+}
+
+export function truthyThenTypeof(z: string | Promise<void>) {
+	if (z) {
+		if (typeof z === "string") {
+			z;
+		}
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding typeofThenTruthy "typeofThenTruthy" => sync Function "typeofThenTruthy" {
+  accepts: {
+    params: [
+      required x: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => string | undefined
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"undefined\"" => boolean
+
+Expression "x" => string | undefined
+
+Expression "\"undefined\"" => string: undefined
+
+Expression "x" => undefined
+
+Expression "x" => undefined
+
+Binding typeofThenTruthyKeepsSubset "typeofThenTruthyKeepsSubset" => sync Function "typeofThenTruthyKeepsSubset" {
+  accepts: {
+    params: [
+      required y: string | instanceof Promise<void>
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => string | instanceof Promise<void>
+
+Expression "typeof y" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof y === \"string\"" => boolean
+
+Expression "y" => string | instanceof Promise<void>
+
+Expression "\"string\"" => string: string
+
+Expression "y" => string
+
+Expression "y" => string
+
+Binding truthyThenTypeof "truthyThenTypeof" => sync Function "truthyThenTypeof" {
+  accepts: {
+    params: [
+      required z: string | instanceof Promise<void>
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding z "z" => string | instanceof Promise<void>
+
+Expression "z" => string | instanceof Promise<void>
+
+Expression "typeof z" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof z === \"string\"" => boolean
+
+Expression "z" => string | instanceof Promise<void>
+
+Expression "\"string\"" => string: string
+
+Expression "z" => string
+```

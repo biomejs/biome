@@ -1,0 +1,177 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Choice = { kind: "left"; left: string } | { kind: "right"; right: number };
+
+export function switches(s: Choice) {
+	switch (s.kind) {
+		case "left":
+			s;
+			break;
+	}
+}
+
+export function equality(q: number | "done") {
+	if (q === "done") {
+		q;
+	}
+}
+
+export function promiseEquality(u: Promise<void> | "done") {
+	if (u === "done") {
+		u;
+	}
+}
+
+interface Lengthy {
+	length: number;
+}
+
+export function stringSatisfies(g: Lengthy | number) {
+	if (g === "done") {
+		g;
+	}
+}
+
+export function genericEquality<T extends string>(o: T | Promise<void>) {
+	if (o === "done") {
+		o;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Choice "Choice" =>
+  Object {
+    prototype: No prototype
+    members: ["kind": string: left, "left": string]
+  }
+  | Object {
+    prototype: No prototype
+    members: ["kind": string: right, "right": number]
+  }
+
+Binding switches "switches" => sync Function "switches" {
+  accepts: {
+    params: [
+      required s: instanceof Choice
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding s "s" => instanceof Choice
+
+Expression "s" => instanceof Choice
+
+Expression "s.kind" => string: left | string: right
+
+Expression "\"left\"" => string: left
+
+Expression "s" => Object {
+  prototype: No prototype
+  members: ["kind": string: left, "left": string]
+}
+
+Binding equality "equality" => sync Function "equality" {
+  accepts: {
+    params: [
+      required q: number | string: done
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding q "q" => number | string: done
+
+Expression "q" => number | string: done
+
+Expression "q === \"done\"" => boolean
+
+Expression "\"done\"" => string: done
+
+Expression "q" => string: done
+
+Binding promiseEquality "promiseEquality" => sync Function "promiseEquality" {
+  accepts: {
+    params: [
+      required u: instanceof Promise<void> | string: done
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding u "u" => instanceof Promise<void> | string: done
+
+Expression "u" => instanceof Promise<void> | string: done
+
+Expression "u === \"done\"" => boolean
+
+Expression "\"done\"" => string: done
+
+Expression "u" => string: done
+
+Binding Lengthy "Lengthy" => interface "Lengthy" {
+  extends: []
+  type_args: []
+  members: ["length": number]
+}
+
+Binding stringSatisfies "stringSatisfies" => sync Function "stringSatisfies" {
+  accepts: {
+    params: [
+      required g: instanceof Lengthy | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding g "g" => instanceof Lengthy | number
+
+Expression "g" => instanceof Lengthy | number
+
+Expression "g === \"done\"" => boolean
+
+Expression "\"done\"" => string: done
+
+Expression "g" => interface "Lengthy" {
+  extends: []
+  type_args: []
+  members: ["length": number]
+}
+
+Binding genericEquality "genericEquality" => sync Function "genericEquality" {
+  accepts: {
+    params: [
+      required o: instanceof T | instanceof Promise<void>
+    ]
+    type_args: [T extends string]
+  }
+  returns: void
+}
+
+Binding T "T" => T extends string
+
+Binding o "o" => instanceof T | instanceof Promise<void>
+
+Expression "o" => instanceof T | instanceof Promise<void>
+
+Expression "o === \"done\"" => boolean
+
+Expression "\"done\"" => string: done
+
+Expression "o" => instanceof T
+```

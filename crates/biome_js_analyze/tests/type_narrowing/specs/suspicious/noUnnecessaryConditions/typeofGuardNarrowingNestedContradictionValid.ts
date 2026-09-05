@@ -1,8 +1,7 @@
 /* should not generate diagnostics */
 
-// Honouring only the innermost `typeof` would narrow `x` to a function and
-// report `if (x)` as always truthy. The guards contradict each other, so the
-// branch is unreachable rather than `x` being conclusively a function.
+// Nothing is both a string and a function, so `x` is `never` here and the
+// condition is not provably truthy.
 function nestedContradictoryGuards(x: string | (() => void)) {
 	if (typeof x === "string") {
 		if (typeof x === "function") {
@@ -13,7 +12,8 @@ function nestedContradictoryGuards(x: string | (() => void)) {
 	}
 }
 
-// The same holds when the inner guard states the contradiction with `!==`.
+// A negated `typeof` is not a guard Biome reads, so only the outer one
+// applies and `x` is `string`, which can still be `""`.
 function nestedNegatedContradiction(x: string | (() => void)) {
 	if (typeof x === "string") {
 		if (typeof x !== "string") {

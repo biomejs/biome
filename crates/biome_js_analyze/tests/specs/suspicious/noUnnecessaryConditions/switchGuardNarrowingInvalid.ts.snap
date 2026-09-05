@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: switchGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function alwaysTruthyCase(x: "on" | "") {
+	switch (x) {
+		case "on":
+			// `x` is narrowed to `"on"` here, so this condition is always
+			// truthy.
+			if (x) {
+				x;
+			}
+			break;
+	}
+}
+
+// The empty-string case narrows `x` to `""`, so the condition is always falsy.
+function alwaysFalsyCase(x: "on" | "") {
+	switch (x) {
+		case "":
+			if (x) {
+				x;
+			}
+			break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+switchGuardNarrowingInvalid.ts:8:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+     6 │ 			// `x` is narrowed to `"on"` here, so this condition is always
+     7 │ 			// truthy.
+   > 8 │ 			if (x) {
+       │ 			    ^
+     9 │ 				x;
+    10 │ 			}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+switchGuardNarrowingInvalid.ts:19:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    17 │ 	switch (x) {
+    18 │ 		case "":
+  > 19 │ 			if (x) {
+       │ 			    ^
+    20 │ 				x;
+    21 │ 			}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```

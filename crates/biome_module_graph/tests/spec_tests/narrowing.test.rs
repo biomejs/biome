@@ -164,6 +164,575 @@ export function constructSignature(k: Ctor | number) {
     );
 }
 
+#[test]
+fn test_infer_module_types_narrows_truthiness_guards() {
+    const SOURCE: &str = r#"
+export function truthiness(z: "on" | null) {
+    if (z) {
+        z;
+    }
+    if (!z) {
+        z;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A truthiness guard drops the nullish variant.
+    let truthy_offset = SOURCE
+        .find("z;")
+        .expect("truthy-guarded reference must exist");
+    let narrowed_to_truthy = normalize_type(&db, module, expression_ty_at(truthy_offset));
+    assert!(contains_inferred_string_literal(
+        &db,
+        narrowed_to_truthy,
+        "on"
+    ));
+    assert!(!contains_inferred_null(&db, narrowed_to_truthy));
+
+    // A negated truthiness guard keeps only the falsy variants.
+    let falsy_offset = SOURCE
+        .rfind("z;")
+        .expect("falsy-guarded reference must exist");
+    let narrowed_to_falsy = normalize_type(&db, module, expression_ty_at(falsy_offset));
+    assert!(contains_inferred_null(&db, narrowed_to_falsy));
+    assert!(!contains_inferred_string_literal(
+        &db,
+        narrowed_to_falsy,
+        "on"
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_truthiness_guards",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_narrows_instanceof_guards() {
+    const SOURCE: &str = r#"
+class BaseCls {}
+class DerivedCls extends BaseCls {
+    run(): void {}
+}
+
+export function instances(v: BaseCls, w: number | DerivedCls) {
+    if (v instanceof DerivedCls) {
+        v;
+    }
+    if (w instanceof DerivedCls) {
+        w;
+    }
+}
+
+function WithMixin<T extends new (...args: unknown[]) => object>(base: T) {
+    return class extends base {};
+}
+class MixedCls extends WithMixin(BaseCls) {
+    onlyMixed(): void {}
+}
+class SiblingCls extends BaseCls {
+    onlySibling(): void {}
+}
+
+export function mixins(m: MixedCls | SiblingCls) {
+    if (m instanceof BaseCls) {
+        m;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // An instanceof guard over a base class reference downcasts it, making
+    // the subclass member visible.
+    let downcast_offset = SOURCE.find("v;").expect("downcast reference must exist");
+    let narrowed_to_derived = normalize_type(&db, module, expression_ty_at(downcast_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_derived, "run")
+            .is_some()
+    );
+
+    // An instanceof guard strips union variants that cannot be instances.
+    let union_offset = SOURCE.find("w;").expect("union reference must exist");
+    let narrowed_to_instance = normalize_type(&db, module, expression_ty_at(union_offset));
+    assert!(!contains_inferred_number(&db, narrowed_to_instance));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_instance, "run")
+            .is_some()
+    );
+
+    // A variant whose extends chain contains a mixin call cannot be walked
+    // to a proof, so it must be kept.
+    let mixin_offset = SOURCE.find("m;").expect("mixin reference must exist");
+    let narrowed_with_mixin = normalize_type(&db, module, expression_ty_at(mixin_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_with_mixin, "onlyMixed")
+            .is_some()
+    );
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_with_mixin, "onlySibling")
+            .is_some()
+    );
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_instanceof_guards",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_narrows_discriminant_guards() {
+    const SOURCE: &str = r#"
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function discriminants(c: Choice) {
+    if (c.kind === "left") {
+        c;
+    }
+}
+
+type Esc =
+    | { kind: "o\x6e"; escaped: string }
+    | { kind: "off"; plain: number };
+
+export function escapes(e: Esc) {
+    if (e.kind === "on") {
+        e;
+    }
+}
+
+export function mutated(m: Choice) {
+    if (m.kind === "left") {
+        m.kind = "right";
+        m;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A discriminant guard strips union variants whose member is a literal
+    // with a different value.
+    let discriminant_offset = SOURCE
+        .find("c;")
+        .expect("discriminant reference must exist");
+    let narrowed_to_left = normalize_type(&db, module, expression_ty_at(discriminant_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_left, "left")
+            .is_some()
+    );
+    // On the un-narrowed union, `kind` would be `"left" | "right"`.
+    let kind_ty = inferred
+        .find_member_type(&db, narrowed_to_left, "kind")
+        .expect("kind member must be inferred");
+    let kind_ty = normalize_type(&db, module, kind_ty);
+    assert!(is_inferred_string_literal(&db, kind_ty, "left"));
+
+    // A discriminant with an escape sequence is compared by its unescaped
+    // value, so the guard keeps the escaped variant and strips the other.
+    let escape_offset = SOURCE.find("e;").expect("escape reference must exist");
+    let narrowed_to_escaped = normalize_type(&db, module, expression_ty_at(escape_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_escaped, "escaped")
+            .is_some()
+    );
+
+    // A write to a member of the narrowed value inside the consequent
+    // declines discriminant narrowing.
+    let mutated_offset = SOURCE.find("m;").expect("mutated reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(mutated_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(formatted.contains("\"left\""), "{formatted}");
+    assert!(formatted.contains("\"right\""), "{formatted}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_discriminant_guards",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_narrows_switch_and_equality_guards() {
+    const SOURCE: &str = r#"
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function switches(s: Choice) {
+    switch (s.kind) {
+        case "left":
+            s;
+            break;
+    }
+}
+
+export function equality(q: number | "done") {
+    if (q === "done") {
+        q;
+    }
+}
+
+export function promiseEquality(u: Promise<void> | "done") {
+    if (u === "done") {
+        u;
+    }
+}
+
+interface Lengthy {
+    length: number;
+}
+
+export function stringSatisfies(g: Lengthy | number) {
+    if (g === "done") {
+        g;
+    }
+}
+
+export function genericEquality<T extends string>(o: T | Promise<void>) {
+    if (o === "done") {
+        o;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A switch case over a member discriminant narrows like the equivalent
+    // `if` guard.
+    let switch_offset = SOURCE.find("s;").expect("switch reference must exist");
+    let narrowed_in_case = normalize_type(&db, module, expression_ty_at(switch_offset));
+    let case_kind_ty = inferred
+        .find_member_type(&db, narrowed_in_case, "kind")
+        .expect("kind member must be inferred");
+    let case_kind_ty = normalize_type(&db, module, case_kind_ty);
+    assert!(is_inferred_string_literal(&db, case_kind_ty, "left"));
+
+    // An equality guard narrows the union to the compared literal.
+    let equality_offset = SOURCE.find("q;").expect("equality reference must exist");
+    let narrowed_to_done = normalize_type(&db, module, expression_ty_at(equality_offset));
+    assert!(is_inferred_string_literal(&db, narrowed_to_done, "done"));
+    assert!(!contains_inferred_number(&db, narrowed_to_done));
+
+    // A promise instance can never strictly equal a string.
+    let promise_equality_offset = SOURCE
+        .find("u;")
+        .expect("promise equality reference must exist");
+    let narrowed_from_promise =
+        normalize_type(&db, module, expression_ty_at(promise_equality_offset));
+    assert!(is_inferred_string_literal(
+        &db,
+        narrowed_from_promise,
+        "done"
+    ));
+
+    // An interface whose members all exist on `String` may describe a
+    // string, so its variant is retained.
+    let satisfies_offset = SOURCE
+        .find("g;")
+        .expect("string-satisfies reference must exist");
+    let narrowed_to_lengthy = normalize_type(&db, module, expression_ty_at(satisfies_offset));
+    assert!(!contains_inferred_number(&db, narrowed_to_lengthy));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_to_lengthy, "length")
+            .is_some()
+    );
+
+    // A generic type parameter could be instantiated with the compared
+    // string, so its variant must survive while the promise is stripped.
+    let generic_offset = SOURCE.find("o;").expect("generic reference must exist");
+    let narrowed_generic = normalize_type(&db, module, expression_ty_at(generic_offset));
+    let formatted = format_inferred_type(&db, narrowed_generic);
+    assert!(formatted.contains('T'), "{formatted}");
+    assert!(!formatted.contains("Promise"), "{formatted}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_switch_and_equality_guards",
+        &db,
+        &fs,
+    );
+}
+
+/// The tests of preceding `case` clauses evaluate at runtime even when
+/// their clauses are not entered, so a write to the discriminant inside one
+/// of them must decline narrowing.
+#[test]
+fn test_infer_module_types_declines_switch_narrowing_on_test_side_effects() {
+    const SOURCE: &str = r#"
+export function precedingCaseTestWrites(x: number | "a") {
+    switch (x) {
+        case (x = 5, "nope" as any):
+            break;
+        case "a":
+            x;
+            break;
+    }
+}
+
+type Kinded =
+    | { kind: "a"; a: number }
+    | { kind: "b"; b: number };
+
+export function precedingCaseTestWritesMember(y: Kinded) {
+    switch (y.kind) {
+        case (y.kind = "a", "zzz" as any):
+            break;
+        case "b":
+            y;
+            break;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let offset = SOURCE.find("x;").expect("case reference must exist");
+    let start = TextSize::from(offset as u32);
+    let range = TextRange::new(start, start + TextSize::from(1));
+    let ty = inferred
+        .expressions
+        .get(&range)
+        .copied()
+        .expect("reference type must be inferred");
+    let unnarrowed = normalize_type(&db, module, ty);
+    assert!(contains_inferred_number(&db, unnarrowed));
+
+    // A preceding case test that writes to a member of the discriminant
+    // object must also decline member-discriminant narrowing.
+    let member_offset = SOURCE
+        .find("y;")
+        .expect("member-discriminant reference must exist");
+    let start = TextSize::from(member_offset as u32);
+    let range = TextRange::new(start, start + TextSize::from(1));
+    let ty = inferred
+        .expressions
+        .get(&range)
+        .copied()
+        .expect("reference type must be inferred");
+    let unnarrowed = normalize_type(&db, module, ty);
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(formatted.contains("\"a\""), "{formatted}");
+    assert!(formatted.contains("\"b\""), "{formatted}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_declines_switch_narrowing_on_test_side_effects",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_narrows_predicate_call_guards() {
+    const SOURCE: &str = r#"
+type Pred = { pr: string };
+
+function isPred(value: unknown): value is Pred {
+    return typeof value === "object" && value !== null;
+}
+
+export function predicates(t: unknown) {
+    if (isPred(t)) {
+        t;
+    }
+}
+
+function isSecond(first: unknown, value: unknown): value is Pred {
+    return typeof value === "object" && value !== null;
+}
+
+export function wrongPosition(w: unknown) {
+    if (isSecond(w, 0)) {
+        w;
+    }
+}
+
+declare const others: unknown[];
+
+export function spreadBefore(b: unknown) {
+    if (isSecond(...others, b)) {
+        b;
+    }
+}
+
+declare function isFirstWithThis(this: void, first: unknown, second: unknown): first is Pred;
+
+export function thisParameter(p: unknown, q: unknown) {
+    if (isFirstWithThis(p, q)) {
+        p;
+        q;
+    }
+}
+
+function looksRight(value: unknown): boolean {
+    return typeof value === "object";
+}
+
+export function plainBoolean(n: unknown) {
+    if (looksRight(n)) {
+        n;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let expression_ty_at = |offset: usize| {
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        inferred
+            .expressions
+            .get(&range)
+            .copied()
+            .expect("reference type must be inferred")
+    };
+
+    // A type predicate narrows its argument to the predicate's type.
+    let predicate_offset = SOURCE.find("t;").expect("predicate reference must exist");
+    let narrowed_by_predicate = normalize_type(&db, module, expression_ty_at(predicate_offset));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_by_predicate, "pr")
+            .is_some()
+    );
+
+    // The predicate is over the second parameter, but the reference was
+    // passed as the first argument; it must keep its declared type.
+    let wrong_position_offset = SOURCE
+        .find("w;")
+        .expect("wrong-position reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(wrong_position_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(!formatted.contains("Pred"), "{formatted}");
+
+    // A spread before the reference makes its runtime parameter position
+    // unknowable; it must keep its declared type.
+    let spread_offset = SOURCE.find("b;").expect("spread reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(spread_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(!formatted.contains("Pred"), "{formatted}");
+
+    // A `this` parameter occupies a parameter slot but no argument
+    // position: the predicate over the first real parameter narrows the
+    // first argument, not the second.
+    let this_param_offset = SOURCE.find("p;").expect("this-param reference must exist");
+    let narrowed = normalize_type(&db, module, expression_ty_at(this_param_offset));
+    assert!(inferred.find_member_type(&db, narrowed, "pr").is_some());
+    let second_offset = SOURCE.find("q;").expect("second reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(second_offset));
+    let formatted = format_inferred_type(&db, unnarrowed);
+    assert!(!formatted.contains("Pred"), "{formatted}");
+
+    // The most common shape in real code: a callee returning plain `boolean`
+    // asserts nothing, so the argument keeps its declared type. Narrowing
+    // would have made it an instance of the predicate's type.
+    let plain_offset = SOURCE
+        .find("n;")
+        .expect("plain-boolean reference must exist");
+    let unnarrowed = normalize_type(&db, module, expression_ty_at(plain_offset));
+    assert!(!contains_inferred_instance(&db, unnarrowed));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_predicate_call_guards",
+        &db,
+        &fs,
+    );
+}
+
 /// A guard says nothing about a name that the guarded code rebinds or
 /// reassigns, so narrowing must be declined for it -- and must survive for
 /// the names the branch leaves alone.
@@ -478,4 +1047,253 @@ export function afterGuard(x: number | string) {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_infer_module_types_narrows_contradictory_equality_guards_to_never() {
+    const SOURCE: &str = r#"
+export function stringEquals(x: "a" | "b" | "c") {
+    if (x === "a") {
+        if (x === "b") {
+            x;
+        }
+    }
+}
+
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function memberEquals(s: Choice) {
+    if (s.kind === "left") {
+        if (s.kind === "right") {
+            s;
+        }
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    // No value passes both guards, so applying them in turn leaves nothing,
+    // the same way contradictory `typeof` guards already resolve to `never`.
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_contradictory_equality_guards_to_never",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_declines_member_narrowing_after_delete() {
+    const SOURCE: &str = r#"
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function example(s: Choice) {
+    if (s.kind === "left") {
+        delete s.kind;
+        s;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    // `delete s.kind` can change the discriminant, so the MemberEquals guard
+    // must be declined here just as it is for a plain assignment to `s.kind`.
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_declines_member_narrowing_after_delete",
+        &db,
+        &fs,
+    );
+}
+
+/// Guards of different kinds nest just like guards of the same kind: the
+/// value inside passed every test, so every enclosing guard narrows it.
+#[test]
+fn test_infer_module_types_narrows_nested_guards_of_different_kinds() {
+    const SOURCE: &str = r#"
+export function typeofThenTruthy(x: string | undefined) {
+    if (typeof x === "undefined") {
+        if (x) {
+            x;
+        }
+    }
+}
+
+export function typeofThenTruthyKeepsSubset(y: string | Promise<void>) {
+    if (typeof y === "string") {
+        if (y) {
+            y;
+        }
+    }
+}
+
+export function truthyThenTypeof(z: string | Promise<void>) {
+    if (z) {
+        if (typeof z === "string") {
+            z;
+        }
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let ty_at = |needle: &str| {
+        let offset = SOURCE.find(needle).expect("reference must exist");
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(1));
+        normalize_type(
+            &db,
+            module,
+            inferred
+                .expressions
+                .get(&range)
+                .copied()
+                .expect("reference type must be inferred"),
+        )
+    };
+
+    // Keeping only the inner truthiness guard would answer `string` for a
+    // value the outer guard proved is `undefined`.
+    let outer_undefined = ty_at("x;");
+    assert!(!contains_inferred_string(&db, outer_undefined));
+
+    // Keeping only the inner truthiness guard would put the promise back,
+    // which the outer `typeof` guard had already ruled out.
+    let outer_string = ty_at("y;");
+    assert!(contains_inferred_string(&db, outer_string));
+    assert!(!contains_inferred_instance(&db, outer_string));
+
+    // The same holds when the more specific guard is the inner one.
+    let inner_string = ty_at("z;");
+    assert!(contains_inferred_string(&db, inner_string));
+    assert!(!contains_inferred_instance(&db, inner_string));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_nested_guards_of_different_kinds",
+        &db,
+        &fs,
+    );
+}
+
+/// A `case` narrows only when every clause before it provably exits, so each
+/// statement kind that ends a clause has to be recognised.
+#[test]
+fn test_infer_module_types_narrows_after_every_case_exit_kind() {
+    const SOURCE: &str = r#"
+type Choice =
+    | { kind: "left"; left: string }
+    | { kind: "right"; right: number };
+
+export function afterReturn(v1: Choice) {
+    switch (v1.kind) {
+        case "right":
+            return;
+        case "left":
+            v1;
+            break;
+    }
+}
+
+export function afterThrow(v2: Choice) {
+    switch (v2.kind) {
+        case "right":
+            throw new Error();
+        case "left":
+            v2;
+            break;
+    }
+}
+
+export function afterContinue(v3: Choice) {
+    while (true) {
+        switch (v3.kind) {
+            case "right":
+                continue;
+            case "left":
+                v3;
+                break;
+        }
+    }
+}
+
+export function afterDefault(v4: Choice) {
+    switch (v4.kind) {
+        default:
+            break;
+        case "left":
+            v4;
+            break;
+    }
+}
+
+export function afterNestedExit(v5: Choice) {
+    switch (v5.kind) {
+        case "right": {
+            break;
+        }
+        case "left":
+            v5;
+            break;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    // `needle` is the reference followed by its `;`, so the reference itself
+    // is one character shorter.
+    let formatted_at = |needle: &str| {
+        let offset = SOURCE.find(needle).expect("reference must exist");
+        let start = TextSize::from(offset as u32);
+        let range = TextRange::new(start, start + TextSize::from(needle.len() as u32 - 1));
+        let ty = normalize_type(
+            &db,
+            module,
+            inferred
+                .expressions
+                .get(&range)
+                .copied()
+                .expect("reference type must be inferred"),
+        );
+        format_inferred_type(&db, ty)
+    };
+
+    for (needle, kind) in [("v1;", "return"), ("v2;", "throw"), ("v3;", "continue")] {
+        let formatted = formatted_at(needle);
+        assert!(!formatted.contains("right"), "after {kind}: {formatted}");
+    }
+
+    // A `default` clause that breaks cannot fall through either.
+    let formatted = formatted_at("v4;");
+    assert!(!formatted.contains("right"), "{formatted}");
+
+    // The exit sits inside a block, which the scan does not look into, so the
+    // clause conservatively declines narrowing for its successors.
+    let formatted = formatted_at("v5;");
+    assert!(formatted.contains("right"), "{formatted}");
 }
