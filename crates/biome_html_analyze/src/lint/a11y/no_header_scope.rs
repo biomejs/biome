@@ -5,7 +5,7 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::T;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::BatchMutationExt;
 use biome_rule_options::no_header_scope::NoHeaderScopeOptions;
 
 use crate::HtmlRuleAction;

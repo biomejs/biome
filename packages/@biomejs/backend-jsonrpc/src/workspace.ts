@@ -2610,6 +2610,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-template-expression
 	 */
 	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
+	* Disallow an unsafe combination of the sandbox attribute.
+See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox 
+	 */
+	noUnsafeIframeSandbox?: NoUnsafeIframeSandboxConfiguration;
+	/**
 	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
@@ -4901,6 +4906,9 @@ export type NoUnmodifiedLoopConditionConfiguration =
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
+export type NoUnsafeIframeSandboxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeIframeSandboxOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
@@ -6871,6 +6879,10 @@ export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryTemplateExpressionOptions;
 }
+export interface RuleWithNoUnsafeIframeSandboxOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeIframeSandboxOptions;
+}
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
@@ -8672,6 +8684,7 @@ export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
+export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
 export interface NoUntrustedLicensesOptions {
@@ -10128,6 +10141,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
+	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUntrustedLicenses"
