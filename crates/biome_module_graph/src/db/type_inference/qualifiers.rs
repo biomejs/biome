@@ -111,7 +111,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 // base. Building the complete namespace here would add
                 // unrelated exports to the declaration graph and could turn
                 // an acyclic lookup into a dependency cycle.
-                let projected_member = resolves_declarations_directly.then(|| {
+                let projected_member = self.import_resolution.is_on_demand().then(|| {
                     members.first().and_then(|member| {
                         self.resolve_namespace_import_member(
                             &TypeReference::Qualifier(Box::new(TypeReferenceQualifier {
@@ -273,7 +273,7 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Projects one member from a reference that leads to a namespace import.
     ///
-    /// Direct declaration evaluation uses this path to avoid resolving every
+    /// On-demand resolution uses this path to avoid resolving every
     /// export on the namespace. Returns `None` when the reference does not lead
     /// to a supported namespace import or the bounded projection cannot finish.
     pub(super) fn resolve_namespace_import_member(

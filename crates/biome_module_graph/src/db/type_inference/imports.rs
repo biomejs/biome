@@ -107,7 +107,8 @@ enum ExportOriginStep {
 /// Finds the declaration behind `root_name` without resolving its type.
 ///
 /// Explicit re-exports follow the selected source name. Blanket re-exports are
-/// searched only when a module has no explicit export with the requested name.
+/// searched only when a module has no explicit export with the requested name,
+/// except for `default`, which is never supplied by a blanket re-export.
 /// Distinct declarations reached through blanket re-exports are ambiguous;
 /// repeated paths to the same declaration are accepted. Cycles are skipped.
 /// The search returns [`ExportOriginResult::Indeterminate`] after 1024 distinct
@@ -296,6 +297,7 @@ fn find_export_origin_in_module(
             }
             ExportOriginStep::Continue
         }
+        None if name.text() == "default" => ExportOriginStep::Continue,
         None => {
             for reexport in js_info.blanket_reexports.iter().rev() {
                 let Some(path) = reexport.import.resolved_path.as_path() else {
