@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: truthyGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function alwaysTruthyAfterGuard(x: "on" | null) {
+	if (x) {
+		// `x` is narrowed to `"on"` here, so this condition is always truthy.
+		if (x) {
+			x;
+		}
+	}
+}
+
+function alwaysFalsyAfterNegatedGuard(x: "on" | null) {
+	if (!x) {
+		// `x` is narrowed to `null` here, so this condition is always falsy.
+		if (x) {
+			x;
+		}
+	}
+}
+
+function alwaysTruthyObjectAfterGuard(x: { a: number } | null) {
+	if (x) {
+		// `x` is narrowed to an object here, so this condition is always truthy.
+		if (x) {
+			x.a;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+truthyGuardNarrowingInvalid.ts:6:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    4 │ 	if (x) {
+    5 │ 		// `x` is narrowed to `"on"` here, so this condition is always truthy.
+  > 6 │ 		if (x) {
+      │ 		    ^
+    7 │ 			x;
+    8 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+truthyGuardNarrowingInvalid.ts:15:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    13 │ 	if (!x) {
+    14 │ 		// `x` is narrowed to `null` here, so this condition is always falsy.
+  > 15 │ 		if (x) {
+       │ 		    ^
+    16 │ 			x;
+    17 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+truthyGuardNarrowingInvalid.ts:24:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    22 │ 	if (x) {
+    23 │ 		// `x` is narrowed to an object here, so this condition is always truthy.
+  > 24 │ 		if (x) {
+       │ 		    ^
+    25 │ 			x.a;
+    26 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
