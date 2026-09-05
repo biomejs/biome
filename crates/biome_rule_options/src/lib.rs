@@ -437,6 +437,7 @@ pub mod use_json_import_attributes;
 pub mod use_jsx_key_in_iterable;
 pub mod use_key_with_click_events;
 pub mod use_key_with_mouse_events;
+pub mod use_layered_styles;
 pub mod use_literal_enum_members;
 pub mod use_literal_keys;
 pub mod use_lone_anonymous_operation;

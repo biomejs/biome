@@ -7321,6 +7321,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLayeredStyles": {
+					"description": "Enforce style rules to be defined within a cascade layer.\nSee https://biomejs.dev/linter/rules/use-layered-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLayeredStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMathMinMax": {
 					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
 					"anyOf": [
@@ -12219,6 +12226,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLayeredStylesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLayeredStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseLiteralEnumMembersOptions": {
 			"type": "object",
 			"properties": {
@@ -16263,6 +16279,22 @@
 		},
 		"UseKeyWithMouseEventsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLayeredStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLayeredStylesOptions" }
+			]
+		},
+		"UseLayeredStylesOptions": {
+			"type": "object",
+			"properties": {
+				"requireImportLayers": {
+					"description": "Require `@import` rules to have a cascade layer. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseLiteralEnumMembersConfiguration": {
