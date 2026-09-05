@@ -22,7 +22,8 @@ pub(in crate::db) use imports::{
     resolve_export_type_on_demand,
 };
 pub(in crate::db) use lookup::{
-    apply_substitutions_to_root_body, find_member_type_on_demand, find_value_member_type_on_demand,
+    apply_substitutions_to_root_body, find_member_type_on_demand,
+    find_named_value_member_type_on_demand, find_value_member_type_on_demand,
     resolve_local_type_on_demand, substitutions_for_instance,
 };
 pub(in crate::db) use promise_classification::{

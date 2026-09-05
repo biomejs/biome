@@ -52,12 +52,13 @@ pub(in crate::db) fn find_member_type_on_demand<'db>(
     ty: InferredTypeData<'db>,
     name: &str,
 ) -> Option<InferredTypeData<'db>> {
-    find_member_type_with_resolver(
+    find_member_type_with_resolver_kind(
         db,
         &mut OnDemandMemberLookupResolver,
         ty,
         name,
         MemberLookupMode::Any,
+        MemberLookupKind::Any,
     )
 }
 
@@ -73,12 +74,32 @@ pub(in crate::db) fn find_value_member_type_on_demand<'db>(
     ty: InferredTypeData<'db>,
     name: &str,
 ) -> Option<InferredTypeData<'db>> {
-    find_member_type_with_resolver(
+    find_member_type_with_resolver_kind(
         db,
         &mut OnDemandMemberLookupResolver,
         ty,
         name,
         MemberLookupMode::Value,
+        MemberLookupKind::Any,
+    )
+}
+
+/// Finds an explicitly named, non-accessor member available on a value.
+///
+/// Computed members and index signatures are excluded even when their keys
+/// match `name`.
+pub(in crate::db) fn find_named_value_member_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_member_type_with_resolver_kind(
+        db,
+        &mut OnDemandMemberLookupResolver,
+        ty,
+        name,
+        MemberLookupMode::Value,
+        MemberLookupKind::Named,
     )
 }
 
@@ -131,7 +152,14 @@ impl<'db> InferredModuleTypes<'db> {
         name: &str,
     ) -> Option<InferredTypeData<'db>> {
         let mut resolver = self;
-        find_member_type_with_resolver(db, &mut resolver, ty, name, MemberLookupMode::Any)
+        find_member_type_with_resolver_kind(
+            db,
+            &mut resolver,
+            ty,
+            name,
+            MemberLookupMode::Any,
+            MemberLookupKind::Any,
+        )
     }
 
     pub(in crate::db::type_inference) fn find_value_member_type_iterative(
@@ -141,7 +169,14 @@ impl<'db> InferredModuleTypes<'db> {
         name: &str,
     ) -> Option<InferredTypeData<'db>> {
         let mut resolver = self;
-        find_member_type_with_resolver(db, &mut resolver, ty, name, MemberLookupMode::Value)
+        find_member_type_with_resolver_kind(
+            db,
+            &mut resolver,
+            ty,
+            name,
+            MemberLookupMode::Value,
+            MemberLookupKind::Any,
+        )
     }
 }
 
@@ -156,6 +191,12 @@ pub(in crate::db::type_inference) enum MemberLookupMode {
     Instance,
     /// Selects class-side or instance-side members from the traversed value type.
     Value,
+}
+
+#[derive(Clone, Copy)]
+enum MemberLookupKind {
+    Any,
+    Named,
 }
 
 impl MemberLookupMode {
@@ -312,6 +353,17 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     name: &str,
     mode: MemberLookupMode,
 ) -> Option<InferredTypeData<'db>> {
+    find_member_type_with_resolver_kind(db, resolver, ty, name, mode, MemberLookupKind::Any)
+}
+
+fn find_member_type_with_resolver_kind<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    ty: InferredTypeData<'db>,
+    name: &str,
+    mode: MemberLookupMode,
+    kind: MemberLookupKind,
+) -> Option<InferredTypeData<'db>> {
     let mut seen = FxHashSet::default();
     let mut pending = vec![MemberLookupState::new(ty, mode)];
     let mut found = Vec::new();
@@ -355,7 +407,8 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             continue;
         }
 
-        if let Some((member_ty, is_optional)) = find_own_member_type(db, ty, name, state.mode) {
+        if let Some((member_ty, is_optional)) = find_own_member_type(db, ty, name, state.mode, kind)
+        {
             let member_ty = resolver.finalize_member_type(
                 db,
                 member_ty,
@@ -620,15 +673,32 @@ fn find_own_member_type<'db>(
     ty: InferredTypeData<'db>,
     name: &str,
     mode: MemberLookupMode,
+    kind: MemberLookupKind,
 ) -> Option<(InferredTypeData<'db>, bool)> {
-    let find = |members, mode: MemberLookupMode, allow_index_signature| {
-        find_member_in_members(
+    let find = |members, mode: MemberLookupMode, allow_index_signature| match kind {
+        MemberLookupKind::Any => find_member_in_members(
             db,
             members,
             name,
             |kind| mode.allows_named_member(kind),
             allow_index_signature,
-        )
+        ),
+        MemberLookupKind::Named => members
+            .iter()
+            .find(|member| {
+                mode.allows_named_member(&member.kind)
+                    && matches!(
+                        member.kind,
+                        InferredTypeMemberKind::Named(_)
+                            | InferredTypeMemberKind::NamedOptional(_)
+                            | InferredTypeMemberKind::NamedStatic(_)
+                            | InferredTypeMemberKind::ConstAssertedNamed(_)
+                            | InferredTypeMemberKind::ConstAssertedNamedOptional(_)
+                            | InferredTypeMemberKind::ConstAssertedNamedStatic(_)
+                    )
+                    && member.kind.has_name(name)
+            })
+            .map(|member| (member.ty, member.kind.is_optional())),
     };
 
     match ty {
