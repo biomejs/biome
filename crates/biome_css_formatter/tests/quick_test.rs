@@ -36,7 +36,6 @@ $map: (
                 version: 0,
             },
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })

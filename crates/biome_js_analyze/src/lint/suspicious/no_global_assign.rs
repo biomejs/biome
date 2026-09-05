@@ -73,7 +73,7 @@ impl Rule for NoGlobalAssign {
             let embedded = ctx
                 .get_service::<EmbeddedService>()
                 .expect("embedded service");
-            if embedded.contains_binding(token.token_text_trimmed()) {
+            if embedded.contains_binding(&token.token_text_trimmed()) {
                 return None;
             }
         }

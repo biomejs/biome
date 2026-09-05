@@ -8,12 +8,13 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;
@@ -78,6 +79,7 @@ impl ExtensionHandler for AstroFileHandler {
 
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -112,25 +114,70 @@ impl ExtensionHandler for AstroFileHandler {
     }
 }
 
+#[salsa::interned]
+struct ParseAstroInput {
+    file: FileSource,
+    document_source: JsFileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_astro_file<'db>(db: &'db dyn Db, input: ParseAstroInput<'db>) -> AnyParse {
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_js_with_cache(
+            AstroFileHandler::input(file.content(db)),
+            input.document_source(db),
+            JsParserOptions::default(),
+            node_cache,
+        )
+        .into()
+    })
+}
+
 fn parse(
-    _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
+    biome_path: &BiomePath,
     _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let frontmatter = AstroFileHandler::input(text);
-    let parse = parse_js_with_cache(
-        frontmatter,
-        file_source
-            .to_js_file_source()
-            .unwrap_or(JsFileSource::ts()),
-        JsParserOptions::default(),
-        cache,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_astro_file(
+        file_db,
+        ParseAstroInput::new(
+            file_db,
+            file,
+            file_source
+                .to_js_file_source()
+                .unwrap_or(JsFileSource::ts()),
+        ),
     );
 
+    Ok(ParseResult {
+        any_parse,
+        language: Some(JsFileSource::astro().into()),
+    })
+}
+
+fn parse_detached(
+    _biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
+) -> ParseResult {
+    let document_source = file_source
+        .to_js_file_source()
+        .unwrap_or(JsFileSource::ts());
+    let any_parse = parse_js_with_cache(
+        AstroFileHandler::input(code),
+        document_source,
+        JsParserOptions::default(),
+        node_cache,
+    )
+    .into();
+
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(JsFileSource::astro().into()),
     }
 }
@@ -139,7 +186,7 @@ fn parse(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {

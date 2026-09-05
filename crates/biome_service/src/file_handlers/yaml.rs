@@ -12,11 +12,11 @@ use crate::settings::{
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
-use biome_parser::NodeParse;
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
@@ -212,6 +212,7 @@ impl ExtensionHandler for YamlFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -250,30 +251,50 @@ fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
     settings.assist_enabled_for_file_path::<YamlLanguage>(path)
 }
 
+#[salsa::interned]
+struct ParseYamlInput {
+    file: FileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_yaml_file<'db>(db: &'db dyn Db, input: ParseYamlInput<'db>) -> AnyParse {
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_yaml_with_cache(file.content(db), node_cache).into()
+    })
+}
+
 fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_yaml_file(file_db, ParseYamlInput::new(file_db, file));
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
-    text: &str,
+    code: &str,
     _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
-    let parse = parse_yaml_with_cache(text, cache);
-    let any_parse =
-        NodeParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics()).into();
-
     ParseResult {
-        any_parse,
+        any_parse: parse_yaml_with_cache(code, node_cache).into(),
         language: Some(file_source),
     }
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: YamlSyntaxNode = parse.syntax(&workspace_db);
-    let tree: YamlRoot = parse.tree(&workspace_db);
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: YamlSyntaxNode = parse.syntax();
+    let tree: YamlRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -288,8 +309,7 @@ fn debug_formatter_ir(
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -299,13 +319,13 @@ fn debug_formatter_ir(
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),

@@ -274,7 +274,7 @@ impl Rule for NoUnusedVariables {
         // binding appear used. Template usage is handled by the reference check.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
             && !file_source.is_svelte_declaration()
-            && embedded.contains_binding(binding_token_text.clone())
+            && embedded.contains_binding(&binding_token_text)
             && binding
                 .declaration()
                 .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
@@ -288,13 +288,13 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+        let is_used_as_reference = embedded.is_used(&binding_token_text)
             || matches!(
                 file_source.as_embedding_kind(),
                 JsEmbeddingKind::Svelte { .. }
-            ) && embedded.is_svelte_store_used(binding_token_text.clone())
+            ) && embedded.is_svelte_store_used(&binding_token_text)
             || matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
-                && embedded.is_vue_directive_used(binding_token_text);
+                && embedded.is_vue_directive_used(&binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
