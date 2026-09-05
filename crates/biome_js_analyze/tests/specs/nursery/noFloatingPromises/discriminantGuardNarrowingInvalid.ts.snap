@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: discriminantGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+// `task.run()` floats with or without narrowing. These cases exist to catch
+// narrowing suppressing the diagnostic, not to prove that narrowing happens --
+// the inferred types are pinned by
+// `biome_module_graph/tests/spec_tests/narrowing.test.rs`.
+
+type Task =
+	| { kind: "sync" }
+	| { kind: "async"; run: () => Promise<void> };
+
+function guardedCall(task: Task) {
+	if (task.kind === "async") {
+		task.run();
+	}
+}
+
+// A `switch` on the discriminant narrows its cases the same way.
+function guardedCallInSwitch(task: Task) {
+	switch (task.kind) {
+		case "async":
+			task.run();
+			break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+discriminantGuardNarrowingInvalid.ts:14:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    12 │ function guardedCall(task: Task) {
+    13 │ 	if (task.kind === "async") {
+  > 14 │ 		task.run();
+       │ 		^^^^^^^^^^^
+    15 │ 	}
+    16 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+discriminantGuardNarrowingInvalid.ts:22:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    20 │ 	switch (task.kind) {
+    21 │ 		case "async":
+  > 22 │ 			task.run();
+       │ 			^^^^^^^^^^^
+    23 │ 			break;
+    24 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
