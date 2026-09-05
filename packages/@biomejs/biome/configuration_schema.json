@@ -3096,6 +3096,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroConflictingSetDirectivesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroConflictingSetDirectivesOptions" }
+			]
+		},
+		"NoAstroConflictingSetDirectivesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroSetHtmlDirectiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6774,6 +6784,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroConflictingSetDirectives": {
+					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroConflictingSetDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroSetHtmlDirective": {
 					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
 					"anyOf": [
@@ -8263,6 +8280,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroConflictingSetDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroConflictingSetDirectivesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -59,6 +59,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
     ));
+    result.push(("nursery", "noAstroConflictingSetDirectives", TypeId::of::<biome_rule_options::no_astro_conflicting_set_directives::NoAstroConflictingSetDirectivesOptions>()));
     result.push(("nursery", "noAstroSetHtmlDirective", TypeId::of::<biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions>()));
     result.push((
         "suspicious",

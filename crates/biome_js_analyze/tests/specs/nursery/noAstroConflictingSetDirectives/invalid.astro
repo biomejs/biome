@@ -1,0 +1,9 @@
+<!-- should generate diagnostics -->
+
+<div>{items.map((item) => <span set:html={item.html}>text child</span>)}</div>
+<div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
+<div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
+
+<div>{show && <Component set:html="html" set:text="text" />}</div>
+<div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+<div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
