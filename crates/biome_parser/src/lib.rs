@@ -1096,7 +1096,6 @@ impl ParsedSnippet {
     pub fn has_errors(&self) -> bool {
         self.parsed.has_errors()
     }
-
 }
 
 /// Convenient type for source

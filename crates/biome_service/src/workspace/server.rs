@@ -55,10 +55,10 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-#[cfg(all(feature = "module_graph", feature = "lang_css"))]
-use biome_css_syntax::AnyCssRoot;
 #[cfg(feature = "lang_css")]
 use biome_css_parser::CssParserOptions;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use biome_css_syntax::AnyCssRoot;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
 use biome_db::{Db, FileSource};
@@ -72,18 +72,18 @@ use biome_diagnostics::{
 use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_syntax::HtmlRoot;
 #[cfg(feature = "lang_html")]
 use biome_html_parser::HtmlParserOptions;
 #[cfg(feature = "lang_html")]
 use biome_html_syntax::HtmlLanguage;
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
+use biome_html_syntax::HtmlRoot;
+#[cfg(feature = "lang_js")]
+use biome_js_parser::JsParserOptions;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_js_semantic::{
     SemanticModel, SemanticModelOptions, semantic_model as build_js_semantic_model,
 };
-#[cfg(feature = "lang_js")]
-use biome_js_parser::JsParserOptions;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_js_syntax::AnyJsRoot;
 #[cfg(feature = "lang_js")]
