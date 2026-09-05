@@ -182,6 +182,8 @@ pub enum JsEmbeddingKind {
         is_source: bool,
         /// Whether this is a v-on event handler (e.g., @click="handler")
         event_handler: bool,
+        /// Whether this embed contains a Vue `v-slot` binding pattern.
+        slot_scope: bool,
         /// Whether this embed should be parsed as statements (module/script).
         /// When `false`, the content is parsed as an expression via `parse_template_expression`.
         /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
@@ -235,6 +237,15 @@ impl JsEmbeddingKind {
             self,
             Self::Vue {
                 event_handler: true,
+                ..
+            }
+        )
+    }
+    pub const fn is_vue_slot_scope(&self) -> bool {
+        matches!(
+            self,
+            Self::Vue {
+                slot_scope: true,
                 ..
             }
         )
@@ -373,6 +384,7 @@ impl JsFileSource {
             setup: false,
             is_source: true,
             event_handler: false,
+            slot_scope: false,
             allow_statements: true,
         })
     }
@@ -383,6 +395,7 @@ impl JsFileSource {
             setup: true,
             is_source: true,
             event_handler: false,
+            slot_scope: false,
             allow_statements: true,
         })
     }
@@ -506,6 +519,12 @@ impl JsFileSource {
     /// Returns true if this is a Vue event handler (v-on directive)
     pub const fn is_vue_event_handler(&self) -> bool {
         self.embedding_kind.is_vue_event_handler()
+    }
+
+    /// Returns true if this is a Vue `v-slot` / `#` directive value, whose
+    /// content declares the slot props instead of referencing them.
+    pub const fn is_vue_slot_scope(&self) -> bool {
+        self.embedding_kind.is_vue_slot_scope()
     }
 
     /// Returns true if this is a Svelte `{@const}` block

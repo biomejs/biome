@@ -198,6 +198,14 @@ pub(crate) fn template_expression_trailing_code(p: &JsParser, range: TextRange) 
     .with_hint("Remove the extra code or split into multiple template expressions.")
 }
 
+pub(crate) fn vue_slot_scope_trailing_code(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "A `v-slot` value can only contain a single binding pattern",
+        range,
+    )
+    .with_hint("Remove the extra code. Type annotations are not supported here.")
+}
+
 pub(crate) fn expected_unary_expression(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_node("unary expression", range, p)
 }

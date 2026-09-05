@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ item }: SlotProps
+
+```
+
+
+## AST
+
+```
+JsVueSlotScopeRoot {
+    pattern: JsBogusBinding {
+        items: [
+            JsObjectBindingPattern {
+                l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+                properties: JsObjectBindingPatternPropertyList [
+                    JsObjectBindingPatternShorthandProperty {
+                        identifier: JsIdentifierBinding {
+                            name_token: IDENT@2..7 "item" [] [Whitespace(" ")],
+                        },
+                        init: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@7..8 "}" [] [],
+            },
+            COLON@8..10 ":" [] [Whitespace(" ")],
+            IDENT@10..19 "SlotProps" [] [],
+        ],
+    },
+    eof_token: EOF@19..20 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_SLOT_SCOPE_ROOT@0..20
+  0: JS_BOGUS_BINDING@0..19
+    0: JS_OBJECT_BINDING_PATTERN@0..8
+      0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+      1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..7
+        0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@2..7
+          0: JS_IDENTIFIER_BINDING@2..7
+            0: IDENT@2..7 "item" [] [Whitespace(" ")]
+          1: (empty)
+      2: R_CURLY@7..8 "}" [] []
+    1: COLON@8..10 ":" [] [Whitespace(" ")]
+    2: IDENT@10..19 "SlotProps" [] []
+  1: EOF@19..20 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+trailing_code.vue_slot_scope.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A `v-slot` value can only contain a single binding pattern
+  
+  > 1 │ { item }: SlotProps
+      │         ^
+    2 │ 
+  
+  i Remove the extra code. Type annotations are not supported here.
+  
+```
