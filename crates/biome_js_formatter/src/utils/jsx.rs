@@ -2,9 +2,9 @@ use crate::JsCommentStyle;
 use crate::prelude::*;
 use biome_formatter::{FormatOptions, QuoteStyle, comments::CommentStyle, format_args, write};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
-    JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,
-    JsxText, TextLen,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsxAttribute, AnyJsxChild, AnyJsxElementName,
+    AnyJsxTag, JsComputedMemberExpression, JsStaticMemberExpression, JsSyntaxKind, JsxChildList,
+    JsxExpressionChild, JsxOpeningElement, JsxTagExpression, JsxText, TextLen,
 };
 use biome_rowan::{Direction, SyntaxResult, TextRange, TextSize, TokenText};
 use std::iter::{FusedIterator, Peekable};
@@ -38,6 +38,42 @@ pub fn is_meaningful_jsx_text(text: &str) -> bool {
     }
 
     !has_newline
+}
+
+/// Whether the element's children are text rather than markup, as they are for `<script>`,
+/// `<style>` and anything `is:raw` marks. Astro renders that text byte for byte, so the
+/// reflow JSX text gets would change what the page shows.
+pub(crate) fn is_astro_raw_text_element(element: &JsxOpeningElement) -> bool {
+    let Ok(AnyJsxElementName::JsxName(name)) = element.name() else {
+        return false;
+    };
+    let Ok(name) = name.value_token() else {
+        return false;
+    };
+
+    if matches!(name.text_trimmed(), "script" | "style") {
+        return true;
+    }
+
+    element.attributes().iter().any(|attribute| {
+        let AnyJsxAttribute::JsxAttribute(attribute) = attribute else {
+            return false;
+        };
+        attribute
+            .name_value_token()
+            .is_ok_and(|name| name.text_trimmed() == "is:raw")
+    })
+}
+
+/// Whether the child contributes anything to its element. [`jsx_split_children`] drops
+/// whitespace-only [`JsxText`] carrying a line break, leaving the element as empty as before.
+pub(crate) fn is_meaningful_jsx_child(child: &AnyJsxChild) -> bool {
+    match child {
+        AnyJsxChild::JsxText(text) => text
+            .value_token()
+            .is_ok_and(|token| is_meaningful_jsx_text(token.text_trimmed())),
+        _ => true,
+    }
 }
 
 /// Tests if a [JsxAnyTag] has a suppression comment or not.
