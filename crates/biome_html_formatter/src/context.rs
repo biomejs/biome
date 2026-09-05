@@ -31,7 +31,9 @@ pub struct HtmlFormatOptions {
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
 
-    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    /// Controls whether the closing bracket of a multiline HTML opening tag is placed at the end
+    /// of the last attribute line instead of on its own line. This also applies to self-closing HTML
+    /// elements.
     ///
     /// See: <https://prettier.io/docs/en/options.html#bracket-line>
     bracket_same_line: BracketSameLine,
@@ -276,7 +278,8 @@ impl FormatOptions for HtmlFormatOptions {
     }
 }
 
-/// Whitespace sensitivity for HTML formatting.
+/// Controls how the formatter treats whitespace around text and child elements in HTML, Vue,
+/// Svelte, and Astro markup.
 ///
 /// The following two cases won't produce the same output:
 ///
@@ -307,14 +310,11 @@ impl FormatOptions for HtmlFormatOptions {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum WhitespaceSensitivity {
-    /// The formatter considers whitespace significant for elements that have an "inline" display style by default in
-    /// browser's user agent style sheets.
+    /// Treats whitespace as significant for elements that browsers display inline by default.
     #[default]
     Css,
-    /// Leading and trailing whitespace in content is considered significant for all elements.
-    ///
-    /// The formatter should leave at least one whitespace character if whitespace is present.
-    /// Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.
+    /// Treats leading and trailing whitespace as significant for every element. Existing whitespace
+    /// is preserved as at least one character and absent whitespace is not added.
     ///
     /// Example of text hugging the tags:
     /// ```html
@@ -323,7 +323,8 @@ pub enum WhitespaceSensitivity {
     /// >
     /// ```
     Strict,
-    /// Whitespace is considered insignificant. The formatter is free to remove or add whitespace as it sees fit.
+    /// Treats whitespace as insignificant, allowing the formatter to add or remove it. Use this only
+    /// when whitespace cannot affect rendered output.
     Ignore,
 }
 
@@ -362,9 +363,8 @@ impl WhitespaceSensitivity {
     }
 }
 
-/// Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
-///
-/// When true, the content of `<script>` and `<style>` tags will be indented one level.
+/// Controls whether the content of `<script>` and `<style>` tags is indented by one level in HTML,
+/// Vue, Svelte, and Astro files.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
@@ -470,7 +470,7 @@ impl CstFormatContext for HtmlFormatContext {
     }
 }
 
-/// Controls whether void-elements should be self closed
+/// Controls whether HTML void elements such as `<img>` and `<input>` include a slash before `>`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
@@ -479,10 +479,10 @@ impl CstFormatContext for HtmlFormatContext {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum SelfCloseVoidElements {
-    /// The `/` inside void elements is removed by the formatter
+    /// Removes the slash, for example `<img src="image.png">`.
     #[default]
     Never,
-    /// The `/` inside void elements is always added
+    /// Adds the slash, for example `<img src="image.png" />`.
     Always,
 }
 

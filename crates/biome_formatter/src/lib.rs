@@ -97,10 +97,10 @@ pub use token_case::{FormatRuleWithTextCase, FormatTextCaseExt, TextCase};
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentStyle {
-    /// Indent with Tab
+    /// Uses tabs for indentation.
     #[default]
     Tab,
-    /// Indent with Space
+    /// Uses spaces for indentation.
     Space,
 }
 
@@ -292,14 +292,35 @@ impl std::fmt::Display for LineEnding {
     }
 }
 
+/// Sets the indentation width. With space indentation, this is the number of spaces emitted per
+/// indentation level. With tab indentation, Biome emits one tab per level and uses this value as the
+/// tab's display width when calculating line length.
+///
+/// Accepted values range from 0 through 24.
 #[derive(Clone, Copy, Eq, Merge, Hash, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IndentWidth(u8);
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for IndentWidth {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("IndentWidth")
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "Sets the indentation width. With space indentation, this is the number of spaces emitted per\nindentation level. With tab indentation, Biome emits one tab per level and uses this value as the\ntab's display width when calculating line length.\n\nAccepted values range from 0 through 24.",
+            "type": "integer",
+            "format": "uint8",
+            "minimum": Self::MIN,
+            "maximum": Self::MAX
+        })
+    }
+}
 
 impl IndentWidth {
     pub const MIN: u8 = 0;
@@ -390,17 +411,34 @@ impl Debug for IndentWidth {
     }
 }
 
-/// Validated value for the `line_width` formatter options
+/// Sets the preferred maximum line width used when deciding where to wrap code. Some content, such
+/// as long unbreakable strings, may still exceed this width.
 ///
-/// The allowed range of values is 1..=320
+/// Accepted values range from 1 through 320.
 #[derive(Clone, Copy, Eq, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct LineWidth(u16);
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for LineWidth {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("LineWidth")
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "Sets the preferred maximum line width used when deciding where to wrap code. Some content, such\nas long unbreakable strings, may still exceed this width.\n\nAccepted values range from 1 through 320.",
+            "type": "integer",
+            "format": "uint16",
+            "minimum": Self::MIN,
+            "maximum": Self::MAX
+        })
+    }
+}
 
 impl LineWidth {
     /// Minimum allowed value for a valid [LineWidth]
@@ -774,6 +812,7 @@ impl FromStr for DelimiterSpacing {
     }
 }
 
+/// Controls attribute placement in HTML-like languages.
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -782,8 +821,10 @@ impl FromStr for DelimiterSpacing {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum AttributePosition {
+    /// Places attributes automatically and wraps them when needed.
     #[default]
     Auto,
+    /// Places each attribute on its own line when an element has multiple attributes.
     Multiline,
 }
 
@@ -810,7 +851,10 @@ impl FromStr for AttributePosition {
     }
 }
 
-/// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+/// Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome
+/// places the bracket at the end of the last attribute line when enabled and on its own line after
+/// the last attribute when disabled. This option also affects self-closing HTML elements, but
+/// self-closing JSX elements are unaffected.
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",

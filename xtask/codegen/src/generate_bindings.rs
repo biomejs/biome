@@ -18,6 +18,20 @@ fn escape_jsdoc_comment_text(text: &str) -> String {
     text.replace("*/", "*\\/")
 }
 
+fn format_jsdoc_comment(text: &str) -> String {
+    let text = escape_jsdoc_comment_text(text);
+    let mut comment = String::from("/**");
+    for line in text.lines() {
+        comment.push_str("\n\t *");
+        if !line.is_empty() {
+            comment.push(' ');
+            comment.push_str(line);
+        }
+    }
+    comment.push_str("\n\t */");
+    comment
+}
+
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let bindings_path = project_root().join("packages/@biomejs/backend-jsonrpc/src/workspace.ts");
     let methods = methods();
@@ -200,8 +214,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     items.extend(declarations.into_iter().map(|(decl, description)| {
         let mut export = make::token(T![export]);
         if let Some(description) = description {
-            let description = escape_jsdoc_comment_text(&description);
-            let comment = format!("/**\n\t* {description} \n\t */\n");
+            let comment = format_jsdoc_comment(&description);
             let trivia = vec![
                 (TriviaPieceKind::Newline, "\n"),
                 (TriviaPieceKind::MultiLineComment, comment.as_str()),

@@ -15,13 +15,13 @@ use serde::{Deserialize, Serialize};
 pub type JsFormatterEnabled = Bool<true>;
 pub type BracketSameLineEnabled = Bool<false>;
 
-/// Formatting options specific to the JavaScript files
+/// Formatting options specific to JavaScript and languages that extend it.
 #[derive(Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsFormatterConfiguration {
-    /// Controls the formatter for JavaScript and languages that extend it.
+    /// Enables or disables the formatter for JavaScript and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-enabled"), argument("true|false"))
@@ -29,7 +29,7 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsFormatterEnabled>,
 
-    /// The type of quotes used in JSX. Defaults to `double`.
+    /// Selects the preferred quote style for JSX attribute values. Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("jsx-quote-style"), argument("double|single"))
@@ -37,7 +37,9 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_quote_style: Option<QuoteStyle>,
 
-    /// Controls when object properties are quoted. Defaults to `asNeeded` in configuration
+    /// Controls whether quotes around object property names are preserved. `asNeeded` removes
+    /// quotes when the property name is valid without them, while `preserve` keeps quotes around
+    /// property names that were quoted in the input. Defaults to `asNeeded` in configuration
     /// (`as-needed` on the CLI).
     #[cfg_attr(
         feature = "cli",
@@ -46,8 +48,11 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_properties: Option<QuoteProperties>,
 
-    /// Prints trailing commas wherever possible in multiline comma-separated structures. Defaults
-    /// to `all`.
+    /// Controls trailing commas in multiline comma-separated structures. `all` adds trailing commas
+    /// wherever syntax permits, including function parameters and calls. `es5` adds them only in
+    /// constructs supported by ES5, such as array and object literals, and excludes function
+    /// parameters, function calls, and TypeScript type parameters. `none` removes trailing commas.
+    /// Defaults to `all`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("trailing-commas"), argument("all|es5|none"))
@@ -64,7 +69,9 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semicolons: Option<Semicolons>,
 
-    /// Whether to add parentheses around arrow function parameters. Defaults to `always`.
+    /// Controls parentheses around arrow-function parameters. `always` always prints parentheses,
+    /// while `asNeeded` omits them when an arrow function has one parameter and the syntax permits
+    /// it. Defaults to `always`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("arrow-parentheses"), argument("always|as-needed"))
@@ -72,9 +79,10 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arrow_parentheses: Option<ArrowParentheses>,
 
-    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line,
-    /// rather than being alone on the following line. If unset, inherits the global bracket
-    /// placement setting.
+    /// Controls the placement of the closing bracket for multiline JSX opening tags. Biome places
+    /// the bracket at the end of the last attribute line when enabled and on its own line after the
+    /// last attribute when disabled. Self-closing JSX elements are unaffected. If unset, inherits
+    /// the global bracket placement setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("bracket-same-line"), argument("true|false"))
@@ -121,8 +129,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// The maximum line width applied to JavaScript and languages that extend it. If unset,
-    /// inherits the global line width.
+    /// The preferred maximum line width applied to JavaScript and languages that extend it. If
+    /// unset, inherits the global line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-line-width"), argument("NUMBER"))
@@ -130,7 +138,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in JavaScript code. Defaults to `double`.
+    /// Selects the preferred quote style for JavaScript and TypeScript string literals. Biome may
+    /// use the alternate quote when that avoids additional escaping. Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-quote-style"), argument("double|single"))
@@ -152,8 +161,9 @@ pub struct JsFormatterConfiguration {
     pub attribute_position: Option<AttributePosition>,
 
     // it's also a top-level configurable property.
-    /// Whether to insert spaces inside braces in object literals. If unset, inherits the global
-    /// bracket spacing setting.
+    /// Controls spaces inside the braces of single-line object literals. Biome formats `{value: 1}`
+    /// when disabled and `{ value: 1 }` when enabled. If unset, inherits the global bracket spacing
+    /// setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-bracket-spacing"), argument("true|false"))
@@ -163,12 +173,13 @@ pub struct JsFormatterConfiguration {
 
     // it's also a top-level configurable property.
     /// Controls spaces immediately inside supported JavaScript and TypeScript delimiters when their
-    /// content fits on one line. It doesn't add spaces before opening delimiters or inside empty
-    /// delimiters.
+    /// content fits on one line. This affects parentheses, square brackets, template
+    /// interpolations, TypeScript angle brackets, and JSX expression braces. Empty delimiters are
+    /// unchanged.
     ///
-    /// It affects parentheses, square brackets, template interpolations, TypeScript angle brackets,
-    /// JSX expression braces, and logical NOT. In operator chains, only the final operator receives
-    /// a following space.
+    /// It also controls spacing after logical NOT operators. In a chain of logical NOT operators,
+    /// only the final operator receives a following space. Biome doesn't add spaces before opening
+    /// delimiters.
     ///
     /// If unset, inherits the global delimiter spacing setting.
     #[cfg_attr(

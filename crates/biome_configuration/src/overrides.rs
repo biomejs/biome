@@ -18,6 +18,8 @@ use biome_plugin_loader::Plugins;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
+/// Configures settings for files selected by each override. When multiple overrides configure the
+/// same single-value setting, the last matching override takes precedence.
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -27,27 +29,27 @@ pub struct Overrides(pub Vec<OverridePattern>);
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
-    /// A list of glob patterns. Biome will include files/folders that will
-    /// match these patterns.
+    /// A list of glob patterns selecting the files to which this override applies. If omitted, the
+    /// override applies to every file. An empty list applies to no files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<OverrideGlobs>,
 
-    /// Specific configuration for the JavaScript language
+    /// JavaScript-specific settings for matched files.
     #[cfg_attr(feature = "lang_js", serde(skip_serializing_if = "Option::is_none"))]
     #[cfg(feature = "lang_js")]
     pub javascript: Option<crate::JsConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// JSON-specific settings for matched files.
     #[cfg(feature = "lang_json")]
     #[cfg_attr(feature = "lang_json", serde(skip_serializing_if = "Option::is_none"))]
     pub json: Option<crate::JsonConfiguration>,
 
-    /// Specific configuration for the CSS language
+    /// CSS-specific settings for matched files.
     #[cfg_attr(feature = "lang_css", serde(skip_serializing_if = "Option::is_none"))]
     #[cfg(feature = "lang_css")]
     pub css: Option<crate::CssConfiguration>,
 
-    /// Specific configuration for the Graphql language
+    /// GraphQL-specific settings for matched files.
     #[cfg(feature = "lang_graphql")]
     #[cfg_attr(
         feature = "lang_graphql",
@@ -55,32 +57,32 @@ pub struct OverridePattern {
     )]
     pub graphql: Option<crate::graphql::GraphqlConfiguration>,
 
-    /// Specific configuration for the GritQL language
+    /// GritQL-specific settings for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit: Option<GritConfiguration>,
 
-    /// Specific configuration for the GritQL language
+    /// HTML-specific settings for matched files.
     #[cfg(feature = "lang_html")]
     #[cfg_attr(feature = "lang_html", serde(skip_serializing_if = "Option::is_none"))]
     pub html: Option<HtmlConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Formatter settings for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<OverrideFormatterConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Linter settings for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<OverrideLinterConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Assist settings for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<OverrideAssistConfiguration>,
 
-    /// Specific configuration for the filesystem
+    /// File-handling settings for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<OverrideFilesConfiguration>,
 
-    /// Specific configuration for additional plugins
+    /// Additional plugins for matched files.
     #[cfg(feature = "plugins")]
     #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<Plugins>,
@@ -125,34 +127,35 @@ impl schemars::JsonSchema for OverrideGlobs {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
-    // if `false`, it disables the feature. `true` by default
+    /// Enables or disables the formatter for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(hide))]
     pub enabled: Option<FormatterEnabled>,
 
-    /// Stores whether formatting should be allowed to proceed if a given file
-    /// has syntax errors
+    /// Allows formatting matched files that contain syntax errors.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(hide))]
     pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
-    /// The indent style.
+    /// Uses tabs or spaces for indentation.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(long("indent-style"), argument("tab|space")))]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
+    /// The indentation width. Deprecated, use `indentWidth` instead.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
     #[cfg_attr(feature = "cli", bpaf(long("indent-size"), argument("NUMBER")))]
     pub indent_size: Option<IndentWidth>,
 
-    /// The size of the indentation, 2 by default
+    /// Sets the indentation width. With space indentation, this is the number of spaces emitted per
+    /// indentation level. With tab indentation, Biome emits one tab per level and uses this value as
+    /// the tab's display width when calculating line length. Accepted values are `0` through `24`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(long("indent-width"), argument("NUMBER")))]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending.
+    /// The line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -160,12 +163,14 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line. Defaults to 80.
+    /// Sets the preferred maximum line width used when deciding where to wrap code. Some content,
+    /// such as long unbreakable strings, may still exceed this width. Accepted values are `1` through
+    /// `320`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(long("line-width"), argument("NUMBER")))]
     pub line_width: Option<LineWidth>,
 
-    /// The attribute position style.
+    /// The attribute position style in HTML-like languages.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -173,7 +178,10 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub attribute_position: Option<AttributePosition>,
 
-    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    /// Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome
+    /// places the bracket at the end of the last attribute line when enabled and on its own line when
+    /// disabled. This also affects self-closing HTML elements, but self-closing JSX elements are
+    /// unaffected.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -181,7 +189,8 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub bracket_same_line: Option<BracketSameLine>,
 
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    /// Controls spaces inside braces in supported single-line structures. The affected structures
+    /// vary by language.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     pub bracket_spacing: Option<BracketSpacing>,
@@ -216,7 +225,8 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub expand: Option<Expand>,
 
-    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+    /// Prints trailing commas wherever possible in multiline comma-separated structures. This is a
+    /// legacy override option. Prefer `javascript.formatter.trailingCommas`.
     #[cfg(feature = "lang_js")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
@@ -225,16 +235,8 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub trailing_commas: Option<TrailingCommas>,
 
-    /// Whether to add a trailing newline at the end of the file.
-    ///
-    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-    /// - https://thoughtbot.com/blog/no-newline-at-end-of-file
-    /// - https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-    /// - https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-    ///
-    /// Disable the option at your own risk.
-    ///
-    /// Defaults to true.
+    /// Whether to add a trailing newline at the end of matched files. Disabling this option can
+    /// cause compatibility problems with other tools.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -248,17 +250,17 @@ pub struct OverrideFormatterConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideLinterConfiguration {
-    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+    /// Enables or disables the linter for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(hide))]
     pub enabled: Option<LinterEnabled>,
 
-    /// List of rules
+    /// The lint-rule configuration for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     pub rules: Option<Rules>,
 
-    /// List of rules
+    /// The lint-domain configuration for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     pub domains: Option<RuleDomains>,
@@ -268,7 +270,7 @@ pub struct OverrideLinterConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OverrideFilesConfiguration {
-    /// File size limit in bytes
+    /// The maximum source-file size in bytes for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 }
@@ -278,12 +280,12 @@ pub struct OverrideFilesConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideAssistConfiguration {
-    /// if `false`, it disables the feature and the assist won't be executed. `true` by default
+    /// Enables or disables assist actions for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(hide))]
     pub enabled: Option<AssistEnabled>,
 
-    /// List of actions
+    /// The assist-action configuration for matched files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",

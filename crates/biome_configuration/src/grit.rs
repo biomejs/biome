@@ -6,6 +6,9 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to GritQL files.
+///
+/// Language-specific settings take precedence over corresponding global settings. Global settings
+/// apply when their language-specific counterparts are omitted, unless stated otherwise.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -38,7 +41,7 @@ pub type GritFormatterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritFormatterConfiguration {
-    /// Controls the formatter for GritQL files.
+    /// Enables or disables the formatter for GritQL.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-formatter-enabled"), argument("true|false"), optional)
@@ -75,7 +78,7 @@ pub struct GritFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// The maximum line width for GritQL files. If unset, inherits the global line width.
+    /// The preferred maximum line width for GritQL files. If unset, inherits the global line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-formatter-line-width"), argument("NUMBER"), optional)
@@ -105,7 +108,7 @@ pub type GritLinterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritLinterConfiguration {
-    /// Controls the linter for GritQL files.
+    /// Enables or disables the linter for GritQL.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-linter-enabled"), argument("true|false"), optional)
@@ -122,7 +125,7 @@ pub type GritAssistEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritAssistConfiguration {
-    /// Controls assist actions for GritQL files.
+    /// Enables or disables assist actions for GritQL.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-assist-enabled"), argument("true|false"), optional)

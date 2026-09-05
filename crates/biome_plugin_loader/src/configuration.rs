@@ -63,9 +63,9 @@ impl DerefMut for Plugins {
     }
 }
 
-/// Configuration for a single plugin entry.
+/// Configuration for one GritQL plugin.
 ///
-/// Can be either a plain path string or an object with path and options:
+/// Use either a path string or an object with a path and optional file filters:
 ///
 /// ```json
 /// {
@@ -79,10 +79,10 @@ impl DerefMut for Plugins {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum PluginConfiguration {
-    /// A plain path to the plugin.
+    /// A path to the plugin's `.grit` file or a directory containing `biome-manifest.jsonc`.
     Path(String),
 
-    /// A path with additional options.
+    /// A plugin path with optional file filters.
     PathWithOptions(PluginWithOptions),
 }
 
@@ -123,12 +123,14 @@ impl Deserializable for PluginConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PluginWithOptions {
-    /// The path to the plugin.
+    /// The path to the plugin's `.grit` file or a directory containing `biome-manifest.jsonc`.
+    /// Relative paths are resolved from the configuration file that declares the plugin.
     #[deserializable(required)]
     pub path: String,
 
-    /// A list of glob patterns. The plugin will only run on files matching
-    /// these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.
+    /// A list of glob patterns selecting files on which the plugin can run. Include a positive
+    /// pattern before exclusions such as `!**/*.test.ts`. If omitted, the plugin runs on every
+    /// supported file processed by the linter. An empty list matches no files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<NormalizedGlob>>,
 }

@@ -12,13 +12,13 @@ pub type FormatterEnabled = Bool<true>;
 pub type UseEditorconfigEnabled = Bool<false>;
 pub type FormatWithErrorsEnabled = Bool<false>;
 
-/// Generic options applied to all files
+/// Configures formatting for selected files.
 #[derive(Clone, Deserializable, Debug, Default, Deserialize, Eq, PartialEq, Merge, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FormatterConfiguration {
-    // if `false`, it disables the feature. `true` by default
+    /// Enables or disables the formatter. Defaults to `true`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<FormatterEnabled>,
@@ -36,7 +36,10 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The indentation width. Defaults to `2`.
+    /// Sets the indentation width. With space indentation, this is the number of spaces emitted per
+    /// indentation level. With tab indentation, Biome emits one tab per level and uses this value as
+    /// the tab's display width when calculating line length. Accepted values are `0` through `24`.
+    /// Defaults to `2`.
     #[cfg_attr(feature = "cli", bpaf(long("indent-width"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
@@ -49,7 +52,9 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// The maximum line width. Defaults to `80`.
+    /// Sets the preferred maximum line width used when deciding where to wrap code. Some content,
+    /// such as long unbreakable strings, may still exceed this width. Accepted values are `1` through
+    /// `320`. Defaults to `80`.
     #[cfg_attr(feature = "cli", bpaf(long("line-width"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
@@ -62,8 +67,10 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attribute_position: Option<AttributePosition>,
 
-    /// Places the `>` of a multiline HTML or JSX element at the end of the last line instead of on
-    /// the next line. Self-closing elements are unaffected. Defaults to `false`.
+    /// Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome
+    /// places the bracket at the end of the last attribute line when enabled and on its own line when
+    /// disabled. This also affects self-closing HTML elements, but self-closing JSX elements are
+    /// unaffected. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("bracket-same-line"), argument("true|false"))
@@ -71,7 +78,8 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
-    /// Whether to insert spaces inside braces in object literals. Defaults to `true`.
+    /// Controls spaces inside braces in supported single-line structures. The affected structures
+    /// vary by language. Defaults to `true`.
     #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
@@ -103,7 +111,7 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
-    /// Whether to add a trailing newline at the end of the file. Defaults to `true`; disabling
+    /// Whether to add a trailing newline at the end of the file. Defaults to `true`. Disabling
     /// this option can cause compatibility problems with other tools.
     #[cfg_attr(
         feature = "cli",
@@ -112,8 +120,11 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
-    /// Uses `.editorconfig` files to configure the formatter. Settings in `biome.json` or
-    /// `biome.jsonc` override `.editorconfig` settings. Defaults to `false`.
+    /// Controls whether Biome loads formatter settings from an `.editorconfig` file. Biome reads
+    /// `indent_style`, `indent_size`, `end_of_line`, and `insert_final_newline`. Settings in
+    /// `biome.json` or `biome.jsonc` take precedence. Biome loads only one `.editorconfig`. Nested
+    /// cascading configurations and the EditorConfig `root` property are not supported. Defaults to
+    /// `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("use-editorconfig"), argument("true|false"))
@@ -121,8 +132,9 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
 
-    /// A list of glob patterns. The formatter will include files/folders that will
-    /// match these patterns.
+    /// A list of glob patterns selecting files to format. If omitted, all files selected by
+    /// `files.includes` remain eligible for formatting. An empty list selects no files. This option
+    /// can only narrow the files selected by `files.includes`.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,

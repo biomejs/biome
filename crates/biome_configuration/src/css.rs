@@ -7,7 +7,10 @@ use biome_formatter::{
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
-/// Options applied to CSS files.
+/// Options applied to CSS and languages that extend it.
+///
+/// Language-specific settings take precedence over corresponding global settings. Global settings
+/// apply when their language-specific counterparts are omitted, unless stated otherwise.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -29,7 +32,7 @@ pub struct CssConfiguration {
     #[cfg_attr(feature = "cli", bpaf(external(css_assist_configuration), optional))]
     pub assist: Option<CssAssistConfiguration>,
 
-    /// CSS globals.
+    /// Reserved for future CSS analyzer support. This option currently has no effect.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,
@@ -45,13 +48,17 @@ pub type CssTailwindDirectivesEnabled = Bool<false>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssParserConfiguration {
-    /// Allows comments to appear on incorrect lines in `.css` files.
+    /// Enables `//` line comments in plain CSS. Standard CSS treats `//` as delimiter characters
+    /// rather than as a comment, and SCSS accepts `//` comments independently of this option.
+    /// Defaults to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
 
-    /// Enables parsing of CSS Modules-specific features. Enable this feature only
-    /// when your files don't end in `.module.css`.
+    /// Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.
+    /// When unset, Biome enables this syntax automatically for files whose names end in
+    /// `.module.css`; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files
+    /// use another naming convention.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -59,7 +66,8 @@ pub struct CssParserConfiguration {
     )]
     pub css_modules: Option<CssModulesEnabled>,
 
-    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    /// Enables parsing Tailwind CSS 4.0 directives and functions, including `@theme`, `@utility`,
+    /// `@variant`, `@source`, and `@apply`. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-parse-tailwind-directives"), argument("true|false"))
@@ -75,7 +83,7 @@ pub type CssFormatterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssFormatterConfiguration {
-    /// Controls the formatter for CSS and languages that extend it.
+    /// Enables or disables the formatter for CSS and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-enabled"), argument("true|false"))
@@ -110,8 +118,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// The maximum line width for CSS and languages that extend it. If unset, inherits the global
-    /// line width.
+    /// The preferred maximum line width for CSS and languages that extend it. If unset, inherits
+    /// the global line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-line-width"), argument("NUMBER"))
@@ -119,7 +127,9 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in CSS code. Defaults to `double`.
+    /// Selects the preferred quote style for CSS strings. Biome may use the alternate quote when
+    /// that avoids additional escaping. Quotes in `@charset` rules are currently preserved.
+    /// Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-quote-style"), argument("double|single"))
@@ -167,7 +177,7 @@ pub type CssLinterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssLinterConfiguration {
-    /// Controls the linter for CSS files.
+    /// Enables or disables the linter for CSS.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-linter-enabled"), argument("true|false"))
@@ -190,7 +200,7 @@ pub type CssAssistEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssAssistConfiguration {
-    /// Controls assist actions for CSS files.
+    /// Enables or disables assist actions for CSS.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-assist-enabled"), argument("true|false"))

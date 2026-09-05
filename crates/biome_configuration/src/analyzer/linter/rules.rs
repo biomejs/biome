@@ -2285,10 +2285,16 @@ impl std::fmt::Display for RuleName {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
-    #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
+    #[doc = r" Enables or disables Biome's recommended non-nursery rules. Defaults to `true`."]
+    #[doc = r""]
+    #[doc = r" **Deprecated:** This option will be removed in the next major version. Use"]
+    #[doc = r" `linter.rules.preset` instead, or run `biome migrate` to update the configuration."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" The rule presets to use."]
+    #[doc = r" Selects the baseline set of lint rules. `recommended` enables Biome's recommended"]
+    #[doc = r" non-nursery rules, `all` enables all non-nursery rules, and `none` starts with no"]
+    #[doc = r" rules enabled. Group-level settings and explicit rule settings override this"]
+    #[doc = r" preset. Defaults to `recommended`."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preset: Option<PresetConfig>,
     #[deserializable(rename = "a11y")]

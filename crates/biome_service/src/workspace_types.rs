@@ -19,6 +19,20 @@ fn escape_jsdoc_comment_text(text: &str) -> String {
     text.replace("*/", "*\\/")
 }
 
+fn format_jsdoc_comment(text: &str) -> String {
+    let text = escape_jsdoc_comment_text(text);
+    let mut comment = String::from("/**");
+    for line in text.lines() {
+        comment.push_str("\n\t *");
+        if !line.is_empty() {
+            comment.push(' ');
+            comment.push_str(line);
+        }
+    }
+    comment.push_str("\n\t */");
+    comment
+}
+
 /// Manages a queue of type definitions that need to be generated
 #[derive(Default)]
 pub struct ModuleQueue<'a> {
@@ -131,8 +145,7 @@ fn instance_type<'a>(
                                 };
 
                                 if let Some(description) = description {
-                                    let description = escape_jsdoc_comment_text(&description);
-                                    let comment = format!("/**\n\t* {description} \n\t */");
+                                    let comment = format_jsdoc_comment(&description);
                                     let trivia = vec![
                                         (TriviaPieceKind::Newline, "\n"),
                                         (TriviaPieceKind::MultiLineComment, comment.as_str()),
@@ -655,8 +668,7 @@ pub fn generate_type<'a>(
                     };
 
                     if let Some(ref description) = description {
-                        let description = escape_jsdoc_comment_text(description);
-                        let comment = format!("/**\n\t* {description} \n\t */");
+                        let comment = format_jsdoc_comment(description);
                         let trivia = vec![
                             (TriviaPieceKind::Newline, "\n"),
                             (TriviaPieceKind::MultiLineComment, comment.as_str()),

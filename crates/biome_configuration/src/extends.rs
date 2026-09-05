@@ -7,7 +7,12 @@ use biome_deserialize_macros::Merge;
 use biome_diagnostics::Severity;
 use serde::{Deserialize, Serialize};
 
-/// A list of paths to other JSON files, used to extend the current configuration.
+/// Extends the current configuration with settings from other Biome configurations.
+///
+/// `"//"` extends the root configuration from any nesting depth. A list extends configurations by
+/// relative path or installed package specifier. Biome merges list entries from left to right:
+/// later configurations take precedence for single-value options, list entries are combined, and
+/// the current configuration is applied last.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Merge)]
 #[serde(deny_unknown_fields, rename_all = "camelCase", untagged)]
 pub enum Extends {
@@ -66,14 +71,21 @@ impl schemars::JsonSchema for Extends {
         std::borrow::Cow::Borrowed("Extends")
     }
 
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        #[derive(serde::Deserialize, schemars::JsonSchema)]
-        #[serde(untagged)]
-        #[expect(dead_code)]
-        enum ExtendsSchema {
-            List(Vec<String>),
-            String(String),
-        }
-        ExtendsSchema::json_schema(generator)
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "Extends the current configuration with settings from other Biome configurations. `//` extends the root configuration from any nesting depth. A list extends configurations by relative path or installed package specifier. Biome merges list entries from left to right: later configurations take precedence for single-value options, list entries are combined, and the current configuration is applied last.",
+            "oneOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "string",
+                    "const": "//"
+                }
+            ]
+        })
     }
 }

@@ -508,8 +508,10 @@ impl fmt::Display for JsFormatOptions {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum QuoteProperties {
+    /// Removes quotes when the property name is valid without them.
     #[default]
     AsNeeded,
+    /// Preserves quotes around property names that were quoted in the input.
     Preserve,
 }
 
@@ -589,8 +591,10 @@ impl fmt::Display for Semicolons {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum ArrowParentheses {
+    /// Always prints parentheses around arrow-function parameters.
     #[default]
     Always,
+    /// Omits parentheses when an arrow function has one parameter and the syntax permits it.
     AsNeeded,
 }
 
