@@ -1896,6 +1896,34 @@ impl TupleElementType {
     }
 }
 
+fn reference_to_widened_property_value(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeReference {
+    match widen_property_value_type_data(
+        collector
+            .resolve_expression(scope_id, expression)
+            .into_owned(),
+    ) {
+        TypeData::Reference(reference) => reference,
+        ty => collector.reference_to_owned_data(ty),
+    }
+}
+
+fn widen_property_value_type_data(ty: TypeData) -> TypeData {
+    match ty {
+        TypeData::Literal(literal) => match literal.as_ref() {
+            Literal::BigInt(_) => TypeData::BigInt,
+            Literal::Boolean(_) => TypeData::Boolean,
+            Literal::Number(_) => TypeData::Number,
+            Literal::String(_) | Literal::Template(_) => TypeData::String,
+            Literal::Object(_) | Literal::RegExp(_) => TypeData::Literal(literal),
+        },
+        ty => ty,
+    }
+}
+
 impl TypeMember {
     pub fn from_any_js_class_member(
         collector: &mut dyn RawTypeCollector,
@@ -2017,7 +2045,9 @@ impl TypeMember {
                         None => member
                             .value()
                             .and_then(|initializer| initializer.expression().ok())
-                            .map(|expr| collector.reference_to_resolved_expression(scope_id, &expr))
+                            .map(|expr| {
+                                reference_to_widened_property_value(collector, scope_id, &expr)
+                            })
                             .unwrap_or_default(),
                     };
                     let is_static = member
@@ -2219,7 +2249,7 @@ impl TypeMember {
                         kind,
                         ty: value
                             .map(|value| {
-                                collector.reference_to_resolved_expression(scope_id, &value)
+                                reference_to_widened_property_value(collector, scope_id, &value)
                             })
                             .unwrap_or_default(),
                     }
