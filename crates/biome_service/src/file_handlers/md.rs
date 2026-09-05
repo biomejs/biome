@@ -24,7 +24,6 @@ use biome_configuration::markdown::{
 use biome_db::{Db, FileSource};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_languages::LanguageDb;
 use biome_markdown_analyze::analyze;
 use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
 use biome_markdown_formatter::format_node;
@@ -410,13 +409,10 @@ struct ParseMarkdownInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_markdown_file<'db>(db: &'db dyn Db, input: ParseMarkdownInput<'db>) -> AnyParse {
-    let mut node_cache = NodeCache::default();
-    parse_markdown_with_cache(
-        input.file(db).content(db),
-        &mut node_cache,
-        input.options(db),
-    )
-    .into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_markdown_with_cache(file.content(db), node_cache, input.options(db)).into()
+    })
 }
 
 fn parse(
@@ -424,9 +420,7 @@ fn parse(
     settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let options = settings.parse_options::<MarkdownLanguage>(biome_path, &file_source);
     let file_db: &dyn Db = &db;
     let any_parse = parse_markdown_file(file_db, ParseMarkdownInput::new(file_db, file, options));

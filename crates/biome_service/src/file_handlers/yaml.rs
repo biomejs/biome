@@ -15,11 +15,11 @@ use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled
 use biome_db::{Db, FileSource};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_languages::{DocumentFileSource, LanguageDb};
+use biome_languages::DocumentFileSource;
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
-use biome_yaml_parser::{parse_yaml, parse_yaml_with_cache};
+use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
 use camino::Utf8Path;
 use tracing::{debug, error};
@@ -258,7 +258,10 @@ struct ParseYamlInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_yaml_file<'db>(db: &'db dyn Db, input: ParseYamlInput<'db>) -> AnyParse {
-    parse_yaml(input.file(db).content(db)).into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_yaml_with_cache(file.content(db), node_cache).into()
+    })
 }
 
 fn parse(
@@ -266,9 +269,7 @@ fn parse(
     _settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let file_db: &dyn Db = &db;
     let any_parse = parse_yaml_file(file_db, ParseYamlInput::new(file_db, file));
 

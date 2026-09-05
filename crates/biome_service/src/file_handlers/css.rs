@@ -44,7 +44,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_languages::css::CssEmbeddingKind;
-use biome_languages::{CssFileSource, DocumentFileSource, LanguageDb};
+use biome_languages::{CssFileSource, DocumentFileSource};
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -565,12 +565,16 @@ struct ParseCssInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_css_file<'db>(db: &'db dyn Db, input: ParseCssInput<'db>) -> AnyParse {
-    biome_css_parser::parse_css(
-        input.file(db).content(db),
-        input.document_source(db),
-        input.options(db),
-    )
-    .into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_css_with_cache(
+            file.content(db),
+            input.document_source(db),
+            node_cache,
+            input.options(db),
+        )
+        .into()
+    })
 }
 
 #[salsa::tracked(returns(ref))]
@@ -584,9 +588,7 @@ fn parse(
     settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
     let source_type = file_source.to_css_file_source().unwrap_or_default();
     let file_db: &dyn Db = &db;

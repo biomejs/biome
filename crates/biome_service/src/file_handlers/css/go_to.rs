@@ -36,10 +36,14 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
             return Some(result);
         };
         let source_index = match &params.parsed_source {
-            AnyParsedSource::ParsedSource(_) => file.document_source_index(&params.workspace_db),
+            AnyParsedSource::ParsedSource(_) => {
+                Some(file.document_source_index(&params.workspace_db))
+            }
             AnyParsedSource::ParsedSnippet(snippet) => snippet.document_source_index(),
         };
-        let Some(file_source) = params.workspace_db.source_from_index(source_index) else {
+        let Some(file_source) = source_index
+            .and_then(|source_index| params.workspace_db.source_from_index(source_index))
+        else {
             return Some(result);
         };
         if !file_source.is_css_like() {

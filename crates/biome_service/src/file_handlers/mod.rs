@@ -62,7 +62,7 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomai
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
-use biome_db::FileSource;
+use biome_db::{Db, FileSource};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::EmbeddedData;
@@ -82,11 +82,11 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList};
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
-use biome_languages::DocumentFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
     JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
 };
+use biome_languages::{DocumentFileSource, LanguageDb};
 #[cfg(feature = "module_graph")]
 use biome_module_graph::ModuleDb;
 use biome_package::{Dependencies, PackageJson};
@@ -259,6 +259,36 @@ pub(crate) struct ParseEmbeddedCaches {
     pub(crate) json: NodeCache,
     #[cfg(feature = "lang_graphql")]
     pub(crate) graphql: NodeCache,
+}
+
+/// Resolves a parser input and provisions its cache for client-owned files.
+/// Call outside tracked queries so client versions do not invalidate parsing.
+fn file_and_source_for_parse(
+    path: &BiomePath,
+    db: &WorkspaceDb,
+) -> Result<(FileSource, DocumentFileSource), WorkspaceError> {
+    let (file, source) = db
+        .file_and_source_from_path(path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+    if file.version(db).is_some() {
+        db.ensure_node_cache_for_path(path.as_path());
+    }
+    Ok((file, source))
+}
+
+fn with_file_node_cache(
+    db: &dyn Db,
+    file: FileSource,
+    parse: impl FnOnce(&mut NodeCache) -> AnyParse,
+) -> AnyParse {
+    if let Some(cache) = db.node_cache_for_path(file.path(db)) {
+        let mut cache = cache
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        parse(&mut cache)
+    } else {
+        parse(&mut NodeCache::default())
+    }
 }
 
 type Parse =
@@ -2406,6 +2436,161 @@ mod tests {
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
     use camino::Utf8Path;
+
+    #[test]
+    fn tracked_parsers_reuse_node_caches_across_edits() {
+        use crate::db::WorkspaceDb;
+        use crate::projects::ProjectDb;
+        use crate::settings::{
+            SettingsEditorState, SettingsHandle, SettingsQuery, SettingsSelectionKey,
+        };
+        use biome_db::Db;
+        use biome_db::testing::{Events, function_query_will_execute_count_by_name};
+        use biome_fs::BiomePath;
+        use biome_rowan::Language;
+
+        fn check<L: Language + 'static>(path: &str, source: &str, updated: &str, query_name: &str) {
+            let events = Events::default();
+            let event_sink = events.clone();
+            let mut db = WorkspaceDb::with_event_handler(Box::new(move |event| {
+                event_sink.0.lock().unwrap().push(event);
+            }));
+            let project_key = db.insert_project("/project".into());
+            let project = db.get_project(&project_key).unwrap();
+            let settings = project.root_settings(&db).clone_arc();
+            let path = BiomePath::new(path);
+            let query = SettingsQuery::new(
+                project,
+                SettingsSelectionKey::Root,
+                &settings,
+                None,
+                path.as_path(),
+            );
+            let settings = SettingsHandle::new(&settings, SettingsEditorState::new(query));
+            let source_type = DocumentFileSource::from_path(path.as_path(), false);
+            let source_index = db.insert_source(source_type);
+            let file = db.upsert_file(path.as_path(), source.into(), source_index, Some(0));
+            let parse = Features::new()
+                .get_deprecated_capabilities(source_type)
+                .parser
+                .parse
+                .unwrap();
+
+            assert!(db.node_cache_for_path(path.as_path()).is_none());
+            let first = parse(&path, &settings, db.clone()).unwrap();
+            assert!(!first.any_parse.has_errors(), "{path}");
+            assert!(db.node_cache_for_path(path.as_path()).is_some());
+            let first_token = first.any_parse.syntax::<L>().first_token().unwrap();
+            let recorded = std::mem::take(&mut *events.0.lock().unwrap());
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query_name, &recorded),
+                1,
+                "{path}"
+            );
+
+            salsa::Setter::to(file.set_version(&mut db), Some(1));
+            events.0.lock().unwrap().clear();
+            let _ = parse(&path, &settings, db.clone()).unwrap();
+            let recorded = std::mem::take(&mut *events.0.lock().unwrap());
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query_name, &recorded),
+                0,
+                "{path}"
+            );
+
+            salsa::Setter::to(file.set_content(&mut db), updated.into());
+            events.0.lock().unwrap().clear();
+            let second = parse(&path, &settings, db.clone()).unwrap();
+            assert!(!second.any_parse.has_errors(), "{path}");
+            let recorded = std::mem::take(&mut *events.0.lock().unwrap());
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query_name, &recorded),
+                1,
+                "{path}"
+            );
+            assert!(
+                first_token.key() == second.any_parse.syntax::<L>().first_token().unwrap().key(),
+                "{path}: unchanged tokens must reuse the per-file cache"
+            );
+        }
+
+        check::<biome_json_syntax::JsonLanguage>(
+            "/project/file.json",
+            "{\"value\": 1}",
+            "{\"value\": 2}",
+            "parse_json_file",
+        );
+        #[cfg(feature = "lang_js")]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.js",
+            "const value = 1;",
+            "const value = 2;",
+            "parse_js_file",
+        );
+        #[cfg(feature = "lang_css")]
+        check::<biome_css_syntax::CssLanguage>(
+            "/project/file.css",
+            ".a { color: red; }",
+            ".a { color: blue; }",
+            "parse_css_file",
+        );
+        #[cfg(feature = "lang_html")]
+        check::<biome_html_syntax::HtmlLanguage>(
+            "/project/file.html",
+            "<div>first</div>",
+            "<div>second</div>",
+            "parse_html_file",
+        );
+        #[cfg(feature = "lang_graphql")]
+        check::<biome_graphql_syntax::GraphqlLanguage>(
+            "/project/file.graphql",
+            "{ first }",
+            "{ second }",
+            "parse_graphql_file",
+        );
+        #[cfg(feature = "lang_grit")]
+        check::<biome_grit_syntax::GritLanguage>(
+            "/project/file.grit",
+            "language js;\n`foo`",
+            "language js;\n`bar`",
+            "parse_grit_file",
+        );
+        #[cfg(feature = "lang_md")]
+        check::<biome_markdown_syntax::MarkdownLanguage>(
+            "/project/file.md",
+            "# Title\n\nfirst",
+            "# Title\n\nsecond",
+            "parse_markdown_file",
+        );
+        #[cfg(feature = "lang_yaml")]
+        check::<biome_yaml_syntax::YamlLanguage>(
+            "/project/file.yaml",
+            "value: 1\n",
+            "value: 2\n",
+            "parse_yaml_file",
+        );
+        #[cfg(feature = "lang_js")]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.astro",
+            "---\nconst value = 1;\n---",
+            "---\nconst value = 2;\n---",
+            "parse_astro_file",
+        );
+        #[cfg(all(feature = "lang_js", feature = "lang_html"))]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.vue",
+            "<script>\nconst value = 1;\n</script>",
+            "<script>\nconst value = 2;\n</script>",
+            "parse_vue_file",
+        );
+        #[cfg(all(feature = "lang_js", feature = "lang_html"))]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.svelte",
+            "<script>\nconst value = 1;\n</script>",
+            "<script>\nconst value = 2;\n</script>",
+            "parse_svelte_file",
+        );
+    }
 
     #[cfg(feature = "lang_js")]
     #[test]

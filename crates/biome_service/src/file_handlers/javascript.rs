@@ -728,7 +728,7 @@ pub fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool 
 
 #[salsa::interned]
 #[derive(Debug)]
-struct ParseJsInput {
+pub(crate) struct ParseJsInput {
     file: FileSource,
     document_source: JsFileSource,
     options: JsParserOptions,
@@ -736,16 +736,20 @@ struct ParseJsInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_js_file<'db>(db: &'db dyn Db, input: ParseJsInput<'db>) -> AnyParse {
-    biome_js_parser::parse(
-        input.file(db).content(db),
-        input.document_source(db),
-        input.options(db),
-    )
-    .into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |cache| {
+        biome_js_parser::parse_js_with_cache(
+            file.content(db),
+            input.document_source(db),
+            input.options(db),
+            cache,
+        )
+        .into()
+    })
 }
 
 #[salsa::tracked(returns(ref))]
-fn js_semantic_model<'db>(db: &'db dyn Db, input: ParseJsInput<'db>) -> SemanticModel {
+pub(crate) fn js_semantic_model<'db>(db: &'db dyn Db, input: ParseJsInput<'db>) -> SemanticModel {
     let parse = parse_js_file(db, input);
     semantic_model(
         &parse.tree(),
@@ -758,9 +762,7 @@ fn parse(
     settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
     let document_source = file_source.to_js_file_source().unwrap_or_default();
     let file_db: &dyn Db = &db;
@@ -1263,7 +1265,7 @@ fn analyzer_semantic_model(
 ) -> SemanticModel {
     if let Some(file) = parsed_source
         .workspace_file()
-        .filter(|_| parsed_source.as_snippet().is_none())
+        .filter(|_| parsed_source.as_snippet().is_none() && !source_type.is_embedded_source())
     {
         let input = ParseJsInput::new(
             workspace_db,
@@ -1829,7 +1831,7 @@ fn format_embedded(
             let snippet = snippets.get(&range)?;
             let snippet = snippet.as_snippet()?;
             let snippet_file_source =
-                workspace_db.source_from_index(snippet.document_source_index())?;
+                workspace_db.source_from_index(snippet.document_source_index()?)?;
 
             let wrap_document = |document: Document| {
                 // TODO: Option to disable indent here?
@@ -2144,7 +2146,7 @@ mod tests {
 
     #[test]
     fn js_semantic_query_reuses_unchanged_input() {
-        let db = TestDb::new();
+        let mut db = TestDb::new();
         let file = make_file(&db, "let value = 1;");
         let input = ParseJsInput::new(
             &db,
@@ -2158,6 +2160,20 @@ mod tests {
         let _ = js_semantic_model(&db, input);
         let events = db.take_salsa_events();
 
+        assert_function_query_was_not_run(&db, js_semantic_model, input, &events);
+
+        salsa::Setter::to(file.set_version(&mut db), Some(1));
+        let input = ParseJsInput::new(
+            &db,
+            file,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        db.clear_salsa_events();
+        let _ = js_semantic_model(&db, input);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_not_run(&db, parse_js_file, input, &events);
         assert_function_query_was_not_run(&db, js_semantic_model, input, &events);
     }
 

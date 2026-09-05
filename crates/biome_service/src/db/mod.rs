@@ -18,6 +18,7 @@ use biome_module_graph::{
     InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
     ModuleInfoKind, TypeDb, module_for_key,
 };
+use biome_rowan::NodeCache;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -26,8 +27,8 @@ use salsa::{Setter, Storage};
 use std::convert::Infallible;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::RwLock;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Mutex, RwLock};
 use tracing::{debug, instrument};
 
 const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
@@ -174,6 +175,7 @@ pub struct WorkspaceDb {
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     /// A map of projects loaded in the workspace.
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
+    node_caches: Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>,
     settings_queries: Arc<SettingsQueryCache>,
     // NOTE: this must stay last as per salsa restrictions.
     storage: Storage<Self>,
@@ -187,6 +189,7 @@ impl Default for WorkspaceDb {
             modules: Arc::default(),
             file_sources: Arc::default(),
             projects: Arc::default(),
+            node_caches: Arc::default(),
             settings_queries: Arc::default(),
             storage: Storage::default(),
         };
@@ -215,6 +218,7 @@ pub struct WorkspaceDbData {
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
+    node_caches: Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>,
 }
 
 impl WorkspaceDbData {
@@ -246,6 +250,7 @@ impl WorkspaceDbData {
 
     pub fn remove_file_source(&self, path: &Utf8Path) {
         self.files.pin().remove(path);
+        self.node_caches.pin().remove(path);
     }
 
     /// Checks whether the module data contains `path` without making Salsa
@@ -282,6 +287,16 @@ impl WorkspaceDbData {
             files.remove(&p);
         }
 
+        let node_caches = self.node_caches.pin();
+        let to_remove: Vec<_> = node_caches
+            .keys()
+            .filter(|cached_path| cached_path.starts_with(path))
+            .cloned()
+            .collect();
+        for cached_path in to_remove {
+            node_caches.remove(&cached_path);
+        }
+
         #[cfg(feature = "module_graph")]
         {
             let modules = self.modules.pin();
@@ -298,6 +313,33 @@ impl WorkspaceDbData {
 }
 
 impl WorkspaceDb {
+    pub(crate) fn ensure_node_cache_for_path(&self, path: &Utf8Path) {
+        let caches = self.node_caches.pin();
+        if !caches.contains_key(path) {
+            caches.insert(
+                path.to_path_buf(),
+                Arc::new(Mutex::new(NodeCache::default())),
+            );
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn with_event_handler(handler: Box<dyn Fn(salsa::Event) + Send + Sync>) -> Self {
+        let db = Self {
+            files: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            modules: Arc::default(),
+            file_sources: Arc::default(),
+            projects: Arc::default(),
+            node_caches: Arc::default(),
+            settings_queries: Arc::default(),
+            storage: Storage::new(Some(handler)),
+        };
+        #[cfg(feature = "module_graph")]
+        ModuleGraphGeneration::new(&db, 0);
+        db
+    }
+
     pub(crate) fn settings_query_db(&self) -> SettingsQueryDb {
         self.settings_queries.database()
     }
@@ -338,6 +380,7 @@ impl WorkspaceDb {
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
             projects: self.projects.clone(),
+            node_caches: self.node_caches.clone(),
         }
     }
 
@@ -506,6 +549,17 @@ impl WorkspaceDb {
                 .collect();
             for p in to_remove {
                 files.remove(&p);
+            }
+        }
+        {
+            let node_caches = self.node_caches.pin();
+            let to_remove: Vec<_> = node_caches
+                .keys()
+                .filter(|cached_path| cached_path.starts_with(path))
+                .cloned()
+                .collect();
+            for cached_path in to_remove {
+                node_caches.remove(&cached_path);
             }
         }
 
@@ -740,6 +794,7 @@ pub struct SharedWorkspaceDb {
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
+    node_caches: Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>,
     settings_queries: Arc<SettingsQueryCache>,
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
@@ -763,6 +818,7 @@ impl SharedWorkspaceDb {
             file_sources,
             storage,
             projects,
+            node_caches,
             settings_queries,
         } = db;
         Self {
@@ -771,6 +827,7 @@ impl SharedWorkspaceDb {
             modules,
             file_sources,
             projects,
+            node_caches,
             settings_queries,
             storage: storage.into_zalsa_handle(),
         }
@@ -783,6 +840,7 @@ impl SharedWorkspaceDb {
             modules: self.modules.clone(),
             file_sources: self.file_sources.clone(),
             projects: self.projects.clone(),
+            node_caches: self.node_caches.clone(),
         }
     }
 
@@ -793,6 +851,7 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             projects: self.projects.clone(),
+            node_caches: self.node_caches.clone(),
             settings_queries: self.settings_queries.clone(),
             storage: self.storage.clone().into_storage(),
         }
@@ -814,6 +873,10 @@ impl biome_db::Db for WorkspaceDb {
         for file in self.files.pin().values() {
             f(*file);
         }
+    }
+
+    fn node_cache_for_path(&self, path: &Utf8Path) -> Option<Arc<Mutex<NodeCache>>> {
+        self.node_caches.pin().get(path).cloned()
     }
 }
 
@@ -985,6 +1048,7 @@ mod tests {
             modules: Arc::default(),
             file_sources: Arc::default(),
             projects: Arc::default(),
+            node_caches: Arc::default(),
             settings_queries,
             storage,
         };
@@ -1061,6 +1125,7 @@ mod tests {
             modules: Arc::default(),
             file_sources: Arc::default(),
             projects: Arc::default(),
+            node_caches: Arc::default(),
             settings_queries: Arc::default(),
             storage,
         };

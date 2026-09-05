@@ -26,9 +26,8 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
-use biome_grit_parser::{parse_grit, parse_grit_with_cache};
+use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
-use biome_languages::LanguageDb;
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -365,7 +364,10 @@ struct ParseGritInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_grit_file<'db>(db: &'db dyn Db, input: ParseGritInput<'db>) -> AnyParse {
-    parse_grit(input.file(db).content(db)).into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_grit_with_cache(file.content(db), node_cache).into()
+    })
 }
 
 fn parse(
@@ -373,9 +375,7 @@ fn parse(
     _settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let file_db: &dyn Db = &db;
     let any_parse = parse_grit_file(file_db, ParseGritInput::new(file_db, file));
 

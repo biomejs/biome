@@ -40,7 +40,7 @@ use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
-use biome_languages::{JsonFileSource, LanguageDb};
+use biome_languages::JsonFileSource;
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -500,7 +500,10 @@ struct ParseJsonInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_json_file<'db>(db: &'db dyn Db, input: ParseJsonInput<'db>) -> AnyParse {
-    biome_json_parser::parse_json(input.file(db).content(db), input.options(db)).into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_json_with_cache(file.content(db), node_cache, input.options(db)).into()
+    })
 }
 
 fn parse(
@@ -508,9 +511,7 @@ fn parse(
     settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
     let file_db: &dyn Db = &db;
     let any_parse = parse_json_file(file_db, ParseJsonInput::new(file_db, file, options));

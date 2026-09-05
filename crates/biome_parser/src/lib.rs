@@ -1084,17 +1084,9 @@ impl ParsedSnippet {
         &self.parsed
     }
 
-    /// Returns the registered document source index.
-    ///
-    /// Callers must register the snippet's document source before invoking this
-    /// method.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `document_source_index` is `None`.
-    pub fn document_source_index(&self) -> usize {
+    /// Returns the document source index after the workspace registers it.
+    pub fn document_source_index(&self) -> Option<usize> {
         self.document_source_index
-            .expect("The workspace must register this index.")
     }
 
     pub fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
@@ -1105,9 +1097,6 @@ impl ParsedSnippet {
         self.parsed.has_errors()
     }
 
-    pub fn error_count(&self) -> usize {
-        self.parsed.diagnostics().len()
-    }
 }
 
 /// Convenient type for source
@@ -1173,10 +1162,10 @@ impl AnyParsedSource {
         }
     }
 
-    pub fn unwrap_as_send_node(&self) -> SendNode {
+    pub fn as_send_node(&self) -> Option<SendNode> {
         match self {
-            Self::ParsedSource(source) => source.unwrap_as_send_node(),
-            Self::ParsedSnippet(_) => panic!("Cannot unwrap ParsedSnippet into SendNode"),
+            Self::ParsedSource(source) => source.as_send_node(),
+            Self::ParsedSnippet(_) => None,
         }
     }
 

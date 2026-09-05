@@ -10,6 +10,8 @@ use biome_configuration::{
     json::{JsonConfiguration, JsonFormatterConfiguration},
 };
 use biome_css_syntax::CssLanguage;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_db::testing::{Events, function_query_will_execute_count_by_name};
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
@@ -33,6 +35,11 @@ fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
         std::thread::yield_now();
     }
     true
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+fn take_salsa_events(events: &Events) -> Vec<salsa::Event> {
+    std::mem::take(&mut *events.0.lock().unwrap())
 }
 
 #[cfg(feature = "plugins")]
@@ -589,6 +596,230 @@ fn workspace_svelte_snippets_use_svelte_semantics() {
         .unwrap();
 
     assert!(result.diagnostics.is_empty(), "{:#?}", result.diagnostics);
+}
+
+#[cfg(all(feature = "lang_html", feature = "html_embeds"))]
+#[test]
+fn process_file_state_holds_one_database_snapshot() {
+    const PATH: &str = "/project/file.html";
+    const SOURCE: &str = "<script>const oldValue = 1;</script>";
+    const UPDATED_SOURCE: &str = "<script>const newValue = 2;</script>";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let attempts = workspace
+        .server
+        .process_file_state_parse_attempts
+        .load(Ordering::Acquire);
+    workspace
+        .server
+        .pause_process_file_state_after_parse
+        .store(true, Ordering::Release);
+
+    let (paused, setter_pending, parsed, changed) = std::thread::scope(|scope| {
+        let parse_workspace = &workspace;
+        let parsed = scope.spawn(move || {
+            let server = parse_workspace.as_workspace();
+            let db = server.get_db();
+            let (_, settings, query) = server
+                .project_get_settings_query(&db, project_key, Utf8Path::new(PATH), None)
+                .unwrap();
+            let settings =
+                server.settings_handle_with_query(&settings, EditorFeatures::default(), query);
+            let state = server
+                .process_file_state_from_db(&BiomePath::new(PATH), &settings, &db)
+                .unwrap();
+            let host = state.parsed.send_node().into_source_text();
+            let snippet = state
+                .iter_snippets()
+                .next()
+                .unwrap()
+                .parsed()
+                .clone()
+                .embedded_syntax::<JsLanguage>()
+                .text_with_trivia()
+                .to_string();
+            (host, snippet)
+        });
+        let paused = wait_until(TIMEOUT, || {
+            workspace
+                .server
+                .process_file_state_parse_attempts
+                .load(Ordering::Acquire)
+                > attempts
+        });
+        let change_workspace = &workspace;
+        let changed = scope.spawn(move || {
+            change_workspace.change_file(ChangeFileParams {
+                project_key,
+                path: BiomePath::new(PATH),
+                content: UPDATED_SOURCE.into(),
+                version: 1,
+                inline_config: None,
+                editor_features: None,
+            })
+        });
+        let setter_pending = wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1);
+        workspace
+            .server
+            .pause_process_file_state_after_parse
+            .store(false, Ordering::Release);
+        (paused, setter_pending, parsed.join(), changed.join())
+    });
+
+    assert!(
+        paused,
+        "workspace parsing did not reach the synchronization point"
+    );
+    assert!(
+        setter_pending,
+        "file update did not wait for the parse snapshot"
+    );
+    let (host, snippet) = parsed.unwrap();
+    assert_eq!(host, SOURCE);
+    assert!(snippet.contains("oldValue"));
+    assert!(changed.unwrap().is_ok());
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        UPDATED_SOURCE
+    );
+}
+
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+#[test]
+fn module_graph_primes_lint_semantic_query() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "const value = 1;";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let events = Events::default();
+    let event_sink = events.clone();
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::with_event_handler(Box::new(move |event| {
+        event_sink.0.lock().unwrap().push(event);
+    }));
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let setup_events = take_salsa_events(&events);
+    let db = workspace.get_db();
+    assert!(function_query_will_execute_count_by_name(&db, "js_semantic_model", &setup_events) > 0);
+    drop(db);
+
+    let no_unused = AnalyzerSelector::from_str("lint/correctness/noUnusedVariables").unwrap();
+    workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            only: vec![no_unused],
+            skip: vec![],
+            enabled_rules: vec![no_unused],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    let pull_events = take_salsa_events(&events);
+    let db = workspace.get_db();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "js_semantic_model", &pull_events),
+        0
+    );
 }
 
 #[test]
@@ -1562,14 +1793,16 @@ fn store_embedded_nodes_with_current_ranges() {
     let scripts: Vec<_> = snippets
         .iter()
         .filter(|node| {
-            db.source_from_index(node.document_source_index())
+            node.document_source_index()
+                .and_then(|index| db.source_from_index(index))
                 .is_some_and(|source| source.is_javascript_like())
         })
         .collect();
     let styles: Vec<_> = snippets
         .iter()
         .filter(|node| {
-            db.source_from_index(node.document_source_index())
+            node.document_source_index()
+                .and_then(|index| db.source_from_index(index))
                 .is_some_and(|source| source.is_css_like())
         })
         .collect();
@@ -2342,7 +2575,9 @@ const Empty = <div style />;"#;
     let style_snippets = snippets
         .iter()
         .filter(|snippet| {
-            db.source_from_index(snippet.document_source_index())
+            snippet
+                .document_source_index()
+                .and_then(|index| db.source_from_index(index))
                 .and_then(|source| source.to_css_file_source())
                 .is_some_and(|source| {
                     matches!(

@@ -20,7 +20,7 @@ pub(crate) use visitor::HtmlModuleVisitor;
 /// A single embedded content block extracted from an HTML-like file
 /// (`*.html`, `*.vue`, `*.astro`, `*.svelte`).
 ///
-/// This is passed to [`ModuleGraph::update_graph_for_html_paths`] so the
+/// This is passed to [`crate::resolve_html_module`] so the
 /// module graph can track both CSS class definitions and JS static imports
 /// without the caller needing to know how they are processed internally.
 ///
@@ -33,8 +33,6 @@ pub(crate) use visitor::HtmlModuleVisitor;
 pub enum HtmlEmbeddedContent {
     /// A `<style>` block with its resolved CSS source and content offset
     /// within the parent document.
-    ///
-    /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
     Css(AnyCssRoot, CssFileSource, TextSize),
     /// A `<script>` block parsed as JS/TS with its content offset within the parent document.
     Js(AnyJsRoot, TextSize),

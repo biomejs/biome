@@ -452,6 +452,18 @@ impl Default for DbState {
 }
 
 impl DbState {
+    #[cfg(test)]
+    pub(crate) fn with_event_handler(handler: Box<dyn Fn(salsa::Event) + Send + Sync>) -> Self {
+        Self {
+            storage: DbStorage::Shared(SharedWorkspaceDb::from_workspace_db(
+                WorkspaceDb::with_event_handler(handler),
+            )),
+            path_info_cache: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            scanner_module_graph_dirty: None,
+        }
+    }
+
     pub fn lsp() -> Self {
         Self {
             storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::default())),

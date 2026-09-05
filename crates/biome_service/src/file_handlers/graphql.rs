@@ -34,11 +34,10 @@ use biome_fs::BiomePath;
 use biome_graphql_analyze::analyze;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
-use biome_graphql_parser::{parse_graphql, parse_graphql_with_cache};
+use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{
     GraphqlLanguage, GraphqlRoot, GraphqlSyntaxKind, GraphqlSyntaxNode, TextRange, TextSize,
 };
-use biome_languages::LanguageDb;
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, TokenAtOffset};
 use camino::Utf8Path;
@@ -430,7 +429,10 @@ struct ParseGraphqlInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_graphql_file<'db>(db: &'db dyn Db, input: ParseGraphqlInput<'db>) -> AnyParse {
-    parse_graphql(input.file(db).content(db)).into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_graphql_with_cache(file.content(db), node_cache).into()
+    })
 }
 
 fn parse(
@@ -438,9 +440,7 @@ fn parse(
     _settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let file_db: &dyn Db = &db;
     let any_parse = parse_graphql_file(file_db, ParseGraphqlInput::new(file_db, file));
 

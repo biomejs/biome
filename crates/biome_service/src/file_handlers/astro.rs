@@ -11,9 +11,9 @@ use crate::workspace::PullActionsResult;
 use biome_db::{Db, FileSource};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
-use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
@@ -122,12 +122,16 @@ struct ParseAstroInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_astro_file<'db>(db: &'db dyn Db, input: ParseAstroInput<'db>) -> AnyParse {
-    parse_js(
-        AstroFileHandler::input(input.file(db).content(db)),
-        input.document_source(db),
-        JsParserOptions::default(),
-    )
-    .into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_js_with_cache(
+            AstroFileHandler::input(file.content(db)),
+            input.document_source(db),
+            JsParserOptions::default(),
+            node_cache,
+        )
+        .into()
+    })
 }
 
 fn parse(
@@ -135,9 +139,7 @@ fn parse(
     _settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let file_db: &dyn Db = &db;
     let any_parse = parse_astro_file(
         file_db,

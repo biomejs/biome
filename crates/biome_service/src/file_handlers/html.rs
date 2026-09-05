@@ -64,7 +64,7 @@ use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
     format_node,
 };
-use biome_html_parser::{HtmlParserOptions, parse_html, parse_html_with_cache};
+use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
@@ -512,8 +512,11 @@ struct ParseHtmlInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_html_file<'db>(db: &'db dyn Db, input: ParseHtmlInput<'db>) -> AnyParse {
-    let parse = parse_html(input.file(db).content(db), input.options(db));
-    parse.into()
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        let parse = parse_html_with_cache(file.content(db), node_cache, input.options(db));
+        parse.into()
+    })
 }
 
 fn parse(
@@ -521,9 +524,7 @@ fn parse(
     settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
     let file_db: &dyn Db = &db;
     let any_parse = parse_html_file(
@@ -647,7 +648,7 @@ fn format_embedded(
             (snippet.content_range() == range).then_some(snippet)
         })?;
         let snippet_file_source =
-            workspace_db.source_from_index(snippet.document_source_index())?;
+            workspace_db.source_from_index(snippet.document_source_index()?)?;
 
         let wrap_document = |document: Document, should_indent: bool| {
             if indent_script_and_style && should_indent {

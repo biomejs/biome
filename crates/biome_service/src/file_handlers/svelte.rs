@@ -15,10 +15,10 @@ use biome_db::{Db, FileSource};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
-use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
-use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -146,7 +146,8 @@ struct ParseSvelteInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_svelte_file<'db>(db: &'db dyn Db, input: ParseSvelteInput<'db>) -> AnyParse {
-    let text = input.file(db).content(db);
+    let file = input.file(db);
+    let text = file.content(db);
     let source_type = input.document_source(db);
     let (script, script_file_source) = if source_type.is_svelte_source_module() {
         (text.as_str(), source_type)
@@ -159,7 +160,15 @@ fn parse_svelte_file<'db>(db: &'db dyn Db, input: ParseSvelteInput<'db>) -> AnyP
 
     debug!("Parsing file with language {:?}", script_file_source);
 
-    parse_js(script, script_file_source, JsParserOptions::default()).into()
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_js_with_cache(
+            script,
+            script_file_source,
+            JsParserOptions::default(),
+            node_cache,
+        )
+        .into()
+    })
 }
 
 fn parse(
@@ -167,9 +176,7 @@ fn parse(
     _settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, file_source) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
     let source_type = file_source.to_js_file_source().unwrap_or_default();
     let file_db: &dyn Db = &db;
     let any_parse = parse_svelte_file(file_db, ParseSvelteInput::new(file_db, file, source_type));

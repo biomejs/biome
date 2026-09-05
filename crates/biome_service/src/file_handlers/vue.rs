@@ -15,10 +15,10 @@ use biome_db::{Db, FileSource};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
-use biome_js_parser::{JsParserOptions, parse as parse_js, parse_js_with_cache};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::javascript::JsEmbeddingKind;
-use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -149,13 +149,16 @@ struct ParseVueInput {
 
 #[salsa::tracked(returns(clone), no_eq)]
 fn parse_vue_file<'db>(db: &'db dyn Db, input: ParseVueInput<'db>) -> AnyParse {
-    let text = input.file(db).content(db);
+    let file = input.file(db);
+    let text = file.content(db);
     let script = VueFileHandler::input(text);
     let file_source = VueFileHandler::file_source(text);
 
     debug!("Parsing file with language {:?}", file_source);
 
-    parse_js(script, file_source, JsParserOptions::default()).into()
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_js_with_cache(script, file_source, JsParserOptions::default(), node_cache).into()
+    })
 }
 
 fn parse(
@@ -163,9 +166,7 @@ fn parse(
     _settings: &SettingsWithEditor,
     db: WorkspaceDb,
 ) -> Result<ParseResult, WorkspaceError> {
-    let (file, _) = db
-        .file_and_source_from_path(biome_path.as_path())
-        .ok_or_else(|| WorkspaceError::not_found(biome_path.as_path().to_string()))?;
+    let (file, _) = super::file_and_source_for_parse(biome_path, &db)?;
     let file_db: &dyn Db = &db;
     let file_source = VueFileHandler::file_source(file.content(file_db));
     let any_parse = parse_vue_file(file_db, ParseVueInput::new(file_db, file));
