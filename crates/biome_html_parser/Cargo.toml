@@ -16,6 +16,10 @@ publish              = true
 harness = false
 name    = "html_parser"
 
+[[bench]]
+harness = false
+name    = "html_parser_walltime"
+
 [dependencies]
 biome_console       = { workspace = true }
 biome_diagnostics   = { workspace = true }
