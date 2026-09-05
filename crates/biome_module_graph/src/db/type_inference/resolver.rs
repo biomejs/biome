@@ -217,6 +217,11 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
     encountered_inference_cycle: Cell<bool>,
     on_demand_declarations: Option<SharedOnDemandDeclarationEvaluator<'db>>,
+    /// Instance of the global `String` class, resolved on first use.
+    ///
+    /// Narrowing asks whether a string can satisfy an object-like type once
+    /// per union variant, and resolving the global by name allocates.
+    pub(in crate::db::type_inference) string_instance: Option<InferredTypeData<'db>>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -287,6 +292,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             resolution_depth: Cell::new(0),
             encountered_inference_cycle: Cell::new(false),
             on_demand_declarations,
+            string_instance: None,
         }
     }
 
