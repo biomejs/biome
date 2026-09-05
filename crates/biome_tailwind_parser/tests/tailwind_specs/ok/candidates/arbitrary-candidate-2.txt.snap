@@ -16,6 +16,7 @@ dark:[--pattern-fg:var(--color-white)]/10
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -64,8 +65,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@41..42 "\n" [] [],
     ],
-    eof_token: EOF@41..42 "" [Newline("\n")] [],
+    eof_token: EOF@42..42 "" [] [],
 }
 ```
 
@@ -74,7 +76,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..42
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..41
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..42
     0: TW_FULL_CANDIDATE@0..41
       0: TW_VARIANT_LIST@0..5
         0: TW_VARIANT_EXPRESSION@0..4
@@ -107,6 +110,7 @@ TwRoot {
           1: TW_NUMBER_VALUE@39..41
             0: TW_NUMBER@39..41 "10" [] []
       4: (empty)
-  2: EOF@41..42 "" [Newline("\n")] []
+    1: WHITESPACE@41..42 "\n" [] []
+  3: EOF@42..42 "" [] []
 
 ```

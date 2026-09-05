@@ -1,6 +1,6 @@
 ---
 name: syntax-text-handling
-description: Use this skill when extracting or storing Biome AST/CST source text, working with `SyntaxToken`, `TokenText`, quoted strings, token-relative ranges, or embedded-language attribute values, or diagnosing trivia, allocation, range, and temporary-borrow problems. Do not use for parser implementation or formatter comment placement.
+description: Use this skill when extracting or storing Biome AST/CST source text, working with any `SyntaxNode`, `SyntaxToken`, `TokenText`, quoted strings, token-relative ranges, or embedded-language attribute values, or diagnosing trivia, allocation, range, and temporary-borrow problems. Do not use for parser implementation or formatter comment placement.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -79,6 +79,22 @@ let text = token.text_trimmed();
 ```
 
 Do not solve a temporary-borrow error by converting to `String` unless the value genuinely must outlive its syntax tree.
+
+## Use Strongly Typed Nodes
+
+Always prefer using specific, strongly typed syntax nodes (like `AnyJsExpression`, `JsCallExpression`) over generic, weakly typed syntax nodes (like `JsSyntaxNode`) in function parameters.
+
+GOOD:
+```rust
+fn is_react_call(node: &JsCallExpression) -> bool { ... }
+```
+
+BAD:
+```rust
+fn is_react_call(node: &JsSyntaxNode) -> bool { ... }
+```
+
+You can use `declare_node_union!` to define custom sets of nodes.
 
 ## Review Checklist
 

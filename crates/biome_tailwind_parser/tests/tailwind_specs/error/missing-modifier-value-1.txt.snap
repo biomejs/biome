@@ -16,6 +16,7 @@ bg-green-500/!
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -40,8 +41,9 @@ TwRoot {
             },
             excl_token: BANG@13..14 "!" [] [],
         },
+        WHITESPACE@14..15 "\n" [] [],
     ],
-    eof_token: EOF@14..15 "" [Newline("\n")] [],
+    eof_token: EOF@15..15 "" [] [],
 }
 ```
 
@@ -50,7 +52,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..15
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..14
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..15
     0: TW_FULL_CANDIDATE@0..14
       0: TW_VARIANT_LIST@0..0
       1: (empty)
@@ -65,7 +68,8 @@ TwRoot {
           1: TW_BOGUS_MODIFIER@13..13
             0: ERROR_TOKEN@13..13 "" [] []
       4: BANG@13..14 "!" [] []
-  2: EOF@14..15 "" [Newline("\n")] []
+    1: WHITESPACE@14..15 "\n" [] []
+  3: EOF@15..15 "" [] []
 
 ```
 

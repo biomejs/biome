@@ -16,6 +16,7 @@ data-active:text-red-500
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -46,8 +47,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@24..25 "\n" [] [],
     ],
-    eof_token: EOF@24..25 "" [Newline("\n")] [],
+    eof_token: EOF@25..25 "" [] [],
 }
 ```
 
@@ -56,7 +58,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..25
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..24
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..25
     0: TW_FULL_CANDIDATE@0..24
       0: TW_VARIANT_LIST@0..12
         0: TW_VARIANT_EXPRESSION@0..11
@@ -78,6 +81,7 @@ TwRoot {
           0: TW_VALUE@17..24 "red-500" [] []
         3: (empty)
       4: (empty)
-  2: EOF@24..25 "" [Newline("\n")] []
+    1: WHITESPACE@24..25 "\n" [] []
+  3: EOF@25..25 "" [] []
 
 ```

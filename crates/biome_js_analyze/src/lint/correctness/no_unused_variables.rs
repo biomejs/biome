@@ -475,9 +475,9 @@ fn is_implemented_overload_type_parameter(
         }
 
         signatures.iter().any(|id| {
-            model.binding_by_id(*id).is_some_and(|binding| {
-                binding.syntax().text_trimmed_range() == signature_range
-            })
+            model
+                .binding_by_id(*id)
+                .is_some_and(|binding| binding.syntax().text_trimmed_range() == signature_range)
         })
     })
 }
@@ -698,7 +698,7 @@ fn is_namespace_merged_with_used_value(
     Some(false)
 }
 
-fn is_value_merged_with_exported_namespace(
+fn is_value_merged_with_used_namespace(
     model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
 ) -> Option<bool> {
@@ -723,7 +723,10 @@ fn is_value_merged_with_exported_namespace(
         return Some(false);
     }
 
-    Some(model.is_exported(&namespace))
+    Some(
+        model.is_exported(&namespace)
+            || !is_unused_by_references(model, &namespace, namespace_decl.syntax()),
+    )
 }
 
 fn is_declaration_merged_with_used(
@@ -732,14 +735,41 @@ fn is_declaration_merged_with_used(
 ) -> Option<bool> {
     let decl = binding.declaration()?;
     match decl {
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => {
+            is_interface_merged_with_used(model, binding)
+        }
         AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
             is_namespace_merged_with_used_value(model, binding)
         }
         _ if is_namespace_merge_value_declaration(&decl) => {
-            is_value_merged_with_exported_namespace(model, binding)
+            is_value_merged_with_used_namespace(model, binding)
         }
         _ => None,
     }
+}
+
+fn is_interface_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let scope = model.scope_hoisted_to(binding.syntax())?;
+
+    Some(scope.bindings().any(|scope_binding| {
+        let other = scope_binding.tree();
+        let Some(other_declaration) = other.declaration() else {
+            return false;
+        };
+        matches!(
+            other_declaration,
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        ) && other
+            .name_token()
+            .is_ok_and(|other_name| other_name.text_trimmed() == name)
+            && (model.is_exported(&other)
+                || !is_unused_by_references(model, &other, other_declaration.syntax()))
+    }))
 }
 
 /// Returns `true` if `call` is a call to a simple identifier named `name`.
@@ -793,29 +823,12 @@ fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
     is_call_to(&props_call, "$props")
 }
 
-/// Returns `true` if `binding` is considered as unused.
-pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
-    if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
-        // Enum members can be unused.
-        return false;
-    }
-
-    // Ignore expressions
-    if binding.parent::<JsFunctionExpression>().is_some()
-        || binding.parent::<JsClassExpression>().is_some()
-    {
-        return false;
-    }
-
-    if model.is_exported(binding) {
-        return false;
-    }
-
-    let Some(declaration) = binding.declaration() else {
-        return false;
-    };
-    let declaration = declaration.syntax();
-    let unused_by_refs = binding
+fn is_unused_by_references(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+    declaration: &JsSyntaxNode,
+) -> bool {
+    binding
         .all_references(model)
         .filter_map(|reference| {
             let ref_parent = reference.syntax().parent()?;
@@ -879,8 +892,31 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
             }
             // Always false when the ref is outside the declaration
             false
-        });
-    if !unused_by_refs {
+        })
+}
+
+/// Returns `true` if `binding` is considered as unused.
+pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
+    if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
+        // Enum members can be unused.
+        return false;
+    }
+
+    // Ignore expressions
+    if binding.parent::<JsFunctionExpression>().is_some()
+        || binding.parent::<JsClassExpression>().is_some()
+    {
+        return false;
+    }
+
+    if model.is_exported(binding) {
+        return false;
+    }
+
+    let Some(declaration) = binding.declaration() else {
+        return false;
+    };
+    if !is_unused_by_references(model, binding, declaration.syntax()) {
         return false;
     }
     !is_declaration_merged_with_used(model, binding).unwrap_or(false)

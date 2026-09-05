@@ -4,3 +4,11 @@ import fs from "node:fs";
 import os from "node:os";
 
 import path from "node:path";
+
+// Bun runtime built-ins are not Node.js modules, so they must not be flagged.
+import Bun from "bun";
+import { dlopen } from "bun:ffi";
+import { jsc } from "bun:jsc";
+import { Database } from "bun:sqlite";
+import { test } from "bun:test";
+import { feature } from "bun:bundle";

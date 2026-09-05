@@ -374,9 +374,9 @@ impl<'a> Printer<'a> {
         if !self.state.pending_indent.is_empty() {
             let indent = std::mem::take(&mut self.state.pending_indent);
 
-            let (indent_string, repeat_count) = match self.options.indent_style() {
-                IndentStyle::Tab => ("\t", 1),
-                IndentStyle::Space => (" ", self.options.indent_width().value()),
+            let (indent_char, repeat_count, indent_char_width) = match self.options.indent_style() {
+                IndentStyle::Tab => ('\t', 1, self.options.indent_width().value()),
+                IndentStyle::Space => (' ', self.options.indent_width().value(), 1),
             };
 
             let total_indent_char_count = indent.level() as usize * repeat_count as usize;
@@ -385,10 +385,12 @@ impl<'a> Printer<'a> {
                 .buffer
                 .reserve(total_indent_char_count + indent.align_len());
 
-            for _ in 0..total_indent_char_count {
-                for ch in indent_string.chars() {
-                    self.print_char(ch);
-                }
+            self.state
+                .buffer
+                .extend(std::iter::repeat_n(indent_char, total_indent_char_count));
+            self.state.line_width += total_indent_char_count * indent_char_width as usize;
+            if total_indent_char_count > 0 {
+                self.state.has_empty_line = false;
             }
 
             for ch in indent.align().chars() {
@@ -1702,6 +1704,19 @@ mod tests {
 a"#,
             formatted.as_code()
         )
+    }
+
+    #[test]
+    fn it_prints_initial_space_indentation_at_the_requested_level() {
+        let options = PrinterOptions {
+            indent_style: IndentStyle::Space,
+            indent_width: 3.try_into().unwrap(),
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options_and_indentation(&token("content"), options, 3);
+
+        assert_eq!("         content", result.as_code());
     }
 
     #[test]

@@ -39,10 +39,10 @@
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
+use biome_parser::{Parser, SyntaxFeature};
 
-use crate::MarkdownParser;
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 mod code_span;
 mod emphasis;
@@ -258,6 +258,13 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         // This handles cases like `**foo*` where opener is at offset 1.
         p.force_relex_emphasis_inline();
         super::parse_textual(p)
+    } else if p.at(DOUBLE_TILDE) && MarkdownSyntaxFeatures::Gfm.is_supported(p) {
+        let result = emphasis::parse_inline_strikethrough(p);
+        if result.is_absent() {
+            super::parse_textual(p)
+        } else {
+            result
+        }
     } else if p.at(T![*]) || p.at(UNDERSCORE) {
         // Try italic, fall back to literal text if flanking rules fail
         let result = emphasis::parse_inline_italic(p);

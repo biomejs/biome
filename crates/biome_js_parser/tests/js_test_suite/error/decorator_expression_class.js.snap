@@ -57,18 +57,16 @@ JsModule {
                                                         },
                                                     ],
                                                 },
-                                                JsArrowFunctionExpression {
-                                                    async_token: missing (optional),
-                                                    type_parameters: missing (optional),
-                                                    parameters: missing (required),
-                                                    return_type_annotation: missing (optional),
-                                                    fat_arrow_token: FAT_ARROW@22..25 "=>" [] [Whitespace(" ")],
-                                                    body: JsFunctionBody {
-                                                        l_curly_token: L_CURLY@25..26 "{" [] [],
-                                                        directives: JsDirectiveList [],
-                                                        statements: JsStatementList [],
-                                                        r_curly_token: R_CURLY@26..27 "}" [] [],
-                                                    },
+                                                JsBogusExpression {
+                                                    items: [
+                                                        FAT_ARROW@22..25 "=>" [] [Whitespace(" ")],
+                                                        JsFunctionBody {
+                                                            l_curly_token: L_CURLY@25..26 "{" [] [],
+                                                            directives: JsDirectiveList [],
+                                                            statements: JsStatementList [],
+                                                            r_curly_token: R_CURLY@26..27 "}" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                         },
@@ -239,13 +237,9 @@ JsModule {
                       0: L_PAREN@19..20 "(" [] []
                       1: JS_CALL_ARGUMENT_LIST@20..20
                       2: R_PAREN@20..22 ")" [] [Whitespace(" ")]
-              2: JS_ARROW_FUNCTION_EXPRESSION@22..27
-                0: (empty)
-                1: (empty)
-                2: (empty)
-                3: (empty)
-                4: FAT_ARROW@22..25 "=>" [] [Whitespace(" ")]
-                5: JS_FUNCTION_BODY@25..27
+              2: JS_BOGUS_EXPRESSION@22..27
+                0: FAT_ARROW@22..25 "=>" [] [Whitespace(" ")]
+                1: JS_FUNCTION_BODY@25..27
                   0: L_CURLY@25..26 "{" [] []
                   1: JS_DIRECTIVE_LIST@26..26
                   2: JS_STATEMENT_LIST@26..26

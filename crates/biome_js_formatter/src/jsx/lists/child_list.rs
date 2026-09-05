@@ -436,7 +436,7 @@ impl FormatJsxChildList {
                     meta.meaningful_text = meta.meaningful_text
                         || text
                             .value_token()
-                            .is_ok_and(|token| is_meaningful_jsx_text(token.text()));
+                            .is_ok_and(|token| is_meaningful_jsx_text(token.text_trimmed()));
                 }
                 _ => {}
             }

@@ -1075,8 +1075,18 @@ impl FormatHtmlElementList {
                             last_nontext_had_trailing_line = false;
                         }
 
-                        // Track this element's group ID if it's followed by another adjacent inline element
-                        if next_is_adjacent_inline {
+                        // A single-brace expression cannot lend its closing token to the
+                        // next child, so a sibling break would insert rendered whitespace.
+                        if next_is_adjacent_inline
+                            && !matches!(
+                                non_text,
+                                AnyHtmlElement::AnyHtmlContent(
+                                    AnyHtmlContent::AnyHtmlTextExpression(
+                                        AnyHtmlTextExpression::HtmlSingleTextExpression(_)
+                                    )
+                                )
+                            )
+                        {
                             prev_inline_group_id = Some(non_text_group_id);
                         } else {
                             prev_inline_group_id = None;

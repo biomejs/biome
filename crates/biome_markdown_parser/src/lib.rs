@@ -2,7 +2,9 @@
 
 use biome_markdown_factory::MarkdownSyntaxFactory;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
-use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
+use biome_parser::{
+    AnyParse, NodeParse, SyntaxFeature, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink,
+};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
 use syntax::parse_document;
@@ -26,10 +28,10 @@ pub use to_html::document_to_html;
 pub(crate) type MarkdownLosslessTreeSink<'source> =
     LosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
 
-/// Parse markdown source code with default options.
-pub fn parse_markdown(source: &str) -> MarkdownParse {
+/// Parse markdown source code with the given options.
+pub fn parse_markdown(source: &str, options: MarkdownParserOptions) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_markdown_with_cache(source, &mut cache, MarkdownParserOptions::default())
+    parse_markdown_with_cache(source, &mut cache, options)
 }
 
 /// Parse markdown source code with custom options and a node cache.
@@ -136,5 +138,20 @@ impl From<MarkdownParse> for AnyParse {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
         NodeParse::new(root.as_send().unwrap(), diagnostics).into()
+    }
+}
+
+pub(crate) enum MarkdownSyntaxFeatures {
+    /// GitHub Flavored Markdown extensions.
+    Gfm,
+}
+
+impl SyntaxFeature for MarkdownSyntaxFeatures {
+    type Parser<'source> = MarkdownParser<'source>;
+
+    fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
+        match self {
+            Self::Gfm => p.options().gfm,
+        }
     }
 }

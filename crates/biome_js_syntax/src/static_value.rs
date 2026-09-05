@@ -63,8 +63,9 @@ impl StaticValue {
                 if matches!(
                     token.kind(),
                     JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::JSX_STRING_LITERAL
-                ) {
-                    // SAFETY: string literal token have a delimiters at the start and the end of the string
+                ) && text.starts_with(['"', '\''])
+                {
+                    // SAFETY: a string literal that starts with a quote is terminated by its matching quote
                     return &text[1..text.len() - 1];
                 }
                 text

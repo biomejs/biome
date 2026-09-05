@@ -151,9 +151,12 @@ impl OrderedMarkerPlan {
 impl Format<MarkdownFormatContext> for BulletListPrinter {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let mut joiner = f.join();
+        let mut previous: Option<&ListBullet> = None;
 
-        for (index, item) in self.bullets.iter().enumerate() {
-            if index > 0 && content_ends_with_quote_prefix(&self.bullets[index - 1].node) {
+        for item in &self.bullets {
+            if let Some(previous) = previous
+                && content_ends_with_quote_prefix(&previous.node)
+            {
                 let line_prefix = quote_line_prefix(item.node.syntax())?;
                 if !line_prefix.is_empty() {
                     joiner.entry(&format_with(|f| {
@@ -168,6 +171,7 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
                 }
             }
             joiner.entry(item);
+            previous = Some(item);
         }
         joiner.finish()
     }

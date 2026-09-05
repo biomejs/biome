@@ -38,20 +38,21 @@ impl Format<YamlFormatContext> for FormatFlowScalar<'_> {
             self.token.text_trimmed().trim_end(),
             f.options().quote_style(),
         );
-        let value = normalized.as_ref();
-        let position = Some(self.token.text_trimmed_range().start());
+        let position = self.token.text_trimmed_range().start();
 
-        if !value.contains(['\n', '\r']) {
-            return write!(f, [format_replaced(self.token, &text(value, position))]);
+        if !normalized.contains(['\n', '\r']) {
+            let content = syntax_token_cow_slice(normalized, self.token, position);
+            return write!(f, [format_replaced(self.token, &content)]);
         }
 
+        let value = normalized.as_ref();
         let content = format_with(|f| {
             let mut lines = ContentLines::new(value);
 
             // Leading whitespace before the token is trivia rather than part
             // of its text, so the first line only has its end trimmed
             if let Some(first) = lines.next() {
-                write!(f, [text(first.trim_end(), position)])?;
+                write!(f, [text(first.trim_end(), Some(position))])?;
             }
 
             let mut prev_empty = false;

@@ -1,11 +1,11 @@
-use crate::MarkdownParser;
 use crate::syntax::parse_error::unclosed_emphasis;
 use crate::syntax::reference::normalize_reference_label;
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_parser::{Parser, SyntaxFeature};
 use biome_unicode_table::is_unicode_punctuation;
 use std::rc::Rc;
 
@@ -18,6 +18,7 @@ use std::rc::Rc;
 enum DelimKind {
     Star,
     Underscore,
+    Tilde,
 }
 
 /// A delimiter run collected during the first pass
@@ -46,6 +47,8 @@ struct EmphasisMatch {
     opener_start: usize,
     /// Byte offset where the closer delimiter starts
     closer_start: usize,
+    /// The delimiter character used by this match.
+    kind: DelimKind,
     /// Whether this is strong (2 chars) or regular (1 char) emphasis
     is_strong: bool,
 }
@@ -56,7 +59,7 @@ fn is_whitespace(c: char) -> bool {
 }
 
 fn is_emphasis_marker(c: char) -> bool {
-    matches!(c, '*' | '_')
+    matches!(c, '*' | '_' | '~')
 }
 
 /// Check if a character is Unicode punctuation for flanking rules.
@@ -235,7 +238,11 @@ fn extract_label_text(source: &str, start: usize, close_pos: usize) -> &str {
     }
 }
 
-fn collect_delimiters(source: &str, reference_checker: impl Fn(&str) -> bool) -> Vec<DelimRun> {
+fn collect_delimiters(
+    source: &str,
+    allow_strikethrough: bool,
+    reference_checker: impl Fn(&str) -> bool,
+) -> Vec<DelimRun> {
     let mut runs = Vec::new();
     let bytes = source.as_bytes();
     let mut i = 0;
@@ -285,11 +292,13 @@ fn collect_delimiters(source: &str, reference_checker: impl Fn(&str) -> bool) ->
         }
 
         // Check for delimiter characters
-        if b == b'*' || b == b'_' {
+        if b == b'*' || b == b'_' || (allow_strikethrough && b == b'~') {
             let kind = if b == b'*' {
                 DelimKind::Star
-            } else {
+            } else if b == b'_' {
                 DelimKind::Underscore
+            } else {
+                DelimKind::Tilde
             };
             let start_offset = i;
 
@@ -319,7 +328,7 @@ fn collect_delimiters(source: &str, reference_checker: impl Fn(&str) -> bool) ->
                     can_underscore_close(char_before, char_after),
                 )
             } else {
-                // Asterisk: can open if left-flanking, can close if right-flanking
+                // Asterisks and tildes can open if left-flanking and close if right-flanking.
                 (
                     is_left_flanking_delimiter(char_after, char_before),
                     is_right_flanking_delimiter(char_before, char_after),
@@ -387,12 +396,17 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
                         continue;
                     }
 
+                    if opener.kind == DelimKind::Tilde && (opener.count != 2 || closer.count != 2) {
+                        continue;
+                    }
+
                     // Rule of 3: if (opener_count + closer_count) % 3 == 0 and
                     // the closer can open or the opener can close, skip unless
                     // both counts are divisible by 3
                     let opener_count = opener.count;
                     let closer_count = closer.count;
-                    if (opener.can_close || closer.can_open)
+                    if opener.kind != DelimKind::Tilde
+                        && (opener.can_close || closer.can_open)
                         && !closer_count.is_multiple_of(3)
                         && (opener_count + closer_count).is_multiple_of(3)
                     {
@@ -405,7 +419,9 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
 
                 let Some(pos) = opener_stack_pos else { break };
                 let opener_idx = opener_stack[pos];
-                let use_count = if runs[opener_idx].count >= 2 && runs[idx].count >= 2 {
+                let use_count = if runs[opener_idx].kind == DelimKind::Tilde
+                    || (runs[opener_idx].count >= 2 && runs[idx].count >= 2)
+                {
                     2
                 } else {
                     1
@@ -421,6 +437,7 @@ fn match_delimiters(runs: &mut [DelimRun]) -> Vec<EmphasisMatch> {
                 matches.push(EmphasisMatch {
                     opener_start,
                     closer_start,
+                    kind: runs[opener_idx].kind,
                     is_strong: use_count == 2,
                 });
 
@@ -484,16 +501,20 @@ impl EmphasisContext {
     pub(crate) fn new(
         source: &str,
         base_offset: usize,
+        allow_strikethrough: bool,
         reference_checker: impl Fn(&str) -> bool,
     ) -> Self {
-        if !source.bytes().any(|byte| matches!(byte, b'*' | b'_')) {
+        if !source
+            .bytes()
+            .any(|byte| matches!(byte, b'*' | b'_') || (allow_strikethrough && byte == b'~'))
+        {
             return Self {
                 matches: Vec::new(),
                 base_offset,
             };
         }
 
-        let mut runs = collect_delimiters(source, reference_checker);
+        let mut runs = collect_delimiters(source, allow_strikethrough, reference_checker);
         let matches = match_delimiters(&mut runs);
         Self {
             matches,
@@ -512,6 +533,7 @@ impl EmphasisContext {
         token_start: usize,
         token_len: usize,
         expect_strong: bool,
+        expected_kind: Option<DelimKind>,
     ) -> Option<OpenerMatch<'_>> {
         let token_end = token_start + token_len;
         let first_match = self
@@ -523,7 +545,7 @@ impl EmphasisContext {
             if abs_opener >= token_end {
                 break;
             }
-            if m.is_strong == expect_strong {
+            if m.is_strong == expect_strong && expected_kind.is_none_or(|kind| m.kind == kind) {
                 return Some(OpenerMatch {
                     matched: m,
                     prefix_len: abs_opener - token_start,
@@ -552,7 +574,7 @@ fn parse_emphasis_from_context(p: &mut MarkdownParser, expect_strong: bool) -> P
     let token_len: usize = p.cur_range().len().into();
 
     // Find match within current token's range that has the expected is_strong value
-    let opener_match = match context.opener_within(token_start, token_len, expect_strong) {
+    let opener_match = match context.opener_within(token_start, token_len, expect_strong, None) {
         Some(m) => m,
         None => return Absent,
     };
@@ -664,6 +686,52 @@ pub(crate) fn parse_inline_italic(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_emphasis_from_context(p, false)
 }
 
+pub(crate) fn parse_inline_strikethrough(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !p.at(DOUBLE_TILDE) {
+        return Absent;
+    }
+
+    let context = match p.emphasis_context() {
+        Some(context) => context,
+        None => return Absent,
+    };
+    let opener_match = match context.opener_within(
+        u32::from(p.cur_range().start()) as usize,
+        p.cur_range().len().into(),
+        true,
+        Some(DelimKind::Tilde),
+    ) {
+        Some(m) if m.prefix_len == 0 => m,
+        _ => return Absent,
+    };
+    let closer_offset = opener_match.matched.closer_start + context.base_offset;
+
+    let m = p.start();
+    let opening_range = p.cur_range();
+    p.bump(DOUBLE_TILDE);
+
+    let content = p.start();
+    while !p.at(T![EOF]) {
+        let current_offset = u32::from(p.cur_range().start()) as usize;
+        let current_len: usize = p.cur_range().len().into();
+        if closer_offset >= current_offset && closer_offset < current_offset + current_len {
+            break;
+        }
+        if current_offset > closer_offset || super::parse_any_inline(p).is_absent() {
+            break;
+        }
+    }
+    content.complete(p, MD_INLINE_ITEM_LIST);
+
+    if p.at(DOUBLE_TILDE) {
+        p.bump(DOUBLE_TILDE);
+    } else {
+        p.error(unclosed_emphasis(p, opening_range, "~~"));
+    }
+
+    Present(m.complete(p, GFM_STRIKETHROUGH))
+}
+
 pub(crate) fn set_inline_emphasis_context_until(
     p: &mut MarkdownParser,
     stop: MarkdownSyntaxKind,
@@ -677,9 +745,12 @@ pub(crate) fn set_inline_emphasis_context_until(
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
     // Create a reference checker closure that uses the parser's link reference definitions
-    let context = EmphasisContext::new(inline_source, base_offset, |label| {
-        p.has_link_reference_definition(label)
-    });
+    let context = EmphasisContext::new(
+        inline_source,
+        base_offset,
+        MarkdownSyntaxFeatures::Gfm.is_supported(p),
+        |label| p.has_link_reference_definition(label),
+    );
     p.set_new_emphasis_context(context)
 }
 
@@ -704,7 +775,7 @@ mod tests {
 
     #[test]
     fn skips_reference_lookups_without_emphasis_delimiters() {
-        let context = EmphasisContext::new("[shortcut]", 0, |_| {
+        let context = EmphasisContext::new("[shortcut]", 0, false, |_| {
             panic!("reference lookup should be skipped")
         });
 

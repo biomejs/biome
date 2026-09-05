@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInterfaceDeclarationMerging.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+interface Unused {
+    first: string;
+}
+
+interface Unused {
+    second: string;
+}
+
+const ValueOnly = 0;
+interface ValueOnly {
+    prop: string;
+}
+console.log(ValueOnly);
+
+interface Shadowed {
+    outer: string;
+}
+export function useShadowed() {
+    interface Shadowed {
+        inner: string;
+    }
+    type Key = keyof Shadowed;
+    return null as Key;
+}
+
+```
+
+# Diagnostics
+```
+invalidInterfaceDeclarationMerging.ts:3:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface Unused is unused.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ interface Unused {
+      │           ^^^^^^
+    4 │     first: string;
+    5 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidInterfaceDeclarationMerging.ts:7:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface Unused is unused.
+  
+    5 │ }
+    6 │ 
+  > 7 │ interface Unused {
+      │           ^^^^^^
+    8 │     second: string;
+    9 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidInterfaceDeclarationMerging.ts:12:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface ValueOnly is unused.
+  
+    11 │ const ValueOnly = 0;
+  > 12 │ interface ValueOnly {
+       │           ^^^^^^^^^
+    13 │     prop: string;
+    14 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidInterfaceDeclarationMerging.ts:17:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface Shadowed is unused.
+  
+    15 │ console.log(ValueOnly);
+    16 │ 
+  > 17 │ interface Shadowed {
+       │           ^^^^^^^^
+    18 │     outer: string;
+    19 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```

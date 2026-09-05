@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::markup_to_string;
+use crate::snap_test::{markup_to_string, message_to_string};
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -146,4 +146,26 @@ fn stdin_full_support_formats_vue_markup() {
         {message.content}
     });
     assert!(content.contains("<template>\n"), "{content}");
+}
+
+#[test]
+fn stdin_formatting_preserves_unicode() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    console.in_buffer.push("const mark=\"✔\"".to_string());
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "file.js"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+    assert!(message.is_raw, "stdin formatting output should be raw");
+    let content = message_to_string(message);
+    assert_eq!(content, "const mark = \"✔\";\n");
 }

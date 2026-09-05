@@ -4,7 +4,7 @@ use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
 use crate::token_source::TailwindLexContext;
-use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
+use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -23,6 +23,7 @@ pub fn parse_root(p: &mut TailwindParser) {
     if p.at(UNICODE_BOM) {
         p.eat(UNICODE_BOM);
     }
+    p.eat(WHITESPACE);
     CandidateList.parse_list(p);
 
     m.complete(p, TW_ROOT);
@@ -31,7 +32,7 @@ pub fn parse_root(p: &mut TailwindParser) {
 #[derive(Default)]
 struct CandidateList;
 
-impl ParseNodeList for CandidateList {
+impl ParseSeparatedList for CandidateList {
     type Kind = TailwindSyntaxKind;
     type Parser<'source> = TailwindParser<'source>;
     const LIST_KIND: Self::Kind = TW_CANDIDATE_LIST;
@@ -40,8 +41,16 @@ impl ParseNodeList for CandidateList {
         parse_full_candidate(p)
     }
 
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        WHITESPACE
+    }
+
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(EOF)
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
     }
 
     fn recover(
@@ -51,8 +60,7 @@ impl ParseNodeList for CandidateList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
-                .enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE]),
             expected_candidate,
         )
     }
@@ -85,8 +93,7 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         .or_else(|| parse_functional_or_static_candidate(p))
         .or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE])
-                .enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE]),
             expected_candidate,
         );
 
@@ -101,7 +108,7 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     // The trailing `!` must be glued to the utility; whitespace before it
     // means the next class starts with the legacy `!` instead.
-    if p.at(T![!]) && !p.source().had_trivia_before() {
+    if p.at(T![!]) {
         if legacy_important {
             p.error(duplicate_important(p, p.cur_range()));
         }
@@ -120,7 +127,6 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
     let m = p.start();
 
     p.bump(TW_BASE);
-    let pos = p.source().position();
     if p.at(T![:]) {
         // Oops, this is a Variant!
         m.abandon(p);
@@ -132,7 +138,7 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         // A modifier can glue straight onto a bare name
         // (`@container/sidebar` names the container); whitespace before
         // the `/` means the next class starts instead.
-        if p.at(T![/]) && !p.source().had_trivia_before() {
+        if p.at(T![/]) {
             parse_modifier(p).or_add_diagnostic(p, expected_modifier);
             if p.at(T![:]) {
                 // A `:` after the modifier means this was a (malformed)
@@ -145,24 +151,10 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         }
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
-    if p.source().had_trivia_before() {
-        // Whitespace is not allowed in tailwind candidates
-        // Theres whitespace between these tokens, so it can't be a functional candidate
-        return Present(m.complete(p, TW_STATIC_CANDIDATE));
-    }
-    if let Some(last_trivia) = p.source().trivia_list.last()
-        && pos < last_trivia.text_range().start()
-    {
-        // Whitespace is not allowed in tailwind candidates
-        // Theres whitespace between these tokens, so it can't be a functional candidate
-        return Present(m.complete(p, TW_STATIC_CANDIDATE));
-    }
-
     p.expect(T![-]);
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]])
-            .enable_recovery_on_line_break(),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]]),
         expected_value,
     ) {
         Ok(_) => {}
@@ -268,7 +260,7 @@ pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     }
     match parse_value(p).or_recover_with_token_set(
         p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, NEWLINE, T![!]]),
+        &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, T![!]]),
         expected_value,
     ) {
         Ok(_) => {}

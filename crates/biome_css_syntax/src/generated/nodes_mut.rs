@@ -1879,6 +1879,14 @@ impl CssLayerReference {
         )
     }
 }
+impl CssLegacyFilterValue {
+    pub fn with_components(self, element: CssCustomPropertyComponentList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssListOfComponentValuesExpression {
     pub fn with_css_component_value_list(self, element: CssComponentValueList) -> Self {
         Self::unwrap_cast(
@@ -4443,6 +4451,14 @@ impl ScssInterpolatedString {
         )
     }
 }
+impl ScssInterpolatedUrlValue {
+    pub fn with_parts(self, element: ScssInterpolatedUrlValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolatedValue {
     pub fn with_items(self, element: ScssInterpolatedValuePartList) -> Self {
         Self::unwrap_cast(
@@ -4962,6 +4978,14 @@ impl ScssUnaryExpression {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssUrlText {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

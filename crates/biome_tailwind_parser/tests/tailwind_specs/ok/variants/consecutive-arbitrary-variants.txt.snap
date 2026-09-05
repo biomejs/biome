@@ -16,6 +16,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -29,11 +30,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@26..31 "grid" [] [Whitespace(" ")],
+                base_token: TW_BASE@26..30 "grid" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@30..31 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwArbitraryVariant {
@@ -49,12 +51,13 @@ TwRoot {
                 base_token: TW_BASE@53..55 "mt" [] [],
                 minus_token: DASH@55..56 "-" [] [],
                 value: TwNumberValue {
-                    value_token: TW_NUMBER@56..58 "4" [] [Whitespace(" ")],
+                    value_token: TW_NUMBER@56..57 "4" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@57..58 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwArbitraryVariant {
@@ -70,12 +73,13 @@ TwRoot {
                 base_token: TW_BASE@75..77 "bg" [] [],
                 minus_token: DASH@77..78 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@78..87 "blue-500" [] [Whitespace(" ")],
+                    value_token: TW_VALUE@78..86 "blue-500" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@86..87 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -103,8 +107,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@108..109 "\n" [] [],
     ],
-    eof_token: EOF@108..109 "" [Newline("\n")] [],
+    eof_token: EOF@109..109 "" [] [],
 }
 ```
 
@@ -113,8 +118,9 @@ TwRoot {
 ```
 0: TW_ROOT@0..109
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..108
-    0: TW_FULL_CANDIDATE@0..31
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..109
+    0: TW_FULL_CANDIDATE@0..30
       0: TW_VARIANT_LIST@0..26
         0: TW_ARBITRARY_VARIANT@0..25
           0: L_BRACKET@0..1 "[" [] []
@@ -123,11 +129,12 @@ TwRoot {
         1: COLON@25..26 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@26..31
-        0: TW_BASE@26..31 "grid" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@26..30
+        0: TW_BASE@26..30 "grid" [] []
         1: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@31..58
+    1: WHITESPACE@30..31 " " [] []
+    2: TW_FULL_CANDIDATE@31..57
       0: TW_VARIANT_LIST@31..53
         0: TW_ARBITRARY_VARIANT@31..52
           0: L_BRACKET@31..32 "[" [] []
@@ -136,14 +143,15 @@ TwRoot {
         1: COLON@52..53 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@53..58
+      3: TW_FUNCTIONAL_CANDIDATE@53..57
         0: TW_BASE@53..55 "mt" [] []
         1: DASH@55..56 "-" [] []
-        2: TW_NUMBER_VALUE@56..58
-          0: TW_NUMBER@56..58 "4" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@56..57
+          0: TW_NUMBER@56..57 "4" [] []
         3: (empty)
       4: (empty)
-    2: TW_FULL_CANDIDATE@58..87
+    3: WHITESPACE@57..58 " " [] []
+    4: TW_FULL_CANDIDATE@58..86
       0: TW_VARIANT_LIST@58..75
         0: TW_ARBITRARY_VARIANT@58..74
           0: L_BRACKET@58..59 "[" [] []
@@ -152,14 +160,15 @@ TwRoot {
         1: COLON@74..75 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@75..87
+      3: TW_FUNCTIONAL_CANDIDATE@75..86
         0: TW_BASE@75..77 "bg" [] []
         1: DASH@77..78 "-" [] []
-        2: TW_NAMED_VALUE@78..87
-          0: TW_VALUE@78..87 "blue-500" [] [Whitespace(" ")]
+        2: TW_NAMED_VALUE@78..86
+          0: TW_VALUE@78..86 "blue-500" [] []
         3: (empty)
       4: (empty)
-    3: TW_FULL_CANDIDATE@87..108
+    5: WHITESPACE@86..87 " " [] []
+    6: TW_FULL_CANDIDATE@87..108
       0: TW_VARIANT_LIST@87..99
         0: TW_VARIANT_EXPRESSION@87..92
           0: TW_VARIANT_SEGMENT_LIST@87..92
@@ -179,6 +188,7 @@ TwRoot {
         0: TW_BASE@99..108 "underline" [] []
         1: (empty)
       4: (empty)
-  2: EOF@108..109 "" [Newline("\n")] []
+    7: WHITESPACE@108..109 "\n" [] []
+  3: EOF@109..109 "" [] []
 
 ```

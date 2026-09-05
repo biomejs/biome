@@ -1,0 +1,190 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.assets {
+  logo: url(images/#{$name}.png);
+  themed: url(#{$base}/#{$theme}/logo.svg);
+  font: src(fonts/#{$family}.woff2);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..8 "assets" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@8..9 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@9..16 "logo" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@18..21 "url" [] [],
+                                        l_paren_token: L_PAREN@21..22 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@22..41 "images/#{$name}.png" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@41..42 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@42..43 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@43..52 "themed" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@54..57 "url" [] [],
+                                        l_paren_token: L_PAREN@57..58 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@58..85 "#{$base}/#{$theme}/logo.svg" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@85..86 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@86..87 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@87..94 "font" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@94..96 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: SRC_KW@96..99 "src" [] [],
+                                        l_paren_token: L_PAREN@99..100 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@100..122 "fonts/#{$family}.woff2" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@122..123 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@123..124 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@124..126 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@126..127 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..127
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..126
+    0: CSS_QUALIFIED_RULE@0..126
+      0: CSS_SELECTOR_LIST@0..8
+        0: CSS_COMPOUND_SELECTOR@0..8
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..8
+            0: CSS_CLASS_SELECTOR@0..8
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..8
+                0: IDENT@1..8 "assets" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@8..126
+        0: L_CURLY@8..9 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@9..124
+          0: CSS_DECLARATION_WITH_SEMICOLON@9..43
+            0: CSS_DECLARATION@9..42
+              0: CSS_GENERIC_PROPERTY@9..42
+                0: CSS_IDENTIFIER@9..16
+                  0: IDENT@9..16 "logo" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@16..18 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@18..42
+                  0: CSS_URL_FUNCTION@18..42
+                    0: URL_KW@18..21 "url" [] []
+                    1: L_PAREN@21..22 "(" [] []
+                    2: CSS_URL_VALUE_RAW@22..41
+                      0: CSS_URL_VALUE_RAW_LITERAL@22..41 "images/#{$name}.png" [] []
+                    3: CSS_URL_MODIFIER_LIST@41..41
+                    4: R_PAREN@41..42 ")" [] []
+              1: (empty)
+            1: SEMICOLON@42..43 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@43..87
+            0: CSS_DECLARATION@43..86
+              0: CSS_GENERIC_PROPERTY@43..86
+                0: CSS_IDENTIFIER@43..52
+                  0: IDENT@43..52 "themed" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@52..54 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@54..86
+                  0: CSS_URL_FUNCTION@54..86
+                    0: URL_KW@54..57 "url" [] []
+                    1: L_PAREN@57..58 "(" [] []
+                    2: CSS_URL_VALUE_RAW@58..85
+                      0: CSS_URL_VALUE_RAW_LITERAL@58..85 "#{$base}/#{$theme}/logo.svg" [] []
+                    3: CSS_URL_MODIFIER_LIST@85..85
+                    4: R_PAREN@85..86 ")" [] []
+              1: (empty)
+            1: SEMICOLON@86..87 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@87..124
+            0: CSS_DECLARATION@87..123
+              0: CSS_GENERIC_PROPERTY@87..123
+                0: CSS_IDENTIFIER@87..94
+                  0: IDENT@87..94 "font" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@94..96 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@96..123
+                  0: CSS_URL_FUNCTION@96..123
+                    0: SRC_KW@96..99 "src" [] []
+                    1: L_PAREN@99..100 "(" [] []
+                    2: CSS_URL_VALUE_RAW@100..122
+                      0: CSS_URL_VALUE_RAW_LITERAL@100..122 "fonts/#{$family}.woff2" [] []
+                    3: CSS_URL_MODIFIER_LIST@122..122
+                    4: R_PAREN@122..123 ")" [] []
+              1: (empty)
+            1: SEMICOLON@123..124 ";" [] []
+        2: R_CURLY@124..126 "}" [Newline("\n")] []
+  2: EOF@126..127 "" [Newline("\n")] []
+
+```

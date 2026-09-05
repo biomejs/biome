@@ -15,6 +15,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -32,11 +33,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@4..9 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@4..8 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@8..9 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -53,11 +55,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@13..18 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@13..17 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@17..18 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -74,11 +77,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@22..27 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@22..26 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@26..27 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -99,11 +103,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@35..40 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@35..39 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@39..40 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -126,11 +131,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@53..58 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@53..57 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@57..58 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -162,8 +168,9 @@ TwRoot {
 ```
 0: TW_ROOT@0..73
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..73
-    0: TW_FULL_CANDIDATE@0..9
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..73
+    0: TW_FULL_CANDIDATE@0..8
       0: TW_VARIANT_LIST@0..4
         0: TW_VARIANT_EXPRESSION@0..3
           0: TW_VARIANT_SEGMENT_LIST@0..3
@@ -174,11 +181,12 @@ TwRoot {
         1: COLON@3..4 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@4..9
-        0: TW_BASE@4..9 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@4..8
+        0: TW_BASE@4..8 "flex" [] []
         1: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@9..18
+    1: WHITESPACE@8..9 " " [] []
+    2: TW_FULL_CANDIDATE@9..17
       0: TW_VARIANT_LIST@9..13
         0: TW_VARIANT_EXPRESSION@9..12
           0: TW_VARIANT_SEGMENT_LIST@9..12
@@ -189,11 +197,12 @@ TwRoot {
         1: COLON@12..13 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@13..18
-        0: TW_BASE@13..18 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@13..17
+        0: TW_BASE@13..17 "flex" [] []
         1: (empty)
       4: (empty)
-    2: TW_FULL_CANDIDATE@18..27
+    3: WHITESPACE@17..18 " " [] []
+    4: TW_FULL_CANDIDATE@18..26
       0: TW_VARIANT_LIST@18..22
         0: TW_VARIANT_EXPRESSION@18..21
           0: TW_VARIANT_SEGMENT_LIST@18..21
@@ -204,11 +213,12 @@ TwRoot {
         1: COLON@21..22 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@22..27
-        0: TW_BASE@22..27 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@22..26
+        0: TW_BASE@22..26 "flex" [] []
         1: (empty)
       4: (empty)
-    3: TW_FULL_CANDIDATE@27..40
+    5: WHITESPACE@26..27 " " [] []
+    6: TW_FULL_CANDIDATE@27..39
       0: TW_VARIANT_LIST@27..35
         0: TW_VARIANT_EXPRESSION@27..34
           0: TW_VARIANT_SEGMENT_LIST@27..34
@@ -222,11 +232,12 @@ TwRoot {
         1: COLON@34..35 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@35..40
-        0: TW_BASE@35..40 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@35..39
+        0: TW_BASE@35..39 "flex" [] []
         1: (empty)
       4: (empty)
-    4: TW_FULL_CANDIDATE@40..58
+    7: WHITESPACE@39..40 " " [] []
+    8: TW_FULL_CANDIDATE@40..57
       0: TW_VARIANT_LIST@40..53
         0: TW_VARIANT_EXPRESSION@40..52
           0: TW_VARIANT_SEGMENT_LIST@40..52
@@ -242,11 +253,12 @@ TwRoot {
         1: COLON@52..53 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@53..58
-        0: TW_BASE@53..58 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@53..57
+        0: TW_BASE@53..57 "flex" [] []
         1: (empty)
       4: (empty)
-    5: TW_FULL_CANDIDATE@58..73
+    9: WHITESPACE@57..58 " " [] []
+    10: TW_FULL_CANDIDATE@58..73
       0: TW_VARIANT_LIST@58..69
         0: TW_VARIANT_EXPRESSION@58..68
           0: TW_VARIANT_SEGMENT_LIST@58..68
@@ -261,6 +273,6 @@ TwRoot {
         0: TW_BASE@69..73 "flex" [] []
         1: (empty)
       4: (empty)
-  2: EOF@73..73 "" [] []
+  3: EOF@73..73 "" [] []
 
 ```

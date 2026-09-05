@@ -2,7 +2,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
+use biome_css_semantic::model::{AnyRuleStart, Rule as CssSemanticRule, RuleId, Specificity};
 use biome_css_syntax::{AnyCssRoot, AnyCssSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
@@ -52,6 +52,20 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// .a th {
+    ///   color: red;
+    /// }
+    ///
+    /// .a .b .c th {
+    ///   color: green;
+    /// }
+    ///
+    /// .a .b th {
+    ///   color: blue;
+    /// }
+    /// ```
+    ///
     ///
     /// ### Valid
     ///
@@ -82,6 +96,18 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css
+    /// .a th {
+    ///   color: red;
+    /// }
+    ///
+    /// @media print {
+    ///   .a .b .c th {
+    ///     color: green;
+    ///   }
+    /// }
+    /// ```
+    ///
     pub NoDescendingSpecificity {
         version: "1.9.3",
         name: "noDescendingSpecificity",
@@ -90,12 +116,6 @@ declare_lint_rule! {
         severity: Severity::Warning,
         sources: &[RuleSource::Stylelint("no-descending-specificity").same()],
     }
-}
-
-#[derive(Debug)]
-pub struct DescendingSelector {
-    high: (TextRange, Specificity),
-    low: (TextRange, Specificity),
 }
 
 impl Rule for NoDescendingSpecificity {
@@ -108,17 +128,40 @@ impl Rule for NoDescendingSpecificity {
         let model = ctx.model();
         let root = ctx.root();
         let mut visited_rules = FxHashSet::default();
-        let mut visited_selectors = FxHashMap::default();
+        let mut visited_selectors = SelectorContexts::default();
         let mut descending_selectors = Vec::new();
-        for rule in model.rules() {
+
+        let mut rules = model
+            .rules()
+            .into_iter()
+            .rev()
+            .map(|rule| (rule, None))
+            .collect::<Vec<_>>();
+        while let Some((rule, at_rule_context)) = rules.pop() {
+            if !visited_rules.insert(rule.id()) {
+                continue;
+            }
+
             find_descending_selector(
-                &root,
                 &rule,
-                model,
-                &mut visited_rules,
+                at_rule_context,
                 &mut visited_selectors,
                 &mut descending_selectors,
             );
+
+            let child_at_rule_context = match rule.node(&root) {
+                AnyRuleStart::CssContainerAtRule(_)
+                | AnyRuleStart::CssMediaAtRule(_)
+                | AnyRuleStart::CssScopeAtRule(_)
+                | AnyRuleStart::CssStartingStyleAtRule(_)
+                | AnyRuleStart::CssSupportsAtRule(_) => Some(rule.id()),
+                _ => at_rule_context,
+            };
+            for child_id in rule.child_ids().iter().rev() {
+                if let Some(child_rule) = model.get_rule_by_id(child_id) {
+                    rules.push((child_rule, child_at_rule_context));
+                }
+            }
         }
         descending_selectors.into_boxed_slice()
     }
@@ -141,6 +184,14 @@ impl Rule for NoDescendingSpecificity {
     }
 }
 
+#[derive(Debug)]
+pub struct DescendingSelector {
+    high: (TextRange, Specificity),
+    low: (TextRange, Specificity),
+}
+
+// `None` represents the top-level comparison context, which has no enclosing at-rule.
+type SelectorContexts = FxHashMap<Option<RuleId>, FxHashMap<String, (TextRange, Specificity)>>;
 /// find tail selector
 /// ```css
 /// a b:hover {
@@ -165,61 +216,46 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
             Some(result)
         }
         AnyCssSelector::CssComplexSelector(s) => {
+            // negligible recursion
             s.right().as_ref().ok().and_then(find_tail_selector_str)
         }
         _ => None,
     }
 }
 
-/// This function traverses the CSS rules starting from the given rule and checks for selectors that have the same tail selector.
-/// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
+/// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
-    root: &AnyCssRoot,
     rule: &CssSemanticRule,
-    model: &SemanticModel,
-    visited_rules: &mut FxHashSet<RuleId>,
-    visited_selectors: &mut FxHashMap<String, (TextRange, Specificity)>,
+    at_rule_context: Option<RuleId>,
+    visited_selectors: &mut SelectorContexts,
     descending_selectors: &mut Vec<DescendingSelector>,
 ) {
-    if !visited_rules.insert(rule.id()) {
-        return;
-    }
+    let visited_selectors = visited_selectors.entry(at_rule_context).or_default();
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node(root).syntax().clone())
-        else {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
             continue;
         };
 
-        if let Some((last_text_range, last_specificity)) = visited_selectors.get(&tail_selector_str)
-        {
-            if last_specificity > &selector.specificity() {
+        if let Some(seen) = visited_selectors.get_mut(&tail_selector_str) {
+            let (last_text_range, last_specificity) = *seen;
+            let specificity = selector.specificity();
+            if last_specificity > specificity {
                 descending_selectors.push(DescendingSelector {
-                    high: (*last_text_range, *last_specificity),
-                    low: (selector.range(root), selector.specificity()),
+                    high: (last_text_range, last_specificity),
+                    low: (selector.range(), specificity),
                 });
+            } else if specificity > last_specificity {
+                *seen = (selector.range(), specificity);
             }
         } else {
             visited_selectors.insert(
                 tail_selector_str,
-                (selector.range(root), selector.specificity()),
-            );
-        }
-    }
-
-    for child_id in rule.child_ids() {
-        if let Some(child_rule) = model.get_rule_by_id(child_id) {
-            find_descending_selector(
-                root,
-                &child_rule,
-                model,
-                visited_rules,
-                visited_selectors,
-                descending_selectors,
+                (selector.range(), selector.specificity()),
             );
         }
     }

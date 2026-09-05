@@ -16,17 +16,19 @@ border focus:outline-none
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@0..7 "border" [] [Whitespace(" ")],
+                base_token: TW_BASE@0..6 "border" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@6..7 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -52,8 +54,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@25..26 "\n" [] [],
     ],
-    eof_token: EOF@25..26 "" [Newline("\n")] [],
+    eof_token: EOF@26..26 "" [] [],
 }
 ```
 
@@ -62,16 +65,18 @@ TwRoot {
 ```
 0: TW_ROOT@0..26
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..25
-    0: TW_FULL_CANDIDATE@0..7
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..26
+    0: TW_FULL_CANDIDATE@0..6
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@0..7
-        0: TW_BASE@0..7 "border" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@0..6
+        0: TW_BASE@0..6 "border" [] []
         1: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@7..25
+    1: WHITESPACE@6..7 " " [] []
+    2: TW_FULL_CANDIDATE@7..25
       0: TW_VARIANT_LIST@7..13
         0: TW_VARIANT_EXPRESSION@7..12
           0: TW_VARIANT_SEGMENT_LIST@7..12
@@ -89,6 +94,7 @@ TwRoot {
           0: TW_VALUE@21..25 "none" [] []
         3: (empty)
       4: (empty)
-  2: EOF@25..26 "" [Newline("\n")] []
+    3: WHITESPACE@25..26 "\n" [] []
+  3: EOF@26..26 "" [] []
 
 ```

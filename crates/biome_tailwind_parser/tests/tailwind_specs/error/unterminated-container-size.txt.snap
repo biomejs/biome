@@ -16,6 +16,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -27,9 +28,23 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_BRACKET@5..6 "[" [] [],
-                        TW_SELECTOR@6..17 "400px:flex" [] [Whitespace(" ")],
-                        TW_BASE@17..21 "@max" [] [],
-                        DASH@21..22 "-" [] [],
+                        TW_SELECTOR@6..16 "400px:flex" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@16..17 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@17..21 "@max" [] [],
+                minus_token: DASH@21..22 "-" [] [],
+                value: TwBogusValue {
+                    items: [
                         L_BRACKET@22..23 "[" [] [],
                         TW_SELECTOR@23..26 "959" [] [],
                     ],
@@ -38,8 +53,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@26..27 "\n" [] [],
     ],
-    eof_token: EOF@26..27 "" [Newline("\n")] [],
+    eof_token: EOF@27..27 "" [] [],
 }
 ```
 
@@ -48,24 +64,35 @@ TwRoot {
 ```
 0: TW_ROOT@0..27
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..26
-    0: TW_FULL_CANDIDATE@0..26
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..27
+    0: TW_FULL_CANDIDATE@0..16
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@0..26
+      3: TW_FUNCTIONAL_CANDIDATE@0..16
         0: TW_BASE@0..4 "@min" [] []
         1: DASH@4..5 "-" [] []
-        2: TW_BOGUS_VALUE@5..26
+        2: TW_BOGUS_VALUE@5..16
           0: L_BRACKET@5..6 "[" [] []
-          1: TW_SELECTOR@6..17 "400px:flex" [] [Whitespace(" ")]
-          2: TW_BASE@17..21 "@max" [] []
-          3: DASH@21..22 "-" [] []
-          4: L_BRACKET@22..23 "[" [] []
-          5: TW_SELECTOR@23..26 "959" [] []
+          1: TW_SELECTOR@6..16 "400px:flex" [] []
         3: (empty)
       4: (empty)
-  2: EOF@26..27 "" [Newline("\n")] []
+    1: WHITESPACE@16..17 " " [] []
+    2: TW_FULL_CANDIDATE@17..26
+      0: TW_VARIANT_LIST@17..17
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@17..26
+        0: TW_BASE@17..21 "@max" [] []
+        1: DASH@21..22 "-" [] []
+        2: TW_BOGUS_VALUE@22..26
+          0: L_BRACKET@22..23 "[" [] []
+          1: TW_SELECTOR@23..26 "959" [] []
+        3: (empty)
+      4: (empty)
+    3: WHITESPACE@26..27 "\n" [] []
+  3: EOF@27..27 "" [] []
 
 ```
 
@@ -74,16 +101,30 @@ TwRoot {
 ```
 unterminated-container-size.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a value but instead found '[400px:flex @max-[959'.
+  × Expected a value but instead found '[400px:flex'.
   
   > 1 │ @min-[400px:flex @max-[959
-      │      ^^^^^^^^^^^^^^^^^^^^^
+      │      ^^^^^^^^^^^
     2 │ 
   
   i Expected a value here.
   
   > 1 │ @min-[400px:flex @max-[959
-      │      ^^^^^^^^^^^^^^^^^^^^^
+      │      ^^^^^^^^^^^
+    2 │ 
+  
+unterminated-container-size.txt:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[959'.
+  
+  > 1 │ @min-[400px:flex @max-[959
+      │                       ^^^^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ @min-[400px:flex @max-[959
+      │                       ^^^^
     2 │ 
   
 ```

@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-unrelated-initializer.vue
+---
+# Input
+```vue
+<!-- should emit diagnostics -->
+<script setup>
+const props = defineProps(['foo', 'bar'])
+const { foo } = props
+const bar = 42
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-unrelated-initializer.vue:3:35 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━
+
+  × Duplicate key bar found in Vue component.
+  
+    1 │ <!-- should emit diagnostics -->
+    2 │ <script setup>
+  > 3 │ const props = defineProps(['foo', 'bar'])
+      │                                   ^^^^^
+    4 │ const { foo } = props
+    5 │ const bar = 42
+  
+  i Key bar is also defined here.
+  
+    3 │ const props = defineProps(['foo', 'bar'])
+    4 │ const { foo } = props
+  > 5 │ const bar = 42
+      │       ^^^
+    6 │ </script>
+    7 │ 
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

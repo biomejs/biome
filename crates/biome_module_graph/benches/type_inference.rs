@@ -10,8 +10,9 @@ use biome_module_graph::{
     BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, LocalTypeInput, ModuleDb,
     ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache, SymbolFromModuleInfo,
     TypeInferenceMode, infer_binding_type, infer_call_argument_type, infer_export_type,
-    infer_expression_is_promise, infer_expression_type, infer_local_type, infer_module_types,
-    infer_module_types_bottom_up, normalize_type, resolve_js_module_with_inference_mode,
+    infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
+    infer_local_type, infer_module_types, infer_module_types_bottom_up, normalize_type,
+    resolve_js_module_with_inference_mode, type_inference::TypeInferenceClassification,
 };
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
@@ -120,7 +121,7 @@ fn bench_index_d_ts_salsa_memoized(bencher: Bencher, name: &str) {
         });
 }
 
-#[divan::bench(name = "bench_normalize_terminal_type", sample_size = 1)]
+#[divan::bench(name = "bench_normalize_terminal_type")]
 fn bench_normalize_terminal_type(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -134,7 +135,7 @@ fn bench_normalize_terminal_type(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_normalize_local_alias", sample_size = 1)]
+#[divan::bench(name = "bench_normalize_local_alias")]
 fn bench_normalize_local_alias(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -161,7 +162,7 @@ fn bench_normalize_local_alias(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_infer_argument_type_many_overloads", sample_size = 1)]
+#[divan::bench(name = "bench_infer_argument_type_many_overloads")]
 fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -185,7 +186,7 @@ fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_binding_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_binding_lookup_queries")]
 fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -204,7 +205,36 @@ fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_local_type_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_cyclic_declaration_promise_lookup")]
+fn bench_cyclic_declaration_promise_lookup(bencher: Bencher) {
+    let (db, module, range) = cyclic_declaration_promise_lookup_input();
+    let input = ExpressionTypeInput::new(&db, module, range);
+    divan::black_box(infer_expression_is_array_of_promises(&db, input));
+    assert_eq!(
+        infer_expression_is_promise(&db, input),
+        TypeInferenceClassification::Indeterminate
+    );
+    let ty = infer_expression_type(&db, input).expect("Promise chain must have a type");
+    let ty = normalize_type(&db, NormalizeTypeInput::new(&db, module, ty));
+    assert!(
+        ty.is_promise_instance(&db),
+        "Promise chain must resolve to a Promise, got {ty:?}"
+    );
+
+    bencher
+        .with_inputs(cyclic_declaration_promise_lookup_input)
+        .bench_local_values(|(db, module, range)| {
+            let input = ExpressionTypeInput::new(&db, module, range);
+            divan::black_box(infer_expression_is_array_of_promises(&db, input));
+            divan::black_box(infer_expression_is_promise(&db, input));
+            let ty = infer_expression_type(&db, input).expect("Promise chain must have a type");
+            let input = NormalizeTypeInput::new(&db, module, ty);
+            divan::black_box(normalize_type(&db, input));
+            db
+        });
+}
+
+#[divan::bench(name = "bench_distinct_local_type_lookup_queries")]
 fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -223,7 +253,7 @@ fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_export_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_export_lookup_queries")]
 fn bench_distinct_export_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
@@ -242,7 +272,7 @@ fn bench_distinct_export_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_expression_lookup_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_expression_lookup_queries")]
 fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| expression_query_inputs(128))
@@ -254,7 +284,7 @@ fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_selective_promise_queries", sample_size = 1)]
+#[divan::bench(name = "bench_distinct_selective_promise_queries")]
 fn bench_distinct_selective_promise_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| expression_query_inputs(128))
@@ -558,6 +588,71 @@ fn declaration_heavy_source(declaration_count: usize) -> String {
         ));
     }
     source
+}
+
+fn cyclic_declaration_promise_lookup_input() -> (WorkspaceDb, ModuleInfo, TextRange) {
+    const CONSUMER_SOURCE: &str = r#"
+        import { load } from "./loader";
+        export interface Consumer {}
+        load().then(() => {});
+    "#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/loader.ts".into(),
+        r#"
+            import type { Consumer } from "./consumer";
+            export function load(): Promise<void> {
+                return Promise.resolve();
+            }
+            export type LoaderConsumer = Consumer;
+        "#,
+    );
+    fs.insert("/src/consumer.ts".into(), CONSUMER_SOURCE);
+
+    let db = WorkspaceDb::default();
+    let path_info_cache = PathInfoCache::default();
+    let mut consumer = None;
+    for name in ["/src/loader.ts", "/src/consumer.ts"] {
+        let path = BiomePath::new(name);
+        let root = get_js_root(&fs, &path);
+        let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+        let (module_info, _, _) = resolve_js_module_with_inference_mode(
+            root,
+            &path,
+            &fs,
+            &ProjectLayout::default(),
+            semantic_model,
+            &path_info_cache,
+            TypeInferenceMode::RawTypesOnly,
+        );
+        let module = ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), module);
+        if name == "/src/consumer.ts" {
+            consumer = Some(module);
+        }
+    }
+
+    let consumer = consumer.expect("consumer module must exist");
+    let ModuleInfoKind::Js(info) = consumer.kind(&db) else {
+        panic!("consumer module must contain JavaScript information");
+    };
+    let range = info
+        .raw_expressions
+        .keys()
+        .copied()
+        .find(|range| {
+            CONSUMER_SOURCE.get(usize::from(range.start())..usize::from(range.end()))
+                == Some("load().then(() => {})")
+        })
+        .expect("Promise chain must be collected");
+    (db, consumer, range)
 }
 
 fn expression_query_inputs(count: usize) -> (WorkspaceDb, ModuleInfo, Vec<TextRange>) {

@@ -15,6 +15,7 @@ has-[>svg]:flex has-[+p]:flex has-[~span]:flex group-has-[>svg]:flex
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -38,11 +39,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@11..16 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@11..15 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@15..16 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -65,11 +67,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@25..30 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@25..29 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@29..30 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -92,11 +95,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@42..47 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@42..46 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@46..47 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -138,8 +142,9 @@ TwRoot {
 ```
 0: TW_ROOT@0..68
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..68
-    0: TW_FULL_CANDIDATE@0..16
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..68
+    0: TW_FULL_CANDIDATE@0..15
       0: TW_VARIANT_LIST@0..11
         0: TW_VARIANT_EXPRESSION@0..10
           0: TW_VARIANT_SEGMENT_LIST@0..10
@@ -155,11 +160,12 @@ TwRoot {
         1: COLON@10..11 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@11..16
-        0: TW_BASE@11..16 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@11..15
+        0: TW_BASE@11..15 "flex" [] []
         1: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@16..30
+    1: WHITESPACE@15..16 " " [] []
+    2: TW_FULL_CANDIDATE@16..29
       0: TW_VARIANT_LIST@16..25
         0: TW_VARIANT_EXPRESSION@16..24
           0: TW_VARIANT_SEGMENT_LIST@16..24
@@ -175,11 +181,12 @@ TwRoot {
         1: COLON@24..25 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@25..30
-        0: TW_BASE@25..30 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@25..29
+        0: TW_BASE@25..29 "flex" [] []
         1: (empty)
       4: (empty)
-    2: TW_FULL_CANDIDATE@30..47
+    3: WHITESPACE@29..30 " " [] []
+    4: TW_FULL_CANDIDATE@30..46
       0: TW_VARIANT_LIST@30..42
         0: TW_VARIANT_EXPRESSION@30..41
           0: TW_VARIANT_SEGMENT_LIST@30..41
@@ -195,11 +202,12 @@ TwRoot {
         1: COLON@41..42 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@42..47
-        0: TW_BASE@42..47 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@42..46
+        0: TW_BASE@42..46 "flex" [] []
         1: (empty)
       4: (empty)
-    3: TW_FULL_CANDIDATE@47..68
+    5: WHITESPACE@46..47 " " [] []
+    6: TW_FULL_CANDIDATE@47..68
       0: TW_VARIANT_LIST@47..64
         0: TW_VARIANT_EXPRESSION@47..63
           0: TW_VARIANT_SEGMENT_LIST@47..63
@@ -222,6 +230,6 @@ TwRoot {
         0: TW_BASE@64..68 "flex" [] []
         1: (empty)
       4: (empty)
-  2: EOF@68..68 "" [] []
+  3: EOF@68..68 "" [] []
 
 ```

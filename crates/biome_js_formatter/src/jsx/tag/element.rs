@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::jsx::lists::child_list::{FormatChildrenResult, FormatJsxChildList, JsxChildListLayout};
-use crate::utils::jsx::{is_implicit_fragment_child, is_jsx_suppressed, is_meaningful_jsx_text};
+use crate::utils::jsx::{is_jsx_suppressed, is_meaningful_jsx_text};
 use biome_formatter::{CstFormatContext, FormatResult, FormatRuleWithOptions, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxChild, JsxChildList, JsxElement, JsxExpressionChild, JsxFragment,
@@ -18,39 +18,6 @@ impl FormatNodeRule<JsxElement> for FormatJsxElement {
 
     fn is_suppressed(&self, node: &JsxElement, f: &JsFormatter) -> bool {
         is_jsx_suppressed(&node.clone().into(), f.comments())
-    }
-
-    fn fmt_leading_comments(&self, node: &JsxElement, f: &mut JsFormatter) -> FormatResult<()> {
-        if is_implicit_fragment_child(node.syntax()) {
-            return format_leading_comments(node.syntax()).fmt(f);
-        }
-        debug_assert!(
-            !f.comments().has_leading_comments(node.syntax()),
-            "JsxElement can not have comments."
-        );
-        Ok(())
-    }
-
-    fn fmt_dangling_comments(&self, node: &JsxElement, f: &mut JsFormatter) -> FormatResult<()> {
-        if is_implicit_fragment_child(node.syntax()) {
-            return format_dangling_comments(node.syntax()).fmt(f);
-        }
-        debug_assert!(
-            !f.comments().has_dangling_comments(node.syntax()),
-            "JsxElement can not have comments."
-        );
-        Ok(())
-    }
-
-    fn fmt_trailing_comments(&self, node: &JsxElement, f: &mut JsFormatter) -> FormatResult<()> {
-        if is_implicit_fragment_child(node.syntax()) {
-            return format_trailing_comments(node.syntax()).fmt(f);
-        }
-        debug_assert!(
-            !f.comments().has_trailing_comments(node.syntax()),
-            "JsxElement can not have comments."
-        );
-        Ok(())
     }
 }
 

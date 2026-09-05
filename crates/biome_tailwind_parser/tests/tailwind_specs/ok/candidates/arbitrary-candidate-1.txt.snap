@@ -16,6 +16,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -53,8 +54,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@38..39 "\n" [] [],
     ],
-    eof_token: EOF@38..39 "" [Newline("\n")] [],
+    eof_token: EOF@39..39 "" [] [],
 }
 ```
 
@@ -63,7 +65,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..39
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..38
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..39
     0: TW_FULL_CANDIDATE@0..38
       0: TW_VARIANT_LIST@0..0
       1: (empty)
@@ -89,6 +92,7 @@ TwRoot {
           1: TW_NUMBER_VALUE@37..38
             0: TW_NUMBER@37..38 "5" [] []
       4: (empty)
-  2: EOF@38..39 "" [Newline("\n")] []
+    1: WHITESPACE@38..39 "\n" [] []
+  3: EOF@39..39 "" [] []
 
 ```

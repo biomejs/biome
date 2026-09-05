@@ -212,6 +212,18 @@ impl JsEmbeddingKind {
             }
         )
     }
+    /// Returns `true` when the code is embedded in the template of an Astro
+    /// file, the only place template-only syntax such as JSX applies; the
+    /// frontmatter is plain TypeScript.
+    pub const fn is_astro_template(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                frontmatter: false,
+                ..
+            }
+        )
+    }
     pub const fn is_vue(&self) -> bool {
         matches!(self, Self::Vue { .. })
     }

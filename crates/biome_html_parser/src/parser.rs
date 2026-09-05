@@ -25,7 +25,10 @@ pub(crate) struct HtmlParser<'source> {
 impl<'source> HtmlParser<'source> {
     pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
         let framework = options.framework();
-        let lexer_options = HtmlLexerOptions { framework };
+        let lexer_options = HtmlLexerOptions {
+            framework,
+            text_expression: options.text_expression,
+        };
         Self {
             context: ParserContext::default(),
             source: HtmlTokenSource::from_str(

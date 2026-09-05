@@ -2,8 +2,9 @@ use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    is_at_scss_interpolated_identifier, is_nth_at_identifier_hyphen_part, is_nth_source_tight,
-    parse_identifier_hyphen_part, parse_scss_interpolated_identifier_parts,
+    is_at_identifier_number_part, is_at_scss_interpolated_identifier,
+    is_nth_at_identifier_hyphen_part, is_nth_source_tight, parse_identifier_hyphen_part,
+    parse_identifier_number_part, parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{
@@ -91,16 +92,17 @@ fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> boo
             && is_nth_at_scss_interpolation(p, n + 2))
 }
 
-/// Returns whether the current token is an identifier, interpolation, or raw
-/// hyphen accepted by the selector-specific part parser.
+/// Returns whether the current token is accepted as a selector identifier part.
+/// The caller has already started the name, so a number can only continue it.
 ///
-/// Example:
 /// ```scss
-/// .button-#{$state} {}
+/// .item-#{$index}00 {}
 /// ```
 #[inline]
 fn is_at_selector_identifier_part(p: &mut CssParser) -> bool {
-    is_at_scss_interpolated_identifier(p) || is_nth_at_identifier_hyphen_part(p, 0)
+    is_at_scss_interpolated_identifier(p)
+        || is_nth_at_identifier_hyphen_part(p, 0)
+        || is_at_identifier_number_part(p)
 }
 
 /// Parses SCSS-interpolated selector name slots.
@@ -113,6 +115,7 @@ fn is_at_selector_identifier_part(p: &mut CssParser) -> bool {
 /// ```scss
 /// .icon-#{$name} {}
 /// button-#{$variant} {}
+/// #{$tag}1 {}
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
@@ -125,7 +128,7 @@ pub(crate) fn parse_scss_selector_identifier(p: &mut CssParser) -> ParsedSyntax 
 ///
 /// Example:
 /// ```scss
-/// .button-#{$variant} {}
+/// .item-#{$index}00 {}
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
@@ -140,6 +143,7 @@ pub(crate) fn parse_scss_selector_custom_identifier(p: &mut CssParser) -> Parsed
 /// ```scss
 /// button-#{$variant} {}
 /// .button-#{$variant} {}
+/// .column-#{$prefix}1-of-12 {}
 /// ```
 fn parse_scss_selector_identifier_with_fragment(
     p: &mut CssParser,
@@ -168,12 +172,10 @@ fn parse_scss_selector_identifier_with_fragment(
     Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
 
-/// Parses one interpolation, raw hyphen, or caller-owned selector identifier
-/// fragment.
+/// Parses one interpolation, hyphen, number, or caller-owned selector fragment.
 ///
-/// Example:
 /// ```scss
-/// .-#{$name} {}
+/// .column-#{$prefix}1-of-12 {}
 /// ```
 #[inline]
 fn parse_selector_identifier_part(
@@ -185,6 +187,9 @@ fn parse_selector_identifier_part(
     } else if is_nth_at_identifier_hyphen_part(p, 0) {
         let context = selector_lex_context(p);
         parse_identifier_hyphen_part(p, context)
+    } else if is_at_identifier_number_part(p) {
+        let context = selector_lex_context(p);
+        parse_identifier_number_part(p, context)
     } else {
         parse_selector_fragment(p)
     }

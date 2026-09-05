@@ -104,8 +104,12 @@ impl SyntaxFeature for JsSyntaxFeature {
             Self::SloppyMode => p.state().strict().is_none(),
             Self::StrictMode => p.state().strict().is_some(),
             Self::TypeScript => p.source_type().language().is_typescript(),
-            Self::Jsx => p.source_type().variant() == LanguageVariant::Jsx,
-            Self::Astro => p.source_type().as_embedding_kind().is_astro(),
+            // Astro frontmatter is plain TS, where `<` opens a type assertion.
+            Self::Jsx => {
+                p.source_type().variant() == LanguageVariant::Jsx
+                    && !p.source_type().as_embedding_kind().is_astro_frontmatter()
+            }
+            Self::Astro => p.source_type().as_embedding_kind().is_astro_template(),
         }
     }
 }

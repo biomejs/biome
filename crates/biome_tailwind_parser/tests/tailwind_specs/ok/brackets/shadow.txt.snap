@@ -16,6 +16,7 @@ shadow-[0px_2px_4px]
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -46,8 +47,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@20..21 "\n" [] [],
     ],
-    eof_token: EOF@20..21 "" [Newline("\n")] [],
+    eof_token: EOF@21..21 "" [] [],
 }
 ```
 
@@ -56,7 +58,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..21
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..20
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..21
     0: TW_FULL_CANDIDATE@0..20
       0: TW_VARIANT_LIST@0..0
       1: (empty)
@@ -79,6 +82,7 @@ TwRoot {
           2: R_BRACKET@19..20 "]" [] []
         3: (empty)
       4: (empty)
-  2: EOF@20..21 "" [Newline("\n")] []
+    1: WHITESPACE@20..21 "\n" [] []
+  3: EOF@21..21 "" [] []
 
 ```

@@ -1,4 +1,4 @@
-use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize};
 
 use crate::{AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, TwCandidateList};
 
@@ -10,7 +10,7 @@ use crate::{AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, TwCan
 pub fn arbitrary_ranges(candidates: &TwCandidateList, content_start: TextSize) -> Vec<TextRange> {
     let mut results = Vec::new();
 
-    for candidate in candidates.iter() {
+    for candidate in candidates.iter().flatten() {
         let AnyTwFullCandidate::TwFullCandidate(candidate) = candidate else {
             continue;
         };

@@ -1817,16 +1817,6 @@ impl OverrideSettings {
         }
     }
 
-    /// Retrieves the options of lint rules that have been overridden
-    pub fn override_analyzer_rules(
-        &self,
-        path: &Utf8Path,
-        analyzer_rules: AnalyzerRules,
-    ) -> AnalyzerRules {
-        let indices = self.matching_indices(path);
-        self.override_analyzer_rules_by_indices(&indices, analyzer_rules)
-    }
-
     pub(crate) fn override_analyzer_rules_by_indices(
         &self,
         indices: &[usize],

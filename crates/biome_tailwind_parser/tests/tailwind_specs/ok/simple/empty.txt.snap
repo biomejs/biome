@@ -15,6 +15,7 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [],
     eof_token: EOF@0..0 "" [] [],
 }
@@ -25,7 +26,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..0
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..0
-  2: EOF@0..0 "" [] []
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..0
+  3: EOF@0..0 "" [] []
 
 ```

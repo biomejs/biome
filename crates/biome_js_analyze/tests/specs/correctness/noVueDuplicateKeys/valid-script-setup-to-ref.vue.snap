@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup-to-ref.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+import { toRef } from 'vue';
+const props = defineProps(['foo', 'bar'])
+const foo = toRef(props, 'foo')
+const bar = toRef(props, 'bar')
+</script>
+
+```
