@@ -1627,6 +1627,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_with::NoWithOptions>(),
     ));
     result.push((
+        "nursery",
+        "noXorAsExponentiation",
+        TypeId::of::<biome_rule_options::no_xor_as_exponentiation::NoXorAsExponentiationOptions>(),
+    ));
+    result.push((
         "style",
         "noYodaExpression",
         TypeId::of::<biome_rule_options::no_yoda_expression::NoYodaExpressionOptions>(),
