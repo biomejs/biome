@@ -542,6 +542,10 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ])]]
                 )
             }
+            // The legacy raw engine does not implement narrowing, so this
+            // falls back to displaying the un-narrowed type, matching
+            // `flattened_expression`'s handling of the same variant.
+            Self::Narrowed(expr) => write!(f, [&expr.ty]),
             Self::New(expr) => {
                 write!(f, [&format_args![token("new"), space(), &expr.callee]])
             }
