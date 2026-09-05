@@ -93,13 +93,13 @@ use biome_js_syntax::{
 };
 #[cfg(feature = "type_inference")]
 use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
-#[cfg(feature = "js_embeds")]
-use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_languages::GraphqlFileSource;
 #[cfg(feature = "js_embeds")]
 use biome_languages::css::CssEmbeddingKind;
-use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+#[cfg(feature = "js_embeds")]
+use biome_languages::{CssFileSource, LanguageDb};
+use biome_languages::{DocumentFileSource, JsFileSource};
 #[cfg(feature = "module_graph")]
 use biome_module_graph::ModuleDb;
 use biome_parser::{AnyParse, AnyParsedSource};
