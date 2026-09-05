@@ -16,6 +16,12 @@ mod path_info_cache;
 mod traverse;
 pub mod type_inference;
 
+/// Whether flow-sensitive type narrowing is compiled into this build.
+///
+/// The only place the feature is read; everything downstream takes this as a
+/// runtime flag.
+pub const TYPE_NARROWING_ENABLED: bool = cfg!(feature = "type_narrowing");
+
 pub use biome_js_type_info::{
     ImportSymbol,
     resolved::{InferredLocalTypeId, InferredModuleKey},
