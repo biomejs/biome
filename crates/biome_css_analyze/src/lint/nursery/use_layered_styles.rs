@@ -121,15 +121,16 @@ impl Rule for UseLayeredStyles {
         }
 
         for ancestor in node.syntax().ancestors().skip(1) {
-            match ancestor.kind() {
+            if matches!(
+                ancestor.kind(),
                 // The rule is contained within a cascade layer.
-                CssSyntaxKind::CSS_LAYER_AT_RULE => return None,
-                // The rule is nested inside another style rule, which is reported
-                // on its own when it is outside a layer.
-                CssSyntaxKind::CSS_QUALIFIED_RULE | CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE => {
-                    return None;
-                }
-                _ => {}
+                CssSyntaxKind::CSS_LAYER_AT_RULE
+                    // The rule is nested inside another style rule, which is
+                    // reported on its own when it is outside a layer.
+                    | CssSyntaxKind::CSS_QUALIFIED_RULE
+                    | CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE
+            ) {
+                return None;
             }
         }
 
