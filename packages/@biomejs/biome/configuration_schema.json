@@ -1980,6 +1980,21 @@
 			},
 			"additionalProperties": false
 		},
+		"FunctionStyle": {
+			"description": "The required form for function definitions: `\"expression\"` or `\"declaration\"`.",
+			"oneOf": [
+				{
+					"description": "Require function expressions assigned to variables. This is the default.",
+					"type": "string",
+					"const": "expression"
+				},
+				{
+					"description": "Require function declarations, subject to the rule's exceptions.",
+					"type": "string",
+					"const": "declaration"
+				}
+			]
+		},
 		"Glob": { "type": "string" },
 		"GraphqlAssistConfiguration": {
 			"description": "Options that change how GraphQL assist behaves.",
@@ -7230,6 +7245,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentFunctionStyle": {
+					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentFunctionStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTestIt": {
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
@@ -11606,6 +11628,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentFunctionStyleOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentFunctionStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentGraphqlDescriptionsOptions": {
 			"type": "object",
 			"properties": {
@@ -15440,6 +15471,27 @@
 		},
 		"UseConsistentEnumValueTypeOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentFunctionStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentFunctionStyleOptions" }
+			]
+		},
+		"UseConsistentFunctionStyleOptions": {
+			"description": "Configures the required function style and whether declaration mode permits arrow functions.",
+			"type": "object",
+			"properties": {
+				"allowArrowFunctions": {
+					"description": "Allow arrow functions when declarations are required. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"style": {
+					"description": "The function style to enforce. Default: `\"expression\"`.",
+					"anyOf": [{ "$ref": "#/$defs/FunctionStyle" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConsistentGraphqlDescriptionsConfiguration": {
