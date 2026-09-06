@@ -4,6 +4,9 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
+use biome_rule_options::use_consistent_function_style::{
+    FunctionStyle, UseConsistentFunctionStyleOptions,
+};
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
@@ -540,6 +543,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::ClassMethodsUseThis(conf));
                             }
                         }
+                        "func-style" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::FuncStyle(conf));
+                            }
+                        }
                         "max-nested-callbacks" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
@@ -643,6 +651,24 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
     fn from(val: NoConsoleOptions) -> Self {
         Self {
             allow: (!val.allow.is_empty()).then_some(val.allow),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct FuncStyleOptions {
+    allow_arrow_functions: Option<bool>,
+}
+
+impl FuncStyleOptions {
+    pub(crate) fn into_biome_options(
+        self,
+        style: FunctionStyle,
+    ) -> UseConsistentFunctionStyleOptions {
+        UseConsistentFunctionStyleOptions {
+            style: Some(style),
+            allow_arrow_functions: self.allow_arrow_functions,
         }
     }
 }
@@ -838,6 +864,7 @@ pub(crate) enum Rule {
     // We use this to configure equivalent Bione's rules.
     ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
+    FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
@@ -864,6 +891,7 @@ impl Rule {
             Self::Any(name, _) => name.clone(),
             Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
+            Self::FuncStyle(_) => Cow::Borrowed("func-style"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
