@@ -1,0 +1,5 @@
+<!-- should not generate diagnostics -->
+
+<div>{items.map((item) => <span set:html={item.html} />)}</div>
+<div>{show && <span set:text="text">   </span>}</div>
+<div>{show && <span set:foo={value}>text child</span>}</div>
