@@ -37,6 +37,7 @@ biome_suppression         = { workspace = true }
 camino                    = { workspace = true }
 regex                     = { workspace = true }
 rustc-hash                = { workspace = true }
+unicode-normalization     = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration" }
