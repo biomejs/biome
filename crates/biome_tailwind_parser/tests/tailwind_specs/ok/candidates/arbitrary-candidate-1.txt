@@ -1,1 +1,0 @@
-[--pattern-fg:var(--color-gray-950)]/5

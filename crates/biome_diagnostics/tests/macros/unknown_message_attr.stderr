@@ -1,5 +1,0 @@
-error: unexpected token
- --> tests/macros/unknown_message_attr.rs:4:22
-  |
-4 | #[diagnostic(message(unknown))]
-  |                      ^^^^^^^

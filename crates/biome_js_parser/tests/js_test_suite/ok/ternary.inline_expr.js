@@ -1,1 +1,0 @@
-isActive ? 'active' : 'inactive'

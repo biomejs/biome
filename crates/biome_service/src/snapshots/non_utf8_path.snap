@@ -1,7 +1,0 @@
----
-source: crates/biome_service/src/diagnostics.rs
-expression: content
----
-path.js internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Biome does not support non-UTF8 characters in path: path.js

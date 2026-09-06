@@ -1,2 +1,0 @@
-// The "function" AST name can conflict with the "function" keyword
-function($parameters)

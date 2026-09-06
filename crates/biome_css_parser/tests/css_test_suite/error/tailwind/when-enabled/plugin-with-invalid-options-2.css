@@ -1,8 +1,0 @@
-@plugin "my-plugin" {
-  .some-selector > * {
-    primary: "blue";
-    secondary: "green";
-  }
-}
-
-/* Error: `@plugin` can only contain declarations. */

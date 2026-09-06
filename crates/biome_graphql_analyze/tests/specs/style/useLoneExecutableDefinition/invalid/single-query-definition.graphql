@@ -1,7 +1,0 @@
-# should generate diagnostics
-{
-	id
-}
-fragment Bar on Bar {
-	id
-}

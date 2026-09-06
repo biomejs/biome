@@ -1,4 +1,0 @@
-arrow_function(
-  parameters = $parameters,
-  body = $body
-)

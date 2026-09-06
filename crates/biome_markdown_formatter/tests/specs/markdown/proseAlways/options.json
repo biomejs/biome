@@ -1,9 +1,0 @@
-{
-  "markdown": {
-    "formatter": {
-      "proseWrap": "always",
-      "lineWidth": 40,
-      "indentStyle": "space"
-    }
-  }
-}

@@ -1,5 +1,0 @@
-() => {
-  return;
-  return foo;
-  return
-}

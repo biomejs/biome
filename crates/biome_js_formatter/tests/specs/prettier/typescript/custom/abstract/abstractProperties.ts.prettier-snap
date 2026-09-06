@@ -1,8 +1,0 @@
-abstract class Foo {
-  private abstract a: 1;
-  private abstract b: 2;
-  static abstract c: 3;
-  private abstract ["g"];
-  private abstract ["h"];
-  static abstract ["i"];
-}

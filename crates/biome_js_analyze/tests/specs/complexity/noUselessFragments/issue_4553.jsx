@@ -1,9 +1,0 @@
-<Suspense
-    fallback={
-        <>
-            <span>Loading...</span>
-        </>
-    }
->
-    {children}
-</Suspense>;

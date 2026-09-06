@@ -1,5 +1,0 @@
-error: unions are not supported by the Diagnostic derive macro
- --> tests/macros/error_union.rs:4:1
-  |
-4 | union ErrorUnion {
-  | ^^^^^

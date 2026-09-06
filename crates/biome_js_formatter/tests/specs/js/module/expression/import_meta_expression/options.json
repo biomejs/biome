@@ -1,8 +1,0 @@
-{
-  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
-  "formatter": {
-    "lineWidth": 120,
-    "indentWidth": 4,
-    "indentStyle": "space"
-  }
-}

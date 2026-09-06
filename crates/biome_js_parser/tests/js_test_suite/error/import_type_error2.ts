@@ -1,1 +1,0 @@
-type A = typeof import("a.json",{

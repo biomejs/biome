@@ -1,1 +1,0 @@
-function evalInComputedPropertyKey({ [computed]: ignored }) {}

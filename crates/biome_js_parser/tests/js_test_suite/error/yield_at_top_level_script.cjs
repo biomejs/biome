@@ -1,2 +1,0 @@
-// SCRIPT
-yield 10;

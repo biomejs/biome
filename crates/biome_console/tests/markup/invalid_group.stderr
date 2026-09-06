@@ -1,5 +1,0 @@
-error: unexpected token
- --> tests/markup/invalid_group.rs:3:9
-  |
-3 |         []
-  |         ^^

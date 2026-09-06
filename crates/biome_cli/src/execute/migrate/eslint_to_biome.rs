@@ -711,6 +711,25 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::ReactJsxNoBind(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                if let eslint_eslint::RuleConf::Option(_, rule_options) = conf
+                    && let Some(rule_options) = rule_options.into_biome_options()
+                {
+                    let group = rules.performance.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_jsx_props_bind =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options: rule_options,
+                                },
+                            ));
+                    }
+                }
+            }
+        }
         eslint_eslint::Rule::NoRestrictedProperties(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();

@@ -1,9 +1,0 @@
----
-source: crates/biome_cli/tests/snap_test.rs
-expression: redactor(content)
----
-# Emitted Messages
-
-```block
-Checked 2 files in <TIME>. Fixed 2 files.
-```

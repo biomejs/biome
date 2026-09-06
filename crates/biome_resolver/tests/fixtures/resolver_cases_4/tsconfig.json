@@ -1,9 +1,0 @@
-{
-    "compilerOptions": {
-        "baseUrl": "./src",
-        "paths": {
-            "@util/*": ["./util/*"],
-            "jquery": ["../vendor/jquery/dist"]
-        }
-    }
-}

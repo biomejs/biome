@@ -1,9 +1,0 @@
-export class F {
-  reformatThis() {
-    return 1;
-  }
-
-  dontTouchThis() {
-    return 2;
-  }
-}

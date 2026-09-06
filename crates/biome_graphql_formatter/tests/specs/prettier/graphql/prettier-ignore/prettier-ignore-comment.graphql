@@ -1,7 +1,0 @@
-{
-  # prettier-ignore
-  hero {
-       name
-    height
-  }
-}

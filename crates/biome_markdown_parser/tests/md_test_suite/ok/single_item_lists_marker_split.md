@@ -1,3 +1,0 @@
-* item one
-
-- item two

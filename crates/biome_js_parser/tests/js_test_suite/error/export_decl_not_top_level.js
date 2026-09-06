@@ -1,3 +1,0 @@
-{
- export { pain } from "life";
-}

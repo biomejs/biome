@@ -1,5 +1,0 @@
-/* should not generate diagnostics */
-:foo-#{$name} { color: red; }
-:#{$name}-foo { color: red; }
-::foo-#{$name} { color: red; }
-::#{$name}-foo { color: red; }

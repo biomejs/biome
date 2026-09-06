@@ -1,5 +1,0 @@
-predicate program_contains_logger() {
-  program <: contains `logger`,
-  "hello" = "world",
-  $list[0] += "world"
-}

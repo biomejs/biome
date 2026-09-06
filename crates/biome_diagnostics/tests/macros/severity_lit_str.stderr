@@ -1,5 +1,0 @@
-error: failed to parse "diagnostic" attribute: expected identifier
- --> tests/macros/severity_lit_str.rs:4:25
-  |
-4 | #[diagnostic(severity = "Error")]
-  |                         ^^^^^^^

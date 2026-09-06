@@ -1,4 +1,0 @@
-outer:
-  inner: value
-  nested:
-    deep: leaf

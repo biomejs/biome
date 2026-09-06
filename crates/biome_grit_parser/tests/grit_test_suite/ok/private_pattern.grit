@@ -1,3 +1,0 @@
-private pattern this_pattern_is_hidden() {
-  `console`
-}

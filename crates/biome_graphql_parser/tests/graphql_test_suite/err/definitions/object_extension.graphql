@@ -1,5 +1,0 @@
-extend type Story
-
-extend type User
-  name: String
-}

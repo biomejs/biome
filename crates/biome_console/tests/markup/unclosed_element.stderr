@@ -1,5 +1,0 @@
-error: unclosed element
- --> tests/markup/unclosed_element.rs:3:10
-  |
-3 |         <Emphasis>
-  |          ^^^^^^^^

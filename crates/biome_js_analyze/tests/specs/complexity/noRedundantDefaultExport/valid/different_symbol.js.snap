@@ -1,9 +1,0 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: different_symbol.js
----
-# Input
-```js
-export const myFunc = () => {};
-export default function () {}
-```

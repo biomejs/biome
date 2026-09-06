@@ -1,3 +1,0 @@
-class Getters {
-  get foo()
-}

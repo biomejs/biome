@@ -1,2 +1,0 @@
-interface undefined {}
-interface any {}

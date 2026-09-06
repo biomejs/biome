@@ -1,3 +1,0 @@
-{
-	"extends": ["something.json", 3, false, null]
-}

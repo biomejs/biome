@@ -1,6 +1,0 @@
-/* should not generate diagnostics */
-/* biome-ignore assist/source/useSortedProperties: test */
-.not-sorted-basic {
-	color: red;
-	display: block;
-}

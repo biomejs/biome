@@ -1,7 +1,0 @@
-{
-  "javascript": {
-    "parser": {
-      "gritMetavariables": true
-    }
-  }
-}

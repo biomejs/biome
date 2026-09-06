@@ -1,7 +1,0 @@
-# should generate diagnostics
-query {
-	fieldA
-}
-query {
-	fieldB
-}

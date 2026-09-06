@@ -1,1 +1,0 @@
-flexhover:flexfocus:flex uppercase

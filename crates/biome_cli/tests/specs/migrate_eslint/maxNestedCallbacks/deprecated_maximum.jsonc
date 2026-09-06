@@ -1,8 +1,0 @@
-{
-  "biome": {},
-  "eslint": {
-    "rules": {
-      "max-nested-callbacks": ["warn", { "maximum": 5 }]
-    }
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "linter": {
-    "rules": {
-      // keep this comment before the key
-      "recommended" /* keep this comment after the key */: true
-    }
-  }
-}

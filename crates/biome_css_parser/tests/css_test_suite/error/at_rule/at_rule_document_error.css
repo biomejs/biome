@@ -1,7 +1,0 @@
- @document url(http://example.com),
-		 invalid-url, /* Error in URL, recover here */ url(http://example.org) {
-		}
-
- @document url(http://example.com),
- invalid-url, /* Error in URL, recover here */ {
- }

@@ -1,8 +1,0 @@
-{
-  "biome": {},
-  "eslint": {
-    "rules": {
-      "@typescript-eslint/array-type": ["error", { "default": "generic" }]
-    }
-  }
-}

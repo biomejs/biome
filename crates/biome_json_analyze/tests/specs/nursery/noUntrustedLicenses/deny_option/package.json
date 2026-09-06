@@ -1,6 +1,0 @@
-{
-    "dependencies": {
-        "trusted-pkg": "^1.0.0",
-        "denied-pkg": "^1.0.0"
-    }
-}

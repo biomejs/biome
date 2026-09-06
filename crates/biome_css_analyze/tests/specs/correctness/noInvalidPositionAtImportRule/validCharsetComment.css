@@ -1,4 +1,0 @@
-/* should not generate diagnostics */
-@charset "utf-8";
-/* some comment */
-@import 'foo.css';

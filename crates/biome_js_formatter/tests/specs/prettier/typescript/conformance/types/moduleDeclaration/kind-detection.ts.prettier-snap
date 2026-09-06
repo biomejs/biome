@@ -1,1 +1,0 @@
-declare namespace /* module */ A {}

@@ -1,7 +1,0 @@
-/* should not generate diagnostics */
-
-/* This file is imported by transitive_theme.css, which is imported by
-   transitive_valid.jsx. The .base class is referenced there. */
-.base {
-	box-sizing: border-box;
-}

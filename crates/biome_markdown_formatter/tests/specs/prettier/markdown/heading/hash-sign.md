@@ -1,5 +1,0 @@
-# Programming languages
-
-## C#
-
-## JavaScript

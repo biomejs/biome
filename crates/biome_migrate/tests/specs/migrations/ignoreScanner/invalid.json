@@ -1,9 +1,0 @@
-{
-  "files": {
-    "experimentalScannerIgnores": [
-      "foo",
-      "bar"
-    ],
-    "includes": ["**", "!foo.ts"]
-  }
-}

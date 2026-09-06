@@ -1,9 +1,0 @@
-{
-    "$schema": "../../../../../packages/@biomejs/biome/configuration_schema.json",
-    "files": {
-        "includes": ["**", "!node_modules"]
-    },
-    "linter": {
-        "enabled": true
-    }
-}

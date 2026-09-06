@@ -1,3 +1,0 @@
-.toolbar {
-  @apply --toolbar-theme;
-}

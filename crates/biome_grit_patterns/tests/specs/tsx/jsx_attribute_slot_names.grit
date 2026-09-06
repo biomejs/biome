@@ -1,7 +1,0 @@
-or {
-  jsx_attribute(name = "className"),
-  JsxAttribute(name = "id"),
-  JsxAttribute($name, $initializer) as $attr where {
-    $name <: "style"
-  },
-}

@@ -1,9 +1,0 @@
-error: closing element mismatch
-
-         = note: found closing element Error
-         = note: expected Emphasis
-
- --> tests/markup/closing_element_mismatch.rs:3:21
-  |
-3 |         <Emphasis></Error>
-  |                     ^^^^^

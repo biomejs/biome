@@ -1,8 +1,0 @@
-{
-	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
-	"javascript": {
-		"parser": {
-			"unsafeParameterDecoratorsEnabled": true
-		}
-	}
-}

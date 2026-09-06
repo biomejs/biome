@@ -1,4 +1,0 @@
-or {
-  CssAttributeSelector(name = $name, matcher = $matcher),
-  CssAttributeMatcher(value = $value),
-}

@@ -1,3 +1,0 @@
-{
-	"globalPassThroughEnv": ["ACME_AUTH_TOKEN", "DATABASE_URL", "ACME_CACHE_*"]
-}

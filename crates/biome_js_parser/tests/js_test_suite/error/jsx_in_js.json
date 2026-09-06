@@ -1,7 +1,0 @@
-{
-  "javascript": {
-    "parser": {
-      "jsxEverywhere": false
-    }
-  }
-}

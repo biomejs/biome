@@ -1,2 +1,0 @@
-// SCRIPT
-function test(await) {}

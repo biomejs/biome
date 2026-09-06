@@ -1,5 +1,0 @@
-class a {
-  b() {}
-}
-
-let x;

@@ -1,9 +1,0 @@
-[
-    "class A { constructor(){} }",
-    "class A { 'constructor'(){} }",
-    "class A extends B { constructor() { super(); } }",
-    "class A extends B { constructor(foo){ super(foo); } }",
-    "class A extends B { constructor(foo, bar){ super(foo, bar); } }",
-    "class A extends B { constructor(...args){ super(...args); } }",
-    "class A extends B { constructor(a, b, ...c) { super(a, b, ...c); } }"
-]

@@ -1,9 +1,0 @@
-:where( {}
-:where() {}
-:where(^invalid) {}
-:where(^invalid {}
-:where(^invalid .class) {}
-:where(.div .class,^invalid) {}
-:where(.div .class {}
-:where(.div {}
-:where(.div

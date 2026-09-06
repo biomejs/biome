@@ -1,1 +1,0 @@
-focus:[mask:radial-gradient()]

@@ -1,7 +1,0 @@
-//! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
-
-#[expect(clippy::module_inception)]
-pub(crate) mod bogus;
-pub(crate) mod bogus_attribute;
-pub(crate) mod bogus_element;
-pub(crate) mod bogus_text_expression;

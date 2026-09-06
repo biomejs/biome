@@ -1,3 +1,0 @@
-records
-coverage
-OutOfScope { reason: "empty_external_module", file: "collector.empty-external-module.d.ts", scope: ExternalModule("empty"), range: 8..23, syntax_kind: TS_EXTERNAL_MODULE_DECLARATION }

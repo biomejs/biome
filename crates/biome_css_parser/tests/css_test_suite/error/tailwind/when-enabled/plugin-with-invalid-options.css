@@ -1,5 +1,0 @@
-@plugin "my-plugin" {
-  color: { red: 100; green: 200; blue: 300 };
-}
-
-/* Error: Objects are not supported in `@plugin` options. */

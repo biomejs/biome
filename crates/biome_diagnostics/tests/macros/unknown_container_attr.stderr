@@ -1,5 +1,0 @@
-error: failed to parse "diagnostic" attribute: unknown attribute
- --> tests/macros/unknown_container_attr.rs:4:14
-  |
-4 | #[diagnostic(unknown_attr)]
-  |              ^^^^^^^^^^^^

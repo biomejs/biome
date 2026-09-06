@@ -1,8 +1,0 @@
-{
-  "biome": {},
-  "eslint": {
-    "rules": {
-      "svelte/no-unnecessary-state-wrap": "error"
-    }
-  }
-}

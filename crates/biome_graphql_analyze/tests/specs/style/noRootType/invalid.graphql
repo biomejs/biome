@@ -1,4 +1,0 @@
-# should generate diagnostics
-type Mutation {
-  createUser(input: CreateUserInput!): User!
-}

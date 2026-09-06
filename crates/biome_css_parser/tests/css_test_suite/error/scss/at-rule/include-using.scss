@@ -1,9 +1,0 @@
-@include button using {
-  color: $value;
-}
-
-@include button using (color) {
-  color: $value;
-}
-
-@include button using ($value);

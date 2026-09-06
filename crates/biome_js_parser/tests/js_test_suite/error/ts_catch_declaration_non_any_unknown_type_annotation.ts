@@ -1,1 +1,0 @@
-try {} catch (error: Error) {}

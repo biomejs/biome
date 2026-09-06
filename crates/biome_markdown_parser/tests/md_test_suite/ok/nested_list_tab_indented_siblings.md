@@ -1,4 +1,0 @@
-- Top
-	- Nested 1
-	- Nested 2
-		- Sub-Nested

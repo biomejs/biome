@@ -1,8 +1,0 @@
-type User {
-  name: String
-  birthday: Int
-}
-
-extend type User {
-  age: Int
-}

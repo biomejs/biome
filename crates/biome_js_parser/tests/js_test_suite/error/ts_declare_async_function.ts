@@ -1,1 +1,0 @@
-declare async function test();

@@ -1,0 +1,14 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "react/jsx-no-bind": [
+        "warn",
+        {
+          "allowArrowFunctions": true,
+          "ignoreRefs": true
+        }
+      ]
+    }
+  }
+}

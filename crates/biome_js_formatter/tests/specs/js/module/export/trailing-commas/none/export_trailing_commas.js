@@ -1,5 +1,0 @@
-export {
-	adsadasdasdasdasdasdasdasdasdasdas,
-	dsadsadasdasdasdasdasdasdasd,
-	dsadsadasdasdasdasdasdasdasd,
-};

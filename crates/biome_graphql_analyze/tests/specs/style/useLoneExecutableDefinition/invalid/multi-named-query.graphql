@@ -1,8 +1,0 @@
-# should generate diagnostics
-query A {
-	id
-}
-
-query B {
-	id
-}

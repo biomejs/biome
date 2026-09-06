@@ -1,9 +1,0 @@
-<!-- should not generate diagnostics -->
-
-<div class="size-4"></div>
-<div class="truncate"></div>
-<Icon class="inline-block group-hover:size-5 text-current" />
-<button class="rounded px-3 py-2" disabled={pending}>
-  Submit
-</button>
-<div class="-my-2 data-[state=open]:size-[10px]"></div>

@@ -1,1 +1,0 @@
-dark:[--pattern-fg:var(--color-white)]/10

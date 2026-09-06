@@ -1,1 +1,0 @@
-/* should not generate diagnostics */

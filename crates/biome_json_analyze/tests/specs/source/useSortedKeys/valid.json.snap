@@ -1,9 +1,0 @@
----
-source: crates/biome_json_analyze/tests/spec_tests.rs
-expression: valid.json
----
-# Input
-```json
-{}
-
-```

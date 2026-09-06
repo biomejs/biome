@@ -1,5 +1,0 @@
-@error color.adjust($color, $lightness: 10%);
-
-.card {
-  @error if($fatal, red, blue);
-}

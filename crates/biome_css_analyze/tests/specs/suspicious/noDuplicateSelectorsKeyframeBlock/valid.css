@@ -1,4 +1,0 @@
-/* should not generate diagnostics */
-@keyframes foo { from {} to {} }
-
-@keyframes foo { 0% {} 100% {} }

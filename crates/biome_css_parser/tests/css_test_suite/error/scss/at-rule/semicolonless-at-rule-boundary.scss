@@ -1,9 +1,0 @@
-@use "theme"
-@forward "tokens"
-
-@mixin button {}
-body {
-  @include button
-
-  $font-stack: Helvetica, Arial;
-}

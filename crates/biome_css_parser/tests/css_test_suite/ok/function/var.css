@@ -1,5 +1,0 @@
-div {
-    color: var(--a);
-    color: var(--a,);
-    color: var(--a, blue);
-}

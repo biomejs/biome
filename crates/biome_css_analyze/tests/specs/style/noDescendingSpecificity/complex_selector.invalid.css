@@ -1,8 +1,0 @@
-/* should generate diagnostics */
-b a {
-    color: red;
-}
-
-a {
-    color: red;
-}

@@ -1,3 +1,0 @@
-`var $x = [$numbers]` => `var firstPrimes = [$numbers]` where {
-  $numbers <: [ `2`, `3`, `5` ]
-}

@@ -1,3 +1,0 @@
-`throw new Error($err)` as $thrown => `throw new CustomError($err);` where {
-  $err <: maybe string(fragment=$fun) => `{ message: $err }`
-}

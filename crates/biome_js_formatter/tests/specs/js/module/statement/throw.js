@@ -1,3 +1,0 @@
-throw "Something";
-
-throw false

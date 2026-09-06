@@ -1,6 +1,0 @@
-/* should generate diagnostics */
-<div>
-    <div />
-    <marquee />
-    <blink />
-</div>

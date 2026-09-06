@@ -1,1 +1,0 @@
-<span>or </span>

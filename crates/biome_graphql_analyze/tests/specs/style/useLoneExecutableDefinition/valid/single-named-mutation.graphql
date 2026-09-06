@@ -1,6 +1,0 @@
-# should not generate diagnostics
-mutation Foo($name: String!) {
-	createFoo {
-		name
-	}
-}

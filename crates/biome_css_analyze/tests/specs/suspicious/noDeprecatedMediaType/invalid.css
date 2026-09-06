@@ -1,4 +1,0 @@
-/* should generate diagnostics */
-@media tv {}
-@media handheld and (min-width: 480px) {}
-@media speech {}

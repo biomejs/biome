@@ -1,3 +1,0 @@
-$10 - $20
-
-Paragraph with $14 million.    But if more $dollars on the same line...

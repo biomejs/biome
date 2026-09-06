@@ -1,1 +1,0 @@
-class C { constructor(this) {} }

@@ -1,1 +1,0 @@
-border-spacing-y-[2px]

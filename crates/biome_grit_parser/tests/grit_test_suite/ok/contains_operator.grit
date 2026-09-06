@@ -1,3 +1,0 @@
-`function ($_) { $body }` where {
-  $body <: contains `console.log`
-}

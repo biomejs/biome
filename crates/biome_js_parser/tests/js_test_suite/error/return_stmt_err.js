@@ -1,2 +1,0 @@
-return;
-return foo;

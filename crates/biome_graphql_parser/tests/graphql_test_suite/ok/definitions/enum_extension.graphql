@@ -1,9 +1,0 @@
-extend enum Direction @deprecated
-
-extend enum Direction {
-  NORTH
-}
-
-extend enum Direction @deprecated {
-  NORTH
-}

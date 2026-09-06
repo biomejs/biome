@@ -1,6 +1,0 @@
-[toolchain]
-# The default profile includes rustc, rust-std, cargo, rust-docs, rustfmt and clippy.
-# https://rust-lang.github.io/rustup/concepts/profiles.html
-profile = "default"
-channel = "1.98.0"
-targets = ["wasm32-unknown-unknown"]

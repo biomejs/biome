@@ -1,1 +1,0 @@
-space-x-[14px] space-y-[10px] divide-x-[2px] divide-y-[3px]

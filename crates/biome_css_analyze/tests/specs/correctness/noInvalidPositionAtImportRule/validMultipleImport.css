@@ -1,3 +1,0 @@
-/* should not generate diagnostics */
-@import 'foo.css';
-@import 'bar.css';

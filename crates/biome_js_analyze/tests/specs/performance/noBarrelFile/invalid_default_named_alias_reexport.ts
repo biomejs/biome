@@ -1,1 +1,0 @@
-export { default as module2 } from "./module2";

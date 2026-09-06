@@ -1,1 +1,0 @@
-<input bind::{name} />

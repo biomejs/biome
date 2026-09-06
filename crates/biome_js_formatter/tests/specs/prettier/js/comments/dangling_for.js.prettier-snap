@@ -1,5 +1,0 @@
-// comment
-for (;;);
-
-/* comment */
-for (;;);

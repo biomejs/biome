@@ -1,4 +1,0 @@
-// SCRIPT
-foo;
-yield;
-await;

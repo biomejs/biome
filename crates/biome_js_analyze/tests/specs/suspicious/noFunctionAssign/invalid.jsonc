@@ -1,9 +1,0 @@
-[
-	"function foo() { }; foo = bar;",
-	"function foo2() { foo2 = bar; }",
-	"foo3 = bar; function foo3() { };",
-	"[foo4] = bar; function foo4() { };",
-	"({ x: foo5 = 0 } = bar); function foo5() { };",
-	"function foo6() { [foo6] = bar; }",
-	"(function () { ({ x: foo7 = 0 } = bar); function foo7() { }; })();"
-]

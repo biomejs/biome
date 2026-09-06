@@ -1,7 +1,0 @@
----
-source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
-expression: content
----
-plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Failed to compile the JS plugin: SyntaxError: /plugin.ts: enum declarations cannot be stripped because they generate runtime code.

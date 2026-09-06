@@ -1,5 +1,0 @@
-# Heading
-
----
-title: value
----

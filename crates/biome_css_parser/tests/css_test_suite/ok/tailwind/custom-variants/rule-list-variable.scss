@@ -1,7 +1,0 @@
-@custom-variant theme {
-  $selector: ".theme";
-
-  &:where(.theme *) {
-    @slot;
-  }
-}

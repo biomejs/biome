@@ -1,3 +1,0 @@
-`console.$method($message)` where {
-    $method <: or { `log`, `info`, `warn`, `error` }
-}

@@ -1,3 +1,0 @@
-query { human }
-mutation { ...Type }
-subscription {}

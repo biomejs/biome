@@ -1,8 +1,0 @@
-// should generate diagnostics
-{
-	"files": {
-		"includes": [
-			"!dist/**"
-		]
-	}
-}

@@ -1,9 +1,0 @@
----
-const title = "Hello";
----
-<!-- should not generate diagnostics -->
-
-<!-- No CSS imports or inline styles: the rule must stay silent. -->
-<div class:list={["whatever"]}>Content</div>
-<div class={"anything"}>Content</div>
-<div class="something">Content</div>

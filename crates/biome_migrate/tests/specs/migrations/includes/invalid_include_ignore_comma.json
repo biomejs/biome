@@ -1,7 +1,0 @@
-{
-  "files": {
-    "include": ["./src", "*.js"],
-    "ignore": ["tests", "*.test.js"],
-    "ignoreUnknown": true
-  }
-}

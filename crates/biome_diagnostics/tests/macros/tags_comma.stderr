@@ -1,5 +1,0 @@
-error: failed to parse "diagnostic" attribute: expected `|`
- --> tests/macros/tags_comma.rs:4:29
-  |
-4 | #[diagnostic(tags(Identifier, Identifier))]
-  |                             ^

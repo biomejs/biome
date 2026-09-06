@@ -1,5 +1,0 @@
-error: unexpected token
- --> tests/markup/open_element_improper_close_1.rs:3:20
-  |
-3 |         <Emphasis /<
-  |                    ^

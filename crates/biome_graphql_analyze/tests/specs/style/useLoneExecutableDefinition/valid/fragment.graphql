@@ -1,4 +1,0 @@
-# should not generate diagnostics
-fragment Foo on Bar {
-	id
-}

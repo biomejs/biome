@@ -1,4 +1,0 @@
-<div>
-    <MyIcon />
-    {score}
-</div>

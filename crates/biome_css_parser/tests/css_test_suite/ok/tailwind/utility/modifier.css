@@ -1,3 +1,0 @@
-@utility text-* {
-	line-height: --modifier(--leading-*, [length]);
-}

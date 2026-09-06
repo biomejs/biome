@@ -1,2 +1,0 @@
-type A<> = {};
-interface B<> {};

@@ -1,9 +1,0 @@
----
-source: crates/biome_graphql_analyze/tests/spec_tests.rs
-expression: allowComments.graphql
----
-# Input
-```graphql
-# Allowed comment
-
-```

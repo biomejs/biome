@@ -1,7 +1,0 @@
-try {
-  1;
-  if (condition) {
-    body;
-  }
-}
-catch (err) {}

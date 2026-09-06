@@ -1,8 +1,0 @@
-{
-  "files": {
-    "experimentalScannerIgnores": [
-      "foo",
-      "bar"
-    ]
-  }
-}

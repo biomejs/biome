@@ -1,6 +1,0 @@
-toml-version = "v1.0.0"  # optional
-
-[format]
-[format.rules]
-key-value-equals-sign-alignment = true
-line-width                      = 120

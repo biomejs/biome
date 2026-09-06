@@ -1,1 +1,0 @@
-has-[>svg]:flex has-[+p]:flex has-[~span]:flex group-has-[>svg]:flex

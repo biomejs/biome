@@ -1,4 +1,0 @@
-<p>
-    format
-    me
-</p>

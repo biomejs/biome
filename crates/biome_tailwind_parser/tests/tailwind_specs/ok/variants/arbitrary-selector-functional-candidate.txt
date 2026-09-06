@@ -1,1 +1,0 @@
-hover:[&_p]:underline

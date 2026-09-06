@@ -1,6 +1,0 @@
-`color: $color` where {
-    $color <: or {
-        `red`,
-        `green`,
-    }
-}

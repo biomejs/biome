@@ -1,5 +1,0 @@
-error: failed to parse "diagnostic" attribute: expected string literal
- --> tests/macros/category_ident.rs:4:25
-  |
-4 | #[diagnostic(category = Identifier)]
-  |                         ^^^^^^^^^^

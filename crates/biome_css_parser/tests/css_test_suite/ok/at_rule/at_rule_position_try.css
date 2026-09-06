@@ -1,9 +1,0 @@
-@position-try --ident { }
-@position-try --AnyCASInG-works { }
-
-@position-try --custom-bottom {
-  top: anchor(bottom);
-  justify-self: anchor-center;
-  margin: 10px 0 0 0;
-  position-area: none;
-}

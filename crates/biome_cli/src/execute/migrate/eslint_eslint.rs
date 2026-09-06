@@ -616,6 +616,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::UnicornNumericSeparatorsStyle(conf));
                             }
                         }
+                        "react/jsx-no-bind" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::ReactJsxNoBind(conf));
+                            }
+                        }
                         // Other rules
                         rule_name => {
                             if let Some(conf) = RuleConf::<()>::deserialize(ctx, &value, name) {
@@ -644,6 +649,44 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
         Self {
             allow: (!val.allow.is_empty()).then_some(val.allow),
         }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct JsxNoBindOptions {
+    #[deserializable(rename = "allowArrowFunctions")]
+    allow_arrow_functions: Option<bool>,
+    #[deserializable(rename = "allowFunctions")]
+    allow_functions: Option<bool>,
+    #[deserializable(rename = "allowBind")]
+    allow_bind: Option<bool>,
+    #[deserializable(rename = "ignoreDOMComponents")]
+    ignore_dom_components: Option<bool>,
+    #[deserializable(rename = "ignoreRefs")]
+    ignore_refs: Option<bool>,
+}
+impl JsxNoBindOptions {
+    pub(crate) fn into_biome_options(
+        self,
+    ) -> Option<biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions> {
+        let options = biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions {
+            allow_arrow_functions: self.allow_arrow_functions,
+            allow_functions: self.allow_functions,
+            allow_bind: self.allow_bind,
+            ignore_dom_components: self.ignore_dom_components,
+            ignore_refs: self.ignore_refs,
+        };
+
+        // Only carry options over when the user actually set at least one.
+        // Otherwise the plain severity mapping applies and existing
+        // snapshots stay untouched.
+        (options.allow_arrow_functions.is_some()
+            || options.allow_functions.is_some()
+            || options.allow_bind.is_some()
+            || options.ignore_dom_components.is_some()
+            || options.ignore_refs.is_some())
+        .then_some(options)
     }
 }
 
@@ -840,6 +883,7 @@ pub(crate) enum Rule {
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
+    ReactJsxNoBind(RuleConf<JsxNoBindOptions>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
@@ -866,6 +910,7 @@ impl Rule {
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
+            Self::ReactJsxNoBind(_) => Cow::Borrowed("react/jsx-no-bind"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),

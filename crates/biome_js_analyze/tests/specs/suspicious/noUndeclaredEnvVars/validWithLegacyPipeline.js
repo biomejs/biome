@@ -1,8 +1,0 @@
-/* should not generate diagnostics - env vars declared in legacy pipeline */
-
-// Legacy pipeline env vars should still work
-const pipelineVar = process.env.PIPELINE_VAR;
-const pipelineOutput = process.env.PIPELINE_OUTPUT;
-
-// Global env vars
-const globalVar = process.env.GLOBAL_VAR;

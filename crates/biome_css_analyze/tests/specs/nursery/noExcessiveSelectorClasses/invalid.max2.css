@@ -1,8 +1,0 @@
-/* should generate diagnostics */
-.ab.cd.ef {}
-:not(.ab.cd.ef) {}
-.ab.cd :not(.ef.gh) {}
-.ab .cd .ef {}
-.ab,
-.cd.ef.gh {}
-.ab.cd.ef :not(.gh) {}

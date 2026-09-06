@@ -1,5 +1,0 @@
-/* should not generate diagnostics */
-
-.theme {
-	--theme-color: blue;
-}

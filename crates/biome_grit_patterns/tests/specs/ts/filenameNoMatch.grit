@@ -1,3 +1,0 @@
-`console.log($message)` where {
-    $filename <: r".*\.tsx$"
-}

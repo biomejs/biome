@@ -1,7 +1,0 @@
-.my-element {
-	background: white;
-
-	@variant hover {
-		background: black;
-	}
-}

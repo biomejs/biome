@@ -1,5 +1,0 @@
-error: failed to parse "location" attribute: unknown location field
- --> tests/macros/unknown_location_attr.rs:5:16
-  |
-5 |     #[location(unknown)]
-  |                ^^^^^^^

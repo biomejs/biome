@@ -1,4 +1,0 @@
-> - list
->   - nested
->     > quote
->     > continuation

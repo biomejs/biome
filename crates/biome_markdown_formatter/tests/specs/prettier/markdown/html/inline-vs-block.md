@@ -1,2 +1,0 @@
-- <div>html</div>            text
-- <span>html</span>            text

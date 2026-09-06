@@ -40,6 +40,10 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
+    /// These options exist to match the ESLint `react/jsx-no-bind` rule so
+    /// migrating projects keep the same behavior. New code should leave them
+    /// off and hoist handlers to stable references instead.
+    ///
     /// ### `allowArrowFunctions`
     ///
     /// When `true`, arrow functions are allowed in JSX props.
@@ -160,7 +164,7 @@ impl Rule for NoJsxPropsBind {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let options = ctx.options();
 
-        // handle ignoreRefs — bit of a hack but it works, just check attr name
+        // handle ignoreRefs ΓÇö bit of a hack but it works, just check attr name
         if options.ignore_refs() {
             if let Ok(name) = ctx.query().name() {
                 if let Ok(token) = name.name() {

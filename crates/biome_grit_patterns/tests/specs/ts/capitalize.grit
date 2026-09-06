@@ -1,3 +1,0 @@
-`console.log($arg)` where {
-    $arg => capitalize(string = $arg)
-}

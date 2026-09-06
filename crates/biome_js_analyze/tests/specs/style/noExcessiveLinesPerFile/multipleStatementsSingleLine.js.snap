@@ -1,9 +1,0 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: multipleStatementsSingleLine.js
----
-# Input
-```js
-const a = 1; const b = 2; const c = 3;
-
-```

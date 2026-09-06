@@ -1,6 +1,0 @@
-{
-    "dependencies": {
-        "fsf-pkg": "^1.0.0",
-        "non-fsf-pkg": "^1.0.0"
-    }
-}

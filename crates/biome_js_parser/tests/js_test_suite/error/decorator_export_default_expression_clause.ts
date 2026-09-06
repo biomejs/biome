@@ -1,2 +1,0 @@
-@decorator
-export default a;

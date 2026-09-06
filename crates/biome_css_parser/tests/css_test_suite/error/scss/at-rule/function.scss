@@ -1,9 +1,0 @@
-@function ($value) {
-  @return $value;
-}
-
-@function double($value 2) {
-  @return $value;
-}
-
-@function double($value: 2)

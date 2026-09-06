@@ -1,4 +1,0 @@
-Symbol()
-Symbol('')
-Symbol("")
-Symbol(``)

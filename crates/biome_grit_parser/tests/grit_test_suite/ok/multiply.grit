@@ -1,4 +1,0 @@
-js"multiply($x)" where {
-  $y = $x * 2,
-  $x => $y
-}

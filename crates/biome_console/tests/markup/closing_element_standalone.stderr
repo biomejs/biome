@@ -1,5 +1,0 @@
-error: unexpected closing element
- --> tests/markup/closing_element_standalone.rs:3:11
-  |
-3 |         </Emphasis>
-  |           ^^^^^^^^

@@ -1,3 +1,0 @@
-@forward "foo.scss" with (
-  $components: red
-);

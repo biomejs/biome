@@ -1,8 +1,0 @@
-{
-	"tasks": {
-		"build": {
-			"env": ["BUILD_VAR"],
-			"passThroughEnv": ["ACME_AUTH_TOKEN", "DATABASE_URL", "ACME_CACHE_*"]
-		}
-	}
-}

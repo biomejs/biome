@@ -1,3 +1,0 @@
-`function $name() { $body }` where {
-  $body <: contains bubble($name) `console.log($message)` => `console.warn($message, $name)`
-}

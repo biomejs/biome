@@ -1,3 +1,0 @@
-{
-	"globalEnv": ["*", "!ACME_SECRET", "!ACME_*", "!INTERNAL_TOKEN"]
-}

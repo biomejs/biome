@@ -1,3 +1,0 @@
-seq: [ : ]
-map: { : }
-tagged: { foo: !!str , !!str : bar }

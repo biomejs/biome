@@ -1,7 +1,0 @@
-@keyframes fade {
-  $stop: 50%;
-
-  to {
-    opacity: 1;
-  }
-}

@@ -1,6 +1,0 @@
-{
-    "compilerOptions": {
-        "baseUrl": "./src",
-        "typeRoots": ["./typings"],
-    }
-}

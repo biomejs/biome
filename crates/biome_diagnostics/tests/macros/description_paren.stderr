@@ -1,5 +1,0 @@
-error: unexpected token
- --> tests/macros/description_paren.rs:4:22
-  |
-4 | #[diagnostic(message(description("description")))]
-  |                      ^^^^^^^^^^^

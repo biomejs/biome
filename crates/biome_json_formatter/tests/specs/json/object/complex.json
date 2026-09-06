@@ -1,7 +1,0 @@
-{
-	"number": 1123123213123123123123122311231232131231231231231223,
-	"string": "some-long-long-long-long-long-long-long-string",
-	"array": [12312321, {"another-number": 12321321, "string": "some-string"}],
-	"object": {"array":  [123214123, "some-long-long-string", [12312312, "some-long-long-string"]]},
-	"null": null
-}

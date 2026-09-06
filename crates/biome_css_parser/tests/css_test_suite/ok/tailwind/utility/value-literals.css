@@ -1,3 +1,0 @@
-@utility tab-* {
-	tab-size: --value("inherit", "initial", "unset");
-}
