@@ -1297,3 +1297,88 @@ export function afterNestedExit(v5: Choice) {
     let formatted = formatted_at("v5;");
     assert!(formatted.contains("right"), "{formatted}");
 }
+
+/// Covers the `instanceof` outcomes no other test reaches: two classes that
+/// are provably unrelated, an `extends` chain that loops, and a guard that is
+/// not a class at all.
+#[test]
+fn test_infer_module_types_narrows_unrelated_and_cyclic_instanceof_guards() {
+    const SOURCE: &str = r#"
+class Left {
+    left(): void {}
+}
+class Right {
+    right(): void {}
+}
+
+// Both chains reach their root without meeting the other, so the guard
+// leaves nothing of the other variant.
+export function unrelatedClasses(v: Left | Right) {
+    if (v instanceof Right) {
+        v;
+    }
+}
+
+class SelfExtending extends SelfExtending {}
+
+// Walking the chain must terminate rather than follow the loop forever.
+export function cyclicChain(w: SelfExtending | number) {
+    if (w instanceof SelfExtending) {
+        w;
+    }
+}
+
+interface NotAClass {
+    tag: string;
+}
+declare const notAClass: NotAClass;
+
+// The right-hand side never resolves to a class, so nothing is narrowed.
+export function nonClassGuard(y: Left | number) {
+    if (y instanceof (notAClass as unknown as typeof Left)) {
+        y;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_unrelated_and_cyclic_instanceof_guards",
+        &db,
+        &fs,
+    );
+}
+
+/// A falsy or truthy guard maps a few types to the only literal they can hold
+/// there; every other arm keeps or drops the type as a whole.
+#[test]
+fn test_infer_module_types_maps_types_to_their_only_literal() {
+    const SOURCE: &str = r#"
+export function falsyMappings(a: bigint | boolean | string) {
+    if (!a) {
+        a;
+    }
+}
+
+export function truthyBoolean(b: boolean | null) {
+    if (b) {
+        b;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_maps_types_to_their_only_literal",
+        &db,
+        &fs,
+    );
+}
