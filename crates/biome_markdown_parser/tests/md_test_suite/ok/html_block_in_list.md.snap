@@ -176,7 +176,10 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@356..358 "  " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@356..357 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@357..358 " " [] [],
                                 },
                             ],
                         },
@@ -196,7 +199,10 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@469..471 "  " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@469..470 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@470..471 " " [] [],
                                 },
                             ],
                         },
@@ -292,8 +298,10 @@ MdRoot {
               0: NEWLINE@355..356 "\n" [] []
             2: MD_CONTINUATION_INDENT@356..358
               0: MD_INDENT_TOKEN_LIST@356..358
-                0: MD_INDENT_TOKEN@356..358
-                  0: MD_INDENT_CHAR@356..358 "  " [] []
+                0: MD_INDENT_TOKEN@356..357
+                  0: MD_INDENT_CHAR@356..357 " " [] []
+                1: MD_INDENT_TOKEN@357..358
+                  0: MD_INDENT_CHAR@357..358 " " [] []
             3: MD_PARAGRAPH@358..468
               0: MD_INLINE_ITEM_LIST@358..468
                 0: MD_TEXTUAL@358..467
@@ -304,8 +312,10 @@ MdRoot {
               0: NEWLINE@468..469 "\n" [] []
             5: MD_CONTINUATION_INDENT@469..471
               0: MD_INDENT_TOKEN_LIST@469..471
-                0: MD_INDENT_TOKEN@469..471
-                  0: MD_INDENT_CHAR@469..471 "  " [] []
+                0: MD_INDENT_TOKEN@469..470
+                  0: MD_INDENT_CHAR@469..470 " " [] []
+                1: MD_INDENT_TOKEN@470..471
+                  0: MD_INDENT_CHAR@470..471 " " [] []
             6: MD_HTML_BLOCK@471..2000
               0: MD_INDENT_TOKEN_LIST@471..471
               1: MD_HTML_CONTENT@471..2000

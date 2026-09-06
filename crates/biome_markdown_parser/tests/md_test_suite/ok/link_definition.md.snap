@@ -123,7 +123,10 @@ MdRoot {
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@65..67 "  " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@65..66 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@66..67 " " [] [],
                 },
             ],
             l_brack_token: L_BRACK@67..68 "[" [] [],
@@ -157,7 +160,13 @@ MdRoot {
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@87..90 "   " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@87..88 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@88..89 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@89..90 " " [] [],
                 },
             ],
             l_brack_token: L_BRACK@90..91 "[" [] [],
@@ -261,8 +270,10 @@ MdRoot {
       0: NEWLINE@64..65 "\n" [] []
     9: MD_LINK_REFERENCE_DEFINITION@65..85
       0: MD_INDENT_TOKEN_LIST@65..67
-        0: MD_INDENT_TOKEN@65..67
-          0: MD_INDENT_CHAR@65..67 "  " [] []
+        0: MD_INDENT_TOKEN@65..66
+          0: MD_INDENT_CHAR@65..66 " " [] []
+        1: MD_INDENT_TOKEN@66..67
+          0: MD_INDENT_CHAR@66..67 " " [] []
       1: L_BRACK@67..68 "[" [] []
       2: MD_LINK_LABEL@68..78
         0: MD_INLINE_ITEM_LIST@68..78
@@ -283,8 +294,12 @@ MdRoot {
       0: NEWLINE@86..87 "\n" [] []
     12: MD_LINK_REFERENCE_DEFINITION@87..110
       0: MD_INDENT_TOKEN_LIST@87..90
-        0: MD_INDENT_TOKEN@87..90
-          0: MD_INDENT_CHAR@87..90 "   " [] []
+        0: MD_INDENT_TOKEN@87..88
+          0: MD_INDENT_CHAR@87..88 " " [] []
+        1: MD_INDENT_TOKEN@88..89
+          0: MD_INDENT_CHAR@88..89 " " [] []
+        2: MD_INDENT_TOKEN@89..90
+          0: MD_INDENT_CHAR@89..90 " " [] []
       1: L_BRACK@90..91 "[" [] []
       2: MD_LINK_LABEL@91..103
         0: MD_INLINE_ITEM_LIST@91..103

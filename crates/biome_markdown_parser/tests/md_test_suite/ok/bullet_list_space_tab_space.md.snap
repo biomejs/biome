@@ -27,7 +27,10 @@ MdRoot {
                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
                         content_indent: MdIndentTokenList [
                             MdIndentToken {
-                                md_indent_char_token: MD_INDENT_CHAR@2..4 "\t " [] [],
+                                md_indent_char_token: MD_INDENT_CHAR@2..3 "\t" [] [],
+                            },
+                            MdIndentToken {
+                                md_indent_char_token: MD_INDENT_CHAR@3..4 " " [] [],
                             },
                         ],
                     },
@@ -66,8 +69,10 @@ MdRoot {
             1: MINUS@0..1 "-" [] []
             2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
             3: MD_INDENT_TOKEN_LIST@2..4
-              0: MD_INDENT_TOKEN@2..4
-                0: MD_INDENT_CHAR@2..4 "\t " [] []
+              0: MD_INDENT_TOKEN@2..3
+                0: MD_INDENT_CHAR@2..3 "\t" [] []
+              1: MD_INDENT_TOKEN@3..4
+                0: MD_INDENT_CHAR@3..4 " " [] []
           1: MD_BLOCK_LIST@4..8
             0: MD_PARAGRAPH@4..8
               0: MD_INLINE_ITEM_LIST@4..8

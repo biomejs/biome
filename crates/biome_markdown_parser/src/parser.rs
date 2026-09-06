@@ -1,6 +1,8 @@
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_parser::ParserContext;
 use biome_parser::event::Event;
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::*;
 use biome_parser::token_source::{BumpWithContext, Trivia};
 use biome_parser::{ParserContextCheckpoint, diagnostic::merge_diagnostics};
@@ -465,6 +467,65 @@ pub(crate) struct LineIndent {
     pub(crate) byte_count: usize,
 }
 
+struct IndentTokenList {
+    remaining_columns: usize,
+    remaining_bytes: usize,
+}
+
+impl IndentTokenList {
+    fn current_indent_width(&self, p: &MarkdownParser) -> Option<usize> {
+        if self.remaining_bytes == 0 || !p.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
+            return None;
+        }
+
+        let width = match p.cur_text().as_bytes().first()? {
+            b' ' => 1,
+            b'\t' => TAB_STOP_SPACES,
+            _ => return None,
+        };
+        (width <= self.remaining_columns).then_some(width)
+    }
+}
+
+impl ParseNodeList for IndentTokenList {
+    type Kind = MarkdownSyntaxKind;
+    type Parser<'source> = MarkdownParser<'source>;
+
+    const LIST_KIND: Self::Kind = MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        let Some(width) = self.current_indent_width(p) else {
+            return ParsedSyntax::Absent;
+        };
+
+        // A textual token can include the marker or content after indentation.
+        p.re_lex_span(
+            p.cur_range().start() + TextSize::from(1),
+            MarkdownSyntaxKind::MD_INDENT_CHAR,
+        );
+        let m = p.start();
+        p.bump(MarkdownSyntaxKind::MD_INDENT_CHAR);
+        self.remaining_columns -= width;
+        self.remaining_bytes -= 1;
+        ParsedSyntax::Present(m.complete(p, MarkdownSyntaxKind::MD_INDENT_TOKEN))
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        self.current_indent_width(p).is_none()
+    }
+
+    fn recover(
+        &mut self,
+        _p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        match parsed_element {
+            ParsedSyntax::Present(marker) => Ok(marker),
+            ParsedSyntax::Absent => Err(RecoveryError::AlreadyRecovered),
+        }
+    }
+}
+
 impl<'source> MarkdownParser<'source> {
     pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
@@ -910,16 +971,35 @@ impl<'source> MarkdownParser<'source> {
     ///
     /// Emits real CST nodes (`MdIndentToken` / `MdIndentTokenList`) for indentation.
     pub fn emit_line_indent(&mut self, max_indent: usize) -> bool {
-        if !self.is_at_line_start() {
-            let list_m = self.start();
-            list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
-            return false;
-        }
+        let max_columns = if self.is_at_line_start() {
+            max_indent
+        } else {
+            0
+        };
+        self.parse_indent_token_list(max_columns) > 0
+    }
 
-        let list_m = self.start();
-        let did_emit = self.emit_indent_tokens_core(max_indent);
-        list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
-        did_emit
+    /// Parses up to `max_columns` columns of spaces and tabs, returning the
+    /// number of columns consumed. Each tab counts as `TAB_STOP_SPACES` columns.
+    ///
+    /// A zero limit produces an empty list.
+    pub(crate) fn parse_indent_token_list(&mut self, max_columns: usize) -> usize {
+        let mut list = IndentTokenList {
+            remaining_columns: max_columns,
+            remaining_bytes: usize::MAX,
+        };
+        list.parse_list(self);
+        max_columns - list.remaining_columns
+    }
+
+    /// Parses up to `max_bytes` bytes of spaces and tabs. Use this when the
+    /// caller has measured indentation with column-dependent tab stops.
+    pub(crate) fn parse_indent_token_list_bytes(&mut self, max_bytes: usize) {
+        IndentTokenList {
+            remaining_columns: usize::MAX,
+            remaining_bytes: max_bytes,
+        }
+        .parse_list(self);
     }
 
     /// Emit individual `MdIndentToken` nodes (no list wrapper) for indentation.

@@ -137,7 +137,13 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@45..48 "   " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@45..46 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@46..47 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@47..48 " " [] [],
                                 },
                             ],
                         },
@@ -266,8 +272,12 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@44..45 "\n" [] []
             1: MD_CONTINUATION_INDENT@45..48
               0: MD_INDENT_TOKEN_LIST@45..48
-                0: MD_INDENT_TOKEN@45..48
-                  0: MD_INDENT_CHAR@45..48 "   " [] []
+                0: MD_INDENT_TOKEN@45..46
+                  0: MD_INDENT_CHAR@45..46 " " [] []
+                1: MD_INDENT_TOKEN@46..47
+                  0: MD_INDENT_CHAR@46..47 " " [] []
+                2: MD_INDENT_TOKEN@47..48
+                  0: MD_INDENT_CHAR@47..48 " " [] []
             2: MD_BULLET_LIST_ITEM@48..61
               0: MD_BULLET_LIST@48..61
                 0: MD_BULLET@48..61

@@ -214,9 +214,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
             p.consume_as_whitespace_trivia();
         }
     } else {
-        // Emit empty r_fence_indent list to satisfy grammar slot
-        let empty_m = p.start();
-        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
+        p.emit_line_indent(0);
     }
 
     Present(m.complete(p, MD_FENCED_CODE_BLOCK))

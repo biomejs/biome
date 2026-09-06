@@ -413,7 +413,10 @@ MdRoot {
                             ],
                             r_fence_indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@230..232 "  " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@230..231 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@231..232 " " [] [],
                                 },
                             ],
                             r_fence: TRIPLE_BACKTICK@232..235 "```" [] [],
@@ -895,8 +898,10 @@ MdRoot {
                 3: MD_TEXTUAL@229..230
                   0: MD_TEXTUAL_LITERAL@229..230 "\n" [] []
               4: MD_INDENT_TOKEN_LIST@230..232
-                0: MD_INDENT_TOKEN@230..232
-                  0: MD_INDENT_CHAR@230..232 "  " [] []
+                0: MD_INDENT_TOKEN@230..231
+                  0: MD_INDENT_CHAR@230..231 " " [] []
+                1: MD_INDENT_TOKEN@231..232
+                  0: MD_INDENT_CHAR@231..232 " " [] []
               5: TRIPLE_BACKTICK@232..235 "```" [] []
             1: MD_NEWLINE@235..236
               0: NEWLINE@235..236 "\n" [] []

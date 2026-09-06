@@ -835,7 +835,10 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@419..421 "  " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@419..420 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@420..421 " " [] [],
                                 },
                             ],
                         },
@@ -1180,7 +1183,10 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@579..581 "  " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@579..580 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@580..581 " " [] [],
                                 },
                             ],
                         },
@@ -1941,8 +1947,10 @@ MdRoot {
               0: NEWLINE@418..419 "\n" [] []
             2: MD_CONTINUATION_INDENT@419..421
               0: MD_INDENT_TOKEN_LIST@419..421
-                0: MD_INDENT_TOKEN@419..421
-                  0: MD_INDENT_CHAR@419..421 "  " [] []
+                0: MD_INDENT_TOKEN@419..420
+                  0: MD_INDENT_CHAR@419..420 " " [] []
+                1: MD_INDENT_TOKEN@420..421
+                  0: MD_INDENT_CHAR@420..421 " " [] []
             3: GFM_TABLE@421..470
               0: GFM_TABLE_ROW@421..438
                 0: MD_QUOTE_PREFIX_LIST@421..421
@@ -2168,8 +2176,10 @@ MdRoot {
               0: NEWLINE@578..579 "\n" [] []
             2: MD_CONTINUATION_INDENT@579..581
               0: MD_INDENT_TOKEN_LIST@579..581
-                0: MD_INDENT_TOKEN@579..581
-                  0: MD_INDENT_CHAR@579..581 "  " [] []
+                0: MD_INDENT_TOKEN@579..580
+                  0: MD_INDENT_CHAR@579..580 " " [] []
+                1: MD_INDENT_TOKEN@580..581
+                  0: MD_INDENT_CHAR@580..581 " " [] []
             3: GFM_TABLE@581..611
               0: GFM_TABLE_ROW@581..587
                 0: MD_QUOTE_PREFIX_LIST@581..581

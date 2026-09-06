@@ -236,7 +236,13 @@ MdRoot {
         MdHeader {
             indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@378..381 "   " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@378..379 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@379..380 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@380..381 " " [] [],
                 },
             ],
             before: MdHashList [
@@ -431,8 +437,12 @@ MdRoot {
           0: MD_TEXTUAL_LITERAL@377..378 "\n" [] []
     19: MD_HEADER@378..416
       0: MD_INDENT_TOKEN_LIST@378..381
-        0: MD_INDENT_TOKEN@378..381
-          0: MD_INDENT_CHAR@378..381 "   " [] []
+        0: MD_INDENT_TOKEN@378..379
+          0: MD_INDENT_CHAR@378..379 " " [] []
+        1: MD_INDENT_TOKEN@379..380
+          0: MD_INDENT_CHAR@379..380 " " [] []
+        2: MD_INDENT_TOKEN@380..381
+          0: MD_INDENT_CHAR@380..381 " " [] []
       1: MD_HASH_LIST@381..382
         0: MD_HASH@381..382
           0: HASH@381..382 "#" [] []
