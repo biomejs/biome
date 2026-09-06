@@ -26,5 +26,11 @@
 	"/foo  {1,2/;",
 	"/\u200E\u2066\u2069   /gu;",
 	"/foo😀  ?/;",
-	"/foo  😀/;"
+	"/foo  😀/;",
+	// A run outside a character class is still merged into a quantifier even
+	// when the same literal also has an (untouched) run inside a class.
+	"/[a-z  ]  b/;",
+	// Escaped brackets aren't a real character class, so a run between them
+	// is still merged as usual.
+	"/\\[   \\]/;"
 ]
