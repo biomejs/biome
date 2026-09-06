@@ -700,6 +700,23 @@ pub enum MigrateSubCommand {
 
 #[derive(Debug, Bpaf, Clone)]
 pub enum InspectSubCommand {
+    /// Resolves plugin files and manifest exports without loading or executing plugin code.
+    ///
+    /// Lists resolved rules by plugin and importing preset, including their include globs.
+    /// Without `--path`, filtered imports are listed separately. Resolution does not establish language
+    /// compatibility or successful compilation.
+    #[bpaf(command)]
+    Plugins {
+        /// Lists only rules selected by override and plugin includes for this path.
+        /// Does not discover nested configurations or evaluate file/VCS ignores.
+        #[bpaf(long("path"), argument("PATH"), optional)]
+        path: Option<String>,
+
+        /// Emits the resolved rule inventory, enabling imports, and errors as JSON.
+        #[bpaf(long("json"), switch)]
+        json: bool,
+    },
+
     /// Shows the final, resolved configuration, including `extends` and matching `overrides`.
     #[bpaf(command)]
     Config {

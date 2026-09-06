@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./rule.grit", "includes": ["**/*.ts", "!**/*.test.ts"] },
+    {
+      "path": "./rule.grit",
+      "includes": ["**/*.ts", "!**/*.test.ts", "**/keep.test.ts"]
+    }
+  ]
+}
+```
+
+## `rule.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Target path: src/keep.test.ts
+  
+  Local plugins
+  
+  - rule (includes: [**/*.ts, !**/*.test.ts, **/keep.test.ts])
+  
+
+```

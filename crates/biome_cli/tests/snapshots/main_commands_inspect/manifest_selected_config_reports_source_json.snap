@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/configs/recommended"] }
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{
+  "version": 1,
+  "configs": [
+    { "minimal": "./minimal.json" },
+    { "recommended": "./recommended.jsonc" }
+  ]
+}
+```
+
+## `node_modules/@shared/config/minimal.json`
+
+```json
+{ "formatter": { "lineWidth": 80 } }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json", "default": "./index.js" }
+}
+```
+
+## `node_modules/@shared/config/recommended.jsonc`
+
+```jsonc
+{
+  "formatter": {
+    "lineWidth": 100,
+  },
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth",
+  "value": 100,
+  "source": {
+    "configurationKind": "extend",
+    "path": "node_modules/@shared/config/recommended.jsonc",
+    "range": {
+      "end": 39,
+      "start": 36
+    },
+    "scope": "base",
+    "specifier": "@shared/config/configs/recommended"
+  }
+}
+```

@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [{ "path": "./base.grit", "includes": [] }],
+  "overrides": [{ "includes": [], "plugins": ["./override.grit"] }]
+}
+```
+
+## `base.grit`
+
+```grit
+`unterminated
+```
+
+## `override.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No plugin rules resolved.
+  
+
+```

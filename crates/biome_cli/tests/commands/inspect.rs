@@ -1391,6 +1391,389 @@ fn conflicting_nested_package_versions_block_inspection() {
     ));
 }
 
+#[test]
+fn manifest_selected_config_reports_source_json() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json", "default": "./index.js" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{
+  "version": 1,
+  "configs": [
+    { "minimal": "./minimal.json" },
+    { "recommended": "./recommended.jsonc" }
+  ]
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/minimal.json".into(),
+        r#"{ "formatter": { "lineWidth": 80 } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.jsonc".into(),
+        r#"{
+  "formatter": {
+    "lineWidth": 100,
+  },
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter.lineWidth", "--json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_selected_config_reports_source_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_configs_resolved_configuration_respects_merge_order() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "extends": ["@shared/config/configs/first", "@shared/config/configs/second"],
+  "formatter": { "lineWidth": 120 }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{
+  "version": 1,
+  "configs": [{ "second": "./second.json" }, { "first": "./first.json" }]
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/first.json".into(),
+        r#"{ "formatter": { "lineWidth": 90, "indentWidth": 2, "indentStyle": "space" } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/second.json".into(),
+        r#"{ "formatter": { "lineWidth": 100, "indentWidth": 4 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_configs_resolved_configuration_respects_merge_order",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_transitive_reexport_keeps_wrapper_specifier_and_leaf_path() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("biome.json".into(), r#"{ "extends": ["base.json"] }"#);
+    fs.insert(
+        "base.json".into(),
+        r#"{
+  "extends": ["@org/wrapper/configs/recommended"],
+  "formatter": { "indentWidth": 4 }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/wrapper/package.json".into(),
+        r#"{
+  "name": "@org/wrapper",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/wrapper/biome-manifest.json".into(),
+        r#"{ "version": 1, "configs": ["@org/source/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@org/source/package.json".into(),
+        r#"{
+  "name": "@org/source",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@org/source/biome-manifest.json".into(),
+        r#"{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }"#,
+    );
+    fs.insert(
+        "node_modules/@org/source/recommended.json".into(),
+        r#"{ "formatter": { "lineWidth": 110 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_transitive_reexport_keeps_wrapper_specifier_and_leaf_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_matching_selected_override_path_provenance() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{
+  "formatter": { "lineWidth": 100 },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "config",
+                "formatter.lineWidth",
+                "--path=file.test.js",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_matching_selected_override_path_provenance",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_non_matching_selected_override_path_provenance() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{
+  "formatter": { "lineWidth": 100 },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter.lineWidth", "--path=file.js"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_non_matching_selected_override_path_provenance",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_unknown_config_selector_is_an_error() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/unknown"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_unknown_config_selector_is_an_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_invalid_config_manifest_is_an_error() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{ "version": 2, "configs": [{ "recommended": "./recommended.json" }] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{ "formatter": { "lineWidth": 100 } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_invalid_config_manifest_is_an_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn manifest_malformed_selected_config_reports_leaf_path() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "extends": ["@shared/config/configs/recommended"] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/package.json".into(),
+        r#"{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/biome-manifest.json".into(),
+        r#"{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/config/recommended.json".into(),
+        r#"{ "formatter": { "lineWidth": "wide" } }"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "manifest_malformed_selected_config_reports_leaf_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
 fn insert_configuration_package(
     fs: &MemoryFileSystem,
     directory: &str,
@@ -1403,4 +1786,101 @@ fn insert_configuration_package(
         format!(r#"{{ "name": "{name}", "version": "{version}", "main": "biome.json" }}"#),
     );
     fs.insert(format!("{directory}/biome.json").into(), configuration);
+}
+
+#[test]
+fn markdown_linter_composite_uses_global_override_source() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "linter": { "enabled": false }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "markdown.linter", "--path=file.md"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "markdown_linter_composite_uses_global_override_source",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn markdown_linter_composite_keeps_base_source_without_global_enabled() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "markdown": { "linter": { "enabled": false } },
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "linter": { "rules": { "recommended": false } }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "markdown.linter", "--path=file.md"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "markdown_linter_composite_keeps_base_source_without_global_enabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn markdown_linter_override_uses_language_configuration() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "linter": { "enabled": false },
+      "markdown": { "linter": { "enabled": true } }
+    }
+  ]
+}"#,
+    );
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "markdown.linter", "--path=file.md"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "markdown_linter_override_uses_language_configuration",
+        fs,
+        console,
+        result,
+    ));
 }

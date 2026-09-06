@@ -1,3 +1,4 @@
+use crate::commands::inspect::InspectionAdvice;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::advice::ListAdvice;
@@ -62,6 +63,18 @@ pub enum CliDiagnostic {
     Report(ReportDiagnostic),
     /// Emitted when there's an error emitted when using stdin mode
     Stdin(StdinDiagnostic),
+    /// Plugin inspection results containing resolution errors.
+    InspectionError(InspectionError),
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(category = "configuration", severity = Error)]
+pub struct InspectionError {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+    #[advice]
+    advice: InspectionAdvice,
 }
 
 #[derive(Debug, Diagnostic)]
@@ -308,6 +321,16 @@ impl Advices for CliAdvice {
 }
 
 impl CliDiagnostic {
+    pub(crate) fn inspection_error(
+        message: biome_console::MarkupBuf,
+        advice: InspectionAdvice,
+    ) -> Self {
+        Self::InspectionError(InspectionError {
+            message: message.into(),
+            advice,
+        })
+    }
+
     /// Returned when a command-line argument cannot be parsed.
     pub fn parse_error(message: impl Into<String>) -> Self {
         Self::ParseError(ParseDiagnostic {

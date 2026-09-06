@@ -8,6 +8,10 @@ use biome_configuration::analyzer::{GroupPlainConfiguration, SeverityOrGroup, St
 use biome_configuration::html::{HtmlConfiguration, HtmlParserConfiguration};
 use biome_configuration::javascript::{JsResolverConfiguration, JsxRuntime};
 use biome_configuration::json::{JsonAssistConfiguration, JsonLinterConfiguration};
+#[cfg(feature = "lang_md")]
+use biome_configuration::markdown::{
+    MarkdownConfiguration, MarkdownFormatterConfiguration, MarkdownLinterConfiguration,
+};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::{
     Configuration, FormatterConfiguration, JsConfiguration, JsonConfiguration, LinterConfiguration,
@@ -20,6 +24,8 @@ use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_languages::DocumentFileSource;
 use biome_languages::HtmlFileSource;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 use std::num::NonZeroU64;
@@ -277,6 +283,115 @@ fn json_to_settings_includes_linter_and_assist() {
 
     assert_eq!(settings.linter.enabled, Some(true.into()));
     assert_eq!(settings.assist.enabled, Some(true.into()));
+}
+
+#[cfg(feature = "lang_md")]
+#[test]
+fn markdown_linter_override_respects_matching_and_language_precedence() {
+    for enabled in [true, false] {
+        for global_enabled in [None, Some(!enabled)] {
+            let configuration = Configuration {
+                markdown: Some(MarkdownConfiguration {
+                    linter: Some(MarkdownLinterConfiguration {
+                        enabled: Some((!enabled).into()),
+                    }),
+                    ..Default::default()
+                }),
+                overrides: Some(Overrides(vec![OverridePattern {
+                    includes: Some(OverrideGlobs::Globs(Box::new([
+                        biome_glob::NormalizedGlob::from_str("special/**").unwrap(),
+                    ]))),
+                    linter: global_enabled.map(|enabled| OverrideLinterConfiguration {
+                        enabled: Some(enabled.into()),
+                        ..Default::default()
+                    }),
+                    markdown: Some(MarkdownConfiguration {
+                        linter: Some(MarkdownLinterConfiguration {
+                            enabled: Some(enabled.into()),
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }])),
+                ..Default::default()
+            };
+            let mut settings = Settings::default();
+            settings
+                .merge_with_configuration(configuration, None, vec![])
+                .expect("valid configuration");
+
+            assert_eq!(
+                settings.override_settings.patterns[0]
+                    .languages
+                    .markdown
+                    .linter
+                    .enabled,
+                Some(enabled.into())
+            );
+            assert_eq!(
+                MarkdownLanguage::linter_enabled_for_file_path(
+                    &settings,
+                    Utf8Path::new("special/file.md"),
+                ),
+                enabled,
+                "Markdown {enabled} must take precedence over global {global_enabled:?}"
+            );
+            assert_eq!(
+                MarkdownLanguage::linter_enabled_for_file_path(&settings, Utf8Path::new("file.md")),
+                !enabled
+            );
+        }
+    }
+}
+
+#[cfg(feature = "lang_md")]
+#[test]
+fn markdown_linter_override_omission_preserves_earlier_setting() {
+    for enabled in [true, false] {
+        let overrides = [
+            Some(MarkdownLinterConfiguration {
+                enabled: Some(enabled.into()),
+            }),
+            None,
+            Some(MarkdownLinterConfiguration::default()),
+        ]
+        .map(|linter| OverridePattern {
+            includes: Some(OverrideGlobs::Globs(Box::new([
+                biome_glob::NormalizedGlob::from_str("special/**").unwrap(),
+            ]))),
+            markdown: Some(MarkdownConfiguration {
+                formatter: Some(MarkdownFormatterConfiguration::default()),
+                linter,
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
+        let configuration = Configuration {
+            markdown: Some(MarkdownConfiguration {
+                linter: Some(MarkdownLinterConfiguration {
+                    enabled: Some((!enabled).into()),
+                }),
+                ..Default::default()
+            }),
+            overrides: Some(Overrides(overrides.into())),
+            ..Default::default()
+        };
+        let mut settings = Settings::default();
+        settings
+            .merge_with_configuration(configuration, None, vec![])
+            .expect("valid configuration");
+
+        for pattern in &settings.override_settings.patterns[1..] {
+            assert_eq!(pattern.languages.markdown.linter.enabled, None);
+        }
+        assert_eq!(
+            MarkdownLanguage::linter_enabled_for_file_path(
+                &settings,
+                Utf8Path::new("special/file.md"),
+            ),
+            enabled
+        );
+    }
 }
 
 #[test]

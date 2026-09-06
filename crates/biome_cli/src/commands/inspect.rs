@@ -1,5 +1,6 @@
 mod configuration;
 mod key;
+mod plugins;
 
 use self::{
     configuration::{ConfigurationInspector, ConfigurationKind, SourceReference, SourceScope},
@@ -34,6 +35,9 @@ pub(crate) fn inspect(
     sub_command: InspectSubCommand,
 ) -> Result<(), CliDiagnostic> {
     match sub_command {
+        InspectSubCommand::Plugins { path, json } => {
+            plugins::inspect_plugins(session, cli_options, path.as_deref(), json)
+        }
         InspectSubCommand::Config { key, path, json } => {
             ConfigInspectionCommand::new(session, cli_options, key, path, json)?.execute()
         }
@@ -492,6 +496,8 @@ impl InspectionDiagnostic {
 /// One ordered advice entry rendered as either a log line or a source code frame.
 #[derive(Debug)]
 enum AdviceLine {
+    List(Vec<MarkupBuf>),
+    Error(Error),
     Frame {
         path: String,
         span: Option<TextRange>,
@@ -503,12 +509,30 @@ enum AdviceLine {
 
 /// Ordered supplemental output rendered after the inspection message and optional code frame.
 #[derive(Debug)]
-struct InspectionAdvice(Vec<AdviceLine>);
+pub(crate) struct InspectionAdvice(Vec<AdviceLine>);
 
 impl Advices for InspectionAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         for line in &self.0 {
             match line {
+                AdviceLine::List(items) => {
+                    let items = items
+                        .iter()
+                        .map(|item| item as &dyn biome_console::fmt::Display)
+                        .collect::<Vec<_>>();
+                    visitor.record_list(&items)?;
+                }
+                AdviceLine::Error(error) => {
+                    for diagnostic in
+                        std::iter::successors(Some(error.as_ref()), |error| error.source())
+                    {
+                        let mut message = MarkupBuf::default();
+                        diagnostic
+                            .message(&mut biome_console::fmt::Formatter::new(&mut message))?;
+                        visitor.record_log(LogCategory::Error, &message)?;
+                        diagnostic.advices(visitor)?;
+                    }
+                }
                 AdviceLine::Frame {
                     path,
                     span,

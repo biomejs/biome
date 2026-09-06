@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./rule.grit", "includes": ["**/*.ts", "!**/*.test.ts"] },
+    {
+      "path": "./rule.grit",
+      "includes": ["**/*.ts", "!**/*.test.ts", "**/keep.test.ts"]
+    }
+  ]
+}
+```
+
+## `rule.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No plugin rules resolved.
+  
+  Target path: src/skip.test.ts
+  
+
+```
