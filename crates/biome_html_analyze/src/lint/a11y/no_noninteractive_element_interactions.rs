@@ -16,6 +16,7 @@ declare_lint_rule! {
     /// Non-interactive elements include `<main>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
     ///
     /// A Non-interactive element does not support event handlers(mouse and key handlers).
+    /// Resource events such as `load` and `error` do not require user interaction and are allowed.
     ///
     /// ## Examples
     ///
@@ -127,8 +128,7 @@ impl Rule for NoNoninteractiveElementInteractions {
     }
 }
 
-// Only check the focus, image, keyboard and mouse event handler types.
-const EVENT_HANDLER_TYPES: &[&str] = &["focus", "image", "keyboard", "mouse"];
+const EVENT_HANDLER_TYPES: &[&str] = &["focus", "keyboard", "mouse"];
 
 #[test]
 fn test_order() {

@@ -1,0 +1,116 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidResourceEvents.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<img src="image.png" alt="Example" onerror="handleError()" onclick="handleInteraction()" />
+<img src="image.png" alt="Example" onerror="handleError()" onkeydown="handleInteraction()" />
+<img src="image.png" alt="Example" onerror="handleError()" onfocus="handleInteraction()" />
+<img src="image.png" alt="Example" onload="handleLoad()" onclick="handleInteraction()" />
+<img src="image.png" alt="Example" onload="handleLoad()" onkeydown="handleInteraction()" />
+<img src="image.png" alt="Example" onload="handleLoad()" onfocus="handleInteraction()" />
+
+```
+
+# Diagnostics
+```
+invalidResourceEvents.html:2:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <img src="image.png" alt="Example" onerror="handleError()" onclick="handleInteraction()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <img src="image.png" alt="Example" onerror="handleError()" onkeydown="handleInteraction()" />
+    4 │ <img src="image.png" alt="Example" onerror="handleError()" onfocus="handleInteraction()" />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.html:3:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <img src="image.png" alt="Example" onerror="handleError()" onclick="handleInteraction()" />
+  > 3 │ <img src="image.png" alt="Example" onerror="handleError()" onkeydown="handleInteraction()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <img src="image.png" alt="Example" onerror="handleError()" onfocus="handleInteraction()" />
+    5 │ <img src="image.png" alt="Example" onload="handleLoad()" onclick="handleInteraction()" />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.html:4:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    2 │ <img src="image.png" alt="Example" onerror="handleError()" onclick="handleInteraction()" />
+    3 │ <img src="image.png" alt="Example" onerror="handleError()" onkeydown="handleInteraction()" />
+  > 4 │ <img src="image.png" alt="Example" onerror="handleError()" onfocus="handleInteraction()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <img src="image.png" alt="Example" onload="handleLoad()" onclick="handleInteraction()" />
+    6 │ <img src="image.png" alt="Example" onload="handleLoad()" onkeydown="handleInteraction()" />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.html:5:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    3 │ <img src="image.png" alt="Example" onerror="handleError()" onkeydown="handleInteraction()" />
+    4 │ <img src="image.png" alt="Example" onerror="handleError()" onfocus="handleInteraction()" />
+  > 5 │ <img src="image.png" alt="Example" onload="handleLoad()" onclick="handleInteraction()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <img src="image.png" alt="Example" onload="handleLoad()" onkeydown="handleInteraction()" />
+    7 │ <img src="image.png" alt="Example" onload="handleLoad()" onfocus="handleInteraction()" />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.html:6:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    4 │ <img src="image.png" alt="Example" onerror="handleError()" onfocus="handleInteraction()" />
+    5 │ <img src="image.png" alt="Example" onload="handleLoad()" onclick="handleInteraction()" />
+  > 6 │ <img src="image.png" alt="Example" onload="handleLoad()" onkeydown="handleInteraction()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <img src="image.png" alt="Example" onload="handleLoad()" onfocus="handleInteraction()" />
+    8 │ 
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalidResourceEvents.html:7:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    5 │ <img src="image.png" alt="Example" onload="handleLoad()" onclick="handleInteraction()" />
+    6 │ <img src="image.png" alt="Example" onload="handleLoad()" onkeydown="handleInteraction()" />
+  > 7 │ <img src="image.png" alt="Example" onload="handleLoad()" onfocus="handleInteraction()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```

@@ -1,0 +1,11 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validResourceEvents.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<img src="image.png" alt="Example" onerror={() => {}} />
+<img src="image.png" alt="Example" onload={() => {}} />
+
+```
