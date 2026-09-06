@@ -159,12 +159,24 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
+        let r_curly = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), self.element.r_curly_token().format()])
+            } else {
+                write!(f, [self.element.r_curly_token().format()])
+            }
+        });
+
+        let format_inner_with_closing = format_with(|f: &mut JsFormatter| {
+            write!(f, [format_inner, line_suffix_boundary(), r_curly])
+        });
+
         let format_indented = format_with(|f: &mut JsFormatter| {
             if self.options.after_new_line {
-                write!(f, [dedent_to_root(&format_inner)])
+                write!(f, [dedent_to_root(&format_inner_with_closing)])
             } else {
                 write_with_indention(
-                    &format_inner,
+                    &format_inner_with_closing,
                     self.options.indention,
                     f.options().tab_width(),
                     f,
@@ -180,23 +192,7 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
-        let r_curly = format_with(|f: &mut JsFormatter| {
-            if f.options().delimiter_spacing().value() {
-                write!(f, [space(), self.element.r_curly_token().format()])
-            } else {
-                write!(f, [self.element.r_curly_token().format()])
-            }
-        });
-
-        write!(
-            f,
-            [group(&format_args![
-                dollar_curly,
-                format_indented,
-                line_suffix_boundary(),
-                r_curly
-            ])]
-        )
+        write!(f, [group(&format_args![dollar_curly, format_indented])])
     }
 }
 
