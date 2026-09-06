@@ -7414,6 +7414,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTopLevelBrowserGlobalsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTopLevelBrowserGlobalsOptions" }
+			]
+		},
+		"NoTopLevelBrowserGlobalsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTopLevelLiteralsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10292,6 +10302,13 @@
 					"description": "Disallow this outside of classes.\nSee https://biomejs.dev/linter/rules/no-this-outside-of-class",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoThisOutsideOfClassConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTopLevelBrowserGlobals": {
+					"description": "Disallow unguarded browser globals at the top level of Vue and Svelte scripts.\nSee https://biomejs.dev/linter/rules/no-top-level-browser-globals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTopLevelBrowserGlobalsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16496,6 +16513,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoThisOutsideOfClassOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTopLevelBrowserGlobalsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTopLevelBrowserGlobalsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
