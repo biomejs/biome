@@ -22,7 +22,8 @@ pub use request::{
     execute_type_inference_request,
 };
 pub use requests::{
-    ArrayOfPromisesClassificationRequest, CallableMemberRequest, ExpectedCallArgumentTypeRequest,
+    ArrayOfPromisesClassificationRequest, CallableMemberRequest, CaseLiteral, CaseLiteralRequest,
+    ConditionalTypeRequest, ExpectedCallArgumentTypeRequest,
     ExpectedConstructorArgumentTypeRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
     NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest, PromiseClassificationRequest,
     PromiseReturningFunctionClassificationRequest, TypeInferenceArgument, TypeInferenceSource,
