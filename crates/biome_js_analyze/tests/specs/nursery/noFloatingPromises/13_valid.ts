@@ -21,6 +21,9 @@ falsy && Promise.reject("logical operator bypass");
 
 interface Foo {}
 let foo: Foo;
+// Biome follows TypeScript and treats an interface-typed value as an object,
+// so it is always truthy -- same as for `c` and `o` below.
+foo || Promise.reject("logical operator bypass");
 foo ?? Promise.reject("logical operator bypass");
 
 class C {}
