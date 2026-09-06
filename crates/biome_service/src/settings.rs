@@ -1864,7 +1864,7 @@ impl OverrideSettings {
         }
     }
 
-        #[cfg(feature = "lang_yaml")]
+    #[cfg(feature = "lang_yaml")]
     pub fn apply_override_yaml_format_options_by_indices(
         &self,
         indices: &[usize],
