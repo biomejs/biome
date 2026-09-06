@@ -277,6 +277,59 @@ export function classFieldInitializer(x: number | (() => void)) {
     }
     return null;
 }
+
+// A getter, a setter and a static initialization block are function-like
+// scopes too, even though `async` is never valid in them.
+export function accessorsAndStaticBlock(x: number | (() => void)) {
+    if (typeof x === "function") {
+        x;
+        return class {
+            static {
+                x;
+            }
+            get value() {
+                return x;
+            }
+            set value(_v: unknown) {
+                x;
+            }
+        };
+    }
+    return null;
+}
+
+export function methodsAndConstructor(x: number | (() => void)) {
+    if (typeof x === "function") {
+        x;
+        return class {
+            constructor() {
+                x;
+            }
+            method() {
+                x;
+            }
+        };
+    }
+    return null;
+}
+
+export function objectAccessors(x: number | (() => void)) {
+    if (typeof x === "function") {
+        x;
+        return {
+            get value() {
+                return x;
+            },
+            set value(_v: unknown) {
+                x;
+            },
+            method() {
+                x;
+            },
+        };
+    }
+    return null;
+}
 "#;
 
     let fs = MemoryFileSystem::default();
@@ -286,6 +339,53 @@ export function classFieldInitializer(x: number | (() => void)) {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_does_not_narrow_across_function_boundaries",
+        &db,
+        &fs,
+    );
+}
+
+/// Covers the shapes whose `typeof` tag is decided by something other than a
+/// plain keyword: a callable interface's bases, literals, and tuples.
+#[test]
+fn test_infer_module_types_reads_typeof_tags_from_type_shapes() {
+    const SOURCE: &str = r#"
+interface CallableBase {
+    (): void;
+}
+
+// A base can still contribute a call signature, so the interface's own tag
+// is unknown and it survives a guard for any tag.
+interface DerivedFromCallable extends CallableBase {
+    tag: string;
+}
+
+export function interfaceWithBases(a: DerivedFromCallable | number) {
+    if (typeof a === "object") {
+        a;
+    }
+}
+
+export function tupleValue(b: [string, number] | number) {
+    if (typeof b === "object") {
+        b;
+    }
+}
+
+export function regexpLiteral(c: number) {
+    const value = c > 0 ? /re/ : c;
+    if (typeof value === "object") {
+        value;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_reads_typeof_tags_from_type_shapes",
         &db,
         &fs,
     );
