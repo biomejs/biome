@@ -182,7 +182,7 @@ where
 
     let JsAnalyzerServices {
         module_db,
-        language_db: embedded_db,
+        language_db: _,
         embedded_data,
         project_layout,
         source_type,
@@ -249,11 +249,7 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    if let Some(embedded_data) = embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data));
-    } else if let Some(embedded_db) = embedded_db {
-        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
-    }
+    services.insert_service(EmbeddedService::new(embedded_data.unwrap_or_default()));
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
     // interleaved with the analyzer's syntax-phase traversal (single pass).

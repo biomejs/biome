@@ -562,7 +562,7 @@ fn export_named_fix(
                         .bindings()
                         .filter(|binding| binding.syntax().text_trimmed() == local_name)
                         .all(|binding| binding.tree().is_type_only())
-                        && !references.is_used_as_value(token.token_text_trimmed())
+                        && !references.is_used_as_value(&token.token_text_trimmed())
                     {
                         specifiers_requiring_type_marker.push(specifier.into());
                     } else {

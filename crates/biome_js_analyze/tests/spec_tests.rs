@@ -2,7 +2,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
     Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_db::ParsedSource;
+use biome_db::FileSource;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
@@ -36,7 +36,7 @@ tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module
 #[salsa::db]
 #[derive(Default)]
 struct TestDb {
-    parsed: Option<ParsedSource>,
+    file: Option<FileSource>,
     source_type: Option<DocumentFileSource>,
     storage: Storage<Self>,
 }
@@ -50,8 +50,14 @@ impl LanguageDb for TestDb {
 
 #[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
-        self.parsed
+    fn file_source_for_path(&self, _path: &Utf8Path) -> Option<FileSource> {
+        self.file
+    }
+
+    fn for_each_file_source(&self, f: &mut dyn FnMut(FileSource)) {
+        if let Some(file) = self.file {
+            f(file);
+        }
     }
 }
 
@@ -64,14 +70,8 @@ fn embedded_db(
     source_type: &JsFileSource,
 ) -> Rc<dyn LanguageDb> {
     let mut db = TestDb::default();
-    let parsed = ParsedSource::new(
-        &db,
-        path.into(),
-        parsed.syntax().as_send().unwrap().into(),
-        0,
-        vec![],
-    );
-    db.parsed = Some(parsed);
+    let file = FileSource::new(&db, path.into(), parsed.syntax().to_string(), 0, None);
+    db.file = Some(file);
     db.source_type = Some(DocumentFileSource::from(*source_type));
     Rc::new(db)
 }

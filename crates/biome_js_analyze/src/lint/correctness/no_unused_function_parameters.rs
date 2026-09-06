@@ -148,7 +148,7 @@ impl Rule for NoUnusedFunctionParameters {
         // can hide a real unused parameter — a false negative, never a false
         // positive on a used one.
         if let Some(embedded) = ctx.get_service::<EmbeddedService>()
-            && embedded.is_used(name.token_text_trimmed())
+            && embedded.is_used(&name.token_text_trimmed())
         {
             return None;
         }

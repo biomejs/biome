@@ -298,7 +298,6 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 document_file_source: None,
                 path: path.clone(),
                 content: FileContent::from_client(input),
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })?;
@@ -486,7 +485,6 @@ mod tests {
                 path: path.clone(),
                 content: FileContent::from_client(SOURCE),
                 document_file_source: None,
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })
@@ -549,7 +547,6 @@ mod tests {
                 path: path.clone(),
                 content: FileContent::from_client(SOURCE),
                 document_file_source: None,
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })

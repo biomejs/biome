@@ -3,7 +3,7 @@ mod go_to;
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, LintParams, LintResults,
-    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, format_on_type_noop,
+    ParseResult, ParsedSource, ProcessFixAll, ProcessLint, SearchCapabilities, format_on_type_noop,
     matches_on_type_char,
 };
 use crate::WorkspaceError;
@@ -33,23 +33,48 @@ use biome_configuration::css::{
 use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
-use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_css_semantic::db::css_semantic_model;
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css_with_cache};
+use biome_css_semantic::model::SemanticModel;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{
     DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_languages::DocumentFileSource;
 use biome_languages::css::CssEmbeddingKind;
+use biome_languages::{CssFileSource, DocumentFileSource};
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{error, info};
+
+fn analyzer_semantic_model(
+    parsed_source: &ParsedSource,
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+    source_type: CssFileSource,
+) -> SemanticModel {
+    if let Some(file) = parsed_source
+        .workspace_file()
+        .filter(|_| parsed_source.as_snippet().is_none())
+    {
+        let input = ParseCssInput::new(
+            workspace_db,
+            file,
+            source_type,
+            settings.parse_options::<CssLanguage>(path, document_file_source),
+        );
+        css_semantic_model(workspace_db, input).clone()
+    } else {
+        semantic_model(&parsed_source.tree::<AnyCssRoot>())
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -472,6 +497,7 @@ impl ExtensionHandler for CssFileHandler {
         Capabilities {
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -529,31 +555,74 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
+#[salsa::interned]
+#[derive(Debug)]
+struct ParseCssInput {
+    file: FileSource,
+    document_source: CssFileSource,
+    options: CssParserOptions,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_css_file<'db>(db: &'db dyn Db, input: ParseCssInput<'db>) -> AnyParse {
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_css_with_cache(
+            file.content(db),
+            input.document_source(db),
+            node_cache,
+            input.options(db),
+        )
+        .into()
+    })
+}
+
+#[salsa::tracked(returns(ref))]
+fn css_semantic_model<'db>(db: &'db dyn Db, input: ParseCssInput<'db>) -> SemanticModel {
+    let parse = parse_css_file(db, input);
+    semantic_model(&parse.tree())
+}
+
 fn parse(
     biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
     settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
+    let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+    let source_type = file_source.to_css_file_source().unwrap_or_default();
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_css_file(
+        file_db,
+        ParseCssInput::new(file_db, file, source_type, options),
+    );
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
+    biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
-
     let source_type = file_source.to_css_file_source().unwrap_or_default();
-    let parse = biome_css_parser::parse_css_with_cache(text, source_type, cache, options);
+    let any_parse = parse_css_with_cache(code, source_type, node_cache, options).into();
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse,
         language: Some(file_source),
     }
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: CssSyntaxNode = parse.syntax(&workspace_db);
-    let tree: CssRoot = parse.tree(&workspace_db);
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: CssSyntaxNode = parse.syntax();
+    let tree: CssRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -568,8 +637,7 @@ fn debug_formatter_ir(
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -579,9 +647,9 @@ fn debug_formatter_ir(
 fn debug_semantic_model(
     _path: &BiomePath,
     parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
+    _workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let tree: AnyCssRoot = parse.tree(&workspace_db);
+    let tree: AnyCssRoot = parse.tree();
     let model = semantic_model(&tree);
     Ok(model.to_string())
 }
@@ -590,13 +658,13 @@ fn debug_semantic_model(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -615,7 +683,7 @@ fn format_range(
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -630,7 +698,7 @@ fn format_on_type(
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
 
     let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
@@ -694,7 +762,7 @@ fn lint(params: LintParams) -> LintResults {
         settings,
         &params.workspace_db,
     );
-    let tree = params.parsed_source.tree(&params.workspace_db);
+    let tree = params.parsed_source.tree();
 
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -717,12 +785,14 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let semantic_model = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => {
-            css_semantic_model(&params.workspace_db, source).clone()
-        }
-        super::ParsedOrigin::Interned { .. } => semantic_model(&tree),
-    };
+    let semantic_model = analyzer_semantic_model(
+        &params.parsed_source,
+        params.path,
+        &params.language,
+        settings,
+        &params.workspace_db,
+        file_source,
+    );
     let css_services = CssAnalyzerServices {
         semantic_model: Some(&semantic_model),
         file_source,
@@ -748,7 +818,7 @@ fn lint(params: LintParams) -> LintResults {
     );
 
     process_lint.into_result(
-        params.parsed_source.serde_diagnostics(&params.workspace_db),
+        params.parsed_source.serde_diagnostics(),
         analyze_diagnostics,
     )
 }
@@ -761,6 +831,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings,
         path,
         workspace_db,
+        #[cfg(feature = "html_embeds")]
+            embedded_data: _,
         project_layout,
         language,
         only,
@@ -772,7 +844,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         working_directory,
         compute_actions,
     } = params;
-    let tree = parsed_source.tree(&workspace_db);
+    let tree = parsed_source.tree();
     let Some(file_source) = language.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
@@ -809,11 +881,19 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
 
     info!("CSS runs the analyzer");
+    let semantic_model = analyzer_semantic_model(
+        &parsed_source,
+        path,
+        &language,
+        settings,
+        &workspace_db,
+        file_source,
+    );
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(css_semantic_model(&workspace_db, &parsed_source)),
+        semantic_model: Some(&semantic_model),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -873,7 +953,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let mut tree: AnyCssRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut tree: AnyCssRoot = params.parsed_source.tree();
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return Ok(None);
@@ -1074,17 +1154,133 @@ fn search(
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
-    workspace_db: WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let any_parse = parsed.any_parse(&workspace_db);
+    let any_parse = parsed.any_parse();
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use biome_db::testing::{
+        Events, assert_function_query_was_not_run, assert_function_query_was_run,
+    };
     use biome_languages::CssFileSource;
     use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind};
+    use camino::{Utf8Path, Utf8PathBuf};
+
+    #[salsa::db]
+    struct TestDb {
+        events: Events,
+        storage: salsa::Storage<Self>,
+    }
+
+    impl TestDb {
+        fn new() -> Self {
+            let events = Events::default();
+            Self {
+                storage: salsa::Storage::new(Some(Box::new({
+                    let events = events.clone();
+                    move |event| events.0.lock().unwrap().push(event)
+                }))),
+                events,
+            }
+        }
+
+        fn clear_salsa_events(&self) {
+            self.take_salsa_events();
+        }
+
+        fn take_salsa_events(&self) -> Vec<salsa::Event> {
+            std::mem::take(&mut *self.events.0.lock().unwrap())
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl Db for TestDb {
+        fn file_source_for_path(&self, _path: &Utf8Path) -> Option<FileSource> {
+            None
+        }
+
+        fn for_each_file_source(&self, _f: &mut dyn FnMut(FileSource)) {}
+    }
+
+    fn make_file(db: &TestDb, source: &str) -> FileSource {
+        FileSource::new(
+            db,
+            Utf8PathBuf::from("test.css"),
+            source.to_string(),
+            0,
+            None,
+        )
+    }
+
+    #[salsa::tracked]
+    fn css_rule_count<'db>(db: &'db dyn Db, input: ParseCssInput<'db>) -> usize {
+        css_semantic_model(db, input).rules().len()
+    }
+
+    #[test]
+    fn css_semantic_query_reuses_unchanged_input() {
+        let db = TestDb::new();
+        let file = make_file(&db, "p { color: red; }");
+        let input =
+            ParseCssInput::new(&db, file, CssFileSource::css(), CssParserOptions::default());
+        let _ = css_semantic_model(&db, input);
+
+        db.clear_salsa_events();
+        let _ = css_semantic_model(&db, input);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_not_run(&db, css_semantic_model, input, &events);
+    }
+
+    #[test]
+    fn css_semantic_query_invalidates_selector_projection() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, "p { color: red; }");
+        let input =
+            ParseCssInput::new(&db, file, CssFileSource::css(), CssParserOptions::default());
+        assert_eq!(css_rule_count(&db, input), 1);
+
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            "span { color: red; }".to_string(),
+        );
+        let input =
+            ParseCssInput::new(&db, file, CssFileSource::css(), CssParserOptions::default());
+        db.clear_salsa_events();
+        assert_eq!(css_rule_count(&db, input), 1);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_semantic_model, input, &events);
+        assert_function_query_was_run(&db, css_rule_count, input, &events);
+    }
+
+    #[test]
+    fn css_semantic_query_backdates_equal_trivia_change() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, "p { color: red; }");
+        let input =
+            ParseCssInput::new(&db, file, CssFileSource::css(), CssParserOptions::default());
+        assert_eq!(css_rule_count(&db, input), 1);
+
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            "p  {  color:  red;  }".to_string(),
+        );
+        let input =
+            ParseCssInput::new(&db, file, CssFileSource::css(), CssParserOptions::default());
+        db.clear_salsa_events();
+        assert_eq!(css_rule_count(&db, input), 1);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_semantic_model, input, &events);
+        assert_function_query_was_not_run(&db, css_rule_count, input, &events);
+    }
 
     #[test]
     fn inherit_global_format_settings() {

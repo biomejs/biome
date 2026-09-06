@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use biome_db::ParsedSource;
+use biome_db::FileSource;
 use biome_db::testing::{
     Events, assert_function_query_was_not_run, assert_function_query_was_run,
     function_query_will_execute_count_by_name, function_query_will_execute_position,
@@ -123,9 +123,11 @@ impl salsa::Database for TestModuleDb {}
 
 #[salsa::db]
 impl biome_db::Db for TestModuleDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+    fn file_source_for_path(&self, _path: &Utf8Path) -> Option<FileSource> {
         None
     }
+
+    fn for_each_file_source(&self, _f: &mut dyn FnMut(FileSource)) {}
 }
 
 #[salsa::db]

@@ -132,7 +132,7 @@ fn template_reference(
     }
 
     let embedded = ctx.get_service::<EmbeddedService>()?;
-    if embedded.contains_binding(token.token_text_trimmed()) {
+    if embedded.contains_binding(&token.token_text_trimmed()) {
         return None;
     }
 

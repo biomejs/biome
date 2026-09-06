@@ -839,7 +839,7 @@ impl<L: Language> From<cursor::SyntaxNode> for SyntaxNode<L> {
 
 /// Language-agnostic representation of the root node of a syntax tree, can be
 /// sent or shared between threads
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SendNode {
     language: TypeId,
     green: GreenNode,
@@ -899,7 +899,7 @@ impl SendNode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EmbeddedSendNode {
     offset: TextSize,
     green: GreenNode,

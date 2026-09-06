@@ -699,7 +699,7 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
         self.as_ref().source.clone()
     }
 
-    fn effective_settings(&self) -> &Settings {
+    pub(crate) fn effective_settings(&self) -> &Settings {
         self.query()
             .inline_settings()
             .map_or_else(|| self.as_ref(), AsRef::as_ref)
