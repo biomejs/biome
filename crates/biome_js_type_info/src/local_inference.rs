@@ -7,26 +7,27 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
-    AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
-    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSwitchClause, AnyTsModuleName,
-    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsCallExpression, JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsClassMemberList, JsComputedMemberAssignment, JsConstructorParameters,
-    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIfStatement,
-    JsInitializerClause, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
-    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsStaticMemberAssignment,
-    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression,
-    JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration,
+    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
+    AnyJsSwitchClause, AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
+    JsArrayBindingPattern, JsArrowFunctionExpression, JsAssignmentOperator, JsBinaryExpression,
+    JsBinaryOperator, JsCallArguments, JsCallExpression, JsCaseClause, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsComputedMemberAssignment, JsConstructorParameters, JsExpressionStatement, JsExtendsClause,
+    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
+    JsIdentifierAssignment, JsIdentifierBinding, JsIfStatement, JsInitializerClause,
+    JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameters,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter,
+    JsReturnStatement, JsSetterObjectMember, JsStaticMemberAssignment, JsSwitchStatement,
+    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
     TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration,
     TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
@@ -1202,7 +1203,7 @@ impl TypeData {
             "undefined" => Self::Undefined,
             _ => {
                 let predicates = if resolver.narrowing_enabled() {
-                    guard_narrowing_predicates(resolver, scope_id, id)
+                    GuardAnalysis::new(resolver, scope_id, name.clone()).predicates(id)
                 } else {
                     Vec::new()
                 };
@@ -3308,22 +3309,27 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
 }
 
-/// Returns the narrowing predicates that the guards enclosing a reference
-/// establish for it, innermost first, e.g. `[Typeof(String)]` for `x` inside
-/// the consequent of `if (typeof x === "string")`, or `[Truthy]` inside the
-/// consequent of `if (x)`.
-fn guard_narrowing_predicates(
-    resolver: &mut dyn RawTypeCollector,
-    scope_id: ScopeId,
-    id: &JsReferenceIdentifier,
-) -> Vec<NarrowingPredicate> {
-    let Ok(name_token) = id.name() else {
-        return Vec::new();
+/// Returns the right-hand side of a statement of the form `<name> = <expr>;`.
+fn plain_assignment_rhs(stmt: &JsExpressionStatement, name: &str) -> Option<AnyJsExpression> {
+    let expr = stmt.expression().ok()?.omit_parentheses();
+    let AnyJsExpression::JsAssignmentExpression(assignment) = expr else {
+        return None;
     };
-    GuardAnalysis::new(resolver, scope_id, name_token).guard_predicates(id)
+    if !matches!(assignment.operator(), Ok(JsAssignmentOperator::Assign)) {
+        return None;
+    }
+    let AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsIdentifierAssignment(target)) =
+        assignment.left().ok()?
+    else {
+        return None;
+    };
+    if target.name_token().ok()?.text_trimmed() != name {
+        return None;
+    }
+    assignment.right().ok()
 }
 
-/// Finds the guards that narrow one reference.
+/// Finds the assignments and guards that narrow one reference.
 ///
 /// `scope_id` is where the other names a guard mentions resolve: the callee
 /// of a predicate call, the class of an `instanceof`.
@@ -3349,6 +3355,14 @@ impl<'a> GuardAnalysis<'a> {
     /// The name of the binding being narrowed.
     fn name(&self) -> &str {
         self.name_token.text()
+    }
+
+    /// Returns the predicates that narrow `id`, innermost first: the
+    /// enclosing guards, then the assignment the reference follows, if any.
+    fn predicates(&mut self, id: &JsReferenceIdentifier) -> Vec<NarrowingPredicate> {
+        let mut predicates = self.guard_predicates(id);
+        predicates.extend(self.assignment_predicate(id));
+        predicates
     }
 
     /// Returns the predicates the guards enclosing `id` establish for it,
@@ -3603,6 +3617,68 @@ impl<'a> GuardAnalysis<'a> {
         }
 
         Some(TypeReference::from_name(self.scope_id, class_name))
+    }
+
+    /// Returns the predicate established by the nearest preceding assignment
+    /// to the narrowed binding, if there is one.
+    ///
+    /// The right-hand side is taken as the collector already inferred it; a
+    /// collector that records no expression types gets no assignment
+    /// narrowing.
+    fn assignment_predicate(&mut self, id: &JsReferenceIdentifier) -> Option<NarrowingPredicate> {
+        let source = self.assignment_source(id)?;
+        let ty = self.resolver.recorded_expression_type(&source)?;
+        Some(NarrowingPredicate::Assigned(ty))
+    }
+
+    /// Returns the right-hand side of the nearest `<name> = <expr>;` before
+    /// `id` in the same statement list, unless a statement in between, or the
+    /// reference's own statement, could write the name again or shadow it.
+    ///
+    /// Only the innermost list is searched: an assignment does not reach into
+    /// a nested block, `if` consequent, or `case` clause.
+    fn assignment_source(&mut self, id: &JsReferenceIdentifier) -> Option<AnyJsExpression> {
+        let containing_stmt = id
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .take_while(|ancestor| !is_narrowing_boundary(ancestor.kind()))
+            .find(|ancestor| {
+                ancestor.parent().is_some_and(|parent| {
+                    matches!(
+                        parent.kind(),
+                        JsSyntaxKind::JS_STATEMENT_LIST | JsSyntaxKind::JS_MODULE_ITEM_LIST
+                    )
+                })
+            })?;
+
+        // One scan of the whole list, shared by every reference in it,
+        // answers the common case of a name the list never writes to.
+        let statement_list = containing_stmt.parent()?;
+        if !self.narrowing_invalidated_within(&statement_list, self.name_token.clone()) {
+            return None;
+        }
+
+        if self.narrowing_invalidated_within(&containing_stmt, self.name_token.clone()) {
+            return None;
+        }
+
+        let mut sibling = containing_stmt.prev_sibling();
+        while let Some(stmt) = sibling {
+            if let Some(source) = JsExpressionStatement::cast_ref(&stmt)
+                .and_then(|stmt| plain_assignment_rhs(&stmt, self.name()))
+            {
+                // A closure in the right-hand side could write the name later.
+                return (!self
+                    .narrowing_invalidated_within(source.syntax(), self.name_token.clone()))
+                .then_some(source);
+            }
+            if self.narrowing_invalidated_within(&stmt, self.name_token.clone()) {
+                return None;
+            }
+            sibling = stmt.prev_sibling();
+        }
+        None
     }
 
     /// Returns whether a binding named `name_token` is declared, or the name

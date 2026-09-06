@@ -541,13 +541,17 @@ impl<'db> TypeData<'db> {
             | Self::ThisKeyword
             | Self::Unknown
             | Self::UnknownKeyword => Some(ConditionalType::Anything),
-            Self::BigInt | Self::Boolean | Self::Interface(_) | Self::Number | Self::String => {
+            Self::BigInt | Self::Boolean | Self::Number | Self::String => {
                 Some(ConditionalType::NonNullish)
             }
+            // Like TypeScript, a value of an interface type counts as an
+            // object, although a primitive can satisfy an interface too:
+            // `const s: { length: number } = ""`.
             Self::Class(_)
             | Self::Constructor(_)
             | Self::Function(_)
             | Self::Global
+            | Self::Interface(_)
             | Self::Module(_)
             | Self::Namespace(_)
             | Self::Object(_)
@@ -1344,7 +1348,9 @@ impl<'db> TypeDataSlots<'db> {
                 // `rebuild_typeof_expression` takes them back in the same
                 // order.
                 match &expression.predicate {
-                    NarrowingPredicate::InstanceOf(guard) => self.slots.push(*guard),
+                    NarrowingPredicate::Assigned(ty) | NarrowingPredicate::InstanceOf(ty) => {
+                        self.slots.push(*ty)
+                    }
                     NarrowingPredicate::PredicateCall(predicate) => {
                         self.slots.push(predicate.callee);
                     }
@@ -1762,6 +1768,9 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 TypeofExpression::Narrowed(TypeofNarrowedExpression {
                     ty: self.take_type()?,
                     predicate: match &expression.predicate {
+                        NarrowingPredicate::Assigned(_) => {
+                            NarrowingPredicate::Assigned(self.take_type()?)
+                        }
                         NarrowingPredicate::InstanceOf(_) => {
                             NarrowingPredicate::InstanceOf(self.take_type()?)
                         }
@@ -2200,7 +2209,7 @@ pub struct TypeofNarrowedExpression<'db> {
 /// Predicate that a call returned `true` for a value passed as one of its
 /// arguments, narrowing the value when the callee turns out to be a type
 /// predicate, e.g. `isFoo(x)`.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct PredicateCallPredicate<'db> {
     /// Reference to the callee.
     pub callee: TypeData<'db>,
@@ -2212,6 +2221,8 @@ pub struct PredicateCallPredicate<'db> {
 /// Predicate established by a guard, used to narrow the guarded value's type.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub enum NarrowingPredicate<'db> {
+    /// The value has the type it was assigned.
+    Assigned(TypeData<'db>),
     /// The value is falsy.
     Falsy,
     /// The value is an instance of the referenced class.
@@ -2739,6 +2750,9 @@ fn convert_typeof_expression<'db>(
             TypeofExpression::Narrowed(TypeofNarrowedExpression {
                 ty: resolve_reference(&expression.ty),
                 predicate: match &expression.predicate {
+                    raw::NarrowingPredicate::Assigned(assigned) => {
+                        NarrowingPredicate::Assigned(resolve_reference(assigned))
+                    }
                     raw::NarrowingPredicate::Falsy => NarrowingPredicate::Falsy,
                     raw::NarrowingPredicate::InstanceOf(guard) => {
                         NarrowingPredicate::InstanceOf(resolve_reference(guard))
@@ -3527,6 +3541,15 @@ mod tests {
                 TypeofExpression::Narrowed(TypeofNarrowedExpression {
                     ty: s.next(),
                     predicate: NarrowingPredicate::Typeof(raw::TypeofTag::String),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    predicate: NarrowingPredicate::Assigned(s.next()),
                 }),
             )
         });

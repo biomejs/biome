@@ -112,8 +112,8 @@ pub trait RawTypeCollector {
         expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData>;
 
-    /// Returns whether references are narrowed by the guards around them
-    /// while collecting types. Off unless a collector opts in.
+    /// Returns whether references are narrowed by the guards and assignments
+    /// around them while collecting types. Off unless a collector opts in.
     fn narrowing_enabled(&self) -> bool {
         false
     }
@@ -177,6 +177,16 @@ pub trait RawTypeCollector {
             ty,
             GLOBAL_UNDEFINED_ID.into(),
         ]))))))
+    }
+
+    /// Returns a reference to the type this collector already inferred for
+    /// `expression`, if it has one.
+    ///
+    /// Unlike [`Self::reference_to_resolved_expression`], this never infers
+    /// the expression: inferred at another position, a name in it could
+    /// resolve to a different binding.
+    fn recorded_expression_type(&mut self, _expression: &AnyJsExpression) -> Option<TypeReference> {
+        None
     }
 
     /// Returns the cache behind the narrowing invalidation scans.
