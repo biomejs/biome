@@ -257,6 +257,7 @@ define_categories! {
     "lint/nursery/noUnsafeIframeSandbox": "https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUnsafeTypeAssertion": "https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+    "lint/nursery/noJsonUnsafeValues": "https://biomejs.dev/linter/rules/no-json-unsafe-values",
     "lint/nursery/noUntrustedLicenses": "https://biomejs.dev/linter/rules/no-untrusted-licenses",
     "lint/nursery/noUnusedClasses": "https://biomejs.dev/linter/rules/no-unused-classes",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
