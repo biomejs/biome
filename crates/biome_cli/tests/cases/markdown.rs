@@ -110,6 +110,123 @@ fn check_markdown_files_with_nursery_rules() {
 }
 
 #[test]
+fn check_markdown_linter_override_disables_matching_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "markdown": {
+        "linter": {
+            "enabled": true
+        }
+    },
+    "linter": {
+        "rules": {
+            "nursery": {
+                "useTopLevelHeading": "error"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["special/**"],
+            "markdown": {
+                "linter": {
+                    "enabled": false
+                }
+            }
+        }
+    ]
+}"#
+        .as_bytes(),
+    );
+    fs.insert(
+        Utf8Path::new("file.md").into(),
+        b"## Second level heading\n",
+    );
+    fs.insert(
+        Utf8Path::new("special/file.md").into(),
+        b"## Second level heading\n",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "file.md", "special/file.md"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_markdown_linter_override_disables_matching_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_markdown_linter_override_enables_with_global_disabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "enabled": false,
+        "rules": {
+            "nursery": {
+                "useTopLevelHeading": "error"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["special/**"],
+            "linter": {
+                "enabled": false
+            },
+            "markdown": {
+                "linter": {
+                    "enabled": true
+                }
+            }
+        }
+    ]
+}"#
+        .as_bytes(),
+    );
+    fs.insert(
+        Utf8Path::new("file.md").into(),
+        b"## Second level heading\n",
+    );
+    fs.insert(
+        Utf8Path::new("special/file.md").into(),
+        b"## Second level heading\n",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "file.md", "special/file.md"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_markdown_linter_override_enables_with_global_disabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_markdown_files_with_prose_wrap_override() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

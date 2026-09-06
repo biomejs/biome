@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./rules", "includes": ["**/*.ts"] },
+    "./rules/foo.grit"
+  ]
+}
+```
+
+## `rules/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "foo": "foo.grit", "alias": "foo.grit" }] } }
+```
+
+## `rules/foo.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  Local plugins
+  
+  - foo
+  
+  Rules with include globs
+  
+  - rules/foo.grit: alias (includes: [**/*.ts])
+  
+
+```

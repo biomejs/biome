@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/configs/recommended"] }
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `node_modules/@shared/config/recommended.json`
+
+```json
+{
+  "formatter": { "lineWidth": 100 },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+node_modules/@shared/config/recommended.json:2:31 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the value 100.
+  
+    1 │ {
+  > 2 │   "formatter": { "lineWidth": 100 },
+      │                               ^^^
+    3 │   "overrides": [
+    4 │     {
+  
+  i This value comes from node_modules/@shared/config/recommended.json, extended by biome.json.
+  
+
+```

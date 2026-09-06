@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["@shared/config/configs/first", "@shared/config/configs/second"],
+  "formatter": { "lineWidth": 120 }
+}
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{
+  "version": 1,
+  "configs": [{ "second": "./second.json" }, { "first": "./first.json" }]
+}
+```
+
+## `node_modules/@shared/config/first.json`
+
+```json
+{ "formatter": { "lineWidth": 90, "indentWidth": 2, "indentStyle": "space" } }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `node_modules/@shared/config/second.json`
+
+```json
+{ "formatter": { "lineWidth": 100, "indentWidth": 4 } }
+```
+
+# Emitted Messages
+
+```block
+biome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Resolved configuration from biome.json.
+  
+  Configuration files used (merge order):
+    - node_modules/@shared/config/first.json
+    - node_modules/@shared/config/second.json
+    - biome.json
+  
+  {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 4,
+      "lineWidth": 120
+    }
+  }
+  
+
+```

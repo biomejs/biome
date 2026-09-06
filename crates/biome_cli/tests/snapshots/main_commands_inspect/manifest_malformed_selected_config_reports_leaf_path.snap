@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/configs/recommended"] }
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `node_modules/@shared/config/recommended.json`
+
+```json
+{ "formatter": { "lineWidth": "wide" } }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+node_modules/@shared/config/recommended.json:1:31 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × lineWidth has an incorrect type, expected a number, but received a string.
+  
+  > 1 │ { "formatter": { "lineWidth": "wide" } }
+      │                               ^^^^^^
+  
+
+```

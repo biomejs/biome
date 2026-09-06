@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["./rules", "./config-only"] }
+```
+
+## `config-only/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "config.json" }] }
+```
+
+## `rules/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "second": "second.grit", "first": "first.grit" }] } }
+```
+
+## `rules/first.grit`
+
+```grit
+`unterminated
+```
+
+## `rules/second.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  Target path: src/file.js
+  
+  Local plugins
+  
+  - first
+  - second
+  
+
+```

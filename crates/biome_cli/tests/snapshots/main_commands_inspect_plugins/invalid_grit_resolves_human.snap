@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["./rules/../rules/invalid.grit"] }
+```
+
+## `file.js`
+
+```js
+  debugger
+```
+
+## `rules/invalid.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Local plugins
+  
+  - invalid
+  
+
+```

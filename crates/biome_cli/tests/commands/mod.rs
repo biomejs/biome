@@ -4,6 +4,7 @@ mod explain;
 mod format;
 mod init;
 mod inspect;
+mod inspect_plugins;
 mod lint;
 mod migrate;
 mod migrate_eslint;

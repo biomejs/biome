@@ -83,7 +83,7 @@ impl ConfigurationKey {
         };
         if !matches!(
             language.as_str(),
-            "javascript" | "json" | "css" | "graphql" | "grit" | "html"
+            "javascript" | "json" | "css" | "graphql" | "grit" | "html" | "markdown"
         ) || !matches!(
             (section.as_str(), property.as_str()),
             ("formatter", _) | ("linter" | "assist", "enabled")
@@ -235,13 +235,50 @@ mod tests {
 
     #[test]
     fn maps_language_fallbacks_to_the_global_override_key() {
-        let key = ConfigurationKey::parse("javascript.formatter.lineWidth".to_string())
-            .expect("valid configuration key");
-        let value = serde_json::json!({ "formatter": { "lineWidth": 100 } });
+        let value = serde_json::json!({
+            "formatter": { "lineWidth": 100 },
+            "linter": { "enabled": false }
+        });
 
-        assert_eq!(
-            key.source_in_override(&value).map(|source| source.text),
-            Some("formatter.lineWidth".to_string())
-        );
+        for (key, source) in [
+            ("javascript.formatter.lineWidth", "formatter.lineWidth"),
+            ("markdown.formatter.lineWidth", "formatter.lineWidth"),
+            ("markdown.linter.enabled", "linter.enabled"),
+        ] {
+            let key = ConfigurationKey::parse(key.to_string()).expect("valid configuration key");
+            assert_eq!(
+                key.source_in_override(&value).map(|source| source.text),
+                Some(source.to_string())
+            );
+        }
+    }
+
+    #[test]
+    fn language_linter_declarations_keep_their_own_source() {
+        for linter in [
+            Value::Null,
+            serde_json::json!({}),
+            serde_json::json!({ "rules": { "recommended": false } }),
+            serde_json::json!({ "enabled": null }),
+        ] {
+            let value = serde_json::json!({
+                "linter": linter,
+                "markdown": { "linter": { "enabled": true } },
+                "javascript": { "linter": { "enabled": true } }
+            });
+            for key in [
+                "markdown.linter",
+                "markdown.linter.enabled",
+                "javascript.linter",
+                "javascript.linter.enabled",
+            ] {
+                let key =
+                    ConfigurationKey::parse(key.to_string()).expect("valid configuration key");
+                assert_eq!(
+                    key.source_in_override(&value).map(|source| source.text),
+                    Some(key.as_str().to_string())
+                );
+            }
+        }
     }
 }

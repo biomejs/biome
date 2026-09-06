@@ -1,0 +1,59 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/configs/recommended"] }
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "./recommended.json" }] }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `node_modules/@shared/config/recommended.json`
+
+```json
+{
+  "formatter": { "lineWidth": 100 },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+node_modules/@shared/config/recommended.json:6:35 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the value 120.
+  
+    4 │     {
+    5 │       "includes": ["**/*.test.js"],
+  > 6 │       "formatter": { "lineWidth": 120 }
+      │                                   ^^^
+    7 │     }
+    8 │   ]
+  
+  i This value is provided by override 0 in the extended configuration.
+  
+  i The override matched file.test.js using **/*.test.js.
+  
+
+```

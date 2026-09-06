@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/configs/recommended"] }
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "./recommended.jsonc" }] }
+```
+
+## `node_modules/@shared/config/node_modules/plugin/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "selected": "selected.grit", "unused": "missing.grit" }] } }
+```
+
+## `node_modules/@shared/config/node_modules/plugin/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"plugin"}
+```
+
+## `node_modules/@shared/config/node_modules/plugin/selected.grit`
+
+```grit
+`unterminated
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@shared/config"}
+```
+
+## `node_modules/@shared/config/recommended.jsonc`
+
+```jsonc
+{
+            "plugins": [
+                { "path": "plugin/selected", "resolutionKind": "config" },
+                "plugin/selected"
+            ]
+        }
+```
+
+## `node_modules/plugin/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "selected": "selected.grit", "unused": "missing.grit" }] } }
+```
+
+## `node_modules/plugin/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"plugin"}
+```
+
+## `node_modules/plugin/selected.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  plugin (node_modules/@shared/config/node_modules/plugin/biome-manifest.json)
+  
+  - selected (direct import)
+  
+  plugin (node_modules/plugin/biome-manifest.json)
+  
+  - selected (direct import)
+  
+
+```

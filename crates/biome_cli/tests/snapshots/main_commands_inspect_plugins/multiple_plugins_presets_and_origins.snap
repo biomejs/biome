@@ -1,0 +1,565 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["shared/base.json", "@acme/biome-config/configs/recommended"],
+  "plugins": [
+    "@acme/javascript/presets/strict",
+    "@acme/javascript/noDebugger",
+    "@acme/javascript/noRestrictedGlobals",
+    {
+      "path": "@acme/javascript/noConsole",
+      "includes": ["src/**/*.ts", "!**/*.test.ts"]
+    }
+  ],
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts"],
+      "plugins": [
+        "@acme/testing/presets/strict",
+        "@acme/testing/noFakeTimers",
+        {
+          "path": "@acme/testing/expectExpect",
+          "includes": ["src/**/*.test.ts"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## `node_modules/@acme/biome-config/biome-manifest.json`
+
+```json
+{ "version": 1, "configs": [{ "recommended": "./recommended.jsonc" }] }
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/biome-manifest.json`
+
+```json
+{"plugins":{"presets":{"recommended":["noSecrets","noUnsafeInnerHtml","noDocumentWrite","noDynamicRequire","noInsecureRandom","noSqlInterpolation","noShellInterpolation","noPathTraversal","noWeakCrypto","useHttps"],"strict":["noSecrets","noUnsafeInnerHtml","noDocumentWrite","noDynamicRequire","noInsecureRandom","noSqlInterpolation","noShellInterpolation","noPathTraversal","noWeakCrypto","useHttps","useTrustedTypes"]},"rules":[{"noDocumentWrite":"rules/noDocumentWrite.grit","noDynamicRequire":"rules/noDynamicRequire.grit","noInsecureRandom":"rules/noInsecureRandom.grit","noPathTraversal":"rules/noPathTraversal.grit","noSecrets":"rules/noSecrets.grit","noShellInterpolation":"rules/noShellInterpolation.grit","noSqlInterpolation":"rules/noSqlInterpolation.grit","noUnsafeInnerHtml":"rules/noUnsafeInnerHtml.grit","noWeakCrypto":"rules/noWeakCrypto.grit","useHttps":"rules/useHttps.grit","useSecureCookies":"rules/useSecureCookies.grit","useTrustedTypes":"rules/useTrustedTypes.grit"}]},"version":1}
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/security"}
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noDocumentWrite.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noDynamicRequire.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noInsecureRandom.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noPathTraversal.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noSecrets.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noShellInterpolation.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noSqlInterpolation.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noUnsafeInnerHtml.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/noWeakCrypto.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/useHttps.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/useSecureCookies.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/node_modules/@acme/security/rules/useTrustedTypes.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/biome-config/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/biome-config"}
+```
+
+## `node_modules/@acme/biome-config/recommended.jsonc`
+
+```jsonc
+{
+            "plugins": [
+                { "path": "@acme/security/presets/recommended", "resolutionKind": "config" },
+                {
+                    "path": "@acme/security/presets/strict",
+                    "resolutionKind": "config",
+                    "includes": ["src/**/*.ts", "!**/*.test.ts"]
+                },
+                { "path": "@acme/security/noSecrets", "resolutionKind": "config" },
+                { "path": "@acme/security/useSecureCookies", "resolutionKind": "config" },
+            ],
+            "overrides": [{
+                "includes": ["e2e/**/*.ts"],
+                "plugins": ["@acme/testing/presets/strict"]
+            }],
+        }
+```
+
+## `node_modules/@acme/javascript/biome-manifest.json`
+
+```json
+{
+            "version": 1,
+            "plugins": {
+                "rules": [
+                    "@acme/standards/presets/all",
+                    { "noRestrictedGlobals": "rules/noRestrictedGlobals.grit" }
+                ],
+                "presets": {
+                    "recommended": [
+                        "@acme/standards/noDebugger", "@acme/standards/noAlert",
+                        "@acme/standards/noEval", "@acme/standards/noVar",
+                        "@acme/standards/useConst", "@acme/standards/useStrictEquality",
+                        "@acme/standards/useObjectShorthand", "@acme/standards/useTemplate"
+                    ],
+                    "strict": [
+                        "@acme/standards/noDebugger", "@acme/standards/noAlert",
+                        "@acme/standards/noEval", "@acme/standards/noVar",
+                        "@acme/standards/useConst", "@acme/standards/useStrictEquality",
+                        "@acme/standards/useObjectShorthand", "@acme/standards/useTemplate",
+                        "@acme/standards/noConsole", "@acme/standards/noImplicitCoercion",
+                        "@acme/standards/noNestedTernary"
+                    ]
+                }
+            }
+        }
+```
+
+## `node_modules/@acme/javascript/node_modules/@acme/standards/biome-manifest.json`
+
+```json
+{"plugins":{"presets":{"all":["@acme/platform/noDebugger","@acme/platform/noAlert","@acme/platform/noEval","@acme/platform/noVar","@acme/platform/useConst","@acme/platform/useStrictEquality","@acme/platform/useObjectShorthand","@acme/platform/useTemplate","@acme/platform/noConsole","@acme/platform/noImplicitCoercion","@acme/platform/noNestedTernary"]},"rules":["@acme/platform/presets/all"]},"version":1}
+```
+
+## `node_modules/@acme/javascript/node_modules/@acme/standards/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/standards"}
+```
+
+## `node_modules/@acme/javascript/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/javascript"}
+```
+
+## `node_modules/@acme/javascript/rules/noRestrictedGlobals.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/biome-manifest.json`
+
+```json
+{"plugins":{"presets":{"all":["@acme/language-rules/noDebugger","@acme/language-rules/noAlert","@acme/language-rules/noEval","@acme/language-rules/noVar","@acme/language-rules/useConst","@acme/language-rules/useStrictEquality","@acme/language-rules/useObjectShorthand","@acme/language-rules/useTemplate","@acme/language-rules/noConsole","@acme/language-rules/noImplicitCoercion","@acme/language-rules/noNestedTernary"]},"rules":["@acme/language-rules/presets/all"]},"version":1}
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/biome-manifest.json`
+
+```json
+{"plugins":{"presets":{"all":["noDebugger","noAlert","noEval","noVar","useConst","useStrictEquality","useObjectShorthand","useTemplate","noConsole","noImplicitCoercion","noNestedTernary"]},"rules":[{"noAlert":"rules/noAlert.grit","noConsole":"rules/noConsole.grit","noDebugger":"rules/noDebugger.grit","noEval":"rules/noEval.grit","noImplicitCoercion":"rules/noImplicitCoercion.grit","noNestedTernary":"rules/noNestedTernary.grit","noVar":"rules/noVar.grit","useConst":"rules/useConst.grit","useObjectShorthand":"rules/useObjectShorthand.grit","useStrictEquality":"rules/useStrictEquality.grit","useTemplate":"rules/useTemplate.grit"}]},"version":1}
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/language-rules"}
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noAlert.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noConsole.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noDebugger.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noEval.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noImplicitCoercion.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noNestedTernary.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/noVar.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/useConst.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/useObjectShorthand.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/useStrictEquality.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/node_modules/@acme/language-rules/rules/useTemplate.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/platform/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/platform"}
+```
+
+## `node_modules/@acme/testing/biome-manifest.json`
+
+```json
+{"plugins":{"presets":{"recommended":["noFocusedTests","noDisabledTests","noDuplicateHooks","noIdenticalTitle","noConditionalExpect","noStandaloneExpect","expectExpect","validDescribeCallback"],"strict":["noFocusedTests","noDisabledTests","noDuplicateHooks","noIdenticalTitle","noConditionalExpect","noStandaloneExpect","expectExpect","validDescribeCallback","useToStrictEqual","useToHaveLength","useAwaitAsyncMatchers"]},"rules":[{"expectExpect":"rules/expectExpect.grit","noConditionalExpect":"rules/noConditionalExpect.grit","noDisabledTests":"rules/noDisabledTests.grit","noDuplicateHooks":"rules/noDuplicateHooks.grit","noFakeTimers":"rules/noFakeTimers.grit","noFocusedTests":"rules/noFocusedTests.grit","noIdenticalTitle":"rules/noIdenticalTitle.grit","noStandaloneExpect":"rules/noStandaloneExpect.grit","useAwaitAsyncMatchers":"rules/useAwaitAsyncMatchers.grit","useToHaveLength":"rules/useToHaveLength.grit","useToStrictEqual":"rules/useToStrictEqual.grit","validDescribeCallback":"rules/validDescribeCallback.grit"}]},"version":1}
+```
+
+## `node_modules/@acme/testing/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"@acme/testing"}
+```
+
+## `node_modules/@acme/testing/rules/expectExpect.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noConditionalExpect.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noDisabledTests.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noDuplicateHooks.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noFakeTimers.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noFocusedTests.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noIdenticalTitle.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/noStandaloneExpect.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/useAwaitAsyncMatchers.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/useToHaveLength.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/useToStrictEqual.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/@acme/testing/rules/validDescribeCallback.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/base.json`
+
+```json
+{
+            "plugins": [
+                "@acme/javascript/presets/recommended",
+                { "path": "@acme/accessibility/presets/recommended", "resolutionKind": "config" },
+                {
+                    "path": "@acme/accessibility/presets/strict",
+                    "resolutionKind": "config",
+                    "includes": ["src/**/*.tsx"]
+                },
+                { "path": "@acme/accessibility/noAutofocus", "resolutionKind": "config" },
+                { "path": "@acme/accessibility/useValidLang", "resolutionKind": "config" }
+            ],
+            "overrides": [{
+                "includes": ["**/*.test.ts", "**/*.spec.ts"],
+                "plugins": ["@acme/testing/presets/recommended"]
+            }]
+        }
+```
+
+## `shared/node_modules/@acme/accessibility/dist/biome-manifest.jsonc`
+
+```jsonc
+{
+"version": 1,
+"plugins": {"presets":{"recommended":["noAutofocus","noPositiveTabindex","noRedundantRoles","useAltText","useAnchorContent","useAriaPropsForRole","useButtonType","useHeadingContent","useHtmlLang","useKeyWithClickEvents"],"strict":["noAutofocus","noPositiveTabindex","noRedundantRoles","useAltText","useAnchorContent","useAriaPropsForRole","useButtonType","useHeadingContent","useHtmlLang","useKeyWithClickEvents","useMediaCaption"]},"rules":[{"noAutofocus":"rules/noAutofocus.grit","noPositiveTabindex":"rules/noPositiveTabindex.grit","noRedundantRoles":"rules/noRedundantRoles.grit","useAltText":"rules/useAltText.grit","useAnchorContent":"rules/useAnchorContent.grit","useAriaPropsForRole":"rules/useAriaPropsForRole.grit","useButtonType":"rules/useButtonType.grit","useHeadingContent":"rules/useHeadingContent.grit","useHtmlLang":"rules/useHtmlLang.grit","useKeyWithClickEvents":"rules/useKeyWithClickEvents.grit","useMediaCaption":"rules/useMediaCaption.grit","useValidLang":"rules/useValidLang.grit"}]},
+}
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/noAutofocus.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/noPositiveTabindex.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/noRedundantRoles.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useAltText.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useAnchorContent.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useAriaPropsForRole.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useButtonType.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useHeadingContent.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useHtmlLang.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useKeyWithClickEvents.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useMediaCaption.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/dist/rules/useValidLang.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `shared/node_modules/@acme/accessibility/package.json`
+
+```json
+{
+            "name": "@acme/accessibility",
+            "exports": {
+                ".": {
+                    "biome": "./dist/biome-manifest.jsonc",
+                    "default": "./index.js"
+                }
+            }
+        }
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 48 rules resolved.
+  
+  @acme/accessibility
+  
+  - noAutofocus (direct import, presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - noPositiveTabindex (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - noRedundantRoles (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useAltText (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useAnchorContent (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useAriaPropsForRole (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useButtonType (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useHeadingContent (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useHtmlLang (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useKeyWithClickEvents (presets/recommended, presets/strict [includes: [src/**/*.tsx]])
+  - useValidLang (direct import)
+  
+  @acme/javascript
+  
+  - noAlert (presets/recommended, presets/strict)
+  - noConsole (direct import [includes: [src/**/*.ts, !**/*.test.ts]], presets/strict)
+  - noDebugger (direct import, presets/recommended, presets/strict)
+  - noEval (presets/recommended, presets/strict)
+  - noImplicitCoercion (presets/strict)
+  - noNestedTernary (presets/strict)
+  - noRestrictedGlobals (direct import)
+  - noVar (presets/recommended, presets/strict)
+  - useConst (presets/recommended, presets/strict)
+  - useObjectShorthand (presets/recommended, presets/strict)
+  - useStrictEquality (presets/recommended, presets/strict)
+  - useTemplate (presets/recommended, presets/strict)
+  
+  @acme/security
+  
+  - noDocumentWrite (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noDynamicRequire (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noInsecureRandom (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noPathTraversal (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noSecrets (direct import, presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noShellInterpolation (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noSqlInterpolation (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noUnsafeInnerHtml (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - noWeakCrypto (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - useHttps (presets/recommended, presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - useSecureCookies (direct import)
+  
+  Rules with include globs
+  
+  - @acme/accessibility/useMediaCaption (presets/strict [includes: [src/**/*.tsx]])
+  - @acme/security/useTrustedTypes (presets/strict [includes: [src/**/*.ts, !**/*.test.ts]])
+  - @acme/testing/expectExpect (direct import [includes: [src/**/*.test.ts] and override includes: [**/*.test.ts]], presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/noConditionalExpect (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/noDisabledTests (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/noDuplicateHooks (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/noFakeTimers (direct import [override includes: [**/*.test.ts]])
+  - @acme/testing/noFocusedTests (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/noIdenticalTitle (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/noStandaloneExpect (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/useAwaitAsyncMatchers (presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/useToHaveLength (presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/useToStrictEqual (presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  - @acme/testing/validDescribeCallback (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [(override includes: [e2e/**/*.ts]) or (override includes: [**/*.test.ts])])
+  
+
+```

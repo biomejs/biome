@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": [{ "path": "missing-package/rule", "resolutionKind": "config" }] }
+```
+
+# Termination Message
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Error(s) during loading of plugins:
+    Failed to resolve plugin package missing-package from 
+  
+
+
+```
