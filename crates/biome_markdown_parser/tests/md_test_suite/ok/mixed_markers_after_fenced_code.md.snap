@@ -50,10 +50,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@8..10 "  " [] [],
                                 },
                             ],
                         },
@@ -77,10 +74,7 @@ MdRoot {
                             ],
                             r_fence_indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@21..22 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@22..23 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@21..23 "  " [] [],
                                 },
                             ],
                             r_fence: TRIPLE_BACKTICK@23..26 "```" [] [],
@@ -150,10 +144,8 @@ MdRoot {
               0: NEWLINE@7..8 "\n" [] []
             2: MD_CONTINUATION_INDENT@8..10
               0: MD_INDENT_TOKEN_LIST@8..10
-                0: MD_INDENT_TOKEN@8..9
-                  0: MD_INDENT_CHAR@8..9 " " [] []
-                1: MD_INDENT_TOKEN@9..10
-                  0: MD_INDENT_CHAR@9..10 " " [] []
+                0: MD_INDENT_TOKEN@8..10
+                  0: MD_INDENT_CHAR@8..10 "  " [] []
             3: MD_FENCED_CODE_BLOCK@10..26
               0: MD_INDENT_TOKEN_LIST@10..10
               1: TRIPLE_BACKTICK@10..13 "```" [] []
@@ -168,10 +160,8 @@ MdRoot {
                 3: MD_TEXTUAL@20..21
                   0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
               4: MD_INDENT_TOKEN_LIST@21..23
-                0: MD_INDENT_TOKEN@21..22
-                  0: MD_INDENT_CHAR@21..22 " " [] []
-                1: MD_INDENT_TOKEN@22..23
-                  0: MD_INDENT_CHAR@22..23 " " [] []
+                0: MD_INDENT_TOKEN@21..23
+                  0: MD_INDENT_CHAR@21..23 "  " [] []
               5: TRIPLE_BACKTICK@23..26 "```" [] []
     1: MD_NEWLINE@26..27
       0: NEWLINE@26..27 "\n" [] []

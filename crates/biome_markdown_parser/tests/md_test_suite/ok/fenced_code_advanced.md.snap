@@ -188,13 +188,7 @@ MdRoot {
             ],
             r_fence_indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@209..210 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@210..211 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@211..212 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@209..212 "   " [] [],
                 },
             ],
             r_fence: TRIPLE_BACKTICK@212..215 "```" [] [],
@@ -246,10 +240,7 @@ MdRoot {
         MdFencedCodeBlock {
             indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@336..337 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@337..338 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@336..338 "  " [] [],
                 },
             ],
             l_fence: TRIPLE_BACKTICK@338..341 "```" [] [],
@@ -261,10 +252,7 @@ MdRoot {
             ],
             r_fence_indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@354..355 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@355..356 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@354..356 "  " [] [],
                 },
             ],
             r_fence: TRIPLE_BACKTICK@356..359 "```" [] [],
@@ -374,12 +362,8 @@ MdRoot {
         0: MD_CODE_CONTENT@203..209
           0: MD_CODE_LITERAL@203..209 "\ncode\n" [] []
       4: MD_INDENT_TOKEN_LIST@209..212
-        0: MD_INDENT_TOKEN@209..210
-          0: MD_INDENT_CHAR@209..210 " " [] []
-        1: MD_INDENT_TOKEN@210..211
-          0: MD_INDENT_CHAR@210..211 " " [] []
-        2: MD_INDENT_TOKEN@211..212
-          0: MD_INDENT_CHAR@211..212 " " [] []
+        0: MD_INDENT_TOKEN@209..212
+          0: MD_INDENT_CHAR@209..212 "   " [] []
       5: TRIPLE_BACKTICK@212..215 "```" [] []
     18: MD_NEWLINE@215..216
       0: NEWLINE@215..216 "\n" [] []
@@ -412,20 +396,16 @@ MdRoot {
           0: MD_TEXTUAL_LITERAL@335..336 "\n" [] []
     25: MD_FENCED_CODE_BLOCK@336..359
       0: MD_INDENT_TOKEN_LIST@336..338
-        0: MD_INDENT_TOKEN@336..337
-          0: MD_INDENT_CHAR@336..337 " " [] []
-        1: MD_INDENT_TOKEN@337..338
-          0: MD_INDENT_CHAR@337..338 " " [] []
+        0: MD_INDENT_TOKEN@336..338
+          0: MD_INDENT_CHAR@336..338 "  " [] []
       1: TRIPLE_BACKTICK@338..341 "```" [] []
       2: MD_CODE_NAME_LIST@341..341
       3: MD_INLINE_ITEM_LIST@341..354
         0: MD_CODE_CONTENT@341..354
           0: MD_CODE_LITERAL@341..354 "\n  code line\n" [] []
       4: MD_INDENT_TOKEN_LIST@354..356
-        0: MD_INDENT_TOKEN@354..355
-          0: MD_INDENT_CHAR@354..355 " " [] []
-        1: MD_INDENT_TOKEN@355..356
-          0: MD_INDENT_CHAR@355..356 " " [] []
+        0: MD_INDENT_TOKEN@354..356
+          0: MD_INDENT_CHAR@354..356 "  " [] []
       5: TRIPLE_BACKTICK@356..359 "```" [] []
     26: MD_NEWLINE@359..360
       0: NEWLINE@359..360 "\n" [] []

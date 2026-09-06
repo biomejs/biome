@@ -164,10 +164,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@115..116 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@116..117 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@115..117 "  " [] [],
                                 },
                             ],
                         },
@@ -197,10 +194,7 @@ MdRoot {
                                     prefix: MdListMarkerPrefix {
                                         pre_marker_indent: MdIndentTokenList [
                                             MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@130..131 " " [] [],
-                                            },
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@131..132 " " [] [],
+                                                md_indent_char_token: MD_INDENT_CHAR@130..132 "  " [] [],
                                             },
                                         ],
                                         marker: MINUS@132..133 "-" [] [],
@@ -347,10 +341,8 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@114..115 "\n" [] []
             1: MD_CONTINUATION_INDENT@115..117
               0: MD_INDENT_TOKEN_LIST@115..117
-                0: MD_INDENT_TOKEN@115..116
-                  0: MD_INDENT_CHAR@115..116 " " [] []
-                1: MD_INDENT_TOKEN@116..117
-                  0: MD_INDENT_CHAR@116..117 " " [] []
+                0: MD_INDENT_TOKEN@115..117
+                  0: MD_INDENT_CHAR@115..117 "  " [] []
             2: MD_BULLET_LIST_ITEM@117..148
               0: MD_BULLET_LIST@117..148
                 0: MD_BULLET@117..130
@@ -369,10 +361,8 @@ MdRoot {
                 1: MD_BULLET@130..148
                   0: MD_LIST_MARKER_PREFIX@130..134
                     0: MD_INDENT_TOKEN_LIST@130..132
-                      0: MD_INDENT_TOKEN@130..131
-                        0: MD_INDENT_CHAR@130..131 " " [] []
-                      1: MD_INDENT_TOKEN@131..132
-                        0: MD_INDENT_CHAR@131..132 " " [] []
+                      0: MD_INDENT_TOKEN@130..132
+                        0: MD_INDENT_CHAR@130..132 "  " [] []
                     1: MINUS@132..133 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@133..134 " " [] []
                     3: MD_INDENT_TOKEN_LIST@134..134

@@ -284,10 +284,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@74..75 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@75..76 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@74..76 "  " [] [],
                                 },
                             ],
                         },
@@ -565,10 +562,8 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@73..74 "\n" [] []
             1: MD_CONTINUATION_INDENT@74..76
               0: MD_INDENT_TOKEN_LIST@74..76
-                0: MD_INDENT_TOKEN@74..75
-                  0: MD_INDENT_CHAR@74..75 " " [] []
-                1: MD_INDENT_TOKEN@75..76
-                  0: MD_INDENT_CHAR@75..76 " " [] []
+                0: MD_INDENT_TOKEN@74..76
+                  0: MD_INDENT_CHAR@74..76 "  " [] []
             2: GFM_TABLE@76..102
               0: GFM_TABLE_ROW@76..82
                 0: MD_QUOTE_PREFIX_LIST@76..76

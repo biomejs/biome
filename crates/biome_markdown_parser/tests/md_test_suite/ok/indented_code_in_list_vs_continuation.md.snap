@@ -65,10 +65,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@26..27 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@27..28 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@26..28 "  " [] [],
                                 },
                             ],
                         },
@@ -161,10 +158,8 @@ MdRoot {
               0: NEWLINE@25..26 "\n" [] []
             4: MD_CONTINUATION_INDENT@26..28
               0: MD_INDENT_TOKEN_LIST@26..28
-                0: MD_INDENT_TOKEN@26..27
-                  0: MD_INDENT_CHAR@26..27 " " [] []
-                1: MD_INDENT_TOKEN@27..28
-                  0: MD_INDENT_CHAR@27..28 " " [] []
+                0: MD_INDENT_TOKEN@26..28
+                  0: MD_INDENT_CHAR@26..28 "  " [] []
             5: MD_PARAGRAPH@28..41
               0: MD_INLINE_ITEM_LIST@28..41
                 0: MD_TEXTUAL@28..40

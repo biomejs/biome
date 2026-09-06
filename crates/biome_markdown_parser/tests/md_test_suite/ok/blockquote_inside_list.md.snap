@@ -49,10 +49,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@7..9 "  " [] [],
                                 },
                             ],
                         },
@@ -116,10 +113,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@37..38 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@38..39 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@37..39 "  " [] [],
                                 },
                             ],
                         },
@@ -172,13 +166,7 @@ MdRoot {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@66..67 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@67..68 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@68..69 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@66..69 "   " [] [],
                                 },
                             ],
                         },
@@ -234,10 +222,8 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
             1: MD_CONTINUATION_INDENT@7..9
               0: MD_INDENT_TOKEN_LIST@7..9
-                0: MD_INDENT_TOKEN@7..8
-                  0: MD_INDENT_CHAR@7..8 " " [] []
-                1: MD_INDENT_TOKEN@8..9
-                  0: MD_INDENT_CHAR@8..9 " " [] []
+                0: MD_INDENT_TOKEN@7..9
+                  0: MD_INDENT_CHAR@7..9 "  " [] []
             2: MD_QUOTE@9..27
               0: MD_QUOTE_PREFIX@9..11
                 0: MD_QUOTE_INDENT_LIST@9..9
@@ -277,10 +263,8 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@36..37 "\n" [] []
             1: MD_CONTINUATION_INDENT@37..39
               0: MD_INDENT_TOKEN_LIST@37..39
-                0: MD_INDENT_TOKEN@37..38
-                  0: MD_INDENT_CHAR@37..38 " " [] []
-                1: MD_INDENT_TOKEN@38..39
-                  0: MD_INDENT_CHAR@38..39 " " [] []
+                0: MD_INDENT_TOKEN@37..39
+                  0: MD_INDENT_CHAR@37..39 "  " [] []
             2: MD_QUOTE@39..54
               0: MD_QUOTE_PREFIX@39..41
                 0: MD_QUOTE_INDENT_LIST@39..39
@@ -312,12 +296,8 @@ MdRoot {
                   0: MD_TEXTUAL_LITERAL@65..66 "\n" [] []
             1: MD_CONTINUATION_INDENT@66..69
               0: MD_INDENT_TOKEN_LIST@66..69
-                0: MD_INDENT_TOKEN@66..67
-                  0: MD_INDENT_CHAR@66..67 " " [] []
-                1: MD_INDENT_TOKEN@67..68
-                  0: MD_INDENT_CHAR@67..68 " " [] []
-                2: MD_INDENT_TOKEN@68..69
-                  0: MD_INDENT_CHAR@68..69 " " [] []
+                0: MD_INDENT_TOKEN@66..69
+                  0: MD_INDENT_CHAR@66..69 "   " [] []
             2: MD_QUOTE@69..84
               0: MD_QUOTE_PREFIX@69..71
                 0: MD_QUOTE_INDENT_LIST@69..69

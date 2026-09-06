@@ -494,19 +494,33 @@ impl ParseNodeList for IndentTokenList {
     const LIST_KIND: Self::Kind = MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        let Some(width) = self.current_indent_width(p) else {
+        if self.is_at_list_end(p) {
             return ParsedSyntax::Absent;
-        };
+        }
 
-        // A textual token can include the marker or content after indentation.
+        let mut byte_count = 0;
+        for byte in p.source_after_current().bytes().take(self.remaining_bytes) {
+            let width = match byte {
+                b' ' => 1,
+                b'\t' => TAB_STOP_SPACES,
+                _ => break,
+            };
+            if width > self.remaining_columns {
+                break;
+            }
+            self.remaining_columns -= width;
+            byte_count += 1;
+        }
+
+        // Keep indentation in one token regardless of whether the lexer splits
+        // the spaces and tabs or includes following content in a textual token.
         p.re_lex_span(
-            p.cur_range().start() + TextSize::from(1),
+            p.cur_range().start() + TextSize::from(byte_count as u32),
             MarkdownSyntaxKind::MD_INDENT_CHAR,
         );
         let m = p.start();
         p.bump(MarkdownSyntaxKind::MD_INDENT_CHAR);
-        self.remaining_columns -= width;
-        self.remaining_bytes -= 1;
+        self.remaining_bytes -= byte_count;
         ParsedSyntax::Present(m.complete(p, MarkdownSyntaxKind::MD_INDENT_TOKEN))
     }
 

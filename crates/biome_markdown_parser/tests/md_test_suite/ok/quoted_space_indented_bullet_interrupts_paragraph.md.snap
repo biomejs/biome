@@ -47,10 +47,7 @@ MdRoot {
                             prefix: MdListMarkerPrefix {
                                 pre_marker_indent: MdIndentTokenList [
                                     MdIndentToken {
-                                        md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
-                                    },
-                                    MdIndentToken {
-                                        md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                        md_indent_char_token: MD_INDENT_CHAR@6..8 "  " [] [],
                                     },
                                 ],
                                 marker: PLUS@8..9 "+" [] [],
@@ -107,10 +104,8 @@ MdRoot {
             0: MD_BULLET@6..12
               0: MD_LIST_MARKER_PREFIX@6..10
                 0: MD_INDENT_TOKEN_LIST@6..8
-                  0: MD_INDENT_TOKEN@6..7
-                    0: MD_INDENT_CHAR@6..7 " " [] []
-                  1: MD_INDENT_TOKEN@7..8
-                    0: MD_INDENT_CHAR@7..8 " " [] []
+                  0: MD_INDENT_TOKEN@6..8
+                    0: MD_INDENT_CHAR@6..8 "  " [] []
                 1: PLUS@8..9 "+" [] []
                 2: MD_LIST_POST_MARKER_SPACE@9..10 " " [] []
                 3: MD_INDENT_TOKEN_LIST@10..10
