@@ -1,0 +1,76 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Cls {}
+
+export function falsyInstance(p: Promise<void>) {
+	if (!p) {
+		p;
+	}
+}
+
+export function instanceofPrimitive(v: number | string) {
+	if (v instanceof Cls) {
+		v;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Cls "Cls" => class "Cls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding falsyInstance "falsyInstance" => sync Function "falsyInstance" {
+  accepts: {
+    params: [
+      required p: instanceof Promise<void>
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding p "p" => instanceof Promise<void>
+
+Expression "!p" => boolean
+
+Expression "p" => instanceof Promise<void>
+
+Expression "p" => never
+
+Binding instanceofPrimitive "instanceofPrimitive" => sync Function "instanceofPrimitive" {
+  accepts: {
+    params: [
+      required v: number | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding v "v" => number | string
+
+Expression "v" => number | string
+
+Expression "v instanceof Cls" => boolean
+
+Expression "Cls" => class "Cls" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "v" => never
+```

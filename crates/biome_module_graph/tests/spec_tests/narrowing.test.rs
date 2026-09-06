@@ -677,7 +677,356 @@ export function plainBoolean(n: unknown) {
     );
 }
 
-/// A guard says nothing about a name the guarded code rebinds or reassigns.
+#[test]
+fn test_infer_module_types_narrows_assigned_references() {
+    const SOURCE: &str = r#"
+export function assigned(x: number | (() => Promise<void>)) {
+    x = async () => {};
+    x;
+}
+
+export function nearestWins(y: string | number | undefined) {
+    y = "first";
+    y = 1;
+    y;
+}
+
+export function conditionalWrite(z: string | undefined, flag: boolean) {
+    z = "on";
+    if (flag) {
+        z = undefined;
+    }
+    z;
+}
+
+export function closureWrite(a: string | undefined) {
+    a = "on";
+    const reset = () => {
+        a = undefined;
+    };
+    reset();
+    a;
+}
+
+export function closureBeforeAssignment(f: string | undefined) {
+    const reset = () => {
+        f = undefined;
+    };
+    f = "on";
+    reset();
+    f;
+}
+
+export function insideClosure(b: string | undefined) {
+    b = "on";
+    return () => {
+        b;
+    };
+}
+
+export function compoundWrite(c: number | undefined) {
+    c = 1;
+    c += 1;
+    c;
+}
+
+export function nestedBlockWrite(q: string | undefined) {
+    q = "on";
+    {
+        q = undefined;
+    }
+    q;
+}
+
+export function loopTest(e: string | undefined) {
+    e = "on";
+    for (; e; ) {
+        e = undefined;
+    }
+}
+
+export function reassignedInGuard(m: number | string) {
+    if (typeof m === "string") {
+        m = 7;
+        m;
+    }
+}
+
+export function selfReference(n: number | undefined) {
+    n = 1;
+    n = n;
+    n;
+}
+
+export function unresolvedRhs(w: string | undefined) {
+    w = missing;
+    w;
+}
+
+export function destructured(p: string | undefined, arr: [string]) {
+    p = "on";
+    [p] = arr;
+    p;
+}
+
+export function scanPast(v: string | undefined, log: (value: string) => void) {
+    v = "on";
+    log(v);
+    v;
+}
+
+export function caseAssignment(t: string | undefined, choice: string) {
+    switch (choice) {
+        case "set":
+            t = "on";
+            t;
+            break;
+    }
+}
+
+export function updateWrite(j: number | undefined) {
+    j = 1;
+    j++;
+    j;
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    // After an assignment, the reference takes the assigned type.
+    let assigned_offset = SOURCE.find("x;").expect("assigned reference must exist");
+    let narrowed_to_assigned =
+        normalize_type(&db, module, expression_ty_at(inferred, assigned_offset));
+    assert!(narrowed_to_assigned.callable_function(&db).is_some());
+    assert!(!contains_inferred_number(&db, narrowed_to_assigned));
+
+    // The nearest preceding assignment wins.
+    let nearest_offset = SOURCE.find("y;").expect("nearest reference must exist");
+    let narrowed_to_nearest =
+        normalize_type(&db, module, expression_ty_at(inferred, nearest_offset));
+    assert!(is_inferred_number(&db, narrowed_to_nearest));
+
+    // A conditional write between the assignment and the reference cancels
+    // the narrowing.
+    let conditional_offset = SOURCE
+        .rfind("z;")
+        .expect("conditional reference must exist");
+    let unnarrowed_conditional =
+        normalize_type(&db, module, expression_ty_at(inferred, conditional_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_conditional));
+
+    // A closure between the assignment and the reference that writes the
+    // value cancels the narrowing.
+    let closure_offset = SOURCE.rfind("a;").expect("closure reference must exist");
+    let unnarrowed_closure =
+        normalize_type(&db, module, expression_ty_at(inferred, closure_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_closure));
+
+    // A call to a closure that writes the name is not a write in the
+    // statement list, so the assignment still narrows. TypeScript agrees.
+    let closure_first_offset = SOURCE
+        .rfind("f;")
+        .expect("closure-before-assignment reference must exist");
+    let narrowed_past_closure_call = normalize_type(
+        &db,
+        module,
+        expression_ty_at(inferred, closure_first_offset),
+    );
+    assert!(is_inferred_string(&db, narrowed_past_closure_call));
+
+    // A reference inside a closure is never narrowed by outer assignments.
+    let inside_closure_offset = SOURCE
+        .find("b;")
+        .expect("inside-closure reference must exist");
+    let unnarrowed_inside = normalize_type(
+        &db,
+        module,
+        expression_ty_at(inferred, inside_closure_offset),
+    );
+    assert!(contains_inferred_undefined(&db, unnarrowed_inside));
+
+    // A compound assignment is not a narrowing source, and cancels scanning
+    // past it.
+    let compound_offset = SOURCE.find("c;").expect("compound reference must exist");
+    let unnarrowed_compound =
+        normalize_type(&db, module, expression_ty_at(inferred, compound_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_compound));
+
+    // A write inside a nested block between the assignment and the
+    // reference cancels the narrowing.
+    let nested_offset = SOURCE.rfind("q;").expect("nested reference must exist");
+    let unnarrowed_nested = normalize_type(&db, module, expression_ty_at(inferred, nested_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_nested));
+
+    // A loop test that the loop body writes to is re-evaluated, so it must
+    // not be narrowed.
+    let loop_offset = SOURCE.find("e;").expect("loop reference must exist");
+    let unnarrowed_loop = normalize_type(&db, module, expression_ty_at(inferred, loop_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_loop));
+
+    // An assignment inside a guarded consequent cancels the guard but
+    // establishes its own narrowing.
+    let guard_offset = SOURCE.find("m;").expect("guard reference must exist");
+    let narrowed_in_guard = normalize_type(&db, module, expression_ty_at(inferred, guard_offset));
+    assert!(is_inferred_number(&db, narrowed_in_guard));
+
+    // A self-referencing assignment resolves without narrowing its own
+    // right-hand side.
+    let self_offset = SOURCE.rfind("n;").expect("self reference must exist");
+    let narrowed_self = normalize_type(&db, module, expression_ty_at(inferred, self_offset));
+    assert!(contains_inferred_undefined(&db, narrowed_self));
+    assert!(contains_inferred_number(&db, narrowed_self));
+
+    // An unresolvable assigned type falls back to the declared type.
+    let unresolved_offset = SOURCE.find("w;").expect("unresolved reference must exist");
+    let unnarrowed_unresolved =
+        normalize_type(&db, module, expression_ty_at(inferred, unresolved_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_unresolved));
+    assert!(contains_inferred_string(&db, unnarrowed_unresolved));
+
+    // A destructuring assignment is not a narrowing source, and cancels
+    // scanning past it.
+    let destructured_offset = SOURCE
+        .rfind("p;")
+        .expect("destructured reference must exist");
+    let unnarrowed_destructured =
+        normalize_type(&db, module, expression_ty_at(inferred, destructured_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_destructured));
+
+    // The scan walks past intervening statements that cannot write the
+    // value.
+    let scan_past_offset = SOURCE.find("v;").expect("scan-past reference must exist");
+    let narrowed_past_call =
+        normalize_type(&db, module, expression_ty_at(inferred, scan_past_offset));
+    assert!(is_inferred_string(&db, narrowed_past_call));
+
+    // A case clause is its own statement list, and an assignment inside it
+    // narrows references that follow in the same clause.
+    let case_offset = SOURCE.find("t;").expect("case reference must exist");
+    let narrowed_in_clause = normalize_type(&db, module, expression_ty_at(inferred, case_offset));
+    assert!(is_inferred_string(&db, narrowed_in_clause));
+
+    // An update expression writes the value, and cancels scanning past it.
+    let update_offset = SOURCE.find("j;").expect("update reference must exist");
+    let unnarrowed_update = normalize_type(&db, module, expression_ty_at(inferred, update_offset));
+    assert!(contains_inferred_undefined(&db, unnarrowed_update));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_assigned_references",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_treats_object_values_as_truthy() {
+    const SOURCE: &str = r#"
+class Service {
+    run(): void {}
+}
+
+interface Task {
+    id: string;
+}
+
+export function promiseInstance(x: Promise<void> | undefined) {
+    if (!x) {
+        x;
+    }
+    if (x) {
+        x;
+    }
+}
+
+export function classInstance(y: Service | null) {
+    if (!y) {
+        y;
+    }
+}
+
+export function interfaceValue(z: Task | undefined) {
+    if (!z) {
+        z;
+    }
+}
+
+export function genericValue<T>(k: T | undefined) {
+    if (!k) {
+        k;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    // A promise instance can never be falsy, so a negated guard narrows the
+    // union to `undefined`.
+    let falsy_promise_offset = SOURCE.find("x;").expect("falsy reference must exist");
+    let narrowed_to_undefined = normalize_type(
+        &db,
+        module,
+        expression_ty_at(inferred, falsy_promise_offset),
+    );
+    assert!(!contains_inferred_instance(&db, narrowed_to_undefined));
+    assert!(contains_inferred_undefined(&db, narrowed_to_undefined));
+
+    // The truthy branch keeps the promise instance.
+    let truthy_promise_offset = SOURCE.rfind("x;").expect("truthy reference must exist");
+    let narrowed_to_promise = normalize_type(
+        &db,
+        module,
+        expression_ty_at(inferred, truthy_promise_offset),
+    );
+    assert!(is_inferred_promise_instance(&db, narrowed_to_promise));
+
+    // A class instance can never be falsy either.
+    let class_offset = SOURCE.find("y;").expect("class reference must exist");
+    let narrowed_to_null = normalize_type(&db, module, expression_ty_at(inferred, class_offset));
+    assert!(!contains_inferred_instance(&db, narrowed_to_null));
+    assert!(contains_inferred_null(&db, narrowed_to_null));
+
+    // A value of an interface type is an object at runtime, following
+    // TypeScript's narrowing semantics.
+    let interface_offset = SOURCE.find("z;").expect("interface reference must exist");
+    let narrowed_interface =
+        normalize_type(&db, module, expression_ty_at(inferred, interface_offset));
+    assert!(contains_inferred_undefined(&db, narrowed_interface));
+    assert!(
+        inferred
+            .find_member_type(&db, narrowed_interface, "id")
+            .is_none()
+    );
+
+    // A generic value could be instantiated with a falsy type, so it must
+    // be kept.
+    let generic_offset = SOURCE.find("k;").expect("generic reference must exist");
+    let kept_generic = normalize_type(&db, module, expression_ty_at(inferred, generic_offset));
+    assert!(contains_inferred_instance(&db, kept_generic));
+    assert!(contains_inferred_undefined(&db, kept_generic));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_treats_object_values_as_truthy",
+        &db,
+        &fs,
+    );
+}
+
+/// A guard says nothing about a name the guarded code rebinds or reassigns;
+/// the reassigned rows in the snapshot show the assigned type instead.
 #[test]
 fn test_infer_module_types_declines_narrowing_when_invalidated() {
     const SOURCE: &str = r#"
@@ -1055,6 +1404,34 @@ export function example(s: Choice) {
     );
 }
 
+#[test]
+fn test_infer_module_types_keeps_number_under_falsy_guards() {
+    const SOURCE: &str = r#"
+export function example(n: number) {
+    if (!n) {
+        n;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let offset = SOURCE.find("n;").expect("guarded reference must exist");
+    let narrowed = normalize_type(&db, module, expression_ty_at(inferred, offset));
+
+    // `0` is not the only falsy number: `-0` and `NaN` are falsy too, so the
+    // guard cannot narrow `number` down to a single literal.
+    assert!(contains_inferred_number(&db, narrowed));
+    assert!(!contains_inferred_number_literal(&db, narrowed, "0"));
+}
+
 /// Guards of different kinds nest just like guards of the same kind: the
 /// value inside passed every test, so every enclosing guard narrows it.
 #[test]
@@ -1307,6 +1684,117 @@ export function truthyBoolean(b: boolean | null) {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_maps_types_to_their_only_literal",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_narrows_unreachable_branches_to_never() {
+    const SOURCE: &str = r#"
+class Cls {}
+
+export function falsyInstance(p: Promise<void>) {
+    if (!p) {
+        p;
+    }
+}
+
+export function instanceofPrimitive(v: number | string) {
+    if (v instanceof Cls) {
+        v;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    // No variant survives either guard, so the branch cannot run.
+    for needle in ["p;", "v;"] {
+        let offset = SOURCE.find(needle).expect("reference must exist");
+        let narrowed = normalize_type(&db, module, expression_ty_at(inferred, offset));
+        assert!(
+            matches!(narrowed, InferredTypeData::NeverKeyword),
+            "{needle} must be never, got {narrowed:?}"
+        );
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_unreachable_branches_to_never",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_widens_assigned_literals_like_typescript() {
+    const SOURCE: &str = r#"
+declare function pick(): string | number;
+
+export let top: string | undefined;
+top = "on";
+top;
+
+export function widens(y: string | number | undefined) {
+    y = 1;
+    y;
+}
+
+export function keepsLiteral(z: "a" | "b" | undefined) {
+    z = "a";
+    z;
+}
+
+export function guardedAfterAssignment(v: string | number | undefined) {
+    v = pick();
+    if (typeof v === "string") v;
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    // Module-level statements narrow like statements in a function body.
+    let top_offset = SOURCE.find("top;").expect("top-level reference must exist");
+    let start = TextSize::from(top_offset as u32);
+    let top_ty = inferred
+        .expressions
+        .get(&TextRange::new(start, start + TextSize::from(3)))
+        .copied()
+        .expect("top-level reference type must be inferred");
+    let narrowed_top = normalize_type(&db, module, top_ty);
+    assert!(is_inferred_string(&db, narrowed_top), "{narrowed_top:?}");
+
+    // `y: string | number | undefined` admits `number`, so `1` widens to it.
+    let widened_offset = SOURCE.find("y;").expect("widened reference must exist");
+    let widened = normalize_type(&db, module, expression_ty_at(inferred, widened_offset));
+    assert!(is_inferred_number(&db, widened), "{widened:?}");
+
+    // `z` admits no `string`, so the literal stays.
+    let literal_offset = SOURCE.find("z;").expect("literal reference must exist");
+    let literal = normalize_type(&db, module, expression_ty_at(inferred, literal_offset));
+    assert!(is_inferred_string_literal(&db, literal, "a"));
+
+    // The guard applies on top of the assigned type.
+    let guarded_offset = SOURCE.find("v;").expect("guarded reference must exist");
+    let guarded = normalize_type(&db, module, expression_ty_at(inferred, guarded_offset));
+    assert!(is_inferred_string(&db, guarded), "{guarded:?}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_widens_assigned_literals_like_typescript",
         &db,
         &fs,
     );

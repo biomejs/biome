@@ -405,6 +405,33 @@ fn infer_type_of_dynamic_import() {
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_dynamic_import");
 }
 
+// The default `recorded_expression_type` records nothing, and the right-hand
+// side must not be inferred a second time at the reference.
+#[test]
+fn declines_assignment_narrowing_without_recorded_expressions() {
+    const CODE: &str = r#"x = y;
+y = x;
+x = y;
+x;"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .filter_map(JsExpressionStatement::cast)
+        .last()
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+
+    assert!(
+        !matches!(ty, TypeData::TypeofExpression(_)),
+        "assignment narrowing must be declined, got {ty:?}"
+    );
+}
+
 #[test]
 fn infer_type_of_typeof_guard_narrowed_reference() {
     const CODE: &str = r#"if (typeof x === "string") {
@@ -438,5 +465,31 @@ fn infer_type_of_typeof_guard_narrowed_reference() {
         matches!(&narrowed.ty, TypeReference::Qualifier(qualifier) if qualifier.path.identifier().is_some_and(|name| name.text() == "x")),
         "the narrowed type must be the reference to `x`, got {:?}",
         narrowed.ty
+    );
+}
+
+// Same, for `x.member++`, via `member_write_invalidated_within`.
+#[test]
+fn declines_member_equals_narrowing_after_pre_or_post_update_on_member() {
+    const CODE: &str = r#"if (x.member === "a") {
+    x.member++;
+    x;
+}"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .filter_map(JsExpressionStatement::cast)
+        .last()
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+
+    assert!(
+        !matches!(ty, TypeData::TypeofExpression(_)),
+        "member-equals narrowing must be declined after x.member++, got {ty:?}"
     );
 }
