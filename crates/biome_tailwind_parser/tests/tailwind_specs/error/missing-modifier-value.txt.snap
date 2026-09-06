@@ -16,6 +16,7 @@ bg-green-500/
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -33,8 +34,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@13..14 "\n" [] [],
     ],
-    eof_token: EOF@13..14 "" [Newline("\n")] [],
+    eof_token: EOF@14..14 "" [] [],
 }
 ```
 
@@ -43,7 +45,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..14
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..13
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..14
     0: TW_FULL_CANDIDATE@0..13
       0: TW_VARIANT_LIST@0..0
       1: (empty)
@@ -55,24 +58,28 @@ TwRoot {
           0: TW_VALUE@3..12 "green-500" [] []
         3: SLASH@12..13 "/" [] []
       4: (empty)
-  2: EOF@13..14 "" [Newline("\n")] []
+    1: WHITESPACE@13..14 "\n" [] []
+  3: EOF@14..14 "" [] []
 
 ```
 
 ## Diagnostics
 
 ```
-missing-modifier-value.txt:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing-modifier-value.txt:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a value but instead found the end of the file.
+  × Expected a value but instead found '
+    '.
   
-    1 │ bg-green-500/
+  > 1 │ bg-green-500/
+      │              
   > 2 │ 
       │ 
   
   i Expected a value here.
   
-    1 │ bg-green-500/
+  > 1 │ bg-green-500/
+      │              
   > 2 │ 
       │ 
   

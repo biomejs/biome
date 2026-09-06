@@ -1031,41 +1031,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ```js
  (text: string, parsers: object, options: object) => AST;
  ```
-@@ -565,51 +559,49 @@
- >
- > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
- 
--| Default | CLI Override          | API Override        |
--| ------- | --------------------- | ------------------- |
--| `80`    | `--print-width <int>` | `printWidth: <int>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`80` | `--print-width <int>` | `printWidth: <int>`
- 
- ### Tab Width
- 
- Specify the number of spaces per indentation-level.
- 
--| Default | CLI Override        | API Override      |
--| ------- | ------------------- | ----------------- |
--| `2`     | `--tab-width <int>` | `tabWidth: <int>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`2` | `--tab-width <int>` | `tabWidth: <int>`
- 
- ### Tabs
- 
- Indent lines with tabs instead of spaces
- 
--| Default | CLI Override | API Override      |
--| ------- | ------------ | ----------------- |
--| `false` | `--use-tabs` | `useTabs: <bool>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`false` | `--use-tabs` | `useTabs: <bool>`
- 
- ### Semicolons
- 
+@@ -590,7 +584,6 @@
  Print semicolons at the ends of statements.
  
  Valid options:
@@ -1073,15 +1039,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - `true` - Add a semicolon at the end of every statement.
  - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
  
--| Default | CLI Override | API Override   |
--| ------- | ------------ | -------------- |
--| `true`  | `--no-semi`  | `semi: <bool>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`true` | `--no-semi` | `semi: <bool>`
- 
- ### Quotes
- 
+@@ -603,7 +596,6 @@
  Use single quotes instead of double quotes.
  
  Notes:
@@ -1089,16 +1047,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - Quotes in JSX will always be double and ignore this setting.
  - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
  
--| Default | CLI Override     | API Override          |
--| ------- | ---------------- | --------------------- |
--| `false` | `--single-quote` | `singleQuote: <bool>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`false` | `--single-quote` | `singleQuote: <bool>`
- 
- ### Trailing Commas
- 
-@@ -617,49 +609,46 @@
+@@ -617,7 +609,6 @@
  for example, never gets trailing commas.)
  
  Valid options:
@@ -1106,16 +1055,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - `"none"` - No trailing commas.
  - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
  - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
- 
--| Default  | CLI Override                                           | API Override                                           |
--| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
--| `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
- 
- ### Bracket Spacing
- 
+@@ -631,7 +622,6 @@
  Print spaces between brackets in object literals.
  
  Valid options:
@@ -1123,43 +1063,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - `true` - Example: `{ foo: bar }`.
  - `false` - Example: `{foo: bar}`.
  
--| Default | CLI Override           | API Override             |
--| ------- | ---------------------- | ------------------------ |
--| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
- 
- ### JSX Brackets
- 
- Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
- 
--| Default | CLI Override              | API Override                 |
--| ------- | ------------------------- | ---------------------------- |
--| `false` | `--jsx-bracket-same-line` | `jsxBracketSameLine: <bool>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`false` | `--jsx-bracket-same-line` | `jsxBracketSameLine: <bool>`
- 
- ### Range
- 
+@@ -652,7 +642,6 @@
  Format only a segment of a file.
  
  These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
 -
  - Backwards to the start of the first line containing the selected statement.
  - Forwards to the end of the selected statement.
- 
--| Default    | CLI Override          | API Override        |
--| ---------- | --------------------- | ------------------- |
--| `0`        | `--range-start <int>` | `rangeStart: <int>` |
--| `Infinity` | `--range-end <int>`   | `rangeEnd: <int>`   |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`0` | `--range-start <int>`| `rangeStart: <int>`
-+`Infinity` | `--range-end <int>` | `rangeEnd: <int>`
- 
- ### Parser
  
 @@ -668,7 +657,6 @@
  Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
@@ -1169,44 +1079,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - [`babylon`](https://github.com/babel/babylon/)
  - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
  - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
-@@ -678,9 +666,9 @@
- 
- [Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
- 
--| Default   | CLI Override                                    | API Override                                               |
--| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
--| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
- 
- ### Filepath
- 
-@@ -692,9 +680,9 @@
- cat foo | prettier --stdin-filepath foo.css
- ```
- 
--| Default | CLI Override                | API Override           |
--| ------- | --------------------------- | ---------------------- |
--| None    | `--stdin-filepath <string>` | `filepath: "<string>"` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+None | `--stdin-filepath <string>` | `filepath: "<string>"`
- 
- ### Require pragma
- 
-@@ -717,15 +705,14 @@
-  */
- ```
- 
--| Default | CLI Override       | API Override            |
--| ------- | ------------------ | ----------------------- |
--| `false` | `--require-pragma` | `requirePragma: <bool>` |
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`false` | `--require-pragma` | `requirePragma: <bool>`
- 
- ## Configuration File
+@@ -725,7 +713,6 @@
  
  Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
  This means you can configure prettier via:
@@ -1780,25 +1653,25 @@ Specify the line length that the printer will wrap on.
 >
 > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`80` | `--print-width <int>` | `printWidth: <int>`
+| Default | CLI Override          | API Override        |
+| ------- | --------------------- | ------------------- |
+| `80`    | `--print-width <int>` | `printWidth: <int>` |
 
 ### Tab Width
 
 Specify the number of spaces per indentation-level.
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`2` | `--tab-width <int>` | `tabWidth: <int>`
+| Default | CLI Override        | API Override      |
+| ------- | ------------------- | ----------------- |
+| `2`     | `--tab-width <int>` | `tabWidth: <int>` |
 
 ### Tabs
 
 Indent lines with tabs instead of spaces
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`false` | `--use-tabs` | `useTabs: <bool>`
+| Default | CLI Override | API Override      |
+| ------- | ------------ | ----------------- |
+| `false` | `--use-tabs` | `useTabs: <bool>` |
 
 ### Semicolons
 
@@ -1808,9 +1681,9 @@ Valid options:
 - `true` - Add a semicolon at the end of every statement.
 - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`true` | `--no-semi` | `semi: <bool>`
+| Default | CLI Override | API Override   |
+| ------- | ------------ | -------------- |
+| `true`  | `--no-semi`  | `semi: <bool>` |
 
 ### Quotes
 
@@ -1820,9 +1693,9 @@ Notes:
 - Quotes in JSX will always be double and ignore this setting.
 - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`false` | `--single-quote` | `singleQuote: <bool>`
+| Default | CLI Override     | API Override          |
+| ------- | ---------------- | --------------------- |
+| `false` | `--single-quote` | `singleQuote: <bool>` |
 
 ### Trailing Commas
 
@@ -1834,9 +1707,9 @@ Valid options:
 - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
 - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
+| Default  | CLI Override                                           | API Override                                           |
+| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
+| `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
 
 ### Bracket Spacing
 
@@ -1846,17 +1719,17 @@ Valid options:
 - `true` - Example: `{ foo: bar }`.
 - `false` - Example: `{foo: bar}`.
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
+| Default | CLI Override           | API Override             |
+| ------- | ---------------------- | ------------------------ |
+| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
 
 ### JSX Brackets
 
 Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`false` | `--jsx-bracket-same-line` | `jsxBracketSameLine: <bool>`
+| Default | CLI Override              | API Override                 |
+| ------- | ------------------------- | ---------------------------- |
+| `false` | `--jsx-bracket-same-line` | `jsxBracketSameLine: <bool>` |
 
 ### Range
 
@@ -1866,10 +1739,10 @@ These two options can be used to format code starting and ending at a given char
 - Backwards to the start of the first line containing the selected statement.
 - Forwards to the end of the selected statement.
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`0` | `--range-start <int>`| `rangeStart: <int>`
-`Infinity` | `--range-end <int>` | `rangeEnd: <int>`
+| Default    | CLI Override          | API Override        |
+| ---------- | --------------------- | ------------------- |
+| `0`        | `--range-start <int>` | `rangeStart: <int>` |
+| `Infinity` | `--range-end <int>`   | `rangeEnd: <int>`   |
 
 ### Parser
 
@@ -1887,9 +1760,9 @@ Built-in parsers:
 
 [Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
+| Default   | CLI Override                                    | API Override                                               |
+| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
+| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
 
 ### Filepath
 
@@ -1901,9 +1774,9 @@ For example, the following will use `postcss` parser:
 cat foo | prettier --stdin-filepath foo.css
 ```
 
-Default | CLI Override | API Override
---------|--------------|-------------
-None | `--stdin-filepath <string>` | `filepath: "<string>"`
+| Default | CLI Override                | API Override           |
+| ------- | --------------------------- | ---------------------- |
+| None    | `--stdin-filepath <string>` | `filepath: "<string>"` |
 
 ### Require pragma
 
@@ -1926,9 +1799,9 @@ or
  */
 ```
 
-Default | CLI Override | API Override
---------|--------------|-------------
-`false` | `--require-pragma` | `requirePragma: <bool>`
+| Default | CLI Override       | API Override            |
+| ------- | ------------------ | ----------------------- |
+| `false` | `--require-pragma` | `requirePragma: <bool>` |
 
 ## Configuration File
 
@@ -2219,14 +2092,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
   588: - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
   600: - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
   614: - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
-  618: `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
+  616: | Default  | CLI Override                                           | API Override                                           |
+  617: | -------- | ------------------------------------------------------ | ------------------------------------------------------ |
+  618: | `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
   634: Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
   644: These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
   657: Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
   662: - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
   664: - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
   665: - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
-  671: `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
+  669: | Default   | CLI Override                                    | API Override                                               |
+  670: | --------- | ----------------------------------------------- | ---------------------------------------------------------- |
+  671: | `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
   689: Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
   692: For example, a file with the following as its first comment will be formatted when `--require-pragma` is supplied:
   714: Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.

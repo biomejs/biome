@@ -649,6 +649,7 @@ fn parse_parenthesized_arrow_function_expression(
     context: ExpressionContext,
 ) -> ParsedSyntax {
     let is_parenthesized = is_parenthesized_arrow_function_expression(p);
+    let is_bogus = p.at(T![=>]);
     match is_parenthesized {
         IsParenthesizedArrowFunctionExpression::True => {
             let (m, flags) =
@@ -656,7 +657,14 @@ fn parse_parenthesized_arrow_function_expression(
                     .expect("'CompletedMarker' because function should never return 'Err' if called with 'Ambiguity::Allowed'.");
             parse_arrow_body(p, flags, context)
                 .or_add_diagnostic(p, js_parse_error::expected_arrow_body);
-            Present(m.complete(p, JS_ARROW_FUNCTION_EXPRESSION))
+            Present(m.complete(
+                p,
+                if is_bogus {
+                    JS_BOGUS_EXPRESSION
+                } else {
+                    JS_ARROW_FUNCTION_EXPRESSION
+                },
+            ))
         }
         IsParenthesizedArrowFunctionExpression::Unknown => {
             parse_possible_parenthesized_arrow_function_expression(p, context)

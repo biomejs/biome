@@ -1,3 +1,10 @@
 enum Status {
+	"""
+	Some description
+	"""
 	Active
+	"Some more description"
+	Inactive
+	# Some comment
+	Some_underscore
 }

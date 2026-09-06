@@ -630,7 +630,7 @@ fn is_vector(list: &CssGenericComponentValueList) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_rowan::AstNodeList;
+    use biome_rowan::AstSeparatedList;
     use biome_tailwind_parser::parse_tailwind;
     use biome_tailwind_syntax::{AnyTwCandidate, AnyTwValue, CssGenericComponentValueList};
 
@@ -642,7 +642,7 @@ mod tests {
 
     fn parse_arbitrary_value(source: &str) -> CssGenericComponentValueList {
         let parsed = parse_tailwind(source);
-        let full = parsed.tree().candidates().iter().next().unwrap();
+        let full = parsed.tree().candidates().iter().next().unwrap().unwrap();
         let full = full.as_tw_full_candidate().unwrap();
         let candidate = full.candidate().unwrap();
         let AnyTwCandidate::TwFunctionalCandidate(functional) = candidate else {
@@ -765,7 +765,7 @@ mod tests {
         assert!(value_matches_type(&parse_value!("THIN"), CssDataType::LineWidth));
         assert!(value_matches_type(&parse_value!("2px"), CssDataType::LineWidth));
         assert!(value_matches_type(
-            &parse_value!("1px 2px"),
+            &parse_value!("1px_2px"),
             CssDataType::LineWidth
         ));
         assert!(!value_matches_type(&parse_value!("solid"), CssDataType::LineWidth));
@@ -804,15 +804,15 @@ mod tests {
         assert!(value_matches_type(&parse_value!("top"), CssDataType::Position));
         assert!(value_matches_type(&parse_value!("TOP"), CssDataType::Position));
         assert!(value_matches_type(
-            &parse_value!("top left"),
+            &parse_value!("top_left"),
             CssDataType::Position
         ));
         assert!(value_matches_type(
-            &parse_value!("50% 10px"),
+            &parse_value!("50%_10px"),
             CssDataType::Position
         ));
         assert!(value_matches_type(
-            &parse_value!("top var(--pos)"),
+            &parse_value!("top_var(--pos)"),
             CssDataType::Position
         ));
         assert!(!value_matches_type(
@@ -820,7 +820,7 @@ mod tests {
             CssDataType::Position
         ));
         assert!(!value_matches_type(
-            &parse_value!("var(--pos) top"),
+            &parse_value!("var(--pos)_top"),
             CssDataType::Position
         ));
         assert!(!value_matches_type(&parse_value!("foo"), CssDataType::Position));
@@ -833,7 +833,7 @@ mod tests {
         assert!(value_matches_type(&parse_value!("auto"), CssDataType::BgSize));
         assert!(value_matches_type(&parse_value!("AUTO"), CssDataType::BgSize));
         assert!(value_matches_type(
-            &parse_value!("200px 100%"),
+            &parse_value!("200px_100%"),
             CssDataType::BgSize
         ));
         assert!(value_matches_type(
@@ -845,16 +845,16 @@ mod tests {
             CssDataType::BgSize
         ));
         assert!(!value_matches_type(
-            &parse_value!("200px 100% 50%"),
+            &parse_value!("200px_100%_50%"),
             CssDataType::BgSize
         ));
     }
 
     #[test]
     fn vector_matches_exactly_three_numbers() {
-        assert!(value_matches_type(&parse_value!("1 2 3"), CssDataType::Vector));
-        assert!(!value_matches_type(&parse_value!("1 2"), CssDataType::Vector));
-        assert!(!value_matches_type(&parse_value!("1px 2 3"), CssDataType::Vector));
+        assert!(value_matches_type(&parse_value!("1_2_3"), CssDataType::Vector));
+        assert!(!value_matches_type(&parse_value!("1_2"), CssDataType::Vector));
+        assert!(!value_matches_type(&parse_value!("1px_2_3"), CssDataType::Vector));
     }
 
     // endregion: multi-value

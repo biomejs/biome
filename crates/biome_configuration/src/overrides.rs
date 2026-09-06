@@ -120,6 +120,8 @@ impl OverridePattern {
             mut grit,
             #[cfg(feature = "lang_html")]
             mut html,
+            #[cfg(feature = "lang_md")]
+            mut markdown,
             mut formatter,
             mut linter,
             mut assist,
@@ -279,6 +281,22 @@ impl OverridePattern {
             formatter.bracket_same_line = formatter.bracket_same_line.or(global.bracket_same_line);
             formatter.attribute_position =
                 formatter.attribute_position.or(global.attribute_position);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+
+        #[cfg(feature = "lang_md")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = markdown
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
             formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
         }
 
@@ -537,6 +555,8 @@ impl OverridePattern {
             grit,
             #[cfg(feature = "lang_html")]
             html,
+            #[cfg(feature = "lang_md")]
+            markdown,
             #[cfg(feature = "plugins")]
             plugins,
             assist,

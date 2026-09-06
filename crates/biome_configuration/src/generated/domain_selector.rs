@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::analyzer::DomainSelector;
-use biome_analyze::{Rule, RuleFilter};
+use biome_analyze::{Rule, RuleFilter, RuleGroup};
 use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
@@ -88,6 +88,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
         RuleFilter::Rule("nursery", "useReactCompiler"),
         RuleFilter::Rule("nursery", "useReactFunctionComponentDefinition"),
+        RuleFilter::Rule("nursery", "useReactNamingConvention"),
         RuleFilter::Rule("performance", "noJsxPropsBind"),
         RuleFilter::Rule("performance", "noSyncScripts"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
@@ -188,10 +189,12 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useVueValidVOnce"),
         RuleFilter::Rule("correctness", "useVueValidVPre"),
         RuleFilter::Rule("correctness", "useVueValidVText"),
+        RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
         RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
         RuleFilter::Rule("nursery", "noVueVOnNumberValues"),
         RuleFilter::Rule("nursery", "useScopedStyles"),
+        RuleFilter::Rule("nursery", "useVueBaseImport"),
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("nursery", "useVueNextTickPromise"),
         RuleFilter::Rule("nursery", "useVueValidVFor"),
@@ -230,34 +233,55 @@ impl DomainSelector {
     where
         R: Rule,
     {
+        self.match_rule_name(<R::Group as RuleGroup>::NAME, R::METADATA.name)
+    }
+    pub(crate) fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
         match self.0 {
-            "astro" => ASTRO_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "astro" => ASTRO_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "drizzle" => DRIZZLE_FILTERS
                 .iter()
-                .any(|filter| filter.match_rule::<R>()),
-            "next" => NEXT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "next" => NEXT_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "playwright" => PLAYWRIGHT_FILTERS
                 .iter()
-                .any(|filter| filter.match_rule::<R>()),
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "project" => PROJECT_FILTERS
                 .iter()
-                .any(|filter| filter.match_rule::<R>()),
-            "qwik" => QWIK_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
-            "react" => REACT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "qwik" => QWIK_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "react" => REACT_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "reactNative" => REACTNATIVE_FILTERS
                 .iter()
-                .any(|filter| filter.match_rule::<R>()),
-            "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
-            "svelte" => SVELTE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "solid" => SOLID_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "svelte" => SVELTE_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "tailwind" => TAILWIND_FILTERS
                 .iter()
-                .any(|filter| filter.match_rule::<R>()),
-            "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "test" => TEST_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "turborepo" => TURBOREPO_FILTERS
                 .iter()
-                .any(|filter| filter.match_rule::<R>()),
-            "types" => TYPES_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
-            "vue" => VUE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "types" => TYPES_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "vue" => VUE_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             _ => false,
         }
     }

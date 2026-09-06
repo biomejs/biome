@@ -108,6 +108,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_blank_target::NoBlankTargetOptions>(),
     ));
     result.push((
+        "nursery",
+        "noBunModules",
+        TypeId::of::<biome_rule_options::no_bun_modules::NoBunModulesOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noCatchAssign",
         TypeId::of::<biome_rule_options::no_catch_assign::NoCatchAssignOptions>(),
@@ -693,6 +698,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("correctness", "noInvalidDirectionInLinearGradient", TypeId::of::<biome_rule_options::no_invalid_direction_in_linear_gradient::NoInvalidDirectionInLinearGradientOptions>()));
     result.push((
+        "nursery",
+        "noInvalidFileInputAccept",
+        TypeId::of::<
+            biome_rule_options::no_invalid_file_input_accept::NoInvalidFileInputAcceptOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noInvalidGridAreas",
         TypeId::of::<biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions>(),
@@ -1214,6 +1226,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noThisOutsideOfClass",
+        TypeId::of::<biome_rule_options::no_this_outside_of_class::NoThisOutsideOfClassOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noTopLevelLiterals",
         TypeId::of::<biome_rule_options::no_top_level_literals::NoTopLevelLiteralsOptions>(),
     ));
@@ -1300,6 +1317,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noUnmodifiedLoopCondition",
+        TypeId::of::<
+            biome_rule_options::no_unmodified_loop_condition::NoUnmodifiedLoopConditionOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noUnnecessaryConditions",
         TypeId::of::<biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions>(
@@ -1332,6 +1356,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "correctness",
         "noUnsafeFinally",
         TypeId::of::<biome_rule_options::no_unsafe_finally::NoUnsafeFinallyOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noUnsafeIframeSandbox",
+        TypeId::of::<biome_rule_options::no_unsafe_iframe_sandbox::NoUnsafeIframeSandboxOptions>(),
     ));
     result.push((
         "suspicious",
@@ -1548,6 +1577,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noVueDeprecatedScopedSlots",
+        TypeId::of::<
+            biome_rule_options::no_vue_deprecated_scoped_slots::NoVueDeprecatedScopedSlotsOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noVueDuplicateKeys",
         TypeId::of::<biome_rule_options::no_vue_duplicate_keys::NoVueDuplicateKeysOptions>(),
@@ -1594,6 +1630,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "noWith",
         TypeId::of::<biome_rule_options::no_with::NoWithOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noXorAsExponentiation",
+        TypeId::of::<biome_rule_options::no_xor_as_exponentiation::NoXorAsExponentiationOptions>(),
     ));
     result.push((
         "style",
@@ -1878,6 +1919,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_flat_map::UseFlatMapOptions>(),
     ));
     result.push((
+        "nursery",
+        "useFlatMathMinMax",
+        TypeId::of::<biome_rule_options::use_flat_math_min_max::UseFlatMathMinMaxOptions>(),
+    ));
+    result.push((
         "a11y",
         "useFocusableInteractive",
         TypeId::of::<biome_rule_options::use_focusable_interactive::UseFocusableInteractiveOptions>(
@@ -2033,6 +2079,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_key_with_mouse_events::UseKeyWithMouseEventsOptions>(),
     ));
     result.push((
+        "nursery",
+        "useLayeredStyles",
+        TypeId::of::<biome_rule_options::use_layered_styles::UseLayeredStylesOptions>(),
+    ));
+    result.push((
         "style",
         "useLiteralEnumMembers",
         TypeId::of::<biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions>(),
@@ -2070,6 +2121,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "a11y",
         "useMediaCaption",
         TypeId::of::<biome_rule_options::use_media_caption::UseMediaCaptionOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useModernMathApis",
+        TypeId::of::<biome_rule_options::use_modern_math_apis::UseModernMathApisOptions>(),
     ));
     result.push((
         "nursery",
@@ -2176,6 +2232,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_react_function_components::UseReactFunctionComponentsOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "useReactNamingConvention",
+        TypeId::of::<
+            biome_rule_options::use_react_naming_convention::UseReactNamingConventionOptions,
+        >(),
+    ));
     result.push(("nursery", "useReactNativePlatformComponents", TypeId::of::<biome_rule_options::use_react_native_platform_components::UseReactNativePlatformComponentsOptions>()));
     result.push((
         "style",
@@ -2249,6 +2312,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useSingleJsDocAsterisk",
         TypeId::of::<biome_rule_options::use_single_js_doc_asterisk::UseSingleJsDocAsteriskOptions>(
         ),
+    ));
+    result.push((
+        "nursery",
+        "useSingleTopLevelHeading",
+        TypeId::of::<
+            biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOptions,
+        >(),
     ));
     result.push((
         "style",
@@ -2403,6 +2473,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "useVarsOnTop",
         TypeId::of::<biome_rule_options::use_vars_on_top::UseVarsOnTopOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueBaseImport",
+        TypeId::of::<biome_rule_options::use_vue_base_import::UseVueBaseImportOptions>(),
     ));
     result.push(("nursery", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
     result.push((

@@ -16,6 +16,7 @@ focus:[mask:radial-gradient()]
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -51,8 +52,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@30..31 "\n" [] [],
     ],
-    eof_token: EOF@30..31 "" [Newline("\n")] [],
+    eof_token: EOF@31..31 "" [] [],
 }
 ```
 
@@ -61,7 +63,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..31
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..30
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..31
     0: TW_FULL_CANDIDATE@0..30
       0: TW_VARIANT_LIST@0..6
         0: TW_VARIANT_EXPRESSION@0..5
@@ -87,6 +90,7 @@ TwRoot {
         4: R_BRACKET@29..30 "]" [] []
         5: (empty)
       4: (empty)
-  2: EOF@30..31 "" [Newline("\n")] []
+    1: WHITESPACE@30..31 "\n" [] []
+  3: EOF@31..31 "" [] []
 
 ```

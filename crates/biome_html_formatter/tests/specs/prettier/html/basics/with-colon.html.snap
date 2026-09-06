@@ -244,7 +244,7 @@ e-wrap </html:textarea>
 -  <html:style
 -    >.a{color:#f00}</html:style
 -  >
-+  <html:style>.a { color:#f00}</html:style>
++  <html:style>.a{color:#f00}</html:style>
    <svg>
      <style>
        .a {
@@ -255,7 +255,7 @@ e-wrap </html:textarea>
 -<html:style
 -  >.a{color:#f00}</html:style
 ->
-+<html:style>.a { color:#f00}</html:style>
++<html:style>.a{color:#f00}</html:style>
 ```
 
 # Output
@@ -475,7 +475,7 @@ e-wrap </textarea>
   <html:script
     >const func = function() { console.log('Hello, there');}</html:script
   >
-  <html:style>.a { color:#f00}</html:style>
+  <html:style>.a{color:#f00}</html:style>
   <svg>
     <style>
       .a {
@@ -494,5 +494,5 @@ e-wrap </textarea>
 <html:script
   >const func = function() { console.log('Hello, there');}</html:script
 >
-<html:style>.a { color:#f00}</html:style>
+<html:style>.a{color:#f00}</html:style>
 ```

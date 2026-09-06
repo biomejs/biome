@@ -41,6 +41,7 @@ pub type MarkdownFormatterEnabled = Bool<true>;
 pub type MarkdownLinterEnabled = Bool<true>;
 pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseFrontmatter = Bool<false>;
+pub type MarkdownParseGfm = Bool<true>;
 
 /// Options that change how the Markdown parser behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
@@ -56,6 +57,11 @@ pub struct MarkdownParserConfiguration {
         bpaf(long("md-parse-frontmatter"), argument("true|false"))
     )]
     pub frontmatter: Option<MarkdownParseFrontmatter>,
+
+    /// Enables GitHub Flavored Markdown extensions. Defaults to `true`.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub gfm: Option<MarkdownParseGfm>,
 }
 
 /// Options that change how the Markdown formatter behaves

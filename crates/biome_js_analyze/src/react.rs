@@ -20,7 +20,7 @@ pub(crate) trait ReactApiCall {
 
 /// A convenient data structure that returns the three arguments of the [React.createElement] call
 ///
-///[React.createElement]: https://reactjs.org/docs/react-api.html#createelement
+/// [React.createElement]: https://react.dev/reference/react/createElement
 pub struct ReactCreateElementCall {
     /// The type of the react element
     pub(crate) element_type: AnyJsCallArgument,
@@ -153,45 +153,55 @@ impl ReactLibrary {
 
 /// List of valid [`React` API]
 ///
-/// [`React` API]: https://reactjs.org/docs/react-api.html
-const VALID_REACT_API: [&str; 31] = [
-    "Component",
-    "PureComponent",
-    "memo",
-    "createElement",
+/// [`React` API]: https://react.dev/reference/react/apis
+const VALID_REACT_API: [&str; 41] = [
+    "act",
+    "Activity",
+    "cache",
+    "cacheSignal",
+    "captureOwnerStack",
+    "Children",
     "cloneElement",
+    "Component",
+    "createContext",
+    "createElement",
     "createFactory",
-    "isValidElement",
-    "Fragment",
     "createRef",
     "forwardRef",
+    "Fragment",
+    "isValidElement",
     "lazy",
-    "Suspense",
+    "memo",
+    "Profiler",
+    "PureComponent",
     "startTransition",
-    "Children",
-    "useEffect",
-    "useLayoutEffect",
-    "useInsertionEffect",
+    "StrictMode",
+    "Suspense",
+    "use",
+    "useActionState",
     "useCallback",
-    "useMemo",
-    "useImperativeHandle",
-    "useState",
     "useContext",
-    "useReducer",
-    "useRef",
     "useDebugValue",
     "useDeferredValue",
-    "useTransition",
-    "useId",
-    "useSyncExternalStore",
-    "Activity",
+    "useEffect",
     "useEffectEvent",
+    "useId",
+    "useImperativeHandle",
+    "useInsertionEffect",
+    "useLayoutEffect",
+    "useMemo",
+    "useReducer",
+    "useRef",
+    "useState",
+    "useSyncExternalStore",
+    "useTransition",
+    "ViewTransition",
 ];
 
 /// Checks if the current [JsCallExpression] is a potential [`React` API].
-/// The function has accepts a `api_name` to check against
+/// The function accepts an API name to check against.
 ///
-/// [`React` API]: https://reactjs.org/docs/react-api.html
+/// [`React` API]: https://react.dev/reference/react/apis
 ///
 /// This also returns `true` for libraries that return React-compatible APIs,
 /// such as Preact.

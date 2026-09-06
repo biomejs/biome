@@ -1,0 +1,4 @@
+  border
+focus:outline-none
+
+uppercase

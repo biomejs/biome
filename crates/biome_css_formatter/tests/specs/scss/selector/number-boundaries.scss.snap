@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/number-boundaries.scss
+---
+
+# Input
+
+```scss
+$index:2;
+$tag:article;
+$id:panel;
+$placeholder:utility;
+$pseudo:state;
+$attribute:mode;
+$base-loading:".vab-loading-type";
+$prefix:md-;
+#{$base-loading}1{color:red}
+#{$tag}1{color:red}
+.item-#{$index}0{color:red}
+.weight-#{$index}00{color:red}
+##{$id}1{color:red}
+%#{$placeholder}1{color:red}
+:#{$pseudo}1{color:red}
+::#{$pseudo}1{color:red}
+[data-#{$attribute}1]{color:red}
+.column-#{$prefix}1-of-12{color:red}
+
+```
+
+
+# Formatted
+
+```scss
+$index: 2;
+$tag: article;
+$id: panel;
+$placeholder: utility;
+$pseudo: state;
+$attribute: mode;
+$base-loading: ".vab-loading-type";
+$prefix: md-;
+#{$base-loading}1 {
+	color: red;
+}
+#{$tag}1 {
+	color: red;
+}
+.item-#{$index}0 {
+	color: red;
+}
+.weight-#{$index}00 {
+	color: red;
+}
+##{$id}1 {
+	color: red;
+}
+%#{$placeholder}1 {
+	color: red;
+}
+:#{$pseudo}1 {
+	color: red;
+}
+::#{$pseudo}1 {
+	color: red;
+}
+[data-#{$attribute}1] {
+	color: red;
+}
+.column-#{$prefix}1-of-12 {
+	color: red;
+}
+
+```

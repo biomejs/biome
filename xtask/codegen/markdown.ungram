@@ -80,6 +80,7 @@ AnyMdLeafBlock =
 	| MdParagraph
 	| MdNewline
 	| MdContinuationIndent
+	| GfmTable
 
 AnyMdContainerBlock =
 	MdQuote
@@ -211,6 +212,8 @@ MdQuotePrefix =
 	marker: '>'
 	post_marker_space: 'md_quote_post_marker_space'?
 
+MdQuotePrefixList = MdQuotePrefix*
+
 // Single pre-marker indent token (MdHash/MdHashList pattern).
 MdQuoteIndent = 'md_quote_pre_marker_indent'
 MdQuoteIndentList = MdQuoteIndent*
@@ -276,6 +279,8 @@ AnyMdInline =
 	| MdCodeContent
 	| MdHardLine
 	| MdTextual
+	| GfmStrikethrough
+	| GfmTaskListItem
 	| MdQuotePrefix
 	| MdIndentToken
 
@@ -400,3 +405,68 @@ MdContinuationIndent = indent: MdIndentTokenList
 
 MdHardLine = value: 'md_hard_line_literal'
 MdTextual = value: 'md_textual_literal'
+
+// ==================================
+// GitHub Flavoured Markdown (GFM)
+// ==================================
+
+GfmTaskListItem =
+	l_bracket: '['
+	// State is generic on purpose, the parser will take care of checking for `x`/whitespace
+	state: MdTextual
+	r_bracket: ']'
+
+GfmStrikethrough =
+	l_fence: '~~'
+	content: MdInlineItemList
+	r_fence: '~~'
+
+// | Header |
+// | ------ |
+// | Cell   |
+// ^^^^^^^^^^
+GfmTable =
+	header: GfmTableRow
+	delimiter: GfmTableDelimiterRow
+	body: GfmTableRowList
+
+GfmTableRowList = GfmTableRow*
+
+// | Header |
+// ^^^^^^^^^^
+GfmTableRow =
+	quote_prefixes: MdQuotePrefixList
+	l_pipe: '|'?
+	cells: GfmTableCellList
+	r_pipe: '|'?
+	newline: 'NEWLINE'?
+
+GfmTableCellList = (GfmTableCell ('|' GfmTableCell)*)
+
+// Header
+// ^^^^^^
+GfmTableCell = content: MdInlineItemList
+
+// | :--- |
+// ^^^^^^^^^
+GfmTableDelimiterRow =
+	quote_prefixes: MdQuotePrefixList
+	l_pipe: '|'?
+	cells: GfmTableDelimiterCellList
+	r_pipe: '|'?
+	newline: 'NEWLINE'?
+
+GfmTableDelimiterCellList = (GfmTableDelimiterCell ('|' GfmTableDelimiterCell)*)
+
+// :---
+// ^^^^
+GfmTableDelimiterCell =
+	l_colon: ':'?
+	dashes: GfmTableDelimiterDashList
+	r_colon: ':'?
+
+GfmTableDelimiterDashList = GfmTableDelimiterDash*
+
+// -
+// ^
+GfmTableDelimiterDash = '-'

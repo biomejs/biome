@@ -11,7 +11,7 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use std::ops::Range;
 use std::rc::Rc;
 
-use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
+use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
 use crate::syntax::TAB_STOP_SPACES;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
@@ -26,12 +26,21 @@ pub struct MarkdownParserOptions {
     /// This limits recursion on pathological input to avoid stack overflow.
     pub max_nesting_depth: usize,
     pub(crate) frontmatter: bool,
+
+    /// Enables GitHub Flavored Markdown extensions.
+    pub(crate) gfm: bool,
 }
 
 impl MarkdownParserOptions {
     /// Controls whether a complete `---` pair at the start of the document is parsed as frontmatter.
     pub fn with_frontmatter(mut self, frontmatter: bool) -> Self {
         self.frontmatter = frontmatter;
+        self
+    }
+
+    /// Controls whether GitHub Flavored Markdown extensions are parsed.
+    pub fn with_gfm(mut self, gfm: bool) -> Self {
+        self.gfm = gfm;
         self
     }
 }
@@ -41,8 +50,17 @@ impl Default for MarkdownParserOptions {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
             frontmatter: false,
+            gfm: false,
         }
     }
+}
+
+/// Lexing modes that persist across ordinary parser token consumption.
+#[derive(Debug, Default, Clone, Copy)]
+enum MarkdownLexMode {
+    #[default]
+    Regular,
+    Table,
 }
 
 /// Internal parser state for tracking nesting and context.
@@ -64,6 +82,8 @@ impl Default for MarkdownParserOptions {
 ///   requires tracking list context during parsing.
 #[derive(Default, Debug)]
 pub(crate) struct MarkdownParserState {
+    /// Table mode is active only while consuming a recognized GFM table row.
+    lex_mode: MarkdownLexMode,
     /// Block quote nesting depth for lazy continuation and depth limits.
     /// See CommonMark §5.1 for block quote continuation rules.
     pub(crate) block_quote_depth: usize,
@@ -104,9 +124,12 @@ pub(crate) struct MarkdownParserState {
     pub(crate) virtual_line_start: Option<TextSize>,
     /// Flag to unwind quote parsing when nesting exceeds the maximum depth.
     pub(crate) quote_depth_exceeded: bool,
+    /// Whether the next paragraph is the first block of a list item.
+    pub(crate) task_list_item_allowed: bool,
 }
 
 struct MarkdownParserStateCheckpoint {
+    lex_mode: MarkdownLexMode,
     block_quote_depth: usize,
     list_nesting_depth: usize,
     list_item_required_indent: usize,
@@ -123,11 +146,13 @@ struct MarkdownParserStateCheckpoint {
     last_list_ends_with_blank: bool,
     virtual_line_start: Option<TextSize>,
     quote_depth_exceeded: bool,
+    task_list_item_allowed: bool,
 }
 
 impl MarkdownParserState {
     fn checkpoint(&self) -> MarkdownParserStateCheckpoint {
         MarkdownParserStateCheckpoint {
+            lex_mode: self.lex_mode,
             block_quote_depth: self.block_quote_depth,
             list_nesting_depth: self.list_nesting_depth,
             list_item_required_indent: self.list_item_required_indent,
@@ -144,10 +169,12 @@ impl MarkdownParserState {
             last_list_ends_with_blank: self.last_list_ends_with_blank,
             virtual_line_start: self.virtual_line_start,
             quote_depth_exceeded: self.quote_depth_exceeded,
+            task_list_item_allowed: self.task_list_item_allowed,
         }
     }
 
     fn rewind(&mut self, checkpoint: MarkdownParserStateCheckpoint) {
+        self.lex_mode = checkpoint.lex_mode;
         self.block_quote_depth = checkpoint.block_quote_depth;
         self.list_nesting_depth = checkpoint.list_nesting_depth;
         self.list_item_required_indent = checkpoint.list_item_required_indent;
@@ -168,6 +195,7 @@ impl MarkdownParserState {
         self.last_list_ends_with_blank = checkpoint.last_list_ends_with_blank;
         self.virtual_line_start = checkpoint.virtual_line_start;
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
+        self.task_list_item_allowed = checkpoint.task_list_item_allowed;
     }
 }
 
@@ -215,9 +243,11 @@ pub(crate) struct MarkdownParserOutput {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DeferredInlineFlavor {
     /// An `MdInlineItemList` that is already enclosed by its block node.
-    Paragraph,
+    Paragraph { task_list_item_allowed: bool },
     /// An ATX heading's `MdParagraph`, including its inline item list.
     AtxParagraph,
+    /// A table cell's `MdInlineItemList`, bounded to the cell's source range.
+    TableCell,
 }
 
 /// Identifies a provisional inline subtree and the parser state needed to
@@ -241,6 +271,10 @@ pub(crate) struct DeferredInline {
     /// A smaller value than the final definition count means later definitions
     /// may change reference and emphasis parsing in this subtree.
     definitions_len: usize,
+    /// Whether parsing this subtree encountered an unresolved reference lookup.
+    ///
+    /// Later definitions can change this subtree only when this is true.
+    has_unresolved_reference_lookup: bool,
 }
 
 pub(crate) struct DeferredInlineStart {
@@ -249,6 +283,7 @@ pub(crate) struct DeferredInlineStart {
     flavor: DeferredInlineFlavor,
     context: InlineContainerContext,
     definitions_len: usize,
+    unresolved_reference_lookup_count: usize,
 }
 
 impl DeferredInline {
@@ -272,6 +307,10 @@ impl DeferredInline {
         self.definitions_len
     }
 
+    pub(crate) fn has_unresolved_reference_lookup(&self) -> bool {
+        self.has_unresolved_reference_lookup
+    }
+
     #[cfg(test)]
     pub(crate) fn for_test(
         event_range: Range<usize>,
@@ -279,6 +318,7 @@ impl DeferredInline {
         flavor: DeferredInlineFlavor,
         context: InlineContainerContext,
         definitions_len: usize,
+        has_unresolved_reference_lookup: bool,
     ) -> Self {
         Self {
             event_range,
@@ -286,6 +326,7 @@ impl DeferredInline {
             flavor,
             context,
             definitions_len,
+            has_unresolved_reference_lookup,
         }
     }
 }
@@ -403,6 +444,7 @@ pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
     source: MarkdownTokenSource<'source>,
     options: MarkdownParserOptions,
+    table_cell_inline: bool,
     known_link_reference_definitions: Option<&'source LinkReferenceDefinitions>,
     state: MarkdownParserState,
     /// Single-entry memo for `absolute_column_at` queries. Most callers ask
@@ -410,6 +452,17 @@ pub(crate) struct MarkdownParser<'source> {
     /// the parser does not advance, so caching the last computed pair avoids
     /// repeated O(line-length) scans for the preceding newline.
     abs_col_cache: Cell<Option<(u32, usize)>>,
+    /// Counts missed reference lookups across parser checkpoints.
+    ///
+    /// Rollbacks must not discard an inline range's dependency on definitions
+    /// that appear later in the document.
+    unresolved_reference_lookup_count: Cell<usize>,
+}
+
+#[derive(Default)]
+pub(crate) struct LineIndent {
+    pub(crate) token_count: usize,
+    pub(crate) byte_count: usize,
 }
 
 impl<'source> MarkdownParser<'source> {
@@ -418,9 +471,11 @@ impl<'source> MarkdownParser<'source> {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
             options,
+            table_cell_inline: false,
             known_link_reference_definitions: None,
             state: MarkdownParserState::default(),
             abs_col_cache: Cell::new(None),
+            unresolved_reference_lookup_count: Cell::new(0),
         }
     }
 
@@ -430,6 +485,7 @@ impl<'source> MarkdownParser<'source> {
         options: MarkdownParserOptions,
         context: InlineContainerContext,
         definitions: &'source LinkReferenceDefinitions,
+        table_cell_inline: bool,
     ) -> Option<Self> {
         let state = MarkdownParserState {
             block_quote_depth: context.block_quote_depth,
@@ -446,9 +502,11 @@ impl<'source> MarkdownParser<'source> {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_range(source, range)?,
             options,
+            table_cell_inline,
             known_link_reference_definitions: Some(definitions),
             state,
             abs_col_cache: Cell::new(None),
+            unresolved_reference_lookup_count: Cell::new(0),
         })
     }
 
@@ -472,6 +530,10 @@ impl<'source> MarkdownParser<'source> {
     /// Returns parser options. Reserved for GFM extensions.
     pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
+    }
+
+    pub(crate) fn is_table_cell_inline(&self) -> bool {
+        self.table_cell_inline
     }
 
     /// Returns immutable state reference for nesting depth checks.
@@ -518,12 +580,23 @@ impl<'source> MarkdownParser<'source> {
 
     /// Returns true if a normalized label has a link reference definition.
     pub(crate) fn has_link_reference_definition(&self, label: &str) -> bool {
-        self.known_link_reference_definitions
+        let is_defined = self
+            .known_link_reference_definitions
             .is_some_and(|definitions| definitions.contains(self.source.source_text(), label))
             || self
                 .state
                 .link_reference_definitions
-                .contains(self.source.source_text(), label)
+                .contains(self.source.source_text(), label);
+
+        if !is_defined {
+            self.unresolved_reference_lookup_count.set(
+                self.unresolved_reference_lookup_count
+                    .get()
+                    .saturating_add(1),
+            );
+        }
+
+        is_defined
     }
 
     pub(crate) fn inline_container_context(&self) -> InlineContainerContext {
@@ -548,10 +621,23 @@ impl<'source> MarkdownParser<'source> {
             flavor,
             context: self.inline_container_context(),
             definitions_len: self.link_reference_definitions_len(),
+            unresolved_reference_lookup_count: self.unresolved_reference_lookup_count(),
         }
     }
 
+    pub(crate) fn take_task_list_item_allowed(&mut self) -> bool {
+        std::mem::take(&mut self.state.task_list_item_allowed)
+    }
+
     pub(crate) fn finish_deferred_inline(&mut self, start: DeferredInlineStart) {
+        self.finish_deferred_inline_at(start, self.cur_range().start());
+    }
+
+    pub(crate) fn finish_deferred_inline_at(
+        &mut self,
+        start: DeferredInlineStart,
+        source_end: TextSize,
+    ) {
         let event_end = self.context.events().len();
         let Some(events) = self.context.events().get(start.event_start..event_end) else {
             return;
@@ -562,13 +648,20 @@ impl<'source> MarkdownParser<'source> {
         {
             return;
         }
+        debug_assert!(start.source_start <= source_end);
         self.state.deferred_inlines.push(DeferredInline {
             event_range: start.event_start..event_end,
-            source_range: TextRange::new(start.source_start, self.cur_range().start()),
+            source_range: TextRange::new(start.source_start, source_end),
             flavor: start.flavor,
             context: start.context,
             definitions_len: start.definitions_len,
+            has_unresolved_reference_lookup: self.unresolved_reference_lookup_count()
+                > start.unresolved_reference_lookup_count,
         });
+    }
+
+    fn unresolved_reference_lookup_count(&self) -> usize {
+        self.unresolved_reference_lookup_count.get()
     }
 
     pub(crate) fn link_reference_definitions_len(&self) -> usize {
@@ -654,8 +747,27 @@ impl<'source> MarkdownParser<'source> {
     /// Use this when switching from LinkDefinition context back to Regular context,
     /// e.g., when entering title content where whitespace should not split tokens.
     pub(crate) fn force_relex_regular(&mut self) {
+        self.state.lex_mode = MarkdownLexMode::Regular;
         self.source
             .force_relex_in_context(MarkdownLexContext::Regular);
+    }
+
+    /// Switches ordinary token consumption to table lexing and re-lexes the current token.
+    pub(crate) fn enter_table_lex_mode(&mut self) {
+        self.state.lex_mode = MarkdownLexMode::Table;
+        self.source
+            .force_relex_in_context(MarkdownLexContext::Table);
+        if self.at(MarkdownSyntaxKind::WHITESPACE) {
+            self.source.skip_as_trivia_of_kind_with_context(
+                TriviaPieceKind::Whitespace,
+                MarkdownLexContext::Table,
+            );
+        }
+    }
+
+    /// Restores regular lexing before the row-ending newline advances to the next line.
+    pub(crate) fn leave_table_lex_mode(&mut self) {
+        self.state.lex_mode = MarkdownLexMode::Regular;
     }
 
     /// Re-lex the current token in Regular context, treating the position as
@@ -770,7 +882,7 @@ impl<'source> MarkdownParser<'source> {
     ///
     /// Uses position-based check rather than trivia_len, so it works correctly
     /// when NEWLINE becomes an explicit token (not trivia).
-    pub fn at_start_of_input(&self) -> bool {
+    pub fn is_at_start_of_input(&self) -> bool {
         self.source.at_start_of_input()
     }
 
@@ -782,8 +894,9 @@ impl<'source> MarkdownParser<'source> {
     ///
     /// Used for detecting block-level constructs that must start at line beginning
     /// (e.g., headers, list items, thematic breaks).
-    pub fn at_line_start(&self) -> bool {
-        self.at_start_of_input()
+    #[inline]
+    pub fn is_at_line_start(&self) -> bool {
+        self.is_at_start_of_input()
             || self.has_preceding_line_break()
             || self.source.at_line_start_with_whitespace()
             || self.state.virtual_line_start == Some(self.cur_range().start())
@@ -795,11 +908,9 @@ impl<'source> MarkdownParser<'source> {
 
     /// Emit an MdIndentTokenList for optional block prefix indentation at line start.
     ///
-    /// Like `skip_line_indent()` but emits real CST nodes (`MdIndentToken` /
-    /// `MdIndentTokenList`) instead of skipped trivia. Use this for non-lookahead,
-    /// non-error-recovery paths where the indent tokens should be visible in the tree.
+    /// Emits real CST nodes (`MdIndentToken` / `MdIndentTokenList`) for indentation.
     pub fn emit_line_indent(&mut self, max_indent: usize) -> bool {
-        if !self.at_line_start() {
+        if !self.is_at_line_start() {
             let list_m = self.start();
             list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
             return false;
@@ -817,7 +928,7 @@ impl<'source> MarkdownParser<'source> {
     /// is already a valid child (via `AnyMdInline`). Unlike `emit_line_indent()`,
     /// this does NOT wrap tokens in an `MdIndentTokenList`.
     pub fn emit_indent_tokens(&mut self, max_indent: usize) -> bool {
-        if !self.at_line_start() {
+        if !self.is_at_line_start() {
             return false;
         }
 
@@ -867,41 +978,57 @@ impl<'source> MarkdownParser<'source> {
         true
     }
 
-    /// Consume optional indentation whitespace at line start, up to `max_indent`
-    /// columns. Each whitespace token is consumed as `Whitespace` trivia
-    /// (attached to the next real token).
-    ///
-    /// This avoids producing `Skipped` trivia, which should be reserved for
-    /// error-recovery paths.
-    pub fn skip_line_indent(&mut self, max_indent: usize) -> bool {
-        if !self.at_line_start() {
-            return false;
+    /// Returns the indentation tokens at the current line start that fit within
+    /// `max_indent` columns without consuming them.
+    pub(crate) fn peek_line_indent(&mut self, max_indent: usize) -> LineIndent {
+        if !self.is_at_line_start() {
+            return LineIndent::default();
         }
 
-        let mut consumed = 0usize;
-        let mut did_skip = false;
+        let mut indent = LineIndent::default();
+        let mut consumed_columns = 0usize;
 
-        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
-            let text = self.cur_text();
-            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+        while self
+            .nth_at::<MarkdownLexer>(indent.token_count, MarkdownSyntaxKind::MD_TEXTUAL_LITERAL)
+        {
+            let Some(text) = self.nth_text(indent.token_count) else {
+                break;
+            };
+            if text.is_empty()
+                || text
+                    .as_bytes()
+                    .iter()
+                    .any(|byte| !matches!(byte, b' ' | b'\t'))
+            {
                 break;
             }
 
-            let indent = text
-                .chars()
-                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+            let columns = text
+                .as_bytes()
+                .iter()
+                .map(|byte| if *byte == b'\t' { TAB_STOP_SPACES } else { 1 })
                 .sum::<usize>();
 
-            if consumed + indent > max_indent {
+            if consumed_columns + columns > max_indent {
                 break;
             }
 
-            consumed += indent;
-            did_skip = true;
+            indent.token_count += 1;
+            indent.byte_count += text.len();
+            consumed_columns += columns;
+        }
+
+        indent
+    }
+
+    /// Consumes optional indentation at line start as whitespace trivia.
+    pub(crate) fn consume_line_indent_as_whitespace_trivia(&mut self, max_indent: usize) -> bool {
+        let indent = self.peek_line_indent(max_indent);
+        for _ in 0..indent.token_count {
             self.consume_as_whitespace_trivia();
         }
 
-        did_skip
+        indent.token_count > 0
     }
 
     /// Consume the current token as `Whitespace` trivia (not `Skipped`).
@@ -945,7 +1072,8 @@ impl<'source> MarkdownParser<'source> {
     /// When this returns true, the parser should NOT consume the NEWLINE.
     /// Instead, the block-level parser should handle the paragraph boundary.
     /// The NEWLINE at a blank line marks the end of the current block.
-    pub fn at_blank_line(&self) -> bool {
+    #[inline]
+    pub fn is_at_blank_line(&self) -> bool {
         if !self.at(MarkdownSyntaxKind::NEWLINE) {
             return false;
         }
@@ -1090,6 +1218,23 @@ impl<'source> Parser for MarkdownParser<'source> {
     fn source_mut(&mut self) -> &mut Self::Source {
         &mut self.source
     }
+
+    fn do_bump(&mut self, kind: Self::Kind) {
+        let end = self.cur_range().end();
+        let skipping = self.context.is_skipping();
+        self.context.push_token(kind, end);
+
+        match (self.state.lex_mode, skipping) {
+            (MarkdownLexMode::Regular, false) => self.source.bump(),
+            (MarkdownLexMode::Regular, true) => self.source.skip_as_trivia(),
+            (MarkdownLexMode::Table, false) => {
+                self.source.bump_with_context(MarkdownLexContext::Table)
+            }
+            (MarkdownLexMode::Table, true) => self
+                .source
+                .skip_as_trivia_with_context(MarkdownLexContext::Table),
+        }
+    }
 }
 
 pub struct MarkdownParserCheckpoint {
@@ -1101,6 +1246,7 @@ pub struct MarkdownParserCheckpoint {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::syntax::parse_document;
 
     #[test]
     fn rewind_removes_only_speculative_link_definitions() {
@@ -1121,5 +1267,39 @@ mod tests {
             parser.state.link_reference_definitions.ranges_by_hash.len(),
             1
         );
+    }
+
+    #[test]
+    fn rewind_preserves_unresolved_reference_lookups() {
+        let mut parser = MarkdownParser::new("", MarkdownParserOptions::default());
+        let checkpoint = parser.checkpoint();
+
+        assert!(!parser.has_link_reference_definition("missing"));
+        parser.rewind(checkpoint);
+
+        assert_eq!(parser.unresolved_reference_lookup_count(), 1);
+    }
+
+    #[test]
+    fn deferred_inlines_track_unresolved_reference_lookups() {
+        let mut direct_link = MarkdownParser::new(
+            "[link](/url)\n\n[ref]: /url\n",
+            MarkdownParserOptions::default(),
+        );
+        parse_document(&mut direct_link);
+        let direct_output = direct_link.finish();
+
+        assert_eq!(direct_output.deferred_inlines.len(), 1);
+        assert!(!direct_output.deferred_inlines[0].has_unresolved_reference_lookup());
+
+        let mut forward_reference = MarkdownParser::new(
+            "[link][ref]\n\n[ref]: /url\n",
+            MarkdownParserOptions::default(),
+        );
+        parse_document(&mut forward_reference);
+        let forward_output = forward_reference.finish();
+
+        assert_eq!(forward_output.deferred_inlines.len(), 1);
+        assert!(forward_output.deferred_inlines[0].has_unresolved_reference_lookup());
     }
 }

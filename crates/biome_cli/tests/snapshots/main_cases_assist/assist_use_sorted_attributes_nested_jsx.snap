@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "useSortedAttributes": "on"
+      }
+    }
+  },
+  "formatter": { "enabled": false },
+  "linter": { "enabled": false }
+}
+```
+
+## `file.jsx`
+
+```jsx
+export const A = <Outer a={<Inner a={2} z={1} />} z="x" />;
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

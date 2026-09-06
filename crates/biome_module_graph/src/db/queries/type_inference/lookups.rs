@@ -149,7 +149,15 @@ fn infer_binding_type_impl<'db>(
 
     let reference = js_info.raw_binding_types.get(&range)?.clone();
     let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
-    Some(ctx.resolve(&reference))
+    let ty = ctx.resolve(&reference);
+    // Build a declaration graph only when the selected lookup crosses an
+    // import cycle. Local and acyclic lookups stay on the ordinary tracked
+    // query path.
+    Some(if ctx.encountered_inference_cycle() {
+        ctx.resolve_root_binding(range)
+    } else {
+        ty
+    })
 }
 
 fn infer_local_type_impl<'db>(
@@ -166,8 +174,16 @@ fn infer_local_type_impl<'db>(
         return None;
     }
 
+    let type_id = TypeId::new(type_id.index());
     let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
-    Some(ctx.resolve_raw_type_id(TypeId::new(type_id.index())))
+    let ty = ctx.resolve_raw_type_id(type_id);
+    // The initial pass preserves the cheaper lookup path. A cycle activates a
+    // root retry that can distinguish an import cycle from a dependency cycle.
+    Some(if ctx.encountered_inference_cycle() {
+        ctx.resolve_root_declaration(type_id)
+    } else {
+        ty
+    })
 }
 
 // #endregion

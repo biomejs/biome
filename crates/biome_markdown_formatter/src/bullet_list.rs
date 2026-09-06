@@ -18,7 +18,7 @@ use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdBlockList,
     MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
-    MdIndentCodeBlock, MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
+    MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction};
 use std::collections::VecDeque;
@@ -151,9 +151,12 @@ impl OrderedMarkerPlan {
 impl Format<MarkdownFormatContext> for BulletListPrinter {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let mut joiner = f.join();
+        let mut previous: Option<&ListBullet> = None;
 
-        for (index, item) in self.bullets.iter().enumerate() {
-            if index > 0 && content_ends_with_quote_prefix(&self.bullets[index - 1].node) {
+        for item in &self.bullets {
+            if let Some(previous) = previous
+                && content_ends_with_quote_prefix(&previous.node)
+            {
                 let line_prefix = quote_line_prefix(item.node.syntax())?;
                 if !line_prefix.is_empty() {
                     joiner.entry(&format_with(|f| {
@@ -168,6 +171,7 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
                 }
             }
             joiner.entry(item);
+            previous = Some(item);
         }
         joiner.finish()
     }
@@ -212,8 +216,9 @@ fn is_nested(list: &MdBulletList) -> bool {
 
 /// Checks whether the indentation before the marker needs to be kept.
 ///
-/// Nested lists discard this indentation. A top-level list keeps it when the
-/// bullet item is followed by a blank line and an indented code block.
+/// Nested lists discard this indentation. A top-level list keeps it when its
+/// next content sibling is an indented code block. Newline and quote-prefix
+/// siblings between the list and code block do not contain document content.
 ///
 /// ```md
 ///  -    one
@@ -223,21 +228,29 @@ fn is_nested(list: &MdBulletList) -> bool {
 ///
 /// Source: <https://spec.commonmark.org/dingus/?text=%20-%20%20%20%20one%0A%0A%20%20%20%20%20two%0A>
 fn should_keep_pre_marker(list: &MdBulletList) -> bool {
-    !is_nested(list)
-        && list
-            .syntax()
-            .ancestors()
-            .find(|ancestor| {
-                MdBulletListItem::can_cast(ancestor.kind())
-                    || MdOrderedListItem::can_cast(ancestor.kind())
-            })
-            .is_some_and(|list_item| {
-                list_item
-                    .siblings(Direction::Next)
-                    // Sibling iteration begins with `list_item` itself.
-                    .skip(1)
-                    .any(|sibling| MdIndentCodeBlock::can_cast(sibling.kind()))
-            })
+    if is_nested(list) {
+        return false;
+    }
+
+    let Some(list_item) = list.syntax().ancestors().find(|ancestor| {
+        MdBulletListItem::can_cast(ancestor.kind()) || MdOrderedListItem::can_cast(ancestor.kind())
+    }) else {
+        return false;
+    };
+
+    for sibling in list_item.siblings(Direction::Next).skip(1) {
+        let Some(block) = AnyMdBlock::cast(sibling) else {
+            return false;
+        };
+
+        match block {
+            block if block.is_newline() => {}
+            AnyMdBlock::MdQuotePrefix(_) => {}
+            block => return block.is_indent_block(),
+        }
+    }
+
+    false
 }
 
 impl Format<MarkdownFormatContext> for ListBullet {

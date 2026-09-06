@@ -6,7 +6,7 @@ use biome_console::markup;
 
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
-use biome_resolver::is_builtin_node_module;
+use biome_resolver::{is_builtin_bun_module, is_builtin_node_module};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions;
 use camino::Utf8PathBuf;
@@ -190,8 +190,8 @@ impl Rule for NoUndeclaredDependencies {
             || ctx.name() == Some(package_name)
             // ignore Node.js builtin modules
             || is_builtin_node_module(package_name)
-            // Ignore `bun` import
-            || package_name == "bun"
+            // ignore Bun builtin modules
+            || is_builtin_bun_module(package_name)
         {
             return None;
         }

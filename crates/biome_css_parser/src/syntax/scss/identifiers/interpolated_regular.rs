@@ -2,8 +2,9 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::scss::expression::parse_scss_regular_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    is_at_identifier_hyphen, is_at_scss_interpolated_identifier, is_nth_at_identifier_hyphen_part,
-    is_nth_source_tight, parse_identifier_hyphen, parse_identifier_hyphen_part,
+    is_at_identifier_hyphen, is_at_identifier_number_part, is_at_scss_interpolated_identifier,
+    is_nth_at_identifier_hyphen_part, is_nth_source_tight, parse_identifier_hyphen,
+    parse_identifier_hyphen_part, parse_identifier_number_part,
     parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::{
@@ -56,6 +57,28 @@ pub(crate) fn parse_scss_interpolated_name(p: &mut CssParser) -> ParsedSyntax {
 /// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
 pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_interpolated_identifier_with_part(p, parse_regular_identifier_part)
+}
+
+/// Parses a source-tight interpolated attribute name, including numeric parts.
+///
+/// ```scss
+/// [data-#{$name}1] {}
+/// ```
+#[inline]
+pub(crate) fn parse_scss_interpolated_attribute_name(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_interpolated_identifier_with_part(p, parse_attribute_name_identifier_part)
+}
+
+/// Parses an interpolated identifier with caller-defined source-tight suffix parts.
+///
+/// ```scss
+/// [data-#{$name}1] {}
+/// ```
+fn parse_scss_interpolated_identifier_with_part(
+    p: &mut CssParser,
+    parse_part: fn(&mut CssParser) -> ParsedSyntax,
+) -> ParsedSyntax {
     if !is_nth_at_scss_interpolated_identifier(p, 0) {
         return Absent;
     }
@@ -72,8 +95,7 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
         return Present(first_fragment);
     }
 
-    let parts =
-        parse_scss_interpolated_identifier_parts(p, first_fragment, parse_regular_identifier_part);
+    let parts = parse_scss_interpolated_identifier_parts(p, first_fragment, parse_part);
 
     Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
@@ -224,5 +246,19 @@ fn parse_regular_identifier_part(p: &mut CssParser) -> ParsedSyntax {
         parse_identifier_hyphen(p)
     } else {
         parse_regular_identifier(p)
+    }
+}
+
+/// Parses a regular or numeric part of an interpolated attribute name.
+///
+/// ```scss
+/// [data-#{$name}1] {}
+/// ```
+#[inline]
+fn parse_attribute_name_identifier_part(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_identifier_number_part(p) {
+        parse_identifier_number_part(p, CssLexContext::Regular)
+    } else {
+        parse_regular_identifier_part(p)
     }
 }

@@ -181,23 +181,88 @@ use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
 use camino::{Utf8Path, Utf8PathBuf};
-use parking_lot::Mutex;
+use parking_lot::{Mutex, MutexGuard};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::panic::resume_unwind;
-use std::sync::atomic::{AtomicUsize, Ordering};
+#[cfg(feature = "module_graph")]
+use std::sync::atomic::AtomicBool;
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
 use tracing::error;
 
 /// Represents the state of the database in the workspace.
 pub struct DbState {
     storage: DbStorage,
-    pub(crate) path_info_cache: PathInfoCache,
+    pub(crate) path_info_cache: Arc<PathInfoCache>,
+    /// Records module-map changes made by a scanner epoch's shared view.
+    #[cfg(feature = "module_graph")]
+    scanner_module_graph_dirty: Option<Arc<AtomicBool>>,
 }
 
 enum DbStorage {
     Shared(SharedWorkspaceDb),
     Owned(OwnedDb),
+}
+
+/// Database view used for the duration of a project scan.
+///
+/// For owned storage, the epoch holds the setter gate and supplies a shared
+/// replacement-update view over the same Salsa storage and workspace
+/// collections. This keeps individual scanner updates from announcing pending
+/// Salsa writes. Dropping the epoch discards the view before publishing one
+/// module graph invalidation and releasing the setter gate.
+/// Shared storage needs no setter gate and reuses its existing update mode.
+pub(crate) struct ScannerDbEpoch<'a> {
+    // Struct fields drop in declaration order. The shared view must be gone
+    // before the finalizer invokes a setter on the canonical database.
+    view: DbState,
+    _finalizer: ScannerDbEpochFinalizer<'a>,
+}
+
+impl ScannerDbEpoch<'_> {
+    /// Returns the database state scanner operations must use during the epoch.
+    pub(crate) fn view(&self) -> &DbState {
+        &self.view
+    }
+}
+
+/// Publishes accumulated scanner changes before releasing the setter gate.
+enum ScannerDbEpochFinalizer<'a> {
+    Shared,
+    Owned {
+        #[cfg(feature = "module_graph")]
+        owner: &'a OwnedDb,
+        setter_guard: MutexGuard<'a, ()>,
+        #[cfg(feature = "module_graph")]
+        module_graph_dirty: Arc<AtomicBool>,
+    },
+}
+
+impl Drop for ScannerDbEpochFinalizer<'_> {
+    fn drop(&mut self) {
+        match self {
+            Self::Shared => {}
+            Self::Owned {
+                #[cfg(feature = "module_graph")]
+                owner,
+                setter_guard,
+                #[cfg(feature = "module_graph")]
+                module_graph_dirty,
+            } => {
+                #[cfg(feature = "module_graph")]
+                if module_graph_dirty.load(Ordering::Acquire) {
+                    owner.with_setter_gate_held(setter_guard, WorkspaceDb::invalidate_module_graph);
+                }
+
+                #[cfg(not(feature = "module_graph"))]
+                let _ = setter_guard;
+            }
+        }
+    }
 }
 
 // Counts database forks held by the current thread.
@@ -288,12 +353,27 @@ struct OwnedDb {
     /// The database instance itself. The lock is held only briefly to create
     /// a clone, and for the whole duration of a setter-based update.
     db: Mutex<WorkspaceDb>,
+    /// Serializes setter intent and keeps setters outside scanner epochs.
+    /// Queued setters do not announce pending writes while waiting here.
+    setter_lock: Mutex<()>,
     /// The collections shared between the database and all its clones. See
     /// [WorkspaceDbData].
     data: WorkspaceDbData,
-    /// How many threads are currently applying, or waiting to apply, a
-    /// setter-based update.
+    /// Whether a setter currently owns the setter gate and is applying, or
+    /// waiting to apply, an update.
     pending_setters: AtomicUsize,
+    /// Number of setter attempts observed before acquiring the setter gate.
+    #[cfg(test)]
+    setter_gate_attempts: AtomicUsize,
+}
+
+/// Clears the pending-setter signal when a setter completes or unwinds.
+struct PendingSetterGuard<'a>(&'a AtomicUsize);
+
+impl Drop for PendingSetterGuard<'_> {
+    fn drop(&mut self) {
+        self.0.fetch_sub(1, Ordering::Release);
+    }
 }
 
 impl OwnedDb {
@@ -301,8 +381,11 @@ impl OwnedDb {
         let data = db.data();
         Self {
             db: Mutex::new(db),
+            setter_lock: Mutex::new(()),
             data,
             pending_setters: AtomicUsize::new(0),
+            #[cfg(test)]
+            setter_gate_attempts: AtomicUsize::new(0),
         }
     }
 
@@ -326,13 +409,6 @@ impl OwnedDb {
     }
 
     fn with_setter<R>(&self, f: impl FnOnce(&mut WorkspaceDb) -> R) -> R {
-        struct PendingSetterGuard<'a>(&'a AtomicUsize);
-        impl Drop for PendingSetterGuard<'_> {
-            fn drop(&mut self) {
-                self.0.fetch_sub(1, Ordering::Release);
-            }
-        }
-
         if LIVE_READS.with(|reads| reads.get()) != 0 {
             debug_assert!(
                 false,
@@ -344,6 +420,21 @@ impl OwnedDb {
             resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
+        #[cfg(test)]
+        self.setter_gate_attempts.fetch_add(1, Ordering::Release);
+        let setter_guard = self.setter_lock.lock();
+        self.with_setter_gate_held(&setter_guard, f)
+    }
+
+    /// Runs a setter after the caller has acquired this database's setter gate.
+    ///
+    /// The guard keeps queued setters from announcing a pending write until the
+    /// current operation has completed.
+    fn with_setter_gate_held<R>(
+        &self,
+        _setter_guard: &MutexGuard<'_, ()>,
+        f: impl FnOnce(&mut WorkspaceDb) -> R,
+    ) -> R {
         self.pending_setters.fetch_add(1, Ordering::Release);
         let _guard = PendingSetterGuard(&self.pending_setters);
         let mut db = self.db.lock();
@@ -355,7 +446,9 @@ impl Default for DbState {
     fn default() -> Self {
         Self {
             storage: DbStorage::Shared(SharedWorkspaceDb::default()),
-            path_info_cache: PathInfoCache::default(),
+            path_info_cache: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            scanner_module_graph_dirty: None,
         }
     }
 }
@@ -364,7 +457,55 @@ impl DbState {
     pub fn lsp() -> Self {
         Self {
             storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::default())),
-            path_info_cache: PathInfoCache::default(),
+            path_info_cache: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            scanner_module_graph_dirty: None,
+        }
+    }
+
+    /// Creates the database epoch used by one project scan.
+    ///
+    /// Owned storage waits for the setter gate without announcing a pending
+    /// Salsa write, then returns a replacement-update view. This leaves reads
+    /// available while preventing setter-based updates from overlapping the
+    /// scan. Shared storage returns an equivalent shared view without locking.
+    pub(crate) fn scanner_epoch(&self) -> ScannerDbEpoch<'_> {
+        #[cfg(feature = "module_graph")]
+        let module_graph_dirty = Arc::new(AtomicBool::new(false));
+
+        match &self.storage {
+            DbStorage::Shared(shared_db) => ScannerDbEpoch {
+                view: Self {
+                    storage: DbStorage::Shared(shared_db.clone()),
+                    path_info_cache: self.path_info_cache.clone(),
+                    #[cfg(feature = "module_graph")]
+                    scanner_module_graph_dirty: None,
+                },
+                _finalizer: ScannerDbEpochFinalizer::Shared,
+            },
+            DbStorage::Owned(owner) => {
+                let setter_guard = owner.setter_lock.lock();
+                let shared_db = {
+                    let db = owner.db.lock();
+                    SharedWorkspaceDb::from_workspace_db(db.clone())
+                };
+
+                ScannerDbEpoch {
+                    view: Self {
+                        storage: DbStorage::Shared(shared_db),
+                        path_info_cache: self.path_info_cache.clone(),
+                        #[cfg(feature = "module_graph")]
+                        scanner_module_graph_dirty: Some(module_graph_dirty.clone()),
+                    },
+                    _finalizer: ScannerDbEpochFinalizer::Owned {
+                        #[cfg(feature = "module_graph")]
+                        owner,
+                        setter_guard,
+                        #[cfg(feature = "module_graph")]
+                        module_graph_dirty,
+                    },
+                }
+            }
         }
     }
 
@@ -512,7 +653,11 @@ impl DbState {
 
     pub(crate) fn unload_path(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().data().unload_path(path),
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().data().unload_path(path);
+                #[cfg(feature = "module_graph")]
+                self.mark_module_graph_dirty();
+            }
             DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
         }
     }
@@ -540,6 +685,7 @@ impl DbState {
                 let db = shared_db.fork();
                 let module = ModuleInfo::new(&db, path.clone(), kind);
                 db.data().insert_module(path, module);
+                self.mark_module_graph_dirty();
                 module
             }
             DbStorage::Owned(db) => db.with_setter(|db| db.update_or_insert_module(path, kind)),
@@ -549,8 +695,19 @@ impl DbState {
     #[cfg(feature = "module_graph")]
     pub(crate) fn remove_module(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().data().remove_module(path),
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().data().remove_module(path);
+                self.mark_module_graph_dirty();
+            }
             DbStorage::Owned(db) => db.with_setter(|db| db.remove_module(path)),
+        }
+    }
+
+    /// Records that a replacement update changed the external module map.
+    #[cfg(feature = "module_graph")]
+    fn mark_module_graph_dirty(&self) {
+        if let Some(dirty) = &self.scanner_module_graph_dirty {
+            dirty.store(true, Ordering::Release);
         }
     }
 
@@ -562,6 +719,15 @@ impl DbState {
         match &self.storage {
             DbStorage::Shared(_) => 0,
             DbStorage::Owned(db) => db.pending_setters.load(Ordering::Acquire),
+        }
+    }
+
+    /// Returns the number of setters that reached the setter gate.
+    #[cfg(test)]
+    pub(crate) fn setter_gate_attempts(&self) -> usize {
+        match &self.storage {
+            DbStorage::Shared(_) => 0,
+            DbStorage::Owned(db) => db.setter_gate_attempts.load(Ordering::Acquire),
         }
     }
 }
@@ -710,6 +876,59 @@ mod tests {
 
         drop(db);
         setter.join().unwrap();
+    }
+
+    /// A queued setter must not extend read cancellation while another setter
+    /// already owns the database. Only the setter that can make progress should
+    /// contribute to `pending_setters`.
+    #[test]
+    fn owned_storage_queues_only_one_pending_setter() {
+        let state = Arc::new(DbState::lsp());
+        let path = Utf8PathBuf::from("test.js");
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+
+        let db = state.fork();
+        let first_setter = {
+            let state = state.clone();
+            let path = path.clone();
+            thread::spawn(move || {
+                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+            })
+        };
+        wait_for_pending_setter(&state);
+
+        let second_start = Arc::new(Barrier::new(2));
+        let second_setter = {
+            let state = state.clone();
+            let path = path.clone();
+            let second_start = second_start.clone();
+            thread::spawn(move || {
+                let parsed = parse_js("let c = 3;");
+                second_start.wait();
+                state.update_parsed_file(&path, parsed, 0, vec![]);
+            })
+        };
+        second_start.wait();
+
+        let deadline = std::time::Instant::now() + Duration::from_secs(1);
+        let second_was_pending = loop {
+            if state.pending_setters() > 1 {
+                break true;
+            }
+            if std::time::Instant::now() >= deadline {
+                break false;
+            }
+            thread::yield_now();
+        };
+
+        drop(db);
+        first_setter.join().unwrap();
+        second_setter.join().unwrap();
+
+        assert!(
+            !second_was_pending,
+            "a setter waiting behind another setter prolonged read cancellation"
+        );
     }
 
     /// Scanner bookkeeping must remain available while another thread is

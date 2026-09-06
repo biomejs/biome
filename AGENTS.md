@@ -23,6 +23,7 @@ This file contains rules that apply to every automated contribution. Detailed wo
 - Make the smallest change that satisfies the requested behavior.
 - Add tests for code changes. Bug fixes require a case that fails without the fix.
 - Run the narrowest relevant tests first, then broader checks when justified.
+- Run the tests of the current crate to check possible regressions.
 - Review generated snapshots as behavior, not disposable output.
 - Run `just f` and `just l` before committing.
 
@@ -30,11 +31,10 @@ Load [testing-codegen](./.claude/skills/testing-codegen/SKILL.md) for test fixtu
 
 Required generated artifacts:
 
-| Changed source | Required command |
-| --- | --- |
-| Grammar `.ungram` | `just gen-grammar <lang>` |
-| Formatter in `*_formatter` | `just gen-formatter <lang>` |
-| Lint rule in `*_analyze` | `just gen-rules` and `just gen-configuration` |
+| Changed source           | Required command                                                       |
+|--------------------------|------------------------------------------------------------------------|
+| Grammar `.ungram`        | `just gen-grammar <lang>`                                              |
+| Lint rule in `*_analyze` | `just gen-rules` and `just gen-configuration` if you changed rule name |
 
 Bindings and other full analyzer outputs may be left to the CI Autofix job unless they are needed for local verification.
 

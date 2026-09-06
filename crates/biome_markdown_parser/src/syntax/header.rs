@@ -24,6 +24,7 @@
 //! ---------
 //! ```
 
+use crate::MarkdownSyntaxFeatures;
 use crate::parser::{DeferredInlineFlavor, MarkdownParser, MarkdownParserCheckpoint};
 use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::inline::EmphasisContext;
@@ -32,7 +33,7 @@ use biome_markdown_syntax::{MarkdownSyntaxKind, T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::{
-    Parser,
+    Parser, SyntaxFeature,
     prelude::ParsedSyntax::{self, *},
 };
 use std::rc::Rc;
@@ -43,13 +44,11 @@ const MAX_HEADER_HASHES: usize = 6;
 /// Check if we might be at an ATX header.
 /// We only check if the current token is a HASH - full validation happens in parse_header.
 pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if !p.at_line_start() && !p.at_start_of_input() {
-            return false;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        p.at(T![#])
-    })
+    if !p.is_at_line_start() {
+        return false;
+    }
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.nth_at(indent.token_count, T![#])
 }
 
 /// Parse an ATX header.
@@ -168,11 +167,11 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
         return;
     }
 
-    // Set up emphasis context for header content (single line only)
-    let prev_context = set_header_emphasis_context(p);
-
     // Parse content as a paragraph containing inline items
     let deferred = p.start_deferred_inline(DeferredInlineFlavor::AtxParagraph);
+
+    // Set up emphasis context for header content (single line only)
+    let prev_context = set_header_emphasis_context(p);
     let m = p.start();
     let inline_m = p.start();
 
@@ -290,9 +289,12 @@ fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisCont
         source
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
-    let context = EmphasisContext::new(inline_source, base_offset, |label| {
-        p.has_link_reference_definition(label)
-    });
+    let context = EmphasisContext::new(
+        inline_source,
+        base_offset,
+        MarkdownSyntaxFeatures::Gfm.is_supported(p),
+        |label| p.has_link_reference_definition(label),
+    );
     p.set_new_emphasis_context(context)
 }
 

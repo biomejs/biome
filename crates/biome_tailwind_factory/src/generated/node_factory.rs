@@ -433,16 +433,22 @@ pub fn tw_root(candidates: TwCandidateList, eof_token: SyntaxToken) -> TwRootBui
         candidates,
         eof_token,
         bom_token: None,
+        leading_whitespace_token: None,
     }
 }
 pub struct TwRootBuilder {
     candidates: TwCandidateList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
+    leading_whitespace_token: Option<SyntaxToken>,
 }
 impl TwRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_leading_whitespace_token(mut self, leading_whitespace_token: SyntaxToken) -> Self {
+        self.leading_whitespace_token = Some(leading_whitespace_token);
         self
     }
     pub fn build(self) -> TwRoot {
@@ -450,6 +456,8 @@ impl TwRootBuilder {
             TailwindSyntaxKind::TW_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
+                self.leading_whitespace_token
+                    .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.candidates.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
@@ -561,16 +569,25 @@ where
         }),
     ))
 }
-pub fn tw_candidate_list<I>(items: I) -> TwCandidateList
+pub fn tw_candidate_list<I, S>(items: I, separators: S) -> TwCandidateList
 where
     I: IntoIterator<Item = AnyTwFullCandidate>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = TailwindSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     TwCandidateList::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_CANDIDATE_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn tw_variant_list<I, S>(items: I, separators: S) -> TwVariantList

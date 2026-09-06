@@ -6,7 +6,7 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
-fn should_error_when_interpolation_is_disabled() {
+fn should_not_error_when_interpolation_is_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -35,11 +35,11 @@ fn should_error_when_interpolation_is_disabled() {
         Args::from(["format", html_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_error_when_interpolation_is_disabled",
+        "should_not_error_when_interpolation_is_disabled",
         fs,
         console,
         result,

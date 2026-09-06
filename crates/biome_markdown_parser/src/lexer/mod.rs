@@ -12,6 +12,7 @@ use biome_parser::lexer::{
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::{is_unicode_punctuation, lookup_byte};
+use std::cell::Cell;
 
 use crate::syntax::{
     MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
@@ -49,6 +50,8 @@ pub enum MarkdownLexContext {
     /// spaces/tabs into a single token so the parser can capture them as
     /// `MD_LIST_POST_MARKER_SPACE`.
     ListPostMarker,
+    /// Inside a GFM table row. Pipes are cell separators.
+    Table,
 }
 
 impl LexContext for MarkdownLexContext {
@@ -120,6 +123,7 @@ pub(crate) struct MarkdownLexer<'src> {
     /// position and the token kind, set by the parser after measuring the
     /// span.
     relex_span: Option<(usize, MarkdownSyntaxKind)>,
+    frontmatter_fence: Cell<Option<(usize, usize)>>,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -272,6 +276,7 @@ impl<'src> MarkdownLexer<'src> {
             diagnostics: vec![],
             force_ordered_list_marker: false,
             relex_span: None,
+            frontmatter_fence: Cell::new(None),
         }
     }
 
@@ -284,7 +289,18 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     pub fn has_frontmatter_closing_fence(&self) -> bool {
-        self.find_frontmatter_fence(self.position).is_some()
+        if self
+            .frontmatter_fence
+            .get()
+            .is_some_and(|(start, _)| start == self.position)
+        {
+            return true;
+        }
+
+        let fence = self.find_frontmatter_fence(self.position);
+        self.frontmatter_fence
+            .set(fence.map(|fence| (self.position, fence)));
+        fence.is_some()
     }
 
     /// Sets the target for the next [MarkdownReLexContext::Span] re-lex.
@@ -293,6 +309,17 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     pub(crate) fn consume_token(
+        &mut self,
+        current: u8,
+        context: MarkdownLexContext,
+    ) -> MarkdownSyntaxKind {
+        match context {
+            MarkdownLexContext::Table => self.consume_token_impl::<true>(current, context),
+            _ => self.consume_token_impl::<false>(current, context),
+        }
+    }
+
+    fn consume_token_impl<const TABLE: bool>(
         &mut self,
         current: u8,
         context: MarkdownLexContext,
@@ -309,6 +336,9 @@ impl<'src> MarkdownLexer<'src> {
         if matches!(context, MarkdownLexContext::Frontmatter) {
             return self.consume_frontmatter();
         }
+        if TABLE && current == b'|' {
+            return self.consume_byte(PIPE);
+        }
         match dispatched {
             // Whitespace handling is context-sensitive and order-dependent:
             // 1. Check newline first (highest priority - block separator)
@@ -324,6 +354,8 @@ impl<'src> MarkdownLexer<'src> {
                     self.consume_newline()
                 } else if matches!(context, MarkdownLexContext::ListPostMarker) {
                     self.consume_list_post_marker_whitespace()
+                } else if TABLE && self.is_table_cell_spacing() {
+                    self.consume_table_whitespace()
                 } else if matches!(context, MarkdownLexContext::ThematicBreakParts) {
                     // In ThematicBreakParts context, emit one MD_INDENT_CHAR per space/tab.
                     self.advance(1);
@@ -331,7 +363,7 @@ impl<'src> MarkdownLexer<'src> {
                 } else if matches!(context, MarkdownLexContext::CodeSpan) {
                     // In code span context, whitespace is literal content.
                     // No hard-line-break detection - the renderer normalizes line endings to spaces.
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 } else if matches!(context, MarkdownLexContext::LinkDefinition) {
                     // In link definition context, whitespace separates tokens.
                     // We consume it as textual literal so it's not treated as trivia by the parser.
@@ -359,16 +391,19 @@ impl<'src> MarkdownLexer<'src> {
                     self.consume_whitespace()
                 } else {
                     // Whitespace is part of text in Markdown.
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 }
             }
-            MUL | MIN | IDT => self.consume_thematic_break_or_emphasis(dispatched, context),
+            MIN if TABLE => self.consume_byte(MINUS),
+            MUL | MIN | IDT => {
+                self.consume_thematic_break_or_emphasis::<TABLE>(dispatched, context)
+            }
             PLS => self.consume_byte(PLUS),
             HAS => {
                 if self.is_at_heading_hash() {
                     self.consume_byte(T![#])
                 } else {
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 }
             }
             TPL => self.consume_backtick(),
@@ -379,7 +414,7 @@ impl<'src> MarkdownLexer<'src> {
                 if self.is_at_image_start() {
                     self.consume_byte(BANG)
                 } else {
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 }
             }
             BTO => self.consume_byte(L_BRACK),
@@ -391,23 +426,23 @@ impl<'src> MarkdownLexer<'src> {
                 if matches!(context, MarkdownLexContext::LinkDefinition) {
                     self.consume_byte(L_PAREN)
                 } else {
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 }
             }
             PNC => {
                 if matches!(context, MarkdownLexContext::LinkDefinition) {
                     self.consume_byte(R_PAREN)
                 } else {
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 }
             }
             COL => self.consume_byte(COLON),
-            AMP => self.consume_entity_or_textual(context),
+            AMP => self.consume_entity_or_textual::<TABLE>(context),
             BSL => {
                 // Per CommonMark §6.1, backslash escapes are NOT processed inside code spans.
                 // Backslash is literal, so `\`` produces a literal backslash followed by backtick.
                 if matches!(context, MarkdownLexContext::CodeSpan) {
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 } else {
                     self.consume_escape()
                 }
@@ -428,7 +463,7 @@ impl<'src> MarkdownLexer<'src> {
                 {
                     self.consume_ordered_list_marker_or_textual()
                 } else {
-                    self.consume_textual(context)
+                    self.consume_textual_impl::<TABLE>(context)
                 }
             }
         }
@@ -505,7 +540,10 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Try to consume entity or numeric character reference per CommonMark §6.2.
-    fn consume_entity_or_textual(&mut self, context: MarkdownLexContext) -> MarkdownSyntaxKind {
+    fn consume_entity_or_textual<const TABLE: bool>(
+        &mut self,
+        context: MarkdownLexContext,
+    ) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
         debug_assert!(matches!(self.current_byte(), Some(b'&')));
 
@@ -516,7 +554,7 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // Not a valid entity - consume as textual
-        self.consume_textual(context)
+        self.consume_textual_impl::<TABLE>(context)
     }
 
     /// Check if text matches entity reference pattern. Returns length if valid.
@@ -742,7 +780,11 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         self.position = self
-            .find_frontmatter_fence(self.position)
+            .frontmatter_fence
+            .take()
+            .map(|(_, fence)| fence)
+            .filter(|fence| *fence >= self.position)
+            .or_else(|| self.find_frontmatter_fence(self.position))
             .unwrap_or(self.end);
         MD_FRONTMATTER_LITERAL
     }
@@ -763,6 +805,7 @@ impl<'src> MarkdownLexer<'src> {
             .then_some(position - start)
     }
 
+    #[inline]
     fn find_frontmatter_fence(&self, start: usize) -> Option<usize> {
         let source = self.source.as_bytes();
         let mut position = start;
@@ -1012,7 +1055,7 @@ impl<'src> MarkdownLexer<'src> {
     /// - 3+ dashes + newline: thematic break (parser may convert to setext if after paragraph)
     ///
     /// This distinction is critical for correct heading vs horizontal rule parsing.
-    fn consume_thematic_break_or_emphasis(
+    fn consume_thematic_break_or_emphasis<const TABLE: bool>(
         &mut self,
         dispatched: Dispatch,
         context: MarkdownLexContext,
@@ -1027,10 +1070,10 @@ impl<'src> MarkdownLexer<'src> {
                 // Only underscore should be treated as emphasis marker
                 match self.current_byte() {
                     Some(b'_') => b'_',
-                    _ => return self.consume_textual(context),
+                    _ => return self.consume_textual_impl::<TABLE>(context),
                 }
             }
-            _ => return self.consume_textual(context),
+            _ => return self.consume_textual_impl::<TABLE>(context),
         };
 
         // Save position to restore if not a thematic break
@@ -1156,7 +1199,7 @@ impl<'src> MarkdownLexer<'src> {
                 if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                     // Too many digits, not a valid marker
                     self.position = start_position;
-                    return self.consume_textual(MarkdownLexContext::Regular);
+                    return self.consume_textual_impl::<false>(MarkdownLexContext::Regular);
                 }
             } else {
                 break;
@@ -1166,14 +1209,14 @@ impl<'src> MarkdownLexer<'src> {
         // Must have at least one digit
         if digit_count == 0 {
             self.position = start_position;
-            return self.consume_textual(MarkdownLexContext::Regular);
+            return self.consume_textual_impl::<false>(MarkdownLexContext::Regular);
         }
 
         // Must be followed by . or )
         let delimiter = self.current_byte();
         if !matches!(delimiter, Some(b'.' | b')')) {
             self.position = start_position;
-            return self.consume_textual(MarkdownLexContext::Regular);
+            return self.consume_textual_impl::<false>(MarkdownLexContext::Regular);
         }
         self.advance(1);
 
@@ -1183,7 +1226,7 @@ impl<'src> MarkdownLexer<'src> {
             && !matches!(self.current_byte(), Some(b'\n' | b'\r'))
         {
             self.position = start_position;
-            return self.consume_textual(MarkdownLexContext::Regular);
+            return self.consume_textual_impl::<false>(MarkdownLexContext::Regular);
         }
 
         MD_ORDERED_LIST_MARKER
@@ -1216,7 +1259,7 @@ impl<'src> MarkdownLexer<'src> {
 
         // Not a valid setext underline - restore position and consume as textual
         self.position = start_position;
-        self.consume_textual(MarkdownLexContext::Regular)
+        self.consume_textual_impl::<false>(MarkdownLexContext::Regular)
     }
 
     /// Consume backtick(s).
@@ -1247,10 +1290,50 @@ impl<'src> MarkdownLexer<'src> {
         BACKTICK
     }
 
-    /// Consume tilde(s) - either single for other uses or triple for fenced code blocks.
+    fn consume_table_whitespace(&mut self) -> MarkdownSyntaxKind {
+        while matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            self.advance(1);
+        }
+        WHITESPACE
+    }
+
+    fn is_table_cell_spacing(&self) -> bool {
+        let bytes = self.source.as_bytes();
+        let mut end = self.position;
+        while end < self.end && matches!(bytes.get(end), Some(b' ' | b'\t')) {
+            end += 1;
+        }
+
+        let starts_cell = match self.position.checked_sub(1) {
+            None => true,
+            Some(index) => match bytes.get(index) {
+                Some(b'\n' | b'\r') => true,
+                Some(b'|') => !self.is_escaped_pipe(index),
+                _ => false,
+            },
+        };
+        let ends_cell = end == self.end || matches!(bytes.get(end), Some(b'|' | b'\n' | b'\r'));
+
+        starts_cell || ends_cell
+    }
+
+    fn is_escaped_pipe(&self, index: usize) -> bool {
+        let Some(before) = self.source.as_bytes().get(..index) else {
+            return false;
+        };
+        before
+            .iter()
+            .rev()
+            .take_while(|byte| **byte == b'\\')
+            .count()
+            % 2
+            == 1
+    }
+
+    /// Consumes a run of tildes.
     ///
     /// At line start with 3+ tildes: emits TRIPLE_TILDE for fenced code blocks.
-    /// Otherwise: emits TILDE containing all consecutive tildes.
+    /// Elsewhere, exactly two tildes emit DOUBLE_TILDE and every other run emits TILDE.
     fn consume_tilde(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
@@ -1264,6 +1347,11 @@ impl<'src> MarkdownLexer<'src> {
         if self.after_newline && count >= MIN_FENCE_RUN_LENGTH {
             self.advance(count);
             return TRIPLE_TILDE;
+        }
+
+        if count == 2 {
+            self.advance(count);
+            return DOUBLE_TILDE;
         }
 
         // Otherwise: emit all consecutive tildes as a single TILDE token
@@ -1328,7 +1416,10 @@ impl<'src> MarkdownLexer<'src> {
     /// Consumes leading whitespace separately if followed by an ordered list marker.
     /// This prevents whitespace from being merged with the marker, maintaining correct token boundaries.
     #[inline]
-    fn consume_textual(&mut self, context: MarkdownLexContext) -> MarkdownSyntaxKind {
+    fn consume_textual_impl<const TABLE: bool>(
+        &mut self,
+        context: MarkdownLexContext,
+    ) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
         if self.force_ordered_list_marker
@@ -1378,6 +1469,9 @@ impl<'src> MarkdownLexer<'src> {
         // cannot be syntax here, they stay part of the text.
         // Spaces and tabs are regular text content (except in the LinkDefinition context).
         while let Some(byte) = self.current_byte() {
+            if TABLE && (byte == b'|' || self.is_table_cell_spacing()) {
+                break;
+            }
             if matches!(context, MarkdownLexContext::LinkDefinition)
                 && (byte == b' ' || byte == b'\t')
             {
@@ -1711,7 +1805,7 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
             // `consume_textual` always consumes the first character, then
             // stops at the next character that could be syntax.
             Some(_) if context == MarkdownReLexContext::TextualFallback => {
-                self.consume_textual(MarkdownLexContext::Regular)
+                self.consume_textual_impl::<false>(MarkdownLexContext::Regular)
             }
             // Consume everything up to the end position the parser measured
             // as one token of the kind the parser chose.

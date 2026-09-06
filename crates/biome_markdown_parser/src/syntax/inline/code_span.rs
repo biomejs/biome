@@ -48,7 +48,7 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
             }
 
             // Blank line = paragraph boundary, terminates search
-            if p.at(NEWLINE) && p.at_blank_line() {
+            if p.at(NEWLINE) && p.is_at_blank_line() {
                 return false;
             }
 
@@ -206,7 +206,7 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
 
         // DESIGN PRINCIPLE #3: Terminate on blank line (paragraph boundary)
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break; // Paragraph boundary - stop
             }
             // Soft line break - consume NEWLINE as content and continue

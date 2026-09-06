@@ -573,6 +573,7 @@ enum NodeDialect {
     Yaml,
     Markdown,
     Angular,
+    Gfm,
 }
 
 impl NodeDialect {
@@ -589,6 +590,7 @@ impl NodeDialect {
             Self::Html,
             Self::Yaml,
             Self::Markdown,
+            Self::Gfm,
         ]
     }
 
@@ -614,6 +616,7 @@ impl NodeDialect {
             Self::Yaml => "yaml",
             Self::Markdown => "markdown",
             Self::Angular => "angular",
+            Self::Gfm => "gfm",
         }
     }
 
@@ -635,6 +638,7 @@ impl NodeDialect {
             "Tw" => Self::Tailwind,
             "Yaml" => Self::Yaml,
             "Md" => Self::Markdown,
+            "Gfm" => Self::Gfm,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js

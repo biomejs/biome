@@ -15,7 +15,7 @@ fn indent_len(indent: impl AstNodeList) -> usize {
 }
 
 fn continuation_indents(input: &str) -> Vec<usize> {
-    let parsed = parse_markdown(input);
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
 
     parsed
         .syntax()
@@ -26,7 +26,7 @@ fn continuation_indents(input: &str) -> Vec<usize> {
 }
 
 fn marker_prefix(input: &str, marker_text: &str) -> MdListMarkerPrefix {
-    let parsed = parse_markdown(input);
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
 
     parsed
         .syntax()
@@ -41,7 +41,7 @@ fn marker_prefix(input: &str, marker_text: &str) -> MdListMarkerPrefix {
 }
 
 fn ordered_list_item_count(input: &str) -> usize {
-    let parsed = parse_markdown(input);
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
 
     parsed
         .syntax()
@@ -56,7 +56,7 @@ fn ordered_list_item_count(input: &str) -> usize {
 /// the raw syntax tree (not the typed `MdBulletList` iterator, which silently
 /// filters to `MdBullet`) so an invalid child cannot hide.
 fn stray_bullet_list_newlines(input: &str) -> Vec<TextRange> {
-    parse_markdown(input)
+    parse_markdown(input, MarkdownParserOptions::default())
         .syntax()
         .descendants()
         .filter(|n| n.kind() == MarkdownSyntaxKind::MD_BULLET_LIST)
@@ -123,7 +123,7 @@ fn bullet_list_blank_separators_do_not_appear_as_siblings() {
                  \n\
                  * **bold**\n";
 
-    let parsed = parse_markdown(input);
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
     assert!(
         !parsed.has_errors(),
         "expected clean parse, got: {:?}",
@@ -155,7 +155,7 @@ fn blockquoted_bullet_list_blank_separators_do_not_appear_as_siblings() {
     assert!(
         stray.is_empty(),
         "blockquoted list separators leaked as MdBulletList children: {stray:?}\n\n{:#?}",
-        parse_markdown(input).syntax()
+        parse_markdown(input, MarkdownParserOptions::default()).syntax()
     );
 }
 
@@ -167,7 +167,7 @@ fn bullet_item_count(input: &str) -> usize {
 /// Counts the direct `MdBullet` children of every `MdBulletList`, in
 /// document order — one entry per list, so nesting is observable.
 fn bullet_item_counts(input: &str) -> Vec<usize> {
-    parse_markdown(input)
+    parse_markdown(input, MarkdownParserOptions::default())
         .syntax()
         .descendants()
         .filter(|n| n.kind() == MarkdownSyntaxKind::MD_BULLET_LIST)
@@ -181,7 +181,7 @@ fn bullet_item_counts(input: &str) -> Vec<usize> {
 
 /// Returns true if the typed AST debug-print contains a missing required slot.
 fn has_missing_required(input: &str) -> bool {
-    let parsed = parse_markdown(input);
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
     format!("{:#?}", parsed.tree()).contains("missing (required)")
 }
 
@@ -189,7 +189,7 @@ fn has_missing_required(input: &str) -> bool {
 /// code blocks store their content in exactly one such token; quote- and
 /// list-nested ones must produce none.
 fn code_literal_texts(input: &str) -> Vec<String> {
-    parse_markdown(input)
+    parse_markdown(input, MarkdownParserOptions::default())
         .syntax()
         .descendants_with_tokens(Direction::Next)
         .filter_map(|element| element.into_token())
@@ -207,7 +207,7 @@ fn document_fence_content_is_one_verbatim_literal() {
     assert!(
         !has_missing_required(input),
         "document-level fence left a missing required slot\n\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
 }
 
@@ -247,7 +247,7 @@ fn frontmatter_is_only_recognized_at_the_document_start() {
         "----\ntitle: value\n---\n",
         "---\nunterminated",
     ] {
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
         assert!(
             parsed.tree().frontmatter().is_none(),
             "unexpected frontmatter in {input:?}\n\n{:#?}",
@@ -259,7 +259,7 @@ fn frontmatter_is_only_recognized_at_the_document_start() {
 #[test]
 fn frontmatter_is_disabled_by_default() {
     for input in ["---\nFoo\n---\nBar\n---\nBaz\n", "---\n---\n"] {
-        let parsed = parse_markdown(input);
+        let parsed = parse_markdown(input, MarkdownParserOptions::default());
 
         assert!(parsed.tree().frontmatter().is_none());
         assert_eq!(parsed.syntax().to_string(), input);
@@ -273,7 +273,7 @@ fn unterminated_document_fence_literal_runs_to_eof() {
     assert!(
         !has_missing_required(input),
         "unterminated fence left a missing required slot\n\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
 }
 
@@ -285,7 +285,7 @@ fn nested_fence_content_keeps_per_line_tokens() {
         assert!(
             code_literal_texts(input).is_empty(),
             "nested fence content was folded into a code literal for {input:?}\n\n{:#?}",
-            parse_markdown(input).tree()
+            parse_markdown(input, MarkdownParserOptions::default()).tree()
         );
     }
 }
@@ -299,7 +299,7 @@ fn unterminated_fence_has_no_missing_required_slot() {
         assert!(
             !has_missing_required(input),
             "unterminated fence left a missing required slot for {input:?}\n\n{:#?}",
-            parse_markdown(input).tree()
+            parse_markdown(input, MarkdownParserOptions::default()).tree()
         );
     }
 }
@@ -318,12 +318,12 @@ fn fence_as_bullet_item_does_not_swallow_siblings() {
         bullet_item_count(input),
         3,
         "fence in a bullet item swallowed its siblings:\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
     assert!(
         !has_missing_required(input),
         "fence-as-bullet left a missing required slot:\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
 }
 
@@ -339,12 +339,12 @@ fn nested_fence_as_bullet_item_does_not_swallow_siblings() {
         bullet_item_counts(input),
         [1, 3],
         "nested fence in a bullet item swallowed its siblings:\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
     assert!(
         !has_missing_required(input),
         "nested fence-as-bullet left a missing required slot:\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
 }
 
@@ -360,12 +360,12 @@ fn blockquoted_fence_as_bullet_item_does_not_swallow_siblings() {
         bullet_item_counts(input),
         [3],
         "blockquoted fence in a bullet item swallowed its siblings:\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
     assert!(
         !has_missing_required(input),
         "blockquoted fence-as-bullet left a missing required slot:\n{:#?}",
-        parse_markdown(input).tree()
+        parse_markdown(input, MarkdownParserOptions::default()).tree()
     );
 }
 
@@ -407,7 +407,7 @@ fn no_fixture_has_bullet_list_newline_siblings() {
 #[test]
 fn deferred_references_preserve_cst_and_container_metadata() {
     let input = "> - *[foo*][ref]\n>\n> [ref]: /uri\n";
-    let parsed = parse_markdown(input);
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
 
     assert_eq!(parsed.syntax().to_string(), input);
     assert!(parsed.diagnostics().is_empty());
@@ -425,7 +425,7 @@ fn deferred_references_preserve_cst_and_container_metadata() {
 #[test]
 fn deferred_references_preserve_headings_and_diagnostics() {
     let heading = "# *[foo*][ref]\n\n[ref]: /uri\n";
-    let parsed = parse_markdown(heading);
+    let parsed = parse_markdown(heading, MarkdownParserOptions::default());
 
     assert_eq!(parsed.syntax().to_string(), heading);
     assert!(
@@ -436,7 +436,7 @@ fn deferred_references_preserve_headings_and_diagnostics() {
     );
 
     let invalid = format!("{} [ref]\n\n[ref]: /uri\n", ">".repeat(101));
-    let parsed = parse_markdown(&invalid);
+    let parsed = parse_markdown(&invalid, MarkdownParserOptions::default());
     assert_eq!(parsed.syntax().to_string(), invalid);
     assert!(!parsed.diagnostics().is_empty());
     assert!(parsed.diagnostics().windows(2).all(|diagnostics| {

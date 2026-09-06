@@ -8,7 +8,7 @@ use crate::{
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
-    rule::Rule,
+    rule::{Rule, RuleAction, RuleMetadata, SuppressAction},
 };
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
@@ -532,32 +532,20 @@ where
         )
         .ok()?;
 
-        R::diagnostic(&ctx, &self.state).map(|mut diagnostic| {
-            diagnostic.severity = ctx.metadata().severity;
-
-            if let Some(issue_number) = ctx.metadata().issue_number {
-                let url = format!("https://github.com/biomejs/biome/issues/{}", issue_number);
-                diagnostic = diagnostic.note(markup! {
-                 "This rule is still being actively worked on, so it may be missing features or have rough edges. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or to report possible bugs."
-                });
-            }
-            if <R::Group as RuleGroup>::NAME == "nursery" {
-                diagnostic = diagnostic.note(markup! {
-                    "This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit "<Hyperlink href="https://biomejs.dev/linter/#nursery">"https://biomejs.dev/linter/#nursery"</Hyperlink>" for more information."
-                });
-            }
-            AnalyzerDiagnostic::from(diagnostic)
+        R::diagnostic(&ctx, &self.state).map(|diagnostic| {
+            build_analyzer_diagnostic(diagnostic, ctx.metadata(), <R::Group as RuleGroup>::NAME)
         })
     }
 
     fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
+        let configured_fix_kind = self.options.rule_fix_kind::<R>();
 
         // When fix is set to "none", disable the rule fix but still allow
         // suppression actions.
-        let fix_disabled = matches!(self.options.rule_fix_kind::<R>(), Some(FixKind::None));
+        let fix_disabled = matches!(configured_fix_kind, Some(FixKind::None));
         let configured_applicability = if filter.is_rule_fix() && !fix_disabled {
-            if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
+            if let Some(fix_kind) = configured_fix_kind {
                 match fix_kind {
                     FixKind::None => None,
                     FixKind::Safe => Some(Applicability::Always),
@@ -588,18 +576,17 @@ where
         .ok();
         let mut actions = Vec::new();
         if let Some(ctx) = ctx {
+            let rule_name = (<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
             if filter.is_rule_fix()
                 && !fix_disabled
                 && let Some(action) = R::action(&ctx, &self.state)
             {
-                actions.push(AnalyzerAction {
-                    rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                    applicability: configured_applicability.unwrap_or(action.applicability()),
-                    category: action.category,
-                    mutation: action.mutation,
-                    message: action.message,
-                    text_edit: None,
-                });
+                actions.push(rule_action_to_analyzer_action(
+                    rule_name,
+                    configured_applicability,
+                    action,
+                ));
             }
 
             if filter.is_inline_suppression()
@@ -611,30 +598,22 @@ where
                     self.options.suppression_reason.as_deref(),
                 )
             {
-                let action = AnalyzerAction {
-                    rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                    category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
-                    applicability: Applicability::Always,
-                    mutation: suppression_action.mutation,
-                    message: suppression_action.message,
-                    text_edit: None,
-                };
-                actions.push(action);
+                actions.push(suppress_action_to_analyzer_action(
+                    rule_name,
+                    ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                    suppression_action,
+                ));
             }
 
             if filter.is_toplevel_suppression()
                 && let Some(suppression_action) =
                     R::top_level_suppression(&ctx, self.suppression_action)
             {
-                let action = AnalyzerAction {
-                    rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                    category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
-                    applicability: Applicability::Always,
-                    mutation: suppression_action.mutation,
-                    message: suppression_action.message,
-                    text_edit: None,
-                };
-                actions.push(action);
+                actions.push(suppress_action_to_analyzer_action(
+                    rule_name,
+                    ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                    suppression_action,
+                ));
             }
 
             AnalyzerActionIter::new(actions)
@@ -644,51 +623,12 @@ where
     }
 
     fn actions_metadata(&self) -> Vec<ActionMetadata> {
-        let rule_name = Some((<R::Group as RuleGroup>::NAME, R::METADATA.name));
-        let rule_category = <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY;
-        let has_suppression = matches!(
-            rule_category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        );
-
-        let mut metadata = Vec::new();
-
-        // Rule fix metadata — only if the rule declares a fix
-        let fix_kind = self.options.rule_fix_kind::<R>();
-        let is_disabled = matches!(fix_kind, Some(FixKind::None));
-        if !is_disabled && R::METADATA.fix_kind != FixKind::None {
-            let applicability = match fix_kind {
-                Some(FixKind::Safe) => Applicability::Always,
-                Some(FixKind::Unsafe) => Applicability::MaybeIncorrect,
-                _ => match R::METADATA.fix_kind {
-                    FixKind::Safe => Applicability::Always,
-                    _ => Applicability::MaybeIncorrect,
-                },
-            };
-            let action_category =
-                R::METADATA.action_category(rule_category, <R::Group as RuleGroup>::NAME);
-            metadata.push(ActionMetadata {
-                rule_name,
-                category: action_category,
-                applicability,
-            });
-        }
-
-        // Suppression metadata
-        if has_suppression {
-            metadata.push(ActionMetadata {
-                rule_name,
-                category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
-                applicability: Applicability::Always,
-            });
-            metadata.push(ActionMetadata {
-                rule_name,
-                category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
-                applicability: Applicability::Always,
-            });
-        }
-
-        metadata
+        build_actions_metadata(
+            (<R::Group as RuleGroup>::NAME, R::METADATA.name),
+            <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY,
+            self.options.rule_fix_kind::<R>(),
+            &R::METADATA,
+        )
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<RuleLanguage<R>> {
@@ -722,4 +662,108 @@ where
             AnalyzerTransformationIter::new(vec![])
         }
     }
+}
+
+/// Post-processing of [AnalyzerSignal::diagnostic] for [RuleSignal], kept out
+/// of the generic method so it is compiled once instead of once per rule.
+fn build_analyzer_diagnostic(
+    mut diagnostic: RuleDiagnostic,
+    metadata: &RuleMetadata,
+    group_name: &'static str,
+) -> AnalyzerDiagnostic {
+    diagnostic.severity = metadata.severity;
+
+    if let Some(issue_number) = metadata.issue_number {
+        let url = format!("https://github.com/biomejs/biome/issues/{issue_number}");
+        diagnostic = diagnostic.note(markup! {
+         "This rule is still being actively worked on, so it may be missing features or have rough edges. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or to report possible bugs."
+        });
+    }
+    if group_name == "nursery" {
+        diagnostic = diagnostic.note(markup! {
+            "This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit "<Hyperlink href="https://biomejs.dev/linter/#nursery">"https://biomejs.dev/linter/#nursery"</Hyperlink>" for more information."
+        });
+    }
+    AnalyzerDiagnostic::from(diagnostic)
+}
+
+fn rule_action_to_analyzer_action<L: Language>(
+    rule_name: (&'static str, &'static str),
+    configured_applicability: Option<Applicability>,
+    action: RuleAction<L>,
+) -> AnalyzerAction<L> {
+    AnalyzerAction {
+        rule_name: Some(rule_name),
+        applicability: configured_applicability.unwrap_or(action.applicability()),
+        category: action.category,
+        mutation: action.mutation,
+        message: action.message,
+        text_edit: None,
+    }
+}
+
+fn suppress_action_to_analyzer_action<L: Language>(
+    rule_name: (&'static str, &'static str),
+    category: ActionCategory,
+    action: SuppressAction<L>,
+) -> AnalyzerAction<L> {
+    AnalyzerAction {
+        rule_name: Some(rule_name),
+        category,
+        applicability: Applicability::Always,
+        mutation: action.mutation,
+        message: action.message,
+        text_edit: None,
+    }
+}
+
+fn build_actions_metadata(
+    rule_name: (&'static str, &'static str),
+    rule_category: RuleCategory,
+    configured_fix_kind: Option<FixKind>,
+    metadata: &RuleMetadata,
+) -> Vec<ActionMetadata> {
+    let (group_name, _) = rule_name;
+    let rule_name = Some(rule_name);
+    let has_suppression = matches!(
+        rule_category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    );
+
+    let mut actions_metadata = Vec::new();
+
+    // Rule fix metadata — only if the rule declares a fix
+    let is_disabled = matches!(configured_fix_kind, Some(FixKind::None));
+    if !is_disabled && metadata.fix_kind != FixKind::None {
+        let applicability = match configured_fix_kind {
+            Some(FixKind::Safe) => Applicability::Always,
+            Some(FixKind::Unsafe) => Applicability::MaybeIncorrect,
+            _ => match metadata.fix_kind {
+                FixKind::Safe => Applicability::Always,
+                _ => Applicability::MaybeIncorrect,
+            },
+        };
+        let action_category = metadata.action_category(rule_category, group_name);
+        actions_metadata.push(ActionMetadata {
+            rule_name,
+            category: action_category,
+            applicability,
+        });
+    }
+
+    // Suppression metadata
+    if has_suppression {
+        actions_metadata.push(ActionMetadata {
+            rule_name,
+            category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
+            applicability: Applicability::Always,
+        });
+        actions_metadata.push(ActionMetadata {
+            rule_name,
+            category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+            applicability: Applicability::Always,
+        });
+    }
+
+    actions_metadata
 }

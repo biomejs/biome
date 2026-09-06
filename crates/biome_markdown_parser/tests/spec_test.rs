@@ -46,14 +46,16 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             &fs::read_to_string(&options_path).expect("Expected options.json to be readable"),
         )
         .expect("Expected options.json to contain a valid configuration");
-        let frontmatter = configuration
+        let parser = configuration
             .markdown
             .and_then(|markdown| markdown.parser)
-            .and_then(|parser| parser.frontmatter)
-            .unwrap_or_default()
-            .into();
+            .unwrap_or_default();
+        let frontmatter = parser.frontmatter.unwrap_or_default().into();
+        let gfm = parser.gfm.unwrap_or_default().into();
 
-        MarkdownParserOptions::default().with_frontmatter(frontmatter)
+        MarkdownParserOptions::default()
+            .with_frontmatter(frontmatter)
+            .with_gfm(gfm)
     } else {
         MarkdownParserOptions::default()
     };
@@ -222,7 +224,7 @@ pub fn quick_test() {
     use biome_rowan::AstNode;
 
     fn test_example(num: u32, input: &str, expected: &str) {
-        let root = parse_markdown(input);
+        let root = parse_markdown(input, MarkdownParserOptions::default());
         let doc = MdRoot::cast(root.syntax())
             .unwrap_or_else(|| panic!("Example {:03}: parse failed", num));
         let html = document_to_html(
@@ -503,7 +505,7 @@ pub fn quick_test() {
 }
 
 fn fuzz_test_example(num: u32, input: &str, expected: &str) {
-    let root = parse_markdown(input);
+    let root = parse_markdown(input, MarkdownParserOptions::default());
     let doc =
         MdRoot::cast(root.syntax()).unwrap_or_else(|| panic!("Fuzz {:03}: parse failed", num));
     let html = document_to_html(

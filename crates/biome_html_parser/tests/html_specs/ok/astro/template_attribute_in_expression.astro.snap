@@ -1,0 +1,85 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<p>{x && <C a=`b > c` />}</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@1..2 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@2..3 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@3..4 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@4..24 "x && <C a=`b > c` />" [] [],
+                    },
+                    r_curly_token: R_CURLY@24..25 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@25..26 "<" [] [],
+                slash_token: SLASH@26..27 "/" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@27..28 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..30
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..29
+    0: HTML_ELEMENT@0..29
+      0: HTML_OPENING_ELEMENT@0..3
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..2
+          0: P_KW@1..2 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@2..2
+        3: R_ANGLE@2..3 ">" [] []
+      1: HTML_ELEMENT_LIST@3..25
+        0: HTML_SINGLE_TEXT_EXPRESSION@3..25
+          0: L_CURLY@3..4 "{" [] []
+          1: HTML_TEXT_EXPRESSION@4..24
+            0: HTML_LITERAL@4..24 "x && <C a=`b > c` />" [] []
+          2: R_CURLY@24..25 "}" [] []
+      2: HTML_CLOSING_ELEMENT@25..29
+        0: L_ANGLE@25..26 "<" [] []
+        1: SLASH@26..27 "/" [] []
+        2: HTML_TAG_NAME@27..28
+          0: P_KW@27..28 "p" [] []
+        3: R_ANGLE@28..29 ">" [] []
+  5: EOF@29..30 "" [Newline("\n")] []
+
+```

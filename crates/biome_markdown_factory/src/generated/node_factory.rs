@@ -6,6 +6,182 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn gfm_strikethrough(
+    l_fence_token: SyntaxToken,
+    content: MdInlineItemList,
+    r_fence_token: SyntaxToken,
+) -> GfmStrikethrough {
+    GfmStrikethrough::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_STRIKETHROUGH,
+        [
+            Some(SyntaxElement::Token(l_fence_token)),
+            Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Token(r_fence_token)),
+        ],
+    ))
+}
+pub fn gfm_table(
+    header: GfmTableRow,
+    delimiter: GfmTableDelimiterRow,
+    body: GfmTableRowList,
+) -> GfmTable {
+    GfmTable::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE,
+        [
+            Some(SyntaxElement::Node(header.into_syntax())),
+            Some(SyntaxElement::Node(delimiter.into_syntax())),
+            Some(SyntaxElement::Node(body.into_syntax())),
+        ],
+    ))
+}
+pub fn gfm_table_cell(content: MdInlineItemList) -> GfmTableCell {
+    GfmTableCell::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_CELL,
+        [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn gfm_table_delimiter_cell(dashes: GfmTableDelimiterDashList) -> GfmTableDelimiterCellBuilder {
+    GfmTableDelimiterCellBuilder {
+        dashes,
+        l_colon_token: None,
+        r_colon_token: None,
+    }
+}
+pub struct GfmTableDelimiterCellBuilder {
+    dashes: GfmTableDelimiterDashList,
+    l_colon_token: Option<SyntaxToken>,
+    r_colon_token: Option<SyntaxToken>,
+}
+impl GfmTableDelimiterCellBuilder {
+    pub fn with_l_colon_token(mut self, l_colon_token: SyntaxToken) -> Self {
+        self.l_colon_token = Some(l_colon_token);
+        self
+    }
+    pub fn with_r_colon_token(mut self, r_colon_token: SyntaxToken) -> Self {
+        self.r_colon_token = Some(r_colon_token);
+        self
+    }
+    pub fn build(self) -> GfmTableDelimiterCell {
+        GfmTableDelimiterCell::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::GFM_TABLE_DELIMITER_CELL,
+            [
+                self.l_colon_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.dashes.into_syntax())),
+                self.r_colon_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn gfm_table_delimiter_dash(minus_token: SyntaxToken) -> GfmTableDelimiterDash {
+    GfmTableDelimiterDash::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_DELIMITER_DASH,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
+pub fn gfm_table_delimiter_row(
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableDelimiterCellList,
+) -> GfmTableDelimiterRowBuilder {
+    GfmTableDelimiterRowBuilder {
+        quote_prefixes,
+        cells,
+        l_pipe_token: None,
+        r_pipe_token: None,
+        newline_token: None,
+    }
+}
+pub struct GfmTableDelimiterRowBuilder {
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableDelimiterCellList,
+    l_pipe_token: Option<SyntaxToken>,
+    r_pipe_token: Option<SyntaxToken>,
+    newline_token: Option<SyntaxToken>,
+}
+impl GfmTableDelimiterRowBuilder {
+    pub fn with_l_pipe_token(mut self, l_pipe_token: SyntaxToken) -> Self {
+        self.l_pipe_token = Some(l_pipe_token);
+        self
+    }
+    pub fn with_r_pipe_token(mut self, r_pipe_token: SyntaxToken) -> Self {
+        self.r_pipe_token = Some(r_pipe_token);
+        self
+    }
+    pub fn with_newline_token(mut self, newline_token: SyntaxToken) -> Self {
+        self.newline_token = Some(newline_token);
+        self
+    }
+    pub fn build(self) -> GfmTableDelimiterRow {
+        GfmTableDelimiterRow::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::GFM_TABLE_DELIMITER_ROW,
+            [
+                Some(SyntaxElement::Node(self.quote_prefixes.into_syntax())),
+                self.l_pipe_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.cells.into_syntax())),
+                self.r_pipe_token.map(|token| SyntaxElement::Token(token)),
+                self.newline_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn gfm_table_row(
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableCellList,
+) -> GfmTableRowBuilder {
+    GfmTableRowBuilder {
+        quote_prefixes,
+        cells,
+        l_pipe_token: None,
+        r_pipe_token: None,
+        newline_token: None,
+    }
+}
+pub struct GfmTableRowBuilder {
+    quote_prefixes: MdQuotePrefixList,
+    cells: GfmTableCellList,
+    l_pipe_token: Option<SyntaxToken>,
+    r_pipe_token: Option<SyntaxToken>,
+    newline_token: Option<SyntaxToken>,
+}
+impl GfmTableRowBuilder {
+    pub fn with_l_pipe_token(mut self, l_pipe_token: SyntaxToken) -> Self {
+        self.l_pipe_token = Some(l_pipe_token);
+        self
+    }
+    pub fn with_r_pipe_token(mut self, r_pipe_token: SyntaxToken) -> Self {
+        self.r_pipe_token = Some(r_pipe_token);
+        self
+    }
+    pub fn with_newline_token(mut self, newline_token: SyntaxToken) -> Self {
+        self.newline_token = Some(newline_token);
+        self
+    }
+    pub fn build(self) -> GfmTableRow {
+        GfmTableRow::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::GFM_TABLE_ROW,
+            [
+                Some(SyntaxElement::Node(self.quote_prefixes.into_syntax())),
+                self.l_pipe_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.cells.into_syntax())),
+                self.r_pipe_token.map(|token| SyntaxElement::Token(token)),
+                self.newline_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn gfm_task_list_item(
+    l_bracket_token: SyntaxToken,
+    state: MdTextual,
+    r_bracket_token: SyntaxToken,
+) -> GfmTaskListItem {
+    GfmTaskListItem::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TASK_LIST_ITEM,
+        [
+            Some(SyntaxElement::Token(l_bracket_token)),
+            Some(SyntaxElement::Node(state.into_syntax())),
+            Some(SyntaxElement::Token(r_bracket_token)),
+        ],
+    ))
+}
 pub fn md_autolink(
     l_angle_token: SyntaxToken,
     value: MdInlineItemList,
@@ -659,6 +835,72 @@ pub fn md_thematic_break_char(value_token: SyntaxToken) -> MdThematicBreakChar {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn gfm_table_cell_list<I, S>(items: I, separators: S) -> GfmTableCellList
+where
+    I: IntoIterator<Item = GfmTableCell>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = MarkdownSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    GfmTableCellList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_CELL_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn gfm_table_delimiter_cell_list<I, S>(items: I, separators: S) -> GfmTableDelimiterCellList
+where
+    I: IntoIterator<Item = GfmTableDelimiterCell>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = MarkdownSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    GfmTableDelimiterCellList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_DELIMITER_CELL_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn gfm_table_delimiter_dash_list<I>(items: I) -> GfmTableDelimiterDashList
+where
+    I: IntoIterator<Item = GfmTableDelimiterDash>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GfmTableDelimiterDashList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_DELIMITER_DASH_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn gfm_table_row_list<I>(items: I) -> GfmTableRowList
+where
+    I: IntoIterator<Item = GfmTableRow>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GfmTableRowList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::GFM_TABLE_ROW_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn md_block_list<I>(items: I) -> MdBlockList
 where
     I: IntoIterator<Item = AnyMdBlock>,
@@ -738,6 +980,18 @@ where
 {
     MdQuoteIndentList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn md_quote_prefix_list<I>(items: I) -> MdQuotePrefixList
+where
+    I: IntoIterator<Item = MdQuotePrefix>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdQuotePrefixList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE_PREFIX_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

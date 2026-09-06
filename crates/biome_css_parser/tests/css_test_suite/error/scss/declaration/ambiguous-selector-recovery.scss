@@ -1,0 +1,12 @@
+.test {
+  label:hover {
+    color: ;
+    background: if(style(--scheme: dark): red; else: blue;);
+  }
+  width: 1px;
+
+  a:#{$pseudo} {
+    color: ;
+  }
+  height: 1px;
+}

@@ -51,10 +51,11 @@ CssBogusPropertyValue = SyntaxElement*
 
 TwRoot =
 	bom: 'UNICODE_BOM'?
+	leading_whitespace: ' '?
 	candidates: TwCandidateList
 	eof: 'EOF'
 
-TwCandidateList = AnyTwFullCandidate*
+TwCandidateList = (AnyTwFullCandidate (' ' AnyTwFullCandidate)* ' '?)
 
 AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 

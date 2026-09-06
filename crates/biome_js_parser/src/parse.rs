@@ -440,11 +440,32 @@ pub fn parse_module_with_offset(
 
 #[cfg(test)]
 mod tests {
-    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset};
+    use crate::{JsParserOptions, parse, parse_js_with_cache, parse_js_with_offset, parse_script};
     use biome_languages::JsFileSource;
     use biome_languages::javascript::JsEmbeddingKind;
 
     use biome_rowan::TextSize;
+
+    #[test]
+    fn deeply_nested_expression_reports_error() {
+        let source = format!("{}a;", "a+".repeat(50_000));
+
+        std::thread::Builder::new()
+            .stack_size(2 * 1024 * 1024)
+            .spawn(move || {
+                let parse = parse_script(&source, JsParserOptions::default());
+                let parsed_source = parse.syntax().text_with_trivia().to_string();
+                let diagnostics_len = parse.diagnostics().len();
+
+                drop(parse);
+
+                assert_eq!(parsed_source, source);
+                assert_eq!(diagnostics_len, 1);
+            })
+            .expect("must create constrained-stack thread")
+            .join()
+            .expect("constrained-stack parse must complete");
+    }
 
     #[test]
     fn test_offset_parsing_basic() {

@@ -40,6 +40,7 @@ fn expression_range_by_source(
 
 const BUDGETED_BINDING_QUERY: &str = "infer_binding_type_with_import_budget";
 const IMPORT_DEPTH_PREPARATION_QUERY: &str = "prepare_module_types_bottom_up_for_import_depth";
+const INFERENCE_SCC_QUERY: &str = "inference_module_sccs";
 
 #[test]
 fn test_binding_query_does_not_infer_complete_module_tables() {
@@ -60,6 +61,60 @@ fn test_binding_query_does_not_infer_complete_module_tables() {
 
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn test_local_lookups_skip_cycle_detection_for_unrelated_imports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/source.ts".into(), "export const unused = 1;");
+    fs.insert(
+        "/src/binding.ts".into(),
+        "import { unused } from './source.ts'; export const value = 1;",
+    );
+    fs.insert(
+        "/src/type.ts".into(),
+        "import { unused } from './source.ts'; export interface Value { field: string; }",
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/source.ts", "/src/binding.ts", "/src/type.ts"],
+        true,
+    );
+    let binding_module = db
+        .module_for_path(Utf8Path::new("/src/binding.ts"))
+        .expect("binding module must exist");
+    let type_module = db
+        .module_for_path(Utf8Path::new("/src/type.ts"))
+        .expect("type module must exist");
+
+    db.clear_salsa_events();
+    let binding = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            binding_module,
+            binding_range_by_name(&db, binding_module, "value"),
+        ),
+    )
+    .expect("value type must be inferred");
+    let local = infer_local_type(
+        &db,
+        LocalTypeInput::new(
+            &db,
+            type_module,
+            local_type_id_by_name(&db, type_module, "Value"),
+        ),
+    )
+    .expect("Value type must be inferred");
+    assert!(InferredType::new(&db, binding).is_inferred());
+    assert!(InferredType::new(&db, local).is_inferred());
+    let events = db.take_salsa_events();
+
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, INFERENCE_SCC_QUERY, &events),
+        0
+    );
 }
 
 #[test]
@@ -329,6 +384,327 @@ fn test_namespace_query_keeps_named_exports_symbolic() {
 }
 
 #[test]
+fn test_namespace_member_inference_skips_unrelated_exports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/schema.ts".into(),
+        r#"
+            export interface Result<T> { success: boolean; error: T; }
+            export declare function safeParse(value: unknown): Result<string>;
+            export * as unrelated from "./unrelated.ts";
+        "#,
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const value = 1;");
+
+    for (declaration, expression, expected) in [
+        ("", "z.safeParse('').error", InferredTypeData::String),
+        ("", "z.safeParse('').success", InferredTypeData::Boolean),
+        ("", "z?.safeParse('').error", InferredTypeData::String),
+        (
+            "const alias = z;",
+            "alias.safeParse('').error",
+            InferredTypeData::String,
+        ),
+        (
+            "const { safeParse } = z;",
+            "safeParse('').error",
+            InferredTypeData::String,
+        ),
+        (
+            "declare const result: z.Result<string>;",
+            "result.error",
+            InferredTypeData::String,
+        ),
+    ] {
+        let source = format!(
+            "import * as z from './schema.ts'; {declaration} export const value = {expression};"
+        );
+        fs.insert("/src/index.ts".into(), source.as_str());
+        let db = build_js_test_module_db(
+            &fs,
+            &["/src/schema.ts", "/src/unrelated.ts", "/src/index.ts"],
+            true,
+        );
+        let module = db
+            .module_for_path(Utf8Path::new("/src/index.ts"))
+            .expect("index module must exist");
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, &source, expression),
+        );
+
+        db.clear_salsa_events();
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        let ty = normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty));
+        assert_eq!(ty, expected, "{expression}");
+        let events = db.take_salsa_events();
+        for query in [
+            "namespace_export_names",
+            "infer_module_types",
+            IMPORT_DEPTH_PREPARATION_QUERY,
+        ] {
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query, &events),
+                0,
+                "{expression} must not execute {query}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_namespace_member_inference_tracks_only_selected_dependencies() {
+    const SOURCE: &str = "import { schema } from './barrel.ts'; schema.value;";
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    fs.insert(
+        "/src/barrel.ts".into(),
+        "export * as schema from './schema.ts';",
+    );
+    fs.insert(
+        "/src/schema.ts".into(),
+        "export declare const value: string; export * as unrelated from './unrelated.ts';",
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const unused = 1;");
+    let mut db = build_js_test_module_db(
+        &fs,
+        &[
+            "/src/index.ts",
+            "/src/barrel.ts",
+            "/src/schema.ts",
+            "/src/unrelated.ts",
+        ],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let range = expression_range_by_source(&db, module, SOURCE, "schema.value");
+    let input = ExpressionTypeInput::new(&db, module, range);
+    let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+    assert_eq!(
+        normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty)),
+        InferredTypeData::String
+    );
+
+    for (path, source, expected, executions) in [
+        (
+            "/src/unrelated.ts",
+            "export const unused = 2;",
+            InferredTypeData::String,
+            0,
+        ),
+        (
+            "/src/schema.ts",
+            "export declare const value: number; export * as unrelated from './unrelated.ts';",
+            InferredTypeData::Number,
+            1,
+        ),
+    ] {
+        fs.insert(path.into(), source);
+        let changed = db
+            .module_for_path(Utf8Path::new(path))
+            .expect("module must exist");
+        let kind = resolve_js_module_kind_for_test(&fs, path, true);
+        salsa::Setter::to(changed.set_kind(&mut db), kind);
+
+        db.clear_salsa_events();
+        let input = ExpressionTypeInput::new(&db, module, range);
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        assert_eq!(
+            normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty)),
+            expected
+        );
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_expression_type", &events),
+            executions,
+            "edit to {path}"
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "namespace_export_names", &events),
+            0
+        );
+    }
+}
+
+#[test]
+fn test_namespace_member_inference_preserves_export_semantics() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/left.ts".into(),
+        "declare const value: string; export { value, value as default };",
+    );
+    fs.insert(
+        "/src/right.ts".into(),
+        "export declare const value: number;",
+    );
+
+    for (exports, member, expected) in [
+        (
+            "export * from './left.ts';",
+            "default",
+            InferredTypeData::Unknown,
+        ),
+        (
+            "export * from './left.ts';",
+            "missing",
+            InferredTypeData::Unknown,
+        ),
+        (
+            "export { default } from './left.ts';",
+            "default",
+            InferredTypeData::String,
+        ),
+        (
+            "export * from './left.ts'; export * from './right.ts';",
+            "value",
+            InferredTypeData::Unknown,
+        ),
+        (
+            "export * from './left.ts'; export { value } from './right.ts';",
+            "value",
+            InferredTypeData::Number,
+        ),
+    ] {
+        fs.insert("/src/barrel.ts".into(), exports);
+        let expression = format!("namespace.{member}");
+        let source = format!("import * as namespace from './barrel.ts'; {expression};");
+        fs.insert("/src/index.ts".into(), source.as_str());
+        let db = build_js_test_module_db(
+            &fs,
+            &[
+                "/src/left.ts",
+                "/src/right.ts",
+                "/src/barrel.ts",
+                "/src/index.ts",
+            ],
+            true,
+        );
+        let module = db
+            .module_for_path(Utf8Path::new("/src/index.ts"))
+            .expect("index module must exist");
+        let input = ExpressionTypeInput::new(
+            &db,
+            module,
+            expression_range_by_source(&db, module, &source, &expression),
+        );
+        let ty = infer_expression_type(&db, input).expect("expression type must be inferred");
+        let ty = normalize_type_query(&db, NormalizeTypeInput::new(&db, module, ty));
+        assert_eq!(ty, expected, "{exports} {expression}");
+    }
+}
+
+#[test]
+fn test_imported_generic_arguments_skip_full_declaration_inference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            export interface Wrapper<T> {
+                value: T;
+                unrelated: Noise;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Wrapper } from "./source.ts";
+            export declare const wrapped: Wrapper<string>;
+        "#,
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const unrelated = 1;");
+
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/source.ts", "/src/index.ts", "/src/unrelated.ts"],
+        true,
+    );
+    let source_module = db
+        .module_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("source module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let wrapped_range = binding_range_by_name(&db, index_module, "wrapped");
+
+    {
+        let wrapper = LocalTypeInput::new(
+            &db,
+            source_module,
+            local_type_id_by_name(&db, source_module, "Wrapper"),
+        );
+        let wrapped = BindingTypeInput::new(&db, index_module, wrapped_range);
+
+        db.clear_salsa_events();
+        let wrapped_ty = infer_binding_type(&db, wrapped).expect("wrapped type must be inferred");
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_local_type, wrapper, &events);
+        let value =
+            find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+        assert!(is_inferred_string(&db, value));
+
+        db.clear_salsa_events();
+        let wrapped_ty =
+            infer_binding_type(&db, wrapped).expect("cached wrapped type must be inferred");
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, wrapped, &events);
+        let value =
+            find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+        assert!(is_inferred_string(&db, value));
+    }
+
+    let unrelated = db
+        .module_for_path(Utf8Path::new("/src/unrelated.ts"))
+        .expect("unrelated module must exist");
+    fs.insert(
+        "/src/unrelated.ts".into(),
+        "export const unrelated = 'changed';",
+    );
+    let unrelated_kind = resolve_js_module_kind_for_test(&fs, "/src/unrelated.ts", true);
+    salsa::Setter::to(unrelated.set_kind(&mut db), unrelated_kind);
+    {
+        let wrapped = BindingTypeInput::new(&db, index_module, wrapped_range);
+        db.clear_salsa_events();
+        let wrapped_ty =
+            infer_binding_type(&db, wrapped).expect("wrapped type must remain inferred");
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, wrapped, &events);
+        let value =
+            find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+        assert!(is_inferred_string(&db, value));
+    }
+
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            export interface Wrapper<T> {
+                value: number;
+                unrelated: Noise;
+            }
+        "#,
+    );
+    let source_kind = resolve_js_module_kind_for_test(&fs, "/src/source.ts", true);
+    salsa::Setter::to(source_module.set_kind(&mut db), source_kind);
+    let wrapped = BindingTypeInput::new(&db, index_module, wrapped_range);
+    db.clear_salsa_events();
+    let wrapped_ty =
+        infer_binding_type(&db, wrapped).expect("changed wrapped type must be inferred");
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_binding_type, wrapped, &events);
+    let value = find_member_type(&db, wrapped_ty, "value").expect("value type must be inferred");
+    assert!(is_inferred_number(&db, value));
+}
+
+#[test]
 fn test_member_lookup_resolves_local_types_without_complete_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -390,6 +766,314 @@ fn test_callable_type_resolution_skips_interface_parameters_and_siblings() {
 
     assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn test_call_return_inference_skips_non_callable_object_argument_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        r#"
+            export interface SkippedNoise { field: string; }
+            export interface DirectNoise { field: string; }
+            export interface CallbackNoise { callback: () => string; }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { CallbackNoise, DirectNoise, SkippedNoise } from "./noise.ts";
+
+            declare const skippedNoise: SkippedNoise;
+            declare const directNoise: DirectNoise;
+            declare const callbackNoise: CallbackNoise;
+
+            type Options = { value: unknown } & { enabled?: boolean };
+            declare function createEnvLike<T = string>(options: Options): T;
+            declare function identity<T>(value: T): T;
+            declare function fromCallback<T>(callback: () => T): T;
+
+            export const skipped = createEnvLike({ value: skippedNoise.field });
+            export const direct = identity({ value: directNoise.field });
+            export const callbackResult = fromCallback(callbackNoise.callback);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/noise.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let local_input = |name| {
+        LocalTypeInput::new(
+            &db,
+            noise_module,
+            local_type_id_by_name(&db, noise_module, name),
+        )
+    };
+
+    db.clear_salsa_events();
+    let skipped = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            index_module,
+            binding_range_by_name(&db, index_module, "skipped"),
+        ),
+    )
+    .expect("skipped result must be inferred");
+    assert!(is_inferred_string(&db, skipped));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, local_input("SkippedNoise"), &events);
+
+    db.clear_salsa_events();
+    let direct = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            index_module,
+            binding_range_by_name(&db, index_module, "direct"),
+        ),
+    )
+    .expect("direct result must be inferred");
+    let value =
+        find_member_type(&db, direct, "value").expect("direct generic value must be inferred");
+    assert!(is_inferred_string(&db, value));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_local_type, local_input("DirectNoise"), &events);
+
+    db.clear_salsa_events();
+    let callback = infer_binding_type(
+        &db,
+        BindingTypeInput::new(
+            &db,
+            index_module,
+            binding_range_by_name(&db, index_module, "callbackResult"),
+        ),
+    )
+    .expect("callback result must be inferred");
+    assert!(
+        is_inferred_string(&db, callback),
+        "callback generic return must remain inferred, got {}",
+        format_inferred_type(&db, callback)
+    );
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_local_type, local_input("CallbackNoise"), &events);
+}
+
+#[test]
+fn test_call_return_inference_preserves_relevant_argument_shapes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        r#"
+            export interface PositionalNoise { field: string; }
+            export interface DefaultNoise { field: string; }
+            export interface SpreadNoise { field: string; }
+            export interface TrailingNoise { field: string; }
+            export interface RestFirstNoise { field: string; }
+            export interface RestSecondNoise { field: string; }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type {
+                DefaultNoise,
+                PositionalNoise,
+                RestFirstNoise,
+                RestSecondNoise,
+                SpreadNoise,
+                TrailingNoise,
+            } from "./noise.ts";
+
+            declare const positionalNoise: PositionalNoise;
+            declare const defaultNoise: DefaultNoise;
+            declare const spreadNoise: SpreadNoise;
+            declare const trailingNoise: TrailingNoise;
+            declare const restFirstNoise: RestFirstNoise;
+            declare const restSecondNoise: RestSecondNoise;
+
+            type Options = { value: unknown };
+            type Callback<T> = () => T;
+            declare function select<T>(options: Options, value: T): T;
+            declare function fromCallback<T>(callback: Callback<T>): T;
+            declare function withDefaults<T = string, U = T>(options: Options): U;
+            declare function fixed(value: number): string;
+            declare function withRest(value: number, ...options: Options[]): string;
+
+            export const positionalResult = select(
+                { value: positionalNoise.field },
+                1,
+            );
+            export const callableResult = fromCallback(
+                {} as { (): string },
+            );
+            export const defaultResult = withDefaults({ value: defaultNoise.field });
+
+            export const spreadResult = select(
+                ...[{ value: spreadNoise.field }, true] as const,
+            );
+            export const trailingResult = fixed(1, { value: trailingNoise.field });
+            export const restResult = withRest(
+                1,
+                { value: restFirstNoise.field },
+                { value: restSecondNoise.field },
+            );
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/noise.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let local_input = |name| {
+        LocalTypeInput::new(
+            &db,
+            noise_module,
+            local_type_id_by_name(&db, noise_module, name),
+        )
+    };
+    let infer_result = |name| {
+        infer_binding_type(
+            &db,
+            BindingTypeInput::new(
+                &db,
+                index_module,
+                binding_range_by_name(&db, index_module, name),
+            ),
+        )
+        .unwrap_or_else(|| panic!("{name} result must be inferred"))
+    };
+
+    db.clear_salsa_events();
+    assert!(is_inferred_number(&db, infer_result("positionalResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(
+        &db,
+        infer_local_type,
+        local_input("PositionalNoise"),
+        &events,
+    );
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("callableResult")));
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("defaultResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, local_input("DefaultNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_boolean(&db, infer_result("spreadResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_local_type, local_input("SpreadNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("trailingResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_local_type, local_input("TrailingNoise"), &events);
+
+    db.clear_salsa_events();
+    assert!(is_inferred_string(&db, infer_result("restResult")));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(
+        &db,
+        infer_local_type,
+        local_input("RestFirstNoise"),
+        &events,
+    );
+    assert_function_query_was_run(
+        &db,
+        infer_local_type,
+        local_input("RestSecondNoise"),
+        &events,
+    );
+}
+
+#[test]
+fn test_skipped_call_argument_dependencies_invalidate_when_the_callee_changes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/leaf.ts".into(),
+        "export interface Noise { field: string; }",
+    );
+    fs.insert(
+        "/src/callee.ts".into(),
+        r#"
+            type Options = { value: unknown };
+            export declare function choose<T = string>(options: Options): T;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Noise } from "./leaf.ts";
+            import { choose } from "./callee.ts";
+            declare const noise: Noise;
+            export const result = choose({ value: noise.field });
+        "#,
+    );
+
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/leaf.ts", "/src/callee.ts", "/src/index.ts"],
+        true,
+    );
+    let leaf_module = db
+        .module_for_path(Utf8Path::new("/src/leaf.ts"))
+        .expect("leaf module must exist");
+    let callee_module = db
+        .module_for_path(Utf8Path::new("/src/callee.ts"))
+        .expect("callee module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let result_range = binding_range_by_name(&db, index_module, "result");
+    {
+        let input = BindingTypeInput::new(&db, index_module, result_range);
+        let initial = infer_binding_type(&db, input).expect("initial result must be inferred");
+        assert!(is_inferred_string(&db, initial));
+    }
+
+    fs.insert(
+        "/src/leaf.ts".into(),
+        "export interface Noise { field: number; }",
+    );
+    let leaf_kind = resolve_js_module_kind_for_test(&fs, "/src/leaf.ts", true);
+    salsa::Setter::to(leaf_module.set_kind(&mut db), leaf_kind);
+
+    {
+        db.clear_salsa_events();
+        let input = BindingTypeInput::new(&db, index_module, result_range);
+        let after_leaf_edit =
+            infer_binding_type(&db, input).expect("fixed result after leaf edit must be inferred");
+        assert!(is_inferred_string(&db, after_leaf_edit));
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
+    }
+
+    fs.insert(
+        "/src/callee.ts".into(),
+        "export declare function choose<T>(options: T): T;",
+    );
+    let callee_kind = resolve_js_module_kind_for_test(&fs, "/src/callee.ts", true);
+    salsa::Setter::to(callee_module.set_kind(&mut db), callee_kind);
+
+    db.clear_salsa_events();
+    let input = BindingTypeInput::new(&db, index_module, result_range);
+    let after_callee_edit =
+        infer_binding_type(&db, input).expect("generic result after callee edit must be inferred");
+    let value = find_member_type(&db, after_callee_edit, "value")
+        .expect("generic result value must be inferred");
+    assert!(is_inferred_number(&db, value));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_binding_type, input, &events);
 }
 
 #[test]

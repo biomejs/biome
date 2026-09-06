@@ -53,14 +53,21 @@ impl Rule for NoDuplicateProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let model = ctx.model();
-        let root = ctx.root();
 
         let rule = model.get_rule_by_range(node.range())?;
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
-        for declaration in rule.declarations() {
-            let prop = declaration.property(&root);
+        for declaration in rule.declarations().iter().filter(|declaration| {
+            declaration
+                .declaration()
+                .syntax()
+                .parent()
+                .and_then(|parent| parent.parent())
+                .as_ref()
+                == Some(node.syntax())
+        }) {
+            let prop = declaration.property();
             let prop_name = prop.value().ok()?;
             let prop_range = prop.range();
 

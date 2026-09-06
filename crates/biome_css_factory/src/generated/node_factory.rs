@@ -1603,6 +1603,12 @@ pub fn css_layer_reference(
         ],
     ))
 }
+pub fn css_legacy_filter_value(components: CssCustomPropertyComponentList) -> CssLegacyFilterValue {
+    CssLegacyFilterValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LEGACY_FILTER_VALUE,
+        [Some(SyntaxElement::Node(components.into_syntax()))],
+    ))
+}
 pub fn css_list_of_component_values_expression(
     css_component_value_list: CssComponentValueList,
 ) -> CssListOfComponentValuesExpression {
@@ -3927,6 +3933,14 @@ pub fn scss_interpolated_string(
         ],
     ))
 }
+pub fn scss_interpolated_url_value(
+    parts: ScssInterpolatedUrlValuePartList,
+) -> ScssInterpolatedUrlValue {
+    ScssInterpolatedUrlValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_URL_VALUE,
+        [Some(SyntaxElement::Node(parts.into_syntax()))],
+    ))
+}
 pub fn scss_interpolated_value(items: ScssInterpolatedValuePartList) -> ScssInterpolatedValue {
     ScssInterpolatedValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_VALUE,
@@ -4444,6 +4458,12 @@ pub fn scss_unary_expression(
             Some(SyntaxElement::Token(operator_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
         ],
+    ))
+}
+pub fn scss_url_text(value_token: SyntaxToken) -> ScssUrlText {
+    ScssUrlText::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_URL_TEXT,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn scss_use_all_namespace(star_token: SyntaxToken) -> ScssUseAllNamespace {
@@ -5678,6 +5698,18 @@ where
 {
     ScssInterpolatedStringPartList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_STRING_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_interpolated_url_value_part_list<I>(items: I) -> ScssInterpolatedUrlValuePartList
+where
+    I: IntoIterator<Item = AnyScssInterpolatedUrlValuePart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssInterpolatedUrlValuePartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_URL_VALUE_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
