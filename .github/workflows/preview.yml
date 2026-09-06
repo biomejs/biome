@@ -245,19 +245,29 @@ jobs:
             const output = JSON.parse(fs.readFileSync('output.json', 'utf8'));
             const biomePackage = output.packages
               .find((p) => p.name === "@biomejs/biome");
-            const branch = context.ref.replace(/^refs\/heads\//, "");
-            const { data: pullRequests } = await github.rest.repos
-              .listPullRequestsAssociatedWithCommit({
-                ...context.repo,
-                commit_sha: context.sha,
-              });
-            const pullRequest = pullRequests.find((pullRequest) =>
-              pullRequest.head.repo?.full_name === `${context.repo.owner}/${context.repo.repo}` &&
-              pullRequest.head.ref === branch
-            ) ?? pullRequests[0];
+            const isBranch = context.ref.startsWith("refs/heads/");
+            const refName = context.ref.replace(/^refs\/(?:heads|tags)\//, "");
+            let pullRequest;
+            if (isBranch) {
+              try {
+                const { data: pullRequests } = await github.rest.repos
+                  .listPullRequestsAssociatedWithCommit({
+                    ...context.repo,
+                    commit_sha: context.sha,
+                  });
+                pullRequest = pullRequests.find((pullRequest) =>
+                  pullRequest.state === "open" &&
+                  pullRequest.head.repo?.full_name === `${context.repo.owner}/${context.repo.repo}` &&
+                  pullRequest.head.ref === refName
+                );
+              } catch (error) {
+                core.warning(`Unable to look up pull requests: ${error}`);
+              }
+            }
+            const refType = isBranch ? "Branch" : "Tag";
             const source = pullRequest
-              ? `Branch: \`${branch}\` ([#${pullRequest.number}](${pullRequest.html_url}))`
-              : `Branch: \`${branch}\``;
+              ? `${refType}: \`${refName}\` ([#${pullRequest.number}](${pullRequest.html_url}))`
+              : `${refType}: \`${refName}\``;
 
             return "New preview release available for `@biomejs/biome`.\n" + source + "\nInstall it using the following command:\n ```bash\n npm i " + biomePackage.url + "\n```";
 
