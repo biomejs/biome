@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/configs/recommended"] }
+```
+
+## `node_modules/@shared/config/biome-manifest.json`
+
+```json
+{ "version": 2, "configs": [{ "recommended": "./recommended.json" }] }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `node_modules/@shared/config/recommended.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Cannot load Biome manifest node_modules/@shared/config/biome-manifest.json.
+    
+    Caused by:
+      version must be 1.
+  
+
+
+```

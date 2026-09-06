@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "markdown": { "linter": { "enabled": false } },
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "linter": { "rules": { "recommended": false } }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:27 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key markdown.linter has the value {"enabled":false}.
+  
+    1 │ {
+  > 2 │   "markdown": { "linter": { "enabled": false } },
+      │                           ^^^^^^^^^^^^^^^^^^^^
+    3 │   "overrides": [
+    4 │     {
+  
+  i This value is provided by the root configuration.
+  
+
+```

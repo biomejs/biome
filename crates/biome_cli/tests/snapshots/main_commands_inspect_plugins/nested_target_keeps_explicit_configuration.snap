@@ -1,0 +1,49 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["./root.grit"] }
+```
+
+## `config/biome.json`
+
+```json
+{ "plugins": ["./custom.grit"] }
+```
+
+## `nested/biome.json`
+
+```json
+{ "root": false, "plugins": ["./missing.grit"] }
+```
+
+## `config/custom.grit`
+
+```grit
+`unterminated
+```
+
+## `root.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Target path: nested/file.js
+  
+  Local plugins
+  
+  - custom
+  
+
+```

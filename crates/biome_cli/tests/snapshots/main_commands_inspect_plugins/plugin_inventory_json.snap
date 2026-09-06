@@ -1,0 +1,168 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./unfiltered.grit", "includes": ["src/**/*.ts"] },
+    "./unfiltered.grit",
+    { "path": "./filtered.grit", "includes": ["src/**/*.ts", "!**/*.test.ts"] },
+    { "path": "./throw.ts", "includes": ["src/**/*.ts"] },
+    "./broken"
+  ],
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "plugins": [
+        { "path": "./filtered.grit", "includes": ["**/*.test.ts"] },
+        { "path": "./throw.ts", "includes": ["**/*.test.ts"] },
+        { "path": "./unfiltered.grit", "includes": ["**/*.test.ts"] }
+      ]
+    },
+    { "includes": ["scripts/**"], "plugins": ["./filtered.grit"] }
+  ]
+}
+```
+
+## `broken/biome-manifest.json`
+
+```json
+{ "version": 2 }
+```
+
+## `filtered.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `throw.ts`
+
+```ts
+throw new Error('must not execute');
+```
+
+## `unfiltered.grit`
+
+```grit
+`console.log($message)`
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 2 rules resolved. Some plugin imports could not be resolved.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+{
+  "errors": [
+    {
+      "causes": [
+        "version must be 1."
+      ],
+      "message": "Cannot load Biome manifest broken/biome-manifest.json.",
+      "reference": "broken"
+    }
+  ],
+  "path": null,
+  "plugins": [
+    {
+      "enabled": false,
+      "imports": null,
+      "name": "filtered.grit",
+      "path": "filtered.grit",
+      "ruleInventoryAvailable": true,
+      "rules": [
+        {
+          "enabled": false,
+          "imports": {
+            "direct import": [
+              {
+                "includes": [
+                  "src/**/*.ts",
+                  "!**/*.test.ts"
+                ],
+                "overrideIncludes": null
+              },
+              {
+                "includes": [
+                  "**/*.test.ts"
+                ],
+                "overrideIncludes": [
+                  "tests/**"
+                ]
+              },
+              {
+                "includes": null,
+                "overrideIncludes": [
+                  "scripts/**"
+                ]
+              }
+            ]
+          },
+          "name": "filtered",
+          "path": "filtered.grit"
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "imports": {
+        "direct import": [
+          {
+            "includes": [
+              "src/**/*.ts"
+            ],
+            "overrideIncludes": null
+          },
+          {
+            "includes": [
+              "**/*.test.ts"
+            ],
+            "overrideIncludes": [
+              "tests/**"
+            ]
+          }
+        ]
+      },
+      "name": "throw.ts",
+      "path": "throw.ts",
+      "ruleInventoryAvailable": false,
+      "rules": []
+    },
+    {
+      "enabled": true,
+      "imports": null,
+      "name": "unfiltered.grit",
+      "path": "unfiltered.grit",
+      "ruleInventoryAvailable": true,
+      "rules": [
+        {
+          "enabled": true,
+          "imports": {
+            "direct import": [
+              {
+                "includes": null,
+                "overrideIncludes": null
+              }
+            ]
+          },
+          "name": "unfiltered",
+          "path": "unfiltered.grit"
+        }
+      ]
+    }
+  ]
+}
+```

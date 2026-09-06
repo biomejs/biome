@@ -1,0 +1,62 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    {
+      "path": "plugin/presets/recommended",
+      "includes": ["src/**/*.ts", "!**/*.test.ts"]
+    }
+  ],
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "plugins": [
+        { "path": "plugin/presets/recommended", "includes": ["**/*.test.ts"] }
+      ]
+    }
+  ]
+}
+```
+
+## `node_modules/plugin/biome-manifest.json`
+
+```json
+{
+            "version": 1,
+            "plugins": {
+                "rules": [{ "noConsole": "noConsole.grit" }],
+                "presets": { "recommended": ["noConsole"] }
+            }
+        }
+```
+
+## `node_modules/plugin/noConsole.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `node_modules/plugin/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"plugin"}
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Rules with include globs
+  
+  - plugin/noConsole (presets/recommended [(includes: [src/**/*.ts, !**/*.test.ts]) or (includes: [**/*.test.ts] and override includes: [tests/**])])
+  
+
+```

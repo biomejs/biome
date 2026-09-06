@@ -120,6 +120,8 @@ impl OverridePattern {
             mut grit,
             #[cfg(feature = "lang_html")]
             mut html,
+            #[cfg(feature = "lang_md")]
+            mut markdown,
             mut formatter,
             mut linter,
             mut assist,
@@ -151,6 +153,11 @@ impl OverridePattern {
         #[cfg(feature = "lang_html")]
         if let Some(html) = html.as_mut() {
             html.experimental_full_support_enabled = None;
+        }
+        #[cfg(feature = "lang_md")]
+        if let Some(markdown) = markdown.as_mut() {
+            // Markdown parsing uses base settings rather than per-file overrides.
+            markdown.parser = None;
         }
 
         if let Some(formatter) = formatter.as_mut() {
@@ -282,6 +289,22 @@ impl OverridePattern {
             formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
         }
 
+        #[cfg(feature = "lang_md")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = markdown
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
+            formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+
         if let Some(global) = linter.as_ref() {
             #[cfg(feature = "lang_js")]
             {
@@ -333,6 +356,16 @@ impl OverridePattern {
             #[cfg(feature = "lang_html")]
             {
                 let linter = html
+                    .get_or_insert_with(Default::default)
+                    .linter
+                    .get_or_insert_with(Default::default);
+                linter.enabled = linter
+                    .enabled
+                    .or(global.enabled.map(|enabled| enabled.value().into()));
+            }
+            #[cfg(feature = "lang_md")]
+            {
+                let linter = markdown
                     .get_or_insert_with(Default::default)
                     .linter
                     .get_or_insert_with(Default::default);
@@ -537,6 +570,8 @@ impl OverridePattern {
             grit,
             #[cfg(feature = "lang_html")]
             html,
+            #[cfg(feature = "lang_md")]
+            markdown,
             #[cfg(feature = "plugins")]
             plugins,
             assist,
@@ -762,6 +797,11 @@ pub struct OverrideAssistConfiguration {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "lang_md")]
+    use crate::markdown::{
+        MarkdownConfiguration, MarkdownFormatterConfiguration, MarkdownLinterConfiguration,
+        MarkdownParserConfiguration,
+    };
 
     #[test]
     fn applies_override_values_without_deserializing_configuration() {
@@ -942,6 +982,164 @@ mod tests {
                 .and_then(|javascript| javascript.parser)
                 .and_then(|parser| parser.unsafe_parameter_decorators_enabled),
             None
+        );
+    }
+
+    #[cfg(feature = "lang_md")]
+    #[test]
+    fn applies_markdown_formatter_overrides_with_global_fallbacks() {
+        use biome_markdown_formatter::context::ProseWrap;
+
+        let base_configuration = Configuration {
+            markdown: Some(MarkdownConfiguration {
+                formatter: Some(MarkdownFormatterConfiguration {
+                    enabled: Some(true.into()),
+                    line_width: Some(LineWidth::try_from(100).expect("valid line width")),
+                    ..MarkdownFormatterConfiguration::default()
+                }),
+                ..MarkdownConfiguration::default()
+            }),
+            ..Configuration::default()
+        };
+        let mut configuration = base_configuration.clone();
+        let global_formatter = OverrideFormatterConfiguration {
+            enabled: Some(false.into()),
+            indent_style: Some(IndentStyle::Space),
+            indent_width: Some(IndentWidth::try_from(4).expect("valid indent width")),
+            line_ending: Some(LineEnding::Crlf),
+            line_width: Some(LineWidth::try_from(120).expect("valid line width")),
+            trailing_newline: Some(false.into()),
+            ..OverrideFormatterConfiguration::default()
+        };
+        let mut pattern = OverridePattern {
+            formatter: Some(global_formatter.clone()),
+            markdown: Some(MarkdownConfiguration {
+                formatter: Some(MarkdownFormatterConfiguration {
+                    enabled: Some(true.into()),
+                    line_width: Some(LineWidth::try_from(80).expect("valid line width")),
+                    prose_wrap: Some(ProseWrap::Always),
+                    ..MarkdownFormatterConfiguration::default()
+                }),
+                ..MarkdownConfiguration::default()
+            }),
+            ..OverridePattern::default()
+        };
+
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+
+        let mut expected = MarkdownFormatterConfiguration {
+            enabled: Some(true.into()),
+            indent_style: global_formatter.indent_style,
+            indent_width: global_formatter.indent_width,
+            line_ending: global_formatter.line_ending,
+            line_width: Some(LineWidth::try_from(80).expect("valid line width")),
+            trailing_newline: global_formatter.trailing_newline,
+            prose_wrap: Some(ProseWrap::Always),
+        };
+        assert_eq!(
+            configuration
+                .markdown
+                .as_ref()
+                .and_then(|markdown| markdown.formatter.as_ref()),
+            Some(&expected)
+        );
+
+        pattern.markdown = None;
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+        OverridePattern::default().apply_to_configuration(&mut configuration, &base_configuration);
+
+        expected.enabled = Some(false.into());
+        expected.line_width = global_formatter.line_width;
+        assert_eq!(
+            configuration
+                .markdown
+                .and_then(|markdown| markdown.formatter),
+            Some(expected)
+        );
+    }
+
+    #[cfg(feature = "lang_md")]
+    #[test]
+    fn applies_markdown_linter_overrides_with_global_fallbacks() {
+        let base_markdown = MarkdownConfiguration {
+            parser: Some(MarkdownParserConfiguration {
+                frontmatter: Some(false.into()),
+            }),
+            linter: Some(MarkdownLinterConfiguration {
+                enabled: Some(true.into()),
+            }),
+            ..MarkdownConfiguration::default()
+        };
+        let base_configuration = Configuration {
+            markdown: Some(base_markdown.clone()),
+            linter: Some(LinterConfiguration {
+                enabled: Some(true.into()),
+                ..LinterConfiguration::default()
+            }),
+            ..Configuration::default()
+        };
+        let mut configuration = base_configuration.clone();
+        let mut pattern = OverridePattern {
+            markdown: Some(MarkdownConfiguration {
+                parser: Some(MarkdownParserConfiguration {
+                    frontmatter: Some(true.into()),
+                }),
+                linter: Some(MarkdownLinterConfiguration {
+                    enabled: Some(false.into()),
+                }),
+                ..MarkdownConfiguration::default()
+            }),
+            ..OverridePattern::default()
+        };
+
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+        assert_eq!(
+            configuration.markdown,
+            Some(MarkdownConfiguration {
+                linter: Some(MarkdownLinterConfiguration {
+                    enabled: Some(false.into())
+                }),
+                ..base_markdown
+            })
+        );
+
+        pattern.markdown.as_mut().expect("Markdown override").linter =
+            Some(MarkdownLinterConfiguration {
+                enabled: Some(true.into()),
+            });
+        pattern.linter = Some(OverrideLinterConfiguration {
+            enabled: Some(false.into()),
+            ..OverrideLinterConfiguration::default()
+        });
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+        assert_eq!(
+            configuration
+                .markdown
+                .as_ref()
+                .and_then(|markdown| markdown.linter.as_ref())
+                .and_then(|linter| linter.enabled),
+            Some(true.into())
+        );
+
+        pattern.markdown.as_mut().expect("Markdown override").linter = None;
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+        assert_eq!(
+            configuration
+                .markdown
+                .as_ref()
+                .and_then(|markdown| markdown.linter.as_ref())
+                .and_then(|linter| linter.enabled),
+            Some(false.into())
+        );
+
+        pattern.linter = Some(OverrideLinterConfiguration::default());
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+        assert_eq!(
+            configuration
+                .markdown
+                .and_then(|markdown| markdown.linter)
+                .and_then(|linter| linter.enabled),
+            Some(true.into())
         );
     }
 }

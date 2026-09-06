@@ -2581,6 +2581,9 @@ fn to_markdown_language_settings(
 
     language_setting.formatter = formatter.into();
 
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter.enabled = linter.enabled;
+
     language_setting
 }
 

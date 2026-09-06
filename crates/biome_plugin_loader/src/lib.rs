@@ -23,7 +23,7 @@ use std::sync::Arc;
 
 use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
-use biome_fs::{ManifestName, normalize_path};
+use biome_fs::{FileSystemDiagnostic, FsErrorKind, ManifestName, normalize_path};
 use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_manifest::{BiomeManifest, BiomeManifestError, ManifestEntry, ManifestPresets};
 use biome_resolver::{
@@ -39,6 +39,46 @@ const MAX_MANIFEST_IMPORT_DEPTH: usize = 10;
 #[derive(Debug)]
 pub struct BiomePlugin {
     pub analyzer_plugins: AnalyzerPluginVec,
+}
+
+/// A plugin reference resolved without reading or executing its rule sources.
+#[derive(Debug, Eq, PartialEq)]
+pub struct ResolvedPlugin {
+    /// The resolved file or directory requested by the caller.
+    /// Package references resolve to their Biome manifest.
+    pub path: Utf8PathBuf,
+    /// The package rule or preset subpath, such as `noFoo` or `presets/recommended`.
+    /// Direct files and local all-rule manifest imports have no selection.
+    pub selection: Option<String>,
+    pub kind: ResolvedPluginKind,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum ResolvedPluginKind {
+    Grit,
+    JavaScript,
+    Manifest {
+        /// The entry manifest containing the selected exports.
+        path: Utf8PathBuf,
+        /// Selected rules in loading order.
+        rules: Vec<ResolvedPluginRule>,
+    },
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct ResolvedPluginRule {
+    pub path: Utf8PathBuf,
+    /// The name used when loading the rule, including its package namespace.
+    pub name: String,
+    /// The public rule name without its package namespace.
+    pub export_name: String,
+    /// The public package namespace, or `None` for a locally declared rule.
+    pub package: Option<String>,
+    /// The manifest exporting the public name, which may re-export another package's rule.
+    /// Package selections use the entry manifest; local imports use the imported package's manifest.
+    pub exporting_manifest_path: Utf8PathBuf,
+    /// The manifest declaring the rule's file, before any package re-exports.
+    pub manifest_path: Utf8PathBuf,
 }
 
 impl From<BiomeManifestError> for PluginDiagnostic {
@@ -79,149 +119,212 @@ impl BiomePlugin {
         includes: Option<&[NormalizedGlob]>,
         package_specifier: Option<&str>,
     ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
-        let package_specifier = package_specifier.map(str::to_owned).or_else(|| {
-            configuration::is_package_plugin_specifier(fs.as_ref(), plugin_path, base_path)
-                .then(|| plugin_path.to_string())
+        let resolved = resolve_plugin(fs.as_ref(), plugin_path, base_path, package_specifier)?;
+        let analyzer_plugins = match resolved.kind {
+            ResolvedPluginKind::Grit => {
+                let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &resolved.path, includes)?;
+                vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)]
+            }
+            #[cfg(feature = "js_plugin")]
+            ResolvedPluginKind::JavaScript => {
+                let plugin = AnalyzerJsPlugin::load(fs, &resolved.path, includes)?;
+                vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)]
+            }
+            #[cfg(not(feature = "js_plugin"))]
+            ResolvedPluginKind::JavaScript => {
+                return Err(PluginDiagnostic::unsupported_rule_format(markup!(
+                    "Unsupported rule format for plugin rule "<Emphasis>{resolved.path.as_str()}</Emphasis>"."
+                )));
+            }
+            ResolvedPluginKind::Manifest { rules, .. } => rules
+                .into_iter()
+                .map(|rule| {
+                    let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?
+                        .with_name(rule.name);
+                    Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
+                })
+                .collect::<Result<_, PluginDiagnostic>>()?,
+        };
+
+        Ok((Self { analyzer_plugins }, resolved.path))
+    }
+}
+
+/// Resolves a plugin and its selected rules without reading, compiling, or executing rule sources.
+///
+/// Relative paths resolve from `base_path`. `package_specifier` retains the original
+/// package selection when `plugin_path` has already been resolved relative to a configuration.
+/// Manifests are read and validated, but only selected rule files must exist.
+/// JavaScript and TypeScript files resolve even when the `js_plugin` feature is disabled.
+/// Successful resolution does not guarantee that the plugin can be loaded.
+pub fn resolve_plugin(
+    fs: &dyn FsWithResolverProxy,
+    plugin_path: &str,
+    base_path: &Utf8Path,
+    package_specifier: Option<&str>,
+) -> Result<ResolvedPlugin, PluginDiagnostic> {
+    let package_specifier = package_specifier.or_else(|| {
+        configuration::is_package_plugin_specifier(fs, plugin_path, base_path)
+            .then_some(plugin_path)
+    });
+    let plugin_path = resolve_plugin_path(fs, base_path, plugin_path)?;
+
+    if plugin_path.extension() == Some("grit") && !fs.path_is_dir(&plugin_path) {
+        validate_plugin_file(fs, &plugin_path)?;
+        return Ok(ResolvedPlugin {
+            path: plugin_path,
+            selection: None,
+            kind: ResolvedPluginKind::Grit,
         });
-        let plugin_path = resolve_plugin_path(fs.as_ref(), base_path, plugin_path)?;
-
-        // If the plugin path references a `.grit` file directly, treat it as
-        // a single-rule plugin instead of going through the manifest process:
-        if plugin_path.extension() == Some("grit") && !fs.path_is_dir(&plugin_path) {
-            let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &plugin_path, includes)?;
-            return Ok((
-                Self {
-                    analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
-                },
-                plugin_path,
-            ));
-        }
-
-        // TODO: plugin can have multiple analyser rules
-        #[cfg(feature = "js_plugin")]
-        if plugin_path
-            .extension()
-            .is_some_and(|extension| matches!(extension, "js" | "mjs" | "ts" | "mts"))
-            && !fs.path_is_dir(&plugin_path)
-        {
-            let plugin = AnalyzerJsPlugin::load(fs.clone(), &plugin_path, includes)?;
-            return Ok((
-                Self {
-                    analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
-                },
-                plugin_path,
-            ));
-        }
-
-        let (selection, package_name) = if let Some(specifier) = &package_specifier {
-            let (package_name, selection) =
-                package_specifier_parts(specifier).map_err(|error| {
-                    PluginDiagnostic::cant_resolve_package(specifier, base_path, error)
-                })?;
-            if selection.is_empty() {
-                return Err(PluginDiagnostic::invalid_manifest(
-                    markup!(
-                        "Plugin package "<Emphasis>{package_name}</Emphasis>
-                        " must select a named rule or preset."
-                    ),
-                    None,
-                ));
-            }
-            validate_rule_selection(selection)?;
-            (Some(selection), Some(package_name))
-        } else {
-            (None, None)
-        };
-        let manifest_path = if ManifestName::is_manifest_file(&plugin_path) {
-            plugin_path.clone()
-        } else {
-            find_biome_manifest(fs.as_ref(), &plugin_path)?
-        };
-        let analyzer_plugins = Self::load_manifest_rules(
-            &fs,
-            &manifest_path,
-            includes,
-            package_name,
-            selection,
-            &mut FxHashSet::default(),
-        )?;
-        let plugin = Self { analyzer_plugins };
-
-        Ok((plugin, plugin_path))
     }
 
-    fn load_manifest_rules(
-        fs: &Arc<dyn FsWithResolverProxy>,
-        manifest_path: &Utf8Path,
-        includes: Option<&[NormalizedGlob]>,
-        package_name: Option<&str>,
-        selection: Option<&str>,
-        active_manifests: &mut FxHashSet<Utf8PathBuf>,
-    ) -> Result<AnalyzerPluginVec, PluginDiagnostic> {
-        let manifest = BiomeManifest::load(fs.as_ref(), manifest_path)?;
-        let plugins = manifest.plugins.unwrap_or_default();
-        let presets = plugins.presets.unwrap_or_default();
-        let rules = collect_manifest_rules(
-            fs,
-            manifest_path,
-            plugins.rules,
-            package_name,
-            None,
-            active_manifests,
-            0,
-        )?;
+    if plugin_path
+        .extension()
+        .is_some_and(|extension| matches!(extension, "js" | "mjs" | "ts" | "mts"))
+        && !fs.path_is_dir(&plugin_path)
+    {
+        validate_plugin_file(fs, &plugin_path)?;
+        return Ok(ResolvedPlugin {
+            path: plugin_path,
+            selection: None,
+            kind: ResolvedPluginKind::JavaScript,
+        });
+    }
 
-        validate_manifest_presets(&presets, &rules, None)?;
+    let (selection, package_name) = if let Some(specifier) = package_specifier {
+        let (package_name, selection) = package_specifier_parts(specifier)
+            .map_err(|error| PluginDiagnostic::cant_resolve_package(specifier, base_path, error))?;
+        if selection.is_empty() {
+            return Err(PluginDiagnostic::invalid_manifest(
+                markup!(
+                    "Plugin package "<Emphasis>{package_name}</Emphasis>
+                    " must select a named rule or preset."
+                ),
+                None,
+            ));
+        }
+        validate_rule_selection(selection)?;
+        (Some(selection), Some(package_name))
+    } else {
+        (None, None)
+    };
+    let manifest_path = if ManifestName::is_manifest_file(&plugin_path) {
+        plugin_path.clone()
+    } else {
+        find_biome_manifest(fs, &plugin_path)?
+    };
+    let manifest = BiomeManifest::load(fs, &manifest_path)?;
+    let plugins = manifest.plugins.unwrap_or_default();
+    let presets = plugins.presets.unwrap_or_default();
+    let rules = collect_manifest_rules(
+        fs,
+        &manifest_path,
+        plugins.rules,
+        package_name,
+        None,
+        &mut FxHashSet::default(),
+        0,
+    )?;
 
-        let selected_rules: Vec<&str> = match selection {
-            Some(selection) if selection.starts_with("presets/") => {
-                let preset_name = &selection["presets/".len()..];
-                let preset = presets.get(preset_name).ok_or_else(|| {
-                    PluginDiagnostic::invalid_manifest(
-                        markup!("Biome manifest does not export preset "<Emphasis>{preset_name}</Emphasis>"."),
-                        None,
-                    )
-                })?;
-                preset.iter().map(String::as_str).collect()
-            }
-            Some(rule_name) => {
-                let rule_key = exported_rule_key(&rules, rule_name).ok_or_else(|| {
-                    PluginDiagnostic::invalid_manifest(
-                        markup!("Biome manifest does not export rule "<Emphasis>{rule_name}</Emphasis>"."),
-                        None,
-                    )
-                })?;
-                vec![rule_key]
-            }
-            None => rules.keys().map(String::as_str).collect(),
-        };
+    validate_manifest_presets(&presets, &rules, None)?;
 
-        selected_rules
-            .into_iter()
-            .map(|rule_name| {
-                let rule = &rules[rule_name];
-                let mut plugin = AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?;
-                if let Some(package_name) = package_name {
-                    plugin = plugin.with_name(format!("{package_name}/{}", rule.export_name));
-                } else if let Some(name) = &rule.qualified_name {
-                    plugin = plugin.with_name(name.clone());
-                } else {
-                    plugin = plugin.with_name(rule.export_name.clone());
-                }
-                Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
+    let selected_rules: Vec<&str> = if let Some(preset_name) =
+        selection.and_then(|selection| selection.strip_prefix("presets/"))
+    {
+        let preset = presets.get(preset_name).ok_or_else(|| {
+            PluginDiagnostic::invalid_manifest(
+                markup!("Biome manifest does not export preset "<Emphasis>{preset_name}</Emphasis>"."),
+                None,
+            )
+        })?;
+        preset.iter().map(String::as_str).collect()
+    } else if let Some(rule_name) = selection {
+        let rule_key = exported_rule_key(&rules, rule_name).ok_or_else(|| {
+            PluginDiagnostic::invalid_manifest(
+                markup!("Biome manifest does not export rule "<Emphasis>{rule_name}</Emphasis>"."),
+                None,
+            )
+        })?;
+        vec![rule_key]
+    } else {
+        rules.keys().map(String::as_str).collect()
+    };
+
+    let rules = selected_rules
+        .into_iter()
+        .map(|rule_name| {
+            debug_assert!(rules.contains_key(rule_name));
+            let rule = &rules[rule_name];
+            validate_plugin_file(fs, &rule.path)?;
+            let (name, package, exporting_manifest_path) = if let Some(package_name) = package_name
+            {
+                (
+                    format!("{package_name}/{}", rule.export_name),
+                    Some(package_name.to_owned()),
+                    manifest_path.clone(),
+                )
+            } else {
+                (
+                    rule.qualified_name
+                        .as_ref()
+                        .unwrap_or(&rule.export_name)
+                        .clone(),
+                    rule.package.clone(),
+                    rule.exporting_manifest_path.clone(),
+                )
+            };
+            Ok(ResolvedPluginRule {
+                path: rule.path.clone(),
+                name,
+                export_name: rule.export_name.clone(),
+                package,
+                exporting_manifest_path,
+                manifest_path: rule.manifest_path.clone(),
             })
-            .collect()
-    }
+        })
+        .collect::<Result<_, PluginDiagnostic>>()?;
+
+    Ok(ResolvedPlugin {
+        path: plugin_path,
+        selection: selection.map(str::to_owned),
+        kind: ResolvedPluginKind::Manifest {
+            path: manifest_path,
+            rules,
+        },
+    })
+}
+
+fn validate_plugin_file(
+    fs: &dyn FsWithResolverProxy,
+    path: &Utf8Path,
+) -> Result<(), PluginDiagnostic> {
+    fs.path_kind(path)
+        .and_then(|kind| {
+            if kind.is_file() {
+                Ok(())
+            } else {
+                Err(FileSystemDiagnostic {
+                    path: path.to_string(),
+                    severity: biome_diagnostics::Severity::Error,
+                    error_kind: FsErrorKind::CantReadFile,
+                    source: None,
+                })
+            }
+        })
+        .map_err(|source| PluginDiagnostic::cant_read_plugin_file(path.to_path_buf(), source))
 }
 
 struct ManifestRule {
     path: Utf8PathBuf,
+    manifest_path: Utf8PathBuf,
     export_name: String,
     qualified_name: Option<String>,
+    package: Option<String>,
+    exporting_manifest_path: Utf8PathBuf,
 }
 
 fn collect_manifest_rules(
-    fs: &Arc<dyn FsWithResolverProxy>,
+    fs: &dyn FsWithResolverProxy,
     manifest_path: &Utf8Path,
     entries: Vec<ManifestEntry>,
     package_name: Option<&str>,
@@ -259,9 +362,8 @@ fn collect_manifest_rules(
                             )
                         })?;
                     validate_rule_selection(selection)?;
-                    let imported_manifest =
-                        resolve_package_manifest(fs.as_ref(), manifest_dir, package)?;
-                    let imported = BiomeManifest::load(fs.as_ref(), &imported_manifest)?;
+                    let imported_manifest = resolve_package_manifest(fs, manifest_dir, package)?;
+                    let imported = BiomeManifest::load(fs, &imported_manifest)?;
                     let imported_plugins = imported.plugins.unwrap_or_default();
                     let imported_presets = imported_plugins.presets.unwrap_or_default();
                     let mut imported_rules = collect_manifest_rules(
@@ -302,13 +404,15 @@ fn collect_manifest_rules(
                         })?;
                         let key = format!("{package}/{}", rule.export_name);
                         rule.qualified_name = Some(key.clone());
+                        rule.package = Some(package.to_owned());
+                        rule.exporting_manifest_path = imported_manifest.clone();
                         insert_named_rule(&mut rules, key, rule)?;
                     }
                 }
                 ManifestEntry::Paths(paths) => {
                     for (name, path) in paths {
                         validate_rule_name(&name)?;
-                        let path = resolve_manifest_rule_path(fs.as_ref(), manifest_dir, &path)?;
+                        let path = resolve_manifest_rule_path(fs, manifest_dir, &path)?;
                         let key = key_prefix
                             .map_or_else(|| name.clone(), |prefix| format!("{prefix}/{name}"));
                         let qualified_name =
@@ -318,8 +422,11 @@ fn collect_manifest_rules(
                             key,
                             ManifestRule {
                                 path,
+                                manifest_path: manifest_path.to_path_buf(),
                                 export_name: name,
                                 qualified_name,
+                                package: package_name.map(str::to_owned),
+                                exporting_manifest_path: manifest_path.to_path_buf(),
                             },
                         )?;
                     }
@@ -659,6 +766,90 @@ mod test {
     }
 
     #[test]
+    fn resolve_grit_plugin_without_reading_or_compiling_source() {
+        let fs = MemoryFileSystem::default();
+        fs.insert("/my-plugin.grit".into(), "`unterminated");
+
+        let resolved = resolve_plugin(&fs, "./my-plugin.grit", Utf8Path::new("/"), None)
+            .expect("resolution should not compile the plugin");
+        assert_eq!(resolved.path, "/my-plugin.grit");
+        assert_eq!(resolved.selection, None);
+        assert_eq!(resolved.kind, ResolvedPluginKind::Grit);
+        assert!(matches!(
+            AnalyzerGritPlugin::load(&fs, &resolved.path, None),
+            Err(PluginDiagnostic::Compile(_))
+        ));
+
+        fs.insert("/my-plugin.grit".into(), vec![0xff]);
+        assert_eq!(
+            resolve_plugin(&fs, "./my-plugin.grit", Utf8Path::new("/"), None).unwrap(),
+            resolved,
+            "resolution should not read plugin source as UTF-8"
+        );
+    }
+
+    #[test]
+    fn resolve_plugin_rejects_missing_direct_and_selected_files() {
+        let fs = MemoryFileSystem::default();
+        let error = resolve_plugin(&fs, "./missing.grit", Utf8Path::new("/"), None)
+            .expect_err("direct plugin files must exist");
+        assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+        assert!(error.to_string().contains("/missing.grit"));
+
+        fs.insert(
+            "/my-plugin/biome-manifest.json".into(),
+            r#"{
+                "version": 1,
+                "plugins": {
+                    "rules": [{ "one": "missing.grit" }],
+                    "presets": { "recommended": ["one"] }
+                }
+            }"#,
+        );
+        for selection in ["plugin/one", "plugin/presets/recommended"] {
+            let error = resolve_plugin(
+                &fs,
+                "/my-plugin/biome-manifest.json",
+                Utf8Path::new("/"),
+                Some(selection),
+            )
+            .expect_err("selected plugin files must exist");
+            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(error.to_string().contains("/my-plugin/missing.grit"));
+        }
+
+        fs.insert("/my-plugin/missing.grit/child".into(), "");
+        resolve_plugin(&fs, "./my-plugin", Utf8Path::new("/"), None)
+            .expect_err("selected plugin paths must be files, not directories");
+    }
+
+    #[test]
+    fn resolve_config_only_manifest_has_no_rules() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/my-plugin/biome-manifest.json".into(),
+            r#"{
+                "version": 1,
+                "configs": [{ "recommended": "biome.json" }]
+            }"#,
+        );
+
+        let resolved = resolve_plugin(&fs, "./my-plugin", Utf8Path::new("/"), None).unwrap();
+        assert_eq!(resolved.path, "/my-plugin");
+        assert_eq!(resolved.selection, None);
+        assert_eq!(
+            resolved.kind,
+            ResolvedPluginKind::Manifest {
+                path: "/my-plugin/biome-manifest.json".into(),
+                rules: vec![],
+            }
+        );
+        let (plugin, _) =
+            BiomePlugin::load(Arc::new(fs), "./my-plugin", Utf8Path::new("/"), None).unwrap();
+        assert!(plugin.analyzer_plugins.is_empty());
+    }
+
+    #[test]
     fn local_manifest_uses_exported_rule_names() {
         let fs = MemoryFileSystem::default();
         fs.insert(
@@ -667,8 +858,8 @@ mod test {
                 "version": 1,
                 "plugins": {
                     "rules": [
-                        { "first": "first/1.grit" },
-                        { "second": "second/1.grit" }
+                        { "second": "second/1.grit" },
+                        { "first": "first/1.grit" }
                     ],
                     "presets": { "recommended": ["first", "second"] }
                 }
@@ -676,6 +867,34 @@ mod test {
         );
         fs.insert("/my-plugin/first/1.grit".into(), r#"`hello`"#);
         fs.insert("/my-plugin/second/1.grit".into(), r#"`world`"#);
+
+        let resolved = resolve_plugin(&fs, "./my-plugin", Utf8Path::new("/"), None).unwrap();
+        assert_eq!(resolved.path, "/my-plugin");
+        assert_eq!(resolved.selection, None);
+        assert_eq!(
+            resolved.kind,
+            ResolvedPluginKind::Manifest {
+                path: "/my-plugin/biome-manifest.json".into(),
+                rules: vec![
+                    ResolvedPluginRule {
+                        path: "/my-plugin/first/1.grit".into(),
+                        name: "first".into(),
+                        export_name: "first".into(),
+                        package: None,
+                        exporting_manifest_path: "/my-plugin/biome-manifest.json".into(),
+                        manifest_path: "/my-plugin/biome-manifest.json".into(),
+                    },
+                    ResolvedPluginRule {
+                        path: "/my-plugin/second/1.grit".into(),
+                        name: "second".into(),
+                        export_name: "second".into(),
+                        package: None,
+                        exporting_manifest_path: "/my-plugin/biome-manifest.json".into(),
+                        manifest_path: "/my-plugin/biome-manifest.json".into(),
+                    },
+                ],
+            }
+        );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let (plugin, _) = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
@@ -928,6 +1147,38 @@ mod test {
             r#"`package`"#,
         );
 
+        let resolved = resolve_plugin(&fs, "plugin/presets/all", Utf8Path::new("/project"), None)
+            .expect("unused missing exports must not prevent resolution");
+        assert_eq!(resolved.selection.as_deref(), Some("presets/all"));
+        assert_eq!(
+            resolved.path,
+            "/project/node_modules/plugin/biome-manifest.json"
+        );
+        let ResolvedPluginKind::Manifest { path, rules } = resolved.kind else {
+            panic!("expected manifest");
+        };
+        assert_eq!(path, resolved.path);
+        let expected_rules = [
+            ("orgRule", "@org/package", "orgRule.grit"),
+            ("orgSecondRule", "@org/package", "orgSecondRule.grit"),
+            ("stylesRule", "biome-styles-plugin", "stylesRule.grit"),
+            ("defaultRule", "default-only-plugin", "defaultRule.grit"),
+            ("explicitRule", "explicit-manifest", "explicitRule.grit"),
+            ("localRule", "plugin", "local-rule.grit"),
+        ];
+        assert_eq!(rules.len(), expected_rules.len());
+        for (rule, (name, package, file)) in rules.iter().zip(expected_rules) {
+            assert_eq!(rule.name, format!("plugin/{name}"));
+            assert_eq!(rule.export_name, name);
+            assert_eq!(rule.package.as_deref(), Some("plugin"));
+            assert_eq!(rule.exporting_manifest_path, resolved.path);
+            assert_eq!(rule.path, format!("/project/node_modules/{package}/{file}"));
+            assert_eq!(
+                rule.manifest_path,
+                format!("/project/node_modules/{package}/biome-manifest.json")
+            );
+        }
+
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let (plugin, _) = BiomePlugin::load(
             fs.clone(),
@@ -1045,9 +1296,43 @@ mod test {
             "/project/node_modules/leaf/noExternalLinks.grit".into(),
             r#"`<a href=$url></a>`"#,
         );
+        fs.insert(
+            "/project/biome-manifest.json".into(),
+            r#"{
+                "version": 1,
+                "plugins": {
+                    "rules": [
+                        "middle/presets/recommended",
+                        { "localRule": "local.grit" }
+                    ]
+                }
+            }"#,
+        );
+        fs.insert("/project/local.grit".into(), vec![0xff]);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         for selection in ["consumer/noExternalLinks", "consumer/presets/recommended"] {
+            let resolved =
+                resolve_plugin(fs.as_ref(), selection, Utf8Path::new("/project"), None).unwrap();
+            assert_eq!(
+                resolved.selection.as_deref(),
+                selection.strip_prefix("consumer/")
+            );
+            assert_eq!(
+                resolved.kind,
+                ResolvedPluginKind::Manifest {
+                    path: "/project/node_modules/consumer/biome-manifest.json".into(),
+                    rules: vec![ResolvedPluginRule {
+                        path: "/project/node_modules/leaf/noExternalLinks.grit".into(),
+                        name: "consumer/noExternalLinks".into(),
+                        export_name: "noExternalLinks".into(),
+                        package: Some("consumer".into()),
+                        exporting_manifest_path:
+                            "/project/node_modules/consumer/biome-manifest.json".into(),
+                        manifest_path: "/project/node_modules/leaf/biome-manifest.json".into(),
+                    }],
+                }
+            );
             let (plugin, _) =
                 BiomePlugin::load(fs.clone(), selection, Utf8Path::new("/project"), None)
                     .expect("transitively re-exported rules should resolve");
@@ -1056,6 +1341,42 @@ mod test {
                 "consumer/noExternalLinks"
             );
         }
+
+        let resolved = resolve_plugin(
+            fs.as_ref(),
+            "./biome-manifest.json",
+            Utf8Path::new("/project"),
+            None,
+        )
+        .expect(
+            "local imports should preserve public package exports without reading rule sources",
+        );
+        assert_eq!(resolved.selection, None);
+        assert_eq!(
+            resolved.kind,
+            ResolvedPluginKind::Manifest {
+                path: "/project/biome-manifest.json".into(),
+                rules: vec![
+                    ResolvedPluginRule {
+                        path: "/project/local.grit".into(),
+                        name: "localRule".into(),
+                        export_name: "localRule".into(),
+                        package: None,
+                        exporting_manifest_path: "/project/biome-manifest.json".into(),
+                        manifest_path: "/project/biome-manifest.json".into(),
+                    },
+                    ResolvedPluginRule {
+                        path: "/project/node_modules/leaf/noExternalLinks.grit".into(),
+                        name: "middle/noExternalLinks".into(),
+                        export_name: "noExternalLinks".into(),
+                        package: Some("middle".into()),
+                        exporting_manifest_path: "/project/node_modules/middle/biome-manifest.json"
+                            .into(),
+                        manifest_path: "/project/node_modules/leaf/biome-manifest.json".into(),
+                    },
+                ],
+            }
+        );
 
         for selection in [
             "consumer/middle/noExternalLinks",
@@ -1449,6 +1770,56 @@ mod test {
         let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.grit", Utf8Path::new("/"), None)
             .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
+    }
+
+    #[test]
+    fn resolve_js_plugin_without_reading_or_evaluating_source() {
+        let fs = MemoryFileSystem::default();
+        for extension in ["js", "mjs", "ts", "mts"] {
+            let path = format!("/my-plugin.{extension}");
+            fs.insert(path.clone().into(), "throw new Error('must not execute');");
+            let resolved = resolve_plugin(&fs, &path, Utf8Path::new("/"), None)
+                .expect("resolution should not execute JavaScript");
+            assert_eq!(resolved.path, path);
+            assert_eq!(resolved.selection, None);
+            assert_eq!(resolved.kind, ResolvedPluginKind::JavaScript);
+
+            fs.insert(path.clone().into(), vec![0xff]);
+            assert_eq!(
+                resolve_plugin(&fs, &path, Utf8Path::new("/"), None).unwrap(),
+                resolved,
+                "resolution should not read plugin source as UTF-8"
+            );
+
+            let error = resolve_plugin(
+                &fs,
+                &format!("./missing.{extension}"),
+                Utf8Path::new("/"),
+                None,
+            )
+            .expect_err("direct JavaScript plugin files must exist");
+            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+        }
+    }
+
+    #[test]
+    fn load_throwing_js_plugin() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/my-plugin.js".into(),
+            "throw new Error('must not execute');",
+        );
+        let error = BiomePlugin::load(Arc::new(fs), "./my-plugin.js", Utf8Path::new("/"), None)
+            .expect_err(
+                "ordinary loading should reject a throwing or unsupported JavaScript plugin",
+            );
+        #[cfg(feature = "js_plugin")]
+        assert!(matches!(error, PluginDiagnostic::Compile(_)));
+        #[cfg(not(feature = "js_plugin"))]
+        {
+            assert!(matches!(error, PluginDiagnostic::UnsupportedRuleFormat(_)));
+            snap_diagnostic("load_js_plugin_without_runtime_support", error.into());
+        }
     }
 
     #[cfg(feature = "js_plugin")]

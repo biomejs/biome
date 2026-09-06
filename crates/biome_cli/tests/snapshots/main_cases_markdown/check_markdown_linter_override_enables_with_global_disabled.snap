@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": false,
+    "rules": {
+      "nursery": {
+        "useTopLevelHeading": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["special/**"],
+      "linter": {
+        "enabled": false
+      },
+      "markdown": {
+        "linter": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}
+```
+
+## `file.md`
+
+```md
+## Second level heading
+
+```
+
+## `special/file.md`
+
+```md
+## Second level heading
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+special/file.md:1:1 lint/nursery/useTopLevelHeading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing top-level heading.
+  
+  > 1 │ ## Second level heading
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i The document should start with a top-level heading (h1) so readers and tools can identify its title. Add a # Heading (or a level-1 setext heading) at the start of the document.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

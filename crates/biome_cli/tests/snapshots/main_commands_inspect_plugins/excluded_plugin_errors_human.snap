@@ -1,0 +1,82 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["./before.grit"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "plugins": [
+        "./missing.grit",
+        "./broken",
+        {
+          "path": "missing-package/presets/recommended",
+          "resolutionKind": "project"
+        },
+        "./after.grit"
+      ]
+    }
+  ]
+}
+```
+
+## `after.grit`
+
+```grit
+`unterminated
+```
+
+## `before.grit`
+
+```grit
+`unterminated
+```
+
+## `broken/biome-manifest.json`
+
+```json
+{ "version": 2 }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 1 rule resolved. Some plugin imports could not be resolved.
+  
+  Target path: file.js
+  
+  Local plugins
+  
+  - before
+  
+  Unresolved imports
+  
+  missing.grit
+  
+  × Failed to read plugin file missing.grit
+  
+  × Cannot read file.
+  
+  × Biome can't read the following file, maybe for permissions reasons or it doesn't exist.
+  
+  broken
+  
+  × Cannot load Biome manifest broken/biome-manifest.json.
+  
+  × version must be 1.
+  
+  missing-package/presets/recommended
+  
+  × Failed to resolve plugin package missing-package from 
+  
+  × Could not resolve missing-package: module not found
+  
+
+
+```

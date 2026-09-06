@@ -261,6 +261,12 @@ impl PluginConfiguration {
         }
     }
 
+    /// Returns whether `path` matches the plugin's includes, including negated globs.
+    /// Omitted includes match every file; an empty list matches none.
+    pub fn matches_includes(&self, path: &Utf8Path) -> bool {
+        crate::file_matches_includes(self.includes(), path)
+    }
+
     pub fn resolved_package_specifier(&self) -> Option<&str> {
         match self {
             Self::Path(_) => None,
@@ -544,11 +550,13 @@ mod tests {
             r#"{
                 "version": 1,
                 "plugins": {
-                    "rules": [{ "one": "rules/1.grit" }],
+                    "rules": [{ "one": "rules/1.grit", "unused": "missing.grit" }],
                     "presets": { "recommended": ["one"] }
                 }
             }"#,
         );
+        let rule_path = package_root.join("rules/1.grit");
+        fs.insert(rule_path.clone(), vec![0xff]);
         let mut plugins = Plugins(vec![PluginConfiguration::PathWithOptions(
             PluginWithOptions {
                 path: "@scope/plugin/one".into(),
@@ -574,6 +582,31 @@ mod tests {
             plugins.0[0].resolved_package_specifier(),
             Some("@scope/plugin/one")
         );
+
+        let config = &plugins.0[0];
+        let resolved = crate::resolve_plugin(
+            &fs,
+            config.path(),
+            Utf8Path::new("/project"),
+            config.resolved_package_specifier(),
+        )
+        .expect("config-relative resolution must not read rule sources or require unused files");
+        assert_eq!(resolved.path, manifest_path);
+        assert_eq!(resolved.selection.as_deref(), Some("one"));
+        assert_eq!(
+            resolved.kind,
+            crate::ResolvedPluginKind::Manifest {
+                path: manifest_path.clone(),
+                rules: vec![crate::ResolvedPluginRule {
+                    path: rule_path,
+                    name: "@scope/plugin/one".into(),
+                    export_name: "one".into(),
+                    package: Some("@scope/plugin".into()),
+                    exporting_manifest_path: manifest_path.clone(),
+                    manifest_path,
+                }],
+            }
+        );
     }
 
     #[test]
@@ -581,15 +614,21 @@ mod tests {
         let config: PluginConfiguration = serde_json::from_str(r#""my-plugin.grit""#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
+        assert!(config.matches_includes(Utf8Path::new("src/main.ts")));
     }
 
     #[test]
     fn deserialize_object_with_includes() {
-        let config: PluginConfiguration =
-            serde_json::from_str(r#"{ "path": "my-plugin.grit", "includes": ["src/**/*.ts"] }"#)
-                .unwrap();
+        let config: PluginConfiguration = serde_json::from_str(
+            r#"{ "path": "my-plugin.grit", "includes": ["src/**/*.ts", "!**/*.test.ts"] }"#,
+        )
+        .unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
-        assert_eq!(config.includes().unwrap().len(), 1);
+        assert_eq!(config.includes().unwrap().len(), 2);
+        assert!(config.matches_includes(Utf8Path::new("src/main.ts")));
+        assert!(!config.matches_includes(Utf8Path::new("src/main.js")));
+        assert!(!config.matches_includes(Utf8Path::new("src/main.test.ts")));
+        assert!(!config.matches_includes(Utf8Path::new("/project/src/main.ts")));
     }
 
     #[test]
@@ -598,6 +637,14 @@ mod tests {
             serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
+        assert!(config.matches_includes(Utf8Path::new("src/main.ts")));
+    }
+
+    #[test]
+    fn empty_includes_match_nothing() {
+        let config: PluginConfiguration =
+            serde_json::from_str(r#"{ "path": "my-plugin.grit", "includes": [] }"#).unwrap();
+        assert!(!config.matches_includes(Utf8Path::new("src/main.ts")));
     }
 
     #[test]
