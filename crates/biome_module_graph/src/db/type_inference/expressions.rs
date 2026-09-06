@@ -30,7 +30,6 @@ use biome_js_type_info::{
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
-    literal::NumberLiteral,
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -173,6 +172,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::Narrowed(expression) => {
                 let ty = self.resolve(&expression.ty);
                 let predicate = match &expression.predicate {
+                    RawNarrowingPredicate::Assigned(assigned) => {
+                        InferredNarrowingPredicate::Assigned(self.resolve(assigned))
+                    }
                     RawNarrowingPredicate::Falsy => InferredNarrowingPredicate::Falsy,
                     RawNarrowingPredicate::InstanceOf(guard) => {
                         InferredNarrowingPredicate::InstanceOf(self.resolve(guard))
@@ -2340,16 +2342,25 @@ impl<'db> ResolutionCtx<'db, '_> {
         subset: ConditionalSubset,
     ) -> Option<InferredTypeData<'db>> {
         self.narrow_union_leaves(ty, |ctx, ty| {
-            // An instance classifies by the type it is an instance of, not by
-            // the instance type itself, which carries no tag of its own.
-            if let InferredTypeData::InstanceOf(instance) = ty
-                && let ConditionalSubset::Typeof(tag) = subset
-            {
-                let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
-                return filter_by_typeof_tag(ctx.instance_typeof_tag(target), tag);
+            // An instance is classified by the type it is an instance of.
+            let InferredTypeData::InstanceOf(instance) = ty else {
+                return ctx.filter_action(ty, subset);
+            };
+            let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
+            match subset {
+                ConditionalSubset::Typeof(tag) => {
+                    filter_by_typeof_tag(ctx.instance_typeof_tag(target), tag)
+                }
+                ConditionalSubset::Falsy
+                | ConditionalSubset::Truthy
+                | ConditionalSubset::NonNullish => {
+                    if ctx.instance_excluded_from_subset(target, subset) {
+                        FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
+                    }
+                }
             }
-
-            ctx.filter_action(ty, subset)
         })
     }
 
@@ -2362,9 +2373,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             ConditionalSubset::Falsy => match ty {
                 InferredTypeData::BigInt => FilterAction::Mapped(self.bigint_literal("0n")),
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(false)),
-                InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
-                InferredTypeData::Unknown
+                // `0` is not the only falsy number: `-0` and `NaN` are falsy
+                // too, and neither has a literal type to map to.
+                InferredTypeData::Number
+                | InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Null
@@ -2396,13 +2409,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {
-                    if ty
-                        .conditional_type_shallow(self.db)
-                        .is_none_or(|conditional| !conditional.is_truthy())
-                    {
-                        FilterAction::Retained
-                    } else {
+                    if self.excluded_from_subset(ty, subset) {
                         FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
                 }
             },
@@ -2443,24 +2453,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {
-                    if ty
-                        .conditional_type_shallow(self.db)
-                        .is_none_or(|conditional| !conditional.is_falsy())
-                    {
-                        FilterAction::Retained
-                    } else {
+                    if self.excluded_from_subset(ty, subset) {
                         FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
                 }
             },
             ConditionalSubset::NonNullish => {
-                if ty
-                    .conditional_type_shallow(self.db)
-                    .is_none_or(|conditional| !conditional.is_nullish())
-                {
-                    FilterAction::Retained
-                } else {
+                if self.excluded_from_subset(ty, subset) {
                     FilterAction::Stripped
+                } else {
+                    FilterAction::Retained
                 }
             }
             ConditionalSubset::Typeof(tag) => filter_by_typeof_tag(self.typeof_tag_of(ty), tag),
@@ -2553,6 +2557,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         predicate: &InferredNarrowingPredicate<'db>,
     ) -> InferredTypeData<'db> {
         let narrowed = match predicate {
+            InferredNarrowingPredicate::Assigned(assigned) => {
+                self.narrow_to_assigned(ty, *assigned)
+            }
             InferredNarrowingPredicate::Falsy => {
                 self.filter_type_to_subset(ty, ConditionalSubset::Falsy)
             }
@@ -2574,6 +2581,60 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         };
         narrowed.unwrap_or(ty)
+    }
+
+    /// Narrows a value to the type it was assigned.
+    ///
+    /// Like TypeScript, an assigned literal widens to its primitive when the
+    /// declared type `ty` admits that primitive, and stays a literal
+    /// otherwise:
+    ///
+    /// ```ts
+    /// let x: string | undefined;
+    /// x = "on";
+    /// x; // string
+    ///
+    /// let y: "a" | "b";
+    /// y = "a";
+    /// y; // "a"
+    /// ```
+    ///
+    /// Returns `None` when the assigned type resolves to `Unknown`, so the
+    /// value keeps its declared type.
+    fn narrow_to_assigned(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        assigned: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let assigned = self.resolve_inferred_type(assigned);
+        if assigned == InferredTypeData::Unknown {
+            return None;
+        }
+        let InferredTypeData::Literal(literal) = assigned else {
+            return Some(assigned);
+        };
+        let primitive = match literal.literal(self.db) {
+            InferredLiteral::BigInt(_) => InferredTypeData::BigInt,
+            InferredLiteral::Boolean(_) => InferredTypeData::Boolean,
+            InferredLiteral::Number(_) => InferredTypeData::Number,
+            InferredLiteral::String(_) | InferredLiteral::Template(_) => InferredTypeData::String,
+            InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => return Some(assigned),
+        };
+        let declared = self.collect_union_leaves(ty, |_, _| FilterAction::Retained)?;
+        let admits_primitive = declared.iter().any(|leaf| {
+            *leaf == primitive
+                || matches!(
+                    leaf,
+                    InferredTypeData::Unknown
+                        | InferredTypeData::AnyKeyword
+                        | InferredTypeData::UnknownKeyword
+                )
+        });
+        Some(if admits_primitive {
+            primitive
+        } else {
+            assigned
+        })
     }
 
     /// Narrows the union variants of `ty` to those the `leaf` callback
@@ -3080,6 +3141,27 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    /// Returns whether `ty` cannot belong to `subset`, judged from its own
+    /// shallow classification.
+    fn excluded_from_subset(&self, ty: InferredTypeData<'db>, subset: ConditionalSubset) -> bool {
+        ty.conditional_type_shallow(self.db)
+            .is_some_and(|conditional| conditional_excluded_from_subset(conditional, subset))
+    }
+
+    /// Returns whether instances of the given `target` type fall outside the
+    /// given `subset`, judged from the target: instances of a class or an
+    /// interface are objects, a generic type parameter could be anything.
+    fn instance_excluded_from_subset(
+        &self,
+        target: InferredTypeData<'db>,
+        subset: ConditionalSubset,
+    ) -> bool {
+        target
+            .expand_canonical_global(self.db)
+            .conditional_type_shallow(self.db)
+            .is_some_and(|conditional| conditional_excluded_from_subset(conditional, subset))
+    }
+
     /// Returns the tag the `typeof` operator evaluates to for instances of
     /// the given `target` type, or `None` if the tag cannot be determined
     /// statically.
@@ -3104,13 +3186,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::Literal(InferredInternedLiteral::new(
             self.db,
             InferredLiteral::Boolean(value.into()),
-        ))
-    }
-
-    fn number_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
-            self.db,
-            InferredLiteral::Number(NumberLiteral::new(Text::new_static(value))),
         ))
     }
 
@@ -3174,6 +3249,24 @@ fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
     members
         .iter()
         .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
+}
+
+/// Returns whether a value classified as `conditional` cannot belong to
+/// `subset`.
+///
+/// A `typeof` subset never excludes anything here: truthiness says nothing
+/// about which `typeof` tag a value has, so those variants are decided by
+/// their tag instead.
+fn conditional_excluded_from_subset(
+    conditional: ConditionalType,
+    subset: ConditionalSubset,
+) -> bool {
+    match subset {
+        ConditionalSubset::Falsy => conditional.is_truthy(),
+        ConditionalSubset::Truthy => conditional.is_falsy(),
+        ConditionalSubset::NonNullish => conditional.is_nullish(),
+        ConditionalSubset::Typeof(_) => false,
+    }
 }
 
 /// Decides a type against a `typeof` guard from the tag it is known to have.
