@@ -863,6 +863,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
             ),
             Self::Narrowed(expr) => {
                 let predicate = format_with(|f| match &expr.predicate {
+                    NarrowingPredicate::Assigned(assigned) => {
+                        write!(f, [&format_args![token("assigned"), space(), assigned]])
+                    }
                     NarrowingPredicate::Falsy => write!(f, [token("falsy")]),
                     NarrowingPredicate::InstanceOf(guard) => {
                         write!(f, [&format_args![token("instanceof"), space(), guard]])
@@ -1300,6 +1303,7 @@ mod tests {
         let cls = class(&db, "Cls");
 
         let predicates = [
+            NarrowingPredicate::Assigned(TypeData::String),
             NarrowingPredicate::Falsy,
             NarrowingPredicate::InstanceOf(cls),
             NarrowingPredicate::MemberEquals(Box::new(MemberEqualsPredicate {
