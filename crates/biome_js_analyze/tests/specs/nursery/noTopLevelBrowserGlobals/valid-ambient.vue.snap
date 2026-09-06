@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-ambient.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+declare class ClientElement extends HTMLElement {}
+export declare class ExportedElement extends HTMLElement {}
+declare namespace Client {
+    class Element extends HTMLElement {}
+}
+</script>
+
+```

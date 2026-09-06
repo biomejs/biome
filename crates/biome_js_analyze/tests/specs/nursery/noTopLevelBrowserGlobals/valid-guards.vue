@@ -1,0 +1,8 @@
+<!-- should not generate diagnostics -->
+<script setup>
+import { BROWSER as client } from "esm-env";
+if (client) { document.title; }
+if (!import.meta.env.SSR) { document.title; }
+if (import.meta.client) { document.title; }
+if (import.meta.server) {} else { document.title; }
+</script>

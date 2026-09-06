@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+window.innerWidth;
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script.vue:3:1 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ window.innerWidth;
+      │ ^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

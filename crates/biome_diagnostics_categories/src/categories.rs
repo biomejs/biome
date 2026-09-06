@@ -364,6 +364,7 @@ define_categories! {
     "lint/nursery/noTestGlobals": "https://biomejs.dev/linter/rules/no-test-globals",
     "lint/nursery/noTestHooks": "https://biomejs.dev/linter/rules/no-test-hooks",
     "lint/nursery/noThisOutsideOfClass": "https://biomejs.dev/linter/rules/no-this-outside-of-class",
+    "lint/nursery/noTopLevelBrowserGlobals": "https://biomejs.dev/linter/rules/no-top-level-browser-globals",
     "lint/nursery/noTripleSlashReference": "https://biomejs.dev/linter/rules/no-triple-slash-reference",
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUndeclaredCustomProperties": "https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
