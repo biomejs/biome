@@ -49,6 +49,7 @@ mod reporter_sarif;
 mod reporter_summary;
 mod reporter_terminal;
 mod rules_via_dependencies;
+mod stdin_full_support;
 mod suppressions;
 mod tailwind_directives;
 mod unknown_files;

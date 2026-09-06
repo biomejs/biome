@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+delete<v l={{}i }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsBogusAssignment {
+                    items: [
+                        DELETE_KW@0..6 "delete" [] [],
+                        JsBogusExpression {
+                            items: [
+                                L_ANGLE@6..7 "<" [] [],
+                                TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@7..9 "v" [] [Whitespace(" ")],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                                JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@9..10 "l" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+                operator_token: EQ@10..11 "=" [] [],
+                right: JsObjectExpression {
+                    l_curly_token: L_CURLY@11..12 "{" [] [],
+                    members: JsObjectMemberList [
+                        JsBogusMember {
+                            items: [
+                                L_CURLY@12..13 "{" [] [],
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@13..14 "}" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@14..16 "i" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                R_CURLY@16..17 "}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..18
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..17
+    0: JS_EXPRESSION_STATEMENT@0..14
+      0: JS_ASSIGNMENT_EXPRESSION@0..14
+        0: JS_BOGUS_ASSIGNMENT@0..10
+          0: DELETE_KW@0..6 "delete" [] []
+          1: JS_BOGUS_EXPRESSION@6..10
+            0: L_ANGLE@6..7 "<" [] []
+            1: TS_REFERENCE_TYPE@7..9
+              0: JS_REFERENCE_IDENTIFIER@7..9
+                0: IDENT@7..9 "v" [] [Whitespace(" ")]
+              1: (empty)
+            2: JS_IDENTIFIER_EXPRESSION@9..10
+              0: JS_REFERENCE_IDENTIFIER@9..10
+                0: IDENT@9..10 "l" [] []
+        1: EQ@10..11 "=" [] []
+        2: JS_OBJECT_EXPRESSION@11..14
+          0: L_CURLY@11..12 "{" [] []
+          1: JS_OBJECT_MEMBER_LIST@12..13
+            0: JS_BOGUS_MEMBER@12..13
+              0: L_CURLY@12..13 "{" [] []
+          2: R_CURLY@13..14 "}" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@14..16
+      0: JS_IDENTIFIER_EXPRESSION@14..16
+        0: JS_REFERENCE_IDENTIFIER@14..16
+          0: IDENT@14..16 "i" [] [Whitespace(" ")]
+      1: (empty)
+    2: JS_BOGUS_STATEMENT@16..17
+      0: R_CURLY@16..17 "}" [] []
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+unary_delete_rewrite_skipped_trivia.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ delete<v l={{}i }
+      │       ^^^^
+    2 │ 
+  
+  i TypeScript only syntax
+  
+unary_delete_rewrite_skipped_trivia.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `delete<v l`
+  
+  > 1 │ delete<v l={{}i }
+      │ ^^^^^^^^^^
+    2 │ 
+  
+  i This expression cannot be assigned to
+  
+unary_delete_rewrite_skipped_trivia.js:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '{'.
+  
+  > 1 │ delete<v l={{}i }
+      │             ^
+    2 │ 
+  
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
+  
+  > 1 │ delete<v l={{}i }
+      │             ^
+    2 │ 
+  
+unary_delete_rewrite_skipped_trivia.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ delete<v l={{}i }
+      │               ^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ delete<v l={{}i }
+      │               ^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ delete<v l={{}i }
+      │ ^^^^^^^^^^^^^^^
+    2 │ 
+  
+unary_delete_rewrite_skipped_trivia.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+  > 1 │ delete<v l={{}i }
+      │                 ^
+    2 │ 
+  
+  i Expected a statement here.
+  
+  > 1 │ delete<v l={{}i }
+      │                 ^
+    2 │ 
+  
+```

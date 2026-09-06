@@ -15,7 +15,7 @@ pub use util::*;
 use crate::TailwindSyntaxKind::{
     TW_BOGUS, TW_BOGUS_CANDIDATE, TW_BOGUS_MODIFIER, TW_BOGUS_VALUE, TW_BOGUS_VARIANT,
 };
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind};
 
 impl From<u16> for TailwindSyntaxKind {
     fn from(d: u16) -> Self {
@@ -71,7 +71,7 @@ impl biome_rowan::SyntaxKind for TailwindSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, Self::NEWLINE | Self::WHITESPACE)
+        matches!(self, Self::CSS_WHITESPACE)
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -83,14 +83,9 @@ impl TryFrom<TailwindSyntaxKind> for TriviaPieceKind {
     type Error = ();
 
     fn try_from(value: TailwindSyntaxKind) -> Result<Self, Self::Error> {
-        if value.is_trivia() {
-            match value {
-                TailwindSyntaxKind::NEWLINE => Ok(Self::Newline),
-                TailwindSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
-                _ => unreachable!("Not Trivia"),
-            }
-        } else {
-            Err(())
+        match value {
+            TailwindSyntaxKind::CSS_WHITESPACE => Ok(Self::Whitespace),
+            _ => Err(()),
         }
     }
 }

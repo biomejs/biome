@@ -252,17 +252,56 @@ impl SyntaxNode {
     }
 
     pub fn first_token(&self) -> Option<SyntaxToken> {
-        self.descendants_with_tokens(Direction::Next)
-            .find_map(|x| x.into_token())
+        self.edge_token(Direction::Next)
     }
 
     pub fn last_token(&self) -> Option<SyntaxToken> {
-        PreorderWithTokens::new(self.clone(), Direction::Prev)
-            .filter_map(|event| match event {
-                WalkEvent::Enter(it) => Some(it),
-                WalkEvent::Leave(_) => None,
-            })
-            .find_map(|x| x.into_token())
+        self.edge_token(Direction::Prev)
+    }
+
+    /// Starts at this node and searches its subtree left to right (`Next`) or
+    /// right to left (`Prev`), returning the first token found, if any.
+    /// For the whole `a + b` expression, `Next` finds `a` and `Prev` finds `b`.
+    fn edge_token(&self, direction: Direction) -> Option<SyntaxToken> {
+        let start: SyntaxElement = self.clone().into();
+        let mut current = start.clone();
+
+        loop {
+            match current {
+                NodeOrToken::Token(token) => return Some(token),
+                NodeOrToken::Node(node) => {
+                    let child = match direction {
+                        Direction::Next => node.first_child_or_token(),
+                        Direction::Prev => node.last_child_or_token(),
+                    };
+
+                    if let Some(child) = child {
+                        current = child;
+                        continue;
+                    }
+
+                    current = node.into();
+                }
+            }
+
+            loop {
+                if current == start {
+                    return None;
+                }
+
+                let sibling = match direction {
+                    Direction::Next => current.next_sibling_or_token(),
+                    Direction::Prev => current.prev_sibling_or_token(),
+                };
+
+                if let Some(sibling) = sibling {
+                    current = sibling;
+                    break;
+                }
+
+                current = current.parent()?.into();
+            }
+        }
     }
 
     #[inline]
@@ -331,16 +370,26 @@ impl SyntaxNode {
                 return TokenAtOffset::None;
             }
 
-            let mut children = node.children_with_tokens().filter(|child| {
-                let child_range = child.text_range();
-                !child_range.is_empty() && child_range.contains_inclusive(offset)
-            });
-
-            let left = children.next().unwrap();
-            let right = children.next();
-            assert!(children.next().is_none());
+            let (left, right) = node.green().children_at_offset(offset - node.offset());
+            let (left, right) = match (left, right) {
+                (Some(left), right) => (left, right),
+                (None, Some(right)) => (right, None),
+                (None, None) => return TokenAtOffset::None,
+            };
+            let left = SyntaxElement::new(
+                left.element(),
+                node.clone().into_owned(),
+                left.slot(),
+                node.offset() + left.rel_offset(),
+            );
 
             if let Some(right) = right {
+                let right = SyntaxElement::new(
+                    right.element(),
+                    node.clone().into_owned(),
+                    right.slot(),
+                    node.offset() + right.rel_offset(),
+                );
                 let token_at_offset =
                     |node: NodeOrToken<Self, SyntaxToken>| -> TokenAtOffset<SyntaxToken> {
                         match node {
@@ -946,7 +995,14 @@ impl<'a> Siblings<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::{SyntaxNode, TextRange, TextSize, TokenAtOffset, TriviaPiece};
+
+    fn token_texts_at_offset(node: &SyntaxNode<RawLanguage>, offset: u32) -> Vec<String> {
+        node.token_at_offset(TextSize::from(offset))
+            .map(|token| token.text_trimmed().to_string())
+            .collect()
+    }
 
     #[test]
     fn slots_iter() {
@@ -993,5 +1049,121 @@ mod tests {
                 .as_deref(),
             Some("3")
         );
+    }
+
+    #[test]
+    fn token_at_offset_preserves_nested_boundaries() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+
+        for text in ["a", "b"] {
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token(RawLanguageKind::STRING_TOKEN, text);
+            builder.finish_node();
+        }
+
+        builder.finish_node();
+        let root = builder.finish();
+
+        assert_eq!(token_texts_at_offset(&root, 0), ["a"]);
+        assert_eq!(token_texts_at_offset(&root, 1), ["a", "b"]);
+        assert_eq!(token_texts_at_offset(&root, 2), ["b"]);
+        assert!(matches!(
+            root.token_at_offset(TextSize::from(3)),
+            TokenAtOffset::None
+        ));
+    }
+
+    #[test]
+    fn token_at_offset_skips_zero_width_elements_and_includes_trivia() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            "a ",
+            &[],
+            &[TriviaPiece::whitespace(1)],
+        );
+        builder.token(RawLanguageKind::STRING_TOKEN, "b");
+        builder.finish_node();
+        let root = builder.finish();
+
+        assert_eq!(token_texts_at_offset(&root, 0), ["a"]);
+        assert_eq!(token_texts_at_offset(&root, 1), ["a"]);
+        assert_eq!(token_texts_at_offset(&root, 2), ["a", "b"]);
+        assert_eq!(token_texts_at_offset(&root, 3), ["b"]);
+    }
+
+    #[test]
+    fn token_at_offset_skips_zero_width_elements_at_boundaries_and_eof() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "a");
+        builder.token(RawLanguageKind::STRING_TOKEN, "");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
+        builder.token(RawLanguageKind::STRING_TOKEN, "b");
+        builder.token(RawLanguageKind::STRING_TOKEN, "");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish();
+
+        assert_eq!(token_texts_at_offset(&root, 1), ["a", "b"]);
+        assert_eq!(token_texts_at_offset(&root, 2), ["b"]);
+    }
+
+    #[test]
+    fn token_at_offset_skips_missing_slots_and_respects_subtree_ranges() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "x");
+        builder.start_node(RawLanguageKind::CONDITION);
+        builder.token(RawLanguageKind::L_PAREN_TOKEN, "x");
+        builder.token(RawLanguageKind::R_PAREN_TOKEN, "x");
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish();
+        let condition = root.children().next().unwrap();
+
+        let TokenAtOffset::Between(left, right) = condition.token_at_offset(TextSize::from(2))
+        else {
+            panic!("expected tokens on both sides of the missing slot");
+        };
+
+        assert_eq!(left.text_trimmed(), "x");
+        assert_eq!(right.text_trimmed(), "x");
+        assert_ne!(left, right);
+        assert_eq!(left.parent(), Some(condition.clone()));
+        assert_eq!(right.parent(), Some(condition.clone()));
+        assert_eq!(left.index(), 0);
+        assert_eq!(right.index(), 2);
+        assert_eq!(left.text_range(), TextRange::new(1.into(), 2.into()));
+        assert_eq!(right.text_range(), TextRange::new(2.into(), 3.into()));
+        assert_eq!(token_texts_at_offset(&condition, 3), ["x"]);
+        assert!(matches!(
+            condition.token_at_offset(TextSize::from(0)),
+            TokenAtOffset::None
+        ));
+        assert!(matches!(
+            condition.token_at_offset(TextSize::from(4)),
+            TokenAtOffset::None
+        ));
+    }
+
+    #[test]
+    fn token_at_offset_returns_none_for_empty_nodes() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.finish_node();
+        let root = builder.finish();
+
+        assert!(matches!(
+            root.token_at_offset(TextSize::from(0)),
+            TokenAtOffset::None
+        ));
     }
 }

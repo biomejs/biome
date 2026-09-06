@@ -14,6 +14,8 @@ pub(super) fn convert_jsx_tag_expression(
         AnyJsxTag::JsxFragment(fragment) => Ok(Expression::JSXFragment(convert_jsx_fragment(
             ctx, &fragment,
         )?)),
+        // Astro syntax; React never sees it.
+        AnyJsxTag::AstroImplicitFragment(fragment) => Err(unsupported(fragment.syntax())),
     }
 }
 
@@ -241,10 +243,13 @@ pub(super) fn convert_jsx_attribute_value(
             AnyJsxTag::JsxSelfClosingElement(element) => Ok(JSXAttributeValue::JSXElement(
                 Box::new(convert_jsx_self_closing_element(ctx, &element)?),
             )),
+            AnyJsxTag::AstroImplicitFragment(fragment) => Err(unsupported(fragment.syntax())),
             AnyJsxTag::JsxFragment(fragment) => Ok(JSXAttributeValue::JSXFragment(
                 convert_jsx_fragment(ctx, &fragment)?,
             )),
         },
+        // Astro-only syntax that React never produces
+        AnyJsxAttributeValue::JsTemplateExpression(template) => Err(unsupported(template.syntax())),
     }
 }
 

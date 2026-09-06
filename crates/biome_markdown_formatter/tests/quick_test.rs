@@ -7,7 +7,7 @@ use biome_rowan::NodeCache;
 fn quick_test() {
     let source = r#"[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) 
 "#;
-    let parse = parse_markdown(source);
+    let parse = parse_markdown(source, MarkdownParserOptions::default());
 
     // Print CST
     eprintln!("{:#?}", parse.syntax());
@@ -29,7 +29,7 @@ fn quick_test() {
 
     // Idempotency
     // Now re-parse the formatted output and show its CST
-    let reparse = parse_markdown(output.as_code());
+    let reparse = parse_markdown(output.as_code(), MarkdownParserOptions::default());
     eprintln!("\n--- Re-parsed CST ---");
     eprintln!("{:#?}", reparse.syntax());
 

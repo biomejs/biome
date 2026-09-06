@@ -167,6 +167,8 @@ pub enum RuleSource<'a> {
     EslintReactDom(&'a str),
     /// A subset of RSC rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactRsc(&'a str),
+    /// A subset of React naming convention rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactNamingConvention(&'a str),
     /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
     EslintRegexp(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
@@ -260,6 +262,9 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintReactJsx(_) => write!(f, "eslint-plugin-react-jsx"),
             Self::EslintReactDom(_) => write!(f, "eslint-plugin-react-dom"),
             Self::EslintReactRsc(_) => write!(f, "eslint-plugin-react-rsc"),
+            Self::EslintReactNamingConvention(_) => {
+                write!(f, "eslint-plugin-react-naming-convention")
+            }
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
@@ -351,6 +356,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactJsx(rule_name)
             | Self::EslintReactDom(rule_name)
             | Self::EslintReactRsc(rule_name)
+            | Self::EslintReactNamingConvention(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSvelte(rule_name)
@@ -417,6 +423,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactJsx(_) => "react-jsx",
             Self::EslintReactDom(_) => "react-dom",
             Self::EslintReactRsc(_) => "react-rsc",
+            Self::EslintReactNamingConvention(_) => "react-naming-convention",
             Self::EslintRegexp(_) => "regexp",
             Self::EslintSolid(_) => "solid",
             Self::EslintSvelte(_) => "svelte",
@@ -486,6 +493,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactJsx(rule_name) => format!("https://eslint-react.xyz/docs/rules/jsx-{rule_name}"),
             Self::EslintReactDom(rule_name) => format!("https://eslint-react.xyz/docs/rules/dom-{rule_name}"),
             Self::EslintReactRsc(rule_name) => format!("https://eslint-react.xyz/docs/rules/rsc-{rule_name}"),
+            Self::EslintReactNamingConvention(rule_name) => format!("https://eslint-react.xyz/docs/rules/naming-convention-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}/"),
@@ -1452,43 +1460,13 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(
-            category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        ) {
-            let rule_category = format!(
-                "{}/{}/{}",
-                category.as_suppression_category(),
-                <Self::Group as RuleGroup>::NAME,
-                Self::METADATA.name
-            );
-            let suppression_text = format!("biome-ignore-all {rule_category}");
-            let root = ctx.root();
-
-            if let Some(first_token) = root.syntax().first_token() {
-                let mut mutation = root.begin();
-                let comment =
-                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
-                suppression_action.apply_top_level_suppression(
-                    &mut mutation,
-                    first_token,
-                    comment.as_str(),
-                );
-                let message = if category == RuleCategory::Action {
-                    "action"
-                } else {
-                    "rule"
-                };
-                return Some(SuppressAction {
-                    mutation,
-                    message:
-                        markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
-                            .to_owned(),
-                });
-            }
-        }
-        None
+        build_top_level_suppression(
+            ctx.root(),
+            <Self::Group as RuleGroup>::Category::CATEGORY,
+            <Self::Group as RuleGroup>::NAME,
+            Self::METADATA.name,
+            suppression_action,
+        )
     }
 
     /// Create a code action that allows you to suppress the rule. The function
@@ -1502,44 +1480,15 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
-        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(
-            category,
-            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
-        ) {
-            let rule_category = format!(
-                "{}/{}/{}",
-                category.as_suppression_category(),
-                <Self::Group as RuleGroup>::NAME,
-                Self::METADATA.name
-            );
-            let suppression_text = format!("biome-ignore {rule_category}");
-            let root = ctx.root();
-            let token = root.syntax().token_at_offset(text_range.start());
-            let mut mutation = root.begin();
-            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
-                suppression_text: suppression_text.as_str(),
-                mutation: &mut mutation,
-                token_offset: token,
-                diagnostic_text_range: text_range,
-                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
-            });
-
-            let message = if category == RuleCategory::Action {
-                "action"
-            } else {
-                "rule"
-            };
-
-            Some(SuppressAction {
-                mutation,
-                message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
-                    .to_owned(),
-            })
-        } else {
-            None
-        }
+        build_inline_suppression(
+            ctx.root(),
+            text_range,
+            <Self::Group as RuleGroup>::Category::CATEGORY,
+            <Self::Group as RuleGroup>::NAME,
+            Self::METADATA.name,
+            suppression_action,
+            suppression_reason,
+        )
     }
 
     /// Returns a mutation to apply to the code
@@ -1547,6 +1496,99 @@ pub trait Rule: RuleMeta + Sized {
         _ctx: &RuleContext<Self>,
         _state: &Self::State,
     ) -> Option<BatchMutation<RuleLanguage<Self>>> {
+        None
+    }
+}
+fn build_top_level_suppression<L: Language>(
+    root: L::Root,
+    category: RuleCategory,
+    group_name: &'static str,
+    rule_name: &'static str,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+) -> Option<SuppressAction<L>> {
+    if matches!(
+        category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    ) {
+        let rule_category = format!(
+            "{}/{}/{}",
+            category.as_suppression_category(),
+            group_name,
+            rule_name
+        );
+        let suppression_text = format!("biome-ignore-all {rule_category}");
+
+        if let Some(first_token) = root.syntax().first_token() {
+            let mut mutation = root.begin();
+            let comment =
+                suppression_action.suppression_top_level_comment(suppression_text.as_str());
+            suppression_action.apply_top_level_suppression(
+                &mut mutation,
+                first_token,
+                comment.as_str(),
+            );
+            let message = if category == RuleCategory::Action {
+                "action"
+            } else {
+                "rule"
+            };
+            return Some(SuppressAction {
+                mutation,
+                message:
+                    markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
+                        .to_owned(),
+            });
+        }
+    }
+    None
+}
+
+/// Body of [Rule::inline_suppression], kept outside the trait so it is
+/// monomorphized once per language instead of once per rule: the rule only
+/// contributes its category, group name, and rule name.
+fn build_inline_suppression<L: Language>(
+    root: L::Root,
+    text_range: &TextRange,
+    category: RuleCategory,
+    group_name: &'static str,
+    rule_name: &'static str,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+    suppression_reason: Option<&str>,
+) -> Option<SuppressAction<L>> {
+    // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
+    if matches!(
+        category,
+        RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+    ) {
+        let rule_category = format!(
+            "{}/{}/{}",
+            category.as_suppression_category(),
+            group_name,
+            rule_name
+        );
+        let suppression_text = format!("biome-ignore {rule_category}");
+        let token = root.syntax().token_at_offset(text_range.start());
+        let mut mutation = root.begin();
+        suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
+            suppression_text: suppression_text.as_str(),
+            mutation: &mut mutation,
+            token_offset: token,
+            diagnostic_text_range: text_range,
+            suppression_reason: suppression_reason.unwrap_or("<explanation>"),
+        });
+
+        let message = if category == RuleCategory::Action {
+            "action"
+        } else {
+            "rule"
+        };
+
+        Some(SuppressAction {
+            mutation,
+            message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
+                .to_owned(),
+        })
+    } else {
         None
     }
 }

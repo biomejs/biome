@@ -128,6 +128,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         kind.as_js_kind().is_some_and(|kind| {
             kind == JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST
                 || kind == JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST
+                || kind == JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER
                 || kind == JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER
         })
     }

@@ -185,6 +185,9 @@
 use crate::utils::children::DisplayHtmlChildSequence;
 use crate::{
     html::auxiliary::{
+        double_text_expression::{
+            FormatHtmlDoubleTextExpression, FormatHtmlDoubleTextExpressionOptions,
+        },
         element::{FormatHtmlElement, FormatHtmlElementOptions},
         self_closing_element::{FormatHtmlSelfClosingElement, FormatHtmlSelfClosingElementOptions},
     },
@@ -417,6 +420,10 @@ impl FormatHtmlElementList {
                 children.pop();
             }
         }
+        let has_inline_double_text_expression = self.is_container_whitespace_sensitive
+            && !has_leading_newline
+            && !had_trailing_newline
+            && has_single_double_text_expression_child(&children);
 
         let formatted_children = format_with(|f| {
             // Print borrowed opening `>` token
@@ -490,6 +497,7 @@ impl FormatHtmlElementList {
             // A following element or word prints the borrowed closing `>` so any break occurs
             // inside the preceding tag rather than between whitespace-sensitive siblings.
             let mut borrowed_sibling_r_angle: Option<HtmlSyntaxToken> = None;
+            let mut borrowed_sibling_interpolation_end: Option<HtmlSyntaxToken> = None;
             let mut borrowed_closing_tag = self.borrowed_tokens.borrowed_closing_tag.as_ref();
 
             let mut is_first_child = true;
@@ -696,6 +704,11 @@ impl FormatHtmlElementList {
                                 // If we're already multiline, keep words after block-like elements on their own line.
                                 child_breaks = true;
                                 write!(f, [hard_line_break()])?;
+                            } else if !self.is_container_whitespace_sensitive
+                                && is_double_text_expression(last_elem)
+                                && matches!(children_iter.peek(), Some(HtmlChild::Word(_)))
+                            {
+                                write!(f, [space()])?;
                             } else if last_css_display.is_externally_whitespace_sensitive(f) {
                                 // For whitespace-sensitive elements, use soft_line_break_or_space
                                 // so the space is preserved in flat mode
@@ -895,19 +908,53 @@ impl FormatHtmlElementList {
 
                         // Take any borrowed `>` from the previous sibling element
                         let current_borrowed_r_angle = borrowed_sibling_r_angle.take();
+                        let current_borrowed_interpolation_end =
+                            borrowed_sibling_interpolation_end.take();
 
                         let next_can_borrow = next_is_adjacent_inline
                             && matches!(
                                 children_iter.peek(),
                                 Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
                             );
+                        let next_can_borrow_interpolation_end = next_is_adjacent_inline
+                            && matches!(
+                                children_iter.peek(),
+                                Some(HtmlChild::NonText(
+                                    AnyHtmlElement::HtmlElement(_)
+                                        | AnyHtmlElement::HtmlSelfClosingElement(_)
+                                ))
+                            );
 
-                        // Create the element formatter with borrowing options
-                        let element_format = format_element_with_borrowing(
-                            non_text,
-                            current_borrowed_r_angle,
-                            next_can_borrow || next_word_borrows_r_angle,
-                        );
+                        let r_double_curly_borrowed = next_can_borrow_interpolation_end
+                            && is_double_text_expression(non_text);
+                        let element_format = format_with(|f| {
+                            if let Some(token) = &current_borrowed_interpolation_end {
+                                write!(f, [token.format()])?;
+                            }
+                            if let AnyHtmlElement::AnyHtmlContent(
+                                AnyHtmlContent::AnyHtmlTextExpression(
+                                    AnyHtmlTextExpression::HtmlDoubleTextExpression(expression),
+                                ),
+                            ) = non_text
+                            {
+                                FormatNodeRule::fmt_fields(
+                                    &FormatHtmlDoubleTextExpression::default().with_options(
+                                        FormatHtmlDoubleTextExpressionOptions {
+                                            r_double_curly_borrowed,
+                                        },
+                                    ),
+                                    expression,
+                                    f,
+                                )
+                            } else {
+                                format_element_with_borrowing(
+                                    non_text,
+                                    current_borrowed_r_angle.clone(),
+                                    next_can_borrow || next_word_borrows_r_angle,
+                                )
+                                .fmt(f)
+                            }
+                        });
 
                         if needs_outer_group {
                             // Wrap inline element in outer group with `line` before it.
@@ -987,7 +1034,18 @@ impl FormatHtmlElementList {
                             }
                             // Wrap conditional break with element in a group
                             // to match Prettier's pattern: group([ifBreak("", softline), element])
-                            if let Some(prev_id) = conditional_leading_break_group_id {
+                            if has_inline_double_text_expression
+                                && conditional_leading_break_group_id.is_none()
+                            {
+                                write!(
+                                    f,
+                                    [
+                                        &memoized,
+                                        format_separator(SeparatorPlacement::InsideGroup),
+                                        format_separator(SeparatorPlacement::OutsideGroup)
+                                    ]
+                                )?;
+                            } else if let Some(prev_id) = conditional_leading_break_group_id {
                                 write!(
                                     f,
                                     [group(&format_args![
@@ -1017,14 +1075,33 @@ impl FormatHtmlElementList {
                             last_nontext_had_trailing_line = false;
                         }
 
-                        // Track this element's group ID if it's followed by another adjacent inline element
-                        if next_is_adjacent_inline {
+                        // A single-brace expression cannot lend its closing token to the
+                        // next child, so a sibling break would insert rendered whitespace.
+                        if next_is_adjacent_inline
+                            && !matches!(
+                                non_text,
+                                AnyHtmlElement::AnyHtmlContent(
+                                    AnyHtmlContent::AnyHtmlTextExpression(
+                                        AnyHtmlTextExpression::HtmlSingleTextExpression(_)
+                                    )
+                                )
+                            )
+                        {
                             prev_inline_group_id = Some(non_text_group_id);
                         } else {
                             prev_inline_group_id = None;
                         }
 
-                        if next_can_borrow || next_word_borrows_r_angle {
+                        if r_double_curly_borrowed {
+                            borrowed_sibling_interpolation_end = match non_text {
+                                AnyHtmlElement::AnyHtmlContent(
+                                    AnyHtmlContent::AnyHtmlTextExpression(
+                                        AnyHtmlTextExpression::HtmlDoubleTextExpression(expression),
+                                    ),
+                                ) => expression.r_double_curly_token().ok(),
+                                _ => None,
+                            };
+                        } else if next_can_borrow || next_word_borrows_r_angle {
                             // Store the closing r_angle token from this element for the next sibling
                             borrowed_sibling_r_angle = non_text.closing_r_angle_token();
                         }
@@ -1056,6 +1133,23 @@ impl FormatHtmlElementList {
 
         if is_root {
             write!(f, [&formatted_children])
+        } else if has_inline_double_text_expression
+            && let Some(opening_tag_group) = self.opening_tag_group
+        {
+            write!(
+                f,
+                [
+                    indent_if_group_breaks(
+                        &format_args![
+                            if_group_breaks(&soft_line_break())
+                                .with_group_id(Some(opening_tag_group)),
+                            &formatted_children
+                        ],
+                        opening_tag_group
+                    ),
+                    if_group_breaks(&soft_line_break()).with_group_id(Some(opening_tag_group))
+                ]
+            )
         } else {
             write!(f, [&soft_block_indent(&formatted_children)])
         }
@@ -1088,6 +1182,25 @@ fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {
     };
 
     meaningful_children.next().is_none()
+}
+
+fn has_single_double_text_expression_child(children: &[HtmlChild]) -> bool {
+    let mut meaningful_children = children.iter().filter(|child| !child.is_any_whitespace());
+
+    let Some(HtmlChild::NonText(element)) = meaningful_children.next() else {
+        return false;
+    };
+
+    is_double_text_expression(element) && meaningful_children.next().is_none()
+}
+
+fn is_double_text_expression(element: &AnyHtmlElement) -> bool {
+    matches!(
+        element,
+        AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
+            AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+        ))
+    )
 }
 
 fn format_partial_closing_tag(

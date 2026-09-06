@@ -17,8 +17,21 @@ use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
+use salsa::plumbing::AsId;
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
+use std::time::{Duration, Instant};
+
+fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
+    let deadline = Instant::now() + timeout;
+    while !predicate() {
+        if Instant::now() >= deadline {
+            return false;
+        }
+        std::thread::yield_now();
+    }
+    true
+}
 
 #[cfg(feature = "plugins")]
 #[test]
@@ -841,6 +854,350 @@ fn change_file_resumes_module_update_after_cancellation() {
 }
 
 #[test]
+fn owned_scan_uses_replacement_updates() {
+    const PATH: &str = "/project/index.js";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .unwrap();
+
+    let scan = || {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            })
+            .unwrap();
+    };
+
+    scan();
+    let first = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(PATH))
+        .unwrap();
+    scan();
+    let second = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(PATH))
+        .unwrap();
+
+    assert_ne!(first.as_id(), second.as_id());
+}
+
+#[test]
+fn scanner_epoch_queues_setters_without_cancelling_scan() {
+    const PATH: &str = "/project/package.json";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"{}");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+    let initial_setter_attempts = workspace.db_state.setter_gate_attempts();
+
+    let (scan_paused, setter_queued, pending_setters, scan_result, update_result) =
+        std::thread::scope(|scope| {
+            let scan_workspace = &workspace;
+            let scan = scope.spawn(move || {
+                scan_workspace
+                    .as_workspace()
+                    .scan_project(ScanProjectParams {
+                        project_key,
+                        watch: false,
+                        force: true,
+                        scan_kind: ScanKind::Project,
+                        verbose: false,
+                    })
+            });
+            let scan_paused = wait_until(TIMEOUT, || {
+                test_state
+                    .file_settings_read_attempts
+                    .load(Ordering::Acquire)
+                    >= 1
+            });
+
+            let update = scan_paused.then(|| {
+                let update_workspace = &workspace;
+                scope.spawn(move || {
+                    update_workspace
+                        .as_workspace()
+                        .update_settings(UpdateSettingsParams {
+                            project_key,
+                            workspace_directory: Some(BiomePath::new("/project")),
+                            configuration: Configuration::default(),
+                            extended_configurations: vec![],
+                            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+                        })
+                })
+            });
+            let setter_queued = update.as_ref().is_some_and(|_| {
+                wait_until(TIMEOUT, || {
+                    workspace.db_state.setter_gate_attempts() > initial_setter_attempts
+                })
+            });
+            let pending_setters = workspace.db_state.pending_setters();
+
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let scan_result = scan.join().unwrap();
+            let update_result = update.map(|update| update.join().unwrap());
+
+            (
+                scan_paused,
+                setter_queued,
+                pending_setters,
+                scan_result,
+                update_result,
+            )
+        });
+
+    assert!(scan_paused, "the scanner did not reach the settings read");
+    assert!(
+        setter_queued,
+        "the settings update did not reach the setter gate"
+    );
+    assert_eq!(
+        pending_setters, 0,
+        "a setter queued behind the scanner epoch must not cancel reads"
+    );
+    assert!(scan_result.is_ok());
+    assert!(update_result.is_some_and(|result| result.is_ok()));
+    assert_eq!(
+        test_state.project_scan_attempts.load(Ordering::Acquire),
+        1,
+        "the project scan should not restart"
+    );
+    assert_eq!(
+        test_state.file_index_attempts.load(Ordering::Acquire),
+        1,
+        "the file indexing operation should not restart"
+    );
+    assert_eq!(
+        test_state.file_commit_attempts.load(Ordering::Acquire),
+        1,
+        "the parsed file should be committed once"
+    );
+}
+
+#[test]
+fn incremental_index_retries_pending_write() {
+    const PATH: &str = "/project/package.json";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"{}");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let retained_db = workspace.get_db();
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+    let initial_index_attempts = test_state.file_index_attempts.load(Ordering::Acquire);
+    let initial_settings_read_attempts = test_state
+        .file_settings_read_attempts
+        .load(Ordering::Acquire);
+
+    let (setter_pending, first_attempt_paused, retry_observed, update_result, index_result) =
+        std::thread::scope(|scope| {
+            let update_workspace = &workspace;
+            let update = scope.spawn(move || {
+                update_workspace
+                    .as_workspace()
+                    .update_settings(UpdateSettingsParams {
+                        project_key,
+                        workspace_directory: Some(BiomePath::new("/project")),
+                        configuration: Configuration::default(),
+                        extended_configurations: vec![],
+                        module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+                    })
+            });
+            let setter_pending = wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1);
+
+            let index = setter_pending.then(|| {
+                let index_workspace = workspace.as_workspace();
+                scope.spawn(move || {
+                    WorkspaceScannerBridge::index_file(
+                        &index_workspace,
+                        project_key,
+                        BiomePath::new(PATH),
+                        IndexTrigger::Update,
+                    )
+                })
+            });
+            let first_attempt_paused = index.as_ref().is_some_and(|_| {
+                wait_until(TIMEOUT, || {
+                    test_state
+                        .file_settings_read_attempts
+                        .load(Ordering::Acquire)
+                        > initial_settings_read_attempts
+                })
+            });
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let retry_observed = first_attempt_paused
+                && wait_until(TIMEOUT, || {
+                    test_state.file_index_attempts.load(Ordering::Acquire)
+                        >= initial_index_attempts + 2
+                });
+
+            drop(retained_db);
+            let update_result = update.join();
+            let index_result = index.map(|index| index.join());
+
+            (
+                setter_pending,
+                first_attempt_paused,
+                retry_observed,
+                update_result,
+                index_result,
+            )
+        });
+
+    assert!(setter_pending, "the settings update did not become pending");
+    assert!(first_attempt_paused, "incremental indexing did not start");
+    assert!(retry_observed, "incremental indexing was not retried");
+    assert!(matches!(update_result, Ok(Ok(_))));
+    assert!(matches!(index_result, Some(Ok(Ok(_)))));
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some()
+    );
+}
+
+#[test]
+fn retrying_workspace_does_not_retry_project_scan() {
+    let fs = MemoryFileSystem::default();
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .server
+        .scanner_test_state
+        .cancel_first_scan_attempt
+        .store(true, Ordering::Release);
+
+    let result = salsa::Cancelled::catch(AssertUnwindSafe(|| {
+        crate::workspace::RetryingWorkspace::new(workspace.as_workspace()).scan_project(
+            ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+    }));
+
+    assert!(matches!(result, Err(salsa::Cancelled::PendingWrite)));
+    assert_eq!(
+        workspace
+            .server
+            .scanner_test_state
+            .project_scan_attempts
+            .load(Ordering::Acquire),
+        1,
+        "a project scan must not be retried from the beginning"
+    );
+}
+
+#[test]
 fn commonjs_file_rejects_import_statement() {
     const FILE_CONTENT: &[u8] = b"import 'foo';";
     const MANIFEST_CONTENT: &[u8] = b"{ \"type\": \"commonjs\" }";
@@ -1655,6 +2012,61 @@ const items = ['a', 'b'];
     assert!(
         result.diagnostics.is_empty(),
         "Expected no diagnostics for Astro JSX shorthand attribute, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
+fn astro_attribute_expression_accepts_tsx() {
+    const FILE_CONTENT: &str = r#"---
+import Icon from './Icon.astro';
+const total = 1;
+---
+<Icon count={total as number} on={(e: Event) => e} icon={<Icon />} />
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.astro"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.astro"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.astro"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for TSX syntax in an Astro attribute expression, got: {:#?}",
         result.diagnostics
     );
 }

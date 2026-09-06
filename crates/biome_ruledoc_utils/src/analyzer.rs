@@ -18,6 +18,7 @@ use biome_languages::{
     DocumentFileSource, HtmlFileSource,
     javascript::{JsEmbeddingKind, JsFileSource},
 };
+use biome_markdown_parser::MarkdownParserOptions;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::Language;
 use camino::Utf8PathBuf;
@@ -223,7 +224,8 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
             }
         }
         DocumentFileSource::Markdown(_) => {
-            let parse = biome_markdown_parser::parse_markdown(code);
+            let parse =
+                biome_markdown_parser::parse_markdown(code, MarkdownParserOptions::default());
 
             if parse.has_errors() {
                 for diagnostic in parse.into_diagnostics() {

@@ -19,7 +19,7 @@ use biome_analyze::{
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::markdown::{
     MarkdownFormatterConfiguration, MarkdownFormatterEnabled, MarkdownLinterEnabled,
-    MarkdownParseFrontmatter, MarkdownParserConfiguration,
+    MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
 };
 use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
@@ -65,12 +65,14 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct MarkdownParserSettings {
     pub frontmatter: Option<MarkdownParseFrontmatter>,
+    pub gfm: Option<MarkdownParseGfm>,
 }
 
 impl From<MarkdownParserConfiguration> for MarkdownParserSettings {
     fn from(configuration: MarkdownParserConfiguration) -> Self {
         Self {
             frontmatter: configuration.frontmatter,
+            gfm: configuration.gfm,
         }
     }
 }
@@ -112,6 +114,7 @@ impl ServiceLanguage for MarkdownLanguage {
     ) -> Self::ParserOptions {
         MarkdownParserOptions::default()
             .with_frontmatter(language.frontmatter.unwrap_or_default().into())
+            .with_gfm(language.gfm.unwrap_or_default().into())
     }
 
     fn resolve_format_options(

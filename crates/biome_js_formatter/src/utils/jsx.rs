@@ -66,7 +66,7 @@ pub(crate) fn is_jsx_suppressed(tag: &AnyJsxTag, comments: &JsComments) -> bool 
                     .find(|sibling| {
                         if let Some(text) = JsxText::cast_ref(sibling) {
                             text.value_token()
-                                .map_or(true, |token| is_meaningful_jsx_text(token.text()))
+                                .map_or(true, |token| is_meaningful_jsx_text(token.text_trimmed()))
                         } else {
                             true
                         }
@@ -234,7 +234,7 @@ where
                 // Keep track if there's any leading/trailing empty line, new line or whitespace
 
                 let value_token = text.value_token()?;
-                let mut chunks = JsxSplitChunksIterator::new(value_token.text()).peekable();
+                let mut chunks = JsxSplitChunksIterator::new(value_token.text_trimmed()).peekable();
 
                 // Text starting with a whitespace
                 if let Some((_, JsxTextChunk::Whitespace(_whitespace))) = chunks.peek() {
@@ -285,9 +285,10 @@ where
 
                         (relative_start, JsxTextChunk::Word(word)) => {
                             let text = value_token
-                                .token_text()
+                                .token_text_trimmed()
                                 .slice(TextRange::at(relative_start, word.text_len()));
-                            let source_position = value_token.text_range().start() + relative_start;
+                            let source_position =
+                                value_token.text_trimmed_range().start() + relative_start;
 
                             builder.entry(JsxChild::Word(JsxWord::new(text, source_position)));
                         }

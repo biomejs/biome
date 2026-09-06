@@ -199,6 +199,34 @@ fn test_node_builtin_imports_resolve_to_builtin_error() {
 }
 
 #[test]
+fn test_bun_builtin_imports_resolve_to_builtin_error() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "import Bun from 'bun'; import { dlopen } from 'bun:ffi'; import { jsc } from 'bun:jsc';",
+    );
+    let db = build_js_db(
+        &fs,
+        &ProjectLayout::default(),
+        &[BiomePath::new("/src/index.ts")],
+        false,
+    );
+    let info = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .unwrap();
+    for specifier in ["bun", "bun:ffi", "bun:jsc"] {
+        assert_eq!(
+            info.import_paths
+                .get(specifier)
+                .unwrap()
+                .resolved_path
+                .error(),
+            Some(&ResolveError::BunBuiltIn)
+        );
+    }
+}
+
+#[test]
 fn test_package_typings_field_resolution() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "import { Icon } from 'my-icons';");

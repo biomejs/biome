@@ -3312,6 +3312,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoBunModulesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBunModulesOptions" }
+			]
+		},
+		"NoBunModulesOptions": { "type": "object", "additionalProperties": false },
 		"NoCatchAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4621,6 +4628,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidFileInputAcceptConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidFileInputAcceptOptions" }
+			]
+		},
+		"NoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInvalidGridAreasConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5835,6 +5852,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoThisOutsideOfClassConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoThisOutsideOfClassOptions" }
+			]
+		},
+		"NoThisOutsideOfClassOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTopLevelLiteralsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6091,6 +6118,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnmodifiedLoopConditionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnmodifiedLoopConditionOptions" }
+			]
+		},
+		"NoUnmodifiedLoopConditionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnnecessaryConditionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6155,6 +6192,16 @@
 			]
 		},
 		"NoUnsafeFinallyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnsafeIframeSandboxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeIframeSandboxOptions" }
+			]
+		},
+		"NoUnsafeIframeSandboxOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6681,6 +6728,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedScopedSlotsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedScopedSlotsOptions" }
+			]
+		},
+		"NoVueDeprecatedScopedSlotsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDuplicateKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6778,6 +6835,16 @@
 			]
 		},
 		"NoWithOptions": { "type": "object", "additionalProperties": false },
+		"NoXorAsExponentiationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoXorAsExponentiationOptions" }
+			]
+		},
+		"NoXorAsExponentiationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoYodaExpressionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6827,6 +6894,13 @@
 					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoBaseToStringConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noBunModules": {
+					"description": "Forbid the use of Bun builtin modules.\nSee https://biomejs.dev/linter/rules/no-bun-modules",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBunModulesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6925,6 +6999,13 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidFileInputAccept": {
+					"description": "Disallow invalid accept values on file inputs.\nSee https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidFileInputAcceptConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7117,6 +7198,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noThisOutsideOfClass": {
+					"description": "Disallow this outside of classes.\nSee https://biomejs.dev/linter/rules/no-this-outside-of-class",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoThisOutsideOfClassConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noTopLevelLiterals": {
 					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
 					"anyOf": [
@@ -7138,10 +7226,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnmodifiedLoopCondition": {
+					"description": "Disallow loop conditions whose variables are never modified in the loop.\nSee https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnmodifiedLoopConditionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnnecessaryTemplateExpression": {
 					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeIframeSandbox": {
+					"description": "Disallow an unsafe combination of the sandbox attribute.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeIframeSandboxConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7180,6 +7282,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueDeprecatedScopedSlots": {
+					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueImportCompilerMacros": {
 					"description": "Disallow importing Vue compiler macros.\nSee https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
 					"anyOf": [
@@ -7198,6 +7307,13 @@
 					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVOnNumberValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noXorAsExponentiation": {
+					"description": "Disallow the bitwise XOR operator where exponentiation was likely intended.\nSee https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoXorAsExponentiationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7307,6 +7423,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFlatMathMinMax": {
+					"description": "Prefer flat Math.min() and Math.max() calls over nested calls of the same method.\nSee https://biomejs.dev/linter/rules/use-flat-math-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseFlatMathMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIframeSandbox": {
 					"description": "Enforce the 'sandbox' attribute for 'iframe' elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
 					"anyOf": [
@@ -7328,10 +7451,24 @@
 						{ "type": "null" }
 					]
 				},
+				"useLayeredStyles": {
+					"description": "Enforce style rules to be defined within a cascade layer.\nSee https://biomejs.dev/linter/rules/use-layered-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLayeredStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMathMinMax": {
 					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseMathMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useModernMathApis": {
+					"description": "Use modern Math APIs for common mathematical operations.\nSee https://biomejs.dev/linter/rules/use-modern-math-apis",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseModernMathApisConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7392,6 +7529,13 @@
 						{
 							"$ref": "#/$defs/UseReactFunctionComponentDefinitionConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"useReactNamingConvention": {
+					"description": "Enforces naming conventions for React createContext, useId, and useRef.\nSee https://biomejs.dev/linter/rules/use-react-naming-convention",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactNamingConventionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7497,6 +7641,13 @@
 					"description": "Require var declarations to appear at the top of their containing scope.\nSee https://biomejs.dev/linter/rules/use-vars-on-top",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVarsOnTopConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueBaseImport": {
+					"description": "Enforce importing Vue's public entry point instead of internal Vue packages.\nSee https://biomejs.dev/linter/rules/use-vue-base-import",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueBaseImportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8142,82 +8293,6 @@
 			},
 			"required": ["level", "options"]
 		},
-		"RuleDomain": {
-			"description": "Rule domains",
-			"oneOf": [
-				{
-					"description": "Astro framework rules",
-					"type": "string",
-					"const": "astro"
-				},
-				{
-					"description": "Drizzle ORM rules",
-					"type": "string",
-					"const": "drizzle"
-				},
-				{
-					"description": "React library rules",
-					"type": "string",
-					"const": "react"
-				},
-				{
-					"description": "React Native framework rules",
-					"type": "string",
-					"const": "reactNative"
-				},
-				{ "description": "Testing rules", "type": "string", "const": "test" },
-				{
-					"description": "Solid.js framework rules",
-					"type": "string",
-					"const": "solid"
-				},
-				{
-					"description": "Next.js framework rules",
-					"type": "string",
-					"const": "next"
-				},
-				{
-					"description": "Qwik framework rules",
-					"type": "string",
-					"const": "qwik"
-				},
-				{
-					"description": "Svelte framework rules",
-					"type": "string",
-					"const": "svelte"
-				},
-				{
-					"description": "Vue.js framework rules",
-					"type": "string",
-					"const": "vue"
-				},
-				{
-					"description": "For rules that require querying multiple files inside a project",
-					"type": "string",
-					"const": "project"
-				},
-				{
-					"description": "Tailwind CSS rules",
-					"type": "string",
-					"const": "tailwind"
-				},
-				{
-					"description": "Turborepo build system rules",
-					"type": "string",
-					"const": "turborepo"
-				},
-				{
-					"description": "Playwright testing framework rules",
-					"type": "string",
-					"const": "playwright"
-				},
-				{
-					"description": "Rules that require type inference",
-					"type": "string",
-					"const": "types"
-				}
-			]
-		},
 		"RuleDomainValue": {
 			"oneOf": [
 				{
@@ -8239,8 +8314,24 @@
 		},
 		"RuleDomains": {
 			"type": "object",
-			"additionalProperties": { "$ref": "#/$defs/RuleDomainValue" },
-			"propertyNames": { "$ref": "#/$defs/RuleDomain" }
+			"properties": {
+				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+				"next": { "$ref": "#/$defs/RuleDomainValue" },
+				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
+				"project": { "$ref": "#/$defs/RuleDomainValue" },
+				"qwik": { "$ref": "#/$defs/RuleDomainValue" },
+				"react": { "$ref": "#/$defs/RuleDomainValue" },
+				"reactNative": { "$ref": "#/$defs/RuleDomainValue" },
+				"solid": { "$ref": "#/$defs/RuleDomainValue" },
+				"svelte": { "$ref": "#/$defs/RuleDomainValue" },
+				"tailwind": { "$ref": "#/$defs/RuleDomainValue" },
+				"test": { "$ref": "#/$defs/RuleDomainValue" },
+				"turborepo": { "$ref": "#/$defs/RuleDomainValue" },
+				"types": { "$ref": "#/$defs/RuleDomainValue" },
+				"vue": { "$ref": "#/$defs/RuleDomainValue" }
+			},
+			"additionalProperties": false
 		},
 		"RulePlainConfiguration": {
 			"oneOf": [
@@ -8472,6 +8563,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBlankTargetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBunModulesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBunModulesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9594,6 +9694,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoInvalidFileInputAcceptOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidFileInputAcceptOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoInvalidGridAreasOptions": {
 			"type": "object",
 			"properties": {
@@ -10630,6 +10740,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoThisOutsideOfClassOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoThisOutsideOfClassOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoTopLevelLiteralsOptions": {
 			"type": "object",
 			"properties": {
@@ -10793,6 +10912,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUnmodifiedLoopConditionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnmodifiedLoopConditionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUnnecessaryConditionsOptions": {
 			"type": "object",
 			"properties": {
@@ -10853,6 +10981,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeFinallyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeIframeSandboxOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeIframeSandboxOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11293,6 +11430,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueDeprecatedScopedSlotsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedScopedSlotsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueDuplicateKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -11379,6 +11526,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoWithOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoXorAsExponentiationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoXorAsExponentiationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11977,6 +12134,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseFlatMathMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseFlatMathMinMaxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseFocusableInteractiveOptions": {
 			"type": "object",
 			"properties": {
@@ -12275,6 +12442,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLayeredStylesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLayeredStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseLiteralEnumMembersOptions": {
 			"type": "object",
 			"properties": {
@@ -12336,6 +12512,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseMediaCaptionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseModernMathApisOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseModernMathApisOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12561,6 +12747,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseReactFunctionComponentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseReactNamingConventionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactNamingConventionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13001,6 +13196,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVarsOnTopOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueBaseImportOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueBaseImportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15949,6 +16154,16 @@
 			]
 		},
 		"UseFlatMapOptions": { "type": "object", "additionalProperties": false },
+		"UseFlatMathMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseFlatMathMinMaxOptions" }
+			]
+		},
+		"UseFlatMathMinMaxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseFocusableInteractiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16301,6 +16516,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseLayeredStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLayeredStylesOptions" }
+			]
+		},
+		"UseLayeredStylesOptions": {
+			"type": "object",
+			"properties": {
+				"requireImportLayers": {
+					"description": "Require `@import` rules to have a cascade layer. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseLiteralEnumMembersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16374,6 +16605,16 @@
 			]
 		},
 		"UseMediaCaptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseModernMathApisConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseModernMathApisOptions" }
+			]
+		},
+		"UseModernMathApisOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -16689,6 +16930,16 @@
 			]
 		},
 		"UseReactFunctionComponentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactNamingConventionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactNamingConventionOptions" }
+			]
+		},
+		"UseReactNamingConventionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -17333,6 +17584,16 @@
 			]
 		},
 		"UseVarsOnTopOptions": { "type": "object", "additionalProperties": false },
+		"UseVueBaseImportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueBaseImportOptions" }
+			]
+		},
+		"UseVueBaseImportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueConsistentDefinePropsDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

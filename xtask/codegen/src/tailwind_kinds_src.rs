@@ -33,7 +33,7 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COLOR_LITERAL",
         "CSS_URL_VALUE_RAW_LITERAL",
     ],
-    tokens: &["ERROR_TOKEN", "IDENT", "NEWLINE"],
+    tokens: &["ERROR_TOKEN", "IDENT", "CSS_WHITESPACE"],
     keywords: &[
         "data", "url", "var", // length units
         "em", "rem", "ex", "rex", "cap", "rcap", "ch", "rch", "ic", "ric", "lh", "rlh",

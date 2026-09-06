@@ -1,5 +1,6 @@
 use crate::globals::{is_google_apps_script_global, is_js_global};
 
+use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -63,6 +64,20 @@ impl Rule for NoGlobalAssign {
             return None;
         }
         let token = assignment.name_token().ok()?;
+
+        // Only trust a cross-embed binding from non-source embeds like template
+        // expressions. Source embeds (e.g. Vue's `<script>` and `<script setup>`)
+        // don't necessarily see each other's bindings, so trusting it there
+        // would hide genuine global assignments.
+        if !ctx.source_type::<JsFileSource>().is_embedded_source() {
+            let embedded = ctx
+                .get_service::<EmbeddedService>()
+                .expect("embedded service");
+            if embedded.contains_binding(token.token_text_trimmed()) {
+                return None;
+            }
+        }
+
         let name = token.text_trimmed();
         // Apps Script service globals (e.g. `SpreadsheetApp`) are read-only
         // globals too, so reassigning them in a `.gs` file is reported.

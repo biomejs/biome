@@ -302,7 +302,7 @@ pub(crate) trait CommandRunner {
                 console.error(markup! {
                     {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
                 });
-                console.append(markup! {{content}});
+                console.append_raw(&content);
                 return Ok(());
             }
 

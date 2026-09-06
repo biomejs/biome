@@ -16,6 +16,7 @@ aria-[disabled]:text-red-500
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
@@ -48,8 +49,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@28..29 "\n" [] [],
     ],
-    eof_token: EOF@28..29 "" [Newline("\n")] [],
+    eof_token: EOF@29..29 "" [] [],
 }
 ```
 
@@ -58,7 +60,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..29
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..28
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..29
     0: TW_FULL_CANDIDATE@0..28
       0: TW_VARIANT_LIST@0..16
         0: TW_VARIANT_EXPRESSION@0..15
@@ -82,6 +85,7 @@ TwRoot {
           0: TW_VALUE@21..28 "red-500" [] []
         3: (empty)
       4: (empty)
-  2: EOF@28..29 "" [Newline("\n")] []
+    1: WHITESPACE@28..29 "\n" [] []
+  3: EOF@29..29 "" [] []
 
 ```

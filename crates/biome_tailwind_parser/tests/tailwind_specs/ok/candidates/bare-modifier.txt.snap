@@ -15,17 +15,19 @@ expression: snapshot
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@0..11 "@container" [] [Whitespace(" ")],
+                base_token: TW_BASE@0..10 "@container" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@10..11 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -35,12 +37,13 @@ TwRoot {
                 modifier: TwModifier {
                     slash_token: SLASH@21..22 "/" [] [],
                     value: TwNamedValue {
-                        value_token: TW_VALUE@22..30 "sidebar" [] [Whitespace(" ")],
+                        value_token: TW_VALUE@22..29 "sidebar" [] [],
                     },
                 },
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@29..30 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -50,12 +53,13 @@ TwRoot {
                 modifier: TwModifier {
                     slash_token: SLASH@36..37 "/" [] [],
                     value: TwNumberValue {
-                        value_token: TW_NUMBER@37..40 "50" [] [Whitespace(" ")],
+                        value_token: TW_NUMBER@37..39 "50" [] [],
                     },
                 },
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@39..40 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -65,12 +69,13 @@ TwRoot {
                 modifier: TwModifier {
                     slash_token: SLASH@44..45 "/" [] [],
                     value: TwNumberValue {
-                        value_token: TW_NUMBER@45..48 "50" [] [Whitespace(" ")],
+                        value_token: TW_NUMBER@45..47 "50" [] [],
                     },
                 },
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@47..48 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -80,12 +85,13 @@ TwRoot {
                 modifier: TwModifier {
                     slash_token: SLASH@59..60 "/" [] [],
                     value: TwNumberValue {
-                        value_token: TW_NUMBER@60..63 "50" [] [Whitespace(" ")],
+                        value_token: TW_NUMBER@60..62 "50" [] [],
                     },
                 },
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@62..63 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -102,11 +108,12 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwStaticCandidate {
-                base_token: TW_BASE@74..79 "flex" [] [Whitespace(" ")],
+                base_token: TW_BASE@74..78 "flex" [] [],
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@78..79 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [
                 TwVariantExpression {
@@ -143,60 +150,66 @@ TwRoot {
 ```
 0: TW_ROOT@0..98
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..98
-    0: TW_FULL_CANDIDATE@0..11
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..98
+    0: TW_FULL_CANDIDATE@0..10
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@0..11
-        0: TW_BASE@0..11 "@container" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@0..10
+        0: TW_BASE@0..10 "@container" [] []
         1: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@11..30
+    1: WHITESPACE@10..11 " " [] []
+    2: TW_FULL_CANDIDATE@11..29
       0: TW_VARIANT_LIST@11..11
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@11..30
+      3: TW_STATIC_CANDIDATE@11..29
         0: TW_BASE@11..21 "@container" [] []
-        1: TW_MODIFIER@21..30
+        1: TW_MODIFIER@21..29
           0: SLASH@21..22 "/" [] []
-          1: TW_NAMED_VALUE@22..30
-            0: TW_VALUE@22..30 "sidebar" [] [Whitespace(" ")]
+          1: TW_NAMED_VALUE@22..29
+            0: TW_VALUE@22..29 "sidebar" [] []
       4: (empty)
-    2: TW_FULL_CANDIDATE@30..40
+    3: WHITESPACE@29..30 " " [] []
+    4: TW_FULL_CANDIDATE@30..39
       0: TW_VARIANT_LIST@30..30
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@30..40
+      3: TW_STATIC_CANDIDATE@30..39
         0: TW_BASE@30..36 "shadow" [] []
-        1: TW_MODIFIER@36..40
+        1: TW_MODIFIER@36..39
           0: SLASH@36..37 "/" [] []
-          1: TW_NUMBER_VALUE@37..40
-            0: TW_NUMBER@37..40 "50" [] [Whitespace(" ")]
+          1: TW_NUMBER_VALUE@37..39
+            0: TW_NUMBER@37..39 "50" [] []
       4: (empty)
-    3: TW_FULL_CANDIDATE@40..48
+    5: WHITESPACE@39..40 " " [] []
+    6: TW_FULL_CANDIDATE@40..47
       0: TW_VARIANT_LIST@40..40
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@40..48
+      3: TW_STATIC_CANDIDATE@40..47
         0: TW_BASE@40..44 "flex" [] []
-        1: TW_MODIFIER@44..48
+        1: TW_MODIFIER@44..47
           0: SLASH@44..45 "/" [] []
-          1: TW_NUMBER_VALUE@45..48
-            0: TW_NUMBER@45..48 "50" [] [Whitespace(" ")]
+          1: TW_NUMBER_VALUE@45..47
+            0: TW_NUMBER@45..47 "50" [] []
       4: (empty)
-    4: TW_FULL_CANDIDATE@48..63
+    7: WHITESPACE@47..48 " " [] []
+    8: TW_FULL_CANDIDATE@48..62
       0: TW_VARIANT_LIST@48..48
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@48..63
+      3: TW_STATIC_CANDIDATE@48..62
         0: TW_BASE@48..59 "drop-shadow" [] []
-        1: TW_MODIFIER@59..63
+        1: TW_MODIFIER@59..62
           0: SLASH@59..60 "/" [] []
-          1: TW_NUMBER_VALUE@60..63
-            0: TW_NUMBER@60..63 "50" [] [Whitespace(" ")]
+          1: TW_NUMBER_VALUE@60..62
+            0: TW_NUMBER@60..62 "50" [] []
       4: (empty)
-    5: TW_FULL_CANDIDATE@63..79
+    9: WHITESPACE@62..63 " " [] []
+    10: TW_FULL_CANDIDATE@63..78
       0: TW_VARIANT_LIST@63..74
         0: TW_VARIANT_EXPRESSION@63..73
           0: TW_VARIANT_SEGMENT_LIST@63..73
@@ -207,11 +220,12 @@ TwRoot {
         1: COLON@73..74 ":" [] []
       1: (empty)
       2: (empty)
-      3: TW_STATIC_CANDIDATE@74..79
-        0: TW_BASE@74..79 "flex" [] [Whitespace(" ")]
+      3: TW_STATIC_CANDIDATE@74..78
+        0: TW_BASE@74..78 "flex" [] []
         1: (empty)
       4: (empty)
-    6: TW_FULL_CANDIDATE@79..98
+    11: WHITESPACE@78..79 " " [] []
+    12: TW_FULL_CANDIDATE@79..98
       0: TW_VARIANT_LIST@79..83
         0: TW_VARIANT_EXPRESSION@79..82
           0: TW_VARIANT_SEGMENT_LIST@79..82
@@ -229,6 +243,6 @@ TwRoot {
           1: TW_NAMED_VALUE@94..98
             0: TW_VALUE@94..98 "main" [] []
       4: (empty)
-  2: EOF@98..98 "" [] []
+  3: EOF@98..98 "" [] []
 
 ```

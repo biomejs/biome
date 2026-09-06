@@ -143,10 +143,11 @@ impl Rule for NoVueDuplicateKeys {
             VueDeclarationCollectionFilter::all() ^ VueDeclarationCollectionFilter::Watcher,
         ) {
             if let Some(name) = declaration.declaration_name() {
-                // Handle cases like `const { foo } = defineProps(...);`.
+                // A setup variable derived from props is the same value as the prop it comes
+                // from, so it doesn't compete with it. Handles cases like
+                // `const { foo } = defineProps(...)` or `const foo = toRef(props, 'foo')`.
                 if let VueDeclaration::Setup(ref setup_decl) = declaration
-                    && (setup_decl.is_assigned_to_props(model)
-                        || setup_decl.is_assigned_to_to_refs(model))
+                    && setup_decl.is_derived_from_props(model)
                 {
                     continue;
                 }

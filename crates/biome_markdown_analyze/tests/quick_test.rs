@@ -2,7 +2,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
-use biome_markdown_parser::parse_markdown;
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 use std::slice;
 
 use biome_markdown_analyze::analyze;
@@ -17,7 +17,7 @@ fn quick_test() {
 d { font: 1em SF Mono, Liberation Mono, sans-serif; }
 "#;
 
-    let parsed = parse_markdown(SOURCE);
+    let parsed = parse_markdown(SOURCE, MarkdownParserOptions::default());
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();

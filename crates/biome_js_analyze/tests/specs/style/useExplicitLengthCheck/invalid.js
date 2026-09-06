@@ -10,8 +10,15 @@ for (let i = 0; (bar && !foo.length); i ++) {}
 const isEmpty = foo.length < 1;
 bar(foo.length >= 1)
 bar(!foo.length || foo.length)
+alert(foo.length && bar())
+const hasLength = () => foo.length && bar()
+const parenthesizedHasLength = () => (foo.length) && bar()
+if (!foo.length > 0) {}
+if (true === !foo.length) {}
 const bar = void !foo.length;
 const isNotEmpty = Boolean(foo.length)
+Boolean(foo.length).toString()
++Boolean(foo.length)
 const isNotEmpty1 = Boolean(foo.length || bar)
 const isEmpty1 = Boolean(!foo.length)
 const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
@@ -19,6 +26,16 @@ const isNotEmpty2 = !Boolean(foo.length === 0)
 const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
 if (foo.size) {}
 if (foo.size && bar.length) {}
+
+// Unlike ESLint Unicorn, Biome checks direct properties on `this` because they
+// can represent numeric cardinality.
+class A {
+    a() {
+        if (this.length) {};
+        while (!this.size || foo);
+    }
+}
+
 // Space after keywords
 function foo() {return!foo.length}
 function foo() {throw!foo.length}
@@ -36,10 +53,3 @@ do!foo.length;while(true) {}
 switch(foo){case!foo.length:{}}
 for(const a of!foo.length);
 for(const a in!foo.length);
-
-class A {
-    a() {
-        if (this.length) {};
-        while (!this.size || foo);
-    }
-}

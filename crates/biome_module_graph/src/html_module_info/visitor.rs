@@ -296,6 +296,7 @@ impl<'a> HtmlModuleVisitor<'a> {
             extensions: HTML_SUPPORTED_EXTENSION_ALIASES,
             extension_aliases: HTML_EXTENSION_ALIASES,
             resolve_node_builtins: true,
+            resolve_bun_builtins: true,
             resolve_types: true,
             ..Default::default()
         };

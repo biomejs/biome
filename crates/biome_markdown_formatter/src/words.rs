@@ -197,7 +197,9 @@ impl ProseItemList {
                 | AnyMdInline::MdReferenceLink(_)
                 | AnyMdInline::MdReferenceImage(_)
                 | AnyMdInline::MdInlineHtml(_)
-                | AnyMdInline::MdEntityReference(_) => {
+                | AnyMdInline::MdEntityReference(_)
+                | AnyMdInline::GfmStrikethrough(_)
+                | AnyMdInline::GfmTaskListItem(_) => {
                     current_word_group.push(ProseAtom::InlineElement(item));
                 }
 

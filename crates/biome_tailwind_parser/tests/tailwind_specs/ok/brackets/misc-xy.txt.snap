@@ -16,6 +16,7 @@ space-x-[14px] space-y-[10px] divide-x-[2px] divide-y-[3px]
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -32,12 +33,13 @@ TwRoot {
                             unit_token: IDENT@11..13 "px" [] [],
                         },
                     ],
-                    r_brack_token: R_BRACKET@13..15 "]" [] [Whitespace(" ")],
+                    r_brack_token: R_BRACKET@13..14 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@14..15 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -53,12 +55,13 @@ TwRoot {
                             unit_token: IDENT@26..28 "px" [] [],
                         },
                     ],
-                    r_brack_token: R_BRACKET@28..30 "]" [] [Whitespace(" ")],
+                    r_brack_token: R_BRACKET@28..29 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@29..30 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -74,12 +77,13 @@ TwRoot {
                             unit_token: IDENT@41..43 "px" [] [],
                         },
                     ],
-                    r_brack_token: R_BRACKET@43..45 "]" [] [Whitespace(" ")],
+                    r_brack_token: R_BRACKET@43..44 "]" [] [],
                 },
                 modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@44..45 " " [] [],
         TwFullCandidate {
             variants: TwVariantList [],
             legacy_important_token: missing (optional),
@@ -101,8 +105,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@59..60 "\n" [] [],
     ],
-    eof_token: EOF@59..60 "" [Newline("\n")] [],
+    eof_token: EOF@60..60 "" [] [],
 }
 ```
 
@@ -111,56 +116,60 @@ TwRoot {
 ```
 0: TW_ROOT@0..60
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..59
-    0: TW_FULL_CANDIDATE@0..15
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..60
+    0: TW_FULL_CANDIDATE@0..14
       0: TW_VARIANT_LIST@0..0
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@0..15
+      3: TW_FUNCTIONAL_CANDIDATE@0..14
         0: TW_BASE@0..7 "space-x" [] []
         1: DASH@7..8 "-" [] []
-        2: TW_ARBITRARY_VALUE@8..15
+        2: TW_ARBITRARY_VALUE@8..14
           0: L_BRACKET@8..9 "[" [] []
           1: CSS_GENERIC_COMPONENT_VALUE_LIST@9..13
             0: CSS_REGULAR_DIMENSION@9..13
               0: CSS_NUMBER_LITERAL@9..11 "14" [] []
               1: IDENT@11..13 "px" [] []
-          2: R_BRACKET@13..15 "]" [] [Whitespace(" ")]
+          2: R_BRACKET@13..14 "]" [] []
         3: (empty)
       4: (empty)
-    1: TW_FULL_CANDIDATE@15..30
+    1: WHITESPACE@14..15 " " [] []
+    2: TW_FULL_CANDIDATE@15..29
       0: TW_VARIANT_LIST@15..15
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@15..30
+      3: TW_FUNCTIONAL_CANDIDATE@15..29
         0: TW_BASE@15..22 "space-y" [] []
         1: DASH@22..23 "-" [] []
-        2: TW_ARBITRARY_VALUE@23..30
+        2: TW_ARBITRARY_VALUE@23..29
           0: L_BRACKET@23..24 "[" [] []
           1: CSS_GENERIC_COMPONENT_VALUE_LIST@24..28
             0: CSS_REGULAR_DIMENSION@24..28
               0: CSS_NUMBER_LITERAL@24..26 "10" [] []
               1: IDENT@26..28 "px" [] []
-          2: R_BRACKET@28..30 "]" [] [Whitespace(" ")]
+          2: R_BRACKET@28..29 "]" [] []
         3: (empty)
       4: (empty)
-    2: TW_FULL_CANDIDATE@30..45
+    3: WHITESPACE@29..30 " " [] []
+    4: TW_FULL_CANDIDATE@30..44
       0: TW_VARIANT_LIST@30..30
       1: (empty)
       2: (empty)
-      3: TW_FUNCTIONAL_CANDIDATE@30..45
+      3: TW_FUNCTIONAL_CANDIDATE@30..44
         0: TW_BASE@30..38 "divide-x" [] []
         1: DASH@38..39 "-" [] []
-        2: TW_ARBITRARY_VALUE@39..45
+        2: TW_ARBITRARY_VALUE@39..44
           0: L_BRACKET@39..40 "[" [] []
           1: CSS_GENERIC_COMPONENT_VALUE_LIST@40..43
             0: CSS_REGULAR_DIMENSION@40..43
               0: CSS_NUMBER_LITERAL@40..41 "2" [] []
               1: IDENT@41..43 "px" [] []
-          2: R_BRACKET@43..45 "]" [] [Whitespace(" ")]
+          2: R_BRACKET@43..44 "]" [] []
         3: (empty)
       4: (empty)
-    3: TW_FULL_CANDIDATE@45..59
+    5: WHITESPACE@44..45 " " [] []
+    6: TW_FULL_CANDIDATE@45..59
       0: TW_VARIANT_LIST@45..45
       1: (empty)
       2: (empty)
@@ -176,6 +185,7 @@ TwRoot {
           2: R_BRACKET@58..59 "]" [] []
         3: (empty)
       4: (empty)
-  2: EOF@59..60 "" [Newline("\n")] []
+    7: WHITESPACE@59..60 "\n" [] []
+  3: EOF@60..60 "" [] []
 
 ```

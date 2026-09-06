@@ -43,7 +43,13 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
         return Absent;
     }
 
-    parse_scss_nesting_declaration_candidate(p).map_or(Absent, |(syntax, _)| syntax)
+    let Some((syntax, _)) =
+        parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Allow)
+    else {
+        return Absent;
+    };
+
+    syntax
 }
 
 #[inline]
@@ -71,37 +77,57 @@ struct ScssNestingMarkers {
     is_custom_property: bool,
 }
 
-/// Parses a SCSS nested-property/declaration candidate and returns both the
-/// parsed syntax and whether the same prefix could still be interpreted as a
-/// selector by the caller.
+/// Controls whether a source-tight selector-like candidate may parse its
+/// following block before the caller decides its final classification.
+#[derive(Clone, Copy)]
+enum SelectorLikeBlockPolicy {
+    /// Allow the candidate to complete as nested-property syntax when a block follows.
+    Allow,
+    /// Reject the candidate before its block so an enclosing speculative parse
+    /// can rewind and retry the construct as a nested qualified rule.
+    Reject,
+}
+
+/// Parses a SCSS nested-property/declaration candidate.
 ///
-/// This keeps the real parsing shared between the committed and speculative
-/// nesting entrypoints.
+/// With [`SelectorLikeBlockPolicy::Reject`], this returns `None` after
+/// abandoning a parsed source-tight selector-like prefix and value immediately
+/// before `{`. That policy must only be used inside `try_parse`, which rewinds
+/// the consumed parser context and token-source state.
 #[inline]
-fn parse_scss_nesting_declaration_candidate(p: &mut CssParser) -> Option<(ParsedSyntax, bool)> {
+fn parse_scss_nesting_declaration_candidate(
+    p: &mut CssParser,
+    selector_like_block_policy: SelectorLikeBlockPolicy,
+) -> Option<(ParsedSyntax, bool)> {
     if !is_at_scss_nesting_declaration(p) {
         return None;
     }
 
     let (markers, could_be_selector) = parse_scss_nesting_declaration_prefix(p)?;
-    let syntax = parse_scss_nesting_declaration_after_prefix(p, markers);
+    let syntax = parse_scss_nesting_declaration_after_prefix(
+        p,
+        markers,
+        could_be_selector,
+        selector_like_block_policy,
+    )?;
 
     Some((syntax, could_be_selector))
 }
 
-/// Parses the remainder of a SCSS nesting candidate after its `name:` prefix
-/// has already been recognized.
+/// Parses the remainder of a SCSS nesting candidate after its `name:` prefix.
 ///
-/// This decides whether the candidate becomes a nested-property block or a
-/// regular declaration once the value and following token are known.
+/// Returns `None` only when [`SelectorLikeBlockPolicy::Reject`] stops a
+/// source-tight selector-like candidate immediately before its block.
 #[inline]
 fn parse_scss_nesting_declaration_after_prefix(
     p: &mut CssParser,
     markers: ScssNestingMarkers,
-) -> ParsedSyntax {
+    could_be_selector: bool,
+    selector_like_block_policy: SelectorLikeBlockPolicy,
+) -> Option<ParsedSyntax> {
     if markers.is_custom_property {
         parse_custom_property_value(p, END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET);
-        return complete_scss_nesting_regular_declaration(p, markers, false);
+        return Some(complete_scss_nesting_regular_declaration(p, markers, false));
     }
 
     let missing_value =
@@ -110,14 +136,27 @@ fn parse_scss_nesting_declaration_after_prefix(
         // handled by the caller via `missing_value`.
         parse_scss_optional_value_until(p, SCSS_NESTING_VALUE_END_SET).is_absent();
 
+    if could_be_selector
+        && p.at(T!['{'])
+        && matches!(selector_like_block_policy, SelectorLikeBlockPolicy::Reject)
+    {
+        markers.property.abandon(p);
+        markers.declaration.abandon(p);
+        return None;
+    }
+
     if p.at(T!['{']) {
         // A following `{` turns the parsed prefix into nested-property syntax.
         if missing_value {
             complete_empty_scss_expression(p);
         }
-        complete_scss_nested_property_block(p, markers)
+        Some(complete_scss_nested_property_block(p, markers))
     } else {
-        complete_scss_nesting_regular_declaration(p, markers, missing_value)
+        Some(complete_scss_nesting_regular_declaration(
+            p,
+            markers,
+            missing_value,
+        ))
     }
 }
 
@@ -230,7 +269,9 @@ pub(crate) fn try_parse_scss_nesting_declaration(
             return Err(());
         }
 
-        let Some((syntax, could_be_selector)) = parse_scss_nesting_declaration_candidate(p) else {
+        let Some((syntax, could_be_selector)) =
+            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Reject)
+        else {
             return Err(());
         };
 
@@ -251,7 +292,9 @@ pub(crate) fn try_parse_scss_nesting_declaration(
 #[inline]
 fn try_parse_scss_nested_property_declaration(p: &mut CssParser) -> Result<ParsedSyntax, ()> {
     try_parse(p, |p| {
-        let Some((syntax, could_be_selector)) = parse_scss_nesting_declaration_candidate(p) else {
+        let Some((syntax, could_be_selector)) =
+            parse_scss_nesting_declaration_candidate(p, SelectorLikeBlockPolicy::Reject)
+        else {
             return Err(());
         };
 

@@ -12,9 +12,9 @@ use crate::syntax::parse_error::{
     expected_component_value, expected_declaration, expected_selector, scss_only_syntax_error,
 };
 use crate::syntax::property::{
-    END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
-    parse_generic_property_name, parse_property_value_with_end_set,
-    parse_supports_custom_property_value,
+    END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_at_legacy_ie_filter_property,
+    is_at_legacy_ie_filter_value, is_nth_at_direct_generic_property, parse_generic_property_name,
+    parse_property_value_with_end_set, parse_supports_custom_property_value,
 };
 use crate::syntax::scss::{
     is_at_scss_supports_interpolated_condition, is_nth_at_scss_interpolated_property_name,
@@ -350,6 +350,7 @@ pub(crate) fn parse_supports_declaration(p: &mut CssParser) -> ParsedSyntax {
 fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
+    let is_legacy_ie_filter_property = is_at_legacy_ie_filter_property(p);
     let is_custom_property = parse_generic_property_name(p).ok().is_some_and(|name| {
         matches!(
             name.kind(p),
@@ -366,7 +367,10 @@ fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
     } else {
         p.expect(T![:])
     };
-    let value = parse_supports_property_value(p, is_scss_custom_property);
+    let is_legacy_filter_value = !CssSyntaxFeatures::Scss.is_supported(p)
+        && is_legacy_ie_filter_property
+        && is_at_legacy_ie_filter_value(p);
+    let value = parse_supports_property_value(p, is_scss_custom_property, is_legacy_filter_value);
 
     if has_colon
         && is_scss_custom_property
@@ -388,6 +392,7 @@ const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
 fn parse_supports_property_value(
     p: &mut CssParser,
     is_scss_custom_property: bool,
+    is_legacy_filter_value: bool,
 ) -> CompletedMarker {
     if is_scss_custom_property {
         parse_supports_custom_property_value(p, END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET)
@@ -395,6 +400,7 @@ fn parse_supports_property_value(
         parse_property_value_with_end_set(
             p,
             false,
+            is_legacy_filter_value,
             END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
             END_OF_PROPERTY_VALUE_TOKEN_SET,
         )

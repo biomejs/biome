@@ -16,6 +16,7 @@ text-[
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
@@ -33,8 +34,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@6..7 "\n" [] [],
     ],
-    eof_token: EOF@6..7 "" [Newline("\n")] [],
+    eof_token: EOF@7..7 "" [] [],
 }
 ```
 
@@ -43,7 +45,8 @@ TwRoot {
 ```
 0: TW_ROOT@0..7
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..6
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..7
     0: TW_FULL_CANDIDATE@0..6
       0: TW_VARIANT_LIST@0..0
       1: (empty)
@@ -55,7 +58,8 @@ TwRoot {
           0: L_BRACKET@5..6 "[" [] []
         3: (empty)
       4: (empty)
-  2: EOF@6..7 "" [Newline("\n")] []
+    1: WHITESPACE@6..7 "\n" [] []
+  3: EOF@7..7 "" [] []
 
 ```
 

@@ -350,6 +350,138 @@ fn classification_requests_preserve_conclusive_and_indeterminate_results() {
 }
 
 #[test]
+fn declaration_class_method_classification_is_conclusive() {
+    const DECLARATION_SOURCE: &str = r#"
+        export declare class Tracer {
+            putAnnotation(key: string, value: string | number | boolean): void;
+            overloaded(value: string): "sync";
+            overloaded(value: number): Promise<void>;
+            static staticOverloaded(value: string): "sync";
+            static staticOverloaded(value: number): Promise<void>;
+        }
+    "#;
+    const SOURCE: &str = r#"
+        import { Tracer } from "./tracer.d.ts";
+        const tracer = new Tracer();
+        declare const typedTracer: Tracer;
+        tracer.putAnnotation("Category", "value");
+        tracer.overloaded("value");
+        typedTracer.overloaded("value");
+        Tracer.staticOverloaded("value");
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/tracer.d.ts".into(), DECLARATION_SOURCE);
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/tracer.d.ts", "/src/index.ts"], true);
+    let declaration_module = db
+        .module_for_path(Utf8Path::new("/src/tracer.d.ts"))
+        .expect("declaration module must exist");
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let caller = TypeInferenceCaller::new("test", "declarationClassMethod");
+    let put_annotation = expression_range_by_source(
+        &db,
+        module,
+        SOURCE,
+        r#"tracer.putAnnotation("Category", "value")"#,
+    );
+    let overloaded =
+        expression_range_by_source(&db, module, SOURCE, r#"tracer.overloaded("value")"#);
+    let typed_overloaded =
+        expression_range_by_source(&db, module, SOURCE, r#"typedTracer.overloaded("value")"#);
+    let static_overloaded =
+        expression_range_by_source(&db, module, SOURCE, r#"Tracer.staticOverloaded("value")"#);
+
+    db.clear_salsa_events();
+    for classification in [
+        execute_type_inference_request(
+            &db,
+            caller,
+            PromiseClassificationRequest::new(module, put_annotation),
+        ),
+        execute_type_inference_request(
+            &db,
+            caller,
+            ArrayOfPromisesClassificationRequest::new(module, put_annotation),
+        ),
+    ] {
+        assert_eq!(classification, TypeInferenceClassification::NoMatch);
+    }
+    for expression in [overloaded, typed_overloaded, static_overloaded] {
+        for classification in [
+            execute_type_inference_request(
+                &db,
+                caller,
+                PromiseClassificationRequest::new(module, expression),
+            ),
+            execute_type_inference_request(
+                &db,
+                caller,
+                ArrayOfPromisesClassificationRequest::new(module, expression),
+            ),
+        ] {
+            assert_eq!(classification, TypeInferenceClassification::Indeterminate);
+        }
+    }
+    for expression in [overloaded, typed_overloaded, static_overloaded] {
+        let ty = execute_type_inference_request(
+            &db,
+            caller,
+            NormalizedExpressionTypeRequest::new(module, expression),
+        )
+        .expect("expression type must be inferred");
+        assert!(is_inferred_string(&db, ty));
+    }
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, declaration_module, &events);
+}
+
+#[test]
+fn class_method_overloads_preserve_member_lookup() {
+    const SOURCE: &str = r#"
+        class Handler {
+            run(value: string): "sync";
+            run(value: number): Promise<void>;
+            run(value: string | number): "sync" | Promise<void> {
+                return value === "sync" ? "sync" : Promise.resolve();
+            }
+
+            static staticRun(value: string): "sync";
+            static staticRun(value: number): Promise<void>;
+            static staticRun(value: string | number): "sync" | Promise<void> {
+                return value === "sync" ? "sync" : Promise.resolve();
+            }
+        }
+
+        const handler = new Handler();
+        handler.run("sync");
+        Handler.staticRun("sync");
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let caller = TypeInferenceCaller::new("test", "classMethodOverloads");
+
+    for expression in [r#"handler.run("sync")"#, r#"Handler.staticRun("sync")"#] {
+        let expression = expression_range_by_source(&db, module, SOURCE, expression);
+        let ty = execute_type_inference_request(
+            &db,
+            caller,
+            NormalizedExpressionTypeRequest::new(module, expression),
+        )
+        .expect("expression type must be inferred");
+        assert!(is_inferred_string(&db, ty));
+    }
+}
+
+#[test]
 fn classification_and_return_type_requests_stay_selective() {
     let source = r#"
         const promise = Promise.resolve(1);

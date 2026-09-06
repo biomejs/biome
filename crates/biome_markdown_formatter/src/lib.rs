@@ -3,6 +3,7 @@ mod comments;
 pub mod context;
 mod cst;
 mod generated;
+mod gfm;
 mod markdown;
 mod prelude;
 mod quote;

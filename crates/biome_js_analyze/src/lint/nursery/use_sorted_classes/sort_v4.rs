@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 
-use biome_rowan::{AstNode, AstNodeList, SyntaxNodeText, TextRange, TextSize, TokenText};
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxNodeText, TextRange, TextSize, TokenText,
+};
 use biome_string_case::Collator;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
@@ -31,7 +33,7 @@ pub fn sort_class_list(root: &TwRoot) -> String {
     // weight in a second pass.
     let mut pending: Vec<(PendingSortKey, SyntaxNodeText)> =
         Vec::with_capacity(candidates.len());
-    for candidate in candidates {
+    for candidate in candidates.iter().flatten() {
         let text = candidate.syntax().text_trimmed();
         let key = PendingSortKey::from_candidate(&candidate);
         pending.push((key, text));
@@ -797,7 +799,7 @@ mod tests {
     /// candidate `x`, for tests that only exercise the placement.
     fn known(property_idx: u16, property_count: u8) -> SortKey {
         let parsed = parse_tailwind("x");
-        let candidate = parsed.tree().candidates().iter().next().unwrap();
+        let candidate = parsed.tree().candidates().iter().next().unwrap().unwrap();
         SortKey::Known {
             variant_weight: VariantWeight::default(),
             signature: Signature::Property(property_idx),
@@ -821,7 +823,7 @@ mod tests {
 
     fn classify(input: &str) -> SortKey {
         let parsed = parse_tailwind(input);
-        let full = parsed.tree().candidates().iter().next().unwrap();
+        let full = parsed.tree().candidates().iter().next().unwrap().unwrap();
         let pending = PendingSortKey::from_candidate(&full);
         // Groups from this one candidate; a plain utility gets empty
         // `variant_weight`.
@@ -855,6 +857,7 @@ mod tests {
             .tree()
             .candidates()
             .iter()
+            .flatten()
             .map(|c| CandidateText(c.syntax().clone()))
             .collect();
         for a in &texts {
@@ -882,6 +885,7 @@ mod tests {
             .tree()
             .candidates()
             .iter()
+            .flatten()
             .map(|candidate| PendingSortKey::from_candidate(&candidate))
             .collect();
         let groups = VariantGroups::new(
@@ -901,7 +905,7 @@ mod tests {
 
     fn functional_parts(input: &str) -> (AnyTwValue, Option<AnyTwModifier>) {
         let parsed = parse_tailwind(input);
-        let full = parsed.tree().candidates().iter().next().unwrap();
+        let full = parsed.tree().candidates().iter().next().unwrap().unwrap();
         let full = full.as_tw_full_candidate().unwrap();
         let candidate = full.candidate().unwrap();
         let AnyTwCandidate::TwFunctionalCandidate(functional) = candidate else {
@@ -1088,7 +1092,13 @@ mod tests {
             ArbitraryBranch::Typed(CssDataType::Number, ModifierKind::None, 10, 1),
             ArbitraryBranch::Fallback(ModifierKind::None, 20, 1),
         ];
-        let full = parse_tailwind("p-[10px]").tree().candidates().iter().next().unwrap();
+        let full = parse_tailwind("p-[10px]")
+            .tree()
+            .candidates()
+            .iter()
+            .next()
+            .unwrap()
+            .unwrap();
         let full = full.as_tw_full_candidate().unwrap();
         let candidate = full.candidate().unwrap();
         let AnyTwCandidate::TwFunctionalCandidate(functional) = candidate else {
@@ -1110,6 +1120,7 @@ mod tests {
             .candidates()
             .iter()
             .next()
+            .unwrap()
             .unwrap();
         let full = full.as_tw_full_candidate().unwrap();
         let candidate = full.candidate().unwrap();

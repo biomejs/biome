@@ -5,7 +5,7 @@ use crate::lexer::base_name_store::{BASENAME_STORE, is_delimiter};
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
-use biome_rowan::{SyntaxKind, TextLen};
+use biome_rowan::TextLen;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
@@ -20,7 +20,6 @@ pub(crate) struct TailwindLexer<'src> {
     current_start: TextSize,
     diagnostics: Vec<ParseDiagnostic>,
     current_flags: TokenFlags,
-    preceding_line_break: bool,
     after_newline: bool,
     unicode_bom_length: usize,
 }
@@ -34,7 +33,6 @@ impl<'src> TailwindLexer<'src> {
             current_start: TextSize::default(),
             diagnostics: Vec::new(),
             current_flags: TokenFlags::empty(),
-            preceding_line_break: false,
             after_newline: false,
             unicode_bom_length: 0,
         }
@@ -43,7 +41,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
@@ -83,7 +81,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token_saw_negative(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
@@ -108,7 +106,7 @@ impl<'src> TailwindLexer<'src> {
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
             _ => self.consume_named_value(),
         }
@@ -122,7 +120,7 @@ impl<'src> TailwindLexer<'src> {
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             COL => self.consume_byte(T![:]),
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_PROPERTY, COL),
             _ if self.current_kind == T![:] => self.consume_token_css_value(current),
@@ -133,7 +131,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token_variant_segment(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
@@ -152,7 +150,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token_css_value(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             BTO => self.consume_byte(T!['[']),
@@ -184,7 +182,7 @@ impl<'src> TailwindLexer<'src> {
     fn consume_token_css_url_raw_value(&mut self, current: u8) -> TailwindSyntaxKind {
         match lookup_byte(current) {
             PNC => self.consume_byte(T![')']),
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => self.consume_whitespace_token(),
             QOT => self.consume_css_string(current),
             _ => self.consume_css_url_raw_value(),
         }
@@ -347,11 +345,19 @@ impl<'src> TailwindLexer<'src> {
     fn consume_css_string(&mut self, quote: u8) -> TailwindSyntaxKind {
         self.advance(1);
         while let Some(byte) = self.current_byte() {
+            if lookup_byte(byte) == WHS {
+                break;
+            }
+
             self.advance(1);
             if byte == quote {
                 break;
             }
-            if byte == b'\\' && !self.is_eof() {
+            if byte == b'\\'
+                && self
+                    .current_byte()
+                    .is_some_and(|escaped| lookup_byte(escaped) != WHS)
+            {
                 self.advance(1);
             }
         }
@@ -373,6 +379,31 @@ impl<'src> TailwindLexer<'src> {
         while self.current_byte() == Some(b'_') {
             self.advance(1);
         }
+        CSS_WHITESPACE
+    }
+
+    fn consume_whitespace_token(&mut self) -> TailwindSyntaxKind {
+        while let Some(byte) = self.current_byte() {
+            if lookup_byte(byte) != WHS {
+                break;
+            }
+
+            match byte {
+                b'\t' | b' ' | b'\r' | b'\n' => self.advance(1),
+                _ => {
+                    let start = self.text_position();
+                    self.advance(1);
+                    self.push_diagnostic(
+                        ParseDiagnostic::new(
+                            "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
+                            start..self.text_position(),
+                        )
+                        .with_hint("Use a regular whitespace character instead."),
+                    );
+                }
+            }
+        }
+
         WHITESPACE
     }
 
@@ -521,7 +552,7 @@ impl<'src> TailwindLexer<'src> {
                 bracket_depth += 1;
             } else if dispatched == BTC && bracket_depth > 0 {
                 bracket_depth -= 1;
-            } else if (dispatched == looking_for || dispatched == WHS) && bracket_depth == 0 {
+            } else if dispatched == WHS || (dispatched == looking_for && bracket_depth == 0) {
                 break;
             }
             let char = self.current_char_unchecked();
@@ -561,7 +592,7 @@ impl<'src> TailwindLexer<'src> {
 }
 
 impl<'src> Lexer<'src> for TailwindLexer<'src> {
-    const NEWLINE: Self::Kind = NEWLINE;
+    const NEWLINE: Self::Kind = WHITESPACE;
     const WHITESPACE: Self::Kind = WHITESPACE;
     type Kind = TailwindSyntaxKind;
     type LexContext = TailwindLexContext;
@@ -612,15 +643,16 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
         self.current_kind = kind;
 
-        if !kind.is_trivia() {
-            self.after_newline = false;
-        }
+        self.after_newline = kind == WHITESPACE
+            && self.source[self.current_range()]
+                .bytes()
+                .any(|byte| matches!(byte, b'\r' | b'\n'));
 
         kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
-        self.preceding_line_break
+        self.current_flags.has_preceding_line_break()
     }
 
     fn has_unicode_escape(&self) -> bool {

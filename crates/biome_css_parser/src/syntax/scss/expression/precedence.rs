@@ -109,13 +109,13 @@ fn parse_scss_unary_expression(p: &mut CssParser, options: ScssExpressionOptions
 
 #[inline]
 fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
-    // `var(--#{$name})` starts with `-`, but the pair belongs to one
-    // custom-property identifier, not chained unary operators.
-    if is_at_scss_interpolated_dashed_identifier(p) {
-        return false;
+    match p.cur() {
+        T![+] | T![not] => true,
+        // `var(--#{$name})` starts with `-`, but the pair belongs to one
+        // custom-property identifier, not chained unary operators.
+        T![-] => !is_at_scss_interpolated_dashed_identifier(p),
+        _ => false,
     }
-
-    p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
 }
 
 /// Returns the precedence level for the current SCSS binary operator token.

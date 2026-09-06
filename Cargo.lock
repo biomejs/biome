@@ -114,6 +114,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "base64"
+version = "0.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
+
+[[package]]
 name = "biome_analyze"
 version = "0.5.7"
 dependencies = [
@@ -128,6 +134,7 @@ dependencies = [
  "biome_suppression",
  "biome_text_edit",
  "bitvec",
+ "biome_unicode_table",
  "camino",
  "either",
  "enumflags2",
@@ -137,6 +144,7 @@ dependencies = [
  "rustc-hash 2.1.3",
  "schemars",
  "serde",
+ "smallvec",
 ]
 
 [[package]]
@@ -322,7 +330,7 @@ dependencies = [
  "termcolor",
  "trybuild",
  "unicode-segmentation",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -533,7 +541,7 @@ dependencies = [
  "termcolor",
  "terminal_size",
  "trybuild",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -604,7 +612,7 @@ dependencies = [
  "rustc-hash 2.1.3",
  "schemars",
  "serde",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -977,6 +985,7 @@ dependencies = [
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
+ "smallvec",
  "tests_macros",
  "tikv-jemallocator",
  "tracing",
@@ -1105,7 +1114,7 @@ dependencies = [
  "smallvec",
  "tests_macros",
  "tikv-jemallocator",
- "unicode-width 0.1.12",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -1490,11 +1499,14 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "camino",
+ "codspeed-criterion-compat",
  "filetime",
  "insta",
+ "mimalloc",
  "schemars",
  "serde",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -1523,12 +1535,16 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "similar-asserts",
  "smallvec",
  "tests_macros",
+ "tikv-jemallocator",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -2168,14 +2184,18 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "biome_test_utils",
  "biome_yaml_parser",
  "biome_yaml_syntax",
  "camino",
+ "codspeed-criterion-compat",
  "countme",
+ "mimalloc",
  "schemars",
  "serde",
  "similar-asserts",
  "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -3520,9 +3540,9 @@ checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
 
 [[package]]
 name = "globset"
-version = "0.4.19"
+version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e47d37d2ae4464254884b60ab7071be2b876a9c35b696bd018ddcc76847309cd"
+checksum = "07c34a9410465b45bd9787443bc7370f37735bad04b0f0cd57ff1a3186c98988"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -3755,7 +3775,7 @@ version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96547c2556ec9d12fb1578c4eaf448b04993e7fb79cbaad930a656880a6bdfa0"
 dependencies = [
- "base64",
+ "base64 0.22.1",
  "bytes",
  "futures-channel",
  "futures-util",
@@ -5419,9 +5439,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.16"
+version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fcfdb36bda0c880c5931cdc7a2bcdc8ba4556847b9d912bca70bc94708711ad"
+checksum = "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -5456,7 +5476,7 @@ version = "0.12.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eddd3ca559203180a307f12d114c268abf583f59b03cb906fd0b3ff8646c1147"
 dependencies = [
- "base64",
+ "base64 0.22.1",
  "bytes",
  "futures-channel",
  "futures-core",
@@ -6377,9 +6397,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.51.1"
+version = "1.53.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f66bf9585cda4b724d3e78ab34b73fb2bbaba9011b9bfdf69dc836382ea13b8c"
+checksum = "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
 dependencies = [
  "bytes",
  "libc",
@@ -6742,11 +6762,11 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "ureq"
-version = "3.3.0"
+version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dea7109cdcd5864d4eeb1b58a1648dc9bf520360d7af16ec26d0a9354bafcfc0"
+checksum = "972d7902c8735f2695410b8aed7df6ed12a47394aa1c8d7af49f0497b731a94d"
 dependencies = [
- "base64",
+ "base64 0.23.1",
  "cookie_store",
  "flate2",
  "log",
@@ -6762,11 +6782,11 @@ dependencies = [
 
 [[package]]
 name = "ureq-proto"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e994ba84b0bd1b1b0cf92878b7ef898a5c1760108fe7b6010327e274917a808c"
+checksum = "da5f78b09e6941e1a0f2e30e695e4b120377b54d5e0aec11b594bb57b3971613"
 dependencies = [
- "base64",
+ "base64 0.23.1",
  "http",
  "httparse",
  "log",
