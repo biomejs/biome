@@ -61,7 +61,9 @@ fn load_fixtures() -> Vec<(String, String, String)> {
         }
     }
 
-    visit(&fixtures_root, &fixtures_root, &mut cases);
+    for group in ["real", "synthetic"] {
+        visit(&fixtures_root.join(group), &fixtures_root, &mut cases);
+    }
     cases
 }
 
