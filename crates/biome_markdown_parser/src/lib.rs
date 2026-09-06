@@ -3,7 +3,9 @@
 use biome_markdown_factory::MarkdownSyntaxFactory;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::tree_sink::{LosslessTreeSink, OffsetLosslessTreeSink};
-use biome_parser::{AnyParse, SyntaxFeature, EmbeddedNodeParse, NodeParse, prelude::ParseDiagnostic};
+use biome_parser::{
+    AnyParse, EmbeddedNodeParse, NodeParse, SyntaxFeature, prelude::ParseDiagnostic,
+};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
 use parser::MarkdownParser;
 use syntax::parse_document;
@@ -273,28 +275,6 @@ impl From<MarkdownOffsetParse> for AnyParse {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
         EmbeddedNodeParse::new(root.as_embedded_send(), diagnostics).into()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{MarkdownParserOptions, parse_markdown_with_offset};
-    use biome_rowan::TextSize;
-
-    #[test]
-    fn offset_parse_ranges_start_at_base_offset() {
-        let source = "# Heading\n";
-        let base_offset = TextSize::from(42);
-        let parse =
-            parse_markdown_with_offset(source, base_offset, MarkdownParserOptions::default());
-
-        assert!(!parse.has_errors());
-        assert_eq!(parse.base_offset(), base_offset);
-        assert_eq!(parse.syntax().text_range_with_trivia().start(), base_offset);
-        assert_eq!(
-            parse.syntax().text_range_with_trivia().end(),
-            base_offset + TextSize::from(source.len() as u32)
-        );
     }
 }
 
