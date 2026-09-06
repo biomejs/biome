@@ -1358,6 +1358,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_unsafe_finally::NoUnsafeFinallyOptions>(),
     ));
     result.push((
+        "nursery",
+        "noUnsafeIframeSandbox",
+        TypeId::of::<biome_rule_options::no_unsafe_iframe_sandbox::NoUnsafeIframeSandboxOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noUnsafeNegation",
         TypeId::of::<biome_rule_options::no_unsafe_negation::NoUnsafeNegationOptions>(),
