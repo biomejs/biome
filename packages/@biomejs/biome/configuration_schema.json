@@ -4616,6 +4616,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoJsonUnsafeValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsonUnsafeValuesOptions" }
+			]
+		},
+		"NoJsonUnsafeValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoJsxLeakedDollarConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6941,6 +6951,13 @@
 					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-js-restricted-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsRestrictedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsonUnsafeValues": {
+					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9617,6 +9634,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoJsRestrictedPropertiesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoJsonUnsafeValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsonUnsafeValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
