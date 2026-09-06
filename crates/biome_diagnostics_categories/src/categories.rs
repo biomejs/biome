@@ -249,6 +249,7 @@ define_categories! {
     "lint/nursery/noSvelteUnnecessaryStateWrap": "https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
     "lint/nursery/noTailwindArbitraryValue": "https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
     "lint/nursery/noThisOutsideOfClass": "https://biomejs.dev/linter/rules/no-this-outside-of-class",
+    "lint/nursery/noTopLevelBrowserGlobals": "https://biomejs.dev/linter/rules/no-top-level-browser-globals",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUndeclaredCustomProperties": "https://biomejs.dev/linter/rules/no-undeclared-custom-properties",

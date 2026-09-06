@@ -1,0 +1,19 @@
+<!-- should not generate diagnostics -->
+<script setup>
+const version = typeof window;
+const width = typeof window !== "undefined" ? window.innerWidth : 0;
+if (typeof (document) === "object") { localStorage.getItem("theme"); }
+if ("undefined" === typeof window) {} else { document.title; }
+typeof window !== "undefined" && document.title;
+typeof window === "undefined" || document.title;
+if (typeof window !== "undefined" && ready) { document.title; }
+if (!(typeof window === "undefined")) { document.title; }
+if (typeof localStorage !== "undefined") { localStorage.getItem("theme"); }
+function read(value = window.innerWidth) { return document.title; }
+const callback = () => window.innerWidth;
+const methods = { read() { return document.title; }, get width() { return window.innerWidth; } };
+class Component { read() { return document.title; } }
+{ const window = { innerWidth: 1 }; console.log(window.innerWidth); }
+{ const document = {}; console.log(document); }
+console.log(fetch, URL, setTimeout, Math);
+</script>

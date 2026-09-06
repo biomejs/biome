@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-class-fields.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+class Client {
+    [window.name] = 1;
+    static width = window.innerWidth;
+    static { document.title; }
+}
+class ClientElement extends HTMLElement {}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-class-fields.vue:4:6 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    2 │ <script setup>
+    3 │ class Client {
+  > 4 │     [window.name] = 1;
+      │      ^^^^^^
+    5 │     static width = window.innerWidth;
+    6 │     static { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-class-fields.vue:5:20 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    3 │ class Client {
+    4 │     [window.name] = 1;
+  > 5 │     static width = window.innerWidth;
+      │                    ^^^^^^
+    6 │     static { document.title; }
+    7 │ }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-class-fields.vue:6:14 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    4 │     [window.name] = 1;
+    5 │     static width = window.innerWidth;
+  > 6 │     static { document.title; }
+      │              ^^^^^^^^
+    7 │ }
+    8 │ class ClientElement extends HTMLElement {}
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-class-fields.vue:8:29 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global HTMLElement.
+  
+     6 │     static { document.title; }
+     7 │ }
+   > 8 │ class ClientElement extends HTMLElement {}
+       │                             ^^^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

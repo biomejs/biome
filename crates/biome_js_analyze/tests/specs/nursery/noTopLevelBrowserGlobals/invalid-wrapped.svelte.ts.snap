@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-wrapped.svelte.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+((globalThis)).document.title;
+(globalThis as typeof globalThis).document.title;
+(0, globalThis).document.title;
+typeof (0, window);
+typeof (window, 0);
+typeof (window as unknown).document;
+
+```
+
+# Diagnostics
+```
+invalid-wrapped.svelte.ts:2:16 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ ((globalThis)).document.title;
+      │                ^^^^^^^^
+    3 │ (globalThis as typeof globalThis).document.title;
+    4 │ (0, globalThis).document.title;
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-wrapped.svelte.ts:3:35 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    1 │ /* should generate diagnostics */
+    2 │ ((globalThis)).document.title;
+  > 3 │ (globalThis as typeof globalThis).document.title;
+      │                                   ^^^^^^^^
+    4 │ (0, globalThis).document.title;
+    5 │ typeof (0, window);
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-wrapped.svelte.ts:4:17 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    2 │ ((globalThis)).document.title;
+    3 │ (globalThis as typeof globalThis).document.title;
+  > 4 │ (0, globalThis).document.title;
+      │                 ^^^^^^^^
+    5 │ typeof (0, window);
+    6 │ typeof (window, 0);
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-wrapped.svelte.ts:5:12 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    3 │ (globalThis as typeof globalThis).document.title;
+    4 │ (0, globalThis).document.title;
+  > 5 │ typeof (0, window);
+      │            ^^^^^^
+    6 │ typeof (window, 0);
+    7 │ typeof (window as unknown).document;
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-wrapped.svelte.ts:6:9 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    4 │ (0, globalThis).document.title;
+    5 │ typeof (0, window);
+  > 6 │ typeof (window, 0);
+      │         ^^^^^^
+    7 │ typeof (window as unknown).document;
+    8 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-wrapped.svelte.ts:7:9 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    5 │ typeof (0, window);
+    6 │ typeof (window, 0);
+  > 7 │ typeof (window as unknown).document;
+      │         ^^^^^^
+    8 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
