@@ -29,6 +29,11 @@ use std::{fs::read_to_string, slice};
 
 // Spec cases are discovered from the filesystem during macro expansion.
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro,gs}", crate::run_test, "module"}
+// Narrowing changes what the type-aware rules see, so its fixtures only hold
+// in a build that compiles it in. The default run stays on the configuration
+// the CLI ships.
+#[cfg(feature = "type_narrowing")]
+tests_macros::gen_tests! {"tests/type_narrowing/*/**/*.{js,jsx,tsx,ts}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
