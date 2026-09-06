@@ -37,6 +37,59 @@ export function classFieldInitializer(x: number | (() => void)) {
 	}
 	return null;
 }
+
+// A getter, a setter and a static initialization block are function-like
+// scopes too, even though `async` is never valid in them.
+export function accessorsAndStaticBlock(x: number | (() => void)) {
+	if (typeof x === "function") {
+		x;
+		return class {
+			static {
+				x;
+			}
+			get value() {
+				return x;
+			}
+			set value(_v: unknown) {
+				x;
+			}
+		};
+	}
+	return null;
+}
+
+export function methodsAndConstructor(x: number | (() => void)) {
+	if (typeof x === "function") {
+		x;
+		return class {
+			constructor() {
+				x;
+			}
+			method() {
+				x;
+			}
+		};
+	}
+	return null;
+}
+
+export function objectAccessors(x: number | (() => void)) {
+	if (typeof x === "function") {
+		x;
+		return {
+			get value() {
+				return x;
+			},
+			set value(_v: unknown) {
+				x;
+			},
+			method() {
+				x;
+			},
+		};
+	}
+	return null;
+}
 ```
 
 ## Inferred types
@@ -255,6 +308,348 @@ Expression "class { field = x; static staticField = x; }" => class {
   implements: []
   type_args: []
 }
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "null" => null
+
+Binding accessorsAndStaticBlock "accessorsAndStaticBlock" => sync Function "accessorsAndStaticBlock" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: class {
+    extends: none
+    implements: []
+    type_args: []
+  }
+  | number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+  | null
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "\"function\"" => string: function
+
+Expression "x" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "class { static { x; } get value() { return x; } set value(_v: unknown) { x; } }" => class {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Binding _v "_v" => unknown
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "null" => null
+
+Binding methodsAndConstructor "methodsAndConstructor" => sync Function "methodsAndConstructor" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: class {
+    extends: none
+    implements: []
+    type_args: []
+  }
+  | null
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "\"function\"" => string: function
+
+Expression "x" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "class { constructor() { x; } method() { x; } }" => class {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "null" => null
+
+Binding objectAccessors "objectAccessors" => sync Function "objectAccessors" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: Object {
+    unknown members
+    prototype: No prototype
+    members: [
+      get "value":
+        sync Function "value" {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: number
+          | sync Function {
+            accepts: {
+              params: []
+              type_args: []
+            }
+            returns: void
+          }
+        }
+      ,
+      "method":
+        sync Function "method" {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: void
+        }
+    ]
+  }
+  | number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+  | null
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Expression "\"function\"" => string: function
+
+Expression "x" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Expression "{ get value() { return x; }, set value(_v: unknown) { x; }, method() { x; }, }" => Object {
+  unknown members
+  prototype: No prototype
+  members: [
+    get "value":
+      sync Function "value" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: number
+        | sync Function {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: void
+        }
+      }
+    ,
+    "method":
+      sync Function "method" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+  ]
+}
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: void
+  }
+
+Binding _v "_v" => unknown
 
 Expression "x" =>
   number
