@@ -1863,7 +1863,7 @@ fn should_apply_correct_file_source() {
         r#"{
     	"linter": {
     		"rules": {
-    			"recommended": true,
+    			"preset": "recommended",
     			"correctness": {
     				"noUndeclaredVariables": "error"
     			}
@@ -1965,7 +1965,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessSwitchCase": "off"
       }
@@ -2139,7 +2139,7 @@ fn should_pass_if_there_are_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -2188,7 +2188,7 @@ fn does_error_with_only_warnings() {
 {
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }
@@ -4388,7 +4388,7 @@ fn should_not_choke_on_recursive_function_call() {
         r#"{
     "linter": {
         "rules": {
-            "recommended": true,
+            "preset": "recommended",
         },
         "domains": {
             "next": "all",
@@ -4582,6 +4582,94 @@ fn only_per_plugin_selector_is_rejected() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "only_per_plugin_selector_is_rejected",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_invalid_plugin_manifest() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = "biome-manifest.json";
+    fs.insert(file_path.into(), b"{}");
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_invalid_plugin_manifest",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_plugin_manifest_rejects_empty_rules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = "biome-manifest.json";
+    fs.insert(
+        file_path.into(),
+        br#"{ "version": 1, "plugins": { "rules": [], "presets": { "recommended": ["one"] } } }"#,
+    );
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_plugin_manifest_rejects_empty_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_package_plugin_with_distinct_includes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": [{ "path": "plugin/noAssign", "includes": ["**/src/**"] }],
+    "overrides": [{
+        "includes": ["tests/**"],
+        "plugins": [{ "path": "plugin/noAssign", "includes": ["**/tests/**"] }]
+    }]
+}"#,
+    );
+    fs.insert(
+        "node_modules/plugin/package.json".into(),
+        br#"{ "name": "plugin" }"#,
+    );
+    fs.insert(
+        "node_modules/plugin/biome-manifest.json".into(),
+        br#"{ "version": 1, "plugins": { "rules": [{ "noAssign": "rules/noAssign.grit" }], "presets": { "recommended": ["noAssign"] } } }"#,
+    );
+    fs.insert(
+        "node_modules/plugin/rules/noAssign.grit".into(),
+        br#"`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.assign")
+}"#,
+    );
+    fs.insert("src/a.ts".into(), b"Object.assign({});");
+    fs.insert("tests/a.ts".into(), b"Object.assign({});");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "src/a.ts", "tests/a.ts"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_package_plugin_with_distinct_includes",
         fs,
         console,
         result,

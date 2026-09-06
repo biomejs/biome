@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `Code.gs`
+
+```gs
+SpreadsheetApp.getActiveSpreadsheet();
+Logger.log("hello");
+notAGlobal();
+
+```
+
+# Emitted Messages
+
+```block
+Code.gs:1:1 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1 │ SpreadsheetApp.getActiveSpreadsheet();
+
+```
+
+```block
+Searched 1 file in <TIME>. Found 1 match.
+```

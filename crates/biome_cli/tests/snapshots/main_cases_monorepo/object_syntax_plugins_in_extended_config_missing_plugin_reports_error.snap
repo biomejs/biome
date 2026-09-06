@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "root": true }
+```
+
+## `packages/mobile/biome.json`
+
+```json
+{ "root": false, "extends": ["../tools/biome.shared.jsonc"] }
+```
+
+## `packages/mobile/src/file.js`
+
+```js
+Object.assign({}, a, b);
+
+```
+
+## `packages/tools/biome.shared.jsonc`
+
+```jsonc
+{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Error(s) during loading of plugins:
+    Failed to read plugin file <TEMP_DIR>/object_syntax_plugins_in_extended_config_missing_plugin_reports_error/packages/tools/biome-plugins/no-object-assign.grit
+  
+
+```

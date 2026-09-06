@@ -65,6 +65,10 @@ export interface Configuration {
 	 */
 	linter?: LinterConfiguration;
 	/**
+	 * Configuration specific to Markdown.
+	 */
+	markdown?: MarkdownConfiguration;
+	/**
 	 * A list of granular patterns applied only to a subset of files.
 	 */
 	overrides?: Overrides;
@@ -81,6 +85,10 @@ project. By default, this is `true`.
 	 * The version control integration configuration.
 	 */
 	vcs?: VcsConfiguration;
+	/**
+	 * Configuration specific to YAML.
+	 */
+	yaml?: YamlConfiguration;
 }
 export type BiomePath = string;
 export type ProjectKey = number;
@@ -373,6 +381,23 @@ match these patterns.
 	 */
 	rules?: Rules;
 }
+/**
+ * Options applied to Markdown files
+ */
+export interface MarkdownConfiguration {
+	/**
+	 * Formatter options
+	 */
+	formatter?: MarkdownFormatterConfiguration;
+	/**
+	 * Linter options
+	 */
+	linter?: MarkdownLinterConfiguration;
+	/**
+	 * Parsing options
+	 */
+	parser?: MarkdownParserConfiguration;
+}
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
@@ -407,6 +432,15 @@ diagnostic.
 exclude file. 
 	 */
 	useIgnoreFile?: Bool;
+}
+/**
+ * Options applied to Yaml files
+ */
+export interface YamlConfiguration {
+	/**
+	 * Formatter options
+	 */
+	formatter?: YamlFormatterConfiguration;
 }
 export interface Actions {
 	/**
@@ -1029,6 +1063,73 @@ export interface Rules {
 	style?: SeverityOrStyle;
 	suspicious?: SeverityOrSuspicious;
 }
+/**
+ * Options that change how the Markdown formatter behaves
+ */
+export interface MarkdownFormatterConfiguration {
+	/**
+	 * Control the formatter for Markdown (and its super languages) files.
+	 */
+	enabled?: Bool;
+	/**
+	 * The indent style applied to Markdown files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to Markdown files. Defaults to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to Markdown files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	* Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+
+Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+line with two spaces or a backslash. 
+	 */
+	proseWrap?: ProseWrap;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
+}
+/**
+ * Options that change how the Markdown linter behaves
+ */
+export interface MarkdownLinterConfiguration {
+	/**
+	 * Control the linter for Markdown files.
+	 */
+	enabled?: Bool;
+}
+/**
+ * Options that change how the Markdown parser behaves
+ */
+export interface MarkdownParserConfiguration {
+	/**
+	 * Enables parsing frontmatter at the start of the file. Defaults to `false`.
+	 */
+	frontmatter?: Bool;
+	/**
+	 * Enables GitHub Flavored Markdown extensions. Defaults to `true`.
+	 */
+	gfm?: Bool;
+}
 export interface OverridePattern {
 	/**
 	 * Specific configuration for the Json language
@@ -1076,26 +1177,70 @@ match these patterns.
 	 */
 	linter?: OverrideLinterConfiguration;
 	/**
+	 * Specific configuration for the Markdown language
+	 */
+	markdown?: MarkdownConfiguration;
+	/**
 	 * Specific configuration for additional plugins
 	 */
 	plugins?: Plugins;
+	/**
+	 * Specific configuration for the YAML language
+	 */
+	yaml?: YamlConfiguration;
 }
 /**
 	* Configuration for a single plugin entry.
 
-Can be either a plain path string or an object with path and options:
+Can be either a path or package name string, or an object with options:
 
 ```json
 {
   "plugins": [
     "simple-plugin.grit",
-    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] }
+    "@scope/biome-plugin",
+    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] },
+    { "path": "./local-plugin.grit", "includes": ["src/**\/*.ts"], "resolutionKind": "config" }
   ]
 }
 ``` 
 	 */
 export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
+/**
+ * Options that change how the Yaml formatter behaves
+ */
+export interface YamlFormatterConfiguration {
+	/**
+	 * Control the formatter for Yaml (and its super languages) files.
+	 */
+	enabled?: Bool;
+	/**
+	 * The size of the indentation applied to Yaml files. Defaults to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to Yaml files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
+}
 /**
  * A preset configuration for enabling a set of rules.
  */
@@ -1221,6 +1366,13 @@ export type SeverityOrPerformance = GroupPlainConfiguration | Performance;
 export type SeverityOrSecurity = GroupPlainConfiguration | Security;
 export type SeverityOrStyle = GroupPlainConfiguration | Style;
 export type SeverityOrSuspicious = GroupPlainConfiguration | Suspicious;
+/**
+	* Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+
+Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+line with two spaces or a backslash. 
+	 */
+export type ProseWrap = "preserve" | "always" | "never";
 export interface OverrideAssistConfiguration {
 	/**
 	 * List of actions
@@ -1332,7 +1484,7 @@ export interface OverrideLinterConfiguration {
 	rules?: Rules;
 }
 /**
- * Plugin path with additional options.
+ * Plugin reference with additional options.
  */
 export interface PluginWithOptions {
 	/**
@@ -1341,9 +1493,19 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 	 */
 	includes?: NormalizedGlob[];
 	/**
-	 * The path to the plugin.
+	 * The path or installed package name.
 	 */
 	path: string;
+	/**
+	* Controls how the plugin is resolved.
+
+This only affects plugin resolution. It does not change how `includes`
+are interpreted.
+
+When omitted, relative paths and package names are resolved from the
+consuming project. 
+	 */
+	resolutionKind?: PluginResolvePath;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
@@ -2693,6 +2855,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
+	* Enforce that all heading levels are consistent and ordered.
+See https://biomejs.dev/linter/rules/use-consistent-heading-level 
+	 */
+	useConsistentHeadingLevel?: UseConsistentHeadingLevelConfiguration;
+	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
@@ -2843,6 +3010,11 @@ See https://biomejs.dev/linter/rules/use-scoped-styles
 	 */
 	useScopedStyles?: UseScopedStylesConfiguration;
 	/**
+	* Enforce that a Markdown document has a single top-level heading.
+See https://biomejs.dev/linter/rules/use-single-top-level-heading 
+	 */
+	useSingleTopLevelHeading?: UseSingleTopLevelHeadingConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -2877,6 +3049,11 @@ See https://biomejs.dev/linter/rules/use-test-hooks-on-top
 See https://biomejs.dev/linter/rules/use-this-in-class-methods 
 	 */
 	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
+	/**
+	* Require Markdown documents to start with a top-level heading.
+See https://biomejs.dev/linter/rules/use-top-level-heading 
+	 */
+	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
 	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
@@ -4161,6 +4338,7 @@ See https://biomejs.dev/linter/rules/use-strict-mode
 	useStrictMode?: UseStrictModeConfiguration;
 }
 export type Glob = string;
+export type PluginResolvePath = "project" | "config";
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithNoDuplicateClassesOptions {
 	level: RuleAssistPlainConfiguration;
@@ -4961,6 +5139,9 @@ export type UseAwaitThenableConfiguration =
 export type UseBaselineConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBaselineOptions;
+export type UseConsistentHeadingLevelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentHeadingLevelOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -5051,6 +5232,9 @@ export type UseRegexpTestConfiguration =
 export type UseScopedStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseScopedStylesOptions;
+export type UseSingleTopLevelHeadingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSingleTopLevelHeadingOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -5072,6 +5256,9 @@ export type UseTestHooksOnTopConfiguration =
 export type UseThisInClassMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseThisInClassMethodsOptions;
+export type UseTopLevelHeadingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTopLevelHeadingOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -5835,10 +6022,25 @@ Default: `natural`.
 	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
+	/**
+	* A list of attribute names that should be sorted before all other
+attributes, in the order they appear in this list. The remaining
+attributes are sorted after the listed ones.
+
+This is useful to keep attributes such as `key` first. 
+	 */
+	sortFirst?: string[];
 	sortOrder?: SortOrder;
 }
 export type UseSortedEnumMembersOptions = {};
-export type UseSortedInterfaceMembersOptions = {};
+export interface UseSortedInterfaceMembersOptions {
+	/**
+	* When enabled, members separated by a blank line are kept in their own
+section and sorted only within that section. This preserves logical
+groupings the author intentionally introduced with empty lines. 
+	 */
+	partitionByNewLine?: boolean;
+}
 export interface UseSortedKeysOptions {
 	/**
 	* When enabled, groups object keys by their value's nesting depth before sorting.
@@ -6958,6 +7160,10 @@ export interface RuleWithUseBaselineOptions {
 	level: RulePlainConfiguration;
 	options?: UseBaselineOptions;
 }
+export interface RuleWithUseConsistentHeadingLevelOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentHeadingLevelOptions;
+}
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7093,6 +7299,10 @@ export interface RuleWithUseScopedStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseScopedStylesOptions;
 }
+export interface RuleWithUseSingleTopLevelHeadingOptions {
+	level: RulePlainConfiguration;
+	options?: UseSingleTopLevelHeadingOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7123,6 +7333,10 @@ export interface RuleWithUseTestHooksOnTopOptions {
 export interface RuleWithUseThisInClassMethodsOptions {
 	level: RulePlainConfiguration;
 	options?: UseThisInClassMethodsOptions;
+}
+export interface RuleWithUseTopLevelHeadingOptions {
+	level: RulePlainConfiguration;
+	options?: UseTopLevelHeadingOptions;
 }
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
@@ -8789,6 +9003,7 @@ export interface UseBaselineOptions {
 	 */
 	available?: AvailabilityTarget;
 }
+export type UseConsistentHeadingLevelOptions = {};
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -8917,6 +9132,12 @@ export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export type UseRegexpTestOptions = {};
 export type UseScopedStylesOptions = {};
+export interface UseSingleTopLevelHeadingOptions {
+	/**
+	 * The heading level that is treated as the document's top-level heading.
+	 */
+	level?: number;
+}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -8957,6 +9178,7 @@ Defaults to `false`.
 	 */
 	ignoreOverrideMethods?: boolean;
 }
+export type UseTopLevelHeadingOptions = {};
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};
@@ -10530,6 +10752,7 @@ export type Category =
 	| "reporter/parse"
 	| "reporter/format"
 	| "reporter/violations"
+	| "reporter/profiler"
 	| "parse"
 	| "lint"
 	| "lint/a11y"
@@ -10747,7 +10970,9 @@ export type DocumentFileSource =
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource };
+	| { Grit: GritFileSource }
+	| { Markdown: MdFileSource }
+	| { Yaml: YamlFileSource };
 export type EditorFeatures = EditorFeature[];
 export interface JsFileSource {
 	/**
@@ -10755,6 +10980,12 @@ export interface JsFileSource {
 For example, if inside an Astro file, a top-level return statement is allowed. 
 	 */
 	embedding_kind: JsEmbeddingKind;
+	/**
+	* Marks a Google Apps Script file (detected via the `.gs` extension).
+Apps Script is plain JavaScript running in Google's runtime, so it
+exposes extra service globals (e.g. `SpreadsheetApp`). 
+	 */
+	is_google_apps_script: boolean;
 	language: Language;
 	module_kind: ModuleKind;
 	variant: LanguageVariant;
@@ -10784,6 +11015,10 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
+export interface MdFileSource {
+	variant: MarkdownVariant;
+}
+export type YamlFileSource = {};
 export type EditorFeature = "gotoDefinition";
 export type JsEmbeddingKind =
 	| "None"
@@ -10884,6 +11119,7 @@ export type HtmlVariant =
 	| "Svelte"
 	| "Angular";
 export type GritVariant = "Standard";
+export type MarkdownVariant = "Standard";
 /**
 	* Identifies the parser contract for JavaScript embedded in a Svelte file.
 

@@ -4,4 +4,4 @@ expression: content
 ---
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Failed to resolve the plugin manifest from /my-plugin/biome-manifest.jsonc
+  × Failed to resolve the Biome manifest from /my-plugin

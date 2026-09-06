@@ -1,9 +1,16 @@
+#[cfg(feature = "md_embeds")]
+mod parse_embedded_nodes;
+
+#[cfg(feature = "md_embeds")]
+use self::parse_embedded_nodes::parse_embedded_nodes;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
     LintResults, ParseResult, ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities,
 };
+#[cfg(not(feature = "md_embeds"))]
+use super::{ParseEmbedResult, ParseEmbeddedParams};
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
@@ -124,9 +131,6 @@ impl ServiceLanguage for MarkdownLanguage {
         override_indices: &[usize],
         _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        // TODO: apply markdown overrides once markdown override settings are introduced.
-        let _ = (overrides, override_indices);
-
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -148,13 +152,17 @@ impl ServiceLanguage for MarkdownLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
         let prose_wrap = language.prose_wrap.unwrap_or_default();
-        MdFormatOptions::new()
+        let mut options = MdFormatOptions::new()
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
             .with_trailing_newline(trailing_newline)
-            .with_prose_wrap(prose_wrap)
+            .with_prose_wrap(prose_wrap);
+
+        overrides.apply_override_markdown_format_options_by_indices(override_indices, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(
@@ -358,7 +366,7 @@ impl ExtensionHandler for MarkdownFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
-                parse_embedded_nodes: None,
+                parse_embedded_nodes: Some(parse_embedded_nodes),
             },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -380,7 +388,7 @@ impl ExtensionHandler for MarkdownFileHandler {
                 format: Some(format),
                 format_range: None,
                 format_on_type: None,
-                format_embedded: None,
+                format_embedded: Some(format_embedded),
             },
             search: SearchCapabilities { search: None },
             editors: EditorCapabilities {
@@ -389,6 +397,11 @@ impl ExtensionHandler for MarkdownFileHandler {
             },
         }
     }
+}
+
+#[cfg(not(feature = "md_embeds"))]
+fn parse_embedded_nodes(_params: ParseEmbeddedParams) -> ParseEmbedResult {
+    ParseEmbedResult::default()
 }
 
 fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
@@ -468,6 +481,23 @@ pub(crate) fn format(
             Err(WorkspaceError::FormatError(error.into()))
         }
     }
+}
+
+fn format_embedded(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: super::ParsedOrigin,
+    settings: &SettingsWithEditor,
+    _embedded_nodes: Vec<super::ParsedSnippetOrigin>,
+    workspace_db: WorkspaceDb,
+) -> Result<Printed, WorkspaceError> {
+    format(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        workspace_db,
+    )
 }
 
 fn lint(params: LintParams) -> LintResults {

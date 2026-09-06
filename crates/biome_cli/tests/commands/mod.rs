@@ -3,6 +3,7 @@ mod ci;
 mod explain;
 mod format;
 mod init;
+mod inspect;
 mod lint;
 mod migrate;
 mod migrate_eslint;

@@ -62,6 +62,7 @@ biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_json"] }
+biome_manifest           = { workspace = true }
 biome_markdown_analyze   = { workspace = true, optional = true }
 biome_markdown_formatter = { workspace = true, optional = true }
 biome_markdown_parser    = { workspace = true, optional = true }
@@ -184,6 +185,16 @@ lang_yaml                    = [
   "dep:biome_yaml_parser",
   "dep:biome_yaml_syntax"
 ]
+md_embeds                    = [
+  "lang_css",
+  "lang_graphql",
+  "lang_grit",
+  "lang_html",
+  "lang_js",
+  "lang_json",
+  "lang_md",
+  "lang_yaml"
+]
 # TODO does it need lang_js, lang_html and lang_css? To verify
 module_graph                 = ["dep:biome_module_graph"]
 plugins                      = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
@@ -202,6 +213,7 @@ schema                       = [
   "biome_js_syntax/schema",
   "biome_json_syntax/schema",
   "biome_languages/schema",
+  "biome_markdown_formatter/schema",
   "biome_markdown_syntax/schema",
   "biome_module_graph/schema",
   "biome_text_edit/schema",
@@ -215,6 +227,8 @@ schema                       = [
   "lang_html",
   "lang_js",
   "lang_json",
+  "lang_md",
+  "lang_yaml",
   "module_graph",
   "type_inference"
 ]
@@ -225,6 +239,9 @@ stable                       = [
   "lang_css",
   "lang_graphql",
   "lang_js",
+  "lang_md",
+  "lang_yaml",
+  "md_embeds",
   "module_graph",
   "plugins",
   "type_inference"

@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["wrapper/configs/recommended"] }
+```
+
+## `node_modules/source/index.js`
+
+```js
+export {};
+
+```
+
+## `node_modules/source/package.json`
+
+```json
+{ "name": "source", "main": "./index.js" }
+```
+
+## `node_modules/wrapper/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": ["source/configs/recommended"]
+}
+```
+
+## `node_modules/wrapper/package.json`
+
+```json
+{ "name": "wrapper" }
+```
+
+## `test.js`
+
+```js
+const value = 1;
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Package source must provide biome-manifest.json or biome-manifest.jsonc.
+  
+
+
+```

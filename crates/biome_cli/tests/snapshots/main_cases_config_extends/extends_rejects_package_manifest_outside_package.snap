@@ -1,0 +1,51 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["config/configs/recommended"] }
+```
+
+## `node_modules/config/package.json`
+
+```json
+{
+    "name": "config",
+    "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `outside/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}
+```
+
+## `outside/recommended.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+## `test.js`
+
+```js
+const value = 1;
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Biome manifest for config must stay within the package directory and must not contain symbolic links.
+  
+
+
+```

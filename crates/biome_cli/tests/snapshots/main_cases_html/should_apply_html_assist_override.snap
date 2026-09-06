@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": { "includes": ["test.html", "special/**"] },
+  "formatter": { "enabled": false },
+  "linter": { "enabled": false },
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "useSortedAttributes": "on" } }
+  },
+  "overrides": [
+    {
+      "includes": ["special/**"],
+      "html": { "assist": { "enabled": false } }
+    }
+  ]
+}
+```
+
+## `special/test.html`
+
+```html
+<input type="text" id="name" name="name" />
+
+```
+
+## `test.html`
+
+```html
+<input id="name" name="name" type="text" />
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

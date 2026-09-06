@@ -3289,7 +3289,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
                 "includes": ["**", "!**/build"],
                 "enabled": true,
                 "rules": {
-                    "recommended": true
+                    "preset": "recommended"
                 }
             }
         }"#,
@@ -4144,44 +4144,4 @@ fn harness_scss_lint() {
         matches!(result, CliDiagnostic::NoFilesWereProcessed(_)),
         "Found: {result:?}"
     )
-}
-
-#[test]
-fn harness_markdown() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file_path = Utf8Path::new("format.md");
-    fs.insert(file_path.into(), "## ff  \n\n\n\n\n bar".as_bytes());
-
-    let (_, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
-    );
-
-    assert!(
-        result.is_err(),
-        "This test will fail once markdown support is officially added"
-    );
-}
-
-#[test]
-fn harness_yaml() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file_path = Utf8Path::new("format.yml");
-    fs.insert(file_path.into(), "- foo\n - bar".as_bytes());
-
-    let (_, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
-    );
-
-    assert!(
-        result.is_err(),
-        "This test will fail once yaml support is officially added"
-    );
 }

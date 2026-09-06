@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@org/wrapper/configs/recommended"] }
+```
+
+## `node_modules/@org/source/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}
+```
+
+## `node_modules/@org/source/package.json`
+
+```json
+{
+    "name": "@org/source",
+    "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `node_modules/@org/source/recommended.json`
+
+```json
+{ "javascript": { "formatter": { "quoteStyle": "single" } } }
+```
+
+## `node_modules/@org/wrapper/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": ["@org/source/configs/recommended"]
+}
+```
+
+## `node_modules/@org/wrapper/package.json`
+
+```json
+{
+    "name": "@org/wrapper",
+    "exports": { "biome": "./biome-manifest.json" }
+}
+```
+
+## `test.js`
+
+```js
+console.log("string");
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - console.log("string");
+      1 │ + console.log('string');
+      2 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

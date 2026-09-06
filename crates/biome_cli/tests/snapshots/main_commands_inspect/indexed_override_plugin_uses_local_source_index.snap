@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["base.grit"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "plugins": ["override.grit"]
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "plugins.1",
+  "value": "override.grit",
+  "source": {
+    "configurationKind": "root",
+    "includes": [
+      "**/*.test.js"
+    ],
+    "matchedPath": "file.test.js",
+    "overrideIndex": 0,
+    "path": "biome.json",
+    "range": {
+      "end": 122,
+      "start": 107
+    },
+    "scope": "override"
+  }
+}
+```

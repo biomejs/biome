@@ -15,7 +15,7 @@ expression: content
         "noAutofocus": "off"
       },
       "complexity": {
-        "recommended": true
+        "preset": "recommended"
       },
       "suspicious": {
         "noCommentText": {
@@ -112,6 +112,10 @@ Linter:
     complexity/useRegexLiterals
     complexity/useSimpleNumberKeys
     suspicious/noCommentText
+
+Files:
+  Ignore Unknown:               unset
+  Includes:                     unset
 
 Server:
   Version:                      0.0.0

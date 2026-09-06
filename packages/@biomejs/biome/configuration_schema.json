@@ -55,6 +55,10 @@
 			"description": "The linter configuration.",
 			"anyOf": [{ "$ref": "#/$defs/LinterConfiguration" }, { "type": "null" }]
 		},
+		"markdown": {
+			"description": "Configuration specific to Markdown.",
+			"anyOf": [{ "$ref": "#/$defs/MarkdownConfiguration" }, { "type": "null" }]
+		},
 		"overrides": {
 			"description": "A list of granular patterns applied only to a subset of files.",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
@@ -70,6 +74,10 @@
 		"vcs": {
 			"description": "The version control integration configuration.",
 			"anyOf": [{ "$ref": "#/$defs/VcsConfiguration" }, { "type": "null" }]
+		},
+		"yaml": {
+			"description": "Configuration specific to YAML.",
+			"anyOf": [{ "$ref": "#/$defs/YamlConfiguration" }, { "type": "null" }]
 		}
 	},
 	"additionalProperties": false,
@@ -2938,6 +2946,95 @@
 				"rules": {
 					"description": "List of rules",
 					"anyOf": [{ "$ref": "#/$defs/Rules" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownConfiguration": {
+			"description": "Options applied to Markdown files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"description": "Linter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownLinterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownParserConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownFormatterConfiguration": {
+			"description": "Options that change how the Markdown formatter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Markdown (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to Markdown files.",
+					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Markdown files. Defaults to 2.",
+					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Markdown files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"proseWrap": {
+					"description": "Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.\n\nManual line breaks are always kept. In Markdown, a manual line break is created by ending a\nline with two spaces or a backslash.",
+					"anyOf": [{ "$ref": "#/$defs/ProseWrap" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownLinterConfiguration": {
+			"description": "Options that change how the Markdown linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for Markdown files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownParserConfiguration": {
+			"description": "Options that change how the Markdown parser behaves",
+			"type": "object",
+			"properties": {
+				"frontmatter": {
+					"description": "Enables parsing frontmatter at the start of the file. Defaults to `false`.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"gfm": {
+					"description": "Enables GitHub Flavored Markdown extensions. Defaults to `true`.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -7264,6 +7361,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentHeadingLevel": {
+					"description": "Enforce that all heading levels are consistent and ordered.\nSee https://biomejs.dev/linter/rules/use-consistent-heading-level",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentHeadingLevelConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTestIt": {
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
@@ -7478,6 +7582,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSingleTopLevelHeading": {
+					"description": "Enforce that a Markdown document has a single top-level heading.\nSee https://biomejs.dev/linter/rules/use-single-top-level-heading",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSingleTopLevelHeadingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
@@ -7524,6 +7635,13 @@
 					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTopLevelHeading": {
+					"description": "Require Markdown documents to start with a top-level heading.\nSee https://biomejs.dev/linter/rules/use-top-level-heading",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTopLevelHeadingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7788,9 +7906,20 @@
 						{ "type": "null" }
 					]
 				},
+				"markdown": {
+					"description": "Specific configuration for the Markdown language",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"plugins": {
 					"description": "Specific configuration for additional plugins",
 					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
+				},
+				"yaml": {
+					"description": "Specific configuration for the YAML language",
+					"anyOf": [{ "$ref": "#/$defs/YamlConfiguration" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -7976,17 +8105,34 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"description": "Configuration for a single plugin entry.\n\nCan be either a path or package name string, or an object with options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    \"@scope/biome-plugin\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolutionKind\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
-				{ "description": "A plain path to the plugin.", "type": "string" },
+				{
+					"description": "A path or installed package name.",
+					"type": "string"
+				},
 				{
 					"description": "A path with additional options.",
 					"$ref": "#/$defs/PluginWithOptions"
 				}
 			]
 		},
+		"PluginResolvePath": {
+			"oneOf": [
+				{
+					"description": "Resolve relative paths and package names from the consuming project.",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Resolve relative paths and package names from the configuration file\nthat declared the plugin.",
+					"type": "string",
+					"const": "config"
+				}
+			]
+		},
 		"PluginWithOptions": {
-			"description": "Plugin path with additional options.",
+			"description": "Plugin reference with additional options.",
 			"type": "object",
 			"properties": {
 				"includes": {
@@ -7994,7 +8140,14 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
-				"path": { "description": "The path to the plugin.", "type": "string" }
+				"path": {
+					"description": "The path or installed package name.",
+					"type": "string"
+				},
+				"resolutionKind": {
+					"description": "Controls how the plugin is resolved.\n\nThis only affects plugin resolution. It does not change how `includes`\nare interpreted.\n\nWhen omitted, relative paths and package names are resolved from the\nconsuming project.",
+					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
+				}
 			},
 			"additionalProperties": false,
 			"required": ["path"]
@@ -8020,6 +8173,26 @@
 					"description": "Disallows property assignments on function parameters.\nEnforces stricter immutability to prevent unintended side effects.",
 					"type": "string",
 					"const": "deny"
+				}
+			]
+		},
+		"ProseWrap": {
+			"description": "Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.\n\nManual line breaks are always kept. In Markdown, a manual line break is created by ending a\nline with two spaces or a backslash.",
+			"oneOf": [
+				{
+					"description": "Keep line breaks as written in the source file. This is the default.",
+					"type": "string",
+					"const": "preserve"
+				},
+				{
+					"description": "Wrap paragraphs to fit the configured `lineWidth`.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Remove line breaks from paragraphs so that each paragraph is on one line.",
+					"type": "string",
+					"const": "never"
 				}
 			]
 		},
@@ -11675,6 +11848,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentHeadingLevelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentHeadingLevelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"properties": {
@@ -12743,6 +12925,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSingleTopLevelHeadingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSingleTopLevelHeadingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSingleVarDeclaratorOptions": {
 			"type": "object",
 			"properties": {
@@ -12892,6 +13083,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseThrowOnlyErrorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTopLevelHeadingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTopLevelHeadingOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15536,6 +15736,16 @@
 			"type": "string",
 			"enum": ["block", "inline"]
 		},
+		"UseConsistentHeadingLevelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentHeadingLevelOptions" }
+			]
+		},
+		"UseConsistentHeadingLevelOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16932,6 +17142,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSingleTopLevelHeadingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSingleTopLevelHeadingOptions" }
+			]
+		},
+		"UseSingleTopLevelHeadingOptions": {
+			"type": "object",
+			"properties": {
+				"level": {
+					"description": "The heading level that is treated as the document's top-level heading.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseSingleVarDeclaratorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16961,6 +17190,11 @@
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
+				"sortFirst": {
+					"description": "A list of attribute names that should be sorted before all other\nattributes, in the order they appear in this list. The remaining\nattributes are sorted after the listed ones.\n\nThis is useful to keep attributes such as `key` first.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
@@ -17007,6 +17241,12 @@
 		},
 		"UseSortedInterfaceMembersOptions": {
 			"type": "object",
+			"properties": {
+				"partitionByNewLine": {
+					"description": "When enabled, members separated by a blank line are kept in their own\nsection and sorted only within that section. This preserves logical\ngroupings the author intentionally introduced with empty lines.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedKeysConfiguration": {
@@ -17208,6 +17448,16 @@
 			]
 		},
 		"UseThrowOnlyErrorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTopLevelHeadingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTopLevelHeadingOptions" }
+			]
+		},
+		"UseTopLevelHeadingOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -17736,6 +17986,47 @@
 					"const": "ignore"
 				}
 			]
+		},
+		"YamlConfiguration": {
+			"description": "Options applied to Yaml files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/YamlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"YamlFormatterConfiguration": {
+			"description": "Options that change how the Yaml formatter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Yaml (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Yaml files. Defaults to 2.",
+					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Yaml files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
 		}
 	}
 }
