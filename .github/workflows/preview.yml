@@ -201,6 +201,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      pull-requests: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
@@ -244,8 +245,31 @@ jobs:
             const output = JSON.parse(fs.readFileSync('output.json', 'utf8'));
             const biomePackage = output.packages
               .find((p) => p.name === "@biomejs/biome");
+            const isBranch = context.ref.startsWith("refs/heads/");
+            const refName = context.ref.replace(/^refs\/(?:heads|tags)\//, "");
+            let pullRequest;
+            if (isBranch) {
+              try {
+                const { data: pullRequests } = await github.rest.repos
+                  .listPullRequestsAssociatedWithCommit({
+                    ...context.repo,
+                    commit_sha: context.sha,
+                  });
+                pullRequest = pullRequests.find((pullRequest) =>
+                  pullRequest.state === "open" &&
+                  pullRequest.head.repo?.full_name === `${context.repo.owner}/${context.repo.repo}` &&
+                  pullRequest.head.ref === refName
+                );
+              } catch (error) {
+                core.warning(`Unable to look up pull requests: ${error}`);
+              }
+            }
+            const refType = isBranch ? "Branch" : "Tag";
+            const source = pullRequest
+              ? `${refType}: \`${refName}\` ([#${pullRequest.number}](${pullRequest.html_url}))`
+              : `${refType}: \`${refName}\``;
 
-            return "New preview release available for `@biomejs/biome`. Install it using the following command:\n ```bash\n npm i " + biomePackage.url + "\n```";
+            return "New preview release available for `@biomejs/biome`.\n" + source + "\nInstall it using the following command:\n ```bash\n npm i " + biomePackage.url + "\n```";
 
           result-encoding: string
 
