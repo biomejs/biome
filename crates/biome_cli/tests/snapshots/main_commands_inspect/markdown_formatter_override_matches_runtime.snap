@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "markdown": { "formatter": { "lineWidth": 80 } },
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "markdown": { "formatter": { "lineWidth": 100 } }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "markdown.formatter.lineWidth",
+  "value": 100,
+  "source": {
+    "configurationKind": "root",
+    "includes": [
+      "**/*.md"
+    ],
+    "matchedPath": "file.md",
+    "overrideIndex": 0,
+    "path": "biome.json",
+    "range": {
+      "end": 159,
+      "start": 156
+    },
+    "scope": "override"
+  }
+}
+```

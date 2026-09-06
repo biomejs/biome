@@ -15,7 +15,7 @@ pub struct MarkdownConfiguration {
     /// Parsing options
     #[cfg_attr(
         feature = "cli",
-        bpaf(external(markdown_parser_configuration), optional, hide)
+        bpaf(external(markdown_parser_configuration), optional)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parser: Option<MarkdownParserConfiguration>,
@@ -23,7 +23,7 @@ pub struct MarkdownConfiguration {
     /// Formatter options
     #[cfg_attr(
         feature = "cli",
-        bpaf(external(markdown_formatter_configuration), optional, hide)
+        bpaf(external(markdown_formatter_configuration), optional)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<MarkdownFormatterConfiguration>,
@@ -31,7 +31,7 @@ pub struct MarkdownConfiguration {
     /// Linter options
     #[cfg_attr(
         feature = "cli",
-        bpaf(external(markdown_linter_configuration), optional, hide)
+        bpaf(external(markdown_linter_configuration), optional)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<MarkdownLinterConfiguration>,

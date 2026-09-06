@@ -85,6 +85,10 @@ project. By default, this is `true`.
 	 * The version control integration configuration.
 	 */
 	vcs?: VcsConfiguration;
+	/**
+	 * Configuration specific to YAML.
+	 */
+	yaml?: YamlConfiguration;
 }
 export type BiomePath = string;
 export type ProjectKey = number;
@@ -428,6 +432,15 @@ diagnostic.
 exclude file. 
 	 */
 	useIgnoreFile?: Bool;
+}
+/**
+ * Options applied to Yaml files
+ */
+export interface YamlConfiguration {
+	/**
+	 * Formatter options
+	 */
+	formatter?: YamlFormatterConfiguration;
 }
 export interface Actions {
 	/**
@@ -1171,6 +1184,10 @@ match these patterns.
 	 * Specific configuration for additional plugins
 	 */
 	plugins?: Plugins;
+	/**
+	 * Specific configuration for the YAML language
+	 */
+	yaml?: YamlConfiguration;
 }
 /**
 	* Configuration for a single plugin entry.
@@ -1190,6 +1207,40 @@ Can be either a path or package name string, or an object with options:
 	 */
 export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
+/**
+ * Options that change how the Yaml formatter behaves
+ */
+export interface YamlFormatterConfiguration {
+	/**
+	 * Control the formatter for Yaml (and its super languages) files.
+	 */
+	enabled?: Bool;
+	/**
+	 * The size of the indentation applied to Yaml files. Defaults to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to Yaml files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	* Whether to add a trailing newline at the end of the file.
+
+Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
+- https://thoughtbot.com/blog/no-newline-at-end-of-file
+- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+
+Disable the option at your own risk.
+
+Defaults to true. 
+	 */
+	trailingNewline?: TrailingNewline;
+}
 /**
  * A preset configuration for enabling a set of rules.
  */
@@ -10920,7 +10971,8 @@ export type DocumentFileSource =
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource }
-	| { Markdown: MdFileSource };
+	| { Markdown: MdFileSource }
+	| { Yaml: YamlFileSource };
 export type EditorFeatures = EditorFeature[];
 export interface JsFileSource {
 	/**
@@ -10966,6 +11018,7 @@ export interface GritFileSource {
 export interface MdFileSource {
 	variant: MarkdownVariant;
 }
+export type YamlFileSource = {};
 export type EditorFeature = "gotoDefinition";
 export type JsEmbeddingKind =
 	| "None"

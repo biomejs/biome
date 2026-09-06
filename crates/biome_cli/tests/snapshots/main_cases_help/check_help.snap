@@ -191,6 +191,52 @@ The configuration contained in `biome.json`.
                               of the file. If unset, inherits the global trailing newline setting.
         --css-linter-enabled=<true|false>  Controls the linter for CSS files.
         --css-assist-enabled=<true|false>  Controls assist actions for CSS files.
+        --md-parse-frontmatter=<true|false>  Enables parsing frontmatter at the start of the file.
+                              Defaults to `false`.
+        --md-formatter-enabled=<true|false>  Control the formatter for Markdown (and its super
+                              languages) files.
+        --md-formatter-indent-style=<tab|space>  The indent style applied to Markdown files.
+        --md-formatter-indent-width=NUMBER  The size of the indentation applied to Markdown files.
+                              Defaults to 2.
+        --md-formatter-line-width=NUMBER  What's the max width of a line applied to Markdown files.
+                              Defaults to 80.
+        --md-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+                              -
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+                              Disable the option at your own risk.
+                              Defaults to true.
+        --md-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to Markdown
+                              (and its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
+        --md-formatter-prose-wrap=<preserve|always|never>  Controls whether Biome keeps, adds, or
+                              removes line breaks in Markdown paragraphs.
+                              Manual line breaks are always kept. In Markdown, a manual line break
+                              is created by ending a line with two spaces or a backslash.
+        --md-linter-enabled=<true|false>  Control the linter for Markdown files.
+        --yaml-formatter-enabled=<true|false>  Control the formatter for Yaml (and its super
+                              languages) files.
+        --yaml-formatter-indent-width=NUMBER  The size of the indentation applied to Yaml files.
+                              Defaults to 2.
+        --yaml-formatter-line-width=NUMBER  What's the max width of a line applied to Yaml files.
+                              Defaults to 80.
+        --yaml-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
+                              of the file.
+                              Setting this option to `false` is **highly discouraged** because it
+                              could cause many problems with other tools: -
+                              https://thoughtbot.com/blog/no-newline-at-end-of-file -
+                              https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
+                              -
+                              https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
+                              Disable the option at your own risk.
+                              Defaults to true.
+        --yaml-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to Yaml (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
         --graphql-formatter-enabled=<true|false>  Controls the formatter for GraphQL files.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files. If
                               unset, inherits the global indentation style.

@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "yaml": {
+    "formatter": {
+      "indentWidth": 2
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["special/**"],
+      "yaml": {
+        "formatter": {
+          "indentWidth": 4
+        }
+      }
+    }
+  ]
+}
+```
+
+## `file.yaml`
+
+```yaml
+root:
+  - item
+
+```
+
+## `special/file.yml`
+
+```yml
+root:
+    - item
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

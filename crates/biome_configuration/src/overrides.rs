@@ -73,6 +73,11 @@ pub struct OverridePattern {
     #[cfg_attr(feature = "lang_md", serde(skip_serializing_if = "Option::is_none"))]
     pub markdown: Option<crate::MarkdownConfiguration>,
 
+    /// Specific configuration for the YAML language
+    #[cfg(feature = "lang_yaml")]
+    #[cfg_attr(feature = "lang_yaml", serde(skip_serializing_if = "Option::is_none"))]
+    pub yaml: Option<crate::yaml::YamlConfiguration>,
+
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<OverrideFormatterConfiguration>,
@@ -122,6 +127,8 @@ impl OverridePattern {
             mut html,
             #[cfg(feature = "lang_md")]
             mut markdown,
+            #[cfg(feature = "lang_yaml")]
+            mut yaml,
             mut formatter,
             mut linter,
             mut assist,
@@ -294,6 +301,21 @@ impl OverridePattern {
                 .enabled
                 .or(global.enabled.map(|enabled| enabled.value().into()));
             formatter.indent_style = formatter.indent_style.or(global.indent_style);
+            formatter.indent_width = formatter.indent_width.or(global.indent_width);
+            formatter.line_ending = formatter.line_ending.or(global.line_ending);
+            formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
+        }
+
+        #[cfg(feature = "lang_yaml")]
+        if let Some(global) = formatter.as_ref() {
+            let formatter = yaml
+                .get_or_insert_with(Default::default)
+                .formatter
+                .get_or_insert_with(Default::default);
+            formatter.enabled = formatter
+                .enabled
+                .or(global.enabled.map(|enabled| enabled.value().into()));
             formatter.indent_width = formatter.indent_width.or(global.indent_width);
             formatter.line_ending = formatter.line_ending.or(global.line_ending);
             formatter.line_width = formatter.line_width.or(global.line_width);
@@ -557,6 +579,8 @@ impl OverridePattern {
             html,
             #[cfg(feature = "lang_md")]
             markdown,
+            #[cfg(feature = "lang_yaml")]
+            yaml,
             #[cfg(feature = "plugins")]
             plugins,
             assist,
