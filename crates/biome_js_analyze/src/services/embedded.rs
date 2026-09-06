@@ -2,13 +2,14 @@ use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDia
 use biome_embeds::EmbeddedData;
 use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
+    get_bindings_by_name,
 };
 use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
 use biome_languages::LanguageDb;
-use biome_rowan::TokenText;
+use biome_rowan::{TextSize, TokenText};
 use camino::Utf8PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -16,6 +17,8 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct EmbeddedService {
     source: EmbeddedSource,
+    /// Where the analyzed snippet starts in its host document, if any.
+    embedded_offset: Option<TextSize>,
 }
 
 #[derive(Clone)]
@@ -28,15 +31,21 @@ enum EmbeddedSource {
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf) -> Self {
+    pub(crate) fn new(
+        db: Rc<dyn LanguageDb>,
+        path: Utf8PathBuf,
+        embedded_offset: Option<TextSize>,
+    ) -> Self {
         Self {
             source: EmbeddedSource::Workspace { db, path },
+            embedded_offset,
         }
     }
 
-    pub(crate) fn from_data(data: Arc<EmbeddedData>) -> Self {
+    pub(crate) fn from_data(data: Arc<EmbeddedData>, embedded_offset: Option<TextSize>) -> Self {
         Self {
             source: EmbeddedSource::Interned(data),
+            embedded_offset,
         }
     }
 
@@ -48,6 +57,34 @@ impl EmbeddedService {
             )
             .is_some(),
             EmbeddedSource::Interned(data) => data.contains_binding(binding.text()),
+        }
+    }
+
+    /// Returns whether a binding named `binding` is in scope for a reference at
+    /// `offset`, which is relative to the start of the analyzed snippet.
+    ///
+    /// Scoped bindings (such as Vue slot props) are only visible inside the
+    /// element that introduces them, so they need the reference position in the
+    /// host document to be resolved.
+    pub(crate) fn contains_binding_visible_at(&self, binding: TokenText, offset: TextSize) -> bool {
+        match &self.source {
+            EmbeddedSource::Workspace { db, path } => {
+                let bindings = get_bindings_by_name(
+                    db.as_ref(),
+                    InternedBindingTokenText::new(db.as_ref(), path.clone(), binding),
+                );
+                let Some(embedded_offset) = self.embedded_offset else {
+                    return !bindings.is_empty();
+                };
+                let offset = embedded_offset + offset;
+                bindings.iter().any(|binding| binding.is_visible_at(offset))
+            }
+            EmbeddedSource::Interned(data) => match self.embedded_offset {
+                Some(embedded_offset) => {
+                    data.contains_binding_visible_at(binding.text(), embedded_offset + offset)
+                }
+                None => data.contains_binding(binding.text()),
+            },
         }
     }
 

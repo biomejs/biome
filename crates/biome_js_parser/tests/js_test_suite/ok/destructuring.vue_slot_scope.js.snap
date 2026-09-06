@@ -1,0 +1,106 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ item = {}, nested: { value }, ...rest }
+
+```
+
+
+## AST
+
+```
+JsVueSlotScopeRoot {
+    pattern: JsObjectBindingPattern {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        properties: JsObjectBindingPatternPropertyList [
+            JsObjectBindingPatternShorthandProperty {
+                identifier: JsIdentifierBinding {
+                    name_token: IDENT@2..7 "item" [] [Whitespace(" ")],
+                },
+                init: JsInitializerClause {
+                    eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+                    expression: JsObjectExpression {
+                        l_curly_token: L_CURLY@9..10 "{" [] [],
+                        members: JsObjectMemberList [],
+                        r_curly_token: R_CURLY@10..11 "}" [] [],
+                    },
+                },
+            },
+            COMMA@11..13 "," [] [Whitespace(" ")],
+            JsObjectBindingPatternProperty {
+                member: JsLiteralMemberName {
+                    value: IDENT@13..19 "nested" [] [],
+                },
+                colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                pattern: JsObjectBindingPattern {
+                    l_curly_token: L_CURLY@21..23 "{" [] [Whitespace(" ")],
+                    properties: JsObjectBindingPatternPropertyList [
+                        JsObjectBindingPatternShorthandProperty {
+                            identifier: JsIdentifierBinding {
+                                name_token: IDENT@23..29 "value" [] [Whitespace(" ")],
+                            },
+                            init: missing (optional),
+                        },
+                    ],
+                    r_curly_token: R_CURLY@29..30 "}" [] [],
+                },
+                init: missing (optional),
+            },
+            COMMA@30..32 "," [] [Whitespace(" ")],
+            JsObjectBindingPatternRest {
+                dotdotdot_token: DOT3@32..35 "..." [] [],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@35..40 "rest" [] [Whitespace(" ")],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@40..41 "}" [] [],
+    },
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_SLOT_SCOPE_ROOT@0..42
+  0: JS_OBJECT_BINDING_PATTERN@0..41
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..40
+      0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@2..11
+        0: JS_IDENTIFIER_BINDING@2..7
+          0: IDENT@2..7 "item" [] [Whitespace(" ")]
+        1: JS_INITIALIZER_CLAUSE@7..11
+          0: EQ@7..9 "=" [] [Whitespace(" ")]
+          1: JS_OBJECT_EXPRESSION@9..11
+            0: L_CURLY@9..10 "{" [] []
+            1: JS_OBJECT_MEMBER_LIST@10..10
+            2: R_CURLY@10..11 "}" [] []
+      1: COMMA@11..13 "," [] [Whitespace(" ")]
+      2: JS_OBJECT_BINDING_PATTERN_PROPERTY@13..30
+        0: JS_LITERAL_MEMBER_NAME@13..19
+          0: IDENT@13..19 "nested" [] []
+        1: COLON@19..21 ":" [] [Whitespace(" ")]
+        2: JS_OBJECT_BINDING_PATTERN@21..30
+          0: L_CURLY@21..23 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@23..29
+            0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@23..29
+              0: JS_IDENTIFIER_BINDING@23..29
+                0: IDENT@23..29 "value" [] [Whitespace(" ")]
+              1: (empty)
+          2: R_CURLY@29..30 "}" [] []
+        3: (empty)
+      3: COMMA@30..32 "," [] [Whitespace(" ")]
+      4: JS_OBJECT_BINDING_PATTERN_REST@32..40
+        0: DOT3@32..35 "..." [] []
+        1: JS_IDENTIFIER_BINDING@35..40
+          0: IDENT@35..40 "rest" [] [Whitespace(" ")]
+    2: R_CURLY@40..41 "}" [] []
+  1: EOF@41..42 "" [Newline("\n")] []
+
+```
