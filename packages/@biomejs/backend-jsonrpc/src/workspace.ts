@@ -2585,6 +2585,11 @@ See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
 	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
 	/**
+	* Disallow unguarded browser globals at the top level of Vue and Svelte scripts.
+See https://biomejs.dev/linter/rules/no-top-level-browser-globals 
+	 */
+	noTopLevelBrowserGlobals?: NoTopLevelBrowserGlobalsConfiguration;
+	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
 	 */
@@ -4891,6 +4896,9 @@ export type NoTailwindArbitraryValueConfiguration =
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
+export type NoTopLevelBrowserGlobalsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTopLevelBrowserGlobalsOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
@@ -6858,6 +6866,10 @@ export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
 }
+export interface RuleWithNoTopLevelBrowserGlobalsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTopLevelBrowserGlobalsOptions;
+}
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
@@ -8677,6 +8689,7 @@ export interface NoTailwindArbitraryValueOptions {
 	functions?: string[];
 }
 export type NoThisOutsideOfClassOptions = {};
+export type NoTopLevelBrowserGlobalsOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -10137,6 +10150,7 @@ export type Category =
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noThisOutsideOfClass"
+	| "lint/nursery/noTopLevelBrowserGlobals"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
