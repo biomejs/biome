@@ -6766,6 +6766,30 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NormalizationForm": {
+			"oneOf": [
+				{
+					"description": "Canonical Decomposition followed by Canonical Composition",
+					"type": "string",
+					"const": "NFC"
+				},
+				{
+					"description": "Canonical Decomposition",
+					"type": "string",
+					"const": "NFD"
+				},
+				{
+					"description": "Compatibility Decomposition followed by Canonical Composition",
+					"type": "string",
+					"const": "NFKC"
+				},
+				{
+					"description": "Compatibility Decomposition",
+					"type": "string",
+					"const": "NFKD"
+				}
+			]
+		},
 		"NormalizedGlob": {
 			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
 			"type": "string"
@@ -7261,6 +7285,13 @@
 					"description": "Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.\nSee https://biomejs.dev/linter/rules/use-baseline",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseBaselineConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentObjectKeys": {
+					"description": "Enforce JSON keys with consistent Unicode representation.\nSee https://biomejs.dev/linter/rules/use-consistent-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11704,6 +11735,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentObjectKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentTestItOptions": {
 			"type": "object",
 			"properties": {
@@ -15587,6 +15628,22 @@
 						{ "$ref": "#/$defs/ObjectPropertySyntax" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentObjectKeysOptions" }
+			]
+		},
+		"UseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"form": {
+					"description": "The Unicode normalization form that every object key must use so equivalent characters share one encoding. Defaults to `NFC`.",
+					"anyOf": [{ "$ref": "#/$defs/NormalizationForm" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
