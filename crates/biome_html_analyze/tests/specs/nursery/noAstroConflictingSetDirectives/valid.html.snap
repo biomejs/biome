@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<div set:html="html" set:text="text">child content</div>
+<div set:html="first" set:html="second"></div>
+
+```

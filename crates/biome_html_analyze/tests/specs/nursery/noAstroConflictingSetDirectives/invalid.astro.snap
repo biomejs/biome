@@ -1,0 +1,58 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+
+<div set:html={html} set:text={text}>
+    <!-- leading comment -->
+    first
+    <span>{middle}</span>
+    last
+    <!-- trailing comment -->
+</div>
+
+```
+
+# Diagnostics
+```
+invalid.astro:3:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div set:html={html} set:text={text}>
+      │      ^^^^^^^^^^^^^^^
+    4 │     <!-- leading comment -->
+    5 │     first
+  
+  i The set:text directive defines the element content here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div set:html={html} set:text={text}>
+      │                      ^^^^^^^^^^^^^^^
+    4 │     <!-- leading comment -->
+    5 │     first
+  
+  i Child content defines the element content here.
+  
+    3 │ <div set:html={html} set:text={text}>
+    4 │     <!-- leading comment -->
+  > 5 │     first
+      │     ^^^^^
+  > 6 │     <span>{middle}</span>
+  > 7 │     last
+      │     ^^^^
+    8 │     <!-- trailing comment -->
+    9 │ </div>
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
