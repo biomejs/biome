@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+function foo() {}
+export function exported() {}
+export default function() {}
+run(function() {}, () => {});
+const object = { method() {}, property: function() {} };
+object.method = function() {};
+const bound = function() { return this; }.bind(this);
+const arrowThis = () => this;
+const arrowParameter = (value = this) => value;
+class Derived extends Base {
+    method() { const arrowSuper = () => super.method(); }
+}
+const returned = factory();
+const computedMethod = () => ({ [this.name]() {} });
+const computedGetter = () => ({ get [this.name]() {} });
+const computedSetter = () => ({ set [this.name](value) {} });
+const computedClassMethod = () => class { [this.name]() {} };
+const computedClassGetter = () => class { get [this.name]() {} };
+const computedClassSetter = () => class { set [this.name](value) {} };
+const computedField = () => class { [this.name] = this; };
+const computedStaticField = () => class { static [this.name] = this; };
+class ComputedDerived extends Base {
+    method() { const computedSuperField = () => class { [super.name] = this; }; }
+}
+const sequenceFunction = (register(), function() {});
+const sequenceArrow = (register(), () => {});
+
+```

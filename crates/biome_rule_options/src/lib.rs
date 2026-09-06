@@ -371,6 +371,7 @@ pub mod use_consistent_arrow_return;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_enum_value_type;
+pub mod use_consistent_function_style;
 pub mod use_consistent_graphql_descriptions;
 pub mod use_consistent_heading_level;
 pub mod use_consistent_member_accessibility;

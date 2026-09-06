@@ -1754,6 +1754,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_consistent_enum_value_type::UseConsistentEnumValueTypeOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "useConsistentFunctionStyle",
+        TypeId::of::<
+            biome_rule_options::use_consistent_function_style::UseConsistentFunctionStyleOptions,
+        >(),
+    ));
     result.push(("style", "useConsistentGraphqlDescriptions", TypeId::of::<biome_rule_options::use_consistent_graphql_descriptions::UseConsistentGraphqlDescriptionsOptions>()));
     result.push((
         "nursery",
