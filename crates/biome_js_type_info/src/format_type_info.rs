@@ -434,6 +434,26 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::CallArgument(argument) => {
+                write!(f, [token("CallArgument"), space()])?;
+                if argument.is_constructor {
+                    write!(f, [token("new"), space()])?;
+                }
+                write!(
+                    f,
+                    [&format_args![
+                        argument.callee,
+                        token("("),
+                        group(&soft_block_indent(&FmtCallArgumentType(
+                            &argument.arguments
+                        ))),
+                        token(")"),
+                        token("["),
+                        text(&argument.index.to_string(), None),
+                        token("]"),
+                    ]]
+                )
+            }
             Self::Conditional(conditional) => {
                 write!(
                     f,
@@ -544,6 +564,19 @@ impl Format<FormatTypeContext> for TypeofExpression {
             }
             Self::New(expr) => {
                 write!(f, [&format_args![token("new"), space(), &expr.callee]])
+            }
+            Self::Parameter(parameter) => {
+                write!(
+                    f,
+                    [&format_args![
+                        token("Parameter"),
+                        space(),
+                        parameter.function,
+                        token("["),
+                        text(&parameter.index.to_string(), None),
+                        token("]"),
+                    ]]
+                )
             }
             Self::NullishCoalescing(expr) => {
                 write!(

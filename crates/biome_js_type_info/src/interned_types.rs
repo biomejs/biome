@@ -1320,6 +1320,11 @@ impl<'db> TypeDataSlots<'db> {
                 self.slots.push(expression.callee);
                 self.push_call_argument_slots(&expression.arguments);
             }
+            TypeofExpression::CallArgument(expression) => {
+                self.slots.push(expression.callee);
+                self.push_call_argument_slots(&expression.arguments);
+            }
+            TypeofExpression::Parameter(expression) => self.slots.push(expression.function),
             TypeofExpression::Conditional(expression) => {
                 self.slots
                     .extend([expression.test, expression.consequent, expression.alternate]);
@@ -1699,6 +1704,20 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 callee: self.take_type()?,
                 arguments: self.rebuild_call_arguments(&expression.arguments)?,
             }),
+            TypeofExpression::CallArgument(expression) => {
+                TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                    callee: self.take_type()?,
+                    arguments: self.rebuild_call_arguments(&expression.arguments)?,
+                    index: expression.index,
+                    is_constructor: expression.is_constructor,
+                })
+            }
+            TypeofExpression::Parameter(expression) => {
+                TypeofExpression::Parameter(TypeofParameterExpression {
+                    function: self.take_type()?,
+                    index: expression.index,
+                })
+            }
             TypeofExpression::Conditional(_) => {
                 TypeofExpression::Conditional(TypeofConditionalExpression {
                     test: self.take_type()?,
@@ -1860,6 +1879,15 @@ impl<'db> FunctionParameter<'db> {
         match self {
             Self::Named(parameter) => parameter.is_rest,
             Self::Pattern(parameter) => parameter.is_rest,
+        }
+    }
+
+    /// Returns whether this is a `this` parameter, which occupies no argument
+    /// position.
+    pub fn is_this(&self) -> bool {
+        match self {
+            Self::Named(parameter) => parameter.name.text() == "this",
+            Self::Pattern(_) => false,
         }
     }
 }
@@ -2077,6 +2105,7 @@ pub enum TypeofExpression<'db> {
     Await(TypeofAwaitExpression<'db>),
     BitwiseNot(TypeofBitwiseNotExpression<'db>),
     Call(TypeofCallExpression<'db>),
+    CallArgument(TypeofCallArgumentExpression<'db>),
     Conditional(TypeofConditionalExpression<'db>),
     Destructure(TypeofDestructureExpression<'db>),
     Index(TypeofIndexExpression<'db>),
@@ -2086,6 +2115,7 @@ pub enum TypeofExpression<'db> {
     LogicalOr(TypeofLogicalOrExpression<'db>),
     New(TypeofNewExpression<'db>),
     NullishCoalescing(TypeofNullishCoalescingExpression<'db>),
+    Parameter(TypeofParameterExpression<'db>),
     StaticMember(TypeofStaticMemberExpression<'db>),
     OptionalChainStaticMember(TypeofStaticMemberExpression<'db>),
     Super(TypeofThisOrSuperExpression<'db>),
@@ -2114,6 +2144,20 @@ pub struct TypeofBitwiseNotExpression<'db> {
 pub struct TypeofCallExpression<'db> {
     pub callee: TypeData<'db>,
     pub arguments: Box<[CallArgumentType<'db>]>,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofCallArgumentExpression<'db> {
+    pub callee: TypeData<'db>,
+    pub arguments: Box<[CallArgumentType<'db>]>,
+    pub index: u16,
+    pub is_constructor: bool,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofParameterExpression<'db> {
+    pub function: TypeData<'db>,
+    pub index: u16,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2610,6 +2654,20 @@ fn convert_typeof_expression<'db>(
             callee: resolve_reference(&expression.callee),
             arguments: convert_call_arguments(db, &expression.arguments, resolve_reference),
         }),
+        raw::TypeofExpression::CallArgument(expression) => {
+            TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                callee: resolve_reference(&expression.callee),
+                arguments: convert_call_arguments(db, &expression.arguments, resolve_reference),
+                index: expression.index,
+                is_constructor: expression.is_constructor,
+            })
+        }
+        raw::TypeofExpression::Parameter(expression) => {
+            TypeofExpression::Parameter(TypeofParameterExpression {
+                function: resolve_reference(&expression.function),
+                index: expression.index,
+            })
+        }
         raw::TypeofExpression::Conditional(expression) => {
             TypeofExpression::Conditional(TypeofConditionalExpression {
                 test: resolve_reference(&expression.test),
@@ -3349,6 +3407,30 @@ mod tests {
                         CallArgumentType::Spread(s.next()),
                     ]
                     .into(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                    callee: s.next(),
+                    arguments: [
+                        CallArgumentType::Argument(s.next()),
+                        CallArgumentType::Spread(s.next()),
+                    ]
+                    .into(),
+                    index: 0,
+                    is_constructor: false,
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Parameter(TypeofParameterExpression {
+                    function: s.next(),
+                    index: 1,
                 }),
             )
         });
