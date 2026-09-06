@@ -122,6 +122,7 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
     ]
 });
@@ -189,6 +190,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useVueValidVOnce"),
         RuleFilter::Rule("correctness", "useVueValidVPre"),
         RuleFilter::Rule("correctness", "useVueValidVText"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
         RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),

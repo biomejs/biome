@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+const local = { document: { title: "local" } };
+(globalThis, local).document.title;
+function read() {
+    return ((globalThis)).document.title;
+}
+if (typeof (globalThis as typeof globalThis).window !== "undefined") {
+    (globalThis as typeof globalThis).document.title;
+}
+const kind = typeof ((globalThis as typeof globalThis).window as unknown);

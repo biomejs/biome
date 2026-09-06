@@ -1231,6 +1231,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noTopLevelBrowserGlobals",
+        TypeId::of::<
+            biome_rule_options::no_top_level_browser_globals::NoTopLevelBrowserGlobalsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noTopLevelLiterals",
         TypeId::of::<biome_rule_options::no_top_level_literals::NoTopLevelLiteralsOptions>(),
     ));

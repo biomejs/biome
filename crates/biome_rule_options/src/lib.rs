@@ -259,6 +259,7 @@ pub mod no_ternary;
 pub mod no_then_property;
 pub mod no_this_in_static;
 pub mod no_this_outside_of_class;
+pub mod no_top_level_browser_globals;
 pub mod no_top_level_literals;
 pub mod no_ts_ignore;
 pub mod no_unassigned_variables;

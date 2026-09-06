@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-instance-fields.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+import { onMount } from "svelte";
+class Client {
+    width = window.innerWidth;
+    #title = document.title;
+}
+onMount(() => new Client());
+</script>
+
+```

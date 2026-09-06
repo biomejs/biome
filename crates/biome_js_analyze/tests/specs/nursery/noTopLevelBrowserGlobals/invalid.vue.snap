@@ -1,0 +1,384 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const width = window.innerWidth;
+const element = document.createElement("div");
+const theme = localStorage.getItem("theme");
+globalThis.document.title;
+globalThis["window"].innerWidth;
+window?.innerWidth;
+if (typeof window === "undefined") { document.title; }
+if (typeof localStorage !== "undefined") { document.title; }
+if (typeof window !== "undefined" || ready) { document.title; }
+if (typeof window === "undefined" && document.title) {}
+if (typeof window.foo !== "undefined") { document.title; }
+const obj = { [window.name]() {} };
+class Component { static width = window.innerWidth; }
+const globals = { window, document };
+window = {};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:15 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ const width = window.innerWidth;
+      │               ^^^^^^
+    4 │ const element = document.createElement("div");
+    5 │ const theme = localStorage.getItem("theme");
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:17 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    2 │ <script setup>
+    3 │ const width = window.innerWidth;
+  > 4 │ const element = document.createElement("div");
+      │                 ^^^^^^^^
+    5 │ const theme = localStorage.getItem("theme");
+    6 │ globalThis.document.title;
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:15 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global localStorage.
+  
+    3 │ const width = window.innerWidth;
+    4 │ const element = document.createElement("div");
+  > 5 │ const theme = localStorage.getItem("theme");
+      │               ^^^^^^^^^^^^
+    6 │ globalThis.document.title;
+    7 │ globalThis["window"].innerWidth;
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:12 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    4 │ const element = document.createElement("div");
+    5 │ const theme = localStorage.getItem("theme");
+  > 6 │ globalThis.document.title;
+      │            ^^^^^^^^
+    7 │ globalThis["window"].innerWidth;
+    8 │ window?.innerWidth;
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:12 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    5 │ const theme = localStorage.getItem("theme");
+    6 │ globalThis.document.title;
+  > 7 │ globalThis["window"].innerWidth;
+      │            ^^^^^^^^
+    8 │ window?.innerWidth;
+    9 │ if (typeof window === "undefined") { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:1 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+     6 │ globalThis.document.title;
+     7 │ globalThis["window"].innerWidth;
+   > 8 │ window?.innerWidth;
+       │ ^^^^^^
+     9 │ if (typeof window === "undefined") { document.title; }
+    10 │ if (typeof localStorage !== "undefined") { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:38 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+     7 │ globalThis["window"].innerWidth;
+     8 │ window?.innerWidth;
+   > 9 │ if (typeof window === "undefined") { document.title; }
+       │                                      ^^^^^^^^
+    10 │ if (typeof localStorage !== "undefined") { document.title; }
+    11 │ if (typeof window !== "undefined" || ready) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:44 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+     8 │ window?.innerWidth;
+     9 │ if (typeof window === "undefined") { document.title; }
+  > 10 │ if (typeof localStorage !== "undefined") { document.title; }
+       │                                            ^^^^^^^^
+    11 │ if (typeof window !== "undefined" || ready) { document.title; }
+    12 │ if (typeof window === "undefined" && document.title) {}
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:47 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+     9 │ if (typeof window === "undefined") { document.title; }
+    10 │ if (typeof localStorage !== "undefined") { document.title; }
+  > 11 │ if (typeof window !== "undefined" || ready) { document.title; }
+       │                                               ^^^^^^^^
+    12 │ if (typeof window === "undefined" && document.title) {}
+    13 │ if (typeof window.foo !== "undefined") { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:38 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    10 │ if (typeof localStorage !== "undefined") { document.title; }
+    11 │ if (typeof window !== "undefined" || ready) { document.title; }
+  > 12 │ if (typeof window === "undefined" && document.title) {}
+       │                                      ^^^^^^^^
+    13 │ if (typeof window.foo !== "undefined") { document.title; }
+    14 │ const obj = { [window.name]() {} };
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:12 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    11 │ if (typeof window !== "undefined" || ready) { document.title; }
+    12 │ if (typeof window === "undefined" && document.title) {}
+  > 13 │ if (typeof window.foo !== "undefined") { document.title; }
+       │            ^^^^^^
+    14 │ const obj = { [window.name]() {} };
+    15 │ class Component { static width = window.innerWidth; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:42 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    11 │ if (typeof window !== "undefined" || ready) { document.title; }
+    12 │ if (typeof window === "undefined" && document.title) {}
+  > 13 │ if (typeof window.foo !== "undefined") { document.title; }
+       │                                          ^^^^^^^^
+    14 │ const obj = { [window.name]() {} };
+    15 │ class Component { static width = window.innerWidth; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:16 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    12 │ if (typeof window === "undefined" && document.title) {}
+    13 │ if (typeof window.foo !== "undefined") { document.title; }
+  > 14 │ const obj = { [window.name]() {} };
+       │                ^^^^^^
+    15 │ class Component { static width = window.innerWidth; }
+    16 │ const globals = { window, document };
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:34 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    13 │ if (typeof window.foo !== "undefined") { document.title; }
+    14 │ const obj = { [window.name]() {} };
+  > 15 │ class Component { static width = window.innerWidth; }
+       │                                  ^^^^^^
+    16 │ const globals = { window, document };
+    17 │ window = {};
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:19 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    14 │ const obj = { [window.name]() {} };
+    15 │ class Component { static width = window.innerWidth; }
+  > 16 │ const globals = { window, document };
+       │                   ^^^^^^
+    17 │ window = {};
+    18 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:27 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    14 │ const obj = { [window.name]() {} };
+    15 │ class Component { static width = window.innerWidth; }
+  > 16 │ const globals = { window, document };
+       │                           ^^^^^^^^
+    17 │ window = {};
+    18 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:1 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    15 │ class Component { static width = window.innerWidth; }
+    16 │ const globals = { window, document };
+  > 17 │ window = {};
+       │ ^^^^^^
+    18 │ </script>
+    19 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

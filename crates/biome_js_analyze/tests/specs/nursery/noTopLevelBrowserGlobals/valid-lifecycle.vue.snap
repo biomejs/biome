@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-lifecycle.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+import { onMounted } from "vue";
+onMounted(() => { document.title; });
+</script>
+<template><button @click="window.alert('hello')">Open</button></template>
+
+```
