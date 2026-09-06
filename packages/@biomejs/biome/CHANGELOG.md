@@ -1,5 +1,65 @@
 # @biomejs/biome
 
+## 2.5.13
+
+### Patch Changes
+
+- [#11379](https://github.com/biomejs/biome/pull/11379) [`07a0073`](https://github.com/biomejs/biome/commit/07a0073c1e1b1de323292968b8988cc6f79ec5c7) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useLayeredStyles`](https://biomejs.dev/linter/rules/use-layered-styles/), which enforces that style rules are defined within a cascade layer and import rules to import its styles into a cascade layer.
+  
+  ```css
+  /* Invalid */
+  @import 'foo.css';
+  
+  .my-style {
+    color: red;
+  }
+  
+  /* Valid */
+  @import 'foo.css' layer(base);
+  
+  @layer base {
+    .my-style {
+      color: red;
+    }
+  }
+  ```
+
+- [#11620](https://github.com/biomejs/biome/pull/11620) [`20e513a`](https://github.com/biomejs/biome/commit/20e513af6fb0127854f4eb5cb9edee0f20d1b543) Thanks [@jakeleventhal](https://github.com/jakeleventhal)! - Fixed [#11610](https://github.com/biomejs/biome/issues/11610), [#11611](https://github.com/biomejs/biome/issues/11611), [#11612](https://github.com/biomejs/biome/issues/11612), [#11615](https://github.com/biomejs/biome/issues/11615), and [#11616](https://github.com/biomejs/biome/issues/11616): Biome no longer fully infers an imported generic declaration just to apply its type arguments, restoring type-aware lint performance for large libraries such as Zod. This improves [`useRegexpExec`](https://biomejs.dev/linter/rules/use-regexp-exec), [`noFloatingPromises`](https://biomejs.dev/linter/rules/no-floating-promises), [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises), [`useNullishCoalescing`](https://biomejs.dev/linter/rules/use-nullish-coalescing), and [`noUnsafePlusOperands`](https://biomejs.dev/linter/rules/no-unsafe-plus-operands).
+
+- [#11627](https://github.com/biomejs/biome/pull/11627) [`23aad6d`](https://github.com/biomejs/biome/commit/23aad6df8f71bd9b134633c43d2334771687d10d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6571](https://github.com/biomejs/biome/issues/6571) so Grit plugins can capture and inspect multiple named import specifiers.
+
+- [#11631](https://github.com/biomejs/biome/pull/11631) [`00dbd3a`](https://github.com/biomejs/biome/commit/00dbd3a30489617d5bb55466006ac9977612a23b) Thanks [@ematipico](https://github.com/ematipico)! - Reduced unnecessary type inference when type-aware lint rules inspect members of namespace imports from libraries such as Zod. Fixed type inference so blanket re-exports do not expose default exports.
+
+- [#11628](https://github.com/biomejs/biome/pull/11628) [`a2f8ff7`](https://github.com/biomejs/biome/commit/a2f8ff7a1eb01f5c91e7154937e17f761863e3bc) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noXorAsExponentiation`](https://biomejs.dev/linter/rules/no-xor-as-exponentiation/), which reports the bitwise XOR operator `^` between two decimal integer literals, where the exponentiation operator `**` was likely intended.
+  
+  ```js
+  const kibibyte = 2 ^ 10; // 8, not 1024
+  ```
+
+- [#11630](https://github.com/biomejs/biome/pull/11630) [`62e1fc5`](https://github.com/biomejs/biome/commit/62e1fc59621b6ab5c3988ae36b6591180e07d08f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed the HTML formatter inserting whitespace between adjacent Svelte expressions when their combined length exceeds the line width.
+  
+  ```diff
+   <span>
+  -  {head.median - base.median >= 0 ? "+" : "−"}
+  -  {formatMs(Math.abs(head.median - base.median))}
+  +  {head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+   </span>
+  ```
+
+- [#11613](https://github.com/biomejs/biome/pull/11613) [`47d7383`](https://github.com/biomejs/biome/commit/47d7383d049b36ff8eaba50912176928143dd9e9) Thanks [@ematipico](https://github.com/ematipico)! - Improved the performance of Biome Formatter up to ~50% in some cases.
+
+- [#11622](https://github.com/biomejs/biome/pull/11622) [`c23e4c7`](https://github.com/biomejs/biome/commit/c23e4c7e7a33d3f00863d80be663678af8c2a073) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noUnsafeIframeSandbox`](https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox/), which reports `iframe` elements whose `sandbox` attribute combines `allow-scripts` and `allow-same-origin`, since that combination lets the embedded document remove its own sandboxing.
+  
+  ```jsx
+  <iframe src="https://example.com" sandbox="allow-scripts allow-same-origin" />
+  ```
+
+- [#11606](https://github.com/biomejs/biome/pull/11606) [`de0528f`](https://github.com/biomejs/biome/commit/de0528f940ea41b798816e1923b2b51ffcd0b473) Thanks [@dyc3](https://github.com/dyc3)! - Added the recommended [`noSvelteAtHtmlTags`](https://biomejs.dev/linter/rules/no-svelte-at-html-tags) nursery rule, which reports Svelte `{@html}` tags that render unescaped HTML.
+
+- [#11595](https://github.com/biomejs/biome/pull/11595) [`a64d757`](https://github.com/biomejs/biome/commit/a64d7572d5684f3555be5dc02eb1d29a16f290dc) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery Vue-domain rule [`useVueBaseImport`](https://biomejs.dev/linter/rules/use-vue-base-import/) rule, which enforces importing Vue APIs from `vue` instead of internal `@vue/*` packages.
+
+- [#11625](https://github.com/biomejs/biome/pull/11625) [`ea20e5a`](https://github.com/biomejs/biome/commit/ea20e5a4640b4455cd12e0eb6ffaa590803c67a2) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Improved linting performance for large CSS and JSON files.
+
 ## 2.5.12
 
 ### Patch Changes
