@@ -137,7 +137,7 @@ libc                         = "0.2.189"
 # mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
 # See: https://github.com/biomejs/biome/issues/10270
 # See: https://github.com/biomejs/biome/issues/11242
-mimalloc                     = "=0.1.48"
+mimalloc                     = "=0.1.52"
 notify                       = "8.2.0"
 papaya                       = "0.2.5"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
