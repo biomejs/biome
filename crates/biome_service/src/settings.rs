@@ -1845,7 +1845,7 @@ impl OverrideSettings {
         }
     }
 
-      #[cfg(feature = "lang_md")]
+    #[cfg(feature = "lang_md")]
     pub fn apply_override_markdown_format_options_by_indices(
         &self,
         indices: &[usize],

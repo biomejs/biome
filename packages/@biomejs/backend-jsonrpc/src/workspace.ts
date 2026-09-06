@@ -1112,6 +1112,10 @@ export interface MarkdownParserConfiguration {
 	 * Enables parsing frontmatter at the start of the file. Defaults to `false`.
 	 */
 	frontmatter?: Bool;
+	/**
+	 * Enables GitHub Flavored Markdown extensions. Defaults to `true`.
+	 */
+	gfm?: Bool;
 }
 export interface OverridePattern {
 	/**
@@ -2954,6 +2958,11 @@ See https://biomejs.dev/linter/rules/use-regexp-test
 See https://biomejs.dev/linter/rules/use-scoped-styles 
 	 */
 	useScopedStyles?: UseScopedStylesConfiguration;
+	/**
+	* Enforce that a Markdown document has a single top-level heading.
+See https://biomejs.dev/linter/rules/use-single-top-level-heading 
+	 */
+	useSingleTopLevelHeading?: UseSingleTopLevelHeadingConfiguration;
 	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
@@ -5172,6 +5181,9 @@ export type UseRegexpTestConfiguration =
 export type UseScopedStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseScopedStylesOptions;
+export type UseSingleTopLevelHeadingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSingleTopLevelHeadingOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -7236,6 +7248,10 @@ export interface RuleWithUseScopedStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseScopedStylesOptions;
 }
+export interface RuleWithUseSingleTopLevelHeadingOptions {
+	level: RulePlainConfiguration;
+	options?: UseSingleTopLevelHeadingOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -9065,6 +9081,12 @@ export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export type UseRegexpTestOptions = {};
 export type UseScopedStylesOptions = {};
+export interface UseSingleTopLevelHeadingOptions {
+	/**
+	 * The heading level that is treated as the document's top-level heading.
+	 */
+	level?: number;
+}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
