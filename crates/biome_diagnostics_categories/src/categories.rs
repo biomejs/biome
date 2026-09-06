@@ -284,6 +284,7 @@ define_categories! {
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExplicitReturnType": "https://biomejs.dev/linter/rules/use-explicit-return-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
+    "lint/nursery/useFencedCodeLanguage": "https://biomejs.dev/linter/rules/use-fenced-code-language",
     "lint/nursery/useFind": "https://biomejs.dev/linter/rules/use-find",
     "lint/nursery/useFlatMathMinMax": "https://biomejs.dev/linter/rules/use-flat-math-min-max",
     "lint/nursery/useGlobalThis": "https://biomejs.dev/linter/rules/use-global-this",
