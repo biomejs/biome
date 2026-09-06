@@ -207,6 +207,12 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
         };
         p.emit_line_indent(max);
         bump_fence(p, is_tilde_fence);
+        // Closing-fence whitespace is structural, even when the regular lexer
+        // bundles trailing spaces and a newline into a hard line break.
+        p.re_lex(MarkdownReLexContext::CodeInfoString);
+        if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.consume_as_whitespace_trivia();
+        }
     } else {
         // Emit empty r_fence_indent list to satisfy grammar slot
         let empty_m = p.start();
