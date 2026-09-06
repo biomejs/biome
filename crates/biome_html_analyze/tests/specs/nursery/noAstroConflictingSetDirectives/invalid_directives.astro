@@ -1,0 +1,11 @@
+<!-- should generate diagnostics -->
+
+<div set:html={html} set:text={text}></div>
+<div set:text={text} set:html={html}></div>
+
+<div set:html={first} set:html={second}></div>
+<div set:text={first} set:text={second}></div>
+
+<Component set:html="html" set:text="text" />
+
+<div set:html={a} set:text={b} set:html={c}></div>
