@@ -58,7 +58,7 @@ Expression "\"undefined\"" => string: undefined
 
 Expression "x" => undefined
 
-Expression "x" => undefined
+Expression "x" => never
 
 Binding typeofThenTruthyKeepsSubset "typeofThenTruthyKeepsSubset" => sync Function "typeofThenTruthyKeepsSubset" {
   accepts: {
