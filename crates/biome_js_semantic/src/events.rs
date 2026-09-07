@@ -756,7 +756,7 @@ impl SemanticEventExtractor {
                         declaration_kind = if imports_only_types {
                             JsDeclarationKind::ImportType
                         } else {
-                            JsDeclarationKind::from_node(node.syntax())
+                            JsDeclarationKind::Import
                         };
                         if !imports_only_types {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
