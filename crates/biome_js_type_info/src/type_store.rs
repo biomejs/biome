@@ -112,13 +112,8 @@ pub trait RawTypeCollector {
         expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData>;
 
-    /// Returns whether guard-based narrowing should be applied while
-    /// collecting types.
-    ///
-    /// Narrowing is still under development, so the collector that feeds the
-    /// module graph decides at construction time whether to enable it.
-    /// Collectors that do not opt in observe the same types as before
-    /// narrowing existed.
+    /// Returns whether references are narrowed by the guards around them
+    /// while collecting types. Off unless a collector opts in.
     fn narrowing_enabled(&self) -> bool {
         false
     }
@@ -184,10 +179,13 @@ pub trait RawTypeCollector {
         ]))))))
     }
 
-    /// Returns a scratch cache for memoizing `typeof`-guard narrowing
-    /// invalidation checks.
-    fn narrowing_invalidation_cache(&mut self) -> &mut FxHashMap<(JsSyntaxNode, Text), bool>;
+    /// Returns the cache behind the narrowing invalidation scans.
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache;
 }
+
+/// Memoizes, per node and name, whether the node invalidates narrowing of
+/// that name.
+pub type NarrowingInvalidationCache = FxHashMap<(JsSyntaxNode, Text), bool>;
 
 #[derive(Default)]
 pub struct UnionCollector {
