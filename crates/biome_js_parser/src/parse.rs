@@ -541,6 +541,7 @@ mod tests {
             setup: false,
             is_source: false,
             event_handler: false,
+            slot_scope: false,
             allow_statements: false,
         });
         let parse = parse("/* only a comment */", vue, JsParserOptions::default());

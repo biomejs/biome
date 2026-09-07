@@ -10834,6 +10834,10 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 * Whether the script is inside script tag with setup attribute
 				 */
 				setup: boolean;
+				/**
+				 * Whether this embed contains a Vue `v-slot` binding pattern.
+				 */
+				slot_scope: boolean;
 			};
 	  }
 	| {

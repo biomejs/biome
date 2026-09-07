@@ -3,6 +3,7 @@ use crate::references::{
     EmbeddedTypeReference, EmbeddedValueReference, is_potential_vue_directive_reference,
     svelte_store_reference_name, vue_directive_name_matches_reference_name,
 };
+use biome_rowan::TextSize;
 
 /// Bindings and references collected across a host document and its embedded
 /// language snippets.
@@ -38,6 +39,17 @@ impl EmbeddedData {
         self.bindings
             .iter()
             .any(|binding| binding.text.text() == name)
+    }
+
+    /// Returns whether a collected binding has the identifier text `name` and is
+    /// visible at `offset`, which is an offset in the host document.
+    ///
+    /// Scoped bindings, such as Vue slot props, are only visible inside the
+    /// element that introduces them.
+    pub fn contains_binding_visible_at(&self, name: &str, offset: TextSize) -> bool {
+        self.bindings
+            .iter()
+            .any(|binding| binding.text.text() == name && binding.is_visible_at(offset))
     }
 
     /// Returns whether a collected value reference has the identifier text

@@ -1185,3 +1185,94 @@ import { mdiSquareOutline } from "@mdi/js";
         result,
     ));
 }
+
+const VUE_SLOT_SCOPE_FILE_UNFORMATTED: &str = r#"<script setup lang="ts"></script>
+<template>
+  <RouterView v-slot="{   Component   }">
+    <component :is="Component" />
+  </RouterView>
+  <DataTable #row="[   first ,   ...rest   ]">
+    <span>{{ first }}{{ rest }}</span>
+  </DataTable>
+  <DataTable v-slot:cell="{ value : { nested } }">
+    <span>{{ nested }}</span>
+  </DataTable>
+</template>"#;
+
+#[test]
+fn format_vue_slot_scope_directives() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_SLOT_SCOPE_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_slot_scope_directives",
+        fs,
+        console,
+        result,
+    ));
+}
+
+const VUE_MALFORMED_SLOT_SCOPE_FILE: &str = r#"<script setup lang="ts"></script>
+<template>
+  <RouterView v-slot="{ item }: SlotProps">
+    <span>{{ item }}</span>
+  </RouterView>
+  <DataTable #row="42">
+    <span>row</span>
+  </DataTable>
+</template>"#;
+
+#[test]
+fn check_vue_malformed_slot_scope_does_not_crash() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_MALFORMED_SLOT_SCOPE_FILE.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_vue_malformed_slot_scope_does_not_crash",
+        fs,
+        console,
+        result,
+    ));
+}

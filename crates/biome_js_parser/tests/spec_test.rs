@@ -107,6 +107,14 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             frontmatter: true,
             is_class_attribute: false,
         });
+    } else if file_name.contains(".vue_slot_scope.") {
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            slot_scope: true,
+            allow_statements: false,
+        });
     }
 
     let extension = file_source.file_extension();

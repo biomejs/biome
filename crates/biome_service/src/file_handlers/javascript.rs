@@ -1237,7 +1237,8 @@ fn js_analyzer_services_for_fix<'a>(
         params.module_db.clone(),
         params.project_layout.clone(),
         source_type,
-    );
+    )
+    .with_embedded_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1299,7 +1300,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         params.module_db.clone(),
         params.project_layout.clone(),
         files_source,
-    );
+    )
+    .with_embedded_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
     let services = services.with_semantic_model(&semantic_model);
@@ -1390,6 +1392,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         project_layout,
         source_type,
     )
+    .with_embedded_offset(action_offset)
     .with_semantic_model(semantic_model);
 
     debug!("Javascript runs the analyzer");

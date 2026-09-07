@@ -98,7 +98,7 @@ impl Rule for NoUndeclaredVariables {
             return None;
         }
 
-        if embedded.contains_binding(token_text)
+        if embedded.contains_binding_visible_at(token_text, token.text_trimmed_range().start())
             || store_name.is_some_and(|store_name| embedded.contains_binding_text(store_name))
         {
             return None;

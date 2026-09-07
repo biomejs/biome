@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-v-slot.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <RouterView v-slot="{ Component }" :fallback="Component">
+    <component :is="Component" :missing="missing" />
+  </RouterView>
+
+  <!-- `Component` is only provided inside the RouterView above -->
+  <span>{{ Component }}</span>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-v-slot.vue:8:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Component variable is undeclared.
+  
+     7 │   <!-- `Component` is only provided inside the RouterView above -->
+   > 8 │   <span>{{ Component }}</span>
+       │            ^^^^^^^^^
+     9 │ </template>
+    10 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-vue-v-slot.vue:3:49 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Component variable is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <RouterView v-slot="{ Component }" :fallback="Component">
+      │                                                 ^^^^^^^^^
+    4 │     <component :is="Component" :missing="missing" />
+    5 │   </RouterView>
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-vue-v-slot.vue:4:42 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missing variable is undeclared.
+  
+    2 │ <template>
+    3 │   <RouterView v-slot="{ Component }" :fallback="Component">
+  > 4 │     <component :is="Component" :missing="missing" />
+      │                                          ^^^^^^^
+    5 │   </RouterView>
+    6 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

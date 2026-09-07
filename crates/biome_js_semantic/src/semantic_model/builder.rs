@@ -87,6 +87,7 @@ impl SemanticModelBuilder {
             | JS_EXPRESSION_TEMPLATE_ROOT
             | JS_SVELTE_DECLARATION_ROOT
             | JS_SVELTE_SNIPPET_ROOT
+            | JS_VUE_SLOT_SCOPE_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION

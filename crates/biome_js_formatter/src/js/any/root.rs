@@ -14,6 +14,7 @@ impl FormatRule<AnyJsRoot> for FormatAnyJsRoot {
             AnyJsRoot::JsScript(node) => node.format().fmt(f),
             AnyJsRoot::JsSvelteDeclarationRoot(node) => node.format().fmt(f),
             AnyJsRoot::JsSvelteSnippetRoot(node) => node.format().fmt(f),
+            AnyJsRoot::JsVueSlotScopeRoot(node) => node.format().fmt(f),
             AnyJsRoot::TsDeclarationModule(node) => node.format().fmt(f),
         }
     }
