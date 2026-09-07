@@ -1,0 +1,110 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid-type-only-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+type vTypeAlias = {};
+interface vInterface {}
+import type { vImportedType } from "./types";
+import { type vInlineType } from "./types";
+import type vDefaultType from "./types";
+</script>
+
+<template>
+    <div v-type-alias></div>
+    <div v-interface></div>
+    <div v-imported-type></div>
+    <div v-inline-type></div>
+    <div v-default-type></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-type-only-setup.vue:11:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-type-alias is undeclared.
+  
+    10 │ <template>
+  > 11 │     <div v-type-alias></div>
+       │          ^^^^^^^^^^^^
+    12 │     <div v-interface></div>
+    13 │     <div v-imported-type></div>
+  
+  i Declare vTypeAlias in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid-type-only-setup.vue:12:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-interface is undeclared.
+  
+    10 │ <template>
+    11 │     <div v-type-alias></div>
+  > 12 │     <div v-interface></div>
+       │          ^^^^^^^^^^^
+    13 │     <div v-imported-type></div>
+    14 │     <div v-inline-type></div>
+  
+  i Declare vInterface in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid-type-only-setup.vue:13:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-imported-type is undeclared.
+  
+    11 │     <div v-type-alias></div>
+    12 │     <div v-interface></div>
+  > 13 │     <div v-imported-type></div>
+       │          ^^^^^^^^^^^^^^^
+    14 │     <div v-inline-type></div>
+    15 │     <div v-default-type></div>
+  
+  i Declare vImportedType in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid-type-only-setup.vue:14:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-inline-type is undeclared.
+  
+    12 │     <div v-interface></div>
+    13 │     <div v-imported-type></div>
+  > 14 │     <div v-inline-type></div>
+       │          ^^^^^^^^^^^^^
+    15 │     <div v-default-type></div>
+    16 │ </template>
+  
+  i Declare vInlineType in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid-type-only-setup.vue:15:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-default-type is undeclared.
+  
+    13 │     <div v-imported-type></div>
+    14 │     <div v-inline-type></div>
+  > 15 │     <div v-default-type></div>
+       │          ^^^^^^^^^^^^^^
+    16 │ </template>
+    17 │ 
+  
+  i Declare vDefaultType in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```

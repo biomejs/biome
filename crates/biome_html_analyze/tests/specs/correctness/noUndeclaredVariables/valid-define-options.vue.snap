@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-define-options.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+defineOptions({
+    directives: {
+        definedWithOptions: {},
+    },
+});
+</script>
+
+<template>
+    <div v-defined-with-options></div>
+</template>
+
+```

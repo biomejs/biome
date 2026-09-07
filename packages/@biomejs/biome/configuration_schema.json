@@ -1201,7 +1201,7 @@
 					]
 				},
 				"noUndeclaredVariables": {
-					"description": "Prevents the usage of variables that haven't been declared inside the document.\nSee https://biomejs.dev/linter/rules/no-undeclared-variables",
+					"description": "Prevents the usage of custom Vue directives that have not been declared.\nSee https://biomejs.dev/linter/rules/no-undeclared-variables",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredVariablesConfiguration" },
 						{ "type": "null" }

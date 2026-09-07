@@ -10,6 +10,7 @@ mod tailwind;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
+use crate::services::embedded::EmbeddedService;
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
@@ -20,8 +21,9 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
+use biome_embeds::EmbeddedData;
 use biome_html_syntax::HtmlLanguage;
-use biome_languages::HtmlFileSource;
+use biome_languages::{HtmlFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -34,6 +36,8 @@ use std::sync::{Arc, LazyLock};
 #[derive(Default)]
 pub struct HtmlAnalyzerServices {
     pub module_db: Option<Rc<dyn ModuleDb>>,
+    pub language_db: Option<Rc<dyn LanguageDb>>,
+    pub embedded_data: Option<Arc<EmbeddedData>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -47,12 +51,24 @@ impl HtmlAnalyzerServices {
         self.project_layout = Some(project_layout);
         self
     }
+
+    pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
+        self.embedded_data = embedded_data;
+        self
+    }
 }
 
 impl std::fmt::Debug for HtmlAnalyzerServices {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("HtmlAnalyzerServices")
             .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("language_db", &self.language_db.as_ref().map(|_| "..."))
+            .field("embedded_data", &self.embedded_data.as_ref().map(|_| "..."))
             .field("project_layout", &self.project_layout)
             .finish()
     }
@@ -158,6 +174,11 @@ where
     services.insert_service(Arc::new(AriaRoles));
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
+    }
+    if let Some(embedded_data) = html_services.embedded_data {
+        services.insert_service(EmbeddedService::from_data(embedded_data));
+    } else if let Some(language_db) = html_services.language_db {
+        services.insert_service(EmbeddedService::new(language_db, options.file_path.clone()));
     }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);

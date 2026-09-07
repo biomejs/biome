@@ -1,0 +1,66 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+    <div v-missing></div>
+    <div v-missing-with-argument:argument.modifier="undeclaredValue"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-missing is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │     <div v-missing></div>
+      │          ^^^^^^^^^
+    4 │     <div v-missing-with-argument:argument.modifier="undeclaredValue"></div>
+    5 │ </template>
+  
+  i Declare vMissing in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid.vue:4:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-missing-with-argument is undeclared.
+  
+    2 │ <template>
+    3 │     <div v-missing></div>
+  > 4 │     <div v-missing-with-argument:argument.modifier="undeclaredValue"></div>
+      │          ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Declare vMissingWithArgument in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid.vue:4:53 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The undeclaredValue variable is undeclared.
+  
+    2 │ <template>
+    3 │     <div v-missing></div>
+  > 4 │     <div v-missing-with-argument:argument.modifier="undeclaredValue"></div>
+      │                                                     ^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
