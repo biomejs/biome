@@ -582,6 +582,9 @@ impl AnyMember {
                 AnyJsClassMember::JsSetterClassMember(member) => {
                     Some(member.name().ok()?.name()?.text() == name)
                 }
+                AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+                    Some(member.name().ok()?.name()?.text() == name)
+                }
                 _ => None,
             },
             Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
