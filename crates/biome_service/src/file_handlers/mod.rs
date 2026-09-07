@@ -246,6 +246,18 @@ impl ParsedSnippetOrigin {
 }
 
 impl ParsedOrigin {
+    pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
+        match self {
+            Self::Workspace(AnyParsedSource::ParsedSource(source)) => {
+                SnippetsIterator::Workspace(source.snippets(db).iter())
+            }
+            Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
+                SnippetsIterator::Interned([].iter())
+            }
+            Self::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
+        }
+    }
+
     pub(crate) fn interned(parse: AnyParse, diagnostic_offset: Option<TextSize>) -> Self {
         Self::Interned {
             parse,

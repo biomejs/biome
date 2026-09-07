@@ -1,4 +1,5 @@
 #![deny(clippy::use_self)]
+#![expect(clippy::too_many_arguments)]
 #![warn(clippy::needless_pass_by_value)]
 #![expect(
     clippy::disallowed_methods,
@@ -10,12 +11,13 @@ pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
 use crate::services::typed::TypedModule;
+pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
-    AnalyzerSignal, AnalyzerSuppression, BatchPluginVisitor, ControlFlow, InspectMatcher,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
-    RuleRegistry, to_analyzer_suppressions,
+    AnalyzerSignal, BatchPluginVisitor, ControlFlow, InspectMatcher, LanguageRoot,
+    MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
+    Suppression,
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
@@ -26,8 +28,7 @@ use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextRange;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_suppression::SuppressionDiagnostic;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -44,6 +45,7 @@ mod react;
 mod registry;
 mod services;
 pub mod shared;
+mod suppression;
 mod suppression_action;
 mod syntax;
 mod tailwind;
@@ -144,6 +146,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -151,32 +154,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for comment in parse_suppression_comment(text) {
-            let suppression = match comment {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -199,7 +176,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        suppression.unwrap_or_else(|| Box::new(JsSuppression)),
         Box::new(JsSuppressionAction),
         &mut emit_signal,
     );
@@ -281,6 +258,7 @@ pub fn analyze<'a, F, B>(
     options: &'a AnalyzerOptions,
     plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -303,6 +281,7 @@ where
         options,
         plugins,
         services,
+        suppression,
         emit_signal,
     )
 }

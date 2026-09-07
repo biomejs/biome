@@ -268,7 +268,7 @@ pub(crate) fn analyze_and_snap(
     }
 
     let (_, errors) =
-        biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
+        biome_js_analyze::analyze(&root, filter, &options, plugins, services, None, |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions(ActionFilter::all()) {
                     if check_action_type.is_suppression() {

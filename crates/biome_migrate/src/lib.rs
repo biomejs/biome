@@ -9,13 +9,13 @@ use crate::registry::visit_migration_registry;
 use crate::services::IsRoot;
 pub use biome_analyze::ControlFlow;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
-    InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    SuppressionAction,
+    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal,
+    AnalyzerSuppression, ApplySuppression, InspectMatcher, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleAction, RuleRegistry, Suppression, SuppressionAction,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
-use biome_rowan::{BatchMutation, SyntaxToken};
+use biome_rowan::{BatchMutation, SyntaxToken, TextRange};
 use camino::Utf8Path;
 use std::convert::Infallible;
 use std::ops::Deref;
@@ -61,6 +61,18 @@ where
     services.insert_service(IsRoot(is_root));
 
     struct TestAction;
+    impl Suppression for TestAction {
+        type Diagnostic = Infallible;
+
+        fn parse_comment<'a>(
+            &self,
+            _: &'a str,
+            _: TextRange,
+        ) -> Vec<Result<AnalyzerSuppression<'a>, Infallible>> {
+            Vec::new()
+        }
+    }
+
     impl SuppressionAction for TestAction {
         type Language = JsonLanguage;
 
@@ -88,7 +100,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(migration_registry, inspect_matcher),
-        |_, _| -> Vec<Result<_, Infallible>> { Default::default() },
+        Box::new(TestAction),
         Box::new(TestAction),
         &mut emit_signal,
     );

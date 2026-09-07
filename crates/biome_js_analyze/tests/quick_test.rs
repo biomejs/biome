@@ -119,6 +119,7 @@ fn quick_test() {
         &options,
         &[],
         services,
+        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 error_ranges.push(diag.location().span.unwrap());
@@ -183,6 +184,7 @@ function App() {
         &options,
         &[],
         services,
+        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 error_ranges.push(diag.location().span.unwrap());

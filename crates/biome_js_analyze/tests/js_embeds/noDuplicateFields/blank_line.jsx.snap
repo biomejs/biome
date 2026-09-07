@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/js_embeds.rs
+expression: snapshot
+---
+# Input
+```jsx
+// should generate diagnostics
+// biome-ignore lint: separated by a blank line
+
+gql`{ user { id id } }`;
+
+```
+
+# Diagnostics
+```
+blank_line.jsx:4:17 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Field `id` defined multiple times.
+  
+    2 │ // biome-ignore lint: separated by a blank line
+    3 │ 
+  > 4 │ gql`{ user { id id } }`;
+      │                 ^^
+    5 │ 
+  
+  i Remove the duplicated field.
+  
+
+```

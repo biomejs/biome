@@ -16,8 +16,8 @@ use crate::embed::EmbedContent;
 use crate::embed::js::{
     EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch, GuestLanguage, TemplateTagKind,
 };
-use crate::file_handlers::FixAllParams;
 use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
+use crate::file_handlers::{FixAllParams, ParsedOrigin};
 use crate::settings::{
     OverrideSettings, Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity, finalize_analyzer_options,
@@ -32,8 +32,8 @@ use crate::{
 use biome_analyze::ActionFilter;
 use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
-    RuleCategoriesBuilder, RuleFilter,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSuppression, ControlFlow,
+    Never, QueryMatch, RuleCategoriesBuilder, RuleFilter, Suppression, SuppressionComment,
 };
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
@@ -41,9 +41,11 @@ use biome_configuration::javascript::{
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
 #[cfg(feature = "js_embeds")]
+use biome_css_analyze::CssSuppression;
+#[cfg(feature = "js_embeds")]
 use biome_css_parser::parse_css_with_offset_and_cache;
 #[cfg(feature = "js_embeds")]
-use biome_css_syntax::CssLanguage;
+use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_db::AnyParsedSource;
 #[cfg(feature = "js_embeds")]
 use biome_formatter::FormatElement;
@@ -55,12 +57,14 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
+use biome_graphql_analyze::GraphqlSuppression;
+#[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
-use biome_graphql_syntax::GraphqlLanguage;
+use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot};
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
-    ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
+    ControlFlowGraph, JsAnalyzerServices, JsSuppression, analyze, analyze_with_inspect_matcher,
 };
 use biome_js_factory::make::ident;
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
@@ -100,12 +104,12 @@ use biome_module_graph::ModuleDb;
 #[cfg(feature = "js_embeds")]
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-#[cfg(feature = "js_embeds")]
-use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
+#[cfg(feature = "js_embeds")]
+use biome_rowan::{AstNodeList, TokenText};
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
@@ -116,6 +120,134 @@ use std::fmt::Debug;
 use std::rc::Rc;
 use std::sync::Arc;
 use tracing::{debug, debug_span, error, instrument, trace_span};
+
+struct JsSuppressionService {
+    js: JsSuppression,
+    #[cfg(feature = "js_embeds")]
+    snippets: FxHashMap<TextRange, JsSuppressionSnippet>,
+}
+
+#[cfg(feature = "js_embeds")]
+struct JsSuppressionSnippet {
+    parser: Box<dyn Suppression<Diagnostic = <JsSuppression as Suppression>::Diagnostic>>,
+    comments: Vec<(TokenText, TextRange)>,
+}
+
+impl JsSuppressionService {
+    #[cfg(not(feature = "js_embeds"))]
+    fn new(_root: &AnyJsRoot, _parsed: &ParsedOrigin, _db: &WorkspaceDb) -> Self {
+        Self { js: JsSuppression }
+    }
+
+    #[cfg(feature = "js_embeds")]
+    fn new(root: &AnyJsRoot, parsed: &ParsedOrigin, db: &WorkspaceDb) -> Self {
+        let snippets = parsed
+            .snippets(db)
+            .filter_map(|snippet| {
+                let file_source = snippet.file_source(db)?;
+                let parsed = snippet.parsed_origin().parse(db);
+                if parsed.has_errors() {
+                    return None;
+                }
+                let content_range = snippet.content_range(db);
+                let token = match root.syntax().token_at_offset(content_range.start()) {
+                    TokenAtOffset::Single(token) | TokenAtOffset::Between(_, token) => token,
+                    TokenAtOffset::None => return None,
+                };
+                let range = token.text_trimmed_range();
+                if !range.contains_range(content_range) {
+                    return None;
+                }
+                let text = &token.text()[content_range - token.text_range().start()];
+                let offset = snippet.content_offset(db);
+                let snippet = match file_source {
+                    DocumentFileSource::Css(_) => {
+                        let guest: AnyCssRoot = parsed.tree();
+                        if guest.syntax().text_with_trivia() != text {
+                            return None;
+                        }
+                        JsSuppressionSnippet {
+                            parser: Box::new(CssSuppression),
+                            comments: Self::comment_trivia(&guest, offset),
+                        }
+                    }
+                    DocumentFileSource::Graphql(_) => {
+                        let guest: GraphqlRoot = parsed.tree();
+                        if guest.syntax().text_with_trivia() != text {
+                            return None;
+                        }
+                        JsSuppressionSnippet {
+                            parser: Box::new(GraphqlSuppression),
+                            comments: Self::comment_trivia(&guest, offset),
+                        }
+                    }
+                    _ => return None,
+                };
+                Some((range, snippet))
+            })
+            .collect();
+        Self {
+            js: JsSuppression,
+            snippets,
+        }
+    }
+
+    #[cfg(feature = "js_embeds")]
+    fn comment_trivia<N: AstNode>(root: &N, offset: TextSize) -> Vec<(TokenText, TextRange)> {
+        root.syntax()
+            .preorder_tokens(Direction::Next)
+            .flat_map(|token| {
+                token
+                    .leading_trivia()
+                    .pieces()
+                    .chain(token.trailing_trivia().pieces())
+                    .filter(|piece| piece.is_comments())
+                    .map(move |piece| {
+                        let range = piece.text_range();
+                        (
+                            token.token_text().slice(range - token.text_range().start()),
+                            range + offset,
+                        )
+                    })
+            })
+            .collect()
+    }
+}
+
+impl Suppression for JsSuppressionService {
+    type Diagnostic = <JsSuppression as Suppression>::Diagnostic;
+
+    fn parse_comment<'a>(
+        &self,
+        text: &'a str,
+        range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression<'a>, Self::Diagnostic>> {
+        self.js.parse_comment(text, range)
+    }
+
+    #[cfg(feature = "js_embeds")]
+    fn parse_snippet(&self, range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        let Some(snippet) = self.snippets.get(&range) else {
+            return Vec::new();
+        };
+        snippet
+            .comments
+            .iter()
+            .filter_map(|(text, range)| {
+                let suppressions = snippet.parser.parse_comment(text.text(), *range);
+                (!suppressions.is_empty()).then_some(SuppressionComment {
+                    range: *range,
+                    suppressions,
+                })
+            })
+            .collect()
+    }
+
+    #[cfg(not(feature = "js_embeds"))]
+    fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        Vec::new()
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -1034,6 +1166,7 @@ fn debug_control_flow(
         &options,
         &[],
         Default::default(),
+        None,
         |_| ControlFlow::<Never>::Continue(()),
     );
 
@@ -1304,12 +1437,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let services = services.with_embedded_data(params.embedded_data.clone());
     let services = services.with_semantic_model(&semantic_model);
 
+    let suppression = JsSuppressionService::new(&tree, &params.parsed_source, &params.workspace_db);
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
         &analyzer_options,
         &params.plugins,
         services,
+        Some(Box::new(suppression)),
         |signal| process_lint.process_signal(signal),
     );
 
@@ -1393,12 +1528,15 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     .with_semantic_model(semantic_model);
 
     debug!("Javascript runs the analyzer");
+    let suppression =
+        JsSuppressionService::new(&tree, &parsed_source.clone().into(), &workspace_db);
     analyze(
         &tree,
         filter,
         &analyzer_options,
         &plugins,
         services,
+        Some(Box::new(suppression)),
         |signal| {
             if compute_actions {
                 actions.extend(
@@ -1492,12 +1630,15 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
             let mut pending_actions = Vec::new();
 
+            let suppression =
+                JsSuppressionService::new(&tree, &params.parsed_source, &params.workspace_db);
             let (_, _) = analyze(
                 &tree,
                 filter,
                 &analyzer_options,
                 &params.plugins,
                 services,
+                Some(Box::new(suppression)),
                 |signal| {
                     if params.collect_final_diagnostics {
                         process_fix_all.collect_signal(signal, &mut pending_actions)
@@ -1538,12 +1679,15 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
         let mut pending_actions = Vec::new();
 
+        let suppression =
+            JsSuppressionService::new(&tree, &params.parsed_source, &params.workspace_db);
         let (_, _) = analyze(
             &tree,
             fixable_filter,
             &analyzer_options,
             &params.plugins,
             services,
+            Some(Box::new(suppression)),
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
@@ -1590,12 +1734,15 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
         let services = js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
 
+        let suppression =
+            JsSuppressionService::new(&tree, &params.parsed_source, &params.workspace_db);
         let (_, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             &params.plugins,
             services,
+            Some(Box::new(suppression)),
             |signal| process_fix_all.collect_diagnostic_only(signal),
         );
     }
@@ -1870,12 +2017,15 @@ pub(crate) fn pull_diagnostics_and_actions(
     .with_semantic_model(semantic_model);
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
+    let suppression =
+        JsSuppressionService::new(&tree, &parsed_source.clone().into(), &workspace_db);
     analyze(
         &tree,
         filter,
         &analyzer_options,
         &plugins,
         services,
+        Some(Box::new(suppression)),
         |signal| process_pull_diagnostics_and_actions.process_signal(signal),
     );
 

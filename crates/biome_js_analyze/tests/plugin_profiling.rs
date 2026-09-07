@@ -67,7 +67,7 @@ fn profiles_are_split_per_plugin() {
 
     profiling::reset();
     profiling::enable();
-    biome_js_analyze::analyze(&root, filter, &options, &plugins, services, |_| {
+    biome_js_analyze::analyze(&root, filter, &options, &plugins, services, None, |_| {
         ControlFlow::<Never>::Continue(())
     });
     profiling::disable();

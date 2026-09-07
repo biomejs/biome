@@ -6,8 +6,8 @@ use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
-    LintResults, ParseResult, ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities,
-    UpdateSnippetsNodes,
+    LintResults, ParseResult, ParsedOrigin, ParserCapabilities, ProcessFixAll, ProcessLint,
+    SearchCapabilities, UpdateSnippetsNodes,
 };
 #[cfg(not(feature = "html_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
@@ -32,8 +32,10 @@ use crate::{
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
+use biome_analyze::SuppressionComment;
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSuppression,
+    ControlFlow, Never, Suppression,
 };
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
@@ -56,7 +58,7 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_html_analyze::{HtmlAnalyzerServices, analyze};
+use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -68,19 +70,179 @@ use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
+use biome_html_syntax::{HtmlElementList, HtmlSingleTextExpression, HtmlTextExpression};
+#[cfg(feature = "html_embeds")]
+use biome_js_analyze::JsSuppression;
+#[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
-use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkElement};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
+#[cfg(feature = "html_embeds")]
+use biome_rowan::TokenAtOffset;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 use camino::Utf8Path;
+#[cfg(feature = "html_embeds")]
+use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::fmt::Debug;
 use tracing::{debug_span, error, instrument, trace_span};
+
+struct HtmlSuppressionService {
+    html: HtmlSuppression,
+    #[cfg(feature = "html_embeds")]
+    snippets: FxHashMap<TextRange, JsSyntaxToken>,
+}
+
+impl HtmlSuppressionService {
+    #[cfg(not(feature = "html_embeds"))]
+    fn new(
+        _root: &HtmlRoot,
+        _source: HtmlFileSource,
+        _parsed: &ParsedOrigin,
+        _db: &WorkspaceDb,
+    ) -> Self {
+        Self {
+            html: HtmlSuppression,
+        }
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn new(
+        root: &HtmlRoot,
+        source: HtmlFileSource,
+        parsed: &ParsedOrigin,
+        db: &WorkspaceDb,
+    ) -> Self {
+        let mut snippets = FxHashMap::default();
+        if source.is_astro() {
+            let existing: FxHashMap<_, _> = parsed
+                .snippets(db)
+                .filter(|snippet| {
+                    snippet
+                        .file_source(db)
+                        .and_then(|source| source.to_js_file_source())
+                        .is_some_and(|source| source.as_embedding_kind().is_astro_template())
+                })
+                .map(|snippet| (snippet.content_range(db), snippet))
+                .collect();
+            for expression in root
+                .syntax()
+                .descendants()
+                .filter_map(HtmlSingleTextExpression::cast)
+            {
+                if expression.parent::<HtmlElementList>().is_none() {
+                    continue;
+                }
+                let Some(token) = expression
+                    .expression()
+                    .and_then(|body| body.html_literal_token().ok())
+                else {
+                    continue;
+                };
+                let range = token.text_trimmed_range();
+                let Some(parsed) = existing
+                    .get(&token.text_range())
+                    .map(|snippet| snippet.parsed_origin().parse(db))
+                else {
+                    continue;
+                };
+
+                if parsed.tree::<AnyJsRoot>().syntax().text_with_trivia() != token.text_trimmed() {
+                    continue;
+                }
+
+                if let Some(token) = Self::host_comment_token(root, range, &parsed) {
+                    snippets.insert(range, token);
+                }
+            }
+        }
+        Self {
+            html: HtmlSuppression,
+            snippets,
+        }
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn host_comment_token(
+        root: &HtmlRoot,
+        range: TextRange,
+        parsed: &AnyParse,
+    ) -> Option<JsSyntaxToken> {
+        if parsed.has_errors() {
+            return None;
+        }
+        let token = match root.syntax().token_at_offset(range.start()) {
+            TokenAtOffset::Single(token) | TokenAtOffset::Between(_, token) => token,
+            TokenAtOffset::None => return None,
+        };
+        if token.text_trimmed_range() != range {
+            return None;
+        }
+        let body = HtmlTextExpression::cast(token.parent()?)?;
+        let expression = body.parent::<HtmlSingleTextExpression>()?;
+        expression.parent::<HtmlElementList>()?;
+        expression.l_curly_token().ok()?;
+        expression.r_curly_token().ok()?;
+        let AnyJsRoot::JsExpressionTemplateRoot(guest) = parsed.tree::<AnyJsRoot>() else {
+            return None;
+        };
+        if guest.expression().is_some() {
+            return None;
+        }
+        let eof = guest.eof_token().ok()?;
+        if eof.text() != token.text_trimmed()
+            || eof.leading_trivia().has_skipped()
+            || eof.trailing_trivia().has_skipped()
+        {
+            return None;
+        }
+        Some(eof)
+    }
+}
+
+impl Suppression for HtmlSuppressionService {
+    type Diagnostic = <HtmlSuppression as Suppression>::Diagnostic;
+
+    fn parse_comment<'a>(
+        &self,
+        text: &'a str,
+        range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression<'a>, Self::Diagnostic>> {
+        self.html.parse_comment(text, range)
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn parse_snippet(&self, range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        let Some(token) = self.snippets.get(&range) else {
+            return Vec::new();
+        };
+        token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+            .filter(|piece| piece.is_comments())
+            .filter_map(|piece| {
+                let text = &token.text()[piece.text_range() - token.text_range().start()];
+                let range = piece.text_range() + range.start();
+                let suppressions = JsSuppression.parse_comment(text, range);
+                (!suppressions.is_empty()).then_some(SuppressionComment {
+                    range,
+                    suppressions,
+                })
+            })
+            .collect()
+    }
+
+    #[cfg(not(feature = "html_embeds"))]
+    fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        Vec::new()
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -767,12 +929,19 @@ fn lint(params: LintParams) -> LintResults {
         },
         project_layout: Some(params.project_layout.clone()),
     };
+    let suppression = HtmlSuppressionService::new(
+        &tree,
+        source_type,
+        &params.parsed_source,
+        &params.workspace_db,
+    );
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
         &analyzer_options,
         source_type,
         html_services,
+        Some(Box::new(suppression)),
         |signal| process_lint.process_signal(signal),
     );
 
@@ -852,12 +1021,15 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         project_layout: Some(project_layout),
     };
 
+    let suppression =
+        HtmlSuppressionService::new(&tree, source_type, &parsed_source.into(), &workspace_db);
     analyze(
         &tree,
         filter,
         &analyzer_options,
         source_type,
         html_services,
+        Some(Box::new(suppression)),
         |signal| {
             if compute_actions {
                 actions.extend(
@@ -952,12 +1124,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 project_layout: Some(params.project_layout.clone()),
             };
 
+            let suppression = HtmlSuppressionService::new(
+                &tree,
+                source_type,
+                &params.parsed_source,
+                &params.workspace_db,
+            );
             let (_, _) = analyze(
                 &tree,
                 filter,
                 &analyzer_options,
                 source_type,
                 html_services,
+                Some(Box::new(suppression)),
                 |signal| {
                     if params.collect_final_diagnostics {
                         process_fix_all.collect_signal(signal, &mut pending_actions)
@@ -1007,12 +1186,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
             project_layout: Some(params.project_layout.clone()),
         };
 
+        let suppression = HtmlSuppressionService::new(
+            &tree,
+            source_type,
+            &params.parsed_source,
+            &params.workspace_db,
+        );
         let (_, _) = analyze(
             &tree,
             fixable_filter,
             &analyzer_options,
             source_type,
             html_services,
+            Some(Box::new(suppression)),
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
@@ -1044,12 +1230,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
             },
             project_layout: Some(params.project_layout.clone()),
         };
+        let suppression = HtmlSuppressionService::new(
+            &tree,
+            source_type,
+            &params.parsed_source,
+            &params.workspace_db,
+        );
         let (_, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             source_type,
             html_services,
+            Some(Box::new(suppression)),
             |signal| process_fix_all.collect_diagnostic_only(signal),
         );
     }
