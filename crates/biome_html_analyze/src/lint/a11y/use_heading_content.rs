@@ -2,10 +2,14 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlSyntaxKind, T};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList,
+    HtmlSyntaxKind, T,
+};
 use biome_languages::HtmlFileSource;
 use biome_parser::{TokenSet, token_set};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
 use crate::a11y::{
@@ -60,6 +64,17 @@ declare_lint_rule! {
     /// <h1><span aria-hidden="true">hidden</span> visible content</h1>
     /// ```
     ///
+    /// In Astro files, the `set:html` and `set:text` directives render the heading
+    /// text, so headings that use them are not reported.
+    ///
+    /// ```astro
+    /// <h1 set:html={heading} />
+    /// ```
+    ///
+    /// ```astro
+    /// <h1 set:text={heading}></h1>
+    /// ```
+    ///
     /// ## Accessibility guidelines
     ///
     /// - [WCAG 2.4.6](https://www.w3.org/TR/UNDERSTANDING-WCAG20/navigation-mechanisms-descriptive.html)
@@ -108,6 +123,12 @@ impl Rule for UseHeadingContent {
             return None;
         }
 
+        // Astro's `set:html` / `set:text` render the heading's text at build time,
+        // so the heading does have content even though the element looks empty.
+        if source_type.is_astro() && has_astro_set_content_directive(&tag_element) {
+            return None;
+        }
+
         match node {
             // Self-closing headings (e.g. <h1 />) can never have content
             AnyHtmlElement::HtmlSelfClosingElement(_) => Some(()),
@@ -142,6 +163,29 @@ impl Rule for UseHeadingContent {
             ),
         )
     }
+}
+
+/// Checks if the element carries Astro's `set:html` or `set:text` directive.
+///
+/// Both directives make Astro render the given expression as the element's
+/// children, so the element has content even when it is written as empty or
+/// self-closing.
+///
+/// Ref: <https://docs.astro.build/en/reference/directives-reference/#sethtml>
+fn has_astro_set_content_directive(element: &AnyHtmlTagElement) -> bool {
+    element.attributes().iter().any(|attribute| {
+        let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroSetDirective(directive)) =
+            attribute
+        else {
+            return false;
+        };
+        directive
+            .value()
+            .ok()
+            .and_then(|value| value.name().ok())
+            .and_then(|name| name.token_text_trimmed())
+            .is_some_and(|name| matches!(name.text(), "html" | "text"))
+    })
 }
 
 /// Checks if an `HtmlElementList` contains accessible content.
