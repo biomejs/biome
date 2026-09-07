@@ -1,0 +1,33 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-normal-script.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+const vOnlyAvailableToTheScript = {};
+</script>
+
+<template>
+    <div v-only-available-to-the-script></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-normal-script.vue:7:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-only-available-to-the-script is undeclared.
+  
+    6 │ <template>
+  > 7 │     <div v-only-available-to-the-script></div>
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i Declare vOnlyAvailableToTheScript in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```

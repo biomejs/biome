@@ -266,6 +266,7 @@ impl AnalyzerServicesBuilder {
         HtmlAnalyzerServices::default()
             .with_module_db(self.module_db.rc_module_db())
             .with_project_layout(self.project_layout.clone())
+            .with_language_db(self.module_db.rc_language_db())
     }
 }
 

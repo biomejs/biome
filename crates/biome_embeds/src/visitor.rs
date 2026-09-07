@@ -1,5 +1,5 @@
 use crate::bindings::EmbeddedBinding;
-use crate::data::EmbeddedData;
+use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
 use biome_db::ParsedSource;
 use biome_html_syntax::{
@@ -12,12 +12,12 @@ use biome_html_syntax::{
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
-    AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
-    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsIdentifierAssignment, JsImport, JsModuleItemList, JsReferenceIdentifier,
-    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement,
-    JsxReferenceIdentifier,
+    AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
+    AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
+    AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression,
+    JsCallExpression, JsExport, JsIdentifierAssignment, JsImport, JsModuleItemList,
+    JsReferenceIdentifier, JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot,
+    JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -60,17 +60,18 @@ pub fn collect_embedded_data<'a>(
     host_parse: &AnyParse,
     snippets: Vec<EmbeddedSnippet<'a>>,
 ) -> EmbeddedData {
-    let bindings = collect_embedded_bindings(host_source, host_parse, &snippets);
+    let collected_bindings = collect_embedded_bindings(host_source, host_parse, &snippets);
     let references = collect_embedded_references(host_source, host_parse, &snippets);
 
     EmbeddedData::new(
-        bindings,
+        collected_bindings.bindings,
         references
             .as_ref()
             .map_or_else(Vec::new, build_value_references),
         references
             .as_ref()
             .map_or_else(Vec::new, build_type_references),
+        collected_bindings.vue_directive_declarations,
     )
 }
 
@@ -128,20 +129,41 @@ pub fn embedded_bindings_from_source(
         })
         .collect::<Vec<_>>();
 
-    vec![collect_embedded_bindings(
-        host_source,
-        file.parsed(db),
-        &snippets,
-    )]
+    vec![collect_embedded_bindings(host_source, file.parsed(db), &snippets).bindings]
+}
+
+/// Collects custom Vue directive declarations from a host document.
+#[salsa::tracked(returns(ref))]
+pub fn vue_directive_declarations_from_source(
+    db: &dyn LanguageDb,
+    file: ParsedSource,
+) -> VueDirectiveDeclarations {
+    let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
+        return VueDirectiveDeclarations::unknown();
+    };
+    let snippets = file
+        .snippets(db)
+        .iter()
+        .filter_map(|snippet| {
+            let file_source = db.source_from_index(snippet.document_source_index(db))?;
+            Some(EmbeddedSnippet::new(
+                snippet.parsed(db),
+                snippet.content_range(db),
+                file_source,
+            ))
+        })
+        .collect::<Vec<_>>();
+
+    collect_embedded_bindings(host_source, file.parsed(db), &snippets).vue_directive_declarations
 }
 
 fn collect_embedded_bindings(
     host_source: DocumentFileSource,
     host_parse: &AnyParse,
     snippets: &[EmbeddedSnippet],
-) -> Vec<EmbeddedBinding> {
+) -> CollectedEmbeddedBindings {
     let Some(host_file_source) = host_source.to_html_file_source() else {
-        return Vec::new();
+        return CollectedEmbeddedBindings::default();
     };
 
     let html_root: HtmlRoot = host_parse.tree();
@@ -149,6 +171,7 @@ fn collect_embedded_bindings(
 
     if host_file_source.is_vue() {
         builder.visit_vue_html_root(&html_root);
+        builder.has_unknown_vue_directive_options |= has_external_script_element(&html_root);
     } else if host_file_source.is_svelte() {
         builder.visit_svelte_html_root(&html_root);
     }
@@ -167,20 +190,34 @@ fn collect_embedded_bindings(
             builder.visit_js_source_snippet(
                 &snippet.parse.tree(),
                 &host_file_source,
+                &js_file_source,
                 block_kind.as_ref(),
             );
         }
     }
 
-    builder
-        .js_bindings
-        .into_iter()
-        .map(|(range, text, source)| EmbeddedBinding {
-            range,
-            text,
-            source,
-        })
-        .collect()
+    CollectedEmbeddedBindings {
+        bindings: builder
+            .js_bindings
+            .into_iter()
+            .map(|(range, text, source)| EmbeddedBinding {
+                range,
+                text,
+                source,
+            })
+            .collect(),
+        vue_directive_declarations: VueDirectiveDeclarations::new(
+            builder.vue_setup_bindings,
+            builder.vue_directive_option_names,
+            builder.has_unknown_vue_directive_options,
+        ),
+    }
+}
+
+#[derive(Default)]
+struct CollectedEmbeddedBindings {
+    bindings: Vec<EmbeddedBinding>,
+    vue_directive_declarations: VueDirectiveDeclarations,
 }
 
 #[salsa::tracked(returns(ref))]
@@ -322,29 +359,70 @@ fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool 
     })
 }
 
+fn has_external_script_element(root: &HtmlRoot) -> bool {
+    root.syntax().descendants().any(|node| {
+        if let Some(element) = HtmlElement::cast_ref(&node) {
+            return element.is_script_tag() && element.find_attribute_by_name("src").is_some();
+        }
+
+        // `<script src="…" />` parses as a self-closing element, which has no
+        // `is_script_tag` of its own because it has no opening element to read.
+        HtmlSelfClosingElement::cast_ref(&node).is_some_and(|element| {
+            element
+                .tag_name()
+                .is_some_and(|name| name.text().eq_ignore_ascii_case("script"))
+                && element.find_attribute_by_name("src").is_some()
+        })
+    })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum BindingErasure {
+    Runtime,
+    TypeOnly,
+}
+
 #[derive(Debug)]
 struct EmbeddedBindingsBuilder {
     js_bindings: Vec<(TextRange, TokenText, Option<TokenText>)>,
+    vue_setup_bindings: Vec<TokenText>,
+    vue_directive_option_names: Vec<TokenText>,
+    has_unknown_vue_directive_options: bool,
+    is_vue_source: bool,
+    is_vue_setup: bool,
 }
 
 impl EmbeddedBindingsBuilder {
     fn new() -> Self {
         Self {
             js_bindings: Vec::default(),
+            vue_setup_bindings: Vec::default(),
+            vue_directive_option_names: Vec::default(),
+            has_unknown_vue_directive_options: false,
+            is_vue_source: false,
+            is_vue_setup: false,
         }
     }
 
     fn register_binding(&mut self, range: TextRange, text: TokenText) {
-        self.js_bindings.push((range, text, None));
+        self.push_binding(range, text, None, BindingErasure::Runtime);
     }
 
-    fn register_binding_with_source(
+    fn register_type_only_binding(&mut self, range: TextRange, text: TokenText) {
+        self.push_binding(range, text, None, BindingErasure::TypeOnly);
+    }
+
+    fn push_binding(
         &mut self,
         range: TextRange,
         text: TokenText,
-        source: TokenText,
+        source: Option<TokenText>,
+        erasure: BindingErasure,
     ) {
-        self.js_bindings.push((range, text, Some(source)));
+        if self.is_vue_setup && erasure == BindingErasure::Runtime {
+            self.vue_setup_bindings.push(text.clone());
+        }
+        self.js_bindings.push((range, text, source));
     }
 
     fn visit_vue_html_root(&mut self, root: &HtmlRoot) {
@@ -551,8 +629,14 @@ impl EmbeddedBindingsBuilder {
         &mut self,
         root: &AnyJsRoot,
         host_file_source: &HtmlFileSource,
+        js_file_source: &JsFileSource,
         embed_block_kind: Option<&EmbeddedBlockKind>,
     ) {
+        let previous_is_vue_source = self.is_vue_source;
+        let previous_is_vue_setup = self.is_vue_setup;
+        self.is_vue_source = host_file_source.is_vue();
+        self.is_vue_setup = self.is_vue_source && js_file_source.as_embedding_kind().is_vue_setup();
+
         let preorder = root.syntax().preorder();
 
         for event in preorder {
@@ -589,6 +673,9 @@ impl EmbeddedBindingsBuilder {
                 WalkEvent::Leave(_) => {}
             }
         }
+
+        self.is_vue_source = previous_is_vue_source;
+        self.is_vue_setup = previous_is_vue_setup;
     }
 
     fn visit_svelte_const_assignment(
@@ -878,20 +965,34 @@ impl EmbeddedBindingsBuilder {
 
     fn visit_js_import(&mut self, import: JsImport) -> Option<()> {
         let clause = import.import_clause().ok()?;
+        // `import type { X }` marks the whole clause; `import { type X }` marks the
+        // single specifier. Either way the binding is erased before the code runs.
+        let clause_erasure = if clause.type_token().is_some() {
+            BindingErasure::TypeOnly
+        } else {
+            BindingErasure::Runtime
+        };
         if let Some(named_specifiers) = clause.named_specifiers() {
-            let imported_names = named_specifiers
-                .specifiers()
-                .iter()
-                .flatten()
-                .map(|specifier| specifier.imported_name());
-
-            for imported_name in imported_names {
-                let Some(imported_name) = imported_name else {
+            for specifier in named_specifiers.specifiers().iter().flatten() {
+                let Some(local_name) = specifier.local_name() else {
                     continue;
                 };
-                self.register_binding(
-                    imported_name.text_trimmed_range(),
-                    imported_name.token_text_trimmed(),
+                let Some(local_name) = local_name.as_js_identifier_binding() else {
+                    continue;
+                };
+                let Ok(local_name) = local_name.name_token() else {
+                    continue;
+                };
+                let erasure = if specifier.type_token().is_some() {
+                    BindingErasure::TypeOnly
+                } else {
+                    clause_erasure
+                };
+                self.push_binding(
+                    local_name.text_trimmed_range(),
+                    local_name.token_text_trimmed(),
+                    None,
+                    erasure,
                 );
             }
         }
@@ -900,9 +1001,11 @@ impl EmbeddedBindingsBuilder {
             let local_name = default_specifiers.local_name().ok()?;
             let local_name = local_name.as_js_identifier_binding()?;
             let local_name = local_name.name_token().ok()?;
-            self.register_binding(
+            self.push_binding(
                 local_name.text_trimmed_range(),
                 local_name.token_text_trimmed(),
+                None,
+                clause_erasure,
             );
         }
 
@@ -913,10 +1016,11 @@ impl EmbeddedBindingsBuilder {
             let name = name.name_token().ok()?;
             let source = import.source_text().ok()?;
 
-            self.register_binding_with_source(
+            self.push_binding(
                 name.text_trimmed_range(),
                 name.token_text_trimmed(),
-                source,
+                Some(source),
+                clause_erasure,
             );
         }
 
@@ -927,10 +1031,11 @@ impl EmbeddedBindingsBuilder {
             let name = name.name_token().ok()?;
             let source = import.source_text().ok()?;
 
-            self.register_binding_with_source(
+            self.push_binding(
                 name.text_trimmed_range(),
                 name.token_text_trimmed(),
-                source,
+                Some(source),
+                clause_erasure,
             );
         }
 
@@ -949,6 +1054,17 @@ impl EmbeddedBindingsBuilder {
             self.register_exported_declaration(declaration_clause);
         }
 
+        if self.is_vue_source && !self.is_vue_setup {
+            if let Some(default_clause) = clause.as_js_export_default_expression_clause() {
+                if let Ok(expression) = default_clause.expression() {
+                    self.visit_vue_default_export(&expression);
+                } else {
+                    self.has_unknown_vue_directive_options = true;
+                }
+            } else if has_non_expression_default_export(&clause) {
+                self.has_unknown_vue_directive_options = true;
+            }
+        }
         let default_clause = clause.as_js_export_default_expression_clause()?;
         let expression = default_clause.expression().ok()?;
         let object_expr = expression.as_js_object_expression()?;
@@ -1006,6 +1122,123 @@ impl EmbeddedBindingsBuilder {
         Some(())
     }
 
+    fn visit_define_options_call(&mut self, call_expression: &JsCallExpression) {
+        let Ok(callee) = call_expression.callee() else {
+            return;
+        };
+        if callee.syntax().text_trimmed() != "defineOptions" {
+            return;
+        }
+
+        let Some(Ok(argument)) = call_expression
+            .arguments()
+            .ok()
+            .and_then(|args| args.args().first())
+        else {
+            self.has_unknown_vue_directive_options = true;
+            return;
+        };
+        let Some(expression) = argument.as_any_js_expression() else {
+            self.has_unknown_vue_directive_options = true;
+            return;
+        };
+        let Some(object) = expression
+            .clone()
+            .inner_expression()
+            .and_then(|expression| expression.as_js_object_expression().cloned())
+        else {
+            self.has_unknown_vue_directive_options = true;
+            return;
+        };
+
+        self.visit_vue_options_object(&object);
+    }
+
+    fn visit_vue_default_export(&mut self, expression: &AnyJsExpression) {
+        let Some(expression) = expression.clone().inner_expression() else {
+            self.has_unknown_vue_directive_options = true;
+            return;
+        };
+
+        match expression {
+            AnyJsExpression::JsObjectExpression(object) => self.visit_vue_options_object(&object),
+            AnyJsExpression::JsCallExpression(call) => {
+                let Ok(callee) = call.callee() else {
+                    self.has_unknown_vue_directive_options = true;
+                    return;
+                };
+                if callee.syntax().text_trimmed() != "defineComponent" {
+                    self.has_unknown_vue_directive_options = true;
+                    return;
+                }
+                let Some(Ok(argument)) = call
+                    .arguments()
+                    .ok()
+                    .and_then(|arguments| arguments.args().last())
+                else {
+                    self.has_unknown_vue_directive_options = true;
+                    return;
+                };
+                let Some(expression) = argument.as_any_js_expression() else {
+                    self.has_unknown_vue_directive_options = true;
+                    return;
+                };
+                let Some(object) = expression
+                    .clone()
+                    .inner_expression()
+                    .and_then(|expression| expression.as_js_object_expression().cloned())
+                else {
+                    self.has_unknown_vue_directive_options = true;
+                    return;
+                };
+                self.visit_vue_options_object(&object);
+            }
+            _ => self.has_unknown_vue_directive_options = true,
+        }
+    }
+
+    fn visit_vue_options_object(&mut self, object: &biome_js_syntax::JsObjectExpression) {
+        for member in object.members().iter().flatten() {
+            let Some(name) = member.name() else {
+                self.has_unknown_vue_directive_options = true;
+                continue;
+            };
+
+            match name.text() {
+                "directives" => {
+                    let AnyJsObjectMember::JsPropertyObjectMember(property) = member else {
+                        self.has_unknown_vue_directive_options = true;
+                        continue;
+                    };
+                    let Ok(value) = property.value() else {
+                        self.has_unknown_vue_directive_options = true;
+                        continue;
+                    };
+                    let Some(registry) = value
+                        .inner_expression()
+                        .and_then(|expression| expression.as_js_object_expression().cloned())
+                    else {
+                        self.has_unknown_vue_directive_options = true;
+                        continue;
+                    };
+                    self.visit_vue_directive_registry(&registry);
+                }
+                "extends" | "mixins" => self.has_unknown_vue_directive_options = true,
+                _ => {}
+            }
+        }
+    }
+
+    fn visit_vue_directive_registry(&mut self, registry: &biome_js_syntax::JsObjectExpression) {
+        for member in registry.members().iter().flatten() {
+            let Some(name) = member.name() else {
+                self.has_unknown_vue_directive_options = true;
+                continue;
+            };
+            self.vue_directive_option_names.push(name);
+        }
+    }
+
     fn register_exported_declaration(
         &mut self,
         declaration: &AnyJsDeclarationClause,
@@ -1058,7 +1291,7 @@ impl EmbeddedBindingsBuilder {
         let binding = result.ok()?;
         let identifier = binding.as_ts_identifier_binding()?;
         let token = identifier.name_token().ok()?;
-        self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+        self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         Some(())
     }
 
@@ -1117,6 +1350,9 @@ impl EmbeddedBindingsBuilder {
             return;
         };
         self.visit_define_props_call(&call_expression);
+        if self.is_vue_setup {
+            self.visit_define_options_call(&call_expression);
+        }
     }
 
     fn visit_define_props_call(&mut self, call_expression: &JsCallExpression) {
@@ -1259,6 +1495,43 @@ impl EmbeddedBindingsBuilder {
         }
 
         Some(())
+    }
+}
+
+fn has_non_expression_default_export(clause: &AnyJsExportClause) -> bool {
+    match clause {
+        AnyJsExportClause::JsExportDefaultDeclarationClause(_) => true,
+        AnyJsExportClause::JsExportNamedClause(clause) => {
+            clause.specifiers().iter().any(|specifier| {
+                let Ok(specifier) = specifier else {
+                    return false;
+                };
+                specifier
+                    .as_js_export_named_specifier()
+                    .and_then(|specifier| specifier.exported_name().ok())
+                    .is_some_and(|name| name.is_default())
+            })
+        }
+        AnyJsExportClause::JsExportNamedFromClause(clause) => {
+            clause.specifiers().iter().any(|specifier| {
+                let Ok(specifier) = specifier else {
+                    return false;
+                };
+                // `export { options as default } from "…"` renames the export, while
+                // `export { default } from "…"` re-exports under the source name.
+                let exported_name = match specifier.export_as() {
+                    Some(export_as) => export_as.exported_name().ok(),
+                    None => specifier.source_name().ok(),
+                };
+                exported_name.is_some_and(|name| name.is_default())
+            })
+        }
+        AnyJsExportClause::AnyJsDeclarationClause(_)
+        | AnyJsExportClause::JsExportDefaultExpressionClause(_)
+        | AnyJsExportClause::JsExportFromClause(_)
+        | AnyJsExportClause::TsExportAsNamespaceClause(_)
+        | AnyJsExportClause::TsExportAssignmentClause(_)
+        | AnyJsExportClause::TsExportDeclareClause(_) => false,
     }
 }
 

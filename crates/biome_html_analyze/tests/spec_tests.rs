@@ -150,6 +150,7 @@ pub(crate) fn analyze_and_snap(
         HtmlAnalyzerServices {
             module_db: Some(module_db.rc_module_db()),
             project_layout: Some(project_layout),
+            ..HtmlAnalyzerServices::default()
         }
     } else {
         HtmlAnalyzerServices::default()

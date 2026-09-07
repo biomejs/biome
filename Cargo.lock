@@ -891,6 +891,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_embeds",
  "biome_html_factory",
  "biome_html_parser",
  "biome_html_syntax",

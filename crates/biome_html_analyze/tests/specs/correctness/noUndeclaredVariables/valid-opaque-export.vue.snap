@@ -1,0 +1,18 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: valid-opaque-export.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const componentOptions = {};
+export { componentOptions as default };
+</script>
+
+<template>
+    <div v-may-come-from-export></div>
+</template>
+
+```
