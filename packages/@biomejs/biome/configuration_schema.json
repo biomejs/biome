@@ -7281,6 +7281,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBetterDomTraversing": {
+					"description": "Prefer modern DOM traversal APIs over positional indexes and chained walks.\nSee https://biomejs.dev/linter/rules/use-better-dom-traversing",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBetterDomTraversingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTestIt": {
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
@@ -11583,6 +11590,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBetterDomTraversingOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBetterDomTraversingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBiomeIgnoreFolderOptions": {
 			"type": "object",
 			"properties": {
@@ -15375,6 +15392,16 @@
 					"$ref": "#/$defs/AvailabilityTarget"
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseBetterDomTraversingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBetterDomTraversingOptions" }
+			]
+		},
+		"UseBetterDomTraversingOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseBiomeIgnoreFolderConfiguration": {

@@ -1716,6 +1716,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_baseline::UseBaselineOptions>(),
     ));
     result.push((
+        "nursery",
+        "useBetterDomTraversing",
+        TypeId::of::<biome_rule_options::use_better_dom_traversing::UseBetterDomTraversingOptions>(
+        ),
+    ));
+    result.push((
         "suspicious",
         "useBiomeIgnoreFolder",
         TypeId::of::<biome_rule_options::use_biome_ignore_folder::UseBiomeIgnoreFolderOptions>(),
