@@ -128,7 +128,8 @@ impl HtmlSuppressionService {
                         .and_then(|source| source.to_js_file_source())
                         .is_some_and(|source| source.as_embedding_kind().is_astro_template())
                 })
-                .map(|snippet| (snippet.content_range(db), snippet))
+                .filter_map(|snippet| Self::comment_only_token(&snippet.parsed_origin().parse(db)))
+                .map(|token| (token.token_text(), token))
                 .collect();
             for expression in root
                 .syntax()
@@ -145,18 +146,11 @@ impl HtmlSuppressionService {
                     continue;
                 };
                 let range = token.text_trimmed_range();
-                let Some(parsed) = existing
-                    .get(&token.text_range())
-                    .map(|snippet| snippet.parsed_origin().parse(db))
-                else {
+                // Host fixes may shift a comment without changing its guest text.
+                let Some(guest_token) = existing.get(&token.token_text_trimmed()) else {
                     continue;
                 };
-
-                if parsed.tree::<AnyJsRoot>().syntax().text_with_trivia() != token.text_trimmed() {
-                    continue;
-                }
-
-                if let Some(token) = Self::host_comment_token(root, range, &parsed) {
+                if let Some(token) = Self::host_comment_token(root, range, guest_token.clone()) {
                     snippets.insert(range, token);
                 }
             }
@@ -168,14 +162,32 @@ impl HtmlSuppressionService {
     }
 
     #[cfg(feature = "html_embeds")]
-    fn host_comment_token(
-        root: &HtmlRoot,
-        range: TextRange,
-        parsed: &AnyParse,
-    ) -> Option<JsSyntaxToken> {
+    fn comment_only_token(parsed: &AnyParse) -> Option<JsSyntaxToken> {
         if parsed.has_errors() {
             return None;
         }
+        let AnyJsRoot::JsExpressionTemplateRoot(guest) = parsed.tree::<AnyJsRoot>() else {
+            return None;
+        };
+        if guest.expression().is_some() {
+            return None;
+        }
+        let eof = guest.eof_token().ok()?;
+        if !(eof.has_leading_comments() || eof.has_trailing_comments())
+            || eof.leading_trivia().has_skipped()
+            || eof.trailing_trivia().has_skipped()
+        {
+            return None;
+        }
+        Some(eof)
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn host_comment_token(
+        root: &HtmlRoot,
+        range: TextRange,
+        eof: JsSyntaxToken,
+    ) -> Option<JsSyntaxToken> {
         let token = match root.syntax().token_at_offset(range.start()) {
             TokenAtOffset::Single(token) | TokenAtOffset::Between(_, token) => token,
             TokenAtOffset::None => return None,
@@ -188,21 +200,39 @@ impl HtmlSuppressionService {
         expression.parent::<HtmlElementList>()?;
         expression.l_curly_token().ok()?;
         expression.r_curly_token().ok()?;
-        let AnyJsRoot::JsExpressionTemplateRoot(guest) = parsed.tree::<AnyJsRoot>() else {
-            return None;
-        };
-        if guest.expression().is_some() {
-            return None;
-        }
-        let eof = guest.eof_token().ok()?;
-        if eof.text() != token.text_trimmed()
-            || eof.leading_trivia().has_skipped()
-            || eof.trailing_trivia().has_skipped()
-        {
+        if eof.text() != token.text_trimmed() {
             return None;
         }
         Some(eof)
     }
+}
+
+/// Identifies template comments owned by HTML analysis while retaining their
+/// guest parse for formatting and suppression extraction.
+#[cfg(feature = "html_embeds")]
+pub(crate) fn is_astro_template_comment(
+    host: &ParsedOrigin,
+    source: DocumentFileSource,
+    snippet: &super::ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    if !source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_astro())
+        || !snippet
+            .file_source(db)
+            .and_then(|source| source.to_js_file_source())
+            .is_some_and(|source| source.as_embedding_kind().is_astro_template())
+    {
+        return false;
+    }
+    let Some(token) =
+        HtmlSuppressionService::comment_only_token(&snippet.parsed_origin().parse(db))
+    else {
+        return false;
+    };
+    HtmlSuppressionService::host_comment_token(&host.tree(db), snippet.content_range(db), token)
+        .is_some()
 }
 
 impl Suppression for HtmlSuppressionService {

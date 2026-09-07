@@ -113,15 +113,10 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                     parse,
                     file_source,
                 );
-                let result = biome_js_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    &[],
-                    services,
-                    None,
-                    |signal| process_signal(signal, analysis_code, &file_path, writer),
-                );
+                let result =
+                    biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
+                        process_signal(signal, analysis_code, &file_path, writer)
+                    });
                 propagate_break(result)?;
             }
         }

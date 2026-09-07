@@ -117,7 +117,6 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 &options,
                                 &[],
                                 services,
-                                None,
                                 |event| {
                                     black_box(event.diagnostic());
                                     black_box(event.actions(ActionFilter::all()));

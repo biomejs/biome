@@ -77,7 +77,6 @@ fn quick_test() {
         &options,
         &[],
         services,
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 error_ranges.push(diag.location().span.unwrap());
@@ -130,7 +129,6 @@ fn quick_test_suppression() {
         &options,
         &[],
         services,
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -219,7 +217,6 @@ fn suppression() {
         &options,
         &[],
         services,
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let span = diag.get_span();
@@ -291,7 +288,6 @@ fn suppression_syntax() {
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -336,7 +332,6 @@ let bar = 33;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -388,7 +383,6 @@ debugger;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -435,7 +429,6 @@ debugger;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -484,7 +477,6 @@ debugger;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -534,7 +526,6 @@ let bar = 33;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -582,7 +573,6 @@ let bar = 33;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -628,7 +618,6 @@ let bar = 33;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -677,7 +666,6 @@ let bar = 33;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -728,7 +716,6 @@ let c;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -780,7 +767,6 @@ debugger;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -833,7 +819,6 @@ let d;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -877,7 +862,7 @@ const foo0 = function (bar: string) {
         .with_source_type(JsFileSource::ts())
         .with_semantic_model(&semantic_model);
 
-    crate::analyze(&root, filter, &options, &[], services, None, |signal| {
+    crate::analyze(&root, filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {
             let error = diag
                 .with_file_path("dummyFile")
@@ -923,7 +908,6 @@ a == b;
         &options,
         &[],
         Default::default(),
-        None,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -966,24 +950,16 @@ var foo = {
     let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
 
     let options = AnalyzerOptions::default();
-    crate::analyze(
-        &parsed.tree(),
-        filter,
-        &options,
-        &[],
-        services,
-        None,
-        |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let code = diag.category().unwrap();
-                if code == category!("suppressions/unused") {
-                    panic!("unexpected diagnostic {code:?}");
-                }
+    crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
+        if let Some(diag) = signal.diagnostic() {
+            let code = diag.category().unwrap();
+            if code == category!("suppressions/unused") {
+                panic!("unexpected diagnostic {code:?}");
             }
+        }
 
-            ControlFlow::<Never>::Continue(())
-        },
-    );
+        ControlFlow::<Never>::Continue(())
+    });
 }
 
 #[test]
@@ -1011,24 +987,16 @@ console.log("should be suppressed");"#;
     let options = AnalyzerOptions::default();
     let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let mut diagnostic_found = false;
-    analyze(
-        &parsed.tree(),
-        filter,
-        &options,
-        &[],
-        services,
-        None,
-        |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let code = diag.category().unwrap();
-                if code == category!("lint/suspicious/noConsole") {
-                    diagnostic_found = true
-                }
+    analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
+        if let Some(diag) = signal.diagnostic() {
+            let code = diag.category().unwrap();
+            if code == category!("lint/suspicious/noConsole") {
+                diagnostic_found = true
             }
+        }
 
-            ControlFlow::<Never>::Continue(())
-        },
-    );
+        ControlFlow::<Never>::Continue(())
+    });
 
     assert!(diagnostic_found, "must have diagnostics");
 }

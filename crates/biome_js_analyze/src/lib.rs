@@ -1,5 +1,4 @@
 #![deny(clippy::use_self)]
-#![expect(clippy::too_many_arguments)]
 #![warn(clippy::needless_pass_by_value)]
 #![expect(
     clippy::disallowed_methods,
@@ -17,7 +16,6 @@ use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
     AnalyzerSignal, BatchPluginVisitor, ControlFlow, InspectMatcher, LanguageRoot,
     MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
-    Suppression,
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
@@ -28,7 +26,6 @@ use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_suppression::SuppressionDiagnostic;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -146,7 +143,6 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
-    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -176,7 +172,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        suppression.unwrap_or_else(|| Box::new(JsSuppression)),
+        Box::new(JsSuppression),
         Box::new(JsSuppressionAction),
         &mut emit_signal,
     );
@@ -258,7 +254,6 @@ pub fn analyze<'a, F, B>(
     options: &'a AnalyzerOptions,
     plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
-    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -281,7 +276,6 @@ where
         options,
         plugins,
         services,
-        suppression,
         emit_signal,
     )
 }

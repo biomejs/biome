@@ -374,6 +374,29 @@ pub(crate) enum SnippetsIterator<'a> {
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
 }
 
+impl<'a> SnippetsIterator<'a> {
+    /// Excludes host-owned template comments from guest analysis. The unfiltered
+    /// iterator remains available for formatting and host suppression extraction.
+    pub(crate) fn for_analysis(
+        self,
+        host: &'a ParsedOrigin,
+        source: DocumentFileSource,
+        db: &'a WorkspaceDb,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        self.filter(move |snippet| {
+            #[cfg(feature = "html_embeds")]
+            {
+                !html::is_astro_template_comment(host, source, snippet, db)
+            }
+            #[cfg(not(feature = "html_embeds"))]
+            {
+                let _ = (host, source, snippet, db);
+                true
+            }
+        })
+    }
+}
+
 impl Iterator for SnippetsIterator<'_> {
     type Item = ParsedSnippetOrigin;
 
