@@ -1,9 +1,6 @@
 // should generate diagnostics
 
-// `task.run()` floats with or without narrowing. These cases exist to catch
-// narrowing suppressing the diagnostic, not to prove that narrowing happens --
-// the inferred types are pinned by
-// `biome_module_graph/tests/spec_tests/narrowing.test.rs`.
+// `task.run()` floats with or without narrowing; narrowing must not hide it.
 
 type Task =
 	| { kind: "sync" }
