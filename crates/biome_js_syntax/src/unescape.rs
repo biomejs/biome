@@ -1,4 +1,83 @@
+use std::borrow::Cow;
+
 use biome_rowan::{Text, TokenText};
+
+/// Returns the value of an identifier after decoding its Unicode escape sequences.
+///
+/// This decodes `\uXXXX` and `\u{...}` escapes without applying Unicode
+/// normalization. If an escape is malformed or represents an invalid Unicode
+/// scalar value, the original identifier is returned unchanged.
+pub fn unescape_js_identifier(identifier: &str) -> Cow<'_, str> {
+    let Some(first_escape) = identifier.find('\\') else {
+        return Cow::Borrowed(identifier);
+    };
+
+    let mut result = String::with_capacity(identifier.len());
+    let mut copied_until = 0;
+    let mut escape_start = first_escape;
+
+    loop {
+        result.push_str(&identifier[copied_until..escape_start]);
+
+        let Some((decoded, escape_end)) = decode_unicode_escape(identifier, escape_start) else {
+            return Cow::Borrowed(identifier);
+        };
+        result.push(decoded);
+        copied_until = escape_end;
+
+        let Some(next_escape) = identifier[escape_end..].find('\\') else {
+            result.push_str(&identifier[escape_end..]);
+            return Cow::Owned(result);
+        };
+        escape_start = escape_end + next_escape;
+    }
+}
+
+fn decode_unicode_escape(identifier: &str, start: usize) -> Option<(char, usize)> {
+    let bytes = identifier.as_bytes();
+    if bytes.get(start..start + 2)? != b"\\u" {
+        return None;
+    }
+
+    if bytes.get(start + 2) == Some(&b'{') {
+        let mut value = 0u32;
+        let mut index = start + 3;
+        let digits_start = index;
+
+        while let Some(&byte) = bytes.get(index) {
+            if byte == b'}' {
+                if index == digits_start {
+                    return None;
+                }
+                return char::from_u32(value).map(|decoded| (decoded, index + 1));
+            }
+
+            value = value.checked_mul(16)?.checked_add(hex_value(byte)?)?;
+            if value > 0x10_ffff {
+                return None;
+            }
+            index += 1;
+        }
+        None
+    } else {
+        let end = start + 6;
+        let digits = bytes.get(start + 2..end)?;
+        let mut value = 0u32;
+        for &digit in digits {
+            value = value * 16 + hex_value(digit)?;
+        }
+        char::from_u32(value).map(|decoded| (decoded, end))
+    }
+}
+
+fn hex_value(byte: u8) -> Option<u32> {
+    match byte {
+        b'0'..=b'9' => Some(u32::from(byte - b'0')),
+        b'a'..=b'f' => Some(u32::from(byte - b'a' + 10)),
+        b'A'..=b'F' => Some(u32::from(byte - b'A' + 10)),
+        _ => None,
+    }
+}
 
 /// Returns `text` with escape sequences processed.
 ///
@@ -168,6 +247,8 @@ pub fn unescape_js_string(text: TokenText) -> Text {
 
 #[cfg(test)]
 mod test {
+    use std::borrow::Cow;
+
     use biome_rowan::RawSyntaxKind;
 
     use super::*;
@@ -189,6 +270,53 @@ mod test {
             let token = TokenText::new_raw(RawSyntaxKind(1), token_text);
             let actual = unescape_js_string(token);
             assert_eq!(actual.text(), *expected, "failed test case: {token_text}");
+        }
+    }
+
+    #[test]
+    fn test_unescape_js_identifier() {
+        let test_cases: &[(&str, &str)] = &[
+            ("identifier", "identifier"),
+            ("\\u0065", "e"),
+            ("\\u{65}", "e"),
+            ("a\\u0062\\u{63}", "abc"),
+            ("\\u{10400}", "𐐀"),
+            ("a\\u200cb", "a\u{200c}b"),
+            ("a\\u200db", "a\u{200d}b"),
+        ];
+
+        for (identifier, expected) in test_cases {
+            assert_eq!(
+                unescape_js_identifier(identifier),
+                *expected,
+                "failed test case: {identifier}"
+            );
+        }
+
+        assert!(matches!(
+            unescape_js_identifier("identifier"),
+            Cow::Borrowed(_)
+        ));
+        assert!(matches!(unescape_js_identifier("\\u0065"), Cow::Owned(_)));
+    }
+
+    #[test]
+    fn test_unescape_malformed_js_identifier() {
+        let test_cases = [
+            "\\x65",
+            "\\u065",
+            "\\u006g",
+            "\\u{}",
+            "\\u{65",
+            "\\u{110000}",
+            "\\ud800",
+        ];
+
+        for identifier in test_cases {
+            assert!(matches!(
+                unescape_js_identifier(identifier),
+                Cow::Borrowed(text) if text == identifier
+            ));
         }
     }
 }
