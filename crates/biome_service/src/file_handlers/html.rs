@@ -95,7 +95,7 @@ use tracing::{debug_span, error, instrument, trace_span};
 struct HtmlSuppressionService {
     html: HtmlSuppression,
     #[cfg(feature = "html_embeds")]
-    snippets: FxHashMap<TextRange, JsSyntaxToken>,
+    snippets: FxHashMap<TextRange, (JsSyntaxToken, TextSize)>,
 }
 
 impl HtmlSuppressionService {
@@ -145,13 +145,15 @@ impl HtmlSuppressionService {
                 else {
                     continue;
                 };
-                let range = token.text_trimmed_range();
+                let range = token.text_range();
                 // Host fixes may shift a comment without changing its guest text.
-                let Some(guest_token) = existing.get(&token.token_text_trimmed()) else {
+                let Some(guest_token) = existing.get(&token.token_text()) else {
                     continue;
                 };
-                if let Some(token) = Self::host_comment_token(root, range, guest_token.clone()) {
-                    snippets.insert(range, token);
+                if let Some(guest_token) =
+                    Self::host_comment_token(root, range, guest_token.clone())
+                {
+                    snippets.insert(token.text_trimmed_range(), (guest_token, range.start()));
                 }
             }
         }
@@ -192,7 +194,7 @@ impl HtmlSuppressionService {
             TokenAtOffset::Single(token) | TokenAtOffset::Between(_, token) => token,
             TokenAtOffset::None => return None,
         };
-        if token.text_trimmed_range() != range {
+        if token.text_range() != range {
             return None;
         }
         let body = HtmlTextExpression::cast(token.parent()?)?;
@@ -200,7 +202,7 @@ impl HtmlSuppressionService {
         expression.parent::<HtmlElementList>()?;
         expression.l_curly_token().ok()?;
         expression.r_curly_token().ok()?;
-        if eof.text() != token.text_trimmed() {
+        if eof.text() != token.text() {
             return None;
         }
         Some(eof)
@@ -248,7 +250,7 @@ impl Suppression for HtmlSuppressionService {
 
     #[cfg(feature = "html_embeds")]
     fn parse_snippet(&self, range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
-        let Some(token) = self.snippets.get(&range) else {
+        let Some((token, offset)) = self.snippets.get(&range) else {
             return Vec::new();
         };
         token
@@ -257,8 +259,9 @@ impl Suppression for HtmlSuppressionService {
             .chain(token.trailing_trivia().pieces())
             .filter(|piece| piece.is_comments())
             .filter_map(|piece| {
-                let text = &token.text()[piece.text_range() - token.text_range().start()];
-                let range = piece.text_range() + range.start();
+                let relative_range = piece.text_range() - token.text_range().start();
+                let text = &token.text()[relative_range];
+                let range = relative_range + *offset;
                 let suppressions = JsSuppression.parse_comment(text, range);
                 (!suppressions.is_empty()).then_some(SuppressionComment {
                     range,

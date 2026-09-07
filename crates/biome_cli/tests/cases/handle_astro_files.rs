@@ -273,6 +273,9 @@ fn lint_astro_files() {
     ));
 }
 
+// Runs lint, formatting with `check --write`, and lint again on the same file.
+// This verifies that Astro suppressions do not produce spurious JavaScript
+// warnings and remain effective when formatting wraps the target tag's attributes.
 #[test]
 fn astro_template_suppressions_have_one_owner() {
     let fs = MemoryFileSystem::default();
@@ -282,6 +285,10 @@ fn astro_template_suppressions_have_one_owner() {
         "file.astro".into(),
         br#"{/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted constants */}
 <script is:inline type="application/ld+json" set:html={JSON.stringify({ name: "Example" })} />
+<!-- biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content -->
+<div
+  set:html={content}
+></div>
 {/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
 <a accesskey="w">WebAIM</a>
 "#,
@@ -294,9 +301,65 @@ fn astro_template_suppressions_have_one_owner() {
     );
 
     assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--error-on-warnings",
+                "--html-formatter-enabled=true",
+                "file.astro",
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "astro_template_suppressions_have_one_owner",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_suppressions_allow_leading_trivia() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    fs.insert(
+        "file.astro".into(),
+        concat!(
+            "{\n/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content */}\n",
+            "<div set:html={content} />\n\n",
+            "{\n  /* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content */}\n",
+            "<div set:html={content} />\n\n",
+            "{\r\n\t/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content */}\n",
+            "<div set:html={content} />\n",
+        )
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_allow_leading_trivia",
         fs,
         console,
         result,
@@ -328,6 +391,13 @@ fn astro_template_suppressions_survive_host_fixes() {
         "<div ></div>\n{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}\n<div accesskey=\"b\"></div>\n",
     );
     assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_survive_host_fixes",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -355,6 +425,13 @@ fn astro_template_suppressions_survive_guest_fixes() {
         "<script></script>\n{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}\n<div accesskey=\"b\"></div>\n",
     );
     assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_survive_guest_fixes",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
