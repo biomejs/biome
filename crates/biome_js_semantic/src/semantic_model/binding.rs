@@ -615,8 +615,9 @@ impl Binding {
         })
     }
 
+    /// Includes regular imports, type-only imports, and TypeScript `import =` declarations.
     pub fn is_imported(&self) -> bool {
-        super::is_imported(&self.syntax())
+        self.declaration_kind().is_import_declaration()
     }
 
     pub fn is_exported(&self) -> bool {
