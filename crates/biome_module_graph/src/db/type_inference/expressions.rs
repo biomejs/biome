@@ -2333,25 +2333,13 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Narrows `ty` to the union variants that belong to the given `subset`.
     ///
-    /// An empty result means no variant belongs to the subset. For a `typeof`
-    /// guard that is conclusive, since a value has exactly one `typeof` tag:
-    ///
-    /// ```js
-    /// function f(x: Promise<void>) {
-    ///   if (typeof x === "number") { x; } // x is `never`
-    /// }
-    /// ```
-    ///
-    /// The other subsets treat an empty result as indeterminate instead, so
-    /// their callers fall back to the un-narrowed type.
-    ///
-    /// Returns `None` if the type cannot be made any more specific.
+    /// See [`Self::narrow_union_leaves`] for the result.
     fn filter_type_to_subset(
         &mut self,
         ty: InferredTypeData<'db>,
         subset: ConditionalSubset,
     ) -> Option<InferredTypeData<'db>> {
-        let types = self.collect_union_leaves(ty, |ctx, ty| {
+        self.narrow_union_leaves(ty, |ctx, ty| {
             // An instance classifies by the type it is an instance of, not by
             // the instance type itself, which carries no tag of its own.
             if let InferredTypeData::InstanceOf(instance) = ty
@@ -2362,16 +2350,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
 
             ctx.filter_action(ty, subset)
-        })?;
-
-        match subset {
-            ConditionalSubset::Typeof(_) => Some(
-                collected_type_result(self.db, types).unwrap_or(InferredTypeData::NeverKeyword),
-            ),
-            ConditionalSubset::Falsy
-            | ConditionalSubset::Truthy
-            | ConditionalSubset::NonNullish => collected_type_result(self.db, types),
-        }
+        })
     }
 
     fn filter_action(
@@ -2531,7 +2510,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::String => Some(TypeofTag::String),
             InferredTypeData::Symbol => Some(TypeofTag::Symbol),
             InferredTypeData::Undefined => Some(TypeofTag::Undefined),
-            // A canonical global handle classifies as its definition.
+            // A global is classified by its definition.
             InferredTypeData::GlobalType(_) => {
                 let expanded = ty.expand_canonical_global(self.db);
                 if matches!(expanded, InferredTypeData::GlobalType(_)) {
@@ -2600,22 +2579,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Narrows the union variants of `ty` to those the `leaf` callback
     /// retains.
     ///
-    /// See [`Self::collect_union_leaves`] for which types `leaf` gets to
-    /// decide on.
-    ///
-    /// Returns `None` if the type cannot be made any more specific.
-    fn narrow_union_leaves(
-        &mut self,
-        ty: InferredTypeData<'db>,
-        leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
-    ) -> Option<InferredTypeData<'db>> {
-        let types = self.collect_union_leaves(ty, leaf)?;
-        collected_type_result(self.db, types)
-    }
-
-    /// Like [`Self::narrow_union_leaves`], for a guard that strips a variant
-    /// only when it provably fails the test, so an empty result means `never`
-    /// rather than "nothing could be decided":
+    /// Every guard strips a variant only when it cannot pass the test, so no
+    /// variant left means the guarded code cannot run and the value is
+    /// `never`:
     ///
     /// ```js
     /// function f(x: "a" | "b") {
@@ -2624,7 +2590,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///   }
     /// }
     /// ```
-    fn narrow_union_leaves_or_never(
+    ///
+    /// Returns `None` if the traversal runs out of steps.
+    fn narrow_union_leaves(
         &mut self,
         ty: InferredTypeData<'db>,
         leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
@@ -2642,9 +2610,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// expanded any further, and decides for each whether it is retained,
     /// stripped, or mapped to another type.
     ///
-    /// Returns `None` if the traversal does not settle within
-    /// [`MAX_CONDITIONAL_FILTER_STEPS`] steps, which bounds the work spent on
-    /// cyclic or pathologically nested types.
+    /// Returns `None` after [`MAX_CONDITIONAL_FILTER_STEPS`] steps, which
+    /// bounds the work spent on cyclic or deeply nested types.
     fn collect_union_leaves(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -2726,17 +2693,14 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Narrows `ty` to the union variants whose member may strictly equal
     /// the string of the given `predicate`.
     ///
-    /// Only variants whose member resolves to a literal type that provably
-    /// differs from the string are stripped, so no variant left means
-    /// `never`.
-    ///
-    /// Returns `None` if the traversal runs out of steps.
+    /// Only a variant whose member is a literal of a different value is
+    /// stripped.
     fn narrow_by_member_equals(
         &mut self,
         ty: InferredTypeData<'db>,
         predicate: &MemberEqualsPredicate,
     ) -> Option<InferredTypeData<'db>> {
-        self.narrow_union_leaves_or_never(ty, |ctx, ty| {
+        self.narrow_union_leaves(ty, |ctx, ty| {
             if ctx.member_may_equal_string(ty, predicate) {
                 FilterAction::Retained
             } else {
@@ -2748,8 +2712,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Returns whether the member named by the given `predicate` may
     /// strictly equal its string on values of type `ty`.
     ///
-    /// Only a member that resolves to a literal type of a provably different
-    /// value yields `false`.
+    /// Only a member that is a literal of a different value yields `false`.
     fn member_may_equal_string(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -2786,8 +2749,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Narrows a value passed as an argument to a call, to the type the
     /// callee's type predicate establishes for it.
     ///
-    /// This replaces the value's declared type rather than intersecting
-    /// with it; the predicate's type is taken at face value.
+    /// The predicate's type replaces the declared type rather than
+    /// intersecting with it.
     ///
     /// Returns `None` if the callee does not turn out to be a type
     /// predicate over the parameter in the position the value was passed
@@ -2835,16 +2798,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Narrows `ty` to the union variants that may strictly equal the given
     /// string `value`.
     ///
-    /// Only variants that provably differ are stripped, so no variant left
-    /// means `never`.
-    ///
-    /// Returns `None` if the traversal runs out of steps.
+    /// Only a variant whose values are never strings is stripped.
     fn narrow_by_string_equals(
         &mut self,
         ty: InferredTypeData<'db>,
         value: &Text,
     ) -> Option<InferredTypeData<'db>> {
-        self.narrow_union_leaves_or_never(ty, |ctx, ty| {
+        self.narrow_union_leaves(ty, |ctx, ty| {
             if ctx.value_may_equal_string(ty, value) {
                 FilterAction::Retained
             } else {
@@ -2856,21 +2816,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Returns whether values of type `ty` may strictly equal the string
     /// `value`.
     ///
-    /// Only types whose values are provably never strings yield `false`.
+    /// Only a type whose values are never strings yields `false`.
     fn value_may_equal_string(&mut self, ty: InferredTypeData<'db>, value: &Text) -> bool {
         match ty {
             InferredTypeData::Literal(literal) => {
                 self.literal_may_equal_string(literal, value.text())
-            }
-            // A string can only satisfy an object-like type whose members
-            // all exist on strings.
-            InferredTypeData::Interface(interface) => {
-                let members = interface.members(self.db).to_vec();
-                self.string_may_satisfy_members(&members)
-            }
-            InferredTypeData::Object(object) => {
-                let members = object.members(self.db).to_vec();
-                self.string_may_satisfy_members(&members)
             }
             // A non-flattened instance can only be ruled out when its
             // `typeof` tag is statically known to differ from `"string"`.
@@ -2896,8 +2846,12 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Tuple(_)
             | InferredTypeData::NeverKeyword
             | InferredTypeData::VoidKeyword => false,
-            // A string may satisfy these, or we cannot tell.
-            InferredTypeData::Unknown
+            // A string may satisfy these, or we cannot tell. Biome does not
+            // model the members of `String`, so an object-like type is never
+            // ruled out.
+            InferredTypeData::Interface(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::String
@@ -2920,58 +2874,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Returns whether a string value may satisfy a type with the given
-    /// members, i.e. whether every named instance member also exists on
-    /// `String`.
-    ///
-    /// Members are looked up on an instance of the global `String` class;
-    /// the bare `String` primitive contributes no members in member lookup.
-    fn string_may_satisfy_members(&mut self, members: &[InferredTypeMember<'db>]) -> bool {
-        let Some(string_instance) = self.string_instance() else {
-            // Without the global String type we cannot prove any member
-            // absent.
-            return true;
-        };
-        for member in members {
-            if member.kind.is_static() || member.kind.is_constructor() {
-                continue;
-            }
-            let Some(name) = member.kind.name() else {
-                // We cannot reason about unnamed members, such as index
-                // signatures.
-                continue;
-            };
-            if self
-                .resolve_static_member_expression(string_instance, name.text())
-                .is_none()
-            {
-                return false;
-            }
-        }
-        true
-    }
-
-    /// Returns an instance of the global `String` class, resolving it on
-    /// first use.
-    fn string_instance(&mut self) -> Option<InferredTypeData<'db>> {
-        if let Some(instance) = self.string_instance {
-            return Some(instance);
-        }
-
-        let string_class = self.resolve_global_name("String")?;
-        let instance = InferredTypeData::instance_of(self.db, string_class, Box::default());
-        self.string_instance = Some(instance);
-        Some(instance)
-    }
-
     /// Narrows `ty` to the subset that may be an instance of the `guard`
     /// class.
     ///
-    /// Union variants that provably cannot be an instance of the guard class
-    /// are stripped, and variants the guard class derives from are replaced
-    /// by an instance of the guard class itself.
+    /// Variants that cannot be an instance of the guard class are stripped,
+    /// and variants the guard class derives from are replaced by an instance
+    /// of the guard class itself.
     ///
-    /// Returns `None` if the type cannot be made any more specific.
+    /// Returns `None` if the guard is not a class.
     fn narrow_to_instance_of(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -3011,15 +2921,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                                 guard,
                                 Box::default(),
                             )),
-                            // Both chains were walked to their roots without
-                            // meeting the other class; the variant provably
-                            // cannot be an instance of the guard class.
+                            // Both chains reach their roots without meeting
+                            // the other class.
                             (
                                 ExtendsChainLookup::DoesNotContain,
                                 ExtendsChainLookup::DoesNotContain,
                             ) => FilterAction::Stripped,
-                            // Without a full proof either way, we cannot
-                            // rule the variant out; keep it.
+                            // One chain has a link we cannot resolve; keep
+                            // the variant.
                             (ExtendsChainLookup::DoesNotContain, ExtendsChainLookup::Unknown)
                             | (
                                 ExtendsChainLookup::Unknown,
@@ -3131,7 +3040,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> ExtendsChainLookup {
         let mut current = class;
         let mut seen = FxHashSet::default();
-        for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
+        loop {
             if current == needle {
                 return ExtendsChainLookup::Contains;
             }
@@ -3183,7 +3092,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::VoidKeyword => return ExtendsChainLookup::Unknown,
             }
         }
-        ExtendsChainLookup::Unknown
     }
 
     /// Returns the tag the `typeof` operator evaluates to for instances of
@@ -3305,7 +3213,6 @@ fn literal_string_may_equal(literal: &str, value: &str) -> bool {
 }
 
 /// Result of searching a class extends chain for a specific class.
-#[derive(Clone, Copy)]
 enum ExtendsChainLookup {
     /// The chain contains the class.
     Contains,
