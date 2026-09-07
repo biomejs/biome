@@ -1415,7 +1415,10 @@ impl WorkspaceServerWithDb<'_> {
         let mut skipped_suggested_fixes = 0;
 
         if let Some(update_snippets) = capabilities.analyzer.update_snippets {
-            let embedded_snippets: Vec<_> = state.iter_snippets().collect();
+            let embedded_snippets: Vec<_> = state
+                .iter_snippets()
+                .for_analysis(&state.parsed, state.file_source, &state.db)
+                .collect();
             let mut new_snippets = Vec::new();
             for embedded_snippet in embedded_snippets {
                 let Some(document_file_source) = embedded_snippet.file_source(&state.db) else {
@@ -1518,7 +1521,27 @@ impl WorkspaceServerWithDb<'_> {
             if !new_snippets.is_empty() {
                 let new_root =
                     update_snippets(state.parsed.clone(), state.db.clone(), new_snippets)?;
-                state.parsed = AnyParse::from(new_root).into();
+                let parse = AnyParse::from(new_root);
+                let snippets = self.parse_embedded_language_snippets(
+                    &path,
+                    &state.file_source,
+                    &parse,
+                    &mut NodeCache::default(),
+                    &settings,
+                )?;
+                state.parsed = ParsedOrigin::interned_document(
+                    parse,
+                    snippets
+                        .into_iter()
+                        .map(
+                            |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
+                                parse,
+                                content,
+                                file_source,
+                            },
+                        )
+                        .collect(),
+                );
             }
         }
 
@@ -1690,7 +1713,11 @@ impl WorkspaceServerWithDb<'_> {
                 mut infos,
             } = results;
 
-            for embedded_node in state.iter_snippets() {
+            for embedded_node in
+                state
+                    .iter_snippets()
+                    .for_analysis(&state.parsed, state.file_source, &state.db)
+            {
                 let Some(file_source) = embedded_node.file_source(&state.db) else {
                     continue;
                 };
@@ -3533,7 +3560,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 working_directory: Some(working_directory.as_path()),
             });
 
-            for embedded_node in embedded_snippets {
+            for embedded_node in SnippetsIterator::Workspace(embedded_snippets.iter()).for_analysis(
+                &parse.into(),
+                language,
+                &workspace_db,
+            ) {
+                let ParsedSnippetOrigin::Workspace(embedded_node) = embedded_node else {
+                    continue;
+                };
                 let Some(file_source) = workspace_db
                     .source_from_index(embedded_node.document_source_index(&*workspace_db))
                 else {
@@ -3635,7 +3669,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             compute_actions,
         });
 
-        for embedded_snippet in &parsed_snippets {
+        for embedded_snippet in SnippetsIterator::Workspace(parsed_snippets.iter()).for_analysis(
+            &parsed_source.into(),
+            language,
+            &workspace_db,
+        ) {
+            let ParsedSnippetOrigin::Workspace(embedded_snippet) = embedded_snippet else {
+                continue;
+            };
             let Some(file_source) = workspace_db
                 .source_from_index(embedded_snippet.document_source_index(&*workspace_db))
             else {

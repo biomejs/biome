@@ -1,0 +1,49 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "a11y": { "noAccessKey": "error" },
+      "suspicious": { "noDebugger": "error" },
+      "nursery": { "noAstroSetHtmlDirective": "error" }
+    }
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+{/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted constants */}
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify({ name: "Example" })}
+/>
+<!-- biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content -->
+<div set:html={content}></div>
+{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
+<a accesskey="w">WebAIM</a>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

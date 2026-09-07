@@ -20,6 +20,7 @@ mod rule;
 mod services;
 pub mod shared;
 mod signals;
+mod suppression;
 mod suppression_action;
 mod suppressions;
 mod syntax;
@@ -68,7 +69,8 @@ use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind,
 };
-use biome_suppression::{Suppression, SuppressionKind};
+use biome_suppression::{Suppression as ParsedSuppression, SuppressionKind};
+pub use suppression::{Suppression, SuppressionComment};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
 
 /// The analyzer is the main entry point into the `biome_analyze` infrastructure.
@@ -88,8 +90,8 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
     query_matcher: Matcher,
-    /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<Diag>,
+    /// Parses native comments and any supplied embedded snippets.
+    suppression: Box<dyn Suppression<Diagnostic = Diag> + 'analyzer>,
     /// Language-specific suppression comment emitter
     suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
@@ -114,7 +116,7 @@ where
     pub fn new(
         metadata: &'analyzer MetadataRegistry,
         query_matcher: Matcher,
-        parse_suppression_comment: SuppressionParser<Diag>,
+        suppression: Box<dyn Suppression<Diagnostic = Diag> + 'analyzer>,
         suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
     ) -> Self {
@@ -122,7 +124,7 @@ where
             phases: BTreeMap::new(),
             metadata,
             query_matcher,
-            parse_suppression_comment,
+            suppression,
             suppression_action,
             emit_signal,
         }
@@ -141,7 +143,7 @@ where
         let Self {
             phases,
             mut query_matcher,
-            parse_suppression_comment,
+            suppression,
             mut emit_signal,
             suppression_action,
             metadata: _,
@@ -156,7 +158,7 @@ where
                 visitors: &mut visitors,
                 query_matcher: &mut query_matcher,
                 signal_queue: BinaryHeap::new(),
-                parse_suppression_comment,
+                suppression: suppression.as_ref(),
                 line_index: &mut line_index,
                 emit_signal: &mut emit_signal,
                 root: &ctx.root,
@@ -256,8 +258,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     query_matcher: &'phase mut Matcher,
     /// Queue for pending analyzer signals
     signal_queue: BinaryHeap<SignalEntry<'phase, L>>,
-    /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<Diag>,
+    suppression: &'phase dyn Suppression<Diagnostic = Diag>,
     /// Language-specific suppression comment emitter
     suppression_action: &'phase dyn SuppressionAction<Language = L>,
     /// Line index at the current position of the traversal
@@ -350,9 +351,8 @@ where
         ControlFlow::Continue(())
     }
 
-    /// Process the text for a single token, parsing suppression comments and
-    /// handling line breaks, then flush all pending query signals in the queue
-    /// whose position is less than the end of the token within the file
+    /// Registers native and embedded suppression comments in source order while
+    /// tracking line breaks in the original token and trivia.
     fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
         for piece in token.leading_trivia().pieces() {
@@ -366,11 +366,36 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(comment.text(), piece.text_range())?;
+                let range = piece.text_range();
+                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                self.handle_comment(SuppressionComment {
+                    range,
+                    suppressions,
+                })?;
             }
         }
 
-        self.bump_line_index(token.text_trimmed(), token.text_trimmed_range());
+        let token_range = token.text_trimmed_range();
+        let mut position = token_range.start();
+        for comment in self.suppression.parse_snippet(token_range) {
+            debug_assert!(token_range.contains_range(comment.range));
+            debug_assert!(position <= comment.range.start());
+            // Advance through each comment before registration, as for native
+            // multiline trivia, without counting the token's newlines twice.
+            let gap = TextRange::new(position, comment.range.start());
+            self.bump_line_index(&token.text()[gap - token.text_range().start()], gap);
+            self.bump_line_index(
+                &token.text()[comment.range - token.text_range().start()],
+                comment.range,
+            );
+            position = comment.range.end();
+            self.handle_comment(comment)?;
+        }
+        let remaining = TextRange::new(position, token_range.end());
+        self.bump_line_index(
+            &token.text()[remaining - token.text_range().start()],
+            remaining,
+        );
         if !self.deny_top_level_suppressions {
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
@@ -386,7 +411,12 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(comment.text(), piece.text_range())?;
+                let range = piece.text_range();
+                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                self.handle_comment(SuppressionComment {
+                    range,
+                    suppressions,
+                })?;
             }
         }
 
@@ -509,10 +539,13 @@ where
         ControlFlow::Continue(())
     }
 
-    /// Parse the text content of a comment trivia piece for suppression
-    /// comments, and create line suppression entries accordingly
-    fn handle_comment(&mut self, text: &str, range: TextRange) -> ControlFlow<Break> {
-        for result in (self.parse_suppression_comment)(text, range) {
+    /// Reports parser diagnostics and registers parsed suppressions from a comment.
+    fn handle_comment(&mut self, comment: SuppressionComment<'_, Diag>) -> ControlFlow<Break> {
+        let SuppressionComment {
+            range,
+            suppressions,
+        } = comment;
+        for result in suppressions {
             let suppression: AnalyzerSuppression = match result {
                 Ok(kind) => kind,
                 Err(diag) => {
@@ -584,27 +617,6 @@ where
 fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
     filter.is_none_or(|filter| filter.intersect(range).is_some())
 }
-
-/// Signature for a suppression comment parser function
-///
-/// This function receives two parameters:
-/// 1. The text content of a comment.
-/// 2. The range of the token the comment belongs too. The range is calculated from [SyntaxToken::text_range], so the range
-///    includes all trivia.
-///
-/// It returns the lint suppressions as an optional lint rule (if the lint rule is `None` the
-/// comment is interpreted as suppressing all lints)
-///
-/// # Examples
-///
-/// - `// biome-ignore format` -> `vec![]`
-/// - `// biome-ignore lint` -> `vec![Everything]`
-/// - `// biome-ignore lint/complexity/useWhile` -> `vec![Rule("complexity/useWhile")]`
-/// - `// biome-ignore lint/complexity/useWhile(foo)` -> `vec![RuleWithValue("complexity/useWhile", "foo")]`
-/// - `// biome-ignore lint/complexity/useWhile lint/nursery/noUnreachable` -> `vec![Rule("complexity/useWhile"), Rule("nursery/noUnreachable")]`
-/// - `/** biome-ignore lint/complexity/useWhile */` if the comment is top-level -> `vec![TopLevel("complexity/useWhile")]`
-type SuppressionParser<D> =
-    for<'a> fn(&'a str, TextRange) -> Vec<Result<AnalyzerSuppression<'a>, D>>;
 
 #[derive(Debug, Clone)]
 /// This enum is used to categorize what is disabled by a suppression comment and with what syntax
@@ -717,9 +729,9 @@ pub enum AnalyzerSuppressionKind<'a> {
     Plugin(Option<&'a str>),
 }
 
-/// Takes a [Suppression] and returns an [AnalyzerSuppression]
+/// Takes a [ParsedSuppression] and returns an [AnalyzerSuppression]
 pub fn to_analyzer_suppressions(
-    suppression: Suppression,
+    suppression: ParsedSuppression,
     piece_range: TextRange,
 ) -> Vec<AnalyzerSuppression> {
     let mut result = Vec::with_capacity(suppression.categories.len());

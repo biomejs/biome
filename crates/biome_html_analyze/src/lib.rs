@@ -1,30 +1,31 @@
 #![deny(clippy::use_self)]
+#![expect(clippy::too_many_arguments)]
 
 mod a11y;
 mod assist;
 mod lint;
 mod registry;
 mod services;
+mod suppression;
 mod suppression_action;
 mod tailwind;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
+pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleAction, RuleRegistry, Suppression,
 };
 use biome_aria::AriaRoles;
-use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::HtmlLanguage;
 use biome_languages::HtmlFileSource;
 use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_suppression::SuppressionDiagnostic;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -75,6 +76,7 @@ pub fn analyze<'a, F, B>(
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -93,6 +95,7 @@ where
         options,
         source_type,
         html_services,
+        suppression,
         emit_signal,
     )
 }
@@ -110,6 +113,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -117,32 +121,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -166,7 +144,7 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        suppression.unwrap_or_else(|| Box::new(HtmlSuppression)),
         Box::new(HtmlSuppressionAction),
         &mut emit_signal,
     );
@@ -229,6 +207,7 @@ mod tests {
             &options,
             HtmlFileSource::html(),
             crate::HtmlAnalyzerServices::default(),
+            None,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

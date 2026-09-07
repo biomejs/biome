@@ -218,6 +218,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                     &options,
                     file_source,
                     services,
+                    None,
                     |signal| process_signal(signal, code, &file_path, writer),
                 );
                 propagate_break(result)?;

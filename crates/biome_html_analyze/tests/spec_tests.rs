@@ -161,6 +161,7 @@ pub(crate) fn analyze_and_snap(
         &options,
         source_type,
         html_services,
+        None,
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions(ActionFilter::all()) {
@@ -261,22 +262,27 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let (group, rule) = parse_test_path(input_file);
 
-    let rule_filter = RuleFilter::Rule(group, rule);
-    let filter = AnalysisFilter {
-        enabled_rules: Some(slice::from_ref(&rule_filter)),
-        ..AnalysisFilter::default()
-    };
+    let snapshot = if matches!(input_file.extension(), Some("astro" | "vue" | "svelte")) {
+        analyze_with_workspace(input_file, input_code, group, rule)
+    } else {
+        let rule_filter = RuleFilter::Rule(group, rule);
+        let filter = AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        };
 
-    let mut snapshot = String::new();
-    analyze_and_snap(
-        &mut snapshot,
-        &input_code,
-        HtmlFileSource::html(),
-        filter,
-        file_name,
-        input_file,
-        CheckActionType::Suppression,
-    );
+        let mut snapshot = String::new();
+        analyze_and_snap(
+            &mut snapshot,
+            &input_code,
+            HtmlFileSource::html(),
+            filter,
+            file_name,
+            input_file,
+            CheckActionType::Suppression,
+        );
+        snapshot
+    };
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
