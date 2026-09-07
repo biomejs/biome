@@ -6,10 +6,7 @@ expression: discriminantGuardNarrowingInvalid.ts
 ```ts
 // should generate diagnostics
 
-// `task.run()` floats with or without narrowing. These cases exist to catch
-// narrowing suppressing the diagnostic, not to prove that narrowing happens --
-// the inferred types are pinned by
-// `biome_module_graph/tests/spec_tests/narrowing.test.rs`.
+// `task.run()` floats with or without narrowing; narrowing must not hide it.
 
 type Task =
 	| { kind: "sync" }
@@ -34,16 +31,16 @@ function guardedCallInSwitch(task: Task) {
 
 # Diagnostics
 ```
-discriminantGuardNarrowingInvalid.ts:14:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+discriminantGuardNarrowingInvalid.ts:11:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    12 │ function guardedCall(task: Task) {
-    13 │ 	if (task.kind === "async") {
-  > 14 │ 		task.run();
+     9 │ function guardedCall(task: Task) {
+    10 │ 	if (task.kind === "async") {
+  > 11 │ 		task.run();
        │ 		^^^^^^^^^^^
-    15 │ 	}
-    16 │ }
+    12 │ 	}
+    13 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -53,16 +50,16 @@ discriminantGuardNarrowingInvalid.ts:14:3 lint/nursery/noFloatingPromises ━━
 ```
 
 ```
-discriminantGuardNarrowingInvalid.ts:22:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
+discriminantGuardNarrowingInvalid.ts:19:4 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    20 │ 	switch (task.kind) {
-    21 │ 		case "async":
-  > 22 │ 			task.run();
+    17 │ 	switch (task.kind) {
+    18 │ 		case "async":
+  > 19 │ 			task.run();
        │ 			^^^^^^^^^^^
-    23 │ 			break;
-    24 │ 	}
+    20 │ 			break;
+    21 │ 	}
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

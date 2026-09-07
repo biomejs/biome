@@ -6,10 +6,7 @@ expression: truthyGuardNarrowingInvalid.ts
 ```ts
 // should generate diagnostics
 
-// `x` is a floating promise with or without narrowing. This case exists to
-// catch narrowing suppressing the diagnostic, not to prove that narrowing
-// happens -- the inferred types are pinned by
-// `biome_module_graph/tests/spec_tests/narrowing.test.rs`.
+// Narrowing must keep the promise, so the diagnostic must survive.
 function narrowedToPromise(x: Promise<void> | undefined) {
 	if (x) {
 		x;
@@ -20,16 +17,16 @@ function narrowedToPromise(x: Promise<void> | undefined) {
 
 # Diagnostics
 ```
-truthyGuardNarrowingInvalid.ts:9:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+truthyGuardNarrowingInvalid.ts:6:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-     7 │ function narrowedToPromise(x: Promise<void> | undefined) {
-     8 │ 	if (x) {
-   > 9 │ 		x;
-       │ 		^^
-    10 │ 	}
-    11 │ }
+    4 │ function narrowedToPromise(x: Promise<void> | undefined) {
+    5 │ 	if (x) {
+  > 6 │ 		x;
+      │ 		^^
+    7 │ 	}
+    8 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
