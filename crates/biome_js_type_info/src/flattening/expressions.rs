@@ -189,8 +189,7 @@ pub(super) fn flattened_expression(
             }
         }
         TypeofExpression::Narrowed(expr) => {
-            // The legacy engine does not implement narrowing; fall back to
-            // the un-narrowed type.
+            // This engine does not narrow; use the type as declared.
             resolver
                 .resolve_and_get(&expr.ty)
                 .map(ResolvedTypeData::to_data)
