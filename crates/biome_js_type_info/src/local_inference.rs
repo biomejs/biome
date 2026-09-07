@@ -3535,7 +3535,7 @@ fn typeof_guard_narrowed_tag(
                     Some(_) => return None,
                 }
             }
-        } else if is_narrowing_boundary(&ancestor) {
+        } else if is_narrowing_boundary(ancestor.kind()) {
             break;
         }
         child = ancestor;
@@ -3635,14 +3635,10 @@ fn narrowing_invalidated_within(
     invalidated
 }
 
-/// Returns whether `node` is a boundary that `typeof` narrowing must not
-/// reach into. A guard only vouches for the value at the time its test runs,
-/// so it says nothing about code whose execution is deferred:
-///
-/// - function-like scopes: functions, methods, constructors, getters,
-///   setters, and static initialization blocks;
-/// - class property members, whose initializers run when the class is
-///   instantiated:
+/// Returns whether a node of this kind runs later than the guard around it,
+/// so the guard says nothing about the values inside: a function, method,
+/// accessor, static block, or a class property, whose initializer runs when
+/// the class is instantiated:
 ///
 /// ```js
 /// if (typeof x === "number") {
@@ -3650,13 +3646,12 @@ fn narrowing_invalidated_within(
 /// }
 /// ```
 ///
-/// A `static` field is evaluated with the class expression itself, so
-/// narrowing it would be correct. We treat the whole class body as one
-/// boundary anyway, rather than deciding per member.
-fn is_narrowing_boundary(node: &JsSyntaxNode) -> bool {
-    AnyFunctionLike::can_cast(node.kind())
+/// A `static` property initializer runs with the class expression itself,
+/// but it is treated the same rather than told apart.
+fn is_narrowing_boundary(kind: JsSyntaxKind) -> bool {
+    AnyFunctionLike::can_cast(kind)
         || matches!(
-            node.kind(),
+            kind,
             JsSyntaxKind::JS_GETTER_CLASS_MEMBER
                 | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
                 | JsSyntaxKind::JS_SETTER_CLASS_MEMBER

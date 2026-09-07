@@ -1,8 +1,7 @@
 /* should not generate diagnostics */
 
-// Each guard contradicts its parameter's declared type, so narrowing has no
-// candidate left and `x` is `never` inside the `if`. Neither `never` nor the
-// `unknown` that calling it yields is promise-like.
+// Each guard contradicts the declared type, so `x` is `never` inside the
+// `if`, and neither `never` nor the result of calling it is a promise.
 function impossibleGuard(x: Promise<void>) {
 	if (typeof x === "number") {
 		x;
