@@ -19,6 +19,7 @@ element.querySelector(".a, .b").querySelector(".c");
 element.querySelector(".a").querySelector(".b, .c");
 element.querySelector(":scope a").querySelector("b");
 element.querySelector(":SCOPE > .item").querySelector("b");
+element.querySelector(":\\73 cope").querySelector("b");
 element.querySelector("a").querySelector("b").querySelector("c");
 element.querySelector("a").querySelector("b").querySelector(selector);
 element.querySelector(selector).querySelector("b").querySelector("c");

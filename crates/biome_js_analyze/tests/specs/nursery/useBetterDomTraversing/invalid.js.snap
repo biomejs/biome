@@ -25,6 +25,7 @@ element.querySelector(".a, .b").querySelector(".c");
 element.querySelector(".a").querySelector(".b, .c");
 element.querySelector(":scope a").querySelector("b");
 element.querySelector(":SCOPE > .item").querySelector("b");
+element.querySelector(":\\73 cope").querySelector("b");
 element.querySelector("a").querySelector("b").querySelector("c");
 element.querySelector("a").querySelector("b").querySelector(selector);
 element.querySelector(selector).querySelector("b").querySelector("c");
@@ -509,7 +510,7 @@ invalid.js:20:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
   > 20 │ element.querySelector(":scope a").querySelector("b");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ element.querySelector(":SCOPE > .item").querySelector("b");
-    22 │ element.querySelector("a").querySelector("b").querySelector("c");
+    22 │ element.querySelector(":\\73 cope").querySelector("b");
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -529,8 +530,8 @@ invalid.js:21:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
     20 │ element.querySelector(":scope a").querySelector("b");
   > 21 │ element.querySelector(":SCOPE > .item").querySelector("b");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ element.querySelector("a").querySelector("b").querySelector("c");
-    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
+    22 │ element.querySelector(":\\73 cope").querySelector("b");
+    23 │ element.querySelector("a").querySelector("b").querySelector("c");
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -542,29 +543,22 @@ invalid.js:21:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 
 ```
-invalid.js:22:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These .querySelector() calls are chained.
   
     20 │ element.querySelector(":scope a").querySelector("b");
     21 │ element.querySelector(":SCOPE > .item").querySelector("b");
-  > 22 │ element.querySelector("a").querySelector("b").querySelector("c");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
-    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
+  > 22 │ element.querySelector(":\\73 cope").querySelector("b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ element.querySelector("a").querySelector("b").querySelector("c");
+    24 │ element.querySelector("a").querySelector("b").querySelector(selector);
   
   i One .querySelector() call with a combined selector is easier to read.
   
+  i Merge the selectors.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Merge the .querySelector() calls.
-  
-    20 20 │   element.querySelector(":scope a").querySelector("b");
-    21 21 │   element.querySelector(":SCOPE > .item").querySelector("b");
-    22    │ - element.querySelector("a").querySelector("b").querySelector("c");
-       22 │ + element.querySelector(":scope·a·b·c");
-    23 23 │   element.querySelector("a").querySelector("b").querySelector(selector);
-    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
   
 
 ```
@@ -575,11 +569,11 @@ invalid.js:23:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
   i These .querySelector() calls are chained.
   
     21 │ element.querySelector(":SCOPE > .item").querySelector("b");
-    22 │ element.querySelector("a").querySelector("b").querySelector("c");
-  > 23 │ element.querySelector("a").querySelector("b").querySelector(selector);
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
-    25 │ (getElement()).querySelector("a").querySelector("b");
+    22 │ element.querySelector(":\\73 cope").querySelector("b");
+  > 23 │ element.querySelector("a").querySelector("b").querySelector("c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ element.querySelector("a").querySelector("b").querySelector(selector);
+    25 │ element.querySelector(selector).querySelector("b").querySelector("c");
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -588,11 +582,11 @@ invalid.js:23:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
   i Unsafe fix: Merge the .querySelector() calls.
   
     21 21 │   element.querySelector(":SCOPE > .item").querySelector("b");
-    22 22 │   element.querySelector("a").querySelector("b").querySelector("c");
-    23    │ - element.querySelector("a").querySelector("b").querySelector(selector);
-       23 │ + element.querySelector(":scope·a·b").querySelector(selector);
-    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
-    25 25 │   (getElement()).querySelector("a").querySelector("b");
+    22 22 │   element.querySelector(":\\73 cope").querySelector("b");
+    23    │ - element.querySelector("a").querySelector("b").querySelector("c");
+       23 │ + element.querySelector(":scope·a·b·c");
+    24 24 │   element.querySelector("a").querySelector("b").querySelector(selector);
+    25 25 │   element.querySelector(selector).querySelector("b").querySelector("c");
   
 
 ```
@@ -602,12 +596,12 @@ invalid.js:24:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 
   i These .querySelector() calls are chained.
   
-    22 │ element.querySelector("a").querySelector("b").querySelector("c");
-    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
-  > 24 │ element.querySelector(selector).querySelector("b").querySelector("c");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ (getElement()).querySelector("a").querySelector("b");
-    26 │ (foo || bar).querySelector("a").querySelector("b");
+    22 │ element.querySelector(":\\73 cope").querySelector("b");
+    23 │ element.querySelector("a").querySelector("b").querySelector("c");
+  > 24 │ element.querySelector("a").querySelector("b").querySelector(selector);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ element.querySelector(selector).querySelector("b").querySelector("c");
+    26 │ (getElement()).querySelector("a").querySelector("b");
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -615,12 +609,12 @@ invalid.js:24:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    22 22 │   element.querySelector("a").querySelector("b").querySelector("c");
-    23 23 │   element.querySelector("a").querySelector("b").querySelector(selector);
-    24    │ - element.querySelector(selector).querySelector("b").querySelector("c");
-       24 │ + element.querySelector(selector).querySelector(":scope·b·c");
-    25 25 │   (getElement()).querySelector("a").querySelector("b");
-    26 26 │   (foo || bar).querySelector("a").querySelector("b");
+    22 22 │   element.querySelector(":\\73 cope").querySelector("b");
+    23 23 │   element.querySelector("a").querySelector("b").querySelector("c");
+    24    │ - element.querySelector("a").querySelector("b").querySelector(selector);
+       24 │ + element.querySelector(":scope·a·b").querySelector(selector);
+    25 25 │   element.querySelector(selector).querySelector("b").querySelector("c");
+    26 26 │   (getElement()).querySelector("a").querySelector("b");
   
 
 ```
@@ -630,12 +624,12 @@ invalid.js:25:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 
   i These .querySelector() calls are chained.
   
-    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
-    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
-  > 25 │ (getElement()).querySelector("a").querySelector("b");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ (foo || bar).querySelector("a").querySelector("b");
-    27 │ 
+    23 │ element.querySelector("a").querySelector("b").querySelector("c");
+    24 │ element.querySelector("a").querySelector("b").querySelector(selector);
+  > 25 │ element.querySelector(selector).querySelector("b").querySelector("c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ (getElement()).querySelector("a").querySelector("b");
+    27 │ (foo || bar).querySelector("a").querySelector("b");
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -643,12 +637,12 @@ invalid.js:25:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    23 23 │   element.querySelector("a").querySelector("b").querySelector(selector);
-    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
-    25    │ - (getElement()).querySelector("a").querySelector("b");
-       25 │ + (getElement()).querySelector(":scope·a·b");
-    26 26 │   (foo || bar).querySelector("a").querySelector("b");
-    27 27 │   
+    23 23 │   element.querySelector("a").querySelector("b").querySelector("c");
+    24 24 │   element.querySelector("a").querySelector("b").querySelector(selector);
+    25    │ - element.querySelector(selector).querySelector("b").querySelector("c");
+       25 │ + element.querySelector(selector).querySelector(":scope·b·c");
+    26 26 │   (getElement()).querySelector("a").querySelector("b");
+    27 27 │   (foo || bar).querySelector("a").querySelector("b");
   
 
 ```
@@ -658,12 +652,12 @@ invalid.js:26:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 
   i These .querySelector() calls are chained.
   
-    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
-    25 │ (getElement()).querySelector("a").querySelector("b");
-  > 26 │ (foo || bar).querySelector("a").querySelector("b");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ 
-    28 │ element.childNodes[/* comment */ 0];
+    24 │ element.querySelector("a").querySelector("b").querySelector(selector);
+    25 │ element.querySelector(selector).querySelector("b").querySelector("c");
+  > 26 │ (getElement()).querySelector("a").querySelector("b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ (foo || bar).querySelector("a").querySelector("b");
+    28 │ 
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -671,31 +665,40 @@ invalid.js:26:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
-    25 25 │   (getElement()).querySelector("a").querySelector("b");
-    26    │ - (foo·||·bar).querySelector("a").querySelector("b");
-       26 │ + (foo·||·bar).querySelector(":scope·a·b");
-    27 27 │   
-    28 28 │   element.childNodes[/* comment */ 0];
+    24 24 │   element.querySelector("a").querySelector("b").querySelector(selector);
+    25 25 │   element.querySelector(selector).querySelector("b").querySelector("c");
+    26    │ - (getElement()).querySelector("a").querySelector("b");
+       26 │ + (getElement()).querySelector(":scope·a·b");
+    27 27 │   (foo || bar).querySelector("a").querySelector("b");
+    28 28 │   
   
 
 ```
 
 ```
-invalid.js:28:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This indexes .childNodes to get the first child.
+  i These .querySelector() calls are chained.
   
-    26 │ (foo || bar).querySelector("a").querySelector("b");
-    27 │ 
-  > 28 │ element.childNodes[/* comment */ 0];
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    29 │ element.children[/* comment */ 0];
-    30 │ element.querySelector(/* comment */ "a").querySelector("b");
+    25 │ element.querySelector(selector).querySelector("b").querySelector("c");
+    26 │ (getElement()).querySelector("a").querySelector("b");
+  > 27 │ (foo || bar).querySelector("a").querySelector("b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ element.childNodes[/* comment */ 0];
   
-  i A positional index is harder to read than a named first-child accessor.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Merge the .querySelector() calls.
+  
+    25 25 │   element.querySelector(selector).querySelector("b").querySelector("c");
+    26 26 │   (getElement()).querySelector("a").querySelector("b");
+    27    │ - (foo·||·bar).querySelector("a").querySelector("b");
+       27 │ + (foo·||·bar).querySelector(":scope·a·b");
+    28 28 │   
+    29 29 │   element.childNodes[/* comment */ 0];
   
 
 ```
@@ -703,13 +706,14 @@ invalid.js:28:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:29:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This indexes .children to get the first element child.
+  i This indexes .childNodes to get the first child.
   
-    28 │ element.childNodes[/* comment */ 0];
-  > 29 │ element.children[/* comment */ 0];
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ element.querySelector(/* comment */ "a").querySelector("b");
-    31 │ element.querySelector("a").querySelector(/* comment */ "b");
+    27 │ (foo || bar).querySelector("a").querySelector("b");
+    28 │ 
+  > 29 │ element.childNodes[/* comment */ 0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ element.children[/* comment */ 0];
+    31 │ element.querySelector(/* comment */ "a").querySelector("b");
   
   i A positional index is harder to read than a named first-child accessor.
   
@@ -721,16 +725,15 @@ invalid.js:29:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:30:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These .querySelector() calls are chained.
+  i This indexes .children to get the first element child.
   
-    28 │ element.childNodes[/* comment */ 0];
-    29 │ element.children[/* comment */ 0];
-  > 30 │ element.querySelector(/* comment */ "a").querySelector("b");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ element.querySelector("a").querySelector(/* comment */ "b");
-    32 │ 
+    29 │ element.childNodes[/* comment */ 0];
+  > 30 │ element.children[/* comment */ 0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ element.querySelector(/* comment */ "a").querySelector("b");
+    32 │ element.querySelector("a").querySelector(/* comment */ "b");
   
-  i One .querySelector() call with a combined selector is easier to read.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -742,12 +745,12 @@ invalid.js:31:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 
   i These .querySelector() calls are chained.
   
-    29 │ element.children[/* comment */ 0];
-    30 │ element.querySelector(/* comment */ "a").querySelector("b");
-  > 31 │ element.querySelector("a").querySelector(/* comment */ "b");
+    29 │ element.childNodes[/* comment */ 0];
+    30 │ element.children[/* comment */ 0];
+  > 31 │ element.querySelector(/* comment */ "a").querySelector("b");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ 
-    33 │ const item = element
+    32 │ element.querySelector("a").querySelector(/* comment */ "b");
+    33 │ 
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -757,18 +760,37 @@ invalid.js:31:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 
 ```
-invalid.js:33:14 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These .querySelector() calls are chained.
+  
+    30 │ element.children[/* comment */ 0];
+    31 │ element.querySelector(/* comment */ "a").querySelector("b");
+  > 32 │ element.querySelector("a").querySelector(/* comment */ "b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ const item = element
+  
+  i One .querySelector() call with a combined selector is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:14 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This indexes .children to get the first element child.
   
-    31 │ element.querySelector("a").querySelector(/* comment */ "b");
-    32 │ 
-  > 33 │ const item = element
+    32 │ element.querySelector("a").querySelector(/* comment */ "b");
+    33 │ 
+  > 34 │ const item = element
        │              ^^^^^^^
-  > 34 │ 	.children[0];
+  > 35 │ 	.children[0];
        │ 	^^^^^^^^^^^^
-    35 │ 
-    36 │ const nested = element
+    36 │ 
+    37 │ const nested = element
   
   i A positional index is harder to read than a named first-child accessor.
   
@@ -776,29 +798,29 @@ invalid.js:33:14 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━�
   
   i Unsafe fix: Use .firstElementChild instead.
   
-    32 32 │   
-    33 33 │   const item = element
-    34    │ - → .children[0];
-       34 │ + → .firstElementChild;
-    35 35 │   
-    36 36 │   const nested = element
+    33 33 │   
+    34 34 │   const item = element
+    35    │ - → .children[0];
+       35 │ + → .firstElementChild;
+    36 36 │   
+    37 37 │   const nested = element
   
 
 ```
 
 ```
-invalid.js:36:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These .querySelector() calls are chained.
   
-    34 │ 	.children[0];
-    35 │ 
-  > 36 │ const nested = element
+    35 │ 	.children[0];
+    36 │ 
+  > 37 │ const nested = element
        │                ^^^^^^^
-  > 37 │ 	.querySelector("a")
-  > 38 │ 	.querySelector("b");
+  > 38 │ 	.querySelector("a")
+  > 39 │ 	.querySelector("b");
        │ 	^^^^^^^^^^^^^^^^^^^
-    39 │ 
+    40 │ 
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -806,12 +828,12 @@ invalid.js:36:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━�
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    35 35 │   
-    36 36 │   const nested = element
-    37    │ - → .querySelector("a")
-    38    │ - → .querySelector("b");
-       37 │ + → .querySelector(":scope·a·b");
-    39 38 │   
+    36 36 │   
+    37 37 │   const nested = element
+    38    │ - → .querySelector("a")
+    39    │ - → .querySelector("b");
+       38 │ + → .querySelector(":scope·a·b");
+    40 39 │   
   
 
 ```

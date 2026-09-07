@@ -318,9 +318,12 @@ fn merge_query_selector_state(node: &JsCallExpression) -> Option<UseBetterDomTra
     Some(UseBetterDomTraversingState::MergeQuerySelector { can_fix })
 }
 
-/// Comma lists and `:scope` (ASCII case-insensitive) are reported but not rewritten.
+/// Comma lists, CSS escapes, and `:scope` (ASCII case-insensitive) are
+/// reported but not rewritten.
 fn can_auto_merge_selector(selector: &str) -> bool {
-    !selector.contains(',') && !selector.to_ascii_lowercase().contains(":scope")
+    !selector.contains(',')
+        && !selector.contains('\\')
+        && !selector.to_ascii_lowercase().contains(":scope")
 }
 
 /// Returns the numeric index when `node` is a non-optional computed access
