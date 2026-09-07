@@ -34,6 +34,8 @@ interface Lengthy {
 	length: number;
 }
 
+// Biome does not model the members of `String`, so an object-like variant
+// is never ruled out by a string comparison.
 export function stringSatisfies(g: Lengthy | number) {
 	if (g === "done") {
 		g;
