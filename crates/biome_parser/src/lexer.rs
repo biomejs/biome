@@ -740,6 +740,14 @@ where
             return Some(lookahead_token);
         }
 
+        self.nth_non_trivia_uncached(n)
+    }
+
+    /// Extends lookahead to an uncached non-trivia token, returning `None` past EOF.
+    ///
+    /// `n` must exceed the number of buffered non-trivia tokens.
+    #[inline(never)]
+    fn nth_non_trivia_uncached(&mut self, n: usize) -> Option<LookaheadToken<Lex::Kind>> {
         // Jump right to where we've left of last time rather than going through all tokens again.
         let mut remaining = n - self.lookahead.non_trivia_len();
         let current_length = self.lookahead.all_len();
