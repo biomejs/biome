@@ -421,12 +421,17 @@ where
     let parent_property = list.parent::<CssGenericProperty>();
     let scss_parent_property = find_scss_parent_property(list);
     let css_property = parent_property.as_ref().and_then(property_name);
-    let is_grid_property = parent_property
-        .as_ref()
-        .or(scss_parent_property.as_ref())
-        .and_then(property_name)
-        .as_ref()
-        .is_some_and(is_grid_template_property_name);
+    let is_grid_property = if parent_property.is_some() {
+        css_property
+            .as_ref()
+            .is_some_and(is_grid_template_property_name)
+    } else {
+        scss_parent_property
+            .as_ref()
+            .and_then(property_name)
+            .as_ref()
+            .is_some_and(is_grid_template_property_name)
+    };
 
     let is_comma_separated = list
         .iter()
