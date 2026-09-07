@@ -385,6 +385,9 @@ pub struct InvalidBiomeManifest {
 
 impl InvalidBiomeManifest {
     fn new(path: String, source: Option<Error>) -> Self {
+        #[cfg(windows)]
+        let path = path.replace('\\', "/");
+
         Self {
             message: MessageAndDescription::from(
                 markup!("Cannot load Biome manifest "<Emphasis>{path}</Emphasis>".").to_owned(),
@@ -394,7 +397,8 @@ impl InvalidBiomeManifest {
         }
     }
 
-    /// Returns the manifest path and the diagnostic that caused validation to fail.
+    /// Returns the manifest's display path and the diagnostic that caused validation to fail.
+    /// Windows path separators are rendered as forward slashes.
     pub fn into_parts(self) -> (String, Option<Error>) {
         (self.path, self.source)
     }
