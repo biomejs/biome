@@ -1,0 +1,3 @@
+a { color: fn(!); width: 1px; }
+b { color: fn(!important); width: 1px; }
+c { color: fn(!notimportant); width: 1px; }

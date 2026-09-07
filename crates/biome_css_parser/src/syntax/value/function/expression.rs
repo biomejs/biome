@@ -1,4 +1,5 @@
 use crate::parser::CssParser;
+use crate::syntax::declaration::is_at_declaration_important;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{SCSS_UNARY_OPERATOR_TOKEN_SET, parse_scss_expression};
@@ -23,6 +24,7 @@ pub(super) fn is_at_any_expression_with_context(
         || is_at_parenthesized(p)
         || is_at_any_value_with_context(p, context)
         || is_at_comma_separated_value(p)
+        || (context.is_full_scss_parsing_allowed() && is_at_declaration_important(p))
 }
 
 #[inline]
@@ -37,6 +39,7 @@ pub(super) fn parse_any_expression_with_context(
     if context.is_full_scss_parsing_allowed()
         && (is_at_parenthesized(p)
             || is_at_any_value_with_context(p, context)
+            || is_at_declaration_important(p)
             || p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET))
     {
         return parse_scss_expression(p);
