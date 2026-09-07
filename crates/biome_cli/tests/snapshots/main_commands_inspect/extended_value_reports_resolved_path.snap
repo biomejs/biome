@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["base.json"], "formatter": { "indentWidth": 4 } }
+```
+
+## `base.json`
+
+```json
+{
+  "formatter": {
+    "lineWidth": 100
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+base.json:3:18 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the value 100.
+  
+    1 │ {
+    2 │   "formatter": {
+  > 3 │     "lineWidth": 100
+      │                  ^^^
+    4 │   }
+    5 │ }
+  
+  i This value comes from base.json, extended by biome.json.
+  
+
+```

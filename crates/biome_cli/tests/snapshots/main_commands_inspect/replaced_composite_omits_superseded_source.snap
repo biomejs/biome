@@ -1,0 +1,58 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsole": {
+          "level": "warn",
+          "options": { "allow": ["error"] }
+        }
+      }
+    }
+  }
+}
+```
+
+## `base.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": { "noConsole": "error" }
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "linter.rules.suspicious.noConsole",
+  "value": {
+    "level": "warn",
+    "options": {
+      "allow": [
+        "error"
+      ]
+    }
+  },
+  "source": {
+    "configurationKind": "root",
+    "path": "biome.json",
+    "range": {
+      "end": 184,
+      "start": 102
+    },
+    "scope": "base"
+  }
+}
+```

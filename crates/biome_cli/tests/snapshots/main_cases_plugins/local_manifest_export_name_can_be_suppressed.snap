@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["./plugin"] }
+```
+
+## `plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": { "rules": [{ "noAssign": "rules/assign.grit" }] }
+}
+```
+
+## `plugin/rules/assign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Prefer object spread")
+}
+```
+
+## `test.js`
+
+```js
+// biome-ignore lint/plugin/noAssign: compatibility
+Object.assign({}, value);
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

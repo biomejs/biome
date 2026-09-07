@@ -1,0 +1,141 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["package-a", "package-b"] }
+```
+
+## `node_modules/package-a/biome.json`
+
+```json
+{ "extends": ["shared-config/configs/recommended"] }
+```
+
+## `node_modules/package-b/biome.json`
+
+```json
+{ "extends": ["shared-config/configs/recommended"] }
+```
+
+## `node_modules/package-a/node_modules/shared-config/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": ["source-config/configs/recommended"]
+}
+```
+
+## `node_modules/package-a/node_modules/shared-config/node_modules/source-config/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}
+```
+
+## `node_modules/package-a/node_modules/shared-config/node_modules/source-config/package.json`
+
+```json
+{ "name": "source-config", "version": "1.0.0" }
+```
+
+## `node_modules/package-a/node_modules/shared-config/node_modules/source-config/recommended.json`
+
+```json
+{ "formatter": { "lineWidth": 90 } }
+```
+
+## `node_modules/package-a/node_modules/shared-config/package.json`
+
+```json
+{ "name": "shared-config", "version": "1.0.0" }
+```
+
+## `node_modules/package-a/package.json`
+
+```json
+{ "name": "package-a", "version": "1.0.0", "main": "biome.json" }
+```
+
+## `node_modules/package-b/node_modules/shared-config/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": ["source-config/configs/recommended"]
+}
+```
+
+## `node_modules/package-b/node_modules/shared-config/node_modules/source-config/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "configs": [{ "recommended": "./recommended.json" }]
+}
+```
+
+## `node_modules/package-b/node_modules/shared-config/node_modules/source-config/package.json`
+
+```json
+{ "name": "source-config", "version": "1.0.0" }
+```
+
+## `node_modules/package-b/node_modules/shared-config/node_modules/source-config/recommended.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+## `node_modules/package-b/node_modules/shared-config/package.json`
+
+```json
+{ "name": "shared-config", "version": "2.0.0" }
+```
+
+## `node_modules/package-b/package.json`
+
+```json
+{ "name": "package-b", "version": "1.0.0", "main": "biome.json" }
+```
+
+## `test.js`
+
+```js
+const value = 1;
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+node_modules/package-b/node_modules/shared-config/node_modules/source-config/recommended.json configuration ━━━━━━━━━━
+
+  × Biome resolved multiple versions of shared-config.
+  
+  i This is an error for Biome because it doesn't know which version to use. Extended configurations are applied in order, and a fixed configuration could be overridden by one that is bugged.
+  
+  i The first reference from node_modules/package-a/biome.json resolves to node_modules/package-a/node_modules/shared-config/node_modules/source-config/recommended.json from shared-config@1.0.0.
+  
+  i The conflicting reference from node_modules/package-b/biome.json resolves to node_modules/package-b/node_modules/shared-config/node_modules/source-config/recommended.json from shared-config@2.0.0.
+  
+  i Biome can't determine which configuration should be used.
+  
+
+```

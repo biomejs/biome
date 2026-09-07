@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "formatter": { "lineWidth": 100 },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth",
+  "value": 100,
+  "source": {
+    "configurationKind": "root",
+    "path": "biome.json",
+    "range": {
+      "end": 35,
+      "start": 32
+    },
+    "scope": "base"
+  }
+}
+```

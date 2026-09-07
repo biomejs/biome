@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: partition_by_new_line_unsorted.ts
+---
+# Input
+```ts
+interface User {
+	id: string;
+
+	updatedAt: Date;
+	createdAt: Date;
+
+	passwordHash: string;
+	name: string;
+	email: string;
+}
+
+```
+
+# Diagnostics
+```
+partition_by_new_line_unsorted.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+   > 1 │ interface User {
+       │ ^^^^^^^^^^^^^^^^
+   > 2 │ 	id: string;
+   > 3 │ 
+   > 4 │ 	updatedAt: Date;
+        ...
+   > 8 │ 	name: string;
+   > 9 │ 	email: string;
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+     2  2 │     id: string;
+     3  3 │   
+     4    │ - → updatedAt:·Date;
+     5    │ - → createdAt:·Date;
+        4 │ + → createdAt:·Date;
+        5 │ + → updatedAt:·Date;
+     6  6 │   
+     7    │ - → passwordHash:·string;
+        7 │ + → email:·string;
+     8  8 │     name: string;
+     9    │ - → email:·string;
+        9 │ + → passwordHash:·string;
+    10 10 │   }
+    11 11 │   
+  
+
+```

@@ -1,0 +1,100 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    "@scope/plugin/presets/recommended",
+    { "path": "@scope/plugin/presets/recommended" }
+  ]
+}
+```
+
+## `node_modules/@scope/plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": {
+        "rules": [{
+            "noAssign": "rules/noAssign.grit",
+            "noKeys": "rules/noKeys.grit"
+        }],
+        "presets": { "recommended": ["noAssign", "noKeys"] }
+    }
+}
+```
+
+## `node_modules/@scope/plugin/package.json`
+
+```json
+{ "name": "@scope/plugin" }
+```
+
+## `node_modules/@scope/plugin/rules/noAssign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.assign")
+}
+```
+
+## `node_modules/@scope/plugin/rules/noKeys.grit`
+
+```grit
+`Object.keys($args)` where {
+    register_diagnostic(span = $args, message = "Do not use Object.keys")
+}
+```
+
+## `test.js`
+
+```js
+Object.assign({}); Object.keys({});
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use Object.assign
+  
+  > 1 │ Object.assign({}); Object.keys({});
+      │               ^^
+    2 │ 
+  
+
+```
+
+```block
+test.js:1:32 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use Object.keys
+  
+  > 1 │ Object.assign({}); Object.keys({});
+      │                                ^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

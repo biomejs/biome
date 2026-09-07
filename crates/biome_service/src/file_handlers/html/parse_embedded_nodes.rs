@@ -414,7 +414,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         HtmlVariant::Angular => {}
     }
 
-    for element in html_root.syntax().descendants() {
+    for element in html_root.syntax().descendants().skip(1) {
         if let Some(attribute) = HtmlAttribute::cast_ref(&element)
             && let Some(candidate) = build_attribute_candidate(&attribute, file_source.variant())
         {

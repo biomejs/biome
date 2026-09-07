@@ -52,6 +52,30 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+biome.json:5:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     3 │ 		"enabled": false
+     4 │ 	},
+   > 5 │ 		"linter": {
+       │ 		          ^
+   > 6 │ 		"enabled": true,
+        ...
+  > 15 │ 			"suspicious": {}
+  > 16 │ 		}
+  > 17 │ 	}
+       │ 	^
+    18 │ 	}
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:

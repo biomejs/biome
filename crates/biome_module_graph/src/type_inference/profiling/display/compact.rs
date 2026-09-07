@@ -1,106 +1,345 @@
-//! Grouped terminal output for type-inference profiles.
-//!
-//! The report groups requests by analyzer and queries by the Rust function that
-//! ran. Each group shows its slowest source location. Request and query groups
-//! have separate display limits.
-
-use std::collections::BTreeMap;
-use std::io;
-use std::time::Duration;
-
-use biome_console::fmt::{Display, Formatter};
-use biome_console::{HARD_LINE, HorizontalLine, Padding, markup};
-use camino::Utf8Path;
+//! Grouped diagnostic advice for type-inference profiles.
 
 use super::{
-    CapacityWarning, HighlightedDuration, RECORD_INDENT, SourceLocation, TimingCutoffs,
-    TimingMetrics,
+    DisplayDuration, FILE_LIMIT, HighlightedDuration, QUERY_LIMIT, REQUEST_LIMIT, SourceLocation,
+    SourcePath, SourceRange, TimingCutoffs, TimingMetrics, WHOLE_MODULE_LIMIT,
+    record_capacity_warning,
 };
 use crate::type_inference::profiling::{
-    RequestMetadata, TypeInferenceProfileLocation, TypeInferenceProfileSnapshot,
-    TypeInferenceQueryProfile, TypeInferenceRequestProfile, TypeInferenceWholeModuleProfile,
+    RequestMetadata, TypeInferenceProfileSnapshot, TypeInferenceQueryProfile,
+    TypeInferenceRequestProfile, TypeInferenceWholeModuleProfile,
 };
 use crate::type_inference::{
     TypeInferenceCaller, TypeInferenceCodeReference, TypeInferenceQueryKind,
     TypeInferenceWholeModuleReason,
 };
-
-const REQUEST_GROUP_LIMIT: usize = 5;
-const QUERY_GROUP_LIMIT: usize = 8;
+use biome_console::fmt::{Display, Formatter};
+use biome_console::markup;
+use biome_diagnostics::{Advices, LogCategory, Visit};
+use camino::Utf8Path;
+use std::collections::BTreeMap;
+use std::io;
+use std::time::Duration;
 
 pub(super) struct CompactTypeInferenceProfile<'a> {
     snapshot: &'a TypeInferenceProfileSnapshot,
     working_directory: Option<&'a Utf8Path>,
-    version: &'a str,
 }
 
 impl<'a> CompactTypeInferenceProfile<'a> {
     pub(super) const fn new(
         snapshot: &'a TypeInferenceProfileSnapshot,
         working_directory: Option<&'a Utf8Path>,
-        version: &'a str,
     ) -> Self {
         Self {
             snapshot,
             working_directory,
-            version,
         }
     }
 }
 
-impl Display for CompactTypeInferenceProfile<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        let request_runs = self
-            .snapshot
-            .requests
-            .iter()
-            .map(|profile| u64::from(profile.completed))
-            .sum::<u64>();
-        let query_runs = self
-            .snapshot
-            .queries
-            .iter()
-            .map(|profile| u64::from(profile.completed))
-            .sum::<u64>();
-        let whole_module_runs = self
-            .snapshot
-            .whole_module_inferences
-            .iter()
-            .map(|profile| u64::from(profile.completed))
-            .sum::<u64>();
-
-        f.write_markup(markup! {
-            {HorizontalLine::new(20)}
-            <Emphasis>"Type inference profile"</Emphasis>" "<Dim>"(Biome "{self.version}")"</Dim>"\n"
-            <Dim>"Timings are inclusive and non-additive; the highest 10% are highlighted in sections with at least ten groups."</Dim>"\n"
-            <Dim>"Completed runs: requests "{request_runs}", tracked queries "{query_runs}", whole-module "{whole_module_runs}"."</Dim>"\n"
-            <Dim>"Showing ranked aggregates; use --verbose for every source record and code reference."</Dim>"\n"
-            <Dim>"Ranges use zero-based UTF-8 byte offsets; paths may reveal project structure."</Dim>
-            {HARD_LINE}
-        })?;
+impl Advices for CompactTypeInferenceProfile<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        visitor.record_log(
+            LogCategory::None,
+            &ProfileSummary {
+                snapshot: self.snapshot,
+                verbose: false,
+            },
+        )?;
 
         if self.snapshot.is_empty() {
-            f.write_markup(markup! {
-                "No type-inference requests or queries were recorded.\n"
-                {CapacityWarning(self.snapshot)}
-            })?;
-            return Ok(());
+            visitor.record_log(
+                LogCategory::None,
+                &"No type-inference requests or queries were recorded.",
+            )?;
+            return record_capacity_warning(visitor, self.snapshot);
         }
 
+        let files = collect_files(self.snapshot);
+        for file in files.iter().take(FILE_LIMIT) {
+            visitor.record_group(
+                &FileTitle::new(file, self.working_directory),
+                &CompactFileAdvice {
+                    file,
+                    working_directory: self.working_directory,
+                },
+            )?;
+        }
+        record_omitted(visitor, files.len(), FILE_LIMIT, "file", "files")?;
+
+        record_capacity_warning(visitor, self.snapshot)?;
+
+        visitor.record_log(LogCategory::Info, &markup! {
+            "To show all the information, use the "<Emphasis>"--verbose"</Emphasis>" option. The output might be very verbose, so it's advised to analyze a single file."
+        })?;
+
+        visitor
+            .record_command("biome lint --profile-type-inference --verbose ./path/to/file.ts")?;
+
+        Ok(())
+    }
+}
+
+pub(super) struct ProfileSummary<'a> {
+    pub(super) snapshot: &'a TypeInferenceProfileSnapshot,
+    pub(super) verbose: bool,
+}
+
+impl Display for ProfileSummary<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        let request_executions = completed_requests(self.snapshot);
+        let query_executions = completed_queries(self.snapshot);
+        let whole_module_executions = completed_whole_modules(self.snapshot);
         f.write_markup(markup! {
-            {CompactRequestProfiles {
-                profiles: &self.snapshot.requests,
-                working_directory: self.working_directory,
-            }}
-            {CompactQueryProfiles {
-                profiles: &self.snapshot.queries,
-                working_directory: self.working_directory,
-            }}
-            {CompactWholeModuleProfiles {
-                profiles: &self.snapshot.whole_module_inferences,
-                working_directory: self.working_directory,
-            }}
-            {CapacityWarning(self.snapshot)}
+            "Completed executions: "{request_executions}" requests, "{query_executions}
+            " tracked queries, "{whole_module_executions}" whole-module inferences.\n"
+        })?;
+        if self.verbose {
+            f.write_markup(markup! {
+                "Showing the top "{REQUEST_LIMIT}" requests, top "{QUERY_LIMIT}" queries, and top "
+                {WHOLE_MODULE_LIMIT}" whole-module records per file.\n"
+            })?;
+        } else {
+            f.write_markup(markup! {
+                "Showing the "{FILE_LIMIT}" files with the highest cumulative request time.\n"
+            })?;
+        }
+        f.write_str(
+            "Inclusive timings are non-additive; the highest 10% are highlighted in sections with at least ten entries.\n",
+        )?;
+        f.write_str("Ranges are zero-based, half-open UTF-8 byte offsets.")
+    }
+}
+
+fn completed_requests(snapshot: &TypeInferenceProfileSnapshot) -> u64 {
+    snapshot
+        .requests
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+fn completed_queries(snapshot: &TypeInferenceProfileSnapshot) -> u64 {
+    snapshot
+        .queries
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+fn completed_whole_modules(snapshot: &TypeInferenceProfileSnapshot) -> u64 {
+    snapshot
+        .whole_module_inferences
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+#[derive(Default)]
+pub(super) struct FileProfiles<'a> {
+    pub(super) path: &'a str,
+    pub(super) requests: Vec<&'a TypeInferenceRequestProfile>,
+    pub(super) queries: Vec<&'a TypeInferenceQueryProfile>,
+    pub(super) whole_modules: Vec<&'a TypeInferenceWholeModuleProfile>,
+}
+
+impl FileProfiles<'_> {
+    pub(super) fn cumulative_request_time(&self) -> Duration {
+        self.requests.iter().fold(Duration::ZERO, |total, profile| {
+            total.saturating_add(profile.total)
+        })
+    }
+}
+
+pub(super) fn collect_files(snapshot: &TypeInferenceProfileSnapshot) -> Vec<FileProfiles<'_>> {
+    let mut files = BTreeMap::<&str, FileProfiles>::new();
+    for profile in &snapshot.requests {
+        files
+            .entry(&profile.location.path)
+            .or_insert_with(|| FileProfiles {
+                path: &profile.location.path,
+                ..FileProfiles::default()
+            })
+            .requests
+            .push(profile);
+    }
+    for profile in &snapshot.queries {
+        files
+            .entry(&profile.location.path)
+            .or_insert_with(|| FileProfiles {
+                path: &profile.location.path,
+                ..FileProfiles::default()
+            })
+            .queries
+            .push(profile);
+    }
+    for profile in &snapshot.whole_module_inferences {
+        files
+            .entry(&profile.root.path)
+            .or_insert_with(|| FileProfiles {
+                path: &profile.root.path,
+                ..FileProfiles::default()
+            })
+            .whole_modules
+            .push(profile);
+    }
+
+    let mut files = files.into_values().collect::<Vec<_>>();
+    files.sort_by(|left, right| {
+        right
+            .cumulative_request_time()
+            .cmp(&left.cumulative_request_time())
+            .then_with(|| left.path.cmp(right.path))
+    });
+    files
+}
+
+pub(super) struct FileTitle<'a> {
+    file: &'a FileProfiles<'a>,
+    working_directory: Option<&'a Utf8Path>,
+}
+
+impl<'a> FileTitle<'a> {
+    pub(super) const fn new(
+        file: &'a FileProfiles<'a>,
+        working_directory: Option<&'a Utf8Path>,
+    ) -> Self {
+        Self {
+            file,
+            working_directory,
+        }
+    }
+}
+
+impl Display for FileTitle<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        let path = Utf8Path::new(self.file.path);
+        let target = if path.is_absolute() {
+            format!("file://{path}")
+        } else if let Some(working_directory) = self.working_directory {
+            format!("file://{}", working_directory.join(path))
+        } else {
+            self.file.path.to_string()
+        };
+        f.write_markup(markup! {
+            <Hyperlink href={target.as_str()}>
+                {SourcePath::new(self.file.path, self.working_directory)}
+            </Hyperlink>
+            " ("{DisplayDuration(self.file.cumulative_request_time())}")"
+        })
+    }
+}
+
+struct CompactFileAdvice<'a> {
+    file: &'a FileProfiles<'a>,
+    working_directory: Option<&'a Utf8Path>,
+}
+
+impl Advices for CompactFileAdvice<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        if !self.file.requests.is_empty() {
+            let groups = aggregate_request_profiles(&self.file.requests);
+            visitor.record_group(
+                &CompactSectionTitle::new(
+                    "Requests",
+                    groups.len().min(REQUEST_LIMIT),
+                    groups.len(),
+                    self.file.requests.len(),
+                    completed_request_profiles(&self.file.requests),
+                ),
+                &CompactRequestProfiles { groups: &groups },
+            )?;
+        }
+
+        if !self.file.queries.is_empty() {
+            let groups = aggregate_query_profiles(&self.file.queries);
+            visitor.record_group(
+                &CompactSectionTitle::new(
+                    "Queries",
+                    groups.len().min(QUERY_LIMIT),
+                    groups.len(),
+                    self.file.queries.len(),
+                    completed_query_profiles(&self.file.queries),
+                ),
+                &CompactQueryProfiles { groups: &groups },
+            )?;
+        }
+
+        let groups = aggregate_whole_module_profiles(&self.file.whole_modules);
+        let advice = CompactWholeModuleProfiles {
+            groups: &groups,
+            working_directory: self.working_directory,
+        };
+        if groups.is_empty() {
+            visitor.record_group(&"Whole-module inference", &advice)
+        } else {
+            visitor.record_group(
+                &CompactSectionTitle::new(
+                    "Whole-module inference",
+                    groups.len().min(WHOLE_MODULE_LIMIT),
+                    groups.len(),
+                    self.file.whole_modules.len(),
+                    completed_whole_module_profiles(&self.file.whole_modules),
+                ),
+                &advice,
+            )
+        }
+    }
+}
+
+fn completed_request_profiles(profiles: &[&TypeInferenceRequestProfile]) -> u64 {
+    profiles
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+fn completed_query_profiles(profiles: &[&TypeInferenceQueryProfile]) -> u64 {
+    profiles
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+fn completed_whole_module_profiles(profiles: &[&TypeInferenceWholeModuleProfile]) -> u64 {
+    profiles
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+struct CompactSectionTitle {
+    label: &'static str,
+    shown: usize,
+    groups: usize,
+    source_records: usize,
+    executions: u64,
+}
+
+impl CompactSectionTitle {
+    const fn new(
+        label: &'static str,
+        shown: usize,
+        groups: usize,
+        source_records: usize,
+        executions: u64,
+    ) -> Self {
+        Self {
+            label,
+            shown,
+            groups,
+            source_records,
+            executions,
+        }
+    }
+}
+
+impl Display for CompactSectionTitle {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        f.write_markup(markup! {
+            {self.label}" (top "{self.shown}" of "{Count::groups(self.groups)}"; "
+            {Count::source_records(self.source_records)}"; "{Count::executions(self.executions)}")"
         })
     }
 }
@@ -148,46 +387,35 @@ impl<'a> RequestGroup<'a> {
 }
 
 struct CompactRequestProfiles<'a> {
-    profiles: &'a [TypeInferenceRequestProfile],
-    working_directory: Option<&'a Utf8Path>,
+    groups: &'a [RequestGroup<'a>],
 }
 
-impl Display for CompactRequestProfiles<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        if self.profiles.is_empty() {
-            return Ok(());
-        }
-
-        let groups = aggregate_request_profiles(self.profiles);
-        let shown = groups.len().min(REQUEST_GROUP_LIMIT);
-        let cutoffs = TimingCutoffs::new(groups.iter().map(|group| group.timing.metrics()));
-        f.write_markup(markup! {
-            <Emphasis>"Requests by consumer"</Emphasis>" "<Dim>"(top "{shown}" of "{Count::groups(groups.len())}"; "{Count::source_records(self.profiles.len())}")"</Dim>"\n"
-        })?;
-        for (index, group) in groups.iter().take(shown).enumerate() {
-            f.write_markup(markup! {
-                {CompactRequestProfileRecord {
+impl Advices for CompactRequestProfiles<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let cutoffs = TimingCutoffs::new(self.groups.iter().map(|group| group.timing.metrics()));
+        for (index, group) in self.groups.iter().take(REQUEST_LIMIT).enumerate() {
+            visitor.record_log(
+                LogCategory::None,
+                &CompactRequestProfileRecord {
                     index: index + 1,
                     group,
-                    working_directory: self.working_directory,
                     cutoffs,
-                }}
-            })?;
+                },
+            )?;
         }
-        let omitted = groups.len().saturating_sub(shown);
-        if omitted > 0 {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}<Dim>{Count::groups(omitted)}" omitted; use --verbose for every source record."</Dim>"\n"
-            })?;
-        }
-        f.write_markup(markup! {{HARD_LINE}})
+        record_omitted(
+            visitor,
+            self.groups.len(),
+            REQUEST_LIMIT,
+            "request group",
+            "request groups",
+        )
     }
 }
 
 struct CompactRequestProfileRecord<'a> {
     index: usize,
     group: &'a RequestGroup<'a>,
-    working_directory: Option<&'a Utf8Path>,
     cutoffs: TimingCutoffs,
 }
 
@@ -195,10 +423,12 @@ impl Display for CompactRequestProfileRecord<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         let group = self.group;
         f.write_markup(markup! {
-            {self.index}". "<Info>{group.key.metadata.label()}</Info><Dim>" <- "</Dim>{group.key.caller.group()}"/"{group.key.caller.name()}"\n"
-            {CompactTimingMetricsDisplay::new(group.timing.metrics(), self.cutoffs)}
-            {Padding::new(RECORD_INDENT)}<Dim>"hottest origin: "</Dim>{SourceLocation::new(&group.hottest.location, self.working_directory)}"\n"
-        })
+            {self.index}". "<Success>{group.key.metadata.label()}</Success><Dim>" <- "</Dim>
+            {group.key.caller.group()}"/"{group.key.caller.name()}"\n"
+            {CompactTimingMetricsDisplay::new(group.timing.metrics(), self.cutoffs)}"\n"
+            <Info>"Hottest range: "</Info>{SourceRange(group.hottest.location.range)}
+        })?;
+        Ok(())
     }
 }
 
@@ -268,46 +498,35 @@ impl<'a> QueryGroup<'a> {
 }
 
 struct CompactQueryProfiles<'a> {
-    profiles: &'a [TypeInferenceQueryProfile],
-    working_directory: Option<&'a Utf8Path>,
+    groups: &'a [QueryGroup<'a>],
 }
 
-impl Display for CompactQueryProfiles<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        if self.profiles.is_empty() {
-            return Ok(());
-        }
-
-        let groups = aggregate_query_profiles(self.profiles);
-        let shown = groups.len().min(QUERY_GROUP_LIMIT);
-        let cutoffs = TimingCutoffs::new(groups.iter().map(|group| group.timing.metrics()));
-        f.write_markup(markup! {
-            <Emphasis>"Query bodies"</Emphasis>" "<Dim>"(top "{shown}" of "{Count::groups(groups.len())}"; "{Count::source_records(self.profiles.len())}")"</Dim>"\n"
-        })?;
-        for (index, group) in groups.iter().take(shown).enumerate() {
-            f.write_markup(markup! {
-                {CompactQueryProfileRecord {
+impl Advices for CompactQueryProfiles<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let cutoffs = TimingCutoffs::new(self.groups.iter().map(|group| group.timing.metrics()));
+        for (index, group) in self.groups.iter().take(QUERY_LIMIT).enumerate() {
+            visitor.record_log(
+                LogCategory::None,
+                &CompactQueryProfileRecord {
                     index: index + 1,
                     group,
-                    working_directory: self.working_directory,
                     cutoffs,
-                }}
-            })?;
+                },
+            )?;
         }
-        let omitted = groups.len().saturating_sub(shown);
-        if omitted > 0 {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}<Dim>{Count::groups(omitted)}" omitted; use --verbose for every source record."</Dim>"\n"
-            })?;
-        }
-        f.write_markup(markup! {{HARD_LINE}})
+        record_omitted(
+            visitor,
+            self.groups.len(),
+            QUERY_LIMIT,
+            "query group",
+            "query groups",
+        )
     }
 }
 
 struct CompactQueryProfileRecord<'a> {
     index: usize,
     group: &'a QueryGroup<'a>,
-    working_directory: Option<&'a Utf8Path>,
     cutoffs: TimingCutoffs,
 }
 
@@ -315,27 +534,20 @@ impl Display for CompactQueryProfileRecord<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         let group = self.group;
         f.write_markup(markup! {
-            {self.index}". "<Info>{group.key.kind.label()}</Info><Dim>" / "</Dim>{group.key.implementation.symbol()}"\n"
-            {CompactTimingMetricsDisplay::new(group.timing.metrics(), self.cutoffs)}
+            {self.index}". "<Success>{group.key.kind.label()}</Success><Dim>" / "</Dim>
+            {group.key.implementation.symbol()}"\n"
+            {CompactTimingMetricsDisplay::new(group.timing.metrics(), self.cutoffs)}"\n"
         })?;
         if let Some(consumer) = group.top_consumer() {
             f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}<Dim>"top consumer: "</Dim>{QueryConsumer(consumer)}"\n"
+                <Info>"Consumer: "</Info>{consumer.request.label()}"\n"
+                <Info>"Caller: "</Info>{consumer.caller.group()}"/"{consumer.caller.name()}"\n"
             })?;
         }
         f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}<Dim>"hottest source: "</Dim>{SourceLocation::new(&group.hottest.location, self.working_directory)}"\n"
-        })
-    }
-}
-
-struct QueryConsumer(QueryConsumerKey);
-
-impl Display for QueryConsumer {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        f.write_markup(markup! {
-            {self.0.request.label()}<Dim>" <- "</Dim>{self.0.caller.group()}"/"{self.0.caller.name()}
-        })
+            <Info>"Hottest range: "</Info>{SourceRange(group.hottest.location.range)}
+        })?;
+        Ok(())
     }
 }
 
@@ -388,42 +600,43 @@ impl<'a> WholeModuleGroup<'a> {
 }
 
 struct CompactWholeModuleProfiles<'a> {
-    profiles: &'a [TypeInferenceWholeModuleProfile],
+    groups: &'a [WholeModuleGroup<'a>],
     working_directory: Option<&'a Utf8Path>,
 }
 
-impl Display for CompactWholeModuleProfiles<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        f.write_markup(markup! {
-            <Emphasis>"Whole-module widening"</Emphasis>"\n"
-        })?;
-        if self.profiles.is_empty() {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}"No widening to complete module tables was recorded."
-                {HARD_LINE}
-            })?;
-            return Ok(());
+impl Advices for CompactWholeModuleProfiles<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        if self.groups.is_empty() {
+            return visitor.record_log(
+                LogCategory::None,
+                &"No requests triggered whole-module inference.",
+            );
         }
 
-        let groups = aggregate_whole_module_profiles(self.profiles);
-        let cutoffs = TimingCutoffs::new(groups.iter().map(|group| group.timing.metrics()));
-        for group in &groups {
-            f.write_markup(markup! {
-                {CompactWholeModuleProfileRecord {
+        let cutoffs = TimingCutoffs::new(self.groups.iter().map(|group| group.timing.metrics()));
+        for (index, group) in self.groups.iter().take(WHOLE_MODULE_LIMIT).enumerate() {
+            visitor.record_log(
+                LogCategory::None,
+                &CompactWholeModuleProfileRecord {
+                    index: index + 1,
                     group,
                     working_directory: self.working_directory,
                     cutoffs,
-                }}
-            })?;
+                },
+            )?;
         }
-        f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}<Dim>"Breadth values are independent maxima across completed runs."</Dim>
-            {HARD_LINE}
-        })
+        record_omitted(
+            visitor,
+            self.groups.len(),
+            WHOLE_MODULE_LIMIT,
+            "whole-module group",
+            "whole-module groups",
+        )
     }
 }
 
 struct CompactWholeModuleProfileRecord<'a> {
+    index: usize,
     group: &'a WholeModuleGroup<'a>,
     working_directory: Option<&'a Utf8Path>,
     cutoffs: TimingCutoffs,
@@ -433,17 +646,20 @@ impl Display for CompactWholeModuleProfileRecord<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         let group = self.group;
         f.write_markup(markup! {
-            <Info>{group.reason.label()}</Info>"\n"
-            {CompactTimingMetricsDisplay::new(group.timing.metrics(), self.cutoffs)}
-            {Padding::new(RECORD_INDENT)}<Dim>"maximum breadth: "</Dim>{group.modules_max}<Dim>" modules, slots T/E/B "</Dim>{group.type_slots_max}"/"{group.expression_slots_max}"/"{group.binding_slots_max}"\n"
+            {self.index}". "<Success>{group.reason.label()}</Success>"\n"
+            {CompactTimingMetricsDisplay::new(group.timing.metrics(), self.cutoffs)}"\n"
+            <Info>"Maximum breadth: "</Info>{group.modules_max}" modules\n"
+            <Info>"Maximum slots: "</Info>{group.type_slots_max}" types, "
+            {group.expression_slots_max}" expressions, "{group.binding_slots_max}" bindings\n"
         })?;
         if group.cycle_recoveries > 0 {
             f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}<Dim>"cycle recoveries: "</Dim>{group.cycle_recoveries}"\n"
+                <Info>"Cycle recoveries: "</Info>{group.cycle_recoveries}"\n"
             })?;
         }
         f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}<Dim>"hottest transition: "</Dim>{SourceLocation::new(&group.hottest.root, self.working_directory)}<Dim>" -> "</Dim>{SourceLocation::new(&group.hottest.trigger, self.working_directory)}"\n"
+            <Info>"Hottest transition: "</Info>{SourceRange(group.hottest.root.range)}
+            <Info>" -> "</Info>{SourceLocation::new(&group.hottest.trigger, self.working_directory)}
         })
     }
 }
@@ -501,22 +717,25 @@ impl CompactTimingMetricsDisplay {
 impl Display for CompactTimingMetricsDisplay {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}<Dim>"time: total "</Dim>{HighlightedDuration::new(self.metrics.total, self.cutoffs.total)}
-            <Dim>", "</Dim>{self.metrics.completed}<Dim>" runs, average "</Dim>{HighlightedDuration::new(self.metrics.average, self.cutoffs.average)}
-            <Dim>", max "</Dim>{HighlightedDuration::new(self.metrics.max, self.cutoffs.max)}
+            <Info>"Total "</Info>{HighlightedDuration::new(self.metrics.total, self.cutoffs.total)}
+            <Info>", "</Info>{Count::executions(u64::from(self.metrics.completed))}
+            <Info>", Average "</Info>{HighlightedDuration::new(self.metrics.average, self.cutoffs.average)}
+            <Info>", Max "</Info>{HighlightedDuration::new(self.metrics.max, self.cutoffs.max)}
         })?;
         if self.metrics.aborted > 0 {
             f.write_markup(markup! {
-                <Dim>", "</Dim>{self.metrics.aborted}<Dim>" aborted"</Dim>
+                <Info>", "</Info>{self.metrics.aborted}<Info>" aborted"</Info>
             })?;
         }
-        f.write_str("\n")
+        Ok(())
     }
 }
 
-fn aggregate_request_profiles(profiles: &[TypeInferenceRequestProfile]) -> Vec<RequestGroup<'_>> {
+fn aggregate_request_profiles<'a>(
+    profiles: &[&'a TypeInferenceRequestProfile],
+) -> Vec<RequestGroup<'a>> {
     let mut groups = BTreeMap::<RequestGroupKey, RequestGroup>::new();
-    for profile in profiles {
+    for &profile in profiles {
         let key = RequestGroupKey {
             metadata: profile.metadata,
             caller: profile.caller,
@@ -537,9 +756,9 @@ fn aggregate_request_profiles(profiles: &[TypeInferenceRequestProfile]) -> Vec<R
     groups
 }
 
-fn aggregate_query_profiles(profiles: &[TypeInferenceQueryProfile]) -> Vec<QueryGroup<'_>> {
+fn aggregate_query_profiles<'a>(profiles: &[&'a TypeInferenceQueryProfile]) -> Vec<QueryGroup<'a>> {
     let mut groups = BTreeMap::<QueryGroupKey, QueryGroup>::new();
-    for profile in profiles {
+    for &profile in profiles {
         let key = QueryGroupKey {
             kind: profile.kind,
             implementation: profile.implementation,
@@ -559,11 +778,11 @@ fn aggregate_query_profiles(profiles: &[TypeInferenceQueryProfile]) -> Vec<Query
     groups
 }
 
-fn aggregate_whole_module_profiles(
-    profiles: &[TypeInferenceWholeModuleProfile],
-) -> Vec<WholeModuleGroup<'_>> {
+fn aggregate_whole_module_profiles<'a>(
+    profiles: &[&'a TypeInferenceWholeModuleProfile],
+) -> Vec<WholeModuleGroup<'a>> {
     let mut groups = BTreeMap::<TypeInferenceWholeModuleReason, WholeModuleGroup>::new();
-    for profile in profiles {
+    for &profile in profiles {
         groups
             .entry(profile.reason)
             .and_modify(|group| group.add(profile))
@@ -579,11 +798,7 @@ fn aggregate_whole_module_profiles(
     groups
 }
 
-impl TypeInferenceProfileLocation {
-    /// Returns whether a record at this location ranks ahead of another record.
-    ///
-    /// Total time takes precedence over maximum time. Equal timings use source
-    /// order so repeated reports choose the same representative location.
+impl crate::type_inference::profiling::TypeInferenceProfileLocation {
     fn is_hotter_than(
         &self,
         total: Duration,
@@ -597,26 +812,52 @@ impl TypeInferenceProfileLocation {
     }
 }
 
+fn record_omitted(
+    visitor: &mut dyn Visit,
+    total: usize,
+    limit: usize,
+    singular: &'static str,
+    plural: &'static str,
+) -> io::Result<()> {
+    let omitted = total.saturating_sub(limit);
+    if omitted > 0 {
+        let label = if omitted == 1 { singular } else { plural };
+        visitor.record_log(
+            LogCategory::None,
+            &markup! { <Dim>{omitted}" "{label}" omitted."</Dim> },
+        )?;
+    }
+    Ok(())
+}
+
 struct Count {
-    count: usize,
+    count: u64,
     singular: &'static str,
     plural: &'static str,
 }
 
 impl Count {
-    const fn source_records(count: usize) -> Self {
+    fn source_records(count: usize) -> Self {
         Self {
-            count,
+            count: count as u64,
             singular: "source record",
             plural: "source records",
         }
     }
 
-    const fn groups(count: usize) -> Self {
+    fn groups(count: usize) -> Self {
         Self {
-            count,
+            count: count as u64,
             singular: "group",
             plural: "groups",
+        }
+    }
+
+    const fn executions(count: u64) -> Self {
+        Self {
+            count,
+            singular: "execution",
+            plural: "executions",
         }
     }
 }
@@ -632,266 +873,5 @@ impl Display for Count {
                 self.plural
             }
         ))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::time::Duration;
-
-    use biome_console::fmt::{Display, Formatter, Termcolor};
-    use biome_console::markup;
-    use biome_diagnostics::termcolor::NoColor;
-    use biome_rowan::TextRange;
-
-    use super::CompactTypeInferenceProfile;
-    use crate::type_inference::profiling::{
-        RequestMetadata, TypeInferenceBreadthProfile, TypeInferenceLocationAttribution,
-        TypeInferenceProfileLocation, TypeInferenceProfileSnapshot, TypeInferenceQueryProfile,
-        TypeInferenceRequestProfile, TypeInferenceWholeModuleProfile,
-    };
-    use crate::type_inference::{
-        ArrayOfPromisesClassificationRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
-        NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest,
-        PromiseClassificationRequest, TypeInferenceCaller, TypeInferenceCodeReference,
-        TypeInferenceQueryKind, TypeInferenceWholeModuleReason,
-    };
-
-    const IMPLEMENTATION: TypeInferenceCodeReference = TypeInferenceCodeReference::new(
-        "crates/biome_module_graph/src/test.rs",
-        1,
-        "test_implementation",
-    );
-
-    fn render(display: impl Display) -> String {
-        let mut buffer = Vec::new();
-        let mut writer = Termcolor(NoColor::new(&mut buffer));
-        let mut f = Formatter::new(&mut writer);
-        f.write_markup(markup! {{ display }}).unwrap();
-        String::from_utf8(buffer).unwrap()
-    }
-
-    fn location(path: &str, start: u32) -> TypeInferenceProfileLocation {
-        TypeInferenceProfileLocation {
-            path: path.into(),
-            range: Some(TextRange::new(start.into(), (start + 1).into())),
-            attribution: TypeInferenceLocationAttribution::Exact,
-        }
-    }
-
-    fn request_profile(
-        metadata: RequestMetadata,
-        caller: TypeInferenceCaller,
-        path: &str,
-        total: Duration,
-        completed: u32,
-    ) -> TypeInferenceRequestProfile {
-        TypeInferenceRequestProfile {
-            caller,
-            metadata,
-            location: location(path, 1),
-            implementation: IMPLEMENTATION,
-            completed,
-            aborted: 0,
-            total,
-            average: total / completed,
-            min: total / completed,
-            max: total,
-        }
-    }
-
-    #[test]
-    fn groups_request_origins_and_uses_a_weighted_average() {
-        let caller = TypeInferenceCaller::new("nursery", "noFloatingPromises");
-        let snapshot = TypeInferenceProfileSnapshot {
-            requests: vec![
-                request_profile(
-                    RequestMetadata::of::<PromiseClassificationRequest>(),
-                    caller,
-                    "src/first.ts",
-                    Duration::from_millis(2),
-                    2,
-                ),
-                request_profile(
-                    RequestMetadata::of::<PromiseClassificationRequest>(),
-                    caller,
-                    "src/hottest.ts",
-                    Duration::from_millis(6),
-                    3,
-                ),
-            ],
-            ..TypeInferenceProfileSnapshot::default()
-        };
-
-        let output = render(CompactTypeInferenceProfile::new(&snapshot, None, "test"));
-
-        assert!(output.contains("Requests by consumer (top 1 of 1 group; 2 source records)"));
-        assert!(output.contains("time: total 8.000ms, 5 runs, average 1.600ms"));
-        assert!(output.contains("hottest origin: src/hottest.ts:1..2"));
-        assert!(!output.contains("Code references"));
-    }
-
-    #[test]
-    fn request_groups_are_bounded() {
-        let caller = TypeInferenceCaller::new("nursery", "rule");
-        let metadata = [
-            RequestMetadata::of::<NormalizedExpressionTypeRequest>(),
-            RequestMetadata::of::<NormalizedBindingTypeRequest>(),
-            RequestMetadata::of::<PromiseClassificationRequest>(),
-            RequestMetadata::of::<ArrayOfPromisesClassificationRequest>(),
-            RequestMetadata::of::<FunctionReturnTypeRequest>(),
-            RequestMetadata::of::<MemberReturnTypeRequest<'static>>(),
-        ];
-        let snapshot = TypeInferenceProfileSnapshot {
-            requests: metadata
-                .into_iter()
-                .enumerate()
-                .map(|(index, metadata)| {
-                    request_profile(
-                        metadata,
-                        caller,
-                        "src/file.ts",
-                        Duration::from_millis((index + 1) as u64),
-                        1,
-                    )
-                })
-                .collect(),
-            ..TypeInferenceProfileSnapshot::default()
-        };
-
-        let output = render(CompactTypeInferenceProfile::new(&snapshot, None, "test"));
-
-        assert!(output.contains("Requests by consumer (top 5 of 6 groups; 6 source records)"));
-        assert!(output.contains("1 group omitted"));
-        assert!(!output.contains("Normalized expression type <- nursery/rule"));
-    }
-
-    #[test]
-    fn query_group_reports_its_largest_consumer() {
-        let first_caller = TypeInferenceCaller::new("nursery", "firstRule");
-        let second_caller = TypeInferenceCaller::new("nursery", "secondRule");
-        let query = |request, caller, path, millis| TypeInferenceQueryProfile {
-            kind: TypeInferenceQueryKind::Promises,
-            request,
-            caller,
-            location: location(path, 4),
-            implementation: IMPLEMENTATION,
-            completed: 1,
-            aborted: 0,
-            total: Duration::from_millis(millis),
-            average: Duration::from_millis(millis),
-            min: Duration::from_millis(millis),
-            max: Duration::from_millis(millis),
-        };
-        let snapshot = TypeInferenceProfileSnapshot {
-            queries: vec![
-                query(
-                    RequestMetadata::of::<PromiseClassificationRequest>(),
-                    first_caller,
-                    "src/first.ts",
-                    2,
-                ),
-                query(
-                    RequestMetadata::of::<ArrayOfPromisesClassificationRequest>(),
-                    second_caller,
-                    "src/second.ts",
-                    4,
-                ),
-            ],
-            ..TypeInferenceProfileSnapshot::default()
-        };
-
-        let output = render(CompactTypeInferenceProfile::new(&snapshot, None, "test"));
-
-        assert!(output.contains("Promises / test_implementation"));
-        assert!(output.contains("time: total 6.000ms, 2 runs, average 3.000ms"));
-        assert!(
-            output.contains("top consumer: Array of Promises classification <- nursery/secondRule")
-        );
-        assert!(output.contains("hottest source: src/second.ts:4..5"));
-    }
-
-    #[test]
-    fn query_groups_are_bounded() {
-        let snapshot = TypeInferenceProfileSnapshot {
-            queries: (1..=9)
-                .map(|line| TypeInferenceQueryProfile {
-                    kind: TypeInferenceQueryKind::Promises,
-                    request: RequestMetadata::of::<PromiseClassificationRequest>(),
-                    caller: TypeInferenceCaller::new("nursery", "rule"),
-                    location: location("src/file.ts", line),
-                    implementation: TypeInferenceCodeReference::new(
-                        "crates/biome_module_graph/src/test.rs",
-                        line,
-                        "query",
-                    ),
-                    completed: 1,
-                    aborted: 0,
-                    total: Duration::from_millis(u64::from(line)),
-                    average: Duration::from_millis(u64::from(line)),
-                    min: Duration::from_millis(u64::from(line)),
-                    max: Duration::from_millis(u64::from(line)),
-                })
-                .collect(),
-            ..TypeInferenceProfileSnapshot::default()
-        };
-
-        let output = render(CompactTypeInferenceProfile::new(&snapshot, None, "test"));
-
-        assert!(output.contains("Query bodies (top 8 of 9 groups; 9 source records)"));
-        assert!(output.contains("1 group omitted"));
-    }
-
-    #[test]
-    fn whole_module_groups_report_maximum_breadth_and_hottest_transition() {
-        let whole_module =
-            |path, millis, modules, cycle_recoveries| TypeInferenceWholeModuleProfile {
-                reason: TypeInferenceWholeModuleReason::ImportDepthLimit,
-                root: location("src/root.ts", 1),
-                trigger: location(path, 2),
-                implementation: IMPLEMENTATION,
-                completed: 1,
-                aborted: 0,
-                total: Duration::from_millis(millis),
-                average: Duration::from_millis(millis),
-                min: Duration::from_millis(millis),
-                max: Duration::from_millis(millis),
-                modules: TypeInferenceBreadthProfile {
-                    average: modules as f64,
-                    min: modules,
-                    max: modules,
-                },
-                type_slots: TypeInferenceBreadthProfile {
-                    average: 0.0,
-                    min: 0,
-                    max: modules * 10,
-                },
-                expression_slots: TypeInferenceBreadthProfile {
-                    average: 0.0,
-                    min: 0,
-                    max: modules * 20,
-                },
-                binding_slots: TypeInferenceBreadthProfile {
-                    average: 0.0,
-                    min: 0,
-                    max: modules * 5,
-                },
-                cycle_recoveries,
-            };
-        let snapshot = TypeInferenceProfileSnapshot {
-            whole_module_inferences: vec![
-                whole_module("src/first.ts", 2, 3, 1),
-                whole_module("src/hottest.ts", 4, 8, 2),
-            ],
-            ..TypeInferenceProfileSnapshot::default()
-        };
-
-        let output = render(CompactTypeInferenceProfile::new(&snapshot, None, "test"));
-
-        assert!(output.contains("Import depth limit"));
-        assert!(output.contains("time: total 6.000ms, 2 runs, average 3.000ms"));
-        assert!(output.contains("maximum breadth: 8 modules, slots T/E/B 80/160/40"));
-        assert!(output.contains("cycle recoveries: 3"));
-        assert!(output.contains("hottest transition: src/root.ts:1..2 -> src/hottest.ts:2..3"));
     }
 }

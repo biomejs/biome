@@ -308,6 +308,14 @@ impl Advices for CliAdvice {
 }
 
 impl CliDiagnostic {
+    /// Returned when a command-line argument cannot be parsed.
+    pub fn parse_error(message: impl Into<String>) -> Self {
+        Self::ParseError(ParseDiagnostic {
+            source: None,
+            message: MessageAndDescription::from(message.into()),
+        })
+    }
+
     /// Returned when a subcommand is called with an unsupported combination of arguments
     pub fn incompatible_arguments(
         first_argument: impl Into<String>,

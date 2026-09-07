@@ -1,0 +1,18 @@
+---
+source: crates/biome_manifest/src/lib.rs
+assertion_line: 328
+expression: diagnostics
+---
+deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The plugin presets must contain at least one preset.
+  
+  > 1 │ {
+      │ ^
+  > 2 │                 "version": 1,
+  > 3 │                 "plugins": {
+  > 4 │                     "rules": [{ "useMyLogger": "./useMyLogger.grit" }],
+  > 5 │                     "presets": {}
+  > 6 │                 }
+  > 7 │             }
+      │             ^

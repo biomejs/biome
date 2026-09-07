@@ -1225,12 +1225,7 @@ where
     }
 
     /// Create a [Send] + [Sync] handle to this node.
-    ///
-    /// ### Panics
-    ///
-    /// It panics if the `base_offset` isn't greater than zero
     pub fn as_embedded_send(&self) -> EmbeddedSendNode {
-        debug_assert!(self.offset > 0.into(), "range must be greater than 0");
         EmbeddedSendNode {
             green: self.node.green_node(),
             offset: self.offset,

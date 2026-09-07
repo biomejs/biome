@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, cmp::Ordering, collections::HashSet};
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
@@ -7,12 +7,12 @@ use biome_analyze::{
 
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsObjectMemberName, AnyTsTypeMember, TsInterfaceDeclaration, TsTypeMemberList,
+    AnyJsObjectMemberName, AnyTsTypeMember, JsLanguage, TsInterfaceDeclaration, TsTypeMemberList,
 };
 use biome_rule_options::use_sorted_interface_members::UseSortedInterfaceMembersOptions;
 
 use crate::JsRuleAction;
-use biome_rowan::{AstNode, AstNodeExt, AstNodeList, BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, AstNodeExt, AstNodeList, BatchMutationExt, SyntaxTriviaPiece, TextRange};
 use biome_string_case::comparable_token::ComparableToken;
 declare_source_rule! {
     /// Sort interface members by key.
@@ -66,6 +66,40 @@ declare_source_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `partitionByNewLine`
+    ///
+    /// When enabled, members separated by a blank line are kept in their own
+    /// section and sorted only within that section. This preserves logical
+    /// groupings that the author intentionally introduced with empty lines.
+    ///
+    /// > Default: `false`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "partitionByNewLine": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With the option enabled, the following interface is considered sorted
+    /// because each section is sorted on its own:
+    ///
+    /// ```ts,use_options
+    /// interface User {
+    ///   id: string;
+    ///
+    ///   createdAt: Date;
+    ///   updatedAt: Date;
+    ///
+    ///   email: string;
+    ///   name: string;
+    ///   passwordHash: string;
+    /// }
+    /// ```
+    ///
     pub UseSortedInterfaceMembers {
         version: "2.4.0",
         name: "useSortedInterfaceMembers",
@@ -83,7 +117,8 @@ impl Rule for UseSortedInterfaceMembers {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let interface = ctx.query();
         let body = interface.members();
-        if is_interface_members_sorted(&body, comparator) {
+        let partition_by_new_line = ctx.options().partition_by_new_line.unwrap_or_default();
+        if is_interface_members_sorted(&body, comparator, partition_by_new_line) {
             None
         } else {
             Some(())
@@ -106,12 +141,13 @@ impl Rule for UseSortedInterfaceMembers {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let interface = ctx.query();
         let list = interface.members();
+        let partition_by_new_line = ctx.options().partition_by_new_line.unwrap_or_default();
         let mut mutation = ctx.root().begin();
 
         // Instead of rebuilding the entire list, replace individual members
         // that are in the wrong position. This preserves comments better.
         // If any token replacements fail, propagate None to skip the fix.
-        sort_interface_members_in_place(&list, comparator, &mut mutation)?;
+        sort_interface_members_in_place(&list, comparator, partition_by_new_line, &mut mutation)?;
 
         Some(RuleAction::new(
             rule_action_category!(),
@@ -135,15 +171,84 @@ fn get_type_member_name(member: &AnyTsTypeMember) -> Option<AnyJsObjectMemberNam
         _ => None,
     }
 }
+
+/// Returns true if `member`'s leading trivia contains a blank line.
+///
+/// A blank line is a pair of newlines optionally separated by whitespace
+/// pieces. Comments between newlines do not count as a blank line.
+fn has_blank_line_before(member: &AnyTsTypeMember) -> bool {
+    let Some(first_token) = member.syntax().first_token() else {
+        return false;
+    };
+    let mut seen_newline = false;
+    for piece in first_token.leading_trivia().pieces() {
+        if piece.is_newline() {
+            if seen_newline {
+                return true;
+            }
+            seen_newline = true;
+        } else if !piece.is_whitespace() {
+            seen_newline = false;
+        }
+    }
+    false
+}
+
+/// Returns the index of the second newline of the last blank line in `pieces`.
+/// This is the boundary between "detached" (section-break) trivia and
+/// "attached" (member-attached) trivia.
+///
+/// Whitespace pieces between two newlines are ignored.
+fn find_last_blank_line_idx(pieces: &[SyntaxTriviaPiece<JsLanguage>]) -> Option<usize> {
+    let mut last = None;
+    let mut seen_newline = false;
+    for (i, piece) in pieces.iter().enumerate() {
+        if piece.is_newline() {
+            if seen_newline {
+                last = Some(i);
+            }
+            seen_newline = true;
+        } else if !piece.is_whitespace() {
+            seen_newline = false;
+        }
+    }
+    last
+}
+
+/// Returns the boundaries (start indices and trailing length sentinel) of
+/// sections in the given member list.
+///
+/// When `partition_by_new_line` is false, the returned vector contains just
+/// `[0, members.len()]` (a single section).
+fn compute_section_boundaries(members: &[AnyTsTypeMember], partition_by_new_line: bool) -> Vec<usize> {
+    let mut boundaries = vec![0_usize];
+    if partition_by_new_line {
+        // `skip(1)` as the first boundary is always 0 (the start of the list)
+        for (i, member) in members.iter().enumerate().skip(1) {
+            if has_blank_line_before(member) {
+                boundaries.push(i);
+            }
+        }
+    }
+    boundaries.push(members.len());
+    boundaries
+}
+
 fn is_interface_members_sorted(
     list: &TsTypeMemberList,
     comparator: impl Fn(&ComparableToken, &ComparableToken) -> std::cmp::Ordering,
+    partition_by_new_line: bool,
 ) -> bool {
-    use std::cmp::Ordering;
     let mut prev_key: Option<ComparableToken> = None;
     let mut saw_non_sortable = false;
 
-    for member in list.iter() {
+    for (i, member) in list.iter().enumerate() {
+        if partition_by_new_line && i > 0 && has_blank_line_before(&member) {
+            // New section: reset state.
+            prev_key = None;
+            saw_non_sortable = false;
+        }
+
         if let Some(name) = get_type_member_name(&member)
             && let Some(token_text) = name.name()
         {
@@ -174,89 +279,119 @@ fn is_interface_members_sorted(
 fn sort_interface_members_in_place(
     list: &TsTypeMemberList,
     comparator: impl Fn(&ComparableToken, &ComparableToken) -> std::cmp::Ordering,
+    partition_by_new_line: bool,
     mutation: &mut biome_rowan::BatchMutation<biome_js_syntax::JsLanguage>,
 ) -> Option<()> {
-    // Collect current members with their trivia
-    let members_with_trivia: Vec<_> = list
-        .iter()
-        .map(|member| {
-            let syntax = member.syntax();
-            let leading_trivia: Vec<_> = syntax
-                .first_token()
-                .map(|token| token.leading_trivia().pieces().collect())
-                .unwrap_or_default();
-            let trailing_trivia: Vec<_> = syntax
-                .last_token()
-                .map(|token| token.trailing_trivia().pieces().collect())
-                .unwrap_or_default();
+    let members: Vec<_> = list.iter().collect();
+    let section_boundaries = compute_section_boundaries(&members, partition_by_new_line);
 
-            (member, leading_trivia, trailing_trivia)
-        })
-        .collect();
+    // For each section, compute the expected order:
+    // sortable members sorted alphabetically, followed by non-sortable members
+    // in their original order.
+    let mut expected_indices = Vec::with_capacity(members.len());
+    for &[start, end] in section_boundaries.array_windows::<2>() {
+        let mut sortable = Vec::new();
+        let mut non_sortable = Vec::new();
 
-    // Separate sortable from non-sortable members
-    let mut sortable_indices = Vec::new();
-    let mut non_sortable_indices = Vec::new();
-
-    for (index, (member, _, _)) in members_with_trivia.iter().enumerate() {
-        if let Some(name) = get_type_member_name(member)
-            && name.name().is_some()
-        {
-            sortable_indices.push(index);
-        } else {
-            non_sortable_indices.push(index);
+        for (idx, member) in members.iter().enumerate().take(end).skip(start) {
+            if let Some(name) = get_type_member_name(member)
+                && name.name().is_some()
+            {
+                sortable.push(idx);
+            } else {
+                non_sortable.push(idx);
+            }
         }
+
+        sortable.sort_by(|&a, &b| {
+            let key_a = get_type_member_name(&members[a])
+                .and_then(|name| name.name())
+                .map(ComparableToken::new);
+            let key_b = get_type_member_name(&members[b])
+                .and_then(|name| name.name())
+                .map(ComparableToken::new);
+
+            match (key_a, key_b) {
+                (Some(a), Some(b)) => comparator(&a, &b),
+                _ => std::cmp::Ordering::Equal,
+            }
+        });
+
+        expected_indices.extend(sortable);
+        expected_indices.extend(non_sortable);
     }
 
-    // Sort the sortable members by their keys
-    sortable_indices.sort_by(|&a, &b| {
-        let (member_a, _, _) = &members_with_trivia[a];
-        let (member_b, _, _) = &members_with_trivia[b];
-
-        let key_a = get_type_member_name(member_a)
-            .and_then(|name| name.name())
-            .map(ComparableToken::new);
-        let key_b = get_type_member_name(member_b)
-            .and_then(|name| name.name())
-            .map(ComparableToken::new);
-
-        match (key_a, key_b) {
-            (Some(a), Some(b)) => comparator(&a, &b),
-            _ => std::cmp::Ordering::Equal,
-        }
-    });
-
-    // Collect current members in order
-    // Build the expected order: sortable first, then everything else
-    let current_members: Vec<_> = list.iter().collect();
-    let expected_indices: Vec<_> = sortable_indices
-        .into_iter()
-        .chain(non_sortable_indices)
+    // Positions (other than 0) that begin a new section. At these positions
+    // the blank line of the original section start must be preserved, while
+    // the moving member should contribute only its attached trivia.
+    let section_start_positions: HashSet<_> = section_boundaries
+        .iter()
+        .copied()
+        .filter(|&i| i > 0 && i < members.len())
         .collect();
 
-    // Replace each member that's in the wrong position
-    for (current_index, current_member) in current_members.iter().enumerate() {
+    for (current_index, current_member) in members.iter().enumerate() {
         let expected_index = expected_indices[current_index];
 
-        if current_index != expected_index {
-            let (expected_member, leading, trailing) = &members_with_trivia[expected_index];
-            let mut new_member = expected_member.clone();
-
-            if let Some(first_token) = new_member.syntax().first_token() {
-                let new_first = first_token
-                    .with_leading_trivia(leading.iter().map(|piece| (piece.kind(), piece.text())));
-                new_member =
-                    new_member.replace_token_discard_trivia(first_token.clone(), new_first)?;
-            }
-            if let Some(last_token) = new_member.syntax().last_token() {
-                let new_last = last_token.with_trailing_trivia_pieces(trailing.iter().cloned());
-                new_member =
-                    new_member.replace_token_discard_trivia(last_token.clone(), new_last)?;
-            }
-
-            // Use replace_node_discard_trivia to avoid transferring trivia from current_member
-            mutation.replace_node_discard_trivia(current_member.clone(), new_member);
+        if current_index == expected_index {
+            continue;
         }
+
+        let expected_member = &members[expected_index];
+
+        let expected_leading: Vec<_> = expected_member
+            .syntax()
+            .first_token()
+            .map(|token| token.leading_trivia().pieces().collect())
+            .unwrap_or_default();
+        let expected_trailing: Vec<_> = expected_member
+            .syntax()
+            .last_token()
+            .map(|token| token.trailing_trivia().pieces().collect())
+            .unwrap_or_default();
+
+        // Build the new leading trivia for the expected member at this position.
+        let new_leading = if partition_by_new_line {
+            // The expected member's attached trivia (everything after its
+            // own last blank line, if any).
+            let attached_start = find_last_blank_line_idx(&expected_leading).unwrap_or(0);
+            let attached_iter = expected_leading.iter().skip(attached_start).cloned();
+
+            if section_start_positions.contains(&current_index) {
+                // Preserve the section break (blank line + any preceding
+                // detached trivia) from the original member at this position.
+                let current_leading: Vec<_> = current_member
+                    .syntax()
+                    .first_token()
+                    .map(|token| token.leading_trivia().pieces().collect())
+                    .unwrap_or_default();
+                let detached_end = find_last_blank_line_idx(&current_leading).unwrap_or(0);
+                current_leading
+                    .iter()
+                    .take(detached_end)
+                    .cloned()
+                    .chain(attached_iter)
+                    .collect()
+            } else {
+                attached_iter.collect()
+            }
+        } else {
+            expected_leading.clone()
+        };
+
+        let mut new_member = expected_member.clone();
+
+        if let Some(first_token) = new_member.syntax().first_token() {
+            let new_first = first_token.with_leading_trivia_pieces(new_leading.iter().cloned());
+            new_member = new_member.replace_token_discard_trivia(first_token.clone(), new_first)?;
+        }
+        if let Some(last_token) = new_member.syntax().last_token() {
+            let new_last = last_token.with_trailing_trivia_pieces(expected_trailing.iter().cloned());
+            new_member = new_member.replace_token_discard_trivia(last_token.clone(), new_last)?;
+        }
+
+        // Use replace_node_discard_trivia to avoid transferring trivia from current_member
+        mutation.replace_node_discard_trivia(current_member.clone(), new_member);
     }
 
     Some(())

@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: partition_by_new_line_sorted.ts
+---
+# Input
+```ts
+interface User {
+	id: string;
+
+	createdAt: Date;
+	updatedAt: Date;
+
+	email: string;
+	name: string;
+	passwordHash: string;
+}
+
+```

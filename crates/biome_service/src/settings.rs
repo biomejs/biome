@@ -7,11 +7,13 @@ pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
 
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
-use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerOptions, AnalyzerRules, ExtendedConfigurationProvider};
 #[cfg(feature = "lang_css")]
 use biome_configuration::CssConfiguration;
 #[cfg(feature = "lang_js")]
 use biome_configuration::JsConfiguration;
+#[cfg(feature = "lang_md")]
+use biome_configuration::MarkdownConfiguration;
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
@@ -25,12 +27,14 @@ use biome_configuration::javascript::{
 };
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
+#[cfg(feature = "lang_yaml")]
+use biome_configuration::yaml::YamlConfiguration;
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, ConfigurationSource, DEFAULT_SCANNER_IGNORE_ENTRIES,
-    ExtendedConfigurations, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, ConfigurationSource, ConfigurationSourceEntry,
+    DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 #[cfg(feature = "lang_css")]
 use biome_css_formatter::context::CssFormatOptions;
@@ -68,8 +72,16 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
+#[cfg(feature = "lang_md")]
+use biome_markdown_formatter::context::MdFormatOptions;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_formatter::YamlFormatOptions;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -84,6 +96,8 @@ use std::sync::{Arc, RwLock};
 pub struct Settings {
     /// The configuration that originated this setting if applicable.
     source: Option<Arc<ConfigurationSource>>,
+
+    configuration_provider: Option<Arc<dyn ExtendedConfigurationProvider>>,
 
     pub(crate) module_graph_resolution_kind: ModuleGraphResolutionKind,
 
@@ -157,13 +171,7 @@ impl Settings {
 
     pub(crate) fn with_inline_configuration(&self, configuration: Configuration) -> Self {
         let mut settings = self.clone();
-        let workspace_directory = self.source.as_ref().and_then(|source| {
-            source
-                .as_ref()
-                .source
-                .as_ref()
-                .and_then(|source| source.1.clone())
-        });
+        let workspace_directory = self.source_path();
 
         // TODO handle error
         let _ = settings.merge_with_configuration(configuration, workspace_directory, vec![]);
@@ -197,15 +205,11 @@ impl Settings {
     }
 
     pub fn source(&self) -> Option<Configuration> {
-        self.source.as_ref()?.source()
+        self.source.as_ref().map(|source| source.resolve())
     }
 
     pub fn source_path(&self) -> Option<Utf8PathBuf> {
         self.source.as_ref()?.source_path()
-    }
-
-    pub fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
-        self.source.clone()
     }
 
     /// Merges the [Configuration] into the settings.
@@ -216,12 +220,40 @@ impl Settings {
         working_directory: Option<Utf8PathBuf>,
         extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
     ) -> Result<(), WorkspaceError> {
+        let extended_configurations = ExtendedConfigurations::from(extended_configurations);
+        self.configuration_provider = Some(Arc::new(extended_configurations));
         self.source = Some(Arc::new(ConfigurationSource {
-            source: Some((configuration.clone(), working_directory.clone())),
-            extended_configurations: ExtendedConfigurations::from(extended_configurations),
+            directory_path: working_directory.clone(),
+            root: Some(ConfigurationSourceEntry {
+                configuration: Some(configuration.clone()),
+                file_path: None,
+                file_source: None,
+            }),
+            extended_configurations: ExtendedConfigurations::default(),
         }));
+        self.apply_configuration(configuration, working_directory)
+    }
 
-        // formatter part§
+    /// Merges a configuration and retains the files used to resolve it.
+    #[tracing::instrument(level = "debug", skip_all)]
+    pub fn merge_with_configuration_source(
+        &mut self,
+        source: impl Into<Arc<ConfigurationSource>>,
+    ) -> Result<(), WorkspaceError> {
+        let source = source.into();
+        let configuration = source.resolve();
+        let working_directory = source.directory_path.clone();
+        self.configuration_provider = Some(source.clone());
+        self.source = Some(source);
+        self.apply_configuration(configuration, working_directory)
+    }
+
+    fn apply_configuration(
+        &mut self,
+        configuration: Configuration,
+        working_directory: Option<Utf8PathBuf>,
+    ) -> Result<(), WorkspaceError> {
+        // formatter part
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_format_settings(
                 working_directory
@@ -695,8 +727,8 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
         self.features().contains(EditorFeature::GotoDefinition)
     }
 
-    pub(crate) fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
-        self.as_ref().source.clone()
+    pub(crate) fn configuration_provider(&self) -> Option<Arc<dyn ExtendedConfigurationProvider>> {
+        self.as_ref().configuration_provider.clone()
     }
 
     fn effective_settings(&self) -> &Settings {
@@ -1124,6 +1156,9 @@ impl From<biome_configuration::MarkdownConfiguration>
         }
         if let Some(formatter) = markdown.formatter {
             language_setting.formatter = formatter.into();
+        }
+        if let Some(linter) = markdown.linter {
+            language_setting.linter.enabled = linter.enabled;
         }
 
         language_setting
@@ -1590,9 +1625,7 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
 
 impl Settings {
     pub fn matching_override_indices(&self, path: &Utf8Path) -> Box<[usize]> {
-        self.override_settings
-            .matching_indices(path)
-            .into_boxed_slice()
+        self.override_settings.matching_indices(path).collect()
     }
 
     /// Whether the formatter should format with parsing errors, for this file path
@@ -1641,14 +1674,15 @@ pub struct OverrideSettings {
 }
 
 impl OverrideSettings {
-    fn matching_indices(&self, path: &Utf8Path) -> Vec<usize> {
+    /// Returns the declaration indices of overrides matching `path`.
+    pub fn matching_indices<'a>(&'a self, path: &'a Utf8Path) -> impl Iterator<Item = usize> + 'a {
         self.patterns
             .iter()
             .enumerate()
             .filter_map(|(index, pattern)| pattern.is_file_included(path).then_some(index))
-            .collect()
     }
 
+    /// It scans the current override rules and return the formatting options that of the first override is matched
     #[cfg(feature = "lang_js")]
     pub(crate) fn override_js_format_options_by_indices(
         &self,
@@ -1813,6 +1847,32 @@ impl OverrideSettings {
         for &index in indices {
             if let Some(pattern) = self.patterns.get(index) {
                 pattern.apply_overrides_to_graphql_format_options(options);
+            }
+        }
+    }
+
+    #[cfg(feature = "lang_md")]
+    pub fn apply_override_markdown_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut MdFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
+                pattern.apply_overrides_to_markdown_format_options(options);
+            }
+        }
+    }
+
+    #[cfg(feature = "lang_yaml")]
+    pub fn apply_override_yaml_format_options_by_indices(
+        &self,
+        indices: &[usize],
+        options: &mut YamlFormatOptions,
+    ) {
+        for &index in indices {
+            if let Some(pattern) = self.patterns.get(index) {
+                pattern.apply_overrides_to_yaml_format_options(options);
             }
         }
     }
@@ -2178,6 +2238,55 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_md")]
+    fn apply_overrides_to_markdown_format_options(&self, options: &mut MdFormatOptions) {
+        let md_formatter = &self.languages.markdown.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = md_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = md_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width);
+        }
+        if let Some(line_ending) = md_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = md_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(trailing_newline) = md_formatter.trailing_newline.or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
+
+        if let Some(prose_wrap) = md_formatter.prose_wrap {
+            options.set_prose_wrap(prose_wrap);
+        }
+    }
+
+    #[cfg(feature = "lang_yaml")]
+    fn apply_overrides_to_yaml_format_options(&self, options: &mut YamlFormatOptions) {
+        let yaml_formatter = &self.languages.yaml.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_width) = yaml_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width);
+        }
+        if let Some(line_ending) = yaml_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = yaml_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(trailing_newline) = yaml_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
+    }
+
     #[cfg(feature = "lang_js")]
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         let js_parser = &self.languages.javascript.parser;
@@ -2298,6 +2407,10 @@ pub fn to_override_settings(
         let css = pattern.css.take().unwrap_or_default();
         #[cfg(feature = "lang_html")]
         let html = pattern.html.take().unwrap_or_default();
+        #[cfg(feature = "lang_md")]
+        let markdown = pattern.markdown.take().unwrap_or_default();
+        #[cfg(feature = "lang_yaml")]
+        let yaml = pattern.yaml.take().unwrap_or_default();
 
         #[cfg(feature = "lang_js")]
         {
@@ -2325,6 +2438,15 @@ pub fn to_override_settings(
         #[cfg(feature = "lang_html")]
         {
             languages.html = to_html_language_settings(html, &current_settings.languages.html);
+        }
+        #[cfg(feature = "lang_md")]
+        {
+            languages.markdown =
+                to_markdown_language_settings(markdown, &current_settings.languages.markdown);
+        }
+        #[cfg(feature = "lang_yaml")]
+        {
+            languages.yaml = to_yaml_language_settings(yaml, &current_settings.languages.yaml);
         }
 
         let pattern_setting = OverrideSettingPattern {
@@ -2356,6 +2478,9 @@ fn to_javascript_language_settings(
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist.enabled = assist.enabled;
 
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;
@@ -2468,6 +2593,40 @@ fn to_html_language_settings(
     _parent_settings: &LanguageSettings<HtmlLanguage>,
 ) -> LanguageSettings<HtmlLanguage> {
     let mut language_setting: LanguageSettings<HtmlLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter = formatter.into();
+
+    let parser = conf.parser.take().unwrap_or_default();
+    language_setting.parser = parser.into();
+
+    let linter = conf.linter.take().unwrap_or_default();
+    language_setting.linter = linter.into();
+
+    let assist = conf.assist.take().unwrap_or_default();
+    language_setting.assist = assist.into();
+
+    language_setting
+}
+#[cfg(feature = "lang_md")]
+fn to_markdown_language_settings(
+    mut conf: MarkdownConfiguration,
+    _parent_settings: &LanguageSettings<MarkdownLanguage>,
+) -> LanguageSettings<MarkdownLanguage> {
+    let mut language_setting: LanguageSettings<MarkdownLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter = formatter.into();
+
+    language_setting
+}
+
+#[cfg(feature = "lang_yaml")]
+fn to_yaml_language_settings(
+    mut conf: YamlConfiguration,
+    _parent_settings: &LanguageSettings<YamlLanguage>,
+) -> LanguageSettings<YamlLanguage> {
+    let mut language_setting: LanguageSettings<YamlLanguage> = LanguageSettings::default();
     let formatter = conf.formatter.take().unwrap_or_default();
 
     language_setting.formatter = formatter.into();

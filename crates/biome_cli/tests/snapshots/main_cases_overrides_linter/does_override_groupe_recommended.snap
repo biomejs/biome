@@ -9,7 +9,7 @@ expression: redactor(content)
   "linter": {
     "rules": {
       "suspicious": {
-        "recommended": true
+        "preset": "recommended"
       }
     }
   },
@@ -19,7 +19,7 @@ expression: redactor(content)
       "linter": {
         "rules": {
           "suspicious": {
-            "recommended": false
+            "preset": "none"
           }
         }
       }

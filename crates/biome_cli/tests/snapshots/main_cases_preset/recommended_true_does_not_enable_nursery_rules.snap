@@ -28,6 +28,28 @@ for (let i = 0; i < 10; i++) {
 # Emitted Messages
 
 ```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+  > 2 │     "linter": {
+      │               ^
+  > 3 │         "rules": {
+  > 4 │             "recommended": true
+  > 5 │         }
+  > 6 │     }
+      │     ^
+    7 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 test.js:3:9 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary continue statement

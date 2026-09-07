@@ -1799,26 +1799,32 @@ impl WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(feature = "plugins")]
-    fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
+    fn load_plugins(
+        &self,
+        base_path: &Utf8Path,
+        plugins: &Plugins,
+    ) -> (PluginCache, Vec<PluginDiagnostic>) {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
 
         for plugin_config in plugins.iter() {
             let plugin_path = plugin_config.path();
             let includes = plugin_config.includes();
-            match BiomePlugin::load(self.fs.clone(), plugin_path, base_path, includes) {
+            match BiomePlugin::load_with_package_specifier(
+                self.fs.clone(),
+                plugin_path,
+                base_path,
+                includes,
+                plugin_config.resolved_package_specifier(),
+            ) {
                 Ok((plugin, _)) => {
-                    plugin_cache.insert_plugin(plugin_path.to_owned().into(), plugin);
+                    plugin_cache.insert_plugin(plugin_config, plugin);
                 }
                 Err(diagnostic) => diagnostics.push(diagnostic),
             }
         }
 
-        self.plugin_caches
-            .pin()
-            .insert(base_path.to_path_buf(), plugin_cache);
-
-        diagnostics
+        (plugin_cache, diagnostics)
     }
 
     #[cfg(feature = "plugins")]
@@ -2754,6 +2760,32 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         };
         settings.module_graph_resolution_kind = module_graph_resolution_kind;
 
+        #[cfg(feature = "plugins")]
+        let configuration = {
+            let mut configuration = configuration;
+            let plugin_resolution_base = workspace_directory
+                .clone()
+                .or_else(|| self.project_get_path(project_key))
+                .unwrap_or_default();
+            if let Some(plugins) = configuration.plugins.as_mut() {
+                plugins
+                    .resolve_paths(self.fs.as_ref(), &plugin_resolution_base)
+                    .map_err(|diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]))?;
+            }
+            if let Some(overrides) = configuration.overrides.as_mut() {
+                for pattern in overrides.0.iter_mut() {
+                    if let Some(plugins) = pattern.plugins.as_mut() {
+                        plugins
+                            .resolve_paths(self.fs.as_ref(), &plugin_resolution_base)
+                            .map_err(|diagnostic| {
+                                WorkspaceError::plugin_errors(vec![diagnostic])
+                            })?;
+                    }
+                }
+            }
+            configuration
+        };
+
         settings.merge_with_configuration(
             configuration,
             workspace_directory.clone(),
@@ -2765,10 +2797,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         #[cfg(feature = "plugins")]
         {
-            let plugin_diagnostics = self.load_plugins(
-                &workspace_directory.clone().unwrap_or_default(),
-                &settings.as_all_plugins(),
-            );
+            let plugin_base_path = workspace_directory.clone().unwrap_or_default();
+            let (plugin_cache, plugin_diagnostics) =
+                self.load_plugins(&plugin_base_path, &settings.as_all_plugins());
 
             let has_errors = plugin_diagnostics
                 .iter()
@@ -2777,6 +2808,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             if has_errors {
                 return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
             }
+            self.plugin_caches
+                .pin()
+                .insert(plugin_base_path, plugin_cache);
             diagnostics.extend(
                 plugin_diagnostics
                     .into_iter()
@@ -4304,13 +4338,12 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             let loaded_nested_configuration =
                 LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
 
-            let LoadedConfiguration {
-                directory_path: nested_directory_path,
-                configuration: nested_configuration,
-                diagnostics,
-                extended_configurations,
-                ..
-            } = loaded_nested_configuration;
+            let nested_directory_path = loaded_nested_configuration
+                .directory_path()
+                .map(Utf8Path::to_path_buf);
+            let nested_configuration = loaded_nested_configuration.resolved_configuration();
+            let extended_configurations = loaded_nested_configuration.extended_configurations();
+            let diagnostics = loaded_nested_configuration.diagnostics;
             let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
             returned_diagnostics.extend(
                 diagnostics
@@ -4602,3 +4635,7 @@ fn init_thread_pool(_threads: Option<usize>) {}
 #[cfg(test)]
 #[path = "server.tests.rs"]
 mod tests;
+
+#[cfg(all(test, feature = "md_embeds"))]
+#[path = "md_embeds.tests.rs"]
+mod md_embeds_tests;

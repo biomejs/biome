@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "formatter": { "formatWithErrors": false },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "formatWithErrors": false }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.formatWithErrors",
+  "value": false,
+  "source": {
+    "configurationKind": "root",
+    "path": "biome.json",
+    "range": {
+      "end": 44,
+      "start": 39
+    },
+    "scope": "base"
+  }
+}
+```

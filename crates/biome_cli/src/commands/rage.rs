@@ -16,10 +16,10 @@ use biome_flags::biome_env;
 use biome_fs::OsFileSystem;
 use biome_resolver::FsWithResolverProxy;
 use biome_service::Workspace;
-use biome_service::configuration::{LoadedConfiguration, load_configuration};
+use biome_service::configuration::load_configuration;
 use biome_service::settings::Settings;
 use biome_service::workspace::{RageEntry, RageParams, client};
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::collections::BTreeSet;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
@@ -214,21 +214,20 @@ impl Display for RageConfiguration<'_> {
             .as_configuration_path_hint(working_dir.as_path());
         match load_configuration(self.fs, path_hint) {
             Ok(loaded_configuration) => {
-                if loaded_configuration.directory_path.is_none() {
+                if loaded_configuration.directory_path().is_none() {
                     markup! {
                         {KeyValuePair::new("Status", markup!(<Dim>"Not set"</Dim>))}
                         {ConfigPath("unset")}
                     }
                     .fmt(fmt)?;
                 } else {
-                    let LoadedConfiguration {
-                        configuration,
-                        diagnostics,
-                        directory_path,
-                        file_path,
-                        extended_configurations,
-                        loaded_location: _,
-                    } = loaded_configuration;
+                    let configuration = loaded_configuration.resolved_configuration();
+                    let extended_configurations = loaded_configuration.extended_configurations();
+                    let directory_path = loaded_configuration
+                        .directory_path()
+                        .map(Utf8Path::to_path_buf);
+                    let file_path = loaded_configuration.file_path().map(Utf8Path::to_path_buf);
+                    let diagnostics = loaded_configuration.diagnostics;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
@@ -391,6 +390,19 @@ impl Display for RageConfiguration<'_> {
                             {RageConfigurationLintRules("Enabled rules", enabled_rules)}
                         ).fmt(fmt)?;
                     }
+
+                    let files_configuration = configuration.get_files_configuration();
+                    let includes = files_configuration.includes.as_ref().map(|list| {
+                        list.iter()
+                            .map(|glob| glob.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    });
+                    markup! (
+                            {Section("Files")}
+                            {KeyValuePair::new("Ignore Unknown", markup!({DisplayOption(files_configuration.ignore_unknown)}))}
+                            {KeyValuePair::new("Includes", markup!({DisplayOption(includes)}))}
+                        ).fmt(fmt)?;
                 }
             }
             Err(err) => markup! (

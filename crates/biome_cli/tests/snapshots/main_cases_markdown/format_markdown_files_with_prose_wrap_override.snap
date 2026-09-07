@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "never"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["special/**"],
+      "markdown": {
+        "formatter": {
+          "lineWidth": 40,
+          "proseWrap": "always"
+        }
+      }
+    }
+  ]
+}
+```
+
+## `file.md`
+
+```md
+This is a long paragraph with enough words to exceed the configured line width and require wrapping.
+
+```
+
+## `special/file.md`
+
+```md
+This is a long paragraph with enough
+words to exceed the configured line
+width and require wrapping.
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

@@ -2,13 +2,15 @@
 pub(crate) mod html;
 #[cfg(feature = "js_embeds")]
 pub(crate) mod js;
+#[cfg(feature = "md_embeds")]
+pub(crate) mod markdown;
 
 use biome_rowan::{TextRange, TextSize, TokenText};
 
 /// The text content and position information for an embed site.
 #[derive(Clone, Debug)]
 #[cfg_attr(
-    not(any(feature = "html_embeds", feature = "js_embeds")),
+    not(any(feature = "html_embeds", feature = "js_embeds", feature = "md_embeds")),
     expect(
         dead_code,
         reason = "Embed content fields are read only when embed features are enabled."

@@ -43,6 +43,42 @@ fn enables_vcs_and_ignore_dist() {
 }
 
 #[test]
+fn enables_vcs_inside_git_repository() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(".git/HEAD".into(), "ref: refs/heads/main\n".as_bytes());
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["init"].as_slice()));
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_vcs_inside_git_repository",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn enables_vcs_with_git_flag() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["init", "--git"].as_slice()));
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_vcs_with_git_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn creates_config_jsonc_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": { "assist": { "enabled": true } },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "javascript": { "assist": { "enabled": false } }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "javascript.assist.enabled",
+  "value": false,
+  "source": {
+    "configurationKind": "root",
+    "includes": [
+      "**/*.js"
+    ],
+    "matchedPath": "file.js",
+    "overrideIndex": 0,
+    "path": "biome.json",
+    "range": {
+      "end": 157,
+      "start": 152
+    },
+    "scope": "override"
+  }
+}
+```

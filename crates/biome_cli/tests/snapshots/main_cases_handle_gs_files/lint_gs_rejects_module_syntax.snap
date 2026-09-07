@@ -1,0 +1,101 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `Code.gs`
+
+```gs
+import { x } from "./y";
+export const z = 1;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Code.gs:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import { x } from "./y";
+      │        ^^^^^
+    2 │ export const z = 1;
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{·x·}·from·"./y";
+      │ ------------------------
+
+```
+
+```block
+Code.gs:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable z is unused.
+  
+    1 │ import { x } from "./y";
+  > 2 │ export const z = 1;
+      │              ^
+    3 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend z with an underscore.
+  
+    1 1 │   import { x } from "./y";
+    2   │ - export·const·z·=·1;
+      2 │ + export·const·_z·=·1;
+    3 3 │   
+  
+
+```
+
+```block
+Code.gs:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of an import declaration outside of a module
+  
+  > 1 │ import { x } from "./y";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export const z = 1;
+    3 │ 
+  
+  i not allowed inside scripts
+  
+
+```
+
+```block
+Code.gs:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of an export declaration outside of a module
+  
+    1 │ import { x } from "./y";
+  > 2 │ export const z = 1;
+      │ ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i not allowed inside scripts
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+Found 2 warnings.
+```

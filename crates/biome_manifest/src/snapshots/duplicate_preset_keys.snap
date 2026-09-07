@@ -1,0 +1,15 @@
+---
+source: crates/biome_manifest/src/lib.rs
+assertion_line: 430
+expression: diagnostics
+---
+deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key recommended is specified more than once.
+  
+    5 │                     "presets": {
+    6 │                         "recommended": ["useMyLogger"],
+  > 7 │                         "recommended": ["useMyLogger"]
+      │                         ^^^^^^^^^^^^^
+    8 │                     }
+    9 │                 }

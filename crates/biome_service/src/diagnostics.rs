@@ -17,6 +17,7 @@ use biome_grit_patterns::CompileError;
 #[cfg(feature = "lang_js")]
 use biome_js_analyze::utils::rename::RenameError;
 use biome_languages::DocumentFileSource;
+use biome_manifest::{BiomeManifestError, InvalidBiomeManifest};
 use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
@@ -61,6 +62,9 @@ pub enum WorkspaceError {
 
     /// Path contained a non-UTF8 character.
     NonUtf8Path(NonUtf8Path),
+
+    /// A Biome manifest could be read but not deserialized or validated.
+    InvalidBiomeManifest(InvalidBiomeManifest),
 
     /// The file does not exist in the [crate::Workspace].
     NotFound(NotFound),
@@ -198,6 +202,15 @@ impl WorkspaceError {
 
     pub fn feature_not_enabled() -> Self {
         Self::FeatureNotEnabled(FeatureNotEnabledDiagnostic {})
+    }
+}
+
+impl From<BiomeManifestError> for WorkspaceError {
+    fn from(value: BiomeManifestError) -> Self {
+        match value {
+            BiomeManifestError::FileSystem(error) => Self::FileSystem(error),
+            BiomeManifestError::Invalid(error) => Self::InvalidBiomeManifest(error),
+        }
     }
 }
 
@@ -581,6 +594,8 @@ pub enum TransportError {
     SerdeError(String),
     /// Generic error type for RPC errors that can't be deserialized into RomeError
     RPCError(String),
+    /// A diagnostic returned by a remote workspace.
+    RemoteDiagnostic(Box<biome_diagnostics::serde::Diagnostic>),
 }
 
 impl Display for TransportError {
@@ -591,11 +606,17 @@ impl Display for TransportError {
 
 impl Diagnostic for TransportError {
     fn category(&self) -> Option<&'static Category> {
-        Some(category!("internalError/io"))
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.category(),
+            _ => Some(category!("internalError/io")),
+        }
     }
 
     fn severity(&self) -> Severity {
-        Severity::Error
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.severity(),
+            _ => Severity::Error,
+        }
     }
 
     fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
@@ -606,6 +627,7 @@ impl Diagnostic for TransportError {
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
             Self::RPCError(err) => fmt.write_str(err),
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.description(fmt),
         }
     }
 
@@ -617,10 +639,43 @@ impl Diagnostic for TransportError {
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
             Self::RPCError(err) => fmt.write_str(err),
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.message(fmt),
         }
     }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.advices(visitor),
+            _ => Ok(()),
+        }
+    }
+
+    fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.verbose_advices(visitor),
+            _ => Ok(()),
+        }
+    }
+
+    fn location(&self) -> Location<'_> {
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.location(),
+            _ => Location::builder().build(),
+        }
+    }
+
     fn tags(&self) -> DiagnosticTags {
-        DiagnosticTags::INTERNAL
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.tags(),
+            _ => DiagnosticTags::INTERNAL,
+        }
+    }
+
+    fn source(&self) -> Option<&dyn Diagnostic> {
+        match self {
+            Self::RemoteDiagnostic(diagnostic) => diagnostic.source(),
+            _ => None,
+        }
     }
 }
 
@@ -689,6 +744,14 @@ impl Diagnostic for PluginErrors {
 
     fn severity(&self) -> Severity {
         Severity::Error
+    }
+
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        fmt.write_str("Error(s) during loading of plugins:")?;
+        for diagnostic in &self.diagnostics {
+            write!(fmt, "\n{diagnostic}")?;
+        }
+        Ok(())
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {

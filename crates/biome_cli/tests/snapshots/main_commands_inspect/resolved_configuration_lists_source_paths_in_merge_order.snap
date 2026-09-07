@@ -1,0 +1,71 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["first.json", "package-a", "second.json", "package-b"] }
+```
+
+## `node_modules/package-a/biome.json`
+
+```json
+{ "formatter": { "indentWidth": 4 } }
+```
+
+## `node_modules/package-b/biome.json`
+
+```json
+{ "formatter": { "lineEnding": "lf" } }
+```
+
+## `first.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+## `node_modules/package-a/package.json`
+
+```json
+{ "name": "package-a", "version": "1.0.0", "main": "biome.json" }
+```
+
+## `node_modules/package-b/package.json`
+
+```json
+{ "name": "package-b", "version": "1.0.0", "main": "biome.json" }
+```
+
+## `second.json`
+
+```json
+{ "formatter": { "indentStyle": "space" } }
+```
+
+# Emitted Messages
+
+```block
+biome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Resolved configuration from biome.json.
+  
+  Configuration files used (merge order):
+    - first.json
+    - node_modules/package-a/biome.json
+    - second.json
+    - node_modules/package-b/biome.json
+    - biome.json
+  
+  {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 4,
+      "lineEnding": "lf",
+      "lineWidth": 100
+    }
+  }
+  
+
+```

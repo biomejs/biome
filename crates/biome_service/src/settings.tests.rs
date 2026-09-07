@@ -236,6 +236,32 @@ fn merge_override_files_max_size_rule() {
 }
 
 #[test]
+fn matching_override_indices_preserve_declaration_order() {
+    let patterns = ["**/*.js", "**/*.test.js", "**/*.css"].map(|pattern| OverridePattern {
+        includes: Some(OverrideGlobs::Globs(Box::new([
+            biome_glob::NormalizedGlob::from_str(pattern).unwrap(),
+        ]))),
+        ..OverridePattern::default()
+    });
+    let configuration = Configuration {
+        overrides: Some(Overrides(patterns.into())),
+        ..Configuration::default()
+    };
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(configuration, None, vec![])
+        .expect("valid configuration");
+
+    assert_eq!(
+        settings
+            .override_settings
+            .matching_indices(Utf8Path::new("src/file.test.js"))
+            .collect::<Vec<_>>(),
+        [0, 1]
+    );
+}
+
+#[test]
 fn json_to_settings_includes_linter_and_assist() {
     let config = JsonConfiguration {
         linter: Some(JsonLinterConfiguration {

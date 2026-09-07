@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<Hello firstName="John" key={id} lastName="Smith" />;
+
+<Hello a="1" ref={r} key={id} b="2" />;
+
+<Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <Hello firstName="John" key={id} lastName="Smith" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <Hello a="1" ref={r} key={id} b="2" />;
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - <Hello·firstName="John"·key={id}·lastName="Smith"·/>;
+      2 │ + <Hello·key={id}·firstName="John"·lastName="Smith"·/>;
+    3 3 │   
+    4 4 │   <Hello a="1" ref={r} key={id} b="2" />;
+  
+
+```
+
+```
+invalid.jsx:4:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    2 │ <Hello firstName="John" key={id} lastName="Smith" />;
+    3 │ 
+  > 4 │ <Hello a="1" ref={r} key={id} b="2" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+  
+  i Safe fix: Sort the JSX props.
+  
+    2 2 │   <Hello firstName="John" key={id} lastName="Smith" />;
+    3 3 │   
+    4   │ - <Hello·a="1"·ref={r}·key={id}·b="2"·/>;
+      4 │ + <Hello·key={id}·ref={r}·a="1"·b="2"·/>;
+    5 5 │   
+    6 6 │   <Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+  
+
+```
+
+```
+invalid.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ <Hello a="1" ref={r} key={id} b="2" />;
+    5 │ 
+  > 6 │ <Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    4 4 │   <Hello a="1" ref={r} key={id} b="2" />;
+    5 5 │   
+    6   │ - <Hello·a="1"·key={id}·{...props}·z="2"·key={id2}·b="3"·/>;
+      6 │ + <Hello·a="1"·key={id}·{...props}·key={id2}·b="3"·z="2"·/>;
+    7 7 │   
+  
+
+```
+
+```
+invalid.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ <Hello a="1" ref={r} key={id} b="2" />;
+    5 │ 
+  > 6 │ <Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    4 4 │   <Hello a="1" ref={r} key={id} b="2" />;
+    5 5 │   
+    6   │ - <Hello·a="1"·key={id}·{...props}·z="2"·key={id2}·b="3"·/>;
+      6 │ + <Hello·key={id}·a="1"·{...props}·z="2"·key={id2}·b="3"·/>;
+    7 7 │   
+  
+
+```
