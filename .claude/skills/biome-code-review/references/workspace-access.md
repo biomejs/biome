@@ -1,6 +1,6 @@
 # Workspace Access Review
 
-Load this reference for changes to workspace methods, service execution, CLI/LSP paths, database storage, Salsa queries, or cancellation.
+Check affected workspace, service, CLI/LSP, database, Salsa, and cancellation contracts only.
 
 ## Two Execution Models
 
@@ -15,9 +15,9 @@ Verify these claims against the current constructors and call sites before citin
 
 ## CLI
 
-After scanning, per-file workers must not publish workspace state while other workers hold snapshots. A new `change_file` or equivalent state-publishing call inside a worker, crawl, or parallel iterator is a high-severity race.
+After scanning, per-file workers must not publish workspace state while others hold snapshots. Trace changed publishing calls' snapshot lifetimes and write ordering to establish reachable races or deadlocks; location alone is insufficient.
 
-Server-backed synchronization, when present, must remain deferred until parallel workers finish and then run sequentially. Do not accept a change that moves synchronization into the crawl or parallelizes the deferred commit without a new architecture that proves safety.
+For changed synchronization, check read/write and write/write overlap against current execution contracts, not scheduling preferences.
 
 ## LSP Cancellation
 
@@ -41,7 +41,7 @@ Search the current workspace implementation for the established example rather t
 
 ## Review Severity
 
-Treat these as high-severity correctness findings:
+These are candidates, not automatic findings. Establish reachability and affected behavior; grade by impact:
 
 - CLI workers publishing state during parallel processing;
 - LSP reads bypassing cancellation handling;
