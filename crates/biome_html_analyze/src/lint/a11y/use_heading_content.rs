@@ -4,8 +4,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{
-    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList,
-    HtmlSyntaxKind, T,
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyVueDirective,
+    HtmlElementList, HtmlSyntaxKind, T,
 };
 use biome_languages::HtmlFileSource;
 use biome_parser::{TokenSet, token_set};
@@ -64,15 +64,16 @@ declare_lint_rule! {
     /// <h1><span aria-hidden="true">hidden</span> visible content</h1>
     /// ```
     ///
-    /// In Astro files, the `set:html` and `set:text` directives render the heading
-    /// text, so headings that use them are not reported.
+    /// Directives that render the heading text are treated as content: `set:html`
+    /// and `set:text` in Astro files, `v-html` and `v-text` in Vue files. Headings
+    /// that use them are not reported.
     ///
     /// ```astro
     /// <h1 set:html={heading} />
     /// ```
     ///
-    /// ```astro
-    /// <h1 set:text={heading}></h1>
+    /// ```vue
+    /// <template><h1 v-text="heading"></h1></template>
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -123,9 +124,10 @@ impl Rule for UseHeadingContent {
             return None;
         }
 
-        // Astro's `set:html` / `set:text` render the heading's text at build time,
-        // so the heading does have content even though the element looks empty.
-        if source_type.is_astro() && has_astro_set_content_directive(&tag_element) {
+        // Astro's `set:html` / `set:text` and Vue's `v-html` / `v-text` render the
+        // heading's text, so the heading does have content even though the element
+        // looks empty.
+        if has_content_injecting_directive(&tag_element, source_type) {
             return None;
         }
 
@@ -165,26 +167,40 @@ impl Rule for UseHeadingContent {
     }
 }
 
-/// Checks if the element carries Astro's `set:html` or `set:text` directive.
+/// Checks if the element carries a directive that renders its content.
 ///
-/// Both directives make Astro render the given expression as the element's
-/// children, so the element has content even when it is written as empty or
-/// self-closing.
+/// Astro's `set:html` / `set:text` and Vue's `v-html` / `v-text` all render the
+/// bound expression as the element's children, so the element has content even
+/// when it is written as empty or self-closing.
 ///
-/// Ref: <https://docs.astro.build/en/reference/directives-reference/#sethtml>
-fn has_astro_set_content_directive(element: &AnyHtmlTagElement) -> bool {
-    element.attributes().iter().any(|attribute| {
-        let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroSetDirective(directive)) =
-            attribute
-        else {
-            return false;
-        };
-        directive
-            .value()
-            .ok()
-            .and_then(|value| value.name().ok())
-            .and_then(|name| name.token_text_trimmed())
-            .is_some_and(|name| matches!(name.text(), "html" | "text"))
+/// Refs: <https://docs.astro.build/en/reference/directives-reference/#sethtml>,
+/// <https://vuejs.org/api/built-in-directives.html#v-html>
+fn has_content_injecting_directive(
+    element: &AnyHtmlTagElement,
+    source_type: &HtmlFileSource,
+) -> bool {
+    element.attributes().iter().any(|attribute| match attribute {
+        // set:html={expr} / set:text={expr}
+        AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroSetDirective(directive))
+            if source_type.is_astro() =>
+        {
+            directive
+                .value()
+                .ok()
+                .and_then(|value| value.name().ok())
+                .and_then(|name| name.token_text_trimmed())
+                .is_some_and(|name| matches!(name.text(), "html" | "text"))
+        }
+        // v-html="expr" / v-text="expr"
+        AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(directive))
+            if source_type.is_vue() =>
+        {
+            directive.name_token().is_ok_and(|name| {
+                let name = name.text_trimmed();
+                name.eq_ignore_ascii_case("v-html") || name.eq_ignore_ascii_case("v-text")
+            })
+        }
+        _ => false,
     })
 }
 
