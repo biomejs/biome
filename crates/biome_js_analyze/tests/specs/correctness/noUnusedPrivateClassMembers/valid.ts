@@ -1,0 +1,58 @@
+/* should not generate diagnostics */
+
+// issue #9008 - destructuring from `this` should count as usage
+class DestructuringShorthand {
+	private myVar: string;
+
+	constructor() {
+		this.myVar = "Hello";
+	}
+
+	print() {
+		const { myVar } = this;
+		console.log(myVar);
+	}
+}
+
+class DestructuringMultiple {
+	private myVar1: string;
+	private myVar2: string;
+
+	constructor() {
+		this.myVar1 = "Hello";
+		this.myVar2 = "World";
+	}
+
+	print() {
+		const { myVar1 } = this;
+		console.log(myVar1);
+		console.log(this.myVar2);
+	}
+}
+
+class DestructuringRenamed {
+	private myVar: string;
+
+	constructor() {
+		this.myVar = "Hello";
+	}
+
+	print() {
+		const { myVar: renamed } = this;
+		console.log(renamed);
+	}
+}
+
+class DestructuringAssignmentPattern {
+	private myVar: string;
+
+	constructor() {
+		this.myVar = "Hello";
+	}
+
+	print() {
+		let myVar: string;
+		({ myVar } = this);
+		console.log(myVar);
+	}
+}
