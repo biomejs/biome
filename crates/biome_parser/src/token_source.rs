@@ -136,7 +136,6 @@ where
     Lex: LexerWithCheckpoint<'l, Kind = T::Kind>,
 {
     /// Gets the kind of the nth non-trivia token
-    #[inline(always)]
     fn nth(&mut self, n: usize) -> T::Kind {
         if n == 0 {
             self.current()
