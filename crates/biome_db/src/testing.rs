@@ -39,17 +39,17 @@
 //!
 //! ```ignore
 //! // Run the query once to populate the cache
-//! let _model = js_semantic_model(&db, file);
+//! let _result = some_query(&db, file);
 //!
 //! // Mutate an input
-//! salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+//! salsa::Setter::to(file.set_content(&mut db), new_content);
 //!
 //! // Clear events, run the query again, then check
 //! db.clear_salsa_events();
-//! let _model = js_semantic_model(&db, file);
+//! let _result = some_query(&db, file);
 //! let events = db.take_salsa_events();
 //!
-//! assert_function_query_was_run(&db, js_semantic_model, file, &events);
+//! assert_function_query_was_run(&db, some_query, file, &events);
 //! ```
 
 use salsa::Event;
@@ -64,7 +64,7 @@ pub struct Events(pub Arc<Mutex<Vec<Event>>>);
 
 /// Assert that a tracked function **was** recomputed for the given input.
 ///
-/// Pass the tracked function by name (e.g. `js_semantic_model`) and the
+/// Pass the tracked function by name and the
 /// Salsa input it was called with. Panics if no matching `WillExecute`
 /// event is found.
 pub fn assert_function_query_was_run<Db, Q, QDb, I, R>(

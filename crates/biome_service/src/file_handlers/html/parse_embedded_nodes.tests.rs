@@ -1,13 +1,14 @@
 use crate::Workspace;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
-use crate::workspace::{FileContent, OpenFileParams, UpdateSettingsParams};
+use crate::workspace::{FileContent, OpenFileParams, PullDiagnosticsParams, UpdateSettingsParams};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, HtmlConfiguration};
+use biome_diagnostics::{Severity, serde::Diagnostic};
 use biome_fs::{BiomePath, MemoryFileSystem};
-use biome_parser::prelude::ParseDiagnostic;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 
-fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
+fn prepare(file: &str, content: &str) -> Vec<Diagnostic> {
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(file), content);
 
@@ -35,13 +36,27 @@ fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
             path: BiomePath::new(file),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
         .unwrap();
 
-    workspace.db_get_parse_diagnostics(Utf8Path::new(file))
+    workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(file),
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap()
+        .diagnostics
 }
 
 fn assert_no_diagnostics(file: &str, content: &str) {

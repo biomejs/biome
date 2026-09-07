@@ -13,7 +13,7 @@ pub(crate) struct JsonParser<'source> {
     options: JsonParserOptions,
 }
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub struct JsonParserOptions {
     pub allow_comments: bool,
     pub allow_trailing_commas: bool,

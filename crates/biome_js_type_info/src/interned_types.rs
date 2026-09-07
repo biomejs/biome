@@ -2720,6 +2720,7 @@ mod tests {
     use crate::type_transform::{
         MAX_TYPE_SUBSTITUTION_STEPS, TypeDataTransformer, TypeSubstituter,
     };
+    use biome_db::FileSource;
     use salsa::plumbing::FromId;
 
     #[salsa::db]
@@ -2733,12 +2734,11 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(
-            &self,
-            _path: &camino::Utf8Path,
-        ) -> Option<biome_db::ParsedSource> {
+        fn file_source_for_path(&self, _path: &camino::Utf8Path) -> Option<FileSource> {
             None
         }
+
+        fn for_each_file_source(&self, _f: &mut dyn FnMut(FileSource)) {}
     }
 
     #[salsa::db]

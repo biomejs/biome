@@ -2,10 +2,12 @@ use crate::file_handlers::ResolveDefinitionParams;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_css_semantic::db::css_semantic_model;
 use biome_css_syntax::CssClassSelector;
+use biome_db::Db;
 use biome_fs::BiomePath;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, find_css_class_definition};
+use biome_parser::AnyParsedSource;
 use biome_rowan::AstNode;
 use std::ops::Add;
 
@@ -30,19 +32,26 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
             }
         }
 
-        let Some(file_source) = params.workspace_db.source_from_index(
-            params
-                .parsed_source
-                .document_file_index(&params.workspace_db),
-        ) else {
+        let Some(file) = params.workspace_db.file_source_for_path(path) else {
+            return Some(result);
+        };
+        let source_index = match &params.parsed_source {
+            AnyParsedSource::ParsedSource(_) => {
+                Some(file.document_source_index(&params.workspace_db))
+            }
+            AnyParsedSource::ParsedSnippet(snippet) => snippet.document_source_index(),
+        };
+        let Some(file_source) = source_index
+            .and_then(|source_index| params.workspace_db.source_from_index(source_index))
+        else {
             return Some(result);
         };
         if !file_source.is_css_like() {
             return Some(result);
         }
 
-        let diagnostic_offset = params.parsed_source.diagnostic_offset(&params.workspace_db);
-        let semantic_model = css_semantic_model(&params.workspace_db, &params.parsed_source);
+        let diagnostic_offset = params.parsed_source.diagnostic_offset();
+        let semantic_model = css_semantic_model(&params.parsed_source);
         for rule in semantic_model.rules() {
             for selector in rule.selectors() {
                 let node = selector.node();

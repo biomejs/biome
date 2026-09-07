@@ -200,7 +200,6 @@ impl<'a> SpecSnapshot<'a> {
                     version: 0,
                 },
                 document_file_source: self.document_file_source,
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })

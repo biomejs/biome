@@ -1,5 +1,6 @@
-use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
+use crate::css_module_info::{CssImport, CssImports, CssModuleInfo, CssPropertyRegistration};
 use crate::module_graph::ModuleGraphFsProxy;
+use biome_css_semantic::db::css_property_definitions;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssImportUrl, AnyCssRoot, CssClassSelector};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
@@ -64,7 +65,15 @@ impl<'a> CssModuleVisitor<'a> {
             }
         }
 
-        CssModuleInfo::new(imports, classes)
+        let property_registrations = css_property_definitions(&self.root)
+            .into_iter()
+            .map(|definition| CssPropertyRegistration {
+                name: definition.name_token().clone(),
+                range: definition.range(),
+            })
+            .collect();
+
+        CssModuleInfo::new(imports, classes, property_registrations)
     }
 
     /// Extracts the class name from a `CssClassSelector` and inserts the

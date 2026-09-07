@@ -17,7 +17,7 @@ pub(crate) struct CssParser<'source> {
     options: CssParserOptions,
 }
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CssParserOptions {
     /// If this is `true`, **wrong** comments starting with `//` will be treated
     /// as a comment.
@@ -48,7 +48,7 @@ pub struct CssParserOptions {
     pub report_scss_exclusive_syntax: bool,
 }
 
-#[derive(Default, Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum CssModulesKind {
     #[default]
     None,

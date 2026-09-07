@@ -9,7 +9,7 @@ pub use printer::*;
 use anyhow::bail;
 use biome_analyze::{RuleCategory, RuleMetadata};
 use biome_configuration::Configuration;
-use biome_db::ParsedSource;
+use biome_db::FileSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
@@ -17,7 +17,7 @@ use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::HtmlParse;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::Parse;
-use biome_js_semantic::{SemanticModel, semantic_model_from_source};
+use biome_js_semantic::{SemanticModel, js_semantic_model};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
@@ -25,6 +25,7 @@ use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
     ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_service::db::WorkspaceDb;
@@ -155,19 +156,9 @@ impl AnalyzerServicesBuilder {
         }
 
         let html_added_paths = get_html_added_paths(&fs, &html_paths);
-        for (path, parse, file_source) in html_added_paths {
-            let source_index = db.insert_source(file_source);
-            let parsed_source = ParsedSource::new(
-                &db,
-                path.as_path().to_path_buf(),
-                parse.into(),
-                source_index,
-                vec![],
-            );
-            db.insert_file(path.as_path(), parsed_source);
-            let resolved = resolve_html_module(&db, path, &fs, &layout, &path_info_cache);
-            debug_assert!(resolved.is_some());
-            let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
+        for (path, parse, _) in html_added_paths {
+            let (module_info, _, _) =
+                resolve_html_module(parse.tree(), &[], path, &fs, &layout, &path_info_cache);
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -196,17 +187,17 @@ impl AnalyzerServicesBuilder {
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
-        let parsed_source = ParsedSource::new(
+        let file = FileSource::new(
             &self.module_db,
             path.clone(),
-            parse.into(),
+            root.syntax().to_string(),
             source_index,
-            vec![],
+            None,
         );
-        self.module_db.insert_file(&path, parsed_source);
+        self.module_db.insert_file(&path, file);
 
-        let semantic_model =
-            Arc::new(semantic_model_from_source(&self.module_db, parsed_source).clone());
+        let parse = AnyParsedSource::from(AnyParse::from(parse));
+        let semantic_model = Arc::new(js_semantic_model(&self.module_db, file, &parse));
         let (module_info, _, _) = resolve_js_module(
             root,
             &BiomePath::new(&path),
@@ -237,29 +228,16 @@ impl AnalyzerServicesBuilder {
         &mut self,
         path: Utf8PathBuf,
         parse: HtmlParse,
-        file_source: HtmlFileSource,
+        _file_source: HtmlFileSource,
     ) -> HtmlAnalyzerServices {
-        let source_index = self
-            .module_db
-            .insert_source(DocumentFileSource::Html(file_source));
-        let parsed_source = ParsedSource::new(
-            &self.module_db,
-            path.clone(),
-            parse.into(),
-            source_index,
-            vec![],
-        );
-        self.module_db.insert_file(&path, parsed_source);
-
-        let resolved = resolve_html_module(
-            &self.module_db,
+        let (module_info, _, _) = resolve_html_module(
+            parse.tree(),
+            &[],
             &BiomePath::new(&path),
             &self.file_system,
             &self.project_layout,
             &self.path_info_cache,
         );
-        debug_assert!(resolved.is_some());
-        let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
         self.module_db
             .update_or_insert_module(path, ModuleInfoKind::Html(module_info));
 

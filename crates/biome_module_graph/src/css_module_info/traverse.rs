@@ -3,9 +3,7 @@ use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::traverse::{UpwardTraversalAction, UpwardTraversalVisitor};
 use crate::{CssPropertyDefinition, JsImportPath, JsImportPhase, JsModuleInfo};
 use biome_console::markup;
-use biome_css_semantic::db::{
-    css_property_definitions_from_snippet, css_property_definitions_from_source,
-};
+use biome_css_syntax::decode_css_identifier;
 use biome_fs::normalize_path;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -146,7 +144,7 @@ impl UpwardTraversalVisitor for CssClassTraversal<'_> {
 /// It searches modules that import the starting module. Each import path is
 /// searched separately and stops at the first definition it finds.
 pub(crate) struct CssPropertyTraversal<'db, 'name> {
-    /// Module information and parsed sources used during the search.
+    /// Module information used during the search.
     db: &'db dyn ModuleDb,
     /// Custom property name being resolved.
     name: &'name str,
@@ -381,16 +379,17 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     }
 
     fn local_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
-        // The semantic extractor assumes the parsed source contains a CSS root.
-        self.db.css_module_info_for_path(path)?;
-        let parsed = self.db.parsed_source_for_path(path)?;
-        let definition = css_property_definitions_from_source(self.db, parsed)
+        let info = self.db.css_module_info_for_path(path)?;
+        let definition = info
+            .property_registrations
             .iter()
             .rev()
-            .find(|definition| definition.matches(self.name))?;
+            .find(|definition| {
+                decode_css_identifier(definition.name.text()) == decode_css_identifier(self.name)
+            })?;
         Some(CssPropertyDefinition {
             module_path: normalize_path(path),
-            range: definition.range(),
+            range: definition.range,
         })
     }
 
@@ -415,42 +414,26 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             })
             .collect::<Vec<_>>();
 
-        if let Some(source) = self.db.parsed_source_for_path(path) {
-            for snippet in source.snippets(self.db) {
-                let Some(file_source) = self
-                    .db
-                    .source_from_index(snippet.document_source_index(self.db))
-                    .and_then(|source| source.to_css_file_source())
-                else {
-                    continue;
-                };
-                if file_source.as_embedding_kind().is_html_style_attribute() {
-                    continue;
-                }
-                let snippet_is_global = file_source.embedding_applicability().is_global();
-                contexts.extend(
-                    css_property_definitions_from_snippet(self.db, *snippet)
-                        .iter()
-                        .filter(|definition| {
-                            definition.matches(self.name)
-                                && (!only_global
-                                    || snippet_is_global
-                                    || definition.is_globally_scoped())
-                        })
-                        .map(|definition| {
-                            // Parsed snippet trees exclude their parser base offset.
-                            let range = definition.range() + snippet.content_offset(self.db);
-                            HtmlPropertyContext {
-                                position: range.start(),
-                                kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
-                                    module_path: normalize_path(path),
-                                    range,
-                                }),
-                            }
-                        }),
-                );
-            }
-        }
+        contexts.extend(
+            info.property_registrations
+                .iter()
+                .filter(|definition| {
+                    !only_global
+                        || definition.applicability.is_global()
+                        || definition.globally_scoped
+                })
+                .filter(|definition| {
+                    decode_css_identifier(definition.name.text())
+                        == decode_css_identifier(self.name)
+                })
+                .map(|definition| HtmlPropertyContext {
+                    position: definition.range.start(),
+                    kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
+                        module_path: normalize_path(path),
+                        range: definition.range,
+                    }),
+                }),
+        );
 
         contexts.sort_by_key(|context| context.position);
         contexts

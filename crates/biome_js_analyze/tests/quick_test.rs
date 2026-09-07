@@ -3,7 +3,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleFilter,
 };
-use biome_db::ParsedSource;
+use biome_db::FileSource;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
@@ -24,7 +24,7 @@ use std::sync::Arc;
 #[salsa::db]
 #[derive(Default)]
 struct TestDb {
-    parsed: Option<ParsedSource>,
+    file: Option<FileSource>,
     storage: Storage<Self>,
 }
 
@@ -37,8 +37,14 @@ impl LanguageDb for TestDb {
 
 #[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
-        self.parsed
+    fn file_source_for_path(&self, _path: &Utf8Path) -> Option<FileSource> {
+        self.file
+    }
+
+    fn for_each_file_source(&self, f: &mut dyn FnMut(FileSource)) {
+        if let Some(file) = self.file {
+            f(file);
+        }
     }
 }
 
@@ -47,14 +53,14 @@ impl salsa::Database for TestDb {}
 
 fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
     let mut db = TestDb::default();
-    let parsed = ParsedSource::new(
+    let file = FileSource::new(
         &db,
         Utf8PathBuf::new(),
-        parsed.syntax().as_send().unwrap().into(),
+        parsed.syntax().to_string(),
         0,
-        vec![],
+        None,
     );
-    db.parsed = Some(parsed);
+    db.file = Some(file);
     Rc::new(db)
 }
 

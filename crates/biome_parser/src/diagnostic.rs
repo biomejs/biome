@@ -23,7 +23,7 @@ use std::ops::Add;
 ///
 /// These information **are printed in this exact order**.
 ///
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ParseDiagnostic {
     /// The location where the error is occurred
     span: Option<TextRange>,
@@ -60,14 +60,14 @@ impl Diagnostic for ParseDiagnostic {
 }
 
 /// Possible details related to the diagnostic
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 struct ParserAdvice {
     advice_list: Vec<ParserAdviceKind>,
 }
 
 /// The structure of the advice. A message that gives details, a possible range so
 /// the diagnostic is able to highlight the part of the code we want to explain.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 struct ParserAdviceDetail {
     /// A message that should explain this detail
     message: MarkupBuf,
@@ -75,7 +75,7 @@ struct ParserAdviceDetail {
     span: Option<TextRange>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum ParserAdviceKind {
     /// A list a possible details that can be attached to the diagnostic.
     /// Useful to explain the nature errors.

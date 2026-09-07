@@ -4,6 +4,7 @@ use super::{
     OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
     UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
+use crate::module_graph::SerializedModuleInfo;
 use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::{Workspace, WorkspaceError};
@@ -75,7 +76,6 @@ fn local_server_retries_reads_interrupted_by_module_updates() {
                 version: 1,
             },
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -156,7 +156,6 @@ fn borrowed_file_guard_does_not_close_file() {
             path: path.clone(),
             content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -186,7 +185,6 @@ fn debug_control_flow() {
             path: BiomePath::new("file.js"),
             content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -210,7 +208,6 @@ fn recognize_typescript_definition_file() {
             // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
             content: FileContent::from_client("export const foo: number"),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -233,7 +230,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("a.json"),
             content: FileContent::from_client(r#"{"a": 42}"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -250,7 +246,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("b.json"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -267,7 +262,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("c.json"),
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -284,7 +278,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("d.jsonc"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -301,7 +294,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("e.jsonc"),
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -318,7 +310,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new(".eslintrc.json"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -339,7 +330,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("project/.vscode/settings.json"),
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -360,7 +350,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("dir/.eslintrc.json"),
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -385,7 +374,6 @@ fn correctly_handle_json_files() {
             path: BiomePath::new("tsconfig.json"),
             content: FileContent::from_client(r#"{"a": 42,}//comment"#),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -423,7 +411,6 @@ type User {
 }"#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -456,7 +443,6 @@ fn correctly_pulls_lint_diagnostics() {
 }"#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -496,7 +482,6 @@ fn pull_grit_debug_info() {
 }"#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -544,19 +529,15 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
                 .get_module_graph(GetModuleGraphParams {})
                 .expect("can get module graph");
 
+            let Some(SerializedModuleInfo::Js(module_info)) =
+                module_graph.data.get("/project/a.ts")
+            else {
+                panic!("expected JavaScript module info for /project/a.ts");
+            };
+
             assert_eq!(
-                module_graph
-                    .data
-                    .get("/project/a.ts")
-                    .map(|module_info| module_info
-                        .as_js_module_info()
-                        .unwrap()
-                        .static_import_paths
-                        .clone()),
-                Some(BTreeMap::from([(
-                    "./b.ts".to_string(),
-                    "/project/b.ts".to_string(),
-                )])),
+                module_info.static_import_paths,
+                BTreeMap::from([("./b.ts".to_string(), "/project/b.ts".to_string(),)]),
             );
         }};
     }
@@ -569,7 +550,6 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             path: BiomePath::new("/project/a.ts"),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -634,7 +614,6 @@ fn too_large_files_are_tracked_but_not_parsed() {
             path: BiomePath::new("/project/a.ts"),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -696,7 +675,6 @@ fn plugins_are_loaded_and_used_during_analysis() {
             path: BiomePath::new("/project/a.ts"),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -771,7 +749,6 @@ language css;
             path: BiomePath::new("/project/a.css"),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -842,7 +819,6 @@ fn plugins_may_use_invalid_span() {
             path: BiomePath::new("/project/a.ts"),
             content: FileContent::FromServer,
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -978,7 +954,6 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 path: BiomePath::new(path),
                 content: FileContent::FromServer,
                 document_file_source: None,
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })
@@ -1095,7 +1070,6 @@ fn correctly_scope_plugin_with_includes() {
                 path: BiomePath::new(path),
                 content: FileContent::FromServer,
                 document_file_source: None,
-                persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })
@@ -1168,7 +1142,6 @@ class Person {
 "#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1204,7 +1177,6 @@ class Person {
 "#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1240,7 +1212,6 @@ class Person {
 "#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1289,7 +1260,6 @@ fn debug_module_graph_mixed_project() {
             path: BiomePath::new("/project/styles.css"),
             content: FileContent::from_client(".button { color: blue; } .container { margin: 0; }"),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1303,7 +1273,6 @@ fn debug_module_graph_mixed_project() {
                 "import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1317,7 +1286,6 @@ fn debug_module_graph_mixed_project() {
                 "<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"./styles.css\"></head><body><div class=\"container\"></div></body></html>",
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1380,7 +1348,6 @@ async function test() {
 "#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1399,7 +1366,6 @@ export const debounce = function debounce() {};
 "#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })
@@ -1416,7 +1382,6 @@ export const squash = function squash() {};
 "#,
             ),
             document_file_source: None,
-            persist_node_cache: false,
             inline_config: None,
             editor_features: None,
         })

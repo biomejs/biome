@@ -33,11 +33,18 @@ impl EmbeddedData {
         }
     }
 
-    /// Returns whether a collected binding has the identifier text `name`.
-    pub fn contains_binding(&self, name: &str) -> bool {
+    /// Returns the first collected binding with the identifier text `name`.
+    pub fn binding(&self, name: &str) -> Option<&EmbeddedBinding> {
         self.bindings
             .iter()
-            .any(|binding| binding.text.text() == name)
+            .find(|binding| binding.text.text() == name)
+    }
+
+    /// Returns the first imported binding with the identifier text `name`.
+    pub fn binding_with_source(&self, name: &str) -> Option<&EmbeddedBinding> {
+        self.bindings
+            .iter()
+            .find(|binding| binding.text.text() == name && binding.source.is_some())
     }
 
     /// Returns whether a collected value reference has the identifier text

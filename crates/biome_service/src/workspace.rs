@@ -52,7 +52,6 @@
 //!   format a file with a language that does not have a formatter
 
 mod client;
-pub(crate) mod document;
 pub mod search;
 mod server;
 
@@ -823,14 +822,6 @@ pub struct OpenFileParams {
     pub path: BiomePath,
     pub content: FileContent,
     pub document_file_source: Option<DocumentFileSource>,
-
-    /// Set to `true` to persist the node cache used during parsing, in order to
-    /// speed up subsequent reparsing if the document has been edited.
-    ///
-    /// This should only be enabled if reparsing is to be expected, such as when
-    /// the file is opened through the LSP Proxy.
-    #[serde(default)]
-    pub persist_node_cache: bool,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,

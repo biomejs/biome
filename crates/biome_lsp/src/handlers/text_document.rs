@@ -65,7 +65,6 @@ pub(crate) async fn did_open(
         path,
         content: FileContent::FromClient { content, version },
         document_file_source: Some(language_hint),
-        persist_node_cache: true,
         inline_config: session.inline_config(),
         editor_features: Some(session.extension_settings.read().editor_features()),
     })?;

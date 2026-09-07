@@ -10,6 +10,7 @@ use std::collections::BTreeMap;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use camino::Utf8PathBuf;
 
+use crate::module_graph::SerializedModuleInfo;
 use crate::scanner::workspace_bridges::ScannerWatcherBridge;
 use crate::test_utils::setup_workspace_and_open_project_and_get_watcher_instruction_receiver;
 use crate::workspace::{
@@ -42,7 +43,6 @@ fn close_modified_file_from_client_before_watcher() {
                 version: 1,
             },
             document_file_source: None,
-            persist_node_cache: true,
             inline_config: None,
             editor_features: None,
         })
@@ -76,16 +76,14 @@ fn close_modified_file_from_client_before_watcher() {
         .get_module_graph(GetModuleGraphParams {})
         .expect("can get module graph");
 
+    let Some(SerializedModuleInfo::Js(module_info)) = module_graph.data.get(file_path.as_str())
+    else {
+        panic!("expected JavaScript module info for {file_path}");
+    };
+
     assert_eq!(
-        module_graph
-            .data
-            .get(file_path.as_str())
-            .map(|module_info| module_info
-                .as_js_module_info()
-                .unwrap()
-                .static_import_paths
-                .clone()),
-        Some(BTreeMap::from([("fooo".to_string(), "fooo".to_string())])),
+        module_info.static_import_paths,
+        BTreeMap::from([("fooo".to_string(), "fooo".to_string())]),
         "index should've updated to the client state"
     );
 
@@ -112,16 +110,14 @@ fn close_modified_file_from_client_before_watcher() {
         .get_module_graph(GetModuleGraphParams {})
         .expect("can get module graph");
 
+    let Some(SerializedModuleInfo::Js(module_info)) = module_graph.data.get(file_path.as_str())
+    else {
+        panic!("expected JavaScript module info for {file_path}");
+    };
+
     assert_eq!(
-        module_graph
-            .data
-            .get(file_path.as_str())
-            .map(|module_info| module_info
-                .as_js_module_info()
-                .unwrap()
-                .static_import_paths
-                .clone()),
-        Some(BTreeMap::from([("foo".to_string(), "foo".to_string())])),
+        module_info.static_import_paths,
+        BTreeMap::from([("foo".to_string(), "foo".to_string())]),
         "index should've reverted to the filesystem state"
     );
 }

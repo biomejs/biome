@@ -44,7 +44,7 @@ use biome_configuration::html::{
 use biome_css_parser::{CssParserOptions, parse_css};
 #[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 #[cfg(feature = "html_embeds")]
 use biome_formatter::FormatElement;
 #[cfg(feature = "html_embeds")]
@@ -73,9 +73,8 @@ use biome_js_parser::{JsParserOptions, parse as parse_js};
 use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
-use biome_languages::HtmlFileSource;
-#[cfg(feature = "html_embeds")]
-use biome_parser::AnyParse;
+use biome_languages::{HtmlFileSource, LanguageDb};
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -454,6 +453,7 @@ impl ExtensionHandler for HtmlFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: Some(parse_embedded_nodes),
             },
             debug: DebugCapabilities {
@@ -503,18 +503,57 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
+#[salsa::interned]
+struct ParseHtmlInput {
+    file: FileSource,
+    document_source: HtmlFileSource,
+    options: HtmlParserOptions,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_html_file<'db>(db: &'db dyn Db, input: ParseHtmlInput<'db>) -> AnyParse {
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        let parse = parse_html_with_cache(file.content(db), node_cache, input.options(db));
+        parse.into()
+    })
+}
+
 fn parse(
     biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
     settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
+    let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_html_file(
+        file_db,
+        ParseHtmlInput::new(
+            file_db,
+            file,
+            file_source.to_html_file_source().unwrap_or_default(),
+            options,
+        ),
+    );
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
+    biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
     let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
-    let parse = parse_html_with_cache(text, cache, options);
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse: parse_html_with_cache(code, node_cache, options).into(),
         language: Some(file_source),
     }
 }
@@ -537,20 +576,16 @@ struct ParsedEmbed {
 /// Groups the arguments that stay constant across all embed parses within a
 /// single `parse_embedded_nodes` invocation.
 #[cfg(feature = "html_embeds")]
-struct EmbedParseContext<'a, 'b> {
-    cache: &'a mut NodeCache,
+struct EmbedParseContext<'a, 'b, 'cache> {
     biome_path: &'a BiomePath,
     host_file_source: &'a HtmlFileSource,
     settings: &'a SettingsWithEditor<'b>,
+    caches: &'cache mut super::ParseEmbeddedCaches,
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: HtmlSyntaxNode = parse.syntax(&workspace_db);
-    let tree: HtmlRoot = parse.tree(&workspace_db);
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: HtmlSyntaxNode = parse.syntax();
+    let tree: HtmlRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -566,7 +601,7 @@ fn debug_formatter_ir(
 ) -> Result<String, WorkspaceError> {
     let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree, false)?;
 
     let root_element = formatted.into_document();
@@ -577,13 +612,13 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree, true)?;
 
     match formatted.print() {
@@ -596,20 +631,24 @@ fn format(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
-    embedded_nodes: Vec<super::ParsedSnippetOrigin>,
+    embedded_nodes: Vec<super::ParsedSource>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let indent_script_and_style = options.indent_script_and_style().value();
     let mut formatted = format_node(options, &tree, true)?;
     formatted.format_embedded(move |range| {
         let mut iter = embedded_nodes.iter();
-        let snippet = iter.find(|node| node.content_range(&workspace_db) == range)?;
-        let snippet_file_source = snippet.file_source(&workspace_db)?;
+        let snippet = iter.find_map(|source| {
+            let snippet = source.as_snippet()?;
+            (snippet.content_range() == range).then_some(snippet)
+        })?;
+        let snippet_file_source =
+            workspace_db.source_from_index(snippet.document_source_index()?)?;
 
         let wrap_document = |document: Document, should_indent: bool| {
             if indent_script_and_style && should_indent {
@@ -639,10 +678,7 @@ fn format_embedded(
                     settings,
                     &workspace_db,
                 );
-                let node = snippet
-                    .parsed_origin()
-                    .parse(&workspace_db)
-                    .embedded_syntax::<JsLanguage>();
+                let node = snippet.parsed().clone().embedded_syntax::<JsLanguage>();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
 
@@ -663,10 +699,7 @@ fn format_embedded(
             DocumentFileSource::Json(_) => {
                 let json_options =
                     json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
-                let node = snippet
-                    .parsed_origin()
-                    .parse(&workspace_db)
-                    .embedded_syntax::<JsonLanguage>();
+                let node = snippet.parsed().clone().embedded_syntax::<JsonLanguage>();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document(), true))
@@ -678,10 +711,7 @@ fn format_embedded(
                     settings,
                     &workspace_db,
                 );
-                let node = snippet
-                    .parsed_origin()
-                    .parse(&workspace_db)
-                    .embedded_syntax::<CssLanguage>();
+                let node = snippet.parsed().clone().embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document(), true))
@@ -704,9 +734,9 @@ fn format_embedded(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
-    embedded_nodes: Vec<super::ParsedSnippetOrigin>,
+    embedded_nodes: Vec<super::ParsedSource>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let _ = embedded_nodes;
@@ -729,7 +759,7 @@ fn lint(params: LintParams) -> LintResults {
         params.settings,
         &params.workspace_db,
     );
-    let tree = params.parsed_source.tree(&params.workspace_db);
+    let tree = params.parsed_source.tree();
 
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -777,7 +807,7 @@ fn lint(params: LintParams) -> LintResults {
     );
 
     process_lint.into_result(
-        params.parsed_source.serde_diagnostics(&params.workspace_db),
+        params.parsed_source.serde_diagnostics(),
         analyze_diagnostics,
     )
 }
@@ -789,6 +819,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings,
         path,
         workspace_db,
+        #[cfg(feature = "html_embeds")]
+            embedded_data: _,
         project_layout,
         language,
         only,
@@ -801,7 +833,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         compute_actions,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
-    let tree = parsed_source.tree(&workspace_db);
+    let tree = parsed_source.tree();
     let _ = trace_span!("Parsed file", tree =? tree).entered();
     let Some(source_type) = language.to_html_file_source() else {
         error!("Could not determine the HTML file source of the file");
@@ -837,7 +869,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules: &disabled_rules,
         range,
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let html_services = HtmlAnalyzerServices {
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -897,7 +929,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let mut tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut tree: HtmlRoot = params.parsed_source.tree();
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1061,11 +1093,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
 #[instrument(level = "debug", skip_all)]
 pub(crate) fn update_snippets(
-    root: super::ParsedOrigin,
-    workspace_db: WorkspaceDb,
+    root: super::ParsedSource,
     mut new_snippets: Vec<UpdateSnippetsNodes>,
 ) -> Result<SendNode, WorkspaceError> {
-    let tree: HtmlRoot = root.tree(&workspace_db);
+    let tree: HtmlRoot = root.tree();
     let mut mutation = BatchMutation::new(tree.syntax().clone());
     let iterator = tree
         .syntax()

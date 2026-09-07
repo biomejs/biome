@@ -490,10 +490,9 @@ impl DocumentFileSource {
         }
     }
 
-    /// Whether this file can contain embedded nodes
-    pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
-        let file_source = Self::from_path(path, experimental_full_html_support);
-        match file_source {
+    /// Whether this document source can contain embedded nodes.
+    pub fn can_contain_embeds(self) -> bool {
+        match self {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
             #[cfg(feature = "lang_md")]

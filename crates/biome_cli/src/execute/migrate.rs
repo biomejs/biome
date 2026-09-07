@@ -200,7 +200,6 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 .unwrap_or_default()
                 .into(),
         ),
-        persist_node_cache: false,
         inline_config: None,
         editor_features: None,
     })?;

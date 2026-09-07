@@ -33,7 +33,6 @@ use self::javascript::JsFileHandler;
 use self::{json::JsonFileHandler, unknown::UnknownFileHandler};
 use crate::WorkspaceError;
 use crate::db::WorkspaceDb;
-use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 pub use crate::file_handlers::astro::AstroFileHandler;
 #[cfg(feature = "lang_graphql")]
@@ -63,7 +62,7 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomai
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
+use biome_db::{Db, FileSource};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::EmbeddedData;
@@ -91,7 +90,7 @@ use biome_languages::{DocumentFileSource, LanguageDb};
 #[cfg(feature = "module_graph")]
 use biome_module_graph::ModuleDb;
 use biome_package::{Dependencies, PackageJson};
-use biome_parser::AnyParse;
+use biome_parser::{AnyParse, AnyParsedSource, ParsedSnippet};
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "lang_js")]
 use biome_rowan::TokenText;
@@ -125,7 +124,7 @@ pub(crate) fn matches_on_type_char(value: &str) -> bool {
 }
 
 pub struct FixAllParams<'a> {
-    pub(crate) parsed_source: ParsedOrigin,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) biome_path: &'a BiomePath,
@@ -146,232 +145,69 @@ pub struct FixAllParams<'a> {
     pub(crate) collect_final_diagnostics: bool,
 }
 
-/// A small wrapper for the parsed file.
 #[derive(Clone, Debug)]
-pub(crate) enum ParsedOrigin {
-    /// The parse result has been queried from the database.
-    Workspace(AnyParsedSource),
-    /// The parse result has been generated from the server during an in-flight operation, and it won't
-    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
-    Interned {
-        parse: AnyParse,
-        diagnostic_offset: Option<TextSize>,
-        snippets: Vec<ParsedSnippetOrigin>,
-    },
+pub(crate) struct ParsedSource {
+    source: AnyParsedSource,
+    origin: ParseOrigin,
 }
 
-#[derive(Clone, Debug)]
-pub(crate) enum ParsedSnippetOrigin {
-    /// The parse result has been queried from the database.
-    Workspace(ParsedSnippet),
-    /// The parse result has been generated from the server during an in-flight operation, and it won't
-    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
-    Interned {
-        parse: AnyParse,
-        content: EmbedContent,
-        file_source: DocumentFileSource,
-    },
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum ParseOrigin {
+    Workspace(FileSource),
+    Stateless,
 }
 
-impl ParsedSnippetOrigin {
-    pub(crate) fn parsed_origin(&self) -> ParsedOrigin {
-        match self {
-            Self::Workspace(snippet) => (*snippet).into(),
-            Self::Interned { parse, content, .. } => {
-                ParsedOrigin::interned(parse.clone(), Some(content.content_offset))
-            }
-        }
-    }
+impl std::ops::Deref for ParsedSource {
+    type Target = AnyParsedSource;
 
-    pub(crate) fn file_source(&self, db: &WorkspaceDb) -> Option<DocumentFileSource> {
-        match self {
-            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index(db)),
-            Self::Interned { file_source, .. } => Some(*file_source),
-        }
-    }
-
-    pub(crate) fn element_range(&self, db: &WorkspaceDb) -> TextRange {
-        match self {
-            Self::Workspace(snippet) => snippet.element_range(db),
-            Self::Interned { content, .. } => content.element_range,
-        }
-    }
-
-    pub(crate) fn content_range(&self, db: &WorkspaceDb) -> TextRange {
-        match self {
-            Self::Workspace(snippet) => snippet.content_range(db),
-            Self::Interned { content, .. } => content.content_range,
-        }
-    }
-
-    pub(crate) fn content_offset(&self, db: &WorkspaceDb) -> TextSize {
-        match self {
-            Self::Workspace(snippet) => snippet.content_offset(db),
-            Self::Interned { content, .. } => content.content_offset,
-        }
-    }
-
-    pub(crate) fn diagnostics<'a>(
-        &'a self,
-        db: &'a WorkspaceDb,
-    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
-        match self {
-            Self::Workspace(snippet) => snippet.parsed(db).diagnostics(),
-            Self::Interned { parse, .. } => parse.diagnostics(),
-        }
-    }
-
-    pub(crate) fn serde_diagnostics(
-        &self,
-        db: &WorkspaceDb,
-    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        match self {
-            Self::Workspace(snippet) => snippet.serde_diagnostics(db),
-            Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
-        }
-    }
-
-    pub(crate) fn has_errors(&self, db: &WorkspaceDb) -> bool {
-        self.diagnostics(db)
-            .iter()
-            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
-    }
-
-    pub(crate) fn error_count(&self, db: &WorkspaceDb) -> usize {
-        self.diagnostics(db)
-            .iter()
-            .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
-            .count()
+    fn deref(&self) -> &Self::Target {
+        &self.source
     }
 }
 
-impl ParsedOrigin {
-    pub(crate) fn interned(parse: AnyParse, diagnostic_offset: Option<TextSize>) -> Self {
-        Self::Interned {
-            parse,
-            diagnostic_offset,
-            snippets: Vec::new(),
+impl ParsedSource {
+    pub(crate) fn workspace(source: AnyParsedSource, file: FileSource) -> Self {
+        Self {
+            source,
+            origin: ParseOrigin::Workspace(file),
         }
     }
 
-    pub(crate) fn interned_document(parse: AnyParse, snippets: Vec<ParsedSnippetOrigin>) -> Self {
-        Self::Interned {
-            parse,
-            diagnostic_offset: None,
-            snippets,
+    pub(crate) fn stateless(source: AnyParsedSource) -> Self {
+        Self {
+            source,
+            origin: ParseOrigin::Stateless,
         }
     }
 
-    pub(crate) fn tree<N>(&self, db: &WorkspaceDb) -> N
-    where
-        N: biome_rowan::AstNode,
-        N::Language: 'static,
-    {
-        match self {
-            Self::Workspace(source) => source.tree(db),
-            Self::Interned { parse, .. } => parse.tree(),
+    pub(crate) fn origin(&self) -> ParseOrigin {
+        self.origin
+    }
+
+    pub(crate) fn workspace_file(&self) -> Option<FileSource> {
+        match self.origin {
+            ParseOrigin::Workspace(file) => Some(file),
+            ParseOrigin::Stateless => None,
         }
     }
 
-    pub(crate) fn syntax<L>(&self, db: &WorkspaceDb) -> SyntaxNode<L>
-    where
-        L: biome_rowan::Language + 'static,
-    {
-        match self {
-            Self::Workspace(source) => source.syntax(db),
-            Self::Interned { parse, .. } => parse.syntax(),
+    pub(crate) fn into_source(self) -> AnyParsedSource {
+        self.source
+    }
+
+    pub(crate) fn as_snippet(&self) -> Option<&ParsedSnippet> {
+        match &self.source {
+            AnyParsedSource::ParsedSnippet(snippet) => Some(snippet),
+            AnyParsedSource::ParsedSource(_) => None,
         }
     }
 
-    pub(crate) fn parse(&self, db: &WorkspaceDb) -> AnyParse {
-        match self {
-            Self::Workspace(source) => source.any_parse(db).clone(),
-            Self::Interned { parse, .. } => parse.clone(),
-        }
+    pub(crate) fn parse(&self) -> AnyParse {
+        self.source.any_parse().clone()
     }
 
-    pub(crate) fn send_node(&self, db: &WorkspaceDb) -> SendNode {
-        match self {
-            Self::Workspace(source) => source.any_parse(db).unwrap_as_send_node(),
-            Self::Interned { parse, .. } => parse.unwrap_as_send_node(),
-        }
-    }
-
-    pub(crate) fn diagnostics<'a>(
-        &'a self,
-        db: &'a WorkspaceDb,
-    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
-        match self {
-            Self::Workspace(source) => source.diagnostics(db),
-            Self::Interned { parse, .. } => parse.diagnostics(),
-        }
-    }
-
-    pub(crate) fn serde_diagnostics(
-        &self,
-        db: &WorkspaceDb,
-    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        match self {
-            Self::Workspace(source) => source.serde_diagnostics(db),
-            Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
-        }
-    }
-
-    pub(crate) fn diagnostic_offset(&self, db: &WorkspaceDb) -> Option<TextSize> {
-        match self {
-            Self::Workspace(source) => source.diagnostic_offset(db),
-            Self::Interned {
-                diagnostic_offset, ..
-            } => *diagnostic_offset,
-        }
-    }
-}
-
-impl From<AnyParsedSource> for ParsedOrigin {
-    fn from(source: AnyParsedSource) -> Self {
-        Self::Workspace(source)
-    }
-}
-
-impl From<ParsedSource> for ParsedOrigin {
-    fn from(source: ParsedSource) -> Self {
-        Self::Workspace(source.into())
-    }
-}
-
-impl From<ParsedSnippet> for ParsedOrigin {
-    fn from(source: ParsedSnippet) -> Self {
-        Self::Workspace(source.into())
-    }
-}
-
-impl From<&ParsedSnippet> for ParsedOrigin {
-    fn from(source: &ParsedSnippet) -> Self {
-        Self::Workspace((*source).into())
-    }
-}
-
-impl From<AnyParse> for ParsedOrigin {
-    fn from(parse: AnyParse) -> Self {
-        Self::interned(parse, None)
-    }
-}
-
-pub(crate) enum SnippetsIterator<'a> {
-    Workspace(std::slice::Iter<'a, ParsedSnippet>),
-    Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
-}
-
-impl Iterator for SnippetsIterator<'_> {
-    type Item = ParsedSnippetOrigin;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-            Self::Workspace(snippets) => {
-                snippets.next().copied().map(ParsedSnippetOrigin::Workspace)
-            }
-            Self::Interned(snippets) => snippets.next().cloned(),
-        }
+    pub(crate) fn send_node(&self) -> SendNode {
+        self.source.any_parse().unwrap_as_send_node()
     }
 }
 
@@ -394,15 +230,15 @@ pub struct Capabilities {
     pub(crate) editors: EditorCapabilities,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ParseResult {
     pub(crate) any_parse: AnyParse,
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default, PartialEq)]
 pub struct ParseEmbedResult {
-    pub(crate) nodes: Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
+    pub(crate) nodes: Vec<(ParsedSnippet, DocumentFileSource)>,
 }
 
 pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
@@ -410,10 +246,54 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) path: &'a BiomePath,
     pub(crate) file_source: &'a DocumentFileSource,
     pub(crate) settings: &'a SettingsWithEditor<'settings>,
-    pub(crate) node_cache: &'a mut NodeCache,
+    pub(crate) caches: &'a mut ParseEmbeddedCaches,
+}
+
+#[derive(Default)]
+pub(crate) struct ParseEmbeddedCaches {
+    #[cfg(feature = "lang_js")]
+    pub(crate) javascript: NodeCache,
+    #[cfg(feature = "lang_css")]
+    pub(crate) css: NodeCache,
+    #[cfg(feature = "lang_json")]
+    pub(crate) json: NodeCache,
+    #[cfg(feature = "lang_graphql")]
+    pub(crate) graphql: NodeCache,
+}
+
+/// Resolves a parser input and provisions its cache for client-owned files.
+/// Call outside tracked queries so client versions do not invalidate parsing.
+fn file_and_source_for_parse(
+    path: &BiomePath,
+    db: &WorkspaceDb,
+) -> Result<(FileSource, DocumentFileSource), WorkspaceError> {
+    let (file, source) = db
+        .file_and_source_from_path(path.as_path())
+        .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+    if file.version(db).is_some() {
+        db.ensure_node_cache_for_path(path.as_path());
+    }
+    Ok((file, source))
+}
+
+fn with_file_node_cache(
+    db: &dyn Db,
+    file: FileSource,
+    parse: impl FnOnce(&mut NodeCache) -> AnyParse,
+) -> AnyParse {
+    if let Some(cache) = db.node_cache_for_path(file.path(db)) {
+        let mut cache = cache
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        parse(&mut cache)
+    } else {
+        parse(&mut NodeCache::default())
+    }
 }
 
 type Parse =
+    fn(&BiomePath, &SettingsWithEditor, WorkspaceDb) -> Result<ParseResult, WorkspaceError>;
+type ParseDetached =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
 type ParseEmbeddedNodes =
     for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
@@ -422,11 +302,14 @@ pub struct ParserCapabilities {
     /// Parse a file
     pub(crate) parse: Option<Parse>,
 
+    /// Parse some text, detached from the database. This is usually used for in-flight operations
+    pub(crate) parse_detached: Option<ParseDetached>,
+
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
-type DebugSyntaxTree = fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> GetSyntaxTreeResult;
-type DebugControlFlow = fn(AnyParsedSource, TextSize, WorkspaceDb) -> String;
+type DebugSyntaxTree = fn(AnyParsedSource) -> GetSyntaxTreeResult;
+type DebugControlFlow = fn(AnyParsedSource, TextSize) -> String;
 type DebugFormatterIR = fn(
     &BiomePath,
     &DocumentFileSource,
@@ -434,9 +317,8 @@ type DebugFormatterIR = fn(
     &SettingsWithEditor,
     WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
-type DebugTypeInfo = fn(AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
-type DebugRegisteredTypes =
-    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(AnyParsedSource) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes = fn(AnyParsedSource) -> Result<String, WorkspaceError>;
 type DebugSemanticModel =
     fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 
@@ -457,7 +339,7 @@ pub struct DebugCapabilities {
 }
 
 pub(crate) struct LintParams<'a> {
-    pub(crate) parsed_source: ParsedOrigin,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -482,7 +364,7 @@ pub(crate) struct LintParams<'a> {
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -490,6 +372,8 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -524,7 +408,7 @@ pub(crate) struct ProcessLint<'a> {
 impl<'a> ProcessLint<'a> {
     pub(crate) fn new(params: &'a LintParams<'_>) -> Self {
         Self {
-            diagnostic_count: params.parsed_source.diagnostics(&params.workspace_db).len() as u32,
+            diagnostic_count: params.parsed_source.diagnostics().len() as u32,
             errors: Default::default(),
             warnings: Default::default(),
             infos: Default::default(),
@@ -538,7 +422,7 @@ impl<'a> ProcessLint<'a> {
                 || !params.skip.is_empty(),
             rules: params.settings.linter_rules(),
             pull_code_actions: params.pull_code_actions,
-            diagnostic_offset: params.parsed_source.diagnostic_offset(&params.workspace_db),
+            diagnostic_offset: params.parsed_source.diagnostic_offset(),
             max_diagnostics: params.max_diagnostics,
             diagnostic_level: params.diagnostic_level,
             enforce_assist: params.enforce_assist,
@@ -979,11 +863,13 @@ impl ProcessDiagnosticsAndActions {
 }
 
 pub(crate) struct CodeActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: ParsedSource,
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -1014,15 +900,10 @@ pub(crate) struct UpdateSnippetsNodes {
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError>;
-type Rename = fn(
-    &BiomePath,
-    AnyParsedSource,
-    TextSize,
-    String,
-    WorkspaceDb,
-) -> Result<RenameResult, WorkspaceError>;
+type Rename =
+    fn(&BiomePath, AnyParsedSource, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type UpdateSnippets =
-    fn(ParsedOrigin, WorkspaceDb, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
+    fn(ParsedSource, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
 #[derive(Default)]
@@ -1044,7 +925,7 @@ pub struct AnalyzerCapabilities {
 type Format = fn(
     &BiomePath,
     &DocumentFileSource,
-    ParsedOrigin,
+    ParsedSource,
     &SettingsWithEditor,
     WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
@@ -1078,9 +959,9 @@ pub(crate) fn format_on_type_noop(offset: TextSize) -> Printed {
 type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
-    ParsedOrigin,
+    ParsedSource,
     &SettingsWithEditor,
-    Vec<ParsedSnippetOrigin>,
+    Vec<ParsedSource>,
     WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -1105,7 +986,6 @@ type Search = fn(
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
-    WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -1133,6 +1013,8 @@ pub(crate) struct ResolveBindingParams {
     pub(crate) cursor_offset: TextSize,
     pub(crate) workspace_db: WorkspaceDb,
     pub(crate) path: Utf8PathBuf,
+    #[cfg(feature = "html_embeds")]
+    pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
 }
 
 pub(crate) struct ResolveDefinitionParams<'a> {
@@ -2554,6 +2436,161 @@ mod tests {
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
     use camino::Utf8Path;
+
+    #[test]
+    fn tracked_parsers_reuse_node_caches_across_edits() {
+        use crate::db::WorkspaceDb;
+        use crate::projects::ProjectDb;
+        use crate::settings::{
+            SettingsEditorState, SettingsHandle, SettingsQuery, SettingsSelectionKey,
+        };
+        use biome_db::Db;
+        use biome_db::testing::{Events, function_query_will_execute_count_by_name};
+        use biome_fs::BiomePath;
+        use biome_rowan::Language;
+
+        fn check<L: Language + 'static>(path: &str, source: &str, updated: &str, query_name: &str) {
+            let events = Events::default();
+            let event_sink = events.clone();
+            let mut db = WorkspaceDb::with_event_handler(Box::new(move |event| {
+                event_sink.0.lock().unwrap().push(event);
+            }));
+            let project_key = db.insert_project("/project".into());
+            let project = db.get_project(&project_key).unwrap();
+            let settings = project.root_settings(&db).clone_arc();
+            let path = BiomePath::new(path);
+            let query = SettingsQuery::new(
+                project,
+                SettingsSelectionKey::Root,
+                &settings,
+                None,
+                path.as_path(),
+            );
+            let settings = SettingsHandle::new(&settings, SettingsEditorState::new(query));
+            let source_type = DocumentFileSource::from_path(path.as_path(), false);
+            let source_index = db.insert_source(source_type);
+            let file = db.upsert_file(path.as_path(), source.into(), source_index, Some(0));
+            let parse = Features::new()
+                .get_deprecated_capabilities(source_type)
+                .parser
+                .parse
+                .unwrap();
+
+            assert!(db.node_cache_for_path(path.as_path()).is_none());
+            let first = parse(&path, &settings, db.clone()).unwrap();
+            assert!(!first.any_parse.has_errors(), "{path}");
+            assert!(db.node_cache_for_path(path.as_path()).is_some());
+            let first_token = first.any_parse.syntax::<L>().first_token().unwrap();
+            let recorded = std::mem::take(&mut *events.0.lock().unwrap());
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query_name, &recorded),
+                1,
+                "{path}"
+            );
+
+            salsa::Setter::to(file.set_version(&mut db), Some(1));
+            events.0.lock().unwrap().clear();
+            let _ = parse(&path, &settings, db.clone()).unwrap();
+            let recorded = std::mem::take(&mut *events.0.lock().unwrap());
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query_name, &recorded),
+                0,
+                "{path}"
+            );
+
+            salsa::Setter::to(file.set_content(&mut db), updated.into());
+            events.0.lock().unwrap().clear();
+            let second = parse(&path, &settings, db.clone()).unwrap();
+            assert!(!second.any_parse.has_errors(), "{path}");
+            let recorded = std::mem::take(&mut *events.0.lock().unwrap());
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query_name, &recorded),
+                1,
+                "{path}"
+            );
+            assert!(
+                first_token.key() == second.any_parse.syntax::<L>().first_token().unwrap().key(),
+                "{path}: unchanged tokens must reuse the per-file cache"
+            );
+        }
+
+        check::<biome_json_syntax::JsonLanguage>(
+            "/project/file.json",
+            "{\"value\": 1}",
+            "{\"value\": 2}",
+            "parse_json_file",
+        );
+        #[cfg(feature = "lang_js")]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.js",
+            "const value = 1;",
+            "const value = 2;",
+            "parse_js_file",
+        );
+        #[cfg(feature = "lang_css")]
+        check::<biome_css_syntax::CssLanguage>(
+            "/project/file.css",
+            ".a { color: red; }",
+            ".a { color: blue; }",
+            "parse_css_file",
+        );
+        #[cfg(feature = "lang_html")]
+        check::<biome_html_syntax::HtmlLanguage>(
+            "/project/file.html",
+            "<div>first</div>",
+            "<div>second</div>",
+            "parse_html_file",
+        );
+        #[cfg(feature = "lang_graphql")]
+        check::<biome_graphql_syntax::GraphqlLanguage>(
+            "/project/file.graphql",
+            "{ first }",
+            "{ second }",
+            "parse_graphql_file",
+        );
+        #[cfg(feature = "lang_grit")]
+        check::<biome_grit_syntax::GritLanguage>(
+            "/project/file.grit",
+            "language js;\n`foo`",
+            "language js;\n`bar`",
+            "parse_grit_file",
+        );
+        #[cfg(feature = "lang_md")]
+        check::<biome_markdown_syntax::MarkdownLanguage>(
+            "/project/file.md",
+            "# Title\n\nfirst",
+            "# Title\n\nsecond",
+            "parse_markdown_file",
+        );
+        #[cfg(feature = "lang_yaml")]
+        check::<biome_yaml_syntax::YamlLanguage>(
+            "/project/file.yaml",
+            "value: 1\n",
+            "value: 2\n",
+            "parse_yaml_file",
+        );
+        #[cfg(feature = "lang_js")]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.astro",
+            "---\nconst value = 1;\n---",
+            "---\nconst value = 2;\n---",
+            "parse_astro_file",
+        );
+        #[cfg(all(feature = "lang_js", feature = "lang_html"))]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.vue",
+            "<script>\nconst value = 1;\n</script>",
+            "<script>\nconst value = 2;\n</script>",
+            "parse_vue_file",
+        );
+        #[cfg(all(feature = "lang_js", feature = "lang_html"))]
+        check::<biome_js_syntax::JsLanguage>(
+            "/project/file.svelte",
+            "<script>\nconst value = 1;\n</script>",
+            "<script>\nconst value = 2;\n</script>",
+            "parse_svelte_file",
+        );
+    }
 
     #[cfg(feature = "lang_js")]
     #[test]

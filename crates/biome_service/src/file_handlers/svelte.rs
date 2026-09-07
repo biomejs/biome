@@ -11,7 +11,7 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
@@ -19,6 +19,7 @@ use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
@@ -102,6 +103,7 @@ impl ExtensionHandler for SvelteFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -136,16 +138,19 @@ impl ExtensionHandler for SvelteFileHandler {
     }
 }
 
-fn parse(
-    _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
-    text: &str,
-    _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-) -> ParseResult {
-    let source_type = file_source.to_js_file_source().unwrap_or_default();
+#[salsa::interned]
+struct ParseSvelteInput {
+    file: FileSource,
+    document_source: JsFileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_svelte_file<'db>(db: &'db dyn Db, input: ParseSvelteInput<'db>) -> AnyParse {
+    let file = input.file(db);
+    let text = file.content(db);
+    let source_type = input.document_source(db);
     let (script, script_file_source) = if source_type.is_svelte_source_module() {
-        (text, source_type)
+        (text.as_str(), source_type)
     } else {
         (
             SvelteFileHandler::input(text),
@@ -155,15 +160,60 @@ fn parse(
 
     debug!("Parsing file with language {:?}", script_file_source);
 
-    let parse = parse_js_with_cache(
-        script,
-        script_file_source,
-        JsParserOptions::default(),
-        cache,
-    );
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_js_with_cache(
+            script,
+            script_file_source,
+            JsParserOptions::default(),
+            node_cache,
+        )
+        .into()
+    })
+}
+
+fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_svelte_file(file_db, ParseSvelteInput::new(file_db, file, source_type));
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
+    _biome_path: &BiomePath,
+    file_source: DocumentFileSource,
+    code: &str,
+    _settings: &SettingsWithEditor,
+    node_cache: &mut NodeCache,
+) -> ParseResult {
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let (script, script_file_source) = if source_type.is_svelte_source_module() {
+        (code, source_type)
+    } else {
+        (
+            SvelteFileHandler::input(code),
+            SvelteFileHandler::file_source(code),
+        )
+    };
+
+    debug!("Parsing file with language {:?}", script_file_source);
 
     ParseResult {
-        any_parse: parse.into(),
+        any_parse: parse_js_with_cache(
+            script,
+            script_file_source,
+            JsParserOptions::default(),
+            node_cache,
+        )
+        .into(),
         language: Some(file_source),
     }
 }
@@ -172,7 +222,7 @@ fn parse(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -189,7 +239,7 @@ fn format(
     } else {
         0
     };
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),

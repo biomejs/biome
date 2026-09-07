@@ -25,7 +25,7 @@ use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
 };
-use biome_db::AnyParsedSource;
+use biome_db::{Db, FileSource};
 use biome_formatter::{
     BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     QuoteStyle, TrailingNewline,
@@ -38,6 +38,7 @@ use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{
     GraphqlLanguage, GraphqlRoot, GraphqlSyntaxKind, GraphqlSyntaxNode, TextRange, TextSize,
 };
+use biome_parser::{AnyParse, AnyParsedSource};
 use biome_rowan::{AstNode, NodeCache, SyntaxKind, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -371,6 +372,7 @@ impl ExtensionHandler for GraphqlFileHandler {
             },
             parser: ParserCapabilities {
                 parse: Some(parse),
+                parse_detached: Some(parse_detached),
                 parse_embedded_nodes: None,
             },
             debug: DebugCapabilities {
@@ -420,28 +422,50 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
     true
 }
 
+#[salsa::interned]
+struct ParseGraphqlInput {
+    file: FileSource,
+}
+
+#[salsa::tracked(returns(clone), no_eq)]
+fn parse_graphql_file<'db>(db: &'db dyn Db, input: ParseGraphqlInput<'db>) -> AnyParse {
+    let file = input.file(db);
+    super::with_file_node_cache(db, file, |node_cache| {
+        parse_graphql_with_cache(file.content(db), node_cache).into()
+    })
+}
+
 fn parse(
+    biome_path: &BiomePath,
+    _settings: &SettingsWithEditor,
+    db: WorkspaceDb,
+) -> Result<ParseResult, WorkspaceError> {
+    let (file, file_source) = super::file_and_source_for_parse(biome_path, &db)?;
+    let file_db: &dyn Db = &db;
+    let any_parse = parse_graphql_file(file_db, ParseGraphqlInput::new(file_db, file));
+
+    Ok(ParseResult {
+        any_parse,
+        language: Some(file_source),
+    })
+}
+
+fn parse_detached(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
-    text: &str,
+    code: &str,
     _settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
+    node_cache: &mut NodeCache,
 ) -> ParseResult {
-    let parse = parse_graphql_with_cache(text, cache);
-
     ParseResult {
-        any_parse: parse.into(),
+        any_parse: parse_graphql_with_cache(code, node_cache).into(),
         language: Some(file_source),
     }
 }
 
-fn debug_syntax_tree(
-    _biome_path: &BiomePath,
-    parse: AnyParsedSource,
-    workspace_db: WorkspaceDb,
-) -> GetSyntaxTreeResult {
-    let syntax: GraphqlSyntaxNode = parse.syntax(&workspace_db);
-    let tree: GraphqlRoot = parse.tree(&workspace_db);
+fn debug_syntax_tree(parse: AnyParsedSource) -> GetSyntaxTreeResult {
+    let syntax: GraphqlSyntaxNode = parse.syntax();
+    let tree: GraphqlRoot = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -456,8 +480,7 @@ fn debug_formatter_ir(
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
-
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -468,13 +491,13 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: super::ParsedOrigin,
+    parse: super::ParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -493,7 +516,7 @@ fn format_range(
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
     let printed = biome_graphql_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -508,7 +531,7 @@ fn format_on_type(
 ) -> Result<Printed, WorkspaceError> {
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
-    let tree = parse.syntax(&workspace_db);
+    let tree = parse.syntax();
 
     let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
@@ -574,7 +597,7 @@ fn lint(params: LintParams) -> LintResults {
         params.settings,
         &params.workspace_db,
     );
-    let tree = params.parsed_source.tree(&params.workspace_db);
+    let tree = params.parsed_source.tree();
 
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -603,7 +626,7 @@ fn lint(params: LintParams) -> LintResults {
     });
 
     process_lint.into_result(
-        params.parsed_source.serde_diagnostics(&params.workspace_db),
+        params.parsed_source.serde_diagnostics(),
         analyze_diagnostics,
     )
 }
@@ -616,6 +639,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings,
         path,
         workspace_db,
+        #[cfg(feature = "html_embeds")]
+            embedded_data: _,
         project_layout,
         language,
         only,
@@ -628,7 +653,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         compute_actions,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
-    let tree = parsed_source.tree(&workspace_db);
+    let tree = parsed_source.tree();
     let _ = trace_span!("Parsed file", tree =? tree).entered();
 
     let analyzer_options = resolve_analyzer_options(
@@ -653,7 +678,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_project_layout(project_layout)
         .finish();
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),
@@ -701,7 +726,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
-    let mut tree: GraphqlRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut tree: GraphqlRoot = params.parsed_source.tree();
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
