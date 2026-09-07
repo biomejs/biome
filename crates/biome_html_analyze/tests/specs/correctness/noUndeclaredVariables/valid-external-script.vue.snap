@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: valid-external-script.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script src="./options.js"></script>
+
+<template>
+    <div v-may-come-from-the-external-script></div>
+</template>
+
+```

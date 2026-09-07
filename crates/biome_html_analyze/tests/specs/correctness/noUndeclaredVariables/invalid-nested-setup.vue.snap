@@ -1,0 +1,55 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid-nested-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+function configure() {
+    const vNestedBinding = {};
+    defineOptions({ directives: { nestedOption: {} } });
+}
+</script>
+
+<template>
+    <div v-nested-binding></div>
+    <div v-nested-option></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-nested-setup.vue:10:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-nested-binding is undeclared.
+  
+     9 │ <template>
+  > 10 │     <div v-nested-binding></div>
+       │          ^^^^^^^^^^^^^^^^
+    11 │     <div v-nested-option></div>
+    12 │ </template>
+  
+  i Declare vNestedBinding in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```
+
+```
+invalid-nested-setup.vue:11:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-nested-option is undeclared.
+  
+     9 │ <template>
+    10 │     <div v-nested-binding></div>
+  > 11 │     <div v-nested-option></div>
+       │          ^^^^^^^^^^^^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Declare vNestedOption in <script setup>, register the directive in the component's directives option, or add it to javascript.globals.
+  
+
+```

@@ -1,0 +1,40 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-options-key.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+    directives: {
+        highlight: {},
+    },
+};
+</script>
+
+<template>
+    <div v-highlight></div>
+    {{ highlight }}
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-options-key.vue:12:8 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The highlight variable is undeclared.
+  
+    10 │ <template>
+    11 │     <div v-highlight></div>
+  > 12 │     {{ highlight }}
+       │        ^^^^^^^^^
+    13 │ </template>
+    14 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

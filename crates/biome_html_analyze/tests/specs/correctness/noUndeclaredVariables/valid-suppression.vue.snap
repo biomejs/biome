@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: valid-suppression.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+    <!-- biome-ignore lint/correctness/noUndeclaredVariables: directive is registered by a plugin -->
+    <div v-rule-suppressed></div>
+    <!-- biome-ignore lint/correctness: directive is registered by a plugin -->
+    <div v-group-suppressed></div>
+</template>
+
+```

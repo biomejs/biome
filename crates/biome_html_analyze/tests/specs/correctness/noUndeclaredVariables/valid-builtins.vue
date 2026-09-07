@@ -1,0 +1,30 @@
+<!-- should not generate diagnostics -->
+<script setup>
+const items = [];
+const props = {};
+const condition = true;
+const html = "";
+const model = "";
+const handler = () => {};
+const text = "";
+</script>
+
+<template>
+    <div
+        v-bind="props"
+        v-cloak
+        v-else
+        v-else-if="condition"
+        v-for="item in items"
+        v-html="html"
+        v-if="condition"
+        v-memo="[condition]"
+        v-model="model"
+        v-on:click="handler"
+        v-once
+        v-pre
+        v-show="condition"
+        v-slot:default
+        v-text="text"
+    ></div>
+</template>
