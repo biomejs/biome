@@ -3320,14 +3320,13 @@ fn guard_narrowing_predicates(
     let Ok(name_token) = id.name() else {
         return Vec::new();
     };
-    GuardAnalysis::new(resolver, scope_id, name_token).narrowing_predicates(id)
+    GuardAnalysis::new(resolver, scope_id, name_token).guard_predicates(id)
 }
 
-/// Detects the narrowing guards that apply to one binding.
+/// Finds the guards that narrow one reference.
 ///
-/// The name being narrowed and the scope other bindings resolve in (the
-/// callee of a predicate call, the class of an `instanceof`) are fixed for
-/// the whole analysis.
+/// `scope_id` is where the other names a guard mentions resolve: the callee
+/// of a predicate call, the class of an `instanceof`.
 struct GuardAnalysis<'a> {
     resolver: &'a mut dyn RawTypeCollector,
     scope_id: ScopeId,
@@ -3353,23 +3352,20 @@ impl<'a> GuardAnalysis<'a> {
     }
 
     /// Returns the predicates the guards enclosing `id` establish for it,
-    /// innermost first.
+    /// innermost first. The walk stops at the enclosing function.
     ///
-    /// This is a purely syntactic check, scoped to the enclosing function. A
-    /// guard whose consequent declares or assigns a binding with the same
-    /// name is ignored, since it no longer says anything about that binding.
-    ///
-    /// A value inside nested guards passed all of their tests, so every
-    /// enclosing guard is collected, not just the innermost:
+    /// A guard whose consequent declares or assigns the name is skipped.
+    /// Every other enclosing guard counts, since the value passed all of
+    /// their tests:
     ///
     /// ```js
     /// if (typeof x === "undefined") {
     ///   if (x) {
-    ///     x; // `undefined` and truthy, not just truthy
+    ///     x; // `never`: nothing is both `undefined` and truthy
     ///   }
     /// }
     /// ```
-    fn narrowing_predicates(&mut self, id: &JsReferenceIdentifier) -> Vec<NarrowingPredicate> {
+    fn guard_predicates(&mut self, id: &JsReferenceIdentifier) -> Vec<NarrowingPredicate> {
         let mut child = id.syntax().clone();
         let mut found = Vec::new();
         for ancestor in id.syntax().ancestors().skip(1) {
@@ -3400,12 +3396,10 @@ impl<'a> GuardAnalysis<'a> {
     /// Returns the predicate that the given `case` clause establishes for
     /// references with the narrowed name in its statements, if any.
     ///
-    /// Narrowing only applies when every preceding clause of the `switch`
-    /// statement provably exits, since execution could otherwise fall through
-    /// into the clause while the discriminant held a different value. The
-    /// tests of preceding clauses still evaluate in order even when their
-    /// clauses are not entered, so a write to the name inside one of them
-    /// also declines narrowing:
+    /// Every preceding clause must end in a jump, or execution could fall
+    /// through into this one with a different value. The tests of preceding
+    /// clauses run even when their clauses are not entered, so a write in
+    /// one of them also declines narrowing:
     ///
     /// ```js
     /// switch (x) {
@@ -3433,7 +3427,7 @@ impl<'a> GuardAnalysis<'a> {
             if clause.syntax() == case_clause.syntax() {
                 break;
             }
-            if !clause_provably_exits(&clause) {
+            if !clause_ends_with_jump(&clause) {
                 return None;
             }
             if let AnyJsSwitchClause::JsCaseClause(preceding) = &clause
@@ -3509,12 +3503,9 @@ impl<'a> GuardAnalysis<'a> {
     }
 
     /// Returns the predicate of a `<name>.<member> === "<value>"` comparison,
-    /// if the given binary expression is one.
+    /// in either operand order, if the given binary expression is one.
     ///
-    /// Handles both operand orders. Loose equality is not accepted: a test like
-    /// `x.kind == "1"` also passes when the member holds the number `1`, so
-    /// stripping the variants whose member is not the string `"1"` would narrow
-    /// away the value actually present at runtime.
+    /// `==` is not a guard: `x.kind == "1"` also passes for the number `1`.
     fn member_equals_guard(
         &mut self,
         if_stmt: &JsIfStatement,
@@ -3541,13 +3532,12 @@ impl<'a> GuardAnalysis<'a> {
     }
 
     /// Returns the predicate of an `isFoo(<name>)`-style call, if the given
-    /// call expression passes a reference with the narrowed name as one of its
-    /// arguments.
+    /// call passes a reference with the narrowed name as one of its
+    /// arguments. Whether the callee is a type predicate is decided during
+    /// resolution.
     ///
-    /// Whether the callee is an actual type predicate is only decided during
-    /// resolution. A spread among the arguments before the reference makes the
-    /// mapping from its position to the callee's parameters ambiguous at
-    /// runtime, so no predicate is returned then.
+    /// A spread before the reference hides which parameter receives it, so
+    /// no predicate is returned then.
     fn predicate_call_guard(
         &mut self,
         if_stmt: &JsIfStatement,
@@ -3561,9 +3551,7 @@ impl<'a> GuardAnalysis<'a> {
             .name()
             .ok()?;
 
-        // The callee reference is resolved from the scope of the narrowed
-        // reference. A same-name binding declared in the consequent would
-        // shadow the callee the guard actually invoked.
+        // A same-name binding in the consequent would shadow the callee.
         if let Ok(consequent) = if_stmt.consequent()
             && self.narrowing_invalidated_within(consequent.syntax(), callee_name.clone())
         {
@@ -3607,9 +3595,7 @@ impl<'a> GuardAnalysis<'a> {
             .name()
             .ok()?;
 
-        // The class reference is resolved from the scope of the narrowed
-        // reference. A same-name binding declared in the consequent would shadow
-        // the class the guard actually checked against.
+        // A same-name binding in the consequent would shadow the class.
         if let Ok(consequent) = if_stmt.consequent()
             && self.narrowing_invalidated_within(consequent.syntax(), class_name.clone())
         {
@@ -3619,16 +3605,12 @@ impl<'a> GuardAnalysis<'a> {
         Some(TypeReference::from_name(self.scope_id, class_name))
     }
 
-    /// Returns whether `name_token` is invalidated as a narrowing target
-    /// somewhere inside `node`: either a `JsIdentifierBinding` with that name
-    /// is declared there, or the name is assigned to (written) within `node`.
+    /// Returns whether a binding named `name_token` is declared, or the name
+    /// is assigned to, anywhere inside `node`. A write after the reference
+    /// counts too.
     ///
-    /// The scan is deliberately conservative: a write anywhere in `node`
-    /// invalidates every reference in it, even ones that precede the write.
-    ///
-    /// The result is memoized in the resolver's
-    /// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
-    /// since this runs once per reference inside a guarded consequent.
+    /// Results are cached per `node` and name, since every reference in a
+    /// guarded consequent asks about the same consequent.
     fn narrowing_invalidated_within(&mut self, node: &JsSyntaxNode, name_token: TokenText) -> bool {
         let key = (
             node.clone(),
@@ -3659,15 +3641,10 @@ impl<'a> GuardAnalysis<'a> {
         invalidated
     }
 
-    /// Returns whether a member of the value with the narrowed name is written
-    /// to, or deleted, within `node`, e.g. `name.member = 1`, `name[key] = 1`,
-    /// or `delete name.member`.
-    ///
-    /// Like [`Self::narrowing_invalidated_within`], the scan is deliberately
-    /// conservative: a member write anywhere in `node` counts, even one that cannot
-    /// execute before the reference being narrowed. Results are memoized in the
-    /// resolver's narrowing invalidation cache, under
-    /// [`NarrowingInvalidationKind::MemberWrite`].
+    /// Returns whether a member of the narrowed value is written to or
+    /// deleted anywhere inside `node`: `name.member = 1`, `name[key] = 1`,
+    /// `delete name.member`. Cached like
+    /// [`Self::narrowing_invalidated_within`].
     fn member_write_invalidated_within(&mut self, node: &JsSyntaxNode) -> bool {
         let name = self.name_token.text();
         let key = (
@@ -3713,13 +3690,10 @@ impl<'a> GuardAnalysis<'a> {
     }
 }
 
-/// Returns whether execution provably exits at the end of the given clause,
-/// instead of falling through to the next one.
-///
-/// Only a `break`, `continue`, `return`, or `throw` as the clause's last
-/// statement counts; an exit nested in a block or an `if` is not detected,
-/// so such clauses conservatively decline narrowing for their successors.
-fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
+/// Returns whether the clause ends in a `break`, `continue`, `return`, or
+/// `throw`, so execution cannot fall through to the next clause. A jump
+/// nested in a block or an `if` does not count.
+fn clause_ends_with_jump(clause: &AnyJsSwitchClause) -> bool {
     let statements = match clause {
         AnyJsSwitchClause::JsCaseClause(clause) => clause.consequent(),
         AnyJsSwitchClause::JsDefaultClause(clause) => clause.consequent(),
@@ -3735,13 +3709,10 @@ fn clause_provably_exits(clause: &AnyJsSwitchClause) -> bool {
     })
 }
 
-/// Returns the string of a `<name> === "<value>"` comparison, if the given
-/// binary expression is one.
+/// Returns the string of a `<name> === "<value>"` comparison, in either
+/// operand order, if the given binary expression is one.
 ///
-/// Handles both operand orders. Loose equality is not accepted: a test like
-/// `x == "1"` also passes when `x` holds the number `1`, so stripping the
-/// variants that are not the string `"1"` would narrow away the value
-/// actually present at runtime.
+/// `==` is not a guard: `x == "1"` also passes for the number `1`.
 fn string_equals_guard(binary: &JsBinaryExpression, name: &str) -> Option<Text> {
     if !matches!(binary.operator().ok()?, JsBinaryOperator::StrictEquality) {
         return None;

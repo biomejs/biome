@@ -2602,16 +2602,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Collects the union variants of `ty` that the `leaf` callback retains.
-    ///
-    /// This is the traversal behind every narrowing operation. It expands the
-    /// types that stand for other types — nested unions, `typeof` types, and
-    /// instances of a type that [should be flattened](InferredTypeData::should_flatten_instance)
-    /// — so `leaf` only sees the types that remain once nothing can be
-    /// expanded any further, and decides for each whether it is retained,
-    /// stripped, or mapped to another type.
+    /// Nested unions, `typeof` types and flattenable instances are expanded
+    /// first, so `leaf` only sees the types that stand for themselves.
     ///
     /// Returns `None` after [`MAX_CONDITIONAL_FILTER_STEPS`] steps, which
-    /// bounds the work spent on cyclic or deeply nested types.
+    /// bounds the work on cyclic types.
     fn collect_union_leaves(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -2766,10 +2761,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         };
 
         let parameters = function.parameters(self.db);
-        // A TS `this` parameter occupies the first slot of the parameter
-        // list but no argument position, so it must not count when mapping
-        // the argument index. `this` cannot be a formal parameter name, so
-        // matching on the name is unambiguous.
+        // A `this` parameter takes no argument position.
         let parameters = match parameters.split_first() {
             Some((InferredFunctionParameter::Named(first), rest)) if first.name == "this" => rest,
             _ => parameters,
@@ -3024,15 +3016,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Returns whether the extends chain of `class`, including `class`
-    /// itself, contains `needle`.
-    ///
-    /// Only returns [`ExtendsChainLookup::DoesNotContain`] when the chain
-    /// was walked all the way to a class without a base class; a chain that
-    /// contains a link we cannot resolve to a class, such as a mixin call or
-    /// an unresolved import, yields [`ExtendsChainLookup::Unknown`].
-    ///
-    /// `class A extends B {}` and `class B extends A {}` parse, so the walk
-    /// stops as soon as it revisits a class.
+    /// itself, contains `needle`. A link that is not a class, such as a mixin
+    /// call, ends the walk with [`ExtendsChainLookup::Unknown`]; so does a
+    /// cycle, which the parser accepts.
     fn class_extends_chain_contains(
         &mut self,
         class: InferredClass<'db>,
