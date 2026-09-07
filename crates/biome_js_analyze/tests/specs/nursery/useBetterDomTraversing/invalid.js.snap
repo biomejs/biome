@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 197
 expression: invalid.js
 ---
 # Input
@@ -25,6 +24,7 @@ element.querySelector("a > b").querySelector(".c");
 element.querySelector(".a, .b").querySelector(".c");
 element.querySelector(".a").querySelector(".b, .c");
 element.querySelector(":scope a").querySelector("b");
+element.querySelector(":SCOPE > .item").querySelector("b");
 element.querySelector("a").querySelector("b").querySelector("c");
 element.querySelector("a").querySelector("b").querySelector(selector);
 element.querySelector(selector).querySelector("b").querySelector("c");
@@ -49,7 +49,7 @@ const nested = element
 ```
 invalid.js:2:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstChild over .childNodes[0].
+  i This indexes .childNodes to get the first child.
   
     1 │ /* should generate diagnostics */
   > 2 │ element.childNodes[0];
@@ -57,7 +57,7 @@ invalid.js:2:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
     3 │ (element.childNodes)[0];
     4 │ (element.children)[0];
   
-  i A named first-child accessor is easier to read than a positional index.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -75,7 +75,7 @@ invalid.js:2:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
 ```
 invalid.js:3:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstChild over .childNodes[0].
+  i This indexes .childNodes to get the first child.
   
     1 │ /* should generate diagnostics */
     2 │ element.childNodes[0];
@@ -84,7 +84,7 @@ invalid.js:3:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
     4 │ (element.children)[0];
     5 │ element.children[0];
   
-  i A named first-child accessor is easier to read than a positional index.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -103,7 +103,7 @@ invalid.js:3:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstElementChild over .children[0].
+  i This indexes .children to get the first element child.
   
     2 │ element.childNodes[0];
     3 │ (element.childNodes)[0];
@@ -112,7 +112,7 @@ invalid.js:4:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
     5 │ element.children[0];
     6 │ element.children[1];
   
-  i A named first-child accessor is easier to read than a positional index.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -131,7 +131,7 @@ invalid.js:4:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstElementChild over .children[0].
+  i This indexes .children to get the first element child.
   
     3 │ (element.childNodes)[0];
     4 │ (element.children)[0];
@@ -140,7 +140,7 @@ invalid.js:5:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
     6 │ element.children[1];
     7 │ element.children[10];
   
-  i A named first-child accessor is easier to read than a positional index.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -159,7 +159,7 @@ invalid.js:5:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━�
 ```
 invalid.js:6:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .querySelector() over positional .children access.
+  i This uses a positional index on .children.
   
     4 │ (element.children)[0];
     5 │ element.children[0];
@@ -180,7 +180,7 @@ invalid.js:6:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .querySelector() over positional .children access.
+  i This uses a positional index on .children.
   
     5 │ element.children[0];
     6 │ element.children[1];
@@ -201,7 +201,7 @@ invalid.js:7:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:8:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .querySelector() over positional .children access.
+  i This uses a positional index on .children.
   
      6 │ element.children[1];
      7 │ element.children[10];
@@ -222,7 +222,7 @@ invalid.js:8:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:9:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .closest() over chaining .parentElement.
+  i This walks ancestors by chaining .parentElement.
   
      7 │ element.children[10];
      8 │ element.children[1].children[2];
@@ -243,7 +243,7 @@ invalid.js:9:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .closest() over chaining .parentElement.
+  i This walks ancestors by chaining .parentElement.
   
      8 │ element.children[1].children[2];
      9 │ element.parentElement.parentElement;
@@ -264,7 +264,7 @@ invalid.js:10:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:11:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
      9 │ element.parentElement.parentElement;
     10 │ element.parentElement.parentElement.parentElement;
@@ -273,7 +273,7 @@ invalid.js:11:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     12 │ document.querySelector("a").querySelector("b");
     13 │ document.body.querySelector("a").querySelector("b");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -292,7 +292,7 @@ invalid.js:11:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:12:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     10 │ element.parentElement.parentElement.parentElement;
     11 │ element.querySelector("a").querySelector("b");
@@ -301,7 +301,7 @@ invalid.js:12:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     13 │ document.body.querySelector("a").querySelector("b");
     14 │ element.querySelector('a').querySelector('b');
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -320,7 +320,7 @@ invalid.js:12:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:13:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     11 │ element.querySelector("a").querySelector("b");
     12 │ document.querySelector("a").querySelector("b");
@@ -329,7 +329,7 @@ invalid.js:13:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     14 │ element.querySelector('a').querySelector('b');
     15 │ element.querySelector(`a`).querySelector(`b`);
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -348,7 +348,7 @@ invalid.js:13:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:14:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     12 │ document.querySelector("a").querySelector("b");
     13 │ document.body.querySelector("a").querySelector("b");
@@ -357,7 +357,7 @@ invalid.js:14:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     15 │ element.querySelector(`a`).querySelector(`b`);
     16 │ element.querySelector("a").querySelector(`b`);
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -376,7 +376,7 @@ invalid.js:14:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:15:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     13 │ document.body.querySelector("a").querySelector("b");
     14 │ element.querySelector('a').querySelector('b');
@@ -385,7 +385,7 @@ invalid.js:15:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     16 │ element.querySelector("a").querySelector(`b`);
     17 │ element.querySelector("a > b").querySelector(".c");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -404,7 +404,7 @@ invalid.js:15:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:16:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     14 │ element.querySelector('a').querySelector('b');
     15 │ element.querySelector(`a`).querySelector(`b`);
@@ -413,7 +413,7 @@ invalid.js:16:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     17 │ element.querySelector("a > b").querySelector(".c");
     18 │ element.querySelector(".a, .b").querySelector(".c");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -432,7 +432,7 @@ invalid.js:16:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:17:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     15 │ element.querySelector(`a`).querySelector(`b`);
     16 │ element.querySelector("a").querySelector(`b`);
@@ -441,7 +441,7 @@ invalid.js:17:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
     18 │ element.querySelector(".a, .b").querySelector(".c");
     19 │ element.querySelector(".a").querySelector(".b, .c");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -460,7 +460,7 @@ invalid.js:17:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:18:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     16 │ element.querySelector("a").querySelector(`b`);
     17 │ element.querySelector("a > b").querySelector(".c");
@@ -469,9 +469,9 @@ invalid.js:18:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
     19 │ element.querySelector(".a").querySelector(".b, .c");
     20 │ element.querySelector(":scope a").querySelector("b");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
-  i Merge the selectors yourself. Selectors that contain a comma or :scope are not rewritten automatically.
+  i Merge the selectors.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -481,18 +481,18 @@ invalid.js:18:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:19:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     17 │ element.querySelector("a > b").querySelector(".c");
     18 │ element.querySelector(".a, .b").querySelector(".c");
   > 19 │ element.querySelector(".a").querySelector(".b, .c");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ element.querySelector(":scope a").querySelector("b");
-    21 │ element.querySelector("a").querySelector("b").querySelector("c");
+    21 │ element.querySelector(":SCOPE > .item").querySelector("b");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
-  i Merge the selectors yourself. Selectors that contain a comma or :scope are not rewritten automatically.
+  i Merge the selectors.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -502,18 +502,18 @@ invalid.js:19:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:20:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     18 │ element.querySelector(".a, .b").querySelector(".c");
     19 │ element.querySelector(".a").querySelector(".b, .c");
   > 20 │ element.querySelector(":scope a").querySelector("b");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ element.querySelector("a").querySelector("b").querySelector("c");
-    22 │ element.querySelector("a").querySelector("b").querySelector(selector);
+    21 │ element.querySelector(":SCOPE > .item").querySelector("b");
+    22 │ element.querySelector("a").querySelector("b").querySelector("c");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
-  i Merge the selectors yourself. Selectors that contain a comma or :scope are not rewritten automatically.
+  i Merge the selectors.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -521,29 +521,22 @@ invalid.js:20:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     19 │ element.querySelector(".a").querySelector(".b, .c");
     20 │ element.querySelector(":scope a").querySelector("b");
-  > 21 │ element.querySelector("a").querySelector("b").querySelector("c");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ element.querySelector("a").querySelector("b").querySelector(selector);
-    23 │ element.querySelector(selector).querySelector("b").querySelector("c");
+  > 21 │ element.querySelector(":SCOPE > .item").querySelector("b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ element.querySelector("a").querySelector("b").querySelector("c");
+    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
+  
+  i Merge the selectors.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Merge the .querySelector() calls.
-  
-    19 19 │   element.querySelector(".a").querySelector(".b, .c");
-    20 20 │   element.querySelector(":scope a").querySelector("b");
-    21    │ - element.querySelector("a").querySelector("b").querySelector("c");
-       21 │ + element.querySelector(":scope·a·b·c");
-    22 22 │   element.querySelector("a").querySelector("b").querySelector(selector);
-    23 23 │   element.querySelector(selector).querySelector("b").querySelector("c");
   
 
 ```
@@ -551,27 +544,27 @@ invalid.js:21:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:22:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
     20 │ element.querySelector(":scope a").querySelector("b");
-    21 │ element.querySelector("a").querySelector("b").querySelector("c");
-  > 22 │ element.querySelector("a").querySelector("b").querySelector(selector);
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ element.querySelector(selector).querySelector("b").querySelector("c");
-    24 │ (getElement()).querySelector("a").querySelector("b");
+    21 │ element.querySelector(":SCOPE > .item").querySelector("b");
+  > 22 │ element.querySelector("a").querySelector("b").querySelector("c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
+    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Merge the .querySelector() calls.
   
     20 20 │   element.querySelector(":scope a").querySelector("b");
-    21 21 │   element.querySelector("a").querySelector("b").querySelector("c");
-    22    │ - element.querySelector("a").querySelector("b").querySelector(selector);
-       22 │ + element.querySelector(":scope·a·b").querySelector(selector);
-    23 23 │   element.querySelector(selector).querySelector("b").querySelector("c");
-    24 24 │   (getElement()).querySelector("a").querySelector("b");
+    21 21 │   element.querySelector(":SCOPE > .item").querySelector("b");
+    22    │ - element.querySelector("a").querySelector("b").querySelector("c");
+       22 │ + element.querySelector(":scope·a·b·c");
+    23 23 │   element.querySelector("a").querySelector("b").querySelector(selector);
+    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
   
 
 ```
@@ -579,27 +572,27 @@ invalid.js:22:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:23:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
-    21 │ element.querySelector("a").querySelector("b").querySelector("c");
-    22 │ element.querySelector("a").querySelector("b").querySelector(selector);
-  > 23 │ element.querySelector(selector).querySelector("b").querySelector("c");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    24 │ (getElement()).querySelector("a").querySelector("b");
-    25 │ (foo || bar).querySelector("a").querySelector("b");
+    21 │ element.querySelector(":SCOPE > .item").querySelector("b");
+    22 │ element.querySelector("a").querySelector("b").querySelector("c");
+  > 23 │ element.querySelector("a").querySelector("b").querySelector(selector);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
+    25 │ (getElement()).querySelector("a").querySelector("b");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    21 21 │   element.querySelector("a").querySelector("b").querySelector("c");
-    22 22 │   element.querySelector("a").querySelector("b").querySelector(selector);
-    23    │ - element.querySelector(selector).querySelector("b").querySelector("c");
-       23 │ + element.querySelector(selector).querySelector(":scope·b·c");
-    24 24 │   (getElement()).querySelector("a").querySelector("b");
-    25 25 │   (foo || bar).querySelector("a").querySelector("b");
+    21 21 │   element.querySelector(":SCOPE > .item").querySelector("b");
+    22 22 │   element.querySelector("a").querySelector("b").querySelector("c");
+    23    │ - element.querySelector("a").querySelector("b").querySelector(selector);
+       23 │ + element.querySelector(":scope·a·b").querySelector(selector);
+    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
+    25 25 │   (getElement()).querySelector("a").querySelector("b");
   
 
 ```
@@ -607,27 +600,27 @@ invalid.js:23:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:24:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
-    22 │ element.querySelector("a").querySelector("b").querySelector(selector);
-    23 │ element.querySelector(selector).querySelector("b").querySelector("c");
-  > 24 │ (getElement()).querySelector("a").querySelector("b");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ (foo || bar).querySelector("a").querySelector("b");
-    26 │ 
+    22 │ element.querySelector("a").querySelector("b").querySelector("c");
+    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
+  > 24 │ element.querySelector(selector).querySelector("b").querySelector("c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ (getElement()).querySelector("a").querySelector("b");
+    26 │ (foo || bar).querySelector("a").querySelector("b");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    22 22 │   element.querySelector("a").querySelector("b").querySelector(selector);
-    23 23 │   element.querySelector(selector).querySelector("b").querySelector("c");
-    24    │ - (getElement()).querySelector("a").querySelector("b");
-       24 │ + (getElement()).querySelector(":scope·a·b");
-    25 25 │   (foo || bar).querySelector("a").querySelector("b");
-    26 26 │   
+    22 22 │   element.querySelector("a").querySelector("b").querySelector("c");
+    23 23 │   element.querySelector("a").querySelector("b").querySelector(selector);
+    24    │ - element.querySelector(selector).querySelector("b").querySelector("c");
+       24 │ + element.querySelector(selector).querySelector(":scope·b·c");
+    25 25 │   (getElement()).querySelector("a").querySelector("b");
+    26 26 │   (foo || bar).querySelector("a").querySelector("b");
   
 
 ```
@@ -635,46 +628,55 @@ invalid.js:24:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━
 ```
 invalid.js:25:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
-    23 │ element.querySelector(selector).querySelector("b").querySelector("c");
-    24 │ (getElement()).querySelector("a").querySelector("b");
-  > 25 │ (foo || bar).querySelector("a").querySelector("b");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ 
-    27 │ element.childNodes[/* comment */ 0];
+    23 │ element.querySelector("a").querySelector("b").querySelector(selector);
+    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
+  > 25 │ (getElement()).querySelector("a").querySelector("b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ (foo || bar).querySelector("a").querySelector("b");
+    27 │ 
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    23 23 │   element.querySelector(selector).querySelector("b").querySelector("c");
-    24 24 │   (getElement()).querySelector("a").querySelector("b");
-    25    │ - (foo·||·bar).querySelector("a").querySelector("b");
-       25 │ + (foo·||·bar).querySelector(":scope·a·b");
-    26 26 │   
-    27 27 │   element.childNodes[/* comment */ 0];
+    23 23 │   element.querySelector("a").querySelector("b").querySelector(selector);
+    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
+    25    │ - (getElement()).querySelector("a").querySelector("b");
+       25 │ + (getElement()).querySelector(":scope·a·b");
+    26 26 │   (foo || bar).querySelector("a").querySelector("b");
+    27 27 │   
   
 
 ```
 
 ```
-invalid.js:27:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstChild over .childNodes[0].
+  i These .querySelector() calls are chained.
   
-    25 │ (foo || bar).querySelector("a").querySelector("b");
-    26 │ 
-  > 27 │ element.childNodes[/* comment */ 0];
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ element.children[/* comment */ 0];
-    29 │ element.querySelector(/* comment */ "a").querySelector("b");
+    24 │ element.querySelector(selector).querySelector("b").querySelector("c");
+    25 │ (getElement()).querySelector("a").querySelector("b");
+  > 26 │ (foo || bar).querySelector("a").querySelector("b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ element.childNodes[/* comment */ 0];
   
-  i A named first-child accessor is easier to read than a positional index.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Merge the .querySelector() calls.
+  
+    24 24 │   element.querySelector(selector).querySelector("b").querySelector("c");
+    25 25 │   (getElement()).querySelector("a").querySelector("b");
+    26    │ - (foo·||·bar).querySelector("a").querySelector("b");
+       26 │ + (foo·||·bar).querySelector(":scope·a·b");
+    27 27 │   
+    28 28 │   element.childNodes[/* comment */ 0];
   
 
 ```
@@ -682,15 +684,16 @@ invalid.js:27:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:28:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstElementChild over .children[0].
+  i This indexes .childNodes to get the first child.
   
-    27 │ element.childNodes[/* comment */ 0];
-  > 28 │ element.children[/* comment */ 0];
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    29 │ element.querySelector(/* comment */ "a").querySelector("b");
-    30 │ element.querySelector("a").querySelector(/* comment */ "b");
+    26 │ (foo || bar).querySelector("a").querySelector("b");
+    27 │ 
+  > 28 │ element.childNodes[/* comment */ 0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ element.children[/* comment */ 0];
+    30 │ element.querySelector(/* comment */ "a").querySelector("b");
   
-  i A named first-child accessor is easier to read than a positional index.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -700,16 +703,15 @@ invalid.js:28:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:29:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i This indexes .children to get the first element child.
   
-    27 │ element.childNodes[/* comment */ 0];
-    28 │ element.children[/* comment */ 0];
-  > 29 │ element.querySelector(/* comment */ "a").querySelector("b");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ element.querySelector("a").querySelector(/* comment */ "b");
-    31 │ 
+    28 │ element.childNodes[/* comment */ 0];
+  > 29 │ element.children[/* comment */ 0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ element.querySelector(/* comment */ "a").querySelector("b");
+    31 │ element.querySelector("a").querySelector(/* comment */ "b");
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -719,16 +721,16 @@ invalid.js:29:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 invalid.js:30:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
-    28 │ element.children[/* comment */ 0];
-    29 │ element.querySelector(/* comment */ "a").querySelector("b");
-  > 30 │ element.querySelector("a").querySelector(/* comment */ "b");
+    28 │ element.childNodes[/* comment */ 0];
+    29 │ element.children[/* comment */ 0];
+  > 30 │ element.querySelector(/* comment */ "a").querySelector("b");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ 
-    32 │ const item = element
+    31 │ element.querySelector("a").querySelector(/* comment */ "b");
+    32 │ 
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -736,61 +738,80 @@ invalid.js:30:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━�
 ```
 
 ```
-invalid.js:32:14 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:1 lint/nursery/useBetterDomTraversing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer .firstElementChild over .children[0].
+  i These .querySelector() calls are chained.
   
-    30 │ element.querySelector("a").querySelector(/* comment */ "b");
-    31 │ 
-  > 32 │ const item = element
+    29 │ element.children[/* comment */ 0];
+    30 │ element.querySelector(/* comment */ "a").querySelector("b");
+  > 31 │ element.querySelector("a").querySelector(/* comment */ "b");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ const item = element
+  
+  i One .querySelector() call with a combined selector is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:14 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexes .children to get the first element child.
+  
+    31 │ element.querySelector("a").querySelector(/* comment */ "b");
+    32 │ 
+  > 33 │ const item = element
        │              ^^^^^^^
-  > 33 │ 	.children[0];
+  > 34 │ 	.children[0];
        │ 	^^^^^^^^^^^^
-    34 │ 
-    35 │ const nested = element
+    35 │ 
+    36 │ const nested = element
   
-  i A named first-child accessor is easier to read than a positional index.
+  i A positional index is harder to read than a named first-child accessor.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .firstElementChild instead.
   
-    31 31 │   
-    32 32 │   const item = element
-    33    │ - → .children[0];
-       33 │ + → .firstElementChild;
-    34 34 │   
-    35 35 │   const nested = element
+    32 32 │   
+    33 33 │   const item = element
+    34    │ - → .children[0];
+       34 │ + → .firstElementChild;
+    35 35 │   
+    36 36 │   const nested = element
   
 
 ```
 
 ```
-invalid.js:35:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These chained .querySelector() calls can be merged.
+  i These .querySelector() calls are chained.
   
-    33 │ 	.children[0];
-    34 │ 
-  > 35 │ const nested = element
+    34 │ 	.children[0];
+    35 │ 
+  > 36 │ const nested = element
        │                ^^^^^^^
-  > 36 │ 	.querySelector("a")
-  > 37 │ 	.querySelector("b");
+  > 37 │ 	.querySelector("a")
+  > 38 │ 	.querySelector("b");
        │ 	^^^^^^^^^^^^^^^^^^^
-    38 │ 
+    39 │ 
   
-  i Combining static selectors into one .querySelector() call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match.
+  i One .querySelector() call with a combined selector is easier to read.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Merge the .querySelector() calls.
   
-    34 34 │   
-    35 35 │   const nested = element
-    36    │ - → .querySelector("a")
-    37    │ - → .querySelector("b");
-       36 │ + → .querySelector(":scope·a·b");
-    38 37 │   
+    35 35 │   
+    36 36 │   const nested = element
+    37    │ - → .querySelector("a")
+    38    │ - → .querySelector("b");
+       37 │ + → .querySelector(":scope·a·b");
+    39 38 │   
   
 
 ```

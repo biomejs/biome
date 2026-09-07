@@ -59,9 +59,6 @@ declare_lint_rule! {
     /// element.firstElementChild;
     /// element.querySelector("li");
     /// element.closest("form");
-    /// ```
-    ///
-    /// ```js
     /// const child = props.children[0];
     /// ```
     ///
@@ -93,11 +90,7 @@ pub enum UseBetterDomTraversingState {
     /// `node.parentElement.parentElement` (diagnostic only)
     Closest,
     /// Chained `.querySelector()` calls with static selectors
-    MergeQuerySelector {
-        can_fix: bool,
-        merged_selector: String,
-        root: AnyJsExpression,
-    },
+    MergeQuerySelector { can_fix: bool },
 }
 
 impl Rule for UseBetterDomTraversing {
@@ -127,27 +120,27 @@ impl Rule for UseBetterDomTraversing {
                 rule_category!(),
                 range,
                 markup! {
-                    "Prefer "<Emphasis>".firstChild"</Emphasis>" over "<Emphasis>".childNodes[0]"</Emphasis>"."
+                    "This indexes "<Emphasis>".childNodes"</Emphasis>" to get the first child."
                 },
             )
             .note(markup! {
-                "A named first-child accessor is easier to read than a positional index."
+                "A positional index is harder to read than a named first-child accessor."
             }),
             UseBetterDomTraversingState::FirstElementChild => RuleDiagnostic::new(
                 rule_category!(),
                 range,
                 markup! {
-                    "Prefer "<Emphasis>".firstElementChild"</Emphasis>" over "<Emphasis>".children[0]"</Emphasis>"."
+                    "This indexes "<Emphasis>".children"</Emphasis>" to get the first element child."
                 },
             )
             .note(markup! {
-                "A named first-child accessor is easier to read than a positional index."
+                "A positional index is harder to read than a named first-child accessor."
             }),
             UseBetterDomTraversingState::PositionalChildren => RuleDiagnostic::new(
                 rule_category!(),
                 range,
                 markup! {
-                    "Prefer "<Emphasis>".querySelector()"</Emphasis>" over positional "<Emphasis>".children"</Emphasis>" access."
+                    "This uses a positional index on "<Emphasis>".children"</Emphasis>"."
                 },
             )
             .note(markup! {
@@ -160,7 +153,7 @@ impl Rule for UseBetterDomTraversing {
                 rule_category!(),
                 range,
                 markup! {
-                    "Prefer "<Emphasis>".closest()"</Emphasis>" over chaining "<Emphasis>".parentElement"</Emphasis>"."
+                    "This walks ancestors by chaining "<Emphasis>".parentElement"</Emphasis>"."
                 },
             )
             .note(markup! {
@@ -169,20 +162,20 @@ impl Rule for UseBetterDomTraversing {
             .note(markup! {
                 "Replace this chain with "<Emphasis>".closest()"</Emphasis>" and a selector for the ancestor."
             }),
-            UseBetterDomTraversingState::MergeQuerySelector { can_fix, .. } => {
+            UseBetterDomTraversingState::MergeQuerySelector { can_fix } => {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     range,
                     markup! {
-                        "These chained "<Emphasis>".querySelector()"</Emphasis>" calls can be merged."
+                        "These "<Emphasis>".querySelector()"</Emphasis>" calls are chained."
                     },
                 )
                 .note(markup! {
-                    "Combining static selectors into one "<Emphasis>".querySelector()"</Emphasis>" call is easier to read. The replacement can change which element is returned because each call searches only inside the previous match."
+                    "One "<Emphasis>".querySelector()"</Emphasis>" call with a combined selector is easier to read."
                 });
                 if !can_fix {
                     diag = diag.note(markup! {
-                        "Merge the selectors yourself. Selectors that contain a comma or "<Emphasis>":scope"</Emphasis>" are not rewritten automatically."
+                        "Merge the selectors."
                     });
                 }
                 diag
@@ -227,24 +220,26 @@ impl Rule for UseBetterDomTraversing {
             }
             (
                 AnyUseBetterDomTraversingQuery::JsCallExpression(node),
-                UseBetterDomTraversingState::MergeQuerySelector {
-                    can_fix: true,
-                    merged_selector,
-                    root,
-                },
+                UseBetterDomTraversingState::MergeQuerySelector { can_fix: true },
             ) => {
                 if has_comments_inside(node.syntax()) {
                     return None;
                 }
+                let (root, selectors) = query_selector_chain(node)?;
+                let merged_selector = if is_document_object(&root) {
+                    selectors.join(" ")
+                } else {
+                    format!(":scope {}", selectors.join(" "))
+                };
                 let argument = first_and_only_argument(node)?;
                 let callee = node.callee().ok()?.omit_parentheses();
                 let member = callee.as_js_static_member_expression()?;
                 let inner_object = member.object().ok()?;
                 mutation.replace_node(
                     argument,
-                    make_string_literal_expression(merged_selector, ctx.preferred_quote()),
+                    make_string_literal_expression(&merged_selector, ctx.preferred_quote()),
                 );
-                mutation.replace_node(inner_object, root.clone());
+                mutation.replace_node(inner_object, root);
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -316,20 +311,16 @@ fn merge_query_selector_state(node: &JsCallExpression) -> Option<UseBetterDomTra
     {
         return None;
     }
-    let (root, selectors) = query_selector_chain(node)?;
-    let can_merge_values = selectors
+    let (_root, selectors) = query_selector_chain(node)?;
+    let can_fix = selectors
         .iter()
-        .all(|selector| !selector.contains(',') && !selector.contains(":scope"));
-    let merged_selector = if is_document_object(&root) {
-        selectors.join(" ")
-    } else {
-        format!(":scope {}", selectors.join(" "))
-    };
-    Some(UseBetterDomTraversingState::MergeQuerySelector {
-        can_fix: can_merge_values,
-        merged_selector,
-        root,
-    })
+        .all(|selector| can_auto_merge_selector(selector));
+    Some(UseBetterDomTraversingState::MergeQuerySelector { can_fix })
+}
+
+/// Comma lists and `:scope` (ASCII case-insensitive) are reported but not rewritten.
+fn can_auto_merge_selector(selector: &str) -> bool {
+    !selector.contains(',') && !selector.to_ascii_lowercase().contains(":scope")
 }
 
 /// Returns the numeric index when `node` is a non-optional computed access
@@ -569,48 +560,22 @@ fn first_child_replacement(
 /// ESTree wraps an entire optional chain in `ChainExpression`. Skip merge
 /// diagnostics when this call is the object/callee of a `?.` access further up.
 fn is_inside_optional_chain(node: &JsSyntaxNode) -> bool {
-    let mut current = node.clone();
-    while let Some(parent) = current.parent() {
-        if let Some(member) = JsStaticMemberExpression::cast_ref(&parent) {
-            if member
-                .object()
-                .ok()
-                .is_some_and(|object| object.syntax() == &current)
-            {
-                if member.is_optional() {
-                    return true;
-                }
-                current = parent;
-                continue;
+    for ancestor in node.ancestors().skip(1) {
+        if let Some(member) = JsStaticMemberExpression::cast_ref(&ancestor) {
+            if member.is_optional() {
+                return true;
             }
-        }
-        if let Some(member) = JsComputedMemberExpression::cast_ref(&parent) {
-            if member
-                .object()
-                .ok()
-                .is_some_and(|object| object.syntax() == &current)
-            {
-                if member.is_optional() {
-                    return true;
-                }
-                current = parent;
-                continue;
+        } else if let Some(member) = JsComputedMemberExpression::cast_ref(&ancestor) {
+            if member.is_optional() {
+                return true;
             }
-        }
-        if let Some(call) = JsCallExpression::cast_ref(&parent) {
-            if call
-                .callee()
-                .ok()
-                .is_some_and(|callee| callee.syntax() == &current)
-            {
-                if call.is_optional() {
-                    return true;
-                }
-                current = parent;
-                continue;
+        } else if let Some(call) = JsCallExpression::cast_ref(&ancestor) {
+            if call.is_optional() {
+                return true;
             }
+        } else {
+            break;
         }
-        break;
     }
     false
 }
