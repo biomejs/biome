@@ -2047,7 +2047,7 @@ See https://biomejs.dev/linter/rules/no-undeclared-dependencies
 	 */
 	noUndeclaredDependencies?: NoUndeclaredDependenciesConfiguration;
 	/**
-	* Prevents the usage of variables that haven't been declared inside the document.
+	* Prevents the usage of custom Vue directives that have not been declared.
 See https://biomejs.dev/linter/rules/no-undeclared-variables 
 	 */
 	noUndeclaredVariables?: NoUndeclaredVariablesConfiguration;
