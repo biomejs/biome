@@ -2200,7 +2200,7 @@ pub struct TypeofNarrowedExpression<'db> {
 /// Predicate that a call returned `true` for a value passed as one of its
 /// arguments, narrowing the value when the callee turns out to be a type
 /// predicate, e.g. `isFoo(x)`.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct PredicateCallPredicate<'db> {
     /// Reference to the callee.
     pub callee: TypeData<'db>,
