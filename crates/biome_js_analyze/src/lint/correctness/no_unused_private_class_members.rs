@@ -11,8 +11,9 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind,
-    JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsFormalParameter, AnyJsName, AnyJsObjectBindingPatternMember, JsAssignmentExpression,
+    JsClassDeclaration, JsObjectBindingPattern, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
+    TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
@@ -284,6 +285,47 @@ fn traverse_members_usage(
                 }
             }
             Err(node) => {
+                if let Some(binding) = JsObjectBindingPattern::cast(node.clone())
+                    && let Some(declarator) =
+                        binding.syntax().parent().and_then(JsVariableDeclarator::cast)
+                    && let Some(initializer) = declarator.initializer()
+                    && let Ok(AnyJsExpression::JsThisExpression(_)) = initializer.expression()
+                {
+                    for property in binding.properties() {
+                        let Ok(property) = property else {
+                            continue;
+                        };
+                        let name = match property {
+                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
+                                property,
+                            ) => property.member().ok().and_then(|member| member.name()),
+                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                                property,
+                            ) => property.identifier().ok().and_then(|identifier| {
+                                identifier
+                                    .as_js_identifier_binding()?
+                                    .name_token()
+                                    .ok()
+                                    .map(|token| token.token_text_trimmed())
+                            }),
+                            AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                            | AnyJsObjectBindingPatternMember::JsMetavariable(_)
+                            | AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(_) => None,
+                        };
+                        let Some(name) = name else {
+                            continue;
+                        };
+                        private_members.retain(|private_member| {
+                            let member_being_used = !private_member.is_private_sharp()
+                                && private_member.match_name(name.text()) == Some(true);
+                            if member_being_used {
+                                ts_private_count -= 1;
+                            }
+                            !member_being_used
+                        });
+                    }
+                }
+
                 if ts_private_count != 0
                     && let Some(computed_member) = AnyJsComputedMember::cast(node)
                     && matches!(
@@ -522,21 +564,23 @@ impl AnyMember {
 
     fn match_js_name(&self, js_name: &AnyJsName) -> Option<bool> {
         let value_token = js_name.value_token().ok()?;
-        let token = value_token.text_trimmed();
+        self.match_name(value_token.text_trimmed())
+    }
 
+    fn match_name(&self, name: &str) -> Option<bool> {
         match self {
             Self::AnyJsClassMember(member) => match member {
                 AnyJsClassMember::JsGetterClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 AnyJsClassMember::JsMethodClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 AnyJsClassMember::JsPropertyClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 AnyJsClassMember::JsSetterClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 _ => None,
             },
@@ -552,7 +596,7 @@ impl AnyMember {
                         .name_token()
                         .ok()?
                         .text_trimmed()
-                        == token,
+                        == name,
                 ),
             },
         }
