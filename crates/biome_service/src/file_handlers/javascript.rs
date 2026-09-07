@@ -87,7 +87,9 @@ use biome_js_syntax::{
     AnyJsRoot, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, TextRange, TextSize, TokenAtOffset,
 };
 #[cfg(feature = "type_inference")]
-use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
+use biome_js_type_info::{
+    NarrowingInvalidationCache, RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore,
+};
 #[cfg(feature = "js_embeds")]
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -104,12 +106,10 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
-use biome_rowan::Text;
-#[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
 use camino::Utf8Path;
-#[cfg(any(feature = "js_embeds", feature = "type_inference"))]
+#[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -1172,7 +1172,7 @@ fn debug_registered_types(
 #[derive(Default)]
 struct DebugTypeCollector {
     types: TypeStore,
-    narrowing_invalidation_cache: FxHashMap<(JsSyntaxNode, Text), bool>,
+    narrowing_invalidation_cache: NarrowingInvalidationCache,
 }
 
 #[cfg(feature = "type_inference")]
@@ -1181,7 +1181,7 @@ impl RawTypeCollector for DebugTypeCollector {
         biome_module_graph::TYPE_NARROWING_ENABLED
     }
 
-    fn narrowing_invalidation_cache(&mut self) -> &mut FxHashMap<(JsSyntaxNode, Text), bool> {
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache {
         &mut self.narrowing_invalidation_cache
     }
 
