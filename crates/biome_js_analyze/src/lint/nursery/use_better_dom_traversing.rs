@@ -430,15 +430,15 @@ fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
     {
         return false;
     }
-    let Some(collection_name) = static_member
+    let Some(collection_token) = static_member
         .member()
         .ok()
         .and_then(|name| name.as_js_name().cloned())
         .and_then(|name| name.value_token().ok())
-        .map(|token| token.text_trimmed().to_string())
     else {
         return false;
     };
+    let collection_name = collection_token.text_trimmed();
     if collection_name != "children" && collection_name != "childNodes" {
         return false;
     }
@@ -451,10 +451,10 @@ fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
     let Some(index) = numeric_index(&outer) else {
         return false;
     };
-    match collection_name.as_str() {
-        "children" => true,
-        "childNodes" => index == 0.0,
-        _ => false,
+    if collection_name == "children" {
+        true
+    } else {
+        index == 0.0
     }
 }
 
