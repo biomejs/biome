@@ -4,6 +4,7 @@ var a = <span role="switch"></span>;
 var a = <span role="slider" aria-valuemin="0"></span>;
 var a = <span role="slider" aria-valuemax="100"></span>;
 var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
+var a = <span role="separator" tabIndex={0}></span>;
 var a = <span role="scrollbar" aria-valuemin="0"></span>;
 var a = <span role="scrollbar" aria-valuemax="100"></span>;
 var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;

@@ -22,10 +22,12 @@ expression: valid.html
 ></span>
 <span
 	role="separator"
+	tabindex="0"
 	aria-valuemax="100"
 	aria-valuemin="0"
 	aria-valuenow="50"
 ></span>
+<span role="separator"></span>
 <span
 	role="slider"
 	aria-valuemax="100"
@@ -43,6 +45,5 @@ expression: valid.html
 	aria-valuemin="0"
 	aria-valuenow="50"
 ></span>
-
 
 ```
