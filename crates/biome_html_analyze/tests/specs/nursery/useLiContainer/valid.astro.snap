@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<ul><><li>Item in a fragment</li></></ul>
+<ol><li /></ol>
+<menu><li>Action</li></menu>
+<Li />
+
+```

@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+function List({ items }: { items: string[] }) {
+    return <ul>{items.map(item => <li key={item}>{item}</li>)}</ul>;
+}
+
+```

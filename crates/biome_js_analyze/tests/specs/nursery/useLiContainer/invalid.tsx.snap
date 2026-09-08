@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+function Item({ label }: { label: string }) {
+    return <div><li>{label}</li><li /></div>;
+}
+
+```
+
+# Diagnostics
+```
+invalid.tsx:3:17 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function Item({ label }: { label: string }) {
+  > 3 │     return <div><li>{label}</li><li /></div>;
+      │                 ^^^^
+    4 │ }
+    5 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:3:33 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function Item({ label }: { label: string }) {
+  > 3 │     return <div><li>{label}</li><li /></div>;
+      │                                 ^^^^^^
+    4 │ }
+    5 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

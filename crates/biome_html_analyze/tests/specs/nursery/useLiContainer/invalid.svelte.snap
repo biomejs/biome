@@ -1,0 +1,98 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div><li /></div>
+<ul>{#if visible}<div><li>Indirect child</li></div>{/if}</ul>
+{#snippet item()}
+    <div><li>Item in a div</li><li /></div>
+{/snippet}
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:6 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div><li /></div>
+      │      ^^^^^^
+    3 │ <ul>{#if visible}<div><li>Indirect child</li></div>{/if}</ul>
+    4 │ {#snippet item()}
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:23 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div><li /></div>
+  > 3 │ <ul>{#if visible}<div><li>Indirect child</li></div>{/if}</ul>
+      │                       ^^^^
+    4 │ {#snippet item()}
+    5 │     <div><li>Item in a div</li><li /></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:10 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    3 │ <ul>{#if visible}<div><li>Indirect child</li></div>{/if}</ul>
+    4 │ {#snippet item()}
+  > 5 │     <div><li>Item in a div</li><li /></div>
+      │          ^^^^
+    6 │ {/snippet}
+    7 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:32 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    3 │ <ul>{#if visible}<div><li>Indirect child</li></div>{/if}</ul>
+    4 │ {#snippet item()}
+  > 5 │     <div><li>Item in a div</li><li /></div>
+      │                                ^^^^^^
+    6 │ {/snippet}
+    7 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

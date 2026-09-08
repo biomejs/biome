@@ -1,0 +1,52 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<div><li /></div>
+<ul><><div><li>Indirect child</li></div></></ul>
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:6 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div><li /></div>
+      │      ^^^^^^
+    3 │ <ul><><div><li>Indirect child</li></div></></ul>
+    4 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:3:12 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div><li /></div>
+  > 3 │ <ul><><div><li>Indirect child</li></div></></ul>
+      │            ^^^^
+    4 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+    <ul><li v-for="item in items" :key="item">{{ item }}</li></ul>
+    <ol><li /></ol>
+    <menu><li>Action</li></menu>
+    <Li />
+</template>
+
+```
