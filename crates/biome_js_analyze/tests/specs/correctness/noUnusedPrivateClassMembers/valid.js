@@ -203,3 +203,10 @@ class UsedPostUpdateExpr {
     return this.#val++;
   }
 }
+
+class UsedMember {
+	#usedInCompoundAssignment = 5;
+	method() {
+		this.#usedInCompoundAssignment += 42;
+	}
+}

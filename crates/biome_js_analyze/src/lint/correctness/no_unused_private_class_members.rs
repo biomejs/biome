@@ -12,8 +12,8 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
     AnyJsFormalParameter, AnyJsName, AnyJsObjectBindingPatternMember, JsAssignmentExpression,
-    JsClassDeclaration, JsObjectBindingPattern, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
-    TsAccessibilityModifier, TsPropertyParameter,
+    JsAssignmentOperator, JsClassDeclaration, JsObjectBindingPattern, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
@@ -65,6 +65,21 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Compound assignments read the current value and therefore count as usage:
+    ///
+    /// ```js
+    /// class UsedMember {
+    ///   #usedMember;
+    ///
+    ///   method() {
+    ///     this.#usedMember ??= getValue();
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// Unlike ESLint's rule, this rule considers a compound assignment to use the
+    /// member even when the assignment's result is discarded.
+    ///
     /// ## Caveats
     ///
     /// The rule currently considers that all TypeScript private members are used if it encounters a computed access.
@@ -84,7 +99,7 @@ declare_lint_rule! {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unused-private-class-members").same()],
+        sources: &[RuleSource::Eslint("no-unused-private-class-members").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -416,29 +431,14 @@ fn get_constructor_params(
         })
 }
 
-/// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
-/// This function inspects the syntax tree around the given `AnyJsName` to check whether it is involved in an assignment operation and whether that assignment can be write-only.
+/// Checks whether `js_name` is the target of a standalone plain assignment.
 ///
 /// # Returns
 ///
-/// - `Some(true)`: If the `js_name` is in a write-only assignment.
-/// - `Some(false)`: If the `js_name` is in a assignments that also reads like shorthand operators
-/// - `None`: If the parent is not present or grand parent is not a JsAssignmentExpression
-///
-/// # Examples of write only expressions
-///
-/// ```js
-/// this.usedOnlyInWrite = 2;
-/// this.usedOnlyInWrite = this.usedOnlyInWrite;
-/// ```
-///
-/// # Examples of expressions that are NOT write-only
-///
-/// ```js
-/// return this.#val++;   // increment expression used as return value
-/// return this.#val = 1; // assignment used as expression
-/// ```
-///
+/// - `Some(true)` if `js_name` is the target of a discarded `=` assignment.
+/// - `Some(false)` if the assignment result is consumed, the name is not the target,
+///   or a compound assignment reads the target's current value.
+/// - `None` if `js_name` is not inside an assignment expression.
 fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     let parent = js_name.syntax().parent()?;
     let grand_parent = parent.parent()?;
@@ -446,6 +446,10 @@ fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     let left = assignment_expression.left().ok()?;
 
     if !is_node_equal(left.syntax(), &parent) {
+        return Some(false);
+    }
+
+    if assignment_expression.operator().ok()? != JsAssignmentOperator::Assign {
         return Some(false);
     }
 

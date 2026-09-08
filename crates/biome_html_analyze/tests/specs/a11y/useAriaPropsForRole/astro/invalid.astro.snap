@@ -21,7 +21,6 @@ expression: invalid.astro
 	aria-valuemax="100"
 	aria-orientation="horizontal"
 ></span>
-<span role="separator"></span>
 <span role="slider" aria-valuemin="0"></span>
 <span role="slider" aria-valuemax="100"></span>
 <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
@@ -243,14 +242,14 @@ invalid.astro:13:2 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 ```
 invalid.astro:18:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the separator ARIA role does not have the required ARIA attributes.
+  × The element with the slider ARIA role does not have the required ARIA attributes.
   
     16 │ 	aria-orientation="horizontal"
     17 │ ></span>
-  > 18 │ <span role="separator"></span>
-       │       ^^^^^^^^^^^^^^^^
-    19 │ <span role="slider" aria-valuemin="0"></span>
-    20 │ <span role="slider" aria-valuemax="100"></span>
+  > 18 │ <span role="slider" aria-valuemin="0"></span>
+       │       ^^^^^^^^^^^^^
+    19 │ <span role="slider" aria-valuemax="100"></span>
+    20 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
   
   i Missing ARIA prop(s):
   
@@ -265,11 +264,11 @@ invalid.astro:19:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
     17 │ ></span>
-    18 │ <span role="separator"></span>
-  > 19 │ <span role="slider" aria-valuemin="0"></span>
+    18 │ <span role="slider" aria-valuemin="0"></span>
+  > 19 │ <span role="slider" aria-valuemax="100"></span>
        │       ^^^^^^^^^^^^^
-    20 │ <span role="slider" aria-valuemax="100"></span>
-    21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+    20 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+    21 │ <span role="switch"></span>
   
   i Missing ARIA prop(s):
   
@@ -283,12 +282,12 @@ invalid.astro:20:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
-    18 │ <span role="separator"></span>
-    19 │ <span role="slider" aria-valuemin="0"></span>
-  > 20 │ <span role="slider" aria-valuemax="100"></span>
+    18 │ <span role="slider" aria-valuemin="0"></span>
+    19 │ <span role="slider" aria-valuemax="100"></span>
+  > 20 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
        │       ^^^^^^^^^^^^^
-    21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
-    22 │ <span role="switch"></span>
+    21 │ <span role="switch"></span>
+    22 │ 
   
   i Missing ARIA prop(s):
   
@@ -300,32 +299,13 @@ invalid.astro:20:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 ```
 invalid.astro:21:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the slider ARIA role does not have the required ARIA attributes.
-  
-    19 │ <span role="slider" aria-valuemin="0"></span>
-    20 │ <span role="slider" aria-valuemax="100"></span>
-  > 21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
-       │       ^^^^^^^^^^^^^
-    22 │ <span role="switch"></span>
-    23 │ 
-  
-  i Missing ARIA prop(s):
-  
-  - aria-valuenow
-  
-
-```
-
-```
-invalid.astro:22:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   × The element with the switch ARIA role does not have the required ARIA attributes.
   
-    20 │ <span role="slider" aria-valuemax="100"></span>
-    21 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
-  > 22 │ <span role="switch"></span>
+    19 │ <span role="slider" aria-valuemax="100"></span>
+    20 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+  > 21 │ <span role="switch"></span>
        │       ^^^^^^^^^^^^^
-    23 │ 
+    22 │ 
   
   i Missing ARIA prop(s):
   

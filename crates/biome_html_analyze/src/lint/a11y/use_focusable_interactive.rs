@@ -68,7 +68,11 @@ impl Rule for UseFocusableInteractive {
                 let tabindex_attribute = node.find_attribute_or_vue_binding("tabindex");
                 let role_value = role_attribute.as_static_value()?;
                 let role = AriaRole::from_roles(role_value.text())?;
-                if role.is_interactive() && !role.is_composite() && tabindex_attribute.is_none() {
+                if role != AriaRole::Separator
+                    && role.is_interactive()
+                    && !role.is_composite()
+                    && tabindex_attribute.is_none()
+                {
                     return Some(());
                 }
             }

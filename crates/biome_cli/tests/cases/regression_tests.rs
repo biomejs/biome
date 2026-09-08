@@ -312,3 +312,65 @@ import { ButtonLink } from "other/components";
         result,
     ));
 }
+
+#[test]
+fn issue_6782() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["fragment.grit"],
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "fragment.grit".into(),
+        br#"`<$component $attrs>$children</$component>` as $fragment where {
+    $component <: `React.Fragment`,
+    register_diagnostic(span=$fragment, message=`Prefer importing <Fragment /> instead of relying on auto import ($component)`)
+}
+"#,
+    );
+
+    let js_file = Utf8Path::new("main.tsx");
+    fs.insert(
+        js_file.into(),
+        br#"const Component = () => {
+  return <React.Fragment>
+    <div>Hello</div>
+    <span>World</span>
+  </React.Fragment>
+}
+
+export default Component
+
+const keyed = <React.Fragment key="item"><span>Child</span></React.Fragment>;
+const empty = <React.Fragment></React.Fragment>;
+const other = <Other.Fragment><span>Child</span></Other.Fragment>;
+const suspense = <React.Suspense><span>Child</span></React.Suspense>;
+const imported = <Fragment><span>Child</span></Fragment>;
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_6782",
+        fs,
+        console,
+        result,
+    ));
+}

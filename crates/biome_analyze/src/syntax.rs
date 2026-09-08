@@ -167,6 +167,7 @@ mod tests {
                 _: ApplySuppression<Self::Language>,
                 _: &str,
                 _: &str,
+                _: &biome_rowan::TextRange,
             ) {
                 unreachable!("")
             }

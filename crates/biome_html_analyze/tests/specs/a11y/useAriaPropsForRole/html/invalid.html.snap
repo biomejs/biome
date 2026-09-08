@@ -21,7 +21,7 @@ expression: invalid.html
 	aria-valuemax="100"
 	aria-orientation="horizontal"
 ></span>
-<span role="separator"></span>
+<span role="separator" tabindex="0"></span>
 <span role="slider" aria-valuemin="0"></span>
 <span role="slider" aria-valuemax="100"></span>
 <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
@@ -247,7 +247,7 @@ invalid.html:18:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
   
     16 │ 	aria-orientation="horizontal"
     17 │ ></span>
-  > 18 │ <span role="separator"></span>
+  > 18 │ <span role="separator" tabindex="0"></span>
        │       ^^^^^^^^^^^^^^^^
     19 │ <span role="slider" aria-valuemin="0"></span>
     20 │ <span role="slider" aria-valuemax="100"></span>
@@ -265,7 +265,7 @@ invalid.html:19:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
     17 │ ></span>
-    18 │ <span role="separator"></span>
+    18 │ <span role="separator" tabindex="0"></span>
   > 19 │ <span role="slider" aria-valuemin="0"></span>
        │       ^^^^^^^^^^^^^
     20 │ <span role="slider" aria-valuemax="100"></span>
@@ -283,7 +283,7 @@ invalid.html:20:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
-    18 │ <span role="separator"></span>
+    18 │ <span role="separator" tabindex="0"></span>
     19 │ <span role="slider" aria-valuemin="0"></span>
   > 20 │ <span role="slider" aria-valuemax="100"></span>
        │       ^^^^^^^^^^^^^
