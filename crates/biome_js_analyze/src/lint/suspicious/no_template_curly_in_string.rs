@@ -40,6 +40,12 @@ declare_lint_rule! {
     /// const a = templateFunction`Hello ${name}`;
     /// ```
     ///
+    /// GitHub Actions expressions using double curly braces are also valid:
+    ///
+    /// ```js
+    /// const a = "${{ inputs.abc }}";
+    /// ```
+    ///
     pub NoTemplateCurlyInString {
         version: "1.9.3",
         name: "noTemplateCurlyInString",
@@ -61,15 +67,49 @@ impl Rule for NoTemplateCurlyInString {
         let token = node.value_token().ok()?;
         let text = token.text_trimmed();
 
-        let mut byte_iter = text.bytes().enumerate();
-        while let Some((i, byte)) = byte_iter.next() {
-            if byte == b'$'
-                && let Some((_, b'{')) = byte_iter.next()
-            {
-                for (j, inner_byte) in byte_iter.by_ref() {
-                    if inner_byte == b'}' {
-                        return Some((i as u32, (j + 1) as u32));
+        let mut iter = text.bytes().enumerate().peekable();
+
+        while let Some((i, byte)) = iter.next() {
+            if byte != b'$' {
+                continue;
+            }
+            if iter.next_if(|(_, b)| *b == b'{').is_none() {
+                continue;
+            }
+
+            // Check for GitHub Actions syntax: ${{ ... }}
+            if iter.next_if(|(_, b)| *b == b'{').is_some() {
+                // Scan for closing }} sequence, tracking first } position
+                let mut first_close_pos = None;
+                let mut prev_was_close = false;
+                let mut found_double_close = false;
+                for (j, b) in iter.by_ref() {
+                    if b == b'}' {
+                        if prev_was_close {
+                            // Found }}, valid GitHub Actions expression
+                            found_double_close = true;
+                            break;
+                        }
+                        first_close_pos.get_or_insert(j);
+                        prev_was_close = true;
+                    } else {
+                        prev_was_close = false;
                     }
+                }
+                if found_double_close {
+                    continue;
+                }
+                // No }} found - if we saw any }, flag as regular template
+                if let Some(j) = first_close_pos {
+                    return Some((i as u32, (j + 1) as u32));
+                }
+                return None;
+            }
+
+            // Regular ${...} pattern - find closing brace
+            for (j, inner_byte) in iter.by_ref() {
+                if inner_byte == b'}' {
+                    return Some((i as u32, (j + 1) as u32));
                 }
             }
         }
