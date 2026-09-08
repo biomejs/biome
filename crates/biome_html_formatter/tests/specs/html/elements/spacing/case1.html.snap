@@ -23,6 +23,7 @@ info: elements/spacing/case1.html
 ```html
 <div>
 	<div>foo</div>
+
 	text
 
 	<div>foo</div>

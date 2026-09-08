@@ -1,4 +1,4 @@
-use crate::lexer::HtmlLexer;
+use crate::lexer::{HtmlLexer, HtmlLexerOptions};
 use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -16,15 +16,14 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for lexing outside of tags.
     ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
     /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceded with a `<`.
-    #[default]
-    Regular,
+    Regular { framework: HtmlFramework },
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     ///
     /// This single context covers plain HTML as well as the Vue/Svelte/Astro
@@ -35,7 +34,10 @@ pub(crate) enum HtmlLexContext {
     /// expression (e.g. `Foo` / `Foo.Bar`), after the parser has already decided
     /// the name is a component. The tag-name token is always emitted as
     /// `HTML_COMPONENT_LITERAL`, and `.` is lexed as a token for member access.
-    /// When `svelte` is `true`, also recognizes `//` and `/* */` JS-style comments.
+    ///
+    /// `svelte` controls brace handling only. Whether `//` and `/* */` comments
+    /// are recognized follows [`HtmlLexerOptions::framework`], since Astro
+    /// accepts them too.
     InsideTagWithDirectives { svelte: bool },
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
@@ -180,10 +182,11 @@ pub(crate) enum HtmlEmbeddedLanguage {
     /// reproduce it byte for byte; splitting it into markup would lose the
     /// whitespace to trivia.
     Preformatted(PreformattedElement),
-    /// A top-level block of a Vue single-file component whose content is not
-    /// HTML: a custom block such as `<i18n>` or `<docs>`, or a `<template>`
-    /// written in another language. The tag name is arbitrary, so it is
-    /// carried as a range into the source rather than as a `&'static str`.
+    /// An element whose content is raw text because of how it was written
+    /// rather than because of its name: a custom block or non-HTML `<template>`
+    /// of a Vue single-file component, or an Astro element carrying `is:raw`.
+    /// The tag name is arbitrary, so it is carried as a range into the source
+    /// rather than as a `&'static str`.
     RawTextBlock {
         name: TextRange,
     },
@@ -222,7 +225,15 @@ impl HtmlEmbeddedLanguage {
 
 impl LexContext for HtmlLexContext {
     fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
+        matches!(self, Self::Regular { .. })
+    }
+}
+
+impl Default for HtmlLexContext {
+    fn default() -> Self {
+        Self::Regular {
+            framework: HtmlFramework::Plain,
+        }
     }
 }
 
@@ -230,14 +241,18 @@ impl LexContext for HtmlLexContext {
 pub(crate) enum HtmlReLexContext {
     /// Specialised relex that manages certain characters such as commas, etc.
     Svelte,
-    /// Relex tokens using `HtmlLexer::consume_html_text`
-    HtmlText,
+    /// Relex tokens using `HtmlLexer::consume_html_text`.
+    HtmlText { framework: HtmlFramework },
     /// Relex tokens as if the parser was inside a tag.
     InsideTag,
     /// Relex tokens as if the parser was inside a tag in an Astro file.
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current `{{` as a single `{`. Used where the file has
+    /// single text expressions, so `{{` opens an object literal rather than an
+    /// interpolation.
+    SingleCurly,
     /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
     /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
     /// speculatively parsed as a template but turned out to have no
@@ -249,13 +264,16 @@ pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind
 
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
-        let lexer = HtmlLexer::from_str(source);
-
+    pub fn from_str(
+        source: &'source str,
+        initial_context: HtmlLexContext,
+        options: HtmlLexerOptions,
+    ) -> Self {
+        let lexer = HtmlLexer::from_str(source).with_options(options);
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 
-        source.next_non_trivia_token(HtmlLexContext::Regular, true);
+        source.next_non_trivia_token(initial_context, true);
         source
     }
 
@@ -339,11 +357,11 @@ impl TokenSource for HtmlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(HtmlLexContext::Regular)
+        self.bump_with_context(HtmlLexContext::default())
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(HtmlLexContext::Regular)
+        self.skip_as_trivia_with_context(HtmlLexContext::default())
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {

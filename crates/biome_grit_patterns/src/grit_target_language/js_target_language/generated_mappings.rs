@@ -219,6 +219,7 @@ pub fn legacy_kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
 pub fn native_kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
     match node_name {
         // Native Biome AST patterns
+        "AstroImplicitFragment" => lang::AstroImplicitFragment::KIND_SET.iter().next(),
         "JsAccessorModifier" => lang::JsAccessorModifier::KIND_SET.iter().next(),
         "JsArrayAssignmentPattern" => lang::JsArrayAssignmentPattern::KIND_SET.iter().next(),
         "JsArrayAssignmentPatternElement" => lang::JsArrayAssignmentPatternElement::KIND_SET
@@ -612,6 +613,7 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
 /// Returns the native Biome slot mappings for a node name.
 pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] {
     match node_name {
+        "AstroImplicitFragment" => &[("children", 0)],
         "JsArrayAssignmentPattern" => &[("elements", 1)],
         "JsArrayAssignmentPatternElement" => &[("pattern", 0), ("init", 1)],
         "JsArrayAssignmentPatternRestElement" => &[("pattern", 1)],

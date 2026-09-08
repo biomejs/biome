@@ -10,7 +10,7 @@ use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
-use biome_service::workspace::db::DbState;
+use biome_service::db::DbState;
 use biome_service::workspace::{
     CloseProjectParams, GritSearchQuery, RageEntry, RageParams, RageResult, ServiceNotification,
 };

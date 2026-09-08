@@ -3,7 +3,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsExportNamedSpecifier, binding_ext::AnyJsIdentifierBinding,
+    AnyJsIdentifierReference, JsExportNamedSpecifier, binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_filenaming_convention::UseFilenamingConventionOptions;
@@ -262,7 +262,7 @@ impl Rule for UseFilenamingConvention {
                             Ok(id) => id.name_token().ok(),
                             Err(export) => match JsExportNamedSpecifier::cast(export.parent()?) {
                                 Some(specifier) => specifier.exported_name().ok()?.value().ok(),
-                                None => AnyJsIdentifierUsage::cast(export)?.value_token().ok(),
+                                None => AnyJsIdentifierReference::cast(export)?.value_token().ok(),
                             },
                         })
                         .all(|exported_name_token| exported_name_token.text_trimmed() != name)

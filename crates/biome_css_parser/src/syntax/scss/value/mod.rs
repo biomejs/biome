@@ -1,6 +1,7 @@
 mod any;
 mod function;
 mod interpolated_string;
+mod interpolated_url;
 mod interpolated_value;
 mod parent_selector;
 
@@ -24,6 +25,7 @@ pub(crate) use function::{
 pub(crate) use interpolated_string::{
     is_at_scss_interpolated_string, parse_scss_interpolated_string,
 };
+pub(crate) use interpolated_url::parse_scss_interpolated_url_value;
 pub(crate) use interpolated_value::{
     is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_value_head,
     is_at_scss_suffixed_interpolated_value, parse_scss_interpolated_function_or_value,

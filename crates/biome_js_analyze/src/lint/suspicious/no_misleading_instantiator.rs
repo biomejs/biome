@@ -71,59 +71,6 @@ pub enum RuleState {
     TypeAliasMisleadingConstructor(TextRange),
 }
 
-impl RuleState {
-    fn message(&self) -> MarkupBuf {
-        match self {
-            Self::ClassMisleadingNew(_) => (markup! {
-                "Don't use the "<Emphasis>"new"</Emphasis>" method in classes."
-            })
-            .to_owned(),
-            Self::InterfaceMisleadingNew(_) => (markup! {
-                "Don't use the "<Emphasis>"new"</Emphasis>" method in interfaces."
-            })
-            .to_owned(),
-            Self::InterfaceMisleadingConstructor(_) => (markup! {
-                "Don't use the "<Emphasis>"constructor"</Emphasis>" method in interfaces."
-            })
-            .to_owned(),
-            Self::TypeAliasMisleadingConstructor(_) => (markup! {
-                "Don't use the "<Emphasis>"constructor"</Emphasis>" method in type aliases."
-            })
-            .to_owned(),
-        }
-    }
-
-    fn note(&self) -> MarkupBuf {
-        match self {
-            Self::ClassMisleadingNew(_) => (markup! {
-                ""<Emphasis>"new"</Emphasis>" is typically used to instantiate objects. In classes, its usage can be misleading."
-            })
-            .to_owned(),
-            Self::InterfaceMisleadingNew(_) => (markup! {
-                ""<Emphasis>"new"</Emphasis>" in an interface suggests it's instantiable, which is incorrect. The returned type should different from the constructor's type."
-            })
-            .to_owned(),
-            Self::InterfaceMisleadingConstructor(_) => (markup! {
-                "Interfaces define a contract, not an implementation. Thus, including a "<Emphasis>"constructor"</Emphasis>"is not appropriate."
-            })
-            .to_owned(),
-            Self::TypeAliasMisleadingConstructor(_) => (markup! {
-                "Type aliases simply rename types. They don't execute code, so a "<Emphasis>"constructor"</Emphasis>"is misleading."
-            })
-            .to_owned(),
-        }
-    }
-
-    fn range(&self) -> &TextRange {
-        match self {
-            Self::ClassMisleadingNew(range)
-            | Self::InterfaceMisleadingNew(range)
-            | Self::InterfaceMisleadingConstructor(range)
-            | Self::TypeAliasMisleadingConstructor(range) => range,
-        }
-    }
-}
-
 impl Rule for NoMisleadingInstantiator {
     type Query = Ast<DeclarationQuery>;
     type State = RuleState;
@@ -243,4 +190,56 @@ fn extract_return_type_ident(reference_type: &TsReferenceType) -> Option<JsSynta
         .as_js_reference_identifier()?
         .value_token()
         .ok()
+}
+impl RuleState {
+    fn message(&self) -> MarkupBuf {
+        match self {
+            Self::ClassMisleadingNew(_) => (markup! {
+                "Don't use the "<Emphasis>"new"</Emphasis>" method in classes."
+            })
+            .to_owned(),
+            Self::InterfaceMisleadingNew(_) => (markup! {
+                "Don't use the "<Emphasis>"new"</Emphasis>" method in interfaces."
+            })
+            .to_owned(),
+            Self::InterfaceMisleadingConstructor(_) => (markup! {
+                "Don't use the "<Emphasis>"constructor"</Emphasis>" method in interfaces."
+            })
+            .to_owned(),
+            Self::TypeAliasMisleadingConstructor(_) => (markup! {
+                "Don't use the "<Emphasis>"constructor"</Emphasis>" method in type aliases."
+            })
+            .to_owned(),
+        }
+    }
+
+    fn note(&self) -> MarkupBuf {
+        match self {
+            Self::ClassMisleadingNew(_) => (markup! {
+                ""<Emphasis>"new"</Emphasis>" is typically used to instantiate objects. In classes, its usage can be misleading."
+            })
+            .to_owned(),
+            Self::InterfaceMisleadingNew(_) => (markup! {
+                ""<Emphasis>"new"</Emphasis>" in an interface suggests it's instantiable, which is incorrect. The returned type should different from the constructor's type."
+            })
+            .to_owned(),
+            Self::InterfaceMisleadingConstructor(_) => (markup! {
+                "Interfaces define a contract, not an implementation. Thus, including a "<Emphasis>"constructor"</Emphasis>"is not appropriate."
+            })
+            .to_owned(),
+            Self::TypeAliasMisleadingConstructor(_) => (markup! {
+                "Type aliases simply rename types. They don't execute code, so a "<Emphasis>"constructor"</Emphasis>"is misleading."
+            })
+            .to_owned(),
+        }
+    }
+
+    fn range(&self) -> &TextRange {
+        match self {
+            Self::ClassMisleadingNew(range)
+            | Self::InterfaceMisleadingNew(range)
+            | Self::InterfaceMisleadingConstructor(range)
+            | Self::TypeAliasMisleadingConstructor(range) => range,
+        }
+    }
 }

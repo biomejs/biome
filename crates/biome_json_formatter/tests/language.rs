@@ -7,7 +7,7 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
 use biome_languages::{DocumentFileSource, JsonFileSource};
 use biome_parser::AnyParse;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
@@ -35,12 +35,9 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = &settings.languages.json.formatter;
-        let options = Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
-            &BiomePath::new(""),
+        let path = BiomePath::new("");
+        let options = settings.format_options::<Self::ServiceLanguage>(
+            &settings.matching_override_indices(path.as_path()),
             file_source,
         );
         JsonFormatLanguage::new(options)

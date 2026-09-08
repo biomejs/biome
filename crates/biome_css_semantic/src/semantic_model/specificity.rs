@@ -4,6 +4,7 @@ use biome_css_syntax::{
     AnyCssCompoundSelector, AnyCssPseudoClass, AnyCssRelativeSelector, AnyCssSelector,
     AnyCssSimpleSelector, AnyCssSubSelector, CssComplexSelector, CssCompoundSelector,
     CssDeclarationOrRuleBlock, CssPseudoClassSelector, CssQualifiedRule,
+    ScssPartialCombinatorSelector,
 };
 
 use biome_rowan::{AstNodeList, AstSeparatedList, declare_node_union};
@@ -170,6 +171,15 @@ pub fn evaluate_complex_selector(selector: &CssComplexSelector) -> Specificity {
     left_specificity + right_specificity
 }
 
+pub fn evaluate_partial_combinator_selector(
+    selector: &ScssPartialCombinatorSelector,
+) -> Specificity {
+    selector
+        .left()
+        .as_ref()
+        .map_or(ZERO_SPECIFICITY, evaluate_any_selector)
+}
+
 pub fn evaluate_any_selector(selector: &AnyCssSelector) -> Specificity {
     match selector {
         AnyCssSelector::CssCompoundSelector(s) => evaluate_compound_selector(s),
@@ -179,6 +189,7 @@ pub fn evaluate_any_selector(selector: &AnyCssSelector) -> Specificity {
             // TODO: Implement this
             ZERO_SPECIFICITY
         }
+        AnyCssSelector::ScssPartialCombinatorSelector(s) => evaluate_partial_combinator_selector(s),
     }
 }
 
@@ -188,5 +199,8 @@ fn evaluate_any_relative_selector(selector: &AnyCssRelativeSelector) -> Specific
         AnyCssRelativeSelector::CssRelativeSelector(s) => s
             .selector()
             .map_or(ZERO_SPECIFICITY, |s| evaluate_any_selector(&s)),
+        AnyCssRelativeSelector::ScssPartialCombinatorSelector(s) => {
+            evaluate_partial_combinator_selector(s)
+        }
     }
 }

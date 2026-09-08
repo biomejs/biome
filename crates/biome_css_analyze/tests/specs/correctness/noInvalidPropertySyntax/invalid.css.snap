@@ -1,0 +1,240 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+@property --missing {
+  inherits: false;
+}
+
+@property --empty {
+  syntax: "";
+  inherits: false;
+}
+
+@property --expected-component {
+  syntax: "auto |";
+  inherits: false;
+}
+
+@property --expected-string {
+  syntax: color;
+  inherits: false;
+}
+
+@property --expected-pipe {
+  syntax: "auto none";
+  inherits: false;
+}
+
+@property --unsupported-type {
+  syntax: "<unknown>";
+  inherits: false;
+}
+
+@property --invalid-custom-identifier {
+  syntax: "initial";
+  inherits: false;
+}
+
+@property --invalid-universal {
+  syntax: "* | auto";
+  inherits: false;
+}
+
+@property --multiplied-transform-list {
+  syntax: "<transform-list>+";
+  inherits: false;
+}
+
+@property --unexpected-whitespace {
+  syntax: "< color>";
+  inherits: false;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:3:2 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property definition is missing a `syntax` descriptor.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ @property --missing {
+      │  ^^^^^^^^^^^^^^^^^^^^
+  > 4 │   inherits: false;
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ @property --empty {
+  
+  i Without a valid syntax descriptor, the browser does not register the custom property.
+  
+  i Add a syntax descriptor that describes the accepted values.
+  
+
+```
+
+```
+invalid.css:8:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property syntax cannot be empty.
+  
+     7 │ @property --empty {
+   > 8 │   syntax: "";
+       │            
+     9 │   inherits: false;
+    10 │ }
+  
+  i Add a syntax component, such as <length>, or use * to accept any value.
+  
+
+```
+
+```
+invalid.css:13:17 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property syntax component.
+  
+    12 │ @property --expected-component {
+  > 13 │   syntax: "auto |";
+       │                 ^
+    14 │   inherits: false;
+    15 │ }
+  
+  i Add a data type, such as <length>, or a custom identifier at this position.
+  
+
+```
+
+```
+invalid.css:18:11 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a string for the property syntax.
+  
+    17 │ @property --expected-string {
+  > 18 │   syntax: color;
+       │           ^^^^^
+    19 │   inherits: false;
+    20 │ }
+  
+
+```
+
+```
+invalid.css:23:17 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Separate property syntax components with |.
+  
+    22 │ @property --expected-pipe {
+  > 23 │   syntax: "auto none";
+       │                 ^^^^
+    24 │   inherits: false;
+    25 │ }
+  
+
+```
+
+```
+invalid.css:28:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a supported property syntax type.
+  
+    27 │ @property --unsupported-type {
+  > 28 │   syntax: "<unknown>";
+       │            ^^^^^^^^^
+    29 │   inherits: false;
+    30 │ }
+  
+  i Supported types:
+  
+  - <angle>
+  - <color>
+  - <custom-ident>
+  - <image>
+  - <integer>
+  - <length>
+  - <length-percentage>
+  - <number>
+  - <percentage>
+  - <resolution>
+  - <string>
+  - <time>
+  - <transform-function>
+  - <transform-list>
+  - <url>
+  
+
+```
+
+```
+invalid.css:33:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a custom identifier that isn't reserved.
+  
+    32 │ @property --invalid-custom-identifier {
+  > 33 │   syntax: "initial";
+       │            ^^^^^^^
+    34 │   inherits: false;
+    35 │ }
+  
+  i Reserved identifiers:
+  
+  - default
+  - inherit
+  - initial
+  - revert
+  - revert-layer
+  - unset
+  
+
+```
+
+```
+invalid.css:38:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The * can't appear with other syntax components.
+  
+    37 │ @property --invalid-universal {
+  > 38 │   syntax: "* | auto";
+       │            ^^^^^^^^
+    39 │   inherits: false;
+    40 │ }
+  
+  i Remove * or remove the other syntax components.
+  
+
+```
+
+```
+invalid.css:43:28 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Remove the multiplier after <transform-list>.
+  
+    42 │ @property --multiplied-transform-list {
+  > 43 │   syntax: "<transform-list>+";
+       │                            ^
+    44 │   inherits: false;
+    45 │ }
+  
+
+```
+
+```
+invalid.css:48:13 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Remove whitespace inside the type name or before the multiplier.
+  
+    47 │ @property --unexpected-whitespace {
+  > 48 │   syntax: "< color>";
+       │             ^
+    49 │   inherits: false;
+    50 │ }
+  
+
+```

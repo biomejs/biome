@@ -2,13 +2,22 @@ use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_markdown_formatter::{MdFormatLanguage, context::MarkdownFormatContext};
-use biome_markdown_parser::parse_markdown;
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown, parse_markdown_with_cache};
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_parser::AnyParse;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_rowan::NodeCache;
+use biome_service::settings::Settings;
 
 #[derive(Default)]
-pub struct MarkdownTestFormatLanguage {}
+pub struct MarkdownTestFormatLanguage {
+    gfm: bool,
+}
+
+impl MarkdownTestFormatLanguage {
+    pub fn gfm() -> Self {
+        Self { gfm: true }
+    }
+}
 
 impl TestFormatLanguage for MarkdownTestFormatLanguage {
     type ServiceLanguage = MarkdownLanguage;
@@ -16,7 +25,16 @@ impl TestFormatLanguage for MarkdownTestFormatLanguage {
     type FormatLanguage = MdFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        parse_markdown(text).into()
+        if self.gfm {
+            parse_markdown_with_cache(
+                text,
+                &mut NodeCache::default(),
+                MarkdownParserOptions::default().with_gfm(true),
+            )
+            .into()
+        } else {
+            parse_markdown(text, MarkdownParserOptions::default()).into()
+        }
     }
 
     fn to_format_language(
@@ -24,12 +42,9 @@ impl TestFormatLanguage for MarkdownTestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = &settings.languages.markdown.formatter;
-        let options = Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
-            &BiomePath::new(""),
+        let path = BiomePath::new("");
+        let options = settings.format_options::<Self::ServiceLanguage>(
+            &settings.matching_override_indices(path.as_path()),
             file_source,
         );
         MdFormatLanguage::new(options)

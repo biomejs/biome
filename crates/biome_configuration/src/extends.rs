@@ -36,7 +36,7 @@ impl Default for Extends {
 
 impl Deserializable for Extends {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

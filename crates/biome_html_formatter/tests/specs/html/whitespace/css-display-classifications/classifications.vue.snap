@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/css-display-classifications/classifications.vue
+---
+
+# Input
+
+```vue
+<template>
+  <marquee behavior="alternate">This text will bounce</marquee>
+  before<noscript>fallback text</noscript>after
+  before<video>fallback video text</video>after
+  before<audio>fallback audio text</audio>after
+  before<object>fallback object text</object>after
+</template>
+
+<template><marquee behavior="alternate"> This text will bounce </marquee>before<noscript>fallback text</noscript>after before<video>fallback video text</video>after before<audio>fallback audio text</audio>after before<object>fallback object text</object>after</template>
+
+```
+
+
+# Options
+
+```json
+{
+	"formatter": {
+		"lineWidth": 50
+	}
+}
+```
+
+# Formatted
+
+```vue
+<template>
+	<marquee behavior="alternate">
+		This text will bounce
+	</marquee>
+	before<noscript>fallback text</noscript>after
+	before<video>fallback video text</video>after
+	before<audio>fallback audio text</audio>after
+	before<object>fallback object text</object>after
+</template>
+
+<template
+	><marquee behavior="alternate">
+		This text will bounce
+	</marquee
+	>before<noscript>fallback text</noscript>after
+	before<video>fallback video text</video>after
+	before<audio>fallback audio text</audio>after
+	before<object>fallback object text</object
+	>after</template
+>
+
+```

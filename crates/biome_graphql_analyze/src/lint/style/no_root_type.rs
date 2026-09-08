@@ -131,7 +131,7 @@ fn check_name(
 
     for root_type in root_types {
         if root_type.to_lowercase_cow() == trimmed.to_lowercase_cow() {
-            return Some((trimmed, name.text_range()));
+            return Some((trimmed, name.text_trimmed_range()));
         }
     }
 

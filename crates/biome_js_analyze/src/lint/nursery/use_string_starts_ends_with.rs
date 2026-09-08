@@ -1020,9 +1020,7 @@ fn matches_length_minus_value(
         is_static_member_named(left, "length")?
             && is_node_equal(left_object.syntax(), object.syntax())
             && binary
-                .right()
-                .ok()
-                .is_some_and(|right| matches_length_expression(ctx, &right, value)),
+                .right().is_ok_and(|right| matches_length_expression(ctx, &right, value)),
     )
 }
 
@@ -1045,7 +1043,7 @@ fn matches_length_expression(
         return false;
     };
 
-    member.object().ok().is_some_and(|object| {
+    member.object().is_ok_and(|object| {
         is_static_member_named(member, "length") == Some(true)
             && ensure_expression_match(&object, value)
     })

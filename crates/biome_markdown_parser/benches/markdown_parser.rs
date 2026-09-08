@@ -79,7 +79,7 @@ fn bench_parser(criterion: &mut Criterion) {
 
         group.bench_with_input(BenchmarkId::new(&id, "uncached"), &code, |b, _| {
             b.iter(|| {
-                black_box(parse_markdown(code));
+                black_box(parse_markdown(code, MarkdownParserOptions::default()));
             })
         });
 

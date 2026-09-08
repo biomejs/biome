@@ -50,7 +50,7 @@ impl TypeInferenceQueryKind {
 /// Reason an analyzer-facing request widened to complete module tables.
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub(crate) enum TypeInferenceWholeModuleReason {
-    /// On-demand import resolution crossed its recursion-depth limit.
+    /// The requested import chain exhausted the on-demand traversal budget.
     ImportDepthLimit,
     /// Complete inference of one module required another module's complete tables.
     InternalDependency,

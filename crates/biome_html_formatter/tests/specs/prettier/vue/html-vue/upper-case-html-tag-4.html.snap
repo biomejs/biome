@@ -25,18 +25,14 @@ info: vue/html-vue/upper-case-html-tag-4.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,8 @@
+@@ -1,6 +1,6 @@
  <html>
    <body>
 -    <div v-if="foo === 'foo'"></div>
 +    <div v-if="foo ===    'foo'"></div>
      <script>
--      new Vue({ el: "#app" });
--    </script>
-+  new Vue({el: '#app'})
-+      </script>
-   </body>
- </html>
+       new Vue({ el: "#app" });
+     </script>
 ```
 
 # Output
@@ -46,8 +42,8 @@ info: vue/html-vue/upper-case-html-tag-4.html
   <body>
     <div v-if="foo ===    'foo'"></div>
     <script>
-  new Vue({el: '#app'})
-      </script>
+      new Vue({ el: "#app" });
+    </script>
   </body>
 </html>
 ```

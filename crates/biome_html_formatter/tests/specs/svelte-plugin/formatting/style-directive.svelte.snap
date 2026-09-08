@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/style-directive.svelte
+---
+
+# Input
+
+```svelte
+<div style:background=green></div>
+<div style:background="{color}"></div>
+<div style:background='prefix{color}suffix'></div>
+<div style:background={background}></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <div style:background="green"></div>
+-<div style:background={color}></div>
+-<div style:background="prefix{color}suffix"></div>
+-<div style:background></div>
++<div style:background="{color}"></div>
++<div style:background='prefix{color}suffix'></div>
++<div style:background={background}></div>
+```
+
+# Output
+
+```svelte
+<div style:background="green"></div>
+<div style:background="{color}"></div>
+<div style:background='prefix{color}suffix'></div>
+<div style:background={background}></div>
+```

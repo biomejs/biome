@@ -37,21 +37,32 @@ info: vue/indent/inside-template.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -7,12 +7,12 @@
-     div {
-         background: #00abc9;
-     }
--  </style>
-+    </style>
+@@ -1,17 +1,17 @@
+ <template>
+   <style>
+-        br {
+-            background: #00abc9;
+-        }
++  br {
++    background: #00abc9;
++  }
+ 
+-    div {
+-        background: #00abc9;
+-    }
++  div {
++    background: #00abc9;
++  }
+   </style>
  
    <script>
-         console.log('hello');
-     console.log('hello');
--  </script>
-+    </script>
+-        console.log('hello');
+-    console.log('hello');
++  console.log("hello");
++  console.log("hello");
+   </script>
  
    <br />
-   <footer>
 ```
 
 # Output
@@ -59,19 +70,19 @@ info: vue/indent/inside-template.vue
 ```vue
 <template>
   <style>
-        br {
-            background: #00abc9;
-        }
+  br {
+    background: #00abc9;
+  }
 
-    div {
-        background: #00abc9;
-    }
-    </style>
+  div {
+    background: #00abc9;
+  }
+  </style>
 
   <script>
-        console.log('hello');
-    console.log('hello');
-    </script>
+  console.log("hello");
+  console.log("hello");
+  </script>
 
   <br />
   <footer>

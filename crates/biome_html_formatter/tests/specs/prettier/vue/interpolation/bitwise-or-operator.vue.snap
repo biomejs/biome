@@ -28,27 +28,25 @@ info: vue/interpolation/bitwise-or-operator.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,16 +1,11 @@
- <template>
+@@ -2,15 +2,12 @@
    <div>
--    {{
--      fn(
+     {{
+       fn(
 -        bitwise |
 -          or |
 -          operator |
 -          a_long_long_long_long_long_long_long_long_long_long_variable,
-+    {{ fn(
 +        bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
        )
 -        | filter1
 -        | filter2
 -        | filter3
 -        | filter4
--    }}
 +      | filter1
 +      | filter2
 +      | filter3
-+      | filter4 }}
++      | filter4
+     }}
    </div>
  </template>
 ```
@@ -58,18 +56,20 @@ info: vue/interpolation/bitwise-or-operator.vue
 ```vue
 <template>
   <div>
-    {{ fn(
+    {{
+      fn(
         bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
       )
       | filter1
       | filter2
       | filter3
-      | filter4 }}
+      | filter4
+    }}
   </div>
 </template>
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-    4:         bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
+    5:         bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
 ```

@@ -1,0 +1,82 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/inline-element-break-long-nonewline.svelte
+---
+
+# Input
+
+```svelte
+<span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span> <span>hi</span><div><span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span><span>hi</span> <span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span></div> <span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,7 +2,9 @@
+     ><span>looooooooooong</span
+     >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+         ><span>hi</span><span>hi</span></span
+-    ></span> <span>hi</span>
++    ></span
++>
++<span>hi</span>
+ <div>
+     <span
+         ><span>looooooooooong</span
+@@ -14,10 +16,12 @@
+         ><span>looooooooooong</span
+         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+             ><span>hi</span><span>hi</span></span
+-        ></span>
++        ></span
++    >
+ </div>
+ <span
+     ><span>looooooooooong</span
+     >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+         ><span>hi</span><span>hi</span></span
+-    ></span>
++    ></span
++>
+```
+
+# Output
+
+```svelte
+<span
+    ><span>looooooooooong</span
+    >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+        ><span>hi</span><span>hi</span></span
+    ></span
+>
+<span>hi</span>
+<div>
+    <span
+        ><span>looooooooooong</span
+        >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+            ><span>hi</span><span>hi</span></span
+        ></span
+    ><span>hi</span>
+    <span
+        ><span>looooooooooong</span
+        >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+            ><span>hi</span><span>hi</span></span
+        ></span
+    >
+</div>
+<span
+    ><span>looooooooooong</span
+    >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+        ><span>hi</span><span>hi</span></span
+    ></span
+>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   11:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+   17:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+```

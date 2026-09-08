@@ -97,6 +97,38 @@ impl ThemeNamespace {
     }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum VariantKind {
+    Static,
+    Functional,
+    Compound,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum VariantCompare {
+    Default,
+    BreakpointAsc,
+    BreakpointDesc,
+    ContainerAsc,
+    ContainerDesc,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct VariantEntry {
+    pub kind: VariantKind,
+    pub order: u16,
+    pub compare: VariantCompare,
+    /// Tailwind's `Compounds` bitflags for what this variant emits:
+    /// `1` = at-rules (media / container queries), `2` = style rules
+    /// (selectors), `0` = neither.
+    pub compounds: u8,
+    /// The `Compounds` bitflags a compound variant (`group-*`, `has-*`)
+    /// accepts as its nested variant; `0` for non-compound variants.
+    pub compounds_with: u8,
+}
+
 #[derive(Copy, Clone)]
 pub struct UtilityEntry {
     /// Index into `SIGNATURE_POOL` — the ascending property-order
@@ -110,9 +142,22 @@ pub struct UtilityEntry {
     pub has_negative: bool,
 }
 
+/// The `/modifier` a named branch accepts. A color branch takes an opacity
+/// modifier (`bg-red-500/50`); a font-size branch takes a line-height
+/// modifier (`text-lg/8`, `text-lg/loose`); every other branch takes none,
+/// so a modifier makes the candidate invalid (`w-1/foo`, `p-4/2`).
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum ModifierKind {
+    None,
+    Opacity,
+    LineHeight,
+}
+
 // Named-path dispatch branches inside a functional utility's compileFn.
-// The trailing `(u16, u8)` payload on every variant is the placement:
-// a `SIGNATURE_POOL` index and the declaration count.
+// After the branch discriminant each variant carries a `ModifierKind` (the
+// `/modifier` it accepts) then the `(u16, u8)` placement: a `SIGNATURE_POOL`
+// index and the declaration count.
 //
 // - Theme:    theme-namespace lookup (`text-lg` ↔ `--text-lg`).
 // - Keyword:  hardcoded keyword set baked into the compileFn
@@ -122,9 +167,9 @@ pub struct UtilityEntry {
 //             `from-25%` Percentage, `w-1/2` Ratio).
 #[derive(Copy, Clone)]
 pub enum NamedBranch {
-    Theme(ThemeNamespace, u16, u8),
-    Keyword(u16, u16, u8),
-    Typed(NamedValueType, u16, u8),
+    Theme(ThemeNamespace, ModifierKind, u16, u8),
+    Keyword(u16, ModifierKind, u16, u8),
+    Typed(NamedValueType, ModifierKind, u16, u8),
 }
 
 // Arbitrary-path dispatch branches inside a functional utility's compileFn.
@@ -138,8 +183,8 @@ pub enum NamedBranch {
 //              → `padding`). Resolved after every `Typed` branch.
 #[derive(Copy, Clone)]
 pub enum ArbitraryBranch {
-    Typed(CssDataType, u16, u8),
-    Fallback(u16, u8),
+    Typed(CssDataType, ModifierKind, u16, u8),
+    Fallback(ModifierKind, u16, u8),
 }
 
 #[derive(Copy, Clone)]
@@ -150,6 +195,14 @@ pub struct FunctionalEntry {
     /// a value (`border`, `ring`, `shadow` have defaults; `w` does
     /// not), as a (`SIGNATURE_POOL` index, declaration count) pair.
     pub bare: Option<(u16, u8)>,
+    /// Placements of the bare basename with a modifier, split by
+    /// modifier shape because the compiled declarations differ:
+    /// a numeric or bracketed modifier (`shadow/50` adds an opacity
+    /// declaration) versus a bare-word modifier (`@container/sidebar`
+    /// names the container). `None` when the modifier invalidates the
+    /// candidate, which is the case for almost every utility.
+    pub bare_opacity: Option<(u16, u8)>,
+    pub bare_name: Option<(u16, u8)>,
     pub negative: Option<Negative>,
 }
 

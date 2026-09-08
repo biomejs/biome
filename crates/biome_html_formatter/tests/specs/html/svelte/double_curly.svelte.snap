@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/double_curly.svelte
+---
+
+# Input
+
+```svelte
+{{ a: true }}
+<p>{{ a: true }}</p>
+<p>{JSON.stringify({ foo: "bar" })}</p>
+<div class={{ active: isActive }}></div>
+
+<p>{   { a: true }    }</p>
+<p>{JSON.stringify(  { foo: "bar" }  )}</p>
+<div class={   {  active: isActive }   }></div>
+
+```
+
+
+# Formatted
+
+```svelte
+{{ a: true }}
+<p>{{ a: true }}</p>
+<p>{JSON.stringify({ foo: "bar" })}</p>
+<div class={{ active: isActive }}></div>
+
+<p>{{ a: true }}</p>
+<p>{JSON.stringify(  { foo: "bar" }  )}</p>
+<div class={{  active: isActive }}></div>
+
+```

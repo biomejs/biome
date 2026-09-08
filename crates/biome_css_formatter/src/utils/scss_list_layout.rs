@@ -351,7 +351,7 @@ fn has_list_shape(elements: &ScssListExpressionElementList) -> bool {
 
 /// Checks whether `"save" 50px` has multiple values.
 fn is_compound_list_element(element: &ScssListExpressionElement) -> bool {
-    element.value().ok().is_some_and(|value| {
+    element.value().is_ok_and(|value| {
         value
             .as_scss_expression()
             .is_some_and(|expression| expression.items().len() > 1)
@@ -408,7 +408,7 @@ fn is_list_owned_by_parentheses(
     parenthesized: &ScssParenthesizedExpression,
     node: &ScssListExpression,
 ) -> bool {
-    parenthesized.expression().ok().is_some_and(|expression| {
+    parenthesized.expression().is_ok_and(|expression| {
         expression
             .as_scss_list_expression()
             .is_some_and(|list| list == node)

@@ -130,9 +130,9 @@ impl Properties {
         fn parse_code_point(input: &str) -> Result<char> {
             char::from_u32(
                 u32::from_str_radix(input, 16)
-                    .with_context(|| format!("unable to parse `{}` as a code point", &input))?,
+                    .with_context(|| format!("unable to parse `{}` as a code point", input))?,
             )
-            .ok_or_else(|| anyhow::anyhow!("invalid char `{}`", &input))
+            .ok_or_else(|| anyhow::anyhow!("invalid char `{}`", input))
         }
 
         self.raw

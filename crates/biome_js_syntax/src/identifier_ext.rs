@@ -8,10 +8,10 @@ use biome_rowan::{
 };
 
 declare_node_union! {
-    pub AnyJsIdentifierUsage = JsReferenceIdentifier | JsIdentifierAssignment | JsxReferenceIdentifier
+    pub AnyJsIdentifierReference = JsReferenceIdentifier | JsIdentifierAssignment | JsxReferenceIdentifier
 }
 
-impl AnyJsIdentifierUsage {
+impl AnyJsIdentifierReference {
     pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
             Self::JsReferenceIdentifier(node) => node.value_token(),
@@ -40,7 +40,7 @@ impl AnyJsIdentifierUsage {
     }
 }
 
-pub enum IdentifierUsageKind {
+pub enum IdentifierReferenceKind {
     TypeValue,
     Type,
     Value,

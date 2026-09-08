@@ -14,8 +14,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -37,9 +38,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..4
+0: MD_ROOT@0..4
   0: (empty)
-  1: MD_BLOCK_LIST@0..4
+  1: (empty)
+  2: MD_BLOCK_LIST@0..4
     0: MD_FENCED_CODE_BLOCK@0..4
       0: MD_INDENT_TOKEN_LIST@0..0
       1: TRIPLE_BACKTICK@0..3 "```" [] []
@@ -49,6 +51,6 @@ MdDocument {
           0: MD_CODE_LITERAL@3..4 "\n" [] []
       4: MD_INDENT_TOKEN_LIST@4..4
       5: (empty)
-  2: EOF@4..4 "" [] []
+  3: EOF@4..4 "" [] []
 
 ```

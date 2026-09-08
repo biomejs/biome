@@ -89,7 +89,7 @@ impl VcsConfiguration {
 impl DeserializableValidator for VcsConfiguration {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {

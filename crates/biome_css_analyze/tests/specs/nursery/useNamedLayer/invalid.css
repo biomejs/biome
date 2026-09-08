@@ -1,0 +1,8 @@
+/* should generate diagnostics */
+@import url(foo.css) layer;
+
+@layer {
+	.test {
+		color: red;
+	}
+}

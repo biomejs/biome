@@ -90,9 +90,45 @@ mod platform {
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+mod platform {
+    use std::cell::Cell;
+    use std::marker::PhantomData;
+
+    /// Fallback for targets without native TLS, i.e. `wasm32-unknown-unknown`,
+    /// which only ever runs on a single thread.
+    pub(super) struct Key<T> {
+        inner: Cell<*mut T>,
+        _phantom: PhantomData<fn() -> T>,
+    }
+
+    // SAFETY: this fallback is only compiled for single-threaded targets, so
+    // the cell can never actually be accessed from more than one thread.
+    unsafe impl<T> Send for Key<T> {}
+    unsafe impl<T> Sync for Key<T> {}
+
+    impl<T> Key<T> {
+        pub(super) unsafe fn new() -> Self {
+            Self {
+                inner: Cell::new(std::ptr::null_mut()),
+                _phantom: PhantomData,
+            }
+        }
+
+        pub(super) unsafe fn get(&self) -> *mut T {
+            self.inner.get()
+        }
+
+        pub(super) unsafe fn set(&self, value: *mut T) {
+            self.inner.set(value);
+        }
+    }
+}
+
 /// Thread-local storage.
 /// It uses [`Fiber Local Storage`](https://learn.microsoft.com/en-us/windows/win32/procthread/fibers#fiber-local-storage) on Windows,
-/// or [`pthread_setspecific(3)`](https://linux.die.net/man/3/pthread_setspecific) on Unix.
+/// [`pthread_setspecific(3)`](https://linux.die.net/man/3/pthread_setspecific) on Unix,
+/// or a plain [`Cell`](std::cell::Cell) on single-threaded targets such as WASM.
 /// Note that the inner value is not dropped on thread exit to avoid double-free after another
 /// [`std::thread_local`] is dropped.
 pub(crate) struct ThreadLocalCell<T> {

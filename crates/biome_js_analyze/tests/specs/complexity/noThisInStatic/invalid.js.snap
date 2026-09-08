@@ -68,7 +68,7 @@ invalid.js:2:14 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
      1  1 │   export default class B extends A {
      2    │ - ····static·{·this.CONSTANT·+=·super.foo();·}
@@ -92,7 +92,7 @@ invalid.js:2:31 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i super refers to a parent class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
      1  1 │   export default class B extends A {
      2    │ - ····static·{·this.CONSTANT·+=·super.foo();·}
@@ -116,7 +116,7 @@ invalid.js:8:19 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
      6  6 │   
      7  7 │       static get property() {
@@ -142,7 +142,7 @@ invalid.js:9:26 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i super refers to a parent class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
      7  7 │       static get property() {
      8  8 │           /*before*/this/*after*/;
@@ -167,7 +167,7 @@ invalid.js:13:15 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     11 11 │   
     12 12 │       static set property(x) {
@@ -193,7 +193,7 @@ invalid.js:14:15 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i super refers to a parent class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     12 12 │       static set property(x) {
     13 13 │           () => this;
@@ -218,7 +218,7 @@ invalid.js:18:16 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     16 16 │   
     17 17 │       static method() {
@@ -243,7 +243,7 @@ invalid.js:18:32 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i super refers to a parent class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     16 16 │   
     17 17 │       static method() {
@@ -269,7 +269,7 @@ invalid.js:24:16 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     22 22 │   class C extends A {
     23 23 │       static method() {
@@ -295,7 +295,7 @@ invalid.js:24:32 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i super refers to a parent class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     22 22 │   class C extends A {
     23 23 │       static method() {
@@ -321,7 +321,7 @@ invalid.js:30:16 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     28 28 │   const D = class D extends f() {
     29 29 │       static method() {
@@ -398,7 +398,7 @@ invalid.js:43:18 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     41 41 │   class FactoryCases {
     42 42 │       static method() {
@@ -424,7 +424,7 @@ invalid.js:44:17 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     42 42 │       static method() {
     43 43 │           new this(this);
@@ -450,7 +450,7 @@ invalid.js:45:13 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━�
   
   i this refers to the class.
   
-  i Safe fix: Use the class name instead.
+  i Unsafe fix: Use the class name instead.
   
     43 43 │           new this(this);
     44 44 │           new Foo(this);

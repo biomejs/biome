@@ -1,10 +1,35 @@
 use crate::assert_semantics;
+use crate::{SemanticFlavor, SemanticModelOptions, semantic_model};
+use biome_js_parser::JsParserOptions;
+use biome_js_syntax::{AnyJsIdentifierReference, JsIdentifierAssignment};
+use biome_languages::JsFileSource;
+use biome_rowan::AstNode;
 
 // Reads
 
 assert_semantics! {
     ok_reference_read_global,
         "let a/*#A*/ = 1; let b = a/*READ A*/ + 1;",
+
+    ok_reference_read_escaped_binding,
+        r#"let \u0065/*#E*/ = 1; e/*READ E*/;"#,
+
+    ok_reference_read_escaped_reference,
+        r#"let e/*#E*/ = 1; \u{65}/*READ E*/;"#,
+
+    ok_reference_read_equivalent_escape_forms,
+        r#"let \u0065/*#E*/ = 1; \u{65}/*READ E*/;"#,
+
+    ok_reference_does_not_normalize_unicode,
+        r#"let \u00e9/*#PRECOMPOSED*/ = 1;
+        let e\u0301/*#DECOMPOSED*/ = 2;
+        console.log(\u{e9}/*READ PRECOMPOSED*/, e\u{301}/*READ DECOMPOSED*/);"#,
+
+    ok_reference_read_astral_escape,
+        r#"let \u{10400}/*#LETTER*/ = 1; \u{010400}/*READ LETTER*/;"#,
+
+    ok_reference_read_join_control_escape,
+        r#"let a\u200c/*#JOINED*/ = 1; a\u{200c}/*READ JOINED*/;"#,
 
     ok_reference_read_inner_scope,
         r#"function f(a/*#A1*/) {
@@ -32,6 +57,156 @@ f(1);"#,
         console.log(5, a/*READ A1*/);",
     ok_reference_recursive,
         "const fn/*#A*/ = (callback) => { callback(fn/*READ A*/) };",
+}
+
+#[test]
+fn classifies_global_and_unresolved_references() {
+    let parse = biome_js_parser::parse(
+        "configured; missing;",
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let mut options = SemanticModelOptions::default();
+    options.globals.insert("configured".into());
+    let model = semantic_model(&parse.tree(), options);
+    let mut references = parse
+        .syntax()
+        .descendants()
+        .filter_map(AnyJsIdentifierReference::cast);
+    let configured = references.next().expect("configured reference");
+    let missing = references.next().expect("unresolved reference");
+
+    assert!(model.is_global_reference(&configured));
+    assert!(!model.is_unresolved_reference(&configured));
+    assert!(model.is_unresolved_reference(&missing));
+    assert!(!model.is_global_reference(&missing));
+}
+
+#[test]
+fn escaped_identifier_scope_lookup_uses_decoded_name() {
+    let parse = biome_js_parser::parse(
+        r#"let \u0065 = 1;"#,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), SemanticModelOptions::default());
+    let scope = model.global_scope();
+
+    assert!(scope.get_binding("e").is_some());
+    assert!(scope.get_binding(r#"\u{65}"#).is_some());
+    assert!(scope.get_binding_reference("e").is_some());
+    assert!(scope.get_binding_reference(r#"\u0065"#).is_some());
+}
+
+#[test]
+fn escaped_identifier_resolves_configured_global() {
+    let parse = biome_js_parser::parse(
+        r#"\u0065;"#,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let mut options = SemanticModelOptions::default();
+    options.globals.insert("e".into());
+    let model = semantic_model(&parse.tree(), options);
+
+    assert_eq!(model.all_unresolved_references().count(), 0);
+    assert_eq!(model.all_global_references().count(), 1);
+}
+
+#[test]
+fn escaped_configured_global_uses_decoded_name() {
+    let parse = biome_js_parser::parse("e;", JsFileSource::js_module(), JsParserOptions::default());
+    let mut options = SemanticModelOptions::default();
+    options.globals.insert(r#"\u0065"#.into());
+    let model = semantic_model(&parse.tree(), options);
+
+    assert_eq!(model.all_unresolved_references().count(), 0);
+    assert_eq!(model.all_global_references().count(), 1);
+}
+
+#[test]
+fn escaped_identifier_overloads_share_one_name() {
+    let parse = biome_js_parser::parse(
+        r#"function \u0066(value: number): number;
+        function f(value: string): string;
+        function \u{66}(value: number | string): number | string { return value; }"#,
+        JsFileSource::ts(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), SemanticModelOptions::default());
+    let scope = model.global_scope();
+
+    assert!(scope.get_binding_reference("f").is_some());
+    let overload_sets = scope.overload_sets();
+    assert_eq!(overload_sets.len(), 1);
+    assert_eq!(overload_sets[0].len(), 3);
+}
+
+fn svelte_options() -> SemanticModelOptions {
+    SemanticModelOptions {
+        flavor: SemanticFlavor::Svelte,
+        ..SemanticModelOptions::default()
+    }
+}
+
+#[test]
+fn svelte_store_dereference_with_escape() {
+    let parse = biome_js_parser::parse(
+        r#"const store = 1; $st\u006fre;"#,
+        JsFileSource::ts(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), svelte_options());
+
+    assert_eq!(model.all_unresolved_references().count(), 0);
+}
+
+#[test]
+fn svelte_store_binding_with_escape() {
+    let parse = biome_js_parser::parse(
+        r#"const st\u006fre = 1; $store;"#,
+        JsFileSource::ts(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), svelte_options());
+
+    assert_eq!(model.all_unresolved_references().count(), 0);
+}
+
+#[test]
+fn escaped_svelte_rune_is_not_a_store_dereference() {
+    let parse = biome_js_parser::parse(
+        r#"const state = 1; $st\u0061te;"#,
+        JsFileSource::ts(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), svelte_options());
+
+    assert_eq!(model.all_unresolved_references().count(), 1);
+}
+
+#[test]
+fn svelte_store_assignment_with_escaped_dollar_is_not_a_binding_write() {
+    let parse = biome_js_parser::parse(
+        r#"const store = 1; \u0024store = 2;"#,
+        JsFileSource::ts(),
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parse.tree(), svelte_options());
+
+    let store_binding = model
+        .global_scope()
+        .get_binding("store")
+        .expect("expected store binding");
+    assert_eq!(store_binding.all_writes().count(), 0);
+    assert_eq!(store_binding.all_reads().count(), 1);
+
+    let assignment = parse
+        .syntax()
+        .descendants()
+        .find_map(JsIdentifierAssignment::cast)
+        .expect("expected an assignment");
+    assert!(model.binding(&assignment).is_none());
 }
 
 // Read Hoisting
@@ -112,6 +287,8 @@ console.log(a/*READ A2*/);",
 
 assert_semantics! {
     ok_reference_write_global, "let a/*#A*/; a/*WRITE A*/ = 1;",
+    ok_reference_write_escaped_reference,
+        r#"let e/*#E*/; \u0065/*WRITE E*/ = 1;"#,
     ok_reference_write_inner_scope, r#"function f(a/*#A1*/) {
     a/*WRITE A1*/ = 1;
     console.log(a);
@@ -246,4 +423,10 @@ assert_semantics! {
         "function f (a/*#A1*/, b: (a/*#A2*/) => any) { return b(a/*READ A1*/); };",
     ok_typescript_type_parameter_name,
         "type A = { [key/*#A1*/ in P]: key/*READ A1*/ }",
+    ok_typescript_escaped_type_name,
+        r#"type \u0054/*#T*/ = string; let value: T/*READ T*/;"#,
+    ok_typescript_escaped_infer_name,
+        r#"type Element<T> = T extends Array<infer \u0055/*#U*/> ? U/*READ U*/ : never;"#,
+    ok_typescript_escaped_enum_member_name,
+        r#"enum E { \u0041/*#A*/ = 1, B = A/*READ A*/ }"#,
 }

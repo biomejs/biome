@@ -1,10 +1,10 @@
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext};
 use biome_analyze::{RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
-use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
+use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{JsSyntaxKind, TextRange};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_redeclare::NoRedeclareOptions;
@@ -81,16 +81,26 @@ pub struct Redeclaration {
 }
 
 impl Rule for NoRedeclare {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierBinding>;
     type State = Redeclaration;
     type Signals = Box<[Redeclaration]>;
     type Options = NoRedeclareOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut redeclarations = Vec::default();
-        for scope in ctx.query().scopes() {
-            check_redeclarations_in_single_scope(&scope, &mut redeclarations);
+        let model = ctx.model();
+        let binding = model.as_binding(ctx.query());
+        let scope = model
+            .scope_hoisted_to(&binding.syntax())
+            .unwrap_or_else(|| binding.scope());
+        if scope
+            .bindings()
+            .next()
+            .is_none_or(|first| first.syntax() != binding.syntax())
+        {
+            return Box::default();
         }
+        let mut redeclarations = Vec::default();
+        check_redeclarations_in_single_scope(&scope, &mut redeclarations);
         redeclarations.into_boxed_slice()
     }
 

@@ -1,6 +1,6 @@
 use super::*;
-use biome_js_syntax::TextRange;
-use biome_rowan::TokenText;
+use biome_js_syntax::{TextRange, unescape_js_identifier};
+use biome_rowan::Text;
 use rustc_hash::FxHashMap;
 use smallvec::SmallVec;
 use std::sync::Arc;
@@ -17,11 +17,11 @@ pub(crate) struct SemanticModelScopeData {
     pub(crate) bindings: Vec<BindingId>,
     // Map pointing to the [bindings] vec of each bindings by its name,
     // tracking the Type/Value/Namespace distinction for TypeScript declaration merging
-    pub(crate) bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
+    pub(crate) bindings_by_name: FxHashMap<Text, TsBindingReference>,
     // Same-name `function` / `declare function` declarations hoisted to this scope,
     // in source order, keyed by name. Tracked separately from `bindings_by_name` so
     // overload sets survive declaration merging with a same-name type/namespace.
-    pub(crate) overloads_by_name: FxHashMap<TokenText, SmallVec<[BindingId; 2]>>,
+    pub(crate) overloads_by_name: FxHashMap<Text, SmallVec<[BindingId; 2]>>,
     // All read references of a scope
     pub(crate) read_references: Vec<ReferenceId>,
     // All write references of a scope
@@ -107,16 +107,16 @@ impl Scope {
         }
     }
 
-    /// Returns a [Binding] by its name, like it appears on code.  It **does
-    /// not** returns bindings of parent scopes.
+    /// Returns a [Binding] by its identifier name. Unicode escapes in `name`
+    /// are decoded before lookup. It **does not** return bindings of parent scopes.
     ///
     /// When a name has both a type and value binding (e.g., a class), this
     /// returns the value binding (or the type binding if only a type exists).
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<Binding> {
         let data = &self.data.scopes[self.id.index()];
 
-        let name = name.as_ref();
-        let binding_ref = data.bindings_by_name.get(name)?;
+        let name = unescape_js_identifier(name.as_ref());
+        let binding_ref = data.bindings_by_name.get(name.as_ref())?;
         let id = binding_ref.value_ty_or_ty();
 
         Some(Binding {
@@ -132,8 +132,8 @@ impl Scope {
     /// It **does not** return bindings of parent scopes.
     pub fn get_binding_reference(&self, name: impl AsRef<str>) -> Option<TsBindingReference> {
         let data = &self.data.scopes[self.id.index()];
-        let name = name.as_ref();
-        data.bindings_by_name.get(name).copied()
+        let name = unescape_js_identifier(name.as_ref());
+        data.bindings_by_name.get(name.as_ref()).copied()
     }
 
     /// Returns every set of same-name function overloads declared in this

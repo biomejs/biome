@@ -12,12 +12,34 @@ use crate::syntax::scss::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet};
 
-pub(crate) struct DeclarationList;
+pub(crate) struct DeclarationList {
+    end_kind: CssSyntaxKind,
+}
+
+impl DeclarationList {
+    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
+
+struct DeclarationListParseRecovery {
+    end_kind: CssSyntaxKind,
+}
+
+impl ParseRecovery for DeclarationListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_DECLARATION;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(self.end_kind) || p.at(T![;])
+    }
+}
 
 impl ParseNodeList for DeclarationList {
     type Kind = CssSyntaxKind;
@@ -45,7 +67,7 @@ impl ParseNodeList for DeclarationList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        p.at(self.end_kind)
     }
 
     fn recover(
@@ -53,9 +75,11 @@ impl ParseNodeList for DeclarationList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
+        parsed_element.or_recover(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'])),
+            &DeclarationListParseRecovery {
+                end_kind: self.end_kind,
+            },
             expected_declaration_item,
         )
     }
@@ -159,8 +183,14 @@ pub(crate) fn parse_optional_declaration_semicolon(p: &mut CssParser) {
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
     // div { color: red; }
     // div { color: red }
-    if !p.at(T!['}']) {
-        if p.nth_at(1, T!['}']) {
+    //
+    // A snippet has no closing brace, so the end of the input closes the last
+    // declaration in its place. That is what lets a `style` attribute be
+    // written the way everyone writes it: `style="color: red"`.
+    let ends_at_eof = p.source_type.as_embedding_kind().is_snippet();
+    let closes_declaration = |at_eof: bool| at_eof && ends_at_eof;
+    if !p.at(T!['}']) && !closes_declaration(p.at(EOF)) {
+        if p.nth_at(1, T!['}']) || closes_declaration(p.nth_at(1, EOF)) {
             p.eat(T![;]);
         } else {
             p.expect(T![;]);

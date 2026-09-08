@@ -2,8 +2,8 @@ use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::shared::sort_attributes::{AttributeGroup, SortableAttribute};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -150,6 +150,22 @@ impl Rule for UseSortedAttributes {
                 .map(|element| element.range())
                 .or_else(|| JsxSelfClosingElement::cast_ref(&node).map(|element| element.range()))
         })
+    }
+
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsLanguage>,
+    ) {
+        for list in ctx
+            .query()
+            .syntax()
+            .descendants()
+            .skip(1)
+            .filter_map(JsxAttributeList::cast)
+        {
+            suppressions.suppress_node(list.syntax().clone());
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

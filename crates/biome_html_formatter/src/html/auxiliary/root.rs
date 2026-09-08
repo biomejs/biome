@@ -10,6 +10,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
             bom_token,
             directive,
             frontmatter,
+            processing_instruction,
             eof_token,
         } = node.as_fields();
 
@@ -19,6 +20,13 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
 
         if let Some(frontmatter) = frontmatter {
             write!(f, [frontmatter.format(), empty_line()])?;
+        }
+
+        if let Some(processing_instruction) = processing_instruction {
+            write!(
+                f,
+                [group(&processing_instruction.format()), hard_line_break()]
+            )?;
         }
 
         if let Some(directive) = directive {

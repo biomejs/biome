@@ -128,7 +128,7 @@ impl TryFrom<String> for EditorconfigGlob {
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for EditorconfigGlob {
     fn deserialize(
-        ctx: &mut impl biome_deserialize::DeserializationContext,
+        ctx: &mut dyn biome_deserialize::DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {

@@ -36,15 +36,7 @@ let x:      string |         number = 1
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,17 +5,17 @@
- <script></script>
- <script></script>
- <script setup lang="ts">
--let x: string | number = 1;
-+let x:      string |         number = 1
- </script>
- <script></script>
- <script></script>
+@@ -12,10 +12,10 @@
  <script></script>
  <template>
    <span
@@ -71,7 +63,7 @@ let x:      string |         number = 1
 <script></script>
 <script></script>
 <script setup lang="ts">
-let x:      string |         number = 1
+let x: string | number = 1;
 </script>
 <script></script>
 <script></script>

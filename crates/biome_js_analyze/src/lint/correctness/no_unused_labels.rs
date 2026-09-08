@@ -71,6 +71,55 @@ declare_lint_rule! {
     }
 }
 
+pub struct UnusedLabel(JsLabeledStatement);
+
+impl Rule for NoUnusedLabels {
+    type Query = UnusedLabel;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = NoUnusedLabelsOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let label = ctx.query().label_token().ok()?;
+        let label = label.text_trimmed();
+        if label == "$"
+            && ctx
+                .source_type::<JsFileSource>()
+                .as_embedding_kind()
+                .is_svelte()
+        {
+            return None;
+        }
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let unused_label = ctx.query();
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            unused_label.label_token().ok()?.text_trimmed_range(),
+            markup! {
+                "Unused "<Emphasis>"label"</Emphasis>"."
+            },
+        ).note(markup!{
+            "The label is not used by any "<Emphasis>"break"</Emphasis>" statement and continue statement."
+        }))
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let unused_label = ctx.query();
+        let body = unused_label.body().ok()?;
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(unused_label.clone().into(), body);
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
+            mutation,
+        ))
+    }
+}
+
 #[derive(Default)]
 struct UnusedLabelVisitor {
     root_id: u32,
@@ -132,8 +181,6 @@ impl Visitor for UnusedLabelVisitor {
     }
 }
 
-pub struct UnusedLabel(JsLabeledStatement);
-
 impl QueryMatch for UnusedLabel {
     fn text_range(&self) -> TextRange {
         self.0.range()
@@ -156,53 +203,6 @@ impl Queryable for UnusedLabel {
     // Extract the output object from the input type
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.0.clone()
-    }
-}
-
-impl Rule for NoUnusedLabels {
-    type Query = UnusedLabel;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = NoUnusedLabelsOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let label = ctx.query().label_token().ok()?;
-        let label = label.text_trimmed();
-        if label == "$"
-            && ctx
-                .source_type::<JsFileSource>()
-                .as_embedding_kind()
-                .is_svelte()
-        {
-            return None;
-        }
-        Some(())
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let unused_label = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            unused_label.label_token().ok()?.text_trimmed_range(),
-            markup! {
-                "Unused "<Emphasis>"label"</Emphasis>"."
-            },
-        ).note(markup!{
-            "The label is not used by any "<Emphasis>"break"</Emphasis>" statement and continue statement."
-        }))
-    }
-
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let unused_label = ctx.query();
-        let body = unused_label.body().ok()?;
-        let mut mutation = ctx.root().begin();
-        mutation.replace_node(unused_label.clone().into(), body);
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
-            mutation,
-        ))
     }
 }
 

@@ -18,6 +18,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteKeyBlock {
@@ -48,7 +49,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..28
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..28
     0: SVELTE_KEY_BLOCK@0..28
       0: SVELTE_KEY_OPENING_BLOCK@0..17
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -60,7 +62,7 @@ HtmlRoot {
         0: HTML_CONTENT@17..28
           0: HTML_LITERAL@17..28 "something" [Newline("\n"), Whitespace("\t")] []
       2: (empty)
-  4: EOF@28..29 "" [Newline("\n")] []
+  5: EOF@28..29 "" [Newline("\n")] []
 
 ```
 

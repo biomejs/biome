@@ -44,13 +44,6 @@ p {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
- <script setup lang="ts">
--console.log("hello");
-+console.log("hello")
- </script>
- 
- <style scoped lang="scss">
 @@ -10,14 +10,14 @@
  
  <unknown-block foo bar="bar" baz long_long_long_long_attribute></unknown-block>
@@ -78,7 +71,7 @@ p {
 
 ```vue
 <script setup lang="ts">
-console.log("hello")
+console.log("hello");
 </script>
 
 <style scoped lang="scss">

@@ -1,9 +1,25 @@
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlDoubleTextExpression, HtmlDoubleTextExpressionFields};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatHtmlDoubleTextExpression;
+pub(crate) struct FormatHtmlDoubleTextExpression {
+    r_double_curly_borrowed: bool,
+}
+
+pub(crate) struct FormatHtmlDoubleTextExpressionOptions {
+    pub r_double_curly_borrowed: bool,
+}
+
+impl FormatRuleWithOptions<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression {
+    type Options = FormatHtmlDoubleTextExpressionOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.r_double_curly_borrowed = options.r_double_curly_borrowed;
+        self
+    }
+}
+
 impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression {
     fn fmt_fields(
         &self,
@@ -20,11 +36,12 @@ impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression
             f,
             [
                 l_double_curly_token.format(),
-                space(),
-                expression.format(),
-                space(),
-                r_double_curly_token.format(),
+                soft_space_or_block_indent(&expression.format()),
             ]
-        )
+        )?;
+        if !self.r_double_curly_borrowed {
+            write!(f, [r_double_curly_token.format()])?;
+        }
+        Ok(())
     }
 }

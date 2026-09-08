@@ -55,7 +55,7 @@ impl CstFormatContext for YamlFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct YamlFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,

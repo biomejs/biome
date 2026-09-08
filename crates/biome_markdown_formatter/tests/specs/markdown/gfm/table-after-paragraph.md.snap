@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/table-after-paragraph.md
+---
+
+# Input
+
+```md
+intro
+a | b
+--- | ---
+c | d
+
+> intro
+> a | b
+> --- | ---
+> c | d
+
+- intro
+  a | b
+  --- | ---
+  c | d
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+intro
+| a   | b   |
+| --- | --- |
+| c   | d   |
+
+> intro
+> | a   | b   |
+> | --- | --- |
+> | c   | d   |
+- intro
+  | a   | b   |
+  | --- | --- |
+  | c   | d   |
+
+```

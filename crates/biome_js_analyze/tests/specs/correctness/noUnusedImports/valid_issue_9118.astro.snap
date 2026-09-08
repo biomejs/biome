@@ -4,7 +4,6 @@ expression: valid_issue_9118.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 import MyElement, {
 	type MyElementShape,
@@ -12,6 +11,7 @@ import MyElement, {
 
 let myElement: MyElementShape =  {};
 ---
+<!-- should not generate diagnostics -->
 
 <template>
 	<MyElement />

@@ -1,0 +1,10 @@
+$base: "https://cdn.example.com";
+
+.assets {
+  logo: url(images/#{$name}.png);
+  themed: url(#{$base}/#{$theme}/logo.svg);
+  font: src(fonts/#{$family}.woff2);
+  block-comment: url(/* TODO(asset) */images/#{$name}.png);
+  line-comment: url(// TODO(asset)
+    images/#{$name}.png);
+}

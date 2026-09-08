@@ -445,8 +445,6 @@ fn is_within_describe(node: &JsCallExpression) -> bool {
         .filter_map(JsCallExpression::cast)
         .any(|ancestor| {
             ancestor
-                .callee()
-                .ok()
-                .is_some_and(|callee| callee.contains_describe_call())
+                .callee().is_ok_and(|callee| callee.contains_describe_call())
         })
 }

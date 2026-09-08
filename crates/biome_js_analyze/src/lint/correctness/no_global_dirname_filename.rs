@@ -103,13 +103,12 @@ impl Rule for NoGlobalDirnameFilename {
                 expr.into(),
                 make_import_meta(dirname_or_filename).into(),
             );
-        } else if let Some(member) = node.parent::<JsShorthandPropertyObjectMember>() {
+        } else {
+            let member = node.parent::<JsShorthandPropertyObjectMember>()?;
             mutation.replace_node::<AnyJsObjectMember>(
                 member.into(),
                 make_property_object_member(syntax_token, dirname_or_filename).into(),
             )
-        } else {
-            return None;
         }
 
         Some(JsRuleAction::new(

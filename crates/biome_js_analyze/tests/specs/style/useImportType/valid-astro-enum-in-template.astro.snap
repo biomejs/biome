@@ -4,10 +4,10 @@ expression: valid-astro-enum-in-template.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 import { Component, FooEnum } from './types';
 ---
+<!-- should not generate diagnostics -->
 <main>
   <Component />
   {FooEnum.Foo}

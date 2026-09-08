@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIssue4928.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+abstract class Base {}
+
+namespace Base {}
+
+export class A extends Base {}
+
+```

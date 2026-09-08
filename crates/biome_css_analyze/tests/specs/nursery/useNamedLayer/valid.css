@@ -1,0 +1,14 @@
+/* should not generate diagnostics */
+@import url(foo.css) layer(reset);
+
+@layer reset {
+	.test {
+		color: red;
+	}
+}
+
+@layer reset.text {
+	.test {
+		color: red;
+	}
+}

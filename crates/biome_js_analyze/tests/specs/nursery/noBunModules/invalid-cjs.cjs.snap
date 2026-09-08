@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-cjs.cjs
+---
+# Input
+```cjs
+const Bun = require('bun');
+const { Database } = require('bun:sqlite');
+const { suffix } = require('bun:ffi');
+
+```
+
+# Diagnostics
+```
+invalid-cjs.cjs:1:21 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import references a Bun builtin module.
+  
+  > 1 │ const Bun = require('bun');
+      │                     ^^^^^
+    2 │ const { Database } = require('bun:sqlite');
+    3 │ const { suffix } = require('bun:ffi');
+  
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
+  
+  i Remove this import or replace it with a runtime-agnostic alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-cjs.cjs:2:30 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import references a Bun builtin module.
+  
+    1 │ const Bun = require('bun');
+  > 2 │ const { Database } = require('bun:sqlite');
+      │                              ^^^^^^^^^^^^
+    3 │ const { suffix } = require('bun:ffi');
+    4 │ 
+  
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
+  
+  i Remove this import or replace it with a runtime-agnostic alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-cjs.cjs:3:28 lint/nursery/noBunModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import references a Bun builtin module.
+  
+    1 │ const Bun = require('bun');
+    2 │ const { Database } = require('bun:sqlite');
+  > 3 │ const { suffix } = require('bun:ffi');
+      │                            ^^^^^^^^^
+    4 │ 
+  
+  i Bun builtin modules are unavailable outside the Bun runtime, so this import breaks client-side and other non-Bun environments.
+  
+  i Remove this import or replace it with a runtime-agnostic alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

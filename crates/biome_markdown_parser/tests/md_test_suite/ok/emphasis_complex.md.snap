@@ -26,8 +26,9 @@ Intraword underscore: foo_bar_baz
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -224,9 +225,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..216
+0: MD_ROOT@0..216
   0: (empty)
-  1: MD_BLOCK_LIST@0..216
+  1: (empty)
+  2: MD_BLOCK_LIST@0..216
     0: MD_PARAGRAPH@0..35
       0: MD_INLINE_ITEM_LIST@0..35
         0: MD_TEXTUAL@0..8
@@ -347,6 +349,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@182..215 "Intraword underscore: foo_bar_baz" [] []
         1: MD_TEXTUAL@215..216
           0: MD_TEXTUAL_LITERAL@215..216 "\n" [] []
-  2: EOF@216..216 "" [] []
+  3: EOF@216..216 "" [] []
 
 ```

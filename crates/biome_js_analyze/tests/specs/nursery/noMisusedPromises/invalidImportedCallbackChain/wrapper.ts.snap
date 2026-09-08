@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: wrapper.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import { load } from "./load";
+
+export function wrappedLoad(value: number) {
+	return load(value);
+}
+
+```

@@ -1,0 +1,15 @@
+.sidebar > {
+  .error {}
+}
+
+.card {
+  + {
+    .media {}
+  }
+}
+
+.navbar {
+  & ~ {
+    .container {}
+  }
+}

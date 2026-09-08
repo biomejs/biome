@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_9541_module_export.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts" module>
+  export const someFunction = () => {
+    console.log("hai!");
+  };
+
+  export function someExportedFunctionDeclaration() {
+    console.log("yo!");
+  }
+
+  const someOtherFunction = () => {
+    console.log("heyy");
+  };
+</script>
+
+<script lang="ts">
+  someFunction();
+  someExportedFunctionDeclaration();
+  someOtherFunction();
+</script>
+
+```

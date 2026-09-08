@@ -26,7 +26,7 @@ info: vue/ts-expression/comment.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,20 +1,13 @@
+@@ -1,19 +1,14 @@
  <template>
    <div
      v-if="
@@ -44,14 +44,13 @@ info: vue/ts-expression/comment.vue
      "
 +    :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
    >
--    {{
+     {{
 -      /* leading comment */ (file as /* NOTE: I like sushi */ mymodule.Folder)
 -        .deadline /* trailing comment */
--    }}
-+    {{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */ }}
++      /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */
+     }}
    </div>
  </template>
- 
 ```
 
 # Output
@@ -66,7 +65,9 @@ info: vue/ts-expression/comment.vue
     "
     :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
   >
-    {{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */ }}
+    {{
+      /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */
+    }}
   </div>
 </template>
 
@@ -76,5 +77,5 @@ info: vue/ts-expression/comment.vue
 # Lines exceeding max width of 80 characters
 ```
     8:     :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
-   10:     {{ /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */ }}
+   11:       /* leading comment */ (   file as /* NOTE: I like sushi */   mymodule.Folder   ).deadline /* trailing comment */
 ```

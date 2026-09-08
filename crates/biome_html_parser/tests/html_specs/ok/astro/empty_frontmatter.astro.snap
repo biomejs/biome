@@ -27,6 +27,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@3..7 "---" [Newline("\n")] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -64,7 +65,8 @@ HtmlRoot {
       0: (empty)
     2: FENCE@3..7 "---" [Newline("\n")] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@7..21
+  3: (empty)
+  4: HTML_ELEMENT_LIST@7..21
     0: HTML_ELEMENT@7..21
       0: HTML_OPENING_ELEMENT@7..14
         0: L_ANGLE@7..10 "<" [Newline("\n"), Newline("\n")] []
@@ -79,6 +81,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@17..20
           0: DIV_KW@17..20 "div" [] []
         3: R_ANGLE@20..21 ">" [] []
-  4: EOF@21..22 "" [Newline("\n")] []
+  5: EOF@21..22 "" [Newline("\n")] []
 
 ```

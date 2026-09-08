@@ -51,14 +51,6 @@ impl Rule for UseRegexpExec {
         let binding = node.callee().ok()?.omit_parentheses();
         let callee = binding.as_js_static_member_expression()?;
 
-        let call_object = callee.object().ok()?;
-        if !ctx
-            .type_of_expression(&call_object)
-            .is_some_and(|ty| ty.is_string_or_string_literal())
-        {
-            return None;
-        }
-
         if callee
             .member()
             .ok()?
@@ -67,6 +59,14 @@ impl Rule for UseRegexpExec {
             .ok()?
             .text_trimmed()
             != "match"
+        {
+            return None;
+        }
+
+        let call_object = callee.object().ok()?;
+        if !ctx
+            .type_of_expression(&call_object)
+            .is_some_and(|ty| ty.is_string_or_string_literal())
         {
             return None;
         }

@@ -3,8 +3,9 @@ use crate::prelude::*;
 use biome_formatter::write;
 use biome_rowan::AstNodeList;
 use biome_yaml_syntax::{
-    AnyYamlBlockHeader, AnyYamlBlockScalar, AnyYamlFlowNode, AnyYamlMappingImplicitKey,
-    AnyYamlProperty, YamlPropertyList, YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlBlockHeader, AnyYamlBlockScalar, AnyYamlFlowNode, AnyYamlJsonContent,
+    AnyYamlMappingImplicitKey, AnyYamlProperty, YamlFlowInBlockNode, YamlPropertyList,
+    YamlSyntaxNode, YamlSyntaxToken,
 };
 
 /// Whether a `:` placed directly after this key would be lexed as part of
@@ -128,6 +129,22 @@ pub(crate) fn ends_in_keep_chomped_scalar(root: &YamlSyntaxNode) -> bool {
                 .any(|header| matches!(header, AnyYamlBlockHeader::YamlBlockKeepIndicator(_)))
         })
     })
+}
+
+pub(crate) fn flow_scalar_has_line_break(node: &YamlFlowInBlockNode) -> bool {
+    let token = match node.flow() {
+        Ok(AnyYamlFlowNode::YamlFlowYamlNode(node)) => {
+            node.content().and_then(|scalar| scalar.value_token().ok())
+        }
+        Ok(AnyYamlFlowNode::YamlFlowJsonNode(node)) => match node.content() {
+            Ok(AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar)) => scalar.value_token().ok(),
+            Ok(AnyYamlJsonContent::YamlSingleQuotedScalar(scalar)) => scalar.value_token().ok(),
+            _ => None,
+        },
+        _ => None,
+    };
+
+    token.is_some_and(|token| token.text_trimmed().contains(['\n', '\r']))
 }
 
 /// Returns the scalar token when `key` is an unqualified multiline plain

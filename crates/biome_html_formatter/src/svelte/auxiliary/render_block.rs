@@ -32,4 +32,13 @@ impl FormatNodeRule<SvelteRenderBlock> for FormatSvelteRenderBlock {
         // handled by element list formatter
         Ok(())
     }
+
+    fn fmt_trailing_comments(
+        &self,
+        _node: &SvelteRenderBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

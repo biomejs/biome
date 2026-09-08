@@ -1,0 +1,113 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<div class=`unterminated>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@5..10 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@11..26 "`unterminated>\n" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@26..26 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..26
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..26
+    0: HTML_ELEMENT@0..26
+      0: HTML_OPENING_ELEMENT@0..26
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..26
+          0: HTML_ATTRIBUTE@5..26
+            0: HTML_ATTRIBUTE_NAME@5..10
+              0: HTML_LITERAL@5..10 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..26
+              0: EQ@10..11 "=" [] []
+              1: HTML_STRING@11..26
+                0: HTML_STRING_LITERAL@11..26 "`unterminated>\n" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@26..26
+      2: (empty)
+  5: EOF@26..26 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unterminated_template_literal_attribute.astro:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing backtick
+  
+  > 1 │ <div class=`unterminated>
+      │            ^^^^^^^^^^^^^^
+  > 2 │ 
+      │ 
+  
+  i file ends here
+  
+    1 │ <div class=`unterminated>
+  > 2 │ 
+      │ 
+  
+unterminated_template_literal_attribute.astro:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead the file ends
+  
+    1 │ <div class=`unterminated>
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <div class=`unterminated>
+  > 2 │ 
+      │ 
+  
+```

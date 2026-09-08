@@ -291,9 +291,7 @@ fn is_negative_one(expr: &AnyJsExpression) -> bool {
         return false;
     };
     let is_minus = unary
-        .operator_token()
-        .ok()
-        .is_some_and(|t| t.kind() == biome_js_syntax::JsSyntaxKind::MINUS);
+        .operator_token().is_ok_and(|t| t.kind() == biome_js_syntax::JsSyntaxKind::MINUS);
     if !is_minus {
         return false;
     }

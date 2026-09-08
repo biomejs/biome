@@ -1,0 +1,156 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+---
+seq:
+&anchor
+- a
+- b
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: DIRECTIVE_END@0..3 "---" [] [],
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@3..4 "" [Newline("\n")] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@4..7 "seq" [] [],
+                                },
+                            },
+                            colon_token: COLON@7..8 ":" [] [],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [
+                                    YamlAnchorProperty {
+                                        value_token: ANCHOR_PROPERTY_LITERAL@8..16 "&anchor" [Newline("\n")] [],
+                                    },
+                                ],
+                                content: YamlBlockSequence {
+                                    sequence_start_token: SEQUENCE_START@16..17 "" [Newline("\n")] [],
+                                    entries: YamlBlockSequenceEntryList [
+                                        YamlBlockSequenceEntry {
+                                            minus_token: DASH@17..19 "-" [] [Whitespace(" ")],
+                                            value: YamlFlowInBlockNode {
+                                                flow_start_token: FLOW_START@19..19 "" [] [],
+                                                flow: YamlFlowYamlNode {
+                                                    properties: YamlPropertyList [],
+                                                    content: YamlPlainScalar {
+                                                        value_token: PLAIN_LITERAL@19..20 "a" [] [],
+                                                    },
+                                                },
+                                                flow_end_token: FLOW_END@20..20 "" [] [],
+                                            },
+                                        },
+                                        YamlBlockSequenceEntry {
+                                            minus_token: DASH@20..23 "-" [Newline("\n")] [Whitespace(" ")],
+                                            value: YamlFlowInBlockNode {
+                                                flow_start_token: FLOW_START@23..23 "" [] [],
+                                                flow: YamlFlowYamlNode {
+                                                    properties: YamlPropertyList [],
+                                                    content: YamlPlainScalar {
+                                                        value_token: PLAIN_LITERAL@23..24 "b" [] [],
+                                                    },
+                                                },
+                                                flow_end_token: FLOW_END@24..24 "" [] [],
+                                            },
+                                        },
+                                    ],
+                                    sequence_end_token: SEQUENCE_END@24..24 "" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@24..25 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@25..25 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..25
+  0: YAML_DOCUMENT_LIST@0..25
+    0: YAML_DOCUMENT@0..25
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: DIRECTIVE_END@0..3 "---" [] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@3..25
+        0: YAML_PROPERTY_LIST@3..3
+        1: YAML_BLOCK_MAPPING@3..25
+          0: MAPPING_START@3..4 "" [Newline("\n")] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@4..24
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@4..24
+              0: YAML_FLOW_YAML_NODE@4..7
+                0: YAML_PROPERTY_LIST@4..4
+                1: YAML_PLAIN_SCALAR@4..7
+                  0: PLAIN_LITERAL@4..7 "seq" [] []
+              1: COLON@7..8 ":" [] []
+              2: YAML_BLOCK_IN_BLOCK_NODE@8..24
+                0: YAML_PROPERTY_LIST@8..16
+                  0: YAML_ANCHOR_PROPERTY@8..16
+                    0: ANCHOR_PROPERTY_LITERAL@8..16 "&anchor" [Newline("\n")] []
+                1: YAML_BLOCK_SEQUENCE@16..24
+                  0: SEQUENCE_START@16..17 "" [Newline("\n")] []
+                  1: YAML_BLOCK_SEQUENCE_ENTRY_LIST@17..24
+                    0: YAML_BLOCK_SEQUENCE_ENTRY@17..20
+                      0: DASH@17..19 "-" [] [Whitespace(" ")]
+                      1: YAML_FLOW_IN_BLOCK_NODE@19..20
+                        0: FLOW_START@19..19 "" [] []
+                        1: YAML_FLOW_YAML_NODE@19..20
+                          0: YAML_PROPERTY_LIST@19..19
+                          1: YAML_PLAIN_SCALAR@19..20
+                            0: PLAIN_LITERAL@19..20 "a" [] []
+                        2: FLOW_END@20..20 "" [] []
+                    1: YAML_BLOCK_SEQUENCE_ENTRY@20..24
+                      0: DASH@20..23 "-" [Newline("\n")] [Whitespace(" ")]
+                      1: YAML_FLOW_IN_BLOCK_NODE@23..24
+                        0: FLOW_START@23..23 "" [] []
+                        1: YAML_FLOW_YAML_NODE@23..24
+                          0: YAML_PROPERTY_LIST@23..23
+                          1: YAML_PLAIN_SCALAR@23..24
+                            0: PLAIN_LITERAL@23..24 "b" [] []
+                        2: FLOW_END@24..24 "" [] []
+                  2: SEQUENCE_END@24..24 "" [] []
+          2: MAPPING_END@24..25 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@25..25 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unindented_anchor_before_sequence.yaml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This anchor or tag is not indented enough.
+  
+    1 │ ---
+    2 │ seq:
+  > 3 │ &anchor
+      │ ^^^^^^^
+    4 │ - a
+    5 │ - b
+  
+  i Indent it at least one space more than the key above.
+  
+```

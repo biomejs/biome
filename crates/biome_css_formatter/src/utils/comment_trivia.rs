@@ -151,8 +151,7 @@ pub(crate) fn has_block_comment_gap_before_token(token: &CssSyntaxToken) -> bool
     if let Some(comment) = token
         .leading_trivia()
         .pieces()
-        .filter(is_block_style_comment)
-        .last()
+        .rfind(is_block_style_comment)
     {
         return comment.text_range().end() < token_start;
     }
@@ -161,8 +160,7 @@ pub(crate) fn has_block_comment_gap_before_token(token: &CssSyntaxToken) -> bool
         previous_token
             .trailing_trivia()
             .pieces()
-            .filter(is_block_style_comment)
-            .last()
+            .rfind(is_block_style_comment)
             .is_some_and(|comment| comment.text_range().end() < token_start)
     })
 }

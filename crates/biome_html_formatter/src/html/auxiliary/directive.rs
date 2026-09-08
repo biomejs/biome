@@ -9,6 +9,7 @@ impl FormatNodeRule<HtmlDirective> for FormatHtmlDirective {
             l_angle_token,
             excl_token,
             doctype_token,
+            name_token,
             html_token,
             quirk_token,
             public_id_token,
@@ -30,6 +31,9 @@ impl FormatNodeRule<HtmlDirective> for FormatHtmlDirective {
             write!(f, [FormatTokenAsLowercase::from(doctype_token?)])?;
         } else {
             write!(f, [doctype_token.format()])?;
+        }
+        if let Some(name) = name_token {
+            write!(f, [space(), name.format()])?;
         }
         if let Some(html) = html_token {
             write!(f, [space(), FormatTokenAsLowercase::from(html)])?;

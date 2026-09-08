@@ -42,7 +42,7 @@ info: html/js/js.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,16 +14,14 @@
+@@ -14,10 +14,10 @@
    alert(message);
  </script>
  <script type="text/babel">
@@ -55,16 +55,6 @@ info: html/js/js.html
  </script>
  
  <script type="module">
--  import lib from "./lib.js";
--
--  function myFunction() {
--    return "foo";
--  }
--</script>
-+      import lib from './lib.js';
-+  
-+        function myFunction() { return 'foo'; }
-+  </script>
 ```
 
 # Output
@@ -93,8 +83,10 @@ info: html/js/js.html
 </script>
 
 <script type="module">
-      import lib from './lib.js';
-  
-        function myFunction() { return 'foo'; }
-  </script>
+  import lib from "./lib.js";
+
+  function myFunction() {
+    return "foo";
+  }
+</script>
 ```

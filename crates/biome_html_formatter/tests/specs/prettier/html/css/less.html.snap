@@ -32,23 +32,34 @@ info: html/css/less.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -8,7 +8,7 @@
+@@ -1,6 +1,6 @@
+ <style type="text/less">
+-  @nice-blue: #5B83AD;
+-  @light-blue: @nice-blue + #111;
++  @nice-blue : #5B83AD;
++  @light-blue : @nice-blue + #111;
+ 
+   #header {
+     color: @light-blue;
+@@ -8,8 +8,8 @@
  </style>
  
  <style lang="less">
 -  @nice-blue: #5b83ad;
-+  @nice-blue: #5B83AD;
-   @light-blue: @nice-blue + #111;
+-  @light-blue: @nice-blue + #111;
++  @nice-blue : #5B83AD;
++  @light-blue : @nice-blue + #111;
  
    #header {
+     color: @light-blue;
 ```
 
 # Output
 
 ```html
 <style type="text/less">
-  @nice-blue: #5B83AD;
-  @light-blue: @nice-blue + #111;
+  @nice-blue : #5B83AD;
+  @light-blue : @nice-blue + #111;
 
   #header {
     color: @light-blue;
@@ -56,8 +67,8 @@ info: html/css/less.html
 </style>
 
 <style lang="less">
-  @nice-blue: #5B83AD;
-  @light-blue: @nice-blue + #111;
+  @nice-blue : #5B83AD;
+  @light-blue : @nice-blue + #111;
 
   #header {
     color: @light-blue;

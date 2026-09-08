@@ -28,49 +28,17 @@ info: vue/vue-3/script-setup.vue
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,13 +1,7 @@
- <script setup></script>
--<script setup="foo"></script>
--<script setup="{ row }"></script>
--<script
--  setup="{
--    destructuring: {
--      a: { b },
--    },
--  }"
--></script>
-+<script setup="     foo"></script>
-+<script setup="     {row   }"></script>
-+<script setup="{destructuring:{   a:{b}}}"></script>
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -14,5 +14,5 @@
  
- <!-- Not script -->
- <custom setup="     {row   }">Not A script</custom>
-```
+ <!-- Not attribute -->
+ <script>
+-<setup>{not:{a:attribute}} < /;>epstu;
++<setup>{not:{a:attribute}} < />epstu;
+ </script>
 
-# Output
-
-```vue
-<script setup></script>
-<script setup="     foo"></script>
-<script setup="     {row   }"></script>
-<script setup="{destructuring:{   a:{b}}}"></script>
-
-<!-- Not script -->
-<custom setup="     {row   }">Not A script</custom>
-<style setup="     {row   }"></style>
-
-<!-- Not root block -->
-<template>
-  <script setup="     {row   }"></script>
-</template>
-
-<!-- Not attribute -->
-<script>
-<setup>{not:{a:attribute}}</setup>
-</script>
 ```

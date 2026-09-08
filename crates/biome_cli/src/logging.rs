@@ -173,8 +173,8 @@ impl Display for LoggingLevel {
 /// - Spans and events at the requested level in `biome*` crates.
 /// - Spans and events at level info or higher in dependencies.
 /// - Spans and events at level warn or higher in Salsa.
-struct LoggingFilter {
-    level: LoggingLevel,
+pub(crate) struct LoggingFilter {
+    pub(crate) level: LoggingLevel,
 }
 
 /// Tracing filter used for spans emitted by `biome*` crates.

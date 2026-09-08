@@ -1,0 +1,62 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `check.css`
+
+```css
+@property --value {
+  syntax: "<unknown>";
+  inherits: false;
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+check.css:2:14 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use a supported property syntax type.
+  
+    1 │ @property --value {
+  > 2 │     syntax: "<unknown>";
+      │              ^^^^^^^^^
+    3 │     inherits: false;
+    4 │ }
+  
+  i Supported types:
+  
+  - <angle>
+  - <color>
+  - <custom-ident>
+  - <image>
+  - <integer>
+  - <length>
+  - <length-percentage>
+  - <number>
+  - <percentage>
+  - <resolution>
+  - <string>
+  - <time>
+  - <transform-function>
+  - <transform-list>
+  - <url>
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

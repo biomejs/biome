@@ -6,13 +6,13 @@
 //! Module responsible for providing utility methods regarding fonts
 //!
 
-use crate::keywords::{
+use crate::utils::is_css_variable;
+use biome_css_syntax::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
     FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LINE_HEIGHT_KEYWORDS,
     SYSTEM_FAMILY_NAME_KEYWORDS,
 };
-use crate::utils::is_css_variable;
 use biome_css_syntax::{
     AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList, CssIdentifier,
     CssString,

@@ -38,15 +38,7 @@ type Foo = () => void
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,23 +1,23 @@
- <script setup lang="ts">
--const 我 = () => {};
--const me = () => {};
-+const 我 = () => {}
-+const me = () => {}
- 
--type Foo = () => void;
-+type Foo = () => void
+@@ -6,18 +6,18 @@
  </script>
  
  <template>
@@ -85,10 +77,10 @@ type Foo = () => void
 
 ```vue
 <script setup lang="ts">
-const 我 = () => {}
-const me = () => {}
+const 我 = () => {};
+const me = () => {};
 
-type Foo = () => void
+type Foo = () => void;
 </script>
 
 <template>

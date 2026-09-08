@@ -2713,6 +2713,38 @@ fn lint_syntax_rules() {
 }
 
 #[test]
+fn lint_invalid_property_syntax() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("check.css");
+    fs.insert(
+        file_path.into(),
+        r#"@property --value {
+    syntax: "<unknown>";
+    inherits: false;
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_invalid_property_syntax",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_lint_error_without_file_paths() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

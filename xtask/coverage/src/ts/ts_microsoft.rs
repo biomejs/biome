@@ -2,6 +2,7 @@ use crate::check_file_encoding;
 use crate::runner::{
     TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
+use crate::util::checkout_repository;
 use biome_js_parser::JsParserOptions;
 use biome_languages::{JsFileSource, javascript::ModuleKind};
 use biome_rowan::{AstNode, SyntaxKind};
@@ -13,7 +14,6 @@ use std::convert::TryFrom;
 use std::fmt::Write;
 use std::io;
 use std::path::Path;
-use std::process::Command;
 use xtask_glue::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/Typescript/tests/cases";
@@ -103,22 +103,11 @@ impl TestSuite for MicrosoftTypescriptTestSuite {
     }
 
     fn checkout(&self) -> io::Result<()> {
-        let base_path = project_root().join("xtask/coverage/Typescript");
-        let mut command = Command::new("git");
-        command
-            .arg("clone")
-            .arg("https://github.com/microsoft/Typescript.git")
-            .arg("--depth")
-            .arg("1")
-            .arg(base_path.display().to_string());
-        command.output()?;
-        let mut command = Command::new("git");
-        command
-            .arg("reset")
-            .arg("--hard")
-            .arg("61a96b1641abe24c4adc3633eb936df89eb991f2");
-        command.output()?;
-        Ok(())
+        checkout_repository(
+            "https://github.com/microsoft/Typescript.git",
+            "61a96b1641abe24c4adc3633eb936df89eb991f2",
+            &project_root().join("xtask/coverage/Typescript"),
+        )
     }
 }
 

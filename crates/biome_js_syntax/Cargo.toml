@@ -21,6 +21,7 @@ camino              = { workspace = true }
 enumflags2          = { workspace = true }
 schemars            = { workspace = true, optional = true }
 serde               = { workspace = true, features = ["derive"] }
+smallvec            = { workspace = true }
 
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }

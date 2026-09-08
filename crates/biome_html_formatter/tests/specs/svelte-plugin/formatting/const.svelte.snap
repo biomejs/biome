@@ -1,0 +1,109 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/const.svelte
+---
+
+# Input
+
+```svelte
+{#each [1, 2] as foo}
+    {@const bar =
+        foo}
+    {foo}{bar}
+{/each}
+
+{#await aPromise then result}
+    {@const bar = result ? 'some super long text which will force the ternary to break' : 'etc etc'}
+{/await}
+
+{#each items as item, index}
+    {@const result = someFunction(
+        item, index)}
+    {result}
+{/each}
+
+{#each items as item}
+    {@const display = type === 'abbrev' 
+        ? abbreviate(item) : item}
+    {display}
+{/each}
+
+{#each entries as entry}
+    {@const idx = list.findIndex((e) => e === entry)}
+    {idx}
+{/each}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,21 +1,22 @@
+ {#each [1, 2] as foo}
+-    {@const bar = foo}
++    {@const bar =
++        foo}
+     {foo}{bar}
+ {/each}
+ 
+ {#await aPromise then result}
+-    {@const bar = result
+-        ? "some super long text which will force the ternary to break"
+-        : "etc etc"}
++    {@const bar = result ? 'some super long text which will force the ternary to break' : 'etc etc'}
+ {/await}
+ 
+ {#each items as item, index}
+-    {@const result = someFunction(item, index)}
++    {@const result = someFunction(
++        item, index)}
+     {result}
+ {/each}
+ 
+ {#each items as item}
+-    {@const display = type === "abbrev" ? abbreviate(item) : item}
++    {@const display = type === 'abbrev' 
++        ? abbreviate(item) : item}
+     {display}
+ {/each}
+ 
+```
+
+# Output
+
+```svelte
+{#each [1, 2] as foo}
+    {@const bar =
+        foo}
+    {foo}{bar}
+{/each}
+
+{#await aPromise then result}
+    {@const bar = result ? 'some super long text which will force the ternary to break' : 'etc etc'}
+{/await}
+
+{#each items as item, index}
+    {@const result = someFunction(
+        item, index)}
+    {result}
+{/each}
+
+{#each items as item}
+    {@const display = type === 'abbrev' 
+        ? abbreviate(item) : item}
+    {display}
+{/each}
+
+{#each entries as entry}
+    {@const idx = list.findIndex((e) => e === entry)}
+    {idx}
+{/each}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    8:     {@const bar = result ? 'some super long text which will force the ternary to break' : 'etc etc'}
+```

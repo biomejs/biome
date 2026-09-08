@@ -9,6 +9,7 @@
 //! whose behavior they implement.
 
 mod css;
+mod js_scc;
 mod type_inference;
 
 use crate::{JsExport, JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind};
@@ -17,6 +18,7 @@ use biome_jsdoc_comment::JsdocComment;
 
 pub use crate::db::type_inference::InferredModuleTypes;
 pub use css::*;
+pub use js_scc::*;
 pub use type_inference::*;
 
 // #region EXPORTED TRACKED QUERIES

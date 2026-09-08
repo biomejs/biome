@@ -1,408 +1,212 @@
 ---
 name: type-inference
-description: Guide for working with Biome's module graph and type inference system. Use when implementing type-aware lint rules, understanding type resolution, working on the module graph infrastructure, or implementing type inference for new features.
+description: Use this skill when working on Biome's Salsa-backed JavaScript and TypeScript inference, including type-aware lint rules, raw collection or inferred representations, analyzer requests, tracked queries, import or cycle resolution, profiling, and Salsa invalidation tests. Do not use for standalone CSS/HTML module-graph data unrelated to JS/TS inference or for ordinary semantic binding analysis.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
-## Purpose
+# Salsa-Backed Type Inference
 
-Use this skill when working with Biome's type inference system and module graph. Covers type references, resolution phases, and the architecture designed for IDE performance.
+## Scope
 
-## Prerequisites
+Use this skill for JavaScript and TypeScript type inference: raw collection,
+Salsa-backed inferred values, analyzer requests, tracked queries, and
+inference-specific tests.
 
-1. Read `crates/biome_js_type_info/CONTRIBUTING.md` for architecture details
-2. Understand Biome's focus on IDE support and instant updates
-3. Familiarity with TypeScript type system concepts
+Load the corresponding skill for general lint scaffolding, diagnostics,
+snapshots, or changesets. CSS and HTML module-graph data is outside this skill
+unless it directly participates in JavaScript or TypeScript inference.
 
-## Key Concepts
+## Read the Relevant Guide
 
-### Module Graph Constraint
+Do not load both architecture guides in full for every inference task. Read the
+sections matching the boundary being changed:
 
-**Critical rule**: No module may copy or clone data from another module, not even behind `Arc`.
+| Task | Canonical guide |
+| --- | --- |
+| Raw and inferred representations, collection, inference layers, handles, normalization, work limits | [`biome_js_type_info/CONTRIBUTING.md`](../../../crates/biome_js_type_info/CONTRIBUTING.md) |
+| Analyzer requests, tracked queries, widening, profiling, Salsa execution tests | [`biome_module_graph/CONTRIBUTING.md`](../../../crates/biome_module_graph/CONTRIBUTING.md) |
 
-**Why**: Any module can be updated at any time (IDE file changes). Copying data would create stale references that are hard to invalidate.
+Read both guides when changing the architecture across their boundary. Then
+inspect the implementation files for the specific request, query family, or
+representation being changed.
 
-**Solution**: Use `TypeReference` instead of direct type references.
+Do not use these checked-in files as current examples:
 
-### Type Data Structure
+- `crates/biome_js_type_info/src/resolver.rs`
+- `crates/biome_js_type_info/src/flattening.rs`
+- `crates/biome_js_type_info/src/type.rs`
+- `crates/biome_js_type_info/src/conditionals.rs`
+- `crates/biome_js_type_info/src/helpers.rs`
+- `crates/biome_module_graph/src/js_module_info/module_resolver.rs`
 
-Types are stored in `TypeData` enum with many variants:
+They are not declared by the active crate module trees. Treat them as legacy
+residue unless the task explicitly concerns removing or migrating them.
 
-```rust
-// Simplified — see crates/biome_js_type_info/src/type_data.rs for the full enum
-enum TypeData {
-    Unknown,                            // Inference not implemented
-    Global,                             // Global type reference
-    BigInt, Boolean, Null, Number,      // Primitive types
-    String, Symbol, Undefined,
-    Function(Box<Function>),            // Function with parameters
-    Object(Box<Object>),                // Object with properties
-    Class(Box<Class>),                  // Class definition
-    Interface(Box<Interface>),          // Interface definition
-    Union(Box<Union>),                  // Union type (A | B)
-    Intersection(Box<Intersection>),    // Intersection type (A & B)
-    Tuple(Box<Tuple>),                  // Tuple type
-    Literal(Box<Literal>),              // Literal type ("foo", 42)
-    Reference(TypeReference),           // Reference to another type
-    TypeofExpression(Box<TypeofExpression>), // typeof an expression
-    // ... plus Conditional, Generic, TypeOperator, InstanceOf,
-    //     keyword variants (AnyKeyword, NeverKeyword, VoidKeyword, etc.)
-}
+## Mental Model
+
+Type inference has five layers:
+
+```text
+syntax and semantic collection
+    -> raw module tables
+    -> analyzer-facing requests
+    -> tracked Salsa queries
+    -> resolver helpers
 ```
 
-### Type References
+Collection walks one module without database access. It records raw types,
+expressions, and binding types in `JsModuleInfo`. A request defines one
+analyzer-facing result contract. Tracked queries provide memoization and
+invalidation boundaries. Resolver helpers evaluate references and inferred
+structures inside those boundaries.
 
-Instead of direct type references, use `TypeReference`:
+Keep the three type worlds distinct:
 
-```rust
-enum TypeReference {
-    Qualifier(Box<TypeReferenceQualifier>),  // Name-based reference
-    Resolved(ResolvedTypeId),                 // Resolved to type ID
-    Import(Box<TypeImportQualifier>),         // Import reference
-}
+| World | Main types | Purpose |
+| --- | --- | --- |
+| Raw collector | `TypeData` / `RawTypeData`, `TypeReference`, `RawTypeId`, `TypeStore` | Module-local syntax, declarations, imports, and deferred expressions |
+| Database-backed | `InferredTypeData<'db>`, `LocalTypeHandle`, `GlobalTypeId` | Inferred values and module ownership in tracked computations |
+| Analyzer-facing | `InferredType<'db>` | Conservative, bounded inspection for lint rules |
+
+`TypeReference` belongs to the raw world. A lint rule should not pattern-match
+raw `TypeData` when `InferredType` already provides the required operation.
+
+Inferred data remains owned by the module that declared it. Do not copy another
+module's inferred payload into the current module, including behind `Arc`.
+Preserve ownership through references, module-aware handles, global IDs, and
+tracked queries.
+
+## Choose the Narrowest Boundary
+
+The inference levels are alternatives, not sequential phases:
+
+| Need | Boundary |
+| --- | --- |
+| Inspect facts collected in one module | Raw local tables |
+| Resolve one expression, binding, export, member, argument, or classification | Targeted request and tracked query |
+| Resolve every raw type, expression, and binding in a module | Complete module inference |
+
+A wider boundary is not inherently more correct. Use this decision order when
+more than one level can answer:
+
+```text
+inspect raw local information
+    -> return when the local result is conclusive
+    -> resolve the smallest selected reference
+    -> preserve uncertainty or widen only when the contract requires it
+    -> use complete-module inference as the last resort
 ```
 
-**Note:** There is no `Unknown` variant. Unknown types are represented as `TypeReference::Resolved(GLOBAL_UNKNOWN_ID)`. Use `TypeReference::unknown()` to create one.
-
-## Type Resolution Phases
-
-### 1. Local Inference
-
-**What**: Derives types from expressions without surrounding context.
-
-**Example**: For `a + b`, creates:
-```rust
-TypeData::TypeofExpression(TypeofExpression::Addition {
-    left: TypeReference::from(TypeReferenceQualifier::from_name("a")),
-    right: TypeReference::from(TypeReferenceQualifier::from_name("b"))
-})
-```
-
-**Where**: Implemented in `local_inference.rs`
-
-**Output**: Types with unresolved `TypeReference::Qualifier` references
-
-### 2. Module-Level ("Thin") Inference
-
-**What**: Resolves references within a single module's scope.
-
-**Process**:
-1. Takes results from local inference
-2. Looks up qualifiers in local scopes
-3. Converts to `TypeReference::Resolved` if found locally
-4. Converts to `TypeReference::Import` if from import statement
-5. Falls back to globals (like `Array`, `Promise`)
-6. Uses `TypeReference::unknown()` if nothing is found
-
-**Where**: Implemented in `js_module_info/collector.rs`
-
-**Output**: Types with resolved local references, import markers, or unknown
-
-### 3. Full Inference
-
-**What**: Resolves import references across module boundaries.
-
-**Process**:
-1. Has access to entire module graph
-2. Resolves `TypeReference::Import` by following imports
-3. Converts to `TypeReference::Resolved` after following imports
-
-**Where**: The Salsa-backed implementation starts at
-`db/queries/type_inference.rs::infer_module_types` and uses helpers under
-`db/type_inference/`. `js_module_info/module_resolver.rs` contains the legacy
-`TypeResolver`-based path.
-
-**Caching**: `infer_module_types` is tracked by Salsa. Imported module results
-are dependencies, so Salsa invalidates affected importers after a change.
-
-## Working with Type Resolvers
-
-### Available Resolvers
-
-```rust
-// 1. For tests
-HardcodedSymbolResolver
-
-// 2. For globals (Array, Promise, etc.)
-GlobalsResolver
-
-// 3. For thin inference (single module)
-JsModuleInfoCollector
-
-// 4. For full inference (across modules)
-ModuleResolver
-```
-
-### Using a Resolver
-
-```rust
-use biome_js_type_info::{TypeResolver, ResolvedTypeData};
-
-fn analyze_type(resolver: &impl TypeResolver, type_ref: TypeReference) {
-    // Resolve the reference
-    let resolved_data: ResolvedTypeData = resolver.resolve_type(type_ref);
-
-    // Get raw data for pattern matching
-    match resolved_data.as_raw_data() {
-        TypeData::String => { /* handle string */ },
-        TypeData::Number => { /* handle number */ },
-        TypeData::Function(func) => { /* handle function */ },
-        _ => { /* handle others */ }
-    }
-
-    // Resolve nested references
-    if let TypeData::Reference(inner_ref) = resolved_data.as_raw_data() {
-        let inner_data = resolver.resolve_type(*inner_ref);
-        // Process inner type
-    }
-}
-```
-
-### Type Flattening
-
-**What**: Converts complex type expressions to concrete types.
-
-**Example**: After resolving `a + b`:
-- If both are `TypeData::Number` → Flatten to `TypeData::Number`
-- Otherwise → Usually flatten to `TypeData::String`
-
-**Where**: Implemented in `flattening.rs`
-
-## Common Workflows
-
-### Implement Type-Aware Lint Rule
-
-```rust
-use biome_analyze::Semantic;
-use biome_js_type_info::{TypeResolver, TypeData};
-
-impl Rule for MyTypeRule {
-    type Query = Semantic<JsCallExpression>;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let model = ctx.model();
-
-        // Get type resolver from model
-        let resolver = model.type_resolver();
-
-        // Get type of expression
-        let expr_type = node.callee().ok()?.infer_type(resolver);
-
-        // Check the type
-        match expr_type.as_raw_data() {
-            TypeData::Function(_) => { /* valid */ },
-            TypeData::Unknown => { /* might be valid, can't tell */ },
-            _ => { return Some(()); /* not callable */ }
-        }
-
-        None
-    }
-}
-```
-
-### Navigate Type References
-
-```rust
-fn is_string_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool {
-    let resolved = resolver.resolve_type(type_ref);
-
-    // Follow references
-    let data = match resolved.as_raw_data() {
-        TypeData::Reference(ref_to) => resolver.resolve_type(*ref_to),
-        _other => resolved,
-    };
-
-    // Check the resolved type
-    matches!(data.as_raw_data(), TypeData::String)
-}
-```
-
-### Work with Function Types
-
-```rust
-fn analyze_function(resolver: &impl TypeResolver, type_ref: TypeReference) {
-    let resolved = resolver.resolve_type(type_ref);
-
-    if let TypeData::Function(func_type) = resolved.as_raw_data() {
-        // Access parameters
-        for param in func_type.parameters() {
-            let param_type = resolver.resolve_type(param.type_ref());
-            // Analyze parameter type
-        }
-
-        // Access return type
-        let return_type = resolver.resolve_type(func_type.return_type());
-    }
-}
-```
-
-## Architecture Principles
-
-### Why Type References?
-
-**Advantages**:
-1. **No stale data**: Module updates don't leave old types in memory
-2. **Better performance**: Types stored in vectors (data locality)
-3. **Easier debugging**: Can inspect all types in vector
-4. **Simpler algorithms**: Process vectors instead of traversing graphs
-
-**Trade-off**: Must explicitly resolve references (not automatic like `Arc`)
-
-### ResolvedTypeId Structure
-
-```rust
-struct ResolvedTypeId(ResolverId, TypeId)
-```
-
-- `TypeId` (u32): Index into a type vector
-- `ResolverId` (u32): Identifies which vector to use
-- Total: 64 bits (compact representation)
-
-### ResolvedTypeData
-
-Always work with `ResolvedTypeData` from resolver, not raw `&TypeData`:
-
-```rust
-// Good - tracks resolver context
-let resolved_data: ResolvedTypeData = resolver.resolve_type(type_ref);
-
-// Be careful - loses resolver context
-let raw_data: &TypeData = resolved_data.as_raw_data();
-// Can't resolve nested TypeReferences without ResolverId!
-```
-
-## Tips
-
-- **Unknown types**: `TypeData::Unknown` means inference not implemented, treat as "could be anything"
-- **Follow references**: Always follow `TypeData::Reference` to get actual type
-- **Resolver context**: Keep `ResolvedTypeData` when possible, don't extract raw `TypeData` early
-- **Performance**: Type vectors are fast - iterate directly instead of recursive traversal
-- **IDE focus**: All design decisions prioritize instant IDE updates over CLI performance
-- **Caching**: Salsa memoizes full-inference query results and invalidates them through tracked module dependencies
-- **Globals**: Currently hardcoded, eventually should use TypeScript's `.d.ts` files
-
-## Common Patterns
-
-```rust
-// Pattern 1: Resolve and flatten
-let type_ref = expr.infer_type(resolver);
-let flattened = type_ref.flatten(resolver);
-
-// Pattern 2: Check if type matches
-fn is_string_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool {
-    let resolved = resolver.resolve_type(type_ref);
-    matches!(resolved.as_raw_data(), TypeData::String)
-}
-
-// Pattern 3: Handle unknown gracefully
-match resolved.as_raw_data() {
-    TypeData::Unknown | TypeData::UnknownKeyword => {
-        // Can't verify, assume valid
-        return None;
-    }
-    TypeData::String => { /* handle */ }
-    _ => { /* handle */ }
-}
-```
-
-## CSS and HTML Module Graph
-
-The module graph tracks not only JS imports/exports but also CSS class names and HTML class references, used by cross-file lint rules like `noUnusedStyles` and `noUndeclaredStyles`.
-
-### Key Types
-
-```
-CssModuleInfo   — classes: IndexSet<CssClass>
-HtmlModuleInfo  — style_classes: IndexSet<CssClass>   (from <style> blocks)
-                — referenced_classes: IndexSet<CssClass> (from class="..." attrs)
-                — imported_stylesheets: Vec<ResolvedPath>
-JsModuleInfo    — referenced_classes: IndexSet<CssClass> (from className="...")
-```
-
-### `CssClass` Design
-
-`CssClass` stores a class name **without allocating a `String` per word**:
-
-```rust
-pub struct CssClass {
-    pub(crate) token: TokenText,  // the full token (or its inner text) — refcount only
-    pub range: TextRange,         // byte range relative to token.text()
-}
-
-impl CssClass {
-    pub fn text(&self) -> &str {
-        let start = usize::from(self.range.start());
-        let end = usize::from(self.range.end());
-        &self.token.text()[start..end]
-    }
-}
-```
-
-- `Borrow<str>`, `Hash`, and `Eq` all delegate to `self.text()`, so `IndexSet::contains("foo")` works with a plain `&str`.
-- For CSS selectors (`.foo`), the token is the whole selector token and the range covers it entirely.
-- For HTML/JSX string attributes (`class="foo bar"`), the token is the **inner** (quote-stripped) `TokenText` from `inner_string_text()`, and each word has its own offset range within that inner text.
-
-### Populating `CssClass` from a CSS selector
-
-```rust
-let token_text = token.token_text_trimmed();
-let len = u32::from(token_text.len());
-classes.insert(CssClass {
-    token: token_text,
-    range: TextRange::new(TextSize::from(0), TextSize::from(len)),
-});
-```
-
-### Populating `CssClass` from a `class="foo bar"` attribute
-
-```rust
-// Use inner_string_text() — strips quotes, no allocation.
-let inner: TokenText = html_string.inner_string_text()?;
-let content = inner.text();
-let mut offset: u32 = 0;
-for word in content.split_ascii_whitespace() {
-    let word_offset = content[offset as usize..]
-        .find(word)
-        .map_or(offset, |pos| offset + pos as u32);
-    let start = TextSize::from(word_offset);
-    let end = start + TextSize::from(word.len() as u32);
-    classes.insert(CssClass {
-        token: inner.clone(), // refcount bump only
-        range: TextRange::new(start, end),
-    });
-    offset = word_offset + word.len() as u32;
-}
-```
-
-### Cross-file class lookup
-
-```rust
-// In a CSS lint rule:
-module_graph.is_class_referenced_by_importers(css_file_path, class_name_str)
-
-// In an HTML lint rule:
-let html_info = module_graph.html_module_info_for_path(file_path)?;
-let css_info  = module_graph.css_module_info_for_path(stylesheet_path)?;
-
-// Zero-alloc lookup (Borrow<str> impl):
-html_info.style_classes.contains("foo")
-css_info.classes.contains("bar")
-```
-
-### Public Function Audit Rules
-
-When adding or removing functions from the module graph, always verify each **public** function has a real production call site (not just test code).
-
-**Rules:**
-- A function used only in tests is not justified — remove it
-- Tests calling a function do not count as "production use"
-- Check with `grep` across all crates before removing anything
-- `data()` is used from `biome_service/workspace/server.rs` — do not remove it even if it looks test-only
-
-## References
-
-- Architecture guide: `crates/biome_js_type_info/CONTRIBUTING.md`
-- Module graph: `crates/biome_module_graph/`
-- Type resolver trait: `crates/biome_js_type_info/src/resolver.rs`
-- Flattening: `crates/biome_js_type_info/src/flattening.rs`
+`infer_module_types` serves contracts that need complete tables.
+`infer_module_types_bottom_up` is an untracked external scheduler and must not
+be called from a new tracked query.
+
+## Type-Aware Lint Rules
+
+Type-aware JavaScript rules use the analyzer service rather than database
+queries directly:
+
+1. Declare `domains: &[RuleDomain::Types]` in rule metadata.
+2. Use `Typed<N>` as the rule query.
+3. Call an existing inference method on `RuleContext`, backed by `TypedService`.
+4. Inspect the returned `InferredType` through its bounded helpers.
+5. Handle classifications explicitly as `Match`, `NoMatch`, or `Indeterminate`.
+
+Start from `crates/biome_js_analyze/src/services/typed.rs` and search current
+`Typed<` consumers. Prefer a classification request when a rule asks one
+property; do not normalize and traverse a complete type when a narrower
+classifier answers the question.
+
+## Changing Raw Inference
+
+When adding syntax-derived type information:
+
+1. Define the raw representation in
+   `crates/biome_js_type_info/src/type_data.rs`.
+2. Collect it in `crates/biome_js_type_info/src/local_inference.rs` or
+   `crates/biome_module_graph/src/js_module_info/collector.rs`, preserving
+   unresolved operands as `TypeReference` values.
+3. Convert it in `crates/biome_js_type_info/src/interned_types.rs`.
+4. Add evaluation under `crates/biome_module_graph/src/db/type_inference/` only
+   when generic raw-to-inferred conversion is insufficient.
+5. Audit raw and inferred matches, traversal, and formatting for the new variant.
+
+Collector snapshots prove the raw structure remains deferred where database
+resolution is required. Query tests separately prove the inferred result.
+
+## Requests and Tracked Queries
+
+Requests live under
+`crates/biome_module_graph/src/type_inference/requests/`. Add one for a reusable
+result contract, not for an individual lint rule. Reuse a current request when
+output and uncertainty behavior match.
+
+A request defines stable metadata, one canonical execution path, exact source
+origin, and explicit uncertainty. Compose operations through
+`TypeInferenceRequestContext`; analyzer code should not construct low-level query
+inputs.
+
+Add a tracked query only when its result needs an independent memoization and
+invalidation boundary. A new query must:
+
+- return the smallest semantic result its consumer needs;
+- take the database and one Salsa input or interned key;
+- read only dependencies that can affect the result;
+- define missing-input, ambiguity, cycle, and work-budget behavior;
+- preserve `Unknown` or `Indeterminate` rather than inventing a definite result;
+- use the current query instrumentation family;
+- have correctness and selective-execution tests.
+
+Interning equal inputs gives them shared identity; it does not memoize query
+results. Follow the module-graph guide's **Request architecture** and **Adding a
+tracked query** sections for current traits, registration, and test requirements.
+
+## Resolution and Result Semantics
+
+On-demand resolution follows the selected lookup path until the request requires
+broader work. Normalization resolves reachable handles with bounded traversal;
+it is not complete-module inference. Namespace expansion and guarded deep-import
+fallback can widen work substantially and must remain explicit and observable.
+
+Do not conflate these outcomes:
+
+| Result | Meaning |
+| --- | --- |
+| `None` | The request has no result under its documented contract |
+| `InferredTypeData::Unknown` | Inference produced a type whose structure is undetermined |
+| `InferredTypeData::UnknownKeyword` | Source explicitly uses TypeScript's `unknown` type |
+| `TypeInferenceClassification::Indeterminate` | Inference cannot prove a match or non-match |
+| `TypeInferenceClassification::Match` | Inference conclusively proves the condition |
+| `TypeInferenceClassification::NoMatch` | Inference conclusively disproves the condition |
+
+Unknown or indeterminate information is not a negative result. Preserve it to
+avoid false-positive diagnostics. Read the canonical widening, cycle recovery,
+and result-semantics sections before changing those paths.
+
+## Testing and Profiling
+
+Test the narrowest affected boundary:
+
+- collector tests for raw records and references;
+- request/query tests for results, imports, cycles, and uncertainty;
+- Salsa event tests when dependency or invalidation scope changes;
+- analyzer fixtures for final diagnostic behavior.
+
+For targeted flows, prove unrelated edits reuse the query and consumed inputs
+recompute it. Assert whole-module inference does not execute unless the request
+contract or tested fallback requires it.
+
+Use the maintenance profile documented in the module-graph guide when a request
+resolves more data than expected. Request and query timings are inclusive and
+must not be added together. Load `testing-codegen` for snapshot mechanics.
+
+## Review Checklist
+
+- The implementation uses the correct raw, inferred, or analyzer-facing world.
+- The request or query is the narrowest boundary satisfying its contract.
+- Missing data, ambiguity, cycles, and exhausted budgets preserve uncertainty.
+- Cross-module inferred data remains owned by its source module.
+- New request contracts are reusable and have stable metadata.
+- New query keys and dependencies are stable Salsa values.
+- Whole-module inference is absent or explicitly justified.
+- Correctness and selective-execution tests cover the changed boundary.

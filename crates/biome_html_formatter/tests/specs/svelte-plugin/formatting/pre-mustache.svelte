@@ -1,0 +1,16 @@
+<pre>Hello,
+  world!   {JSON.stringify({   foo:'bar'},null,
+  2)}Goodbye.
+  this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
+  <code>const asd = {
+    variable };</code>
+      <code>nested
+
+        should
+
+        stay
+
+        as is
+      </code>
+			this line is intended using tabs which should be preserved
+</pre>

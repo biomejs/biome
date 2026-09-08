@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/attributes-without-quotes.svelte
+---
+
+# Input
+
+```svelte
+<script  lang="ts"module
+></script>
+
+<script  lang=ts boolean></script>
+
+<p class=foo>asd</p>
+<div>
+    <script  lang=ts>d</script>
+</div>
+
+<style lang="less
+
+"></style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,9 +4,7 @@
+ 
+ <p class="foo">asd</p>
+ <div>
+-    <script lang="ts">
+-        d;
+-    </script>
++    <script lang="ts">d</script>
+ </div>
+ 
+ <style
+```
+
+# Output
+
+```svelte
+<script lang="ts" module></script>
+
+<script lang="ts" boolean></script>
+
+<p class="foo">asd</p>
+<div>
+    <script lang="ts">d</script>
+</div>
+
+<style
+    lang="less
+
+"
+></style>
+```

@@ -178,7 +178,7 @@ impl Rule for NoInferrableTypes {
     fn diagnostic(_: &RuleContext<Self>, annotation: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            annotation.range(),
+            annotation.ty().ok()?.range(),
             markup! {
                 "This type annotation is trivially inferred from its initialization."
             },

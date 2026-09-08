@@ -21,7 +21,7 @@ use crate::syntax::{
     parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, T, decode_css_identifier};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{
     ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
@@ -29,7 +29,9 @@ use biome_parser::parse_recovery::{
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
-pub(crate) use custom::{parse_custom_property_value, parse_supports_custom_property_value};
+pub(crate) use custom::{
+    parse_custom_property_value, parse_legacy_filter_value, parse_supports_custom_property_value,
+};
 
 #[inline]
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
@@ -383,6 +385,7 @@ fn parse_generic_property_with_value_end_set(
     }
 
     let m = p.start();
+    let is_legacy_ie_filter_property = is_at_legacy_ie_filter_property(p);
     let is_custom_property = parse_generic_property_name(p).ok().is_some_and(|name| {
         matches!(
             name.kind(p),
@@ -398,7 +401,16 @@ fn parse_generic_property_with_value_end_set(
     } else {
         p.expect(T![:]);
     }
-    parse_property_value_with_end_set(p, is_custom_property, value_end_set, recovery_end_set);
+    let use_raw_value_parser = !CssSyntaxFeatures::Scss.is_supported(p)
+        && is_legacy_ie_filter_property
+        && is_at_legacy_ie_filter_value(p);
+    parse_property_value_with_end_set(
+        p,
+        is_custom_property,
+        use_raw_value_parser,
+        value_end_set,
+        recovery_end_set,
+    );
 
     Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
@@ -407,16 +419,35 @@ fn parse_generic_property_with_value_end_set(
 pub(crate) fn parse_property_value_with_end_set(
     p: &mut CssParser,
     is_custom_property: bool,
+    is_legacy_filter_value: bool,
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) -> CompletedMarker {
-    if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
+    if is_legacy_filter_value {
+        parse_legacy_filter_value(p, value_end_set, recovery_end_set)
+    } else if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
         parse_custom_property_value(p, value_end_set)
     } else if CssSyntaxFeatures::Scss.is_supported(p) {
         parse_required_scss_value_until(p, value_end_set)
     } else {
         GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p)
     }
+}
+
+#[inline]
+pub(crate) fn is_at_legacy_ie_filter_property(p: &mut CssParser) -> bool {
+    let text = p.cur_text();
+    let name = decode_css_identifier(text);
+    name.eq_ignore_ascii_case("filter") || name.eq_ignore_ascii_case("-ms-filter")
+}
+
+#[inline]
+pub(crate) fn is_at_legacy_ie_filter_value(p: &mut CssParser) -> bool {
+    let text = p.cur_text();
+    let name = decode_css_identifier(text);
+    let is_progid = name.eq_ignore_ascii_case("progid");
+    let is_alpha = name.eq_ignore_ascii_case("alpha");
+    (is_progid && p.nth_at(1, T![:])) || (is_alpha && p.nth_at(1, T!['(']))
 }
 
 pub(crate) const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =

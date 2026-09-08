@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+const allowedTypes = "image/png, .png";
+
+const Valid = () => (
+	<>
+		<input type="file" accept="image/png" />
+		<input type="file" accept=".png" />
+		<input type="file" accept="image/png, .png" />
+		<input type="file" accept=".tar.gz" />
+		<input type="file" accept="audio/*, video/*, image/*" />
+		<input type="FILE" accept="image/png" />
+		<input type="file" accept={allowedTypes} />
+		<input type="file" accept={"IMAGE/PNG"} />
+		<input type="file" accept={`image/${type}`} />
+		<input type={type} accept="image/jpg" />
+		<input type="file" accept="image&sol;png" />
+		<input type="file" accept="image/jpg" {...props} />
+		<input type="file" accept="image/jpg" accept={allowedTypes} />
+		<input type="file" type={type} accept="image/jpg" />
+		<input accept="image/png" />
+		<input type="text" accept="image/png" />
+		<Input type="file" accept="image/jpg" />
+		<Form.input type="file" accept={allowedTypes} />
+		<form:input type="file" accept={allowedTypes} />
+		<input type="file" Accept="image/jpg" />
+		<input Type="file" accept="image/jpg" />
+		<input type="text" type="file" accept="image/jpg" />
+		<input type="file" accept="image/jpeg" accept="image/jpg" />
+		<input type="file" accept="image/jpg" accept="image/jpeg" />
+	</>
+);
+
+```

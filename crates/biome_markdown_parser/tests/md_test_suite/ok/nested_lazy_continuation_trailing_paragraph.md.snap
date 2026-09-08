@@ -17,8 +17,9 @@ hello
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -101,9 +102,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..37
+0: MD_ROOT@0..37
   0: (empty)
-  1: MD_BLOCK_LIST@0..37
+  1: (empty)
+  2: MD_BLOCK_LIST@0..37
     0: MD_BULLET_LIST_ITEM@0..37
       0: MD_BULLET_LIST@0..37
         0: MD_BULLET@0..37
@@ -150,6 +152,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@31..36 "hello" [] []
                         7: MD_TEXTUAL@36..37
                           0: MD_TEXTUAL_LITERAL@36..37 "\n" [] []
-  2: EOF@37..37 "" [] []
+  3: EOF@37..37 "" [] []
 
 ```

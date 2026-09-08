@@ -1,13 +1,13 @@
 use crate::{
     AnyJsBinding, AnyJsCombinedSpecifier, AnyJsImportClause, AnyJsModuleSource,
-    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
-    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
-    JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
-    JsSyntaxKind, JsSyntaxToken, inner_string_text,
+    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsExportFromClause,
+    JsExportNamedFromClause, JsImport, JsImportAssertion, JsImportCallExpression, JsModuleSource,
+    JsNamedImportSpecifier, JsNamedImportSpecifiers, JsNamespaceImportSpecifier,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, Text, TextRange, TokenText,
-    declare_node_union,
+    AstNode, AstSeparatedList, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, Text, TextRange,
+    TokenText, declare_node_union,
 };
 
 impl JsImport {
@@ -332,6 +332,42 @@ impl JsModuleSource {
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
         Ok(inner_string_text(&self.value_token()?))
+    }
+
+    pub fn imports_only_types(&self) -> bool {
+        if let Some(clause) = self.parent::<AnyJsImportClause>() {
+            return match clause {
+                AnyJsImportClause::JsImportDefaultClause(clause) => clause.type_token().is_some(),
+                AnyJsImportClause::JsImportNamedClause(clause) => {
+                    clause.type_token().is_some()
+                        || clause.named_specifiers().is_ok_and(|specifiers| {
+                            let mut specifiers = specifiers.specifiers().iter();
+                            specifiers.len() > 0
+                                && specifiers.all(|specifier| {
+                                    specifier.is_ok_and(|it| it.imports_only_types())
+                                })
+                        })
+                }
+                AnyJsImportClause::JsImportNamespaceClause(clause) => clause.type_token().is_some(),
+                _ => false,
+            };
+        }
+        if self
+            .parent::<JsExportFromClause>()
+            .is_some_and(|clause| clause.type_token().is_some())
+        {
+            return true;
+        }
+        self.parent::<JsExportNamedFromClause>()
+            .is_some_and(|clause| {
+                clause.type_token().is_some() || {
+                    let mut specifiers = clause.specifiers().iter();
+                    specifiers.len() > 0
+                        && specifiers.all(|specifier| {
+                            specifier.is_ok_and(|specifier| specifier.type_token().is_some())
+                        })
+                }
+            })
     }
 }
 

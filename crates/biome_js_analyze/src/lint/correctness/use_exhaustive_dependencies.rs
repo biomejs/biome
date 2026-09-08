@@ -432,6 +432,471 @@ pub struct HookConfigMaps {
     pub(crate) stable_config: FxHashSet<StableReactHookConfiguration>,
 }
 
+/// Flags the possible fixes that were found
+pub enum Fix {
+    /// When the entire dependencies array is missing
+    MissingDependenciesArray { function_name_range: TextRange },
+    /// When the dependency array is not an array literal node.
+    NonLiteralDependenciesArray { expr: AnyJsExpression },
+    /// When a dependency needs to be added.
+    AddDependency {
+        function_name_range: TextRange,
+        captures: (Box<str>, Box<[JsSyntaxNode]>),
+        dependencies_array: JsArrayExpression,
+    },
+    /// When a dependency needs to be removed.
+    RemoveDependency {
+        function_name_range: TextRange,
+        component_function: JsSyntaxNode,
+        dependencies: Box<[AnyJsExpression]>,
+        dependencies_array: JsArrayExpression,
+    },
+    /// When a dependency is too unstable (changes every render).
+    DependencyTooUnstable {
+        dependency_name: Box<str>,
+        dependency_range: TextRange,
+        kind: UnstableDependencyKind,
+    },
+    /// When a dependency is more deep than the capture
+    DependencyTooDeep {
+        function_name_range: TextRange,
+        capture_range: TextRange,
+        dependency_range: TextRange,
+        dependency_text: Box<str>,
+    },
+}
+
+pub enum UnstableDependencyKind {
+    Function,
+    ObjectLiteral,
+}
+
+impl Rule for UseExhaustiveDependencies {
+    type Query = Semantic<JsCallExpression>;
+    type State = Fix;
+    type Signals = Box<[Self::State]>;
+    type Options = UseExhaustiveDependenciesOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+        let hook_config_maps = HookConfigMaps::new(options);
+
+        let call = ctx.query();
+        let model = ctx.model();
+
+        let (Some(result), Some(component_function)) = (
+            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model),
+            function_of_hook_call(call),
+        ) else {
+            return Vec::new().into_boxed_slice();
+        };
+
+        let mut signals = Vec::new();
+
+        let dependencies_array = match &result.dependencies_node {
+            Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
+            Some(expr) => {
+                return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
+                    .into_boxed_slice();
+            }
+            None => {
+                return if options.report_missing_dependencies_array() {
+                    vec![Fix::MissingDependenciesArray {
+                        function_name_range: result.function_name_range,
+                    }]
+                    .into_boxed_slice()
+                } else {
+                    Vec::new().into_boxed_slice()
+                };
+            }
+        };
+
+        let component_function_range = component_function.text_range_with_trivia();
+
+        let captures: Vec<_> =
+            get_relevant_capture_nodes(&result, model, &component_function_range)
+                .iter()
+                .filter_map(|capture_node| {
+                    let expression_candidates = get_expression_candidates(capture_node.clone());
+                    if capture_needs_to_be_in_the_dependency_list(
+                        capture_node,
+                        &expression_candidates,
+                        &component_function_range,
+                        model,
+                        &hook_config_maps,
+                    ) {
+                        // Latest expression candidate is the longest expression
+                        return Some(expression_candidates.last().map_or_else(
+                            || capture_node.clone(),
+                            |expression| expression.syntax().clone(),
+                        ));
+                    }
+                    None
+                })
+                .collect();
+
+        let deps: Vec<_> = result.all_dependencies().collect();
+        let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
+
+        // Evaluate all the captures
+        for capture in &captures {
+            let mut suggested_fix = None;
+            let mut is_captured_covered = false;
+            for dep in &deps {
+                let (capture_contains_dep, dep_contains_capture) =
+                    compare_member_depth(capture, dep.syntax());
+
+                match (capture_contains_dep, dep_contains_capture) {
+                    // capture == dependency
+                    (true, true) => {
+                        suggested_fix = None;
+                        is_captured_covered = true;
+                        break;
+                    }
+                    // example
+                    // capture: a.b.c
+                    // dependency: a
+                    // this is ok, but we may suggest performance improvements
+                    // in the future
+                    (true, false) => {
+                        // We need to continue, because it may still have a perfect match
+                        // in the dependency list
+                        is_captured_covered = true;
+                    }
+                    // example
+                    // capture: a.b
+                    // dependency: a.b.c
+                    // This can be valid in some cases. We will flag an error nonetheless.
+                    (false, true) => {
+                        // We need to continue, because it may still have a perfect match
+                        // in the dependency list
+                        suggested_fix = Some(Fix::DependencyTooDeep {
+                            function_name_range: result.function_name_range,
+                            capture_range: capture.text_trimmed_range(),
+                            dependency_range: dep.syntax().text_trimmed_range(),
+                            dependency_text: dep.syntax().text_trimmed().into_text().into(),
+                        });
+                    }
+                    _ => {}
+                }
+            }
+
+            if let Some(fix) = suggested_fix {
+                signals.push(fix);
+            }
+
+            if !is_captured_covered {
+                let captures = add_deps
+                    .entry(capture.text_trimmed().into_text().into())
+                    .or_default();
+
+                if !captures.iter().any(|existing| existing == capture) {
+                    captures.push(capture.clone());
+                }
+            }
+        }
+
+        // Split deps into correctly specified ones and unnecessary ones.
+        let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) = deps.into_iter().partition(|dep| {
+            captures.iter().any(|capture| {
+                let (capture_contains_dep, dep_contains_capture) =
+                    compare_member_depth(capture, dep.syntax());
+                capture_contains_dep || dep_contains_capture
+            })
+        });
+
+        // Find duplicated deps from specified ones
+        {
+            let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
+            for dep in correct_deps.iter() {
+                let expression_name = dep.to_string();
+                if dep_list.contains_key(&expression_name) {
+                    signals.push(Fix::RemoveDependency {
+                        function_name_range: result.function_name_range,
+                        component_function: component_function.clone(),
+                        dependencies: vec![dep.clone()].into_boxed_slice(),
+                        dependencies_array: dependencies_array.clone(),
+                    });
+                    continue;
+                }
+                dep_list.insert(expression_name, dep.clone());
+            }
+        }
+
+        // Find correctly specified dependencies with an unstable identity,
+        // since they would trigger re-evaluation on every render.
+        let unstable_deps = correct_deps
+            .into_iter()
+            .filter_map(|dep| determine_unstable_dependency(&dep, model).map(|kind| (dep, kind)));
+
+        // Generate signals
+        for (name, nodes) in add_deps {
+            signals.push(Fix::AddDependency {
+                function_name_range: result.function_name_range,
+                captures: (name, nodes.into_boxed_slice()),
+                dependencies_array: dependencies_array.clone(),
+            });
+        }
+
+        if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
+            signals.push(Fix::RemoveDependency {
+                function_name_range: result.function_name_range,
+                component_function,
+                dependencies: excessive_deps.into_boxed_slice(),
+                dependencies_array: dependencies_array.clone(),
+            });
+        }
+
+        for (unstable_dep, kind) in unstable_deps {
+            signals.push(Fix::DependencyTooUnstable {
+                dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
+                dependency_range: unstable_dep.range(),
+                kind,
+            });
+        }
+
+        signals.into_boxed_slice()
+    }
+
+    fn instances_for_signal(signal: &Self::State) -> Box<[Box<str>]> {
+        match signal {
+            Fix::MissingDependenciesArray { .. } => vec![].into_boxed_slice(),
+            Fix::NonLiteralDependenciesArray { .. } => vec![].into_boxed_slice(),
+            Fix::AddDependency { captures, .. } => vec![captures.0.clone()].into(),
+            Fix::RemoveDependency { dependencies, .. } => dependencies
+                .iter()
+                .map(|dep| dep.syntax().text_trimmed().into_text().into())
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
+            Fix::DependencyTooUnstable {
+                dependency_name, ..
+            } => vec![dependency_name.clone()].into(),
+            Fix::DependencyTooDeep {
+                dependency_text, ..
+            } => vec![dependency_text.clone()].into(),
+        }
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
+        match dep {
+            Fix::MissingDependenciesArray {
+                function_name_range,
+            } => Some(RuleDiagnostic::new(
+                rule_category!(),
+                function_name_range,
+                markup! {"This hook does not have a dependencies array."},
+            )
+            .note(markup! {
+                "React relies on hook dependencies to determine when to re-compute Effects."
+                "\nAdd an explicit array (i.e. "<Emphasis>"[]"</Emphasis>") and list the callback's dependencies inside it."
+                },
+            )),
+            Fix::NonLiteralDependenciesArray { expr } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    expr.range(),
+                    markup! {"This dependencies list is not an array literal."},
+                )
+                .note(markup! {
+                    "Biome can't statically verify whether you've passed the correct dependencies."
+                    "\nReplace the argument with an array literal and list your dependencies within it."
+                })
+            ),
+            Fix::AddDependency {
+                function_name_range,
+                captures,
+                dependencies_array,
+                ..
+            } => {
+                let (capture_text, captures_range) = captures;
+                let mut diag = RuleDiagnostic::new(
+                    rule_category!(),
+                    function_name_range,
+                    markup! {
+                        "This hook "<Emphasis>"does not specify"</Emphasis>" its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."
+                    },
+                ).note(markup! {
+                    "React relies on hook dependencies to determine when to re-compute Effects."
+                    "\nFailing to specify dependencies can result in Effects "<Emphasis>"not updating correctly"</Emphasis>" when state changes."
+                    "\nThese \"stale closures\" are a common source of surprising bugs."
+                    },
+                );
+
+                for range in captures_range {
+                    diag = diag.detail(
+                        range.text_trimmed_range(),
+                        "This dependency is being used here, but is not specified in the hook dependency list.",
+                    );
+                }
+
+                if dependencies_array.elements().len() == 0 {
+                    diag = diag.note("Either include it or remove the dependency array.");
+                }
+
+                Some(diag)
+            }
+            Fix::RemoveDependency {
+                function_name_range,
+                dependencies,
+                component_function,
+                ..
+            } => {
+                let deps_joined_with_comma = dependencies
+                    .iter()
+                    .map(|dep| dep.syntax().text_trimmed().into_text().into())
+                    .collect::<Vec<Box<str>>>()
+                    .join(", ");
+                let mut diag = RuleDiagnostic::new(
+                    rule_category!(),
+                    function_name_range,
+                    markup! {
+                        "This hook specifies "<Emphasis>"more dependencies than necessary"</Emphasis>": "{deps_joined_with_comma}"."
+                    },
+                )
+                .note(markup! {
+                        "React relies on hook dependencies to determine when to re-compute Effects."
+                        "\nSpecifying more dependencies than required can lead to "<Emphasis>"unnecessary re-rendering"</Emphasis>
+                        "\nand "<Emphasis>"degraded performance"</Emphasis>"."
+                    },
+                );
+
+                let model = ctx.model();
+                for dep in dependencies {
+                    if is_out_of_function_scope(dep, component_function, model).unwrap_or(false) {
+                        diag = diag.detail(
+                            dep.syntax().text_trimmed_range(),
+                            "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.",
+                        );
+                    } else {
+                        diag = diag.detail(
+                            dep.syntax().text_trimmed_range(),
+                            "This dependency can be removed from the list.",
+                        );
+                    }
+                }
+
+                Some(diag)
+            }
+            Fix::DependencyTooUnstable {
+                dependency_name,
+                dependency_range,
+                kind,
+            } => {
+                let suggested_hook = match kind {
+                    UnstableDependencyKind::Function => "useCallback()",
+                    UnstableDependencyKind::ObjectLiteral => "useMemo()",
+                };
+                let diag = RuleDiagnostic::new(
+                    rule_category!(),
+                    dependency_range,
+                    markup! {
+                        <Emphasis>{dependency_name.as_ref()}</Emphasis>" changes on every re-render and should not be used as a hook dependency."
+                    },
+                )
+                .note(markup! {
+                    "To fix this, wrap the definition of "<Emphasis>{dependency_name.as_ref()}</Emphasis>" in its own "<Emphasis>{suggested_hook}</Emphasis>" hook."
+                });
+                Some(diag)
+            }
+            Fix::DependencyTooDeep {
+                function_name_range,
+                capture_range,
+                dependency_range,
+                dependency_text,
+            } => {
+                let diag = RuleDiagnostic::new(
+                    rule_category!(),
+                    function_name_range,
+                    markup! {
+                        "This hook specifies a dependency more specific than its captures: "{dependency_text.as_ref()}""
+                    },
+                )
+                .detail(capture_range, "This capture is more generic than...")
+                .detail(dependency_range, "...this dependency.");
+                Some(diag)
+            }
+        }
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+
+        let message = match state {
+            Fix::AddDependency {
+                captures,
+                dependencies_array,
+                ..
+            } => {
+                let (capture_text, captures_range) = captures;
+                let new_elements = captures_range.first().into_iter().filter_map(|node| {
+                    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
+                        return Some(AnyJsArrayElement::AnyJsExpression(
+                            make::js_identifier_expression(make::js_reference_identifier(
+                                jsx_ref.value_token().ok()?,
+                            ))
+                            .into(),
+                        ));
+                    }
+
+                    node.ancestors()
+                        .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
+                            Some(node) => Some(make::js_identifier_expression(node).into()),
+                            _ => node.cast::<AnyJsExpression>(),
+                        })
+                        .and_then(|node| node.trim_trivia())
+                        .map(AnyJsArrayElement::AnyJsExpression)
+                });
+
+                let elements = dependencies_array.elements();
+                let elements = elements
+                    .elements()
+                    .flat_map(|element| element.into_node())
+                    .chain(new_elements)
+                    .collect::<Vec<_>>();
+
+                mutation.replace_node(
+                    dependencies_array.clone(),
+                    recreate_array(dependencies_array, elements),
+                );
+
+                markup! { "Add the missing dependency "<Emphasis>{capture_text.as_ref()}</Emphasis>" to the list." }
+            }
+            Fix::RemoveDependency {
+                dependencies,
+                dependencies_array,
+                ..
+            } => {
+                let elements = dependencies_array.elements();
+                let elements = elements.elements()
+                    .flat_map(|element| element.into_node())
+                    .filter(|node| {
+                        matches!(node, AnyJsArrayElement::AnyJsExpression(expr) if !dependencies.contains(expr))
+                    })
+                    .collect::<Vec<_>>();
+
+                mutation.replace_node(
+                    dependencies_array.clone(),
+                    recreate_array(dependencies_array, elements),
+                );
+
+                markup! { "Remove the extra dependencies from the list." }
+            }
+            _ => return None,
+        };
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            message,
+            mutation,
+        ))
+    }
+}
+
+
+declare_node_union! {
+    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier | JsxReferenceIdentifier
+}
 impl Default for HookConfigMaps {
     fn default() -> Self {
         let hooks_config: std::collections::HashMap<Box<str>, _, rustc_hash::FxBuildHasher> =
@@ -496,49 +961,6 @@ impl HookConfigMaps {
 
         result
     }
-}
-
-/// Flags the possible fixes that were found
-pub enum Fix {
-    /// When the entire dependencies array is missing
-    MissingDependenciesArray { function_name_range: TextRange },
-    /// When the dependency array is not an array literal node.
-    NonLiteralDependenciesArray { expr: AnyJsExpression },
-    /// When a dependency needs to be added.
-    AddDependency {
-        function_name_range: TextRange,
-        captures: (Box<str>, Box<[JsSyntaxNode]>),
-        dependencies_array: JsArrayExpression,
-    },
-    /// When a dependency needs to be removed.
-    RemoveDependency {
-        function_name_range: TextRange,
-        component_function: JsSyntaxNode,
-        dependencies: Box<[AnyJsExpression]>,
-        dependencies_array: JsArrayExpression,
-    },
-    /// When a dependency is too unstable (changes every render).
-    DependencyTooUnstable {
-        dependency_name: Box<str>,
-        dependency_range: TextRange,
-        kind: UnstableDependencyKind,
-    },
-    /// When a dependency is more deep than the capture
-    DependencyTooDeep {
-        function_name_range: TextRange,
-        capture_range: TextRange,
-        dependency_range: TextRange,
-        dependency_text: Box<str>,
-    },
-}
-
-pub enum UnstableDependencyKind {
-    Function,
-    ObjectLiteral,
-}
-
-declare_node_union! {
-    pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier | JsxReferenceIdentifier
 }
 
 /// Returns expression candidates for a given reference for further checking.
@@ -1273,428 +1695,6 @@ fn get_relevant_capture_nodes(
             .collect()
     } else {
         vec![]
-    }
-}
-
-impl Rule for UseExhaustiveDependencies {
-    type Query = Semantic<JsCallExpression>;
-    type State = Fix;
-    type Signals = Box<[Self::State]>;
-    type Options = UseExhaustiveDependenciesOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let options = ctx.options();
-        let hook_config_maps = HookConfigMaps::new(options);
-
-        let call = ctx.query();
-        let model = ctx.model();
-
-        let (Some(result), Some(component_function)) = (
-            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model),
-            function_of_hook_call(call),
-        ) else {
-            return Vec::new().into_boxed_slice();
-        };
-
-        let mut signals = Vec::new();
-
-        let dependencies_array = match &result.dependencies_node {
-            Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
-            Some(expr) => {
-                return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
-                    .into_boxed_slice();
-            }
-            None => {
-                return if options.report_missing_dependencies_array() {
-                    vec![Fix::MissingDependenciesArray {
-                        function_name_range: result.function_name_range,
-                    }]
-                    .into_boxed_slice()
-                } else {
-                    Vec::new().into_boxed_slice()
-                };
-            }
-        };
-
-        let component_function_range = component_function.text_range_with_trivia();
-
-        let captures: Vec<_> =
-            get_relevant_capture_nodes(&result, model, &component_function_range)
-                .iter()
-                .filter_map(|capture_node| {
-                    let expression_candidates = get_expression_candidates(capture_node.clone());
-                    if capture_needs_to_be_in_the_dependency_list(
-                        capture_node,
-                        &expression_candidates,
-                        &component_function_range,
-                        model,
-                        &hook_config_maps,
-                    ) {
-                        // Latest expression candidate is the longest expression
-                        return Some(expression_candidates.last().map_or_else(
-                            || capture_node.clone(),
-                            |expression| expression.syntax().clone(),
-                        ));
-                    }
-                    None
-                })
-                .collect();
-
-        let deps: Vec<_> = result.all_dependencies().collect();
-        let mut add_deps: BTreeMap<Box<str>, Vec<JsSyntaxNode>> = BTreeMap::new();
-
-        // Evaluate all the captures
-        for capture in &captures {
-            let mut suggested_fix = None;
-            let mut is_captured_covered = false;
-            for dep in &deps {
-                let (capture_contains_dep, dep_contains_capture) =
-                    compare_member_depth(capture, dep.syntax());
-
-                match (capture_contains_dep, dep_contains_capture) {
-                    // capture == dependency
-                    (true, true) => {
-                        suggested_fix = None;
-                        is_captured_covered = true;
-                        break;
-                    }
-                    // example
-                    // capture: a.b.c
-                    // dependency: a
-                    // this is ok, but we may suggest performance improvements
-                    // in the future
-                    (true, false) => {
-                        // We need to continue, because it may still have a perfect match
-                        // in the dependency list
-                        is_captured_covered = true;
-                    }
-                    // example
-                    // capture: a.b
-                    // dependency: a.b.c
-                    // This can be valid in some cases. We will flag an error nonetheless.
-                    (false, true) => {
-                        // We need to continue, because it may still have a perfect match
-                        // in the dependency list
-                        suggested_fix = Some(Fix::DependencyTooDeep {
-                            function_name_range: result.function_name_range,
-                            capture_range: capture.text_trimmed_range(),
-                            dependency_range: dep.syntax().text_trimmed_range(),
-                            dependency_text: dep.syntax().text_trimmed().into_text().into(),
-                        });
-                    }
-                    _ => {}
-                }
-            }
-
-            if let Some(fix) = suggested_fix {
-                signals.push(fix);
-            }
-
-            if !is_captured_covered {
-                let captures = add_deps
-                    .entry(capture.text_trimmed().into_text().into())
-                    .or_default();
-
-                if !captures.iter().any(|existing| existing == capture) {
-                    captures.push(capture.clone());
-                }
-            }
-        }
-
-        // Split deps into correctly specified ones and unnecessary ones.
-        let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) = deps.into_iter().partition(|dep| {
-            captures.iter().any(|capture| {
-                let (capture_contains_dep, dep_contains_capture) =
-                    compare_member_depth(capture, dep.syntax());
-                capture_contains_dep || dep_contains_capture
-            })
-        });
-
-        // Find duplicated deps from specified ones
-        {
-            let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
-            for dep in correct_deps.iter() {
-                let expression_name = dep.to_string();
-                if dep_list.contains_key(&expression_name) {
-                    signals.push(Fix::RemoveDependency {
-                        function_name_range: result.function_name_range,
-                        component_function: component_function.clone(),
-                        dependencies: vec![dep.clone()].into_boxed_slice(),
-                        dependencies_array: dependencies_array.clone(),
-                    });
-                    continue;
-                }
-                dep_list.insert(expression_name, dep.clone());
-            }
-        }
-
-        // Find correctly specified dependencies with an unstable identity,
-        // since they would trigger re-evaluation on every render.
-        let unstable_deps = correct_deps
-            .into_iter()
-            .filter_map(|dep| determine_unstable_dependency(&dep, model).map(|kind| (dep, kind)));
-
-        // Generate signals
-        for (name, nodes) in add_deps {
-            signals.push(Fix::AddDependency {
-                function_name_range: result.function_name_range,
-                captures: (name, nodes.into_boxed_slice()),
-                dependencies_array: dependencies_array.clone(),
-            });
-        }
-
-        if options.report_unnecessary_dependencies() && !excessive_deps.is_empty() {
-            signals.push(Fix::RemoveDependency {
-                function_name_range: result.function_name_range,
-                component_function,
-                dependencies: excessive_deps.into_boxed_slice(),
-                dependencies_array: dependencies_array.clone(),
-            });
-        }
-
-        for (unstable_dep, kind) in unstable_deps {
-            signals.push(Fix::DependencyTooUnstable {
-                dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
-                dependency_range: unstable_dep.range(),
-                kind,
-            });
-        }
-
-        signals.into_boxed_slice()
-    }
-
-    fn instances_for_signal(signal: &Self::State) -> Box<[Box<str>]> {
-        match signal {
-            Fix::MissingDependenciesArray { .. } => vec![].into_boxed_slice(),
-            Fix::NonLiteralDependenciesArray { .. } => vec![].into_boxed_slice(),
-            Fix::AddDependency { captures, .. } => vec![captures.0.clone()].into(),
-            Fix::RemoveDependency { dependencies, .. } => dependencies
-                .iter()
-                .map(|dep| dep.syntax().text_trimmed().into_text().into())
-                .collect::<Vec<_>>()
-                .into_boxed_slice(),
-            Fix::DependencyTooUnstable {
-                dependency_name, ..
-            } => vec![dependency_name.clone()].into(),
-            Fix::DependencyTooDeep {
-                dependency_text, ..
-            } => vec![dependency_text.clone()].into(),
-        }
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
-        match dep {
-            Fix::MissingDependenciesArray {
-                function_name_range,
-            } => Some(RuleDiagnostic::new(
-                rule_category!(),
-                function_name_range,
-                markup! {"This hook does not have a dependencies array."},
-            )
-            .note(markup! {
-                "React relies on hook dependencies to determine when to re-compute Effects."
-                "\nAdd an explicit array (i.e. "<Emphasis>"[]"</Emphasis>") and list the callback's dependencies inside it."
-                },
-            )),
-            Fix::NonLiteralDependenciesArray { expr } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    expr.range(),
-                    markup! {"This dependencies list is not an array literal."},
-                )
-                .note(markup! {
-                    "Biome can't statically verify whether you've passed the correct dependencies."
-                    "\nReplace the argument with an array literal and list your dependencies within it."
-                })
-            ),
-            Fix::AddDependency {
-                function_name_range,
-                captures,
-                dependencies_array,
-                ..
-            } => {
-                let (capture_text, captures_range) = captures;
-                let mut diag = RuleDiagnostic::new(
-                    rule_category!(),
-                    function_name_range,
-                    markup! {
-                        "This hook "<Emphasis>"does not specify"</Emphasis>" its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."
-                    },
-                ).note(markup! {
-                    "React relies on hook dependencies to determine when to re-compute Effects."
-                    "\nFailing to specify dependencies can result in Effects "<Emphasis>"not updating correctly"</Emphasis>" when state changes."
-                    "\nThese \"stale closures\" are a common source of surprising bugs."
-                    },
-                );
-
-                for range in captures_range {
-                    diag = diag.detail(
-                        range.text_trimmed_range(),
-                        "This dependency is being used here, but is not specified in the hook dependency list.",
-                    );
-                }
-
-                if dependencies_array.elements().len() == 0 {
-                    diag = diag.note("Either include it or remove the dependency array.");
-                }
-
-                Some(diag)
-            }
-            Fix::RemoveDependency {
-                function_name_range,
-                dependencies,
-                component_function,
-                ..
-            } => {
-                let deps_joined_with_comma = dependencies
-                    .iter()
-                    .map(|dep| dep.syntax().text_trimmed().into_text().into())
-                    .collect::<Vec<Box<str>>>()
-                    .join(", ");
-                let mut diag = RuleDiagnostic::new(
-                    rule_category!(),
-                    function_name_range,
-                    markup! {
-                        "This hook specifies "<Emphasis>"more dependencies than necessary"</Emphasis>": "{deps_joined_with_comma}"."
-                    },
-                )
-                .note(markup! {
-                        "React relies on hook dependencies to determine when to re-compute Effects."
-                        "\nSpecifying more dependencies than required can lead to "<Emphasis>"unnecessary re-rendering"</Emphasis>
-                        "\nand "<Emphasis>"degraded performance"</Emphasis>"."
-                    },
-                );
-
-                let model = ctx.model();
-                for dep in dependencies {
-                    if is_out_of_function_scope(dep, component_function, model).unwrap_or(false) {
-                        diag = diag.detail(
-                            dep.syntax().text_trimmed_range(),
-                            "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.",
-                        );
-                    } else {
-                        diag = diag.detail(
-                            dep.syntax().text_trimmed_range(),
-                            "This dependency can be removed from the list.",
-                        );
-                    }
-                }
-
-                Some(diag)
-            }
-            Fix::DependencyTooUnstable {
-                dependency_name,
-                dependency_range,
-                kind,
-            } => {
-                let suggested_hook = match kind {
-                    UnstableDependencyKind::Function => "useCallback()",
-                    UnstableDependencyKind::ObjectLiteral => "useMemo()",
-                };
-                let diag = RuleDiagnostic::new(
-                    rule_category!(),
-                    dependency_range,
-                    markup! {
-                        <Emphasis>{dependency_name.as_ref()}</Emphasis>" changes on every re-render and should not be used as a hook dependency."
-                    },
-                )
-                .note(markup! {
-                    "To fix this, wrap the definition of "<Emphasis>{dependency_name.as_ref()}</Emphasis>" in its own "<Emphasis>{suggested_hook}</Emphasis>" hook."
-                });
-                Some(diag)
-            }
-            Fix::DependencyTooDeep {
-                function_name_range,
-                capture_range,
-                dependency_range,
-                dependency_text,
-            } => {
-                let diag = RuleDiagnostic::new(
-                    rule_category!(),
-                    function_name_range,
-                    markup! {
-                        "This hook specifies a dependency more specific than its captures: "{dependency_text.as_ref()}""
-                    },
-                )
-                .detail(capture_range, "This capture is more generic than...")
-                .detail(dependency_range, "...this dependency.");
-                Some(diag)
-            }
-        }
-    }
-
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let mut mutation = ctx.root().begin();
-
-        let message = match state {
-            Fix::AddDependency {
-                captures,
-                dependencies_array,
-                ..
-            } => {
-                let (capture_text, captures_range) = captures;
-                let new_elements = captures_range.first().into_iter().filter_map(|node| {
-                    if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
-                        return Some(AnyJsArrayElement::AnyJsExpression(
-                            make::js_identifier_expression(make::js_reference_identifier(
-                                jsx_ref.value_token().ok()?,
-                            ))
-                            .into(),
-                        ));
-                    }
-
-                    node.ancestors()
-                        .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
-                            Some(node) => Some(make::js_identifier_expression(node).into()),
-                            _ => node.cast::<AnyJsExpression>(),
-                        })
-                        .and_then(|node| node.trim_trivia())
-                        .map(AnyJsArrayElement::AnyJsExpression)
-                });
-
-                let elements = dependencies_array.elements();
-                let elements = elements
-                    .elements()
-                    .flat_map(|element| element.into_node())
-                    .chain(new_elements)
-                    .collect::<Vec<_>>();
-
-                mutation.replace_node(
-                    dependencies_array.clone(),
-                    recreate_array(dependencies_array, elements),
-                );
-
-                markup! { "Add the missing dependency "<Emphasis>{capture_text.as_ref()}</Emphasis>" to the list." }
-            }
-            Fix::RemoveDependency {
-                dependencies,
-                dependencies_array,
-                ..
-            } => {
-                let elements = dependencies_array.elements();
-                let elements = elements.elements()
-                    .flat_map(|element| element.into_node())
-                    .filter(|node| {
-                        matches!(node, AnyJsArrayElement::AnyJsExpression(expr) if !dependencies.contains(expr))
-                    })
-                    .collect::<Vec<_>>();
-
-                mutation.replace_node(
-                    dependencies_array.clone(),
-                    recreate_array(dependencies_array, elements),
-                );
-
-                markup! { "Remove the extra dependencies from the list." }
-            }
-            _ => return None,
-        };
-
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            message,
-            mutation,
-        ))
     }
 }
 

@@ -6,8 +6,14 @@ expression: valid.graphql
 ```graphql
 # should not generate diagnostics
 enum Status {
+	"""
+	Some description
+	"""
 	ACTIVE
+	"Some more description"
 	INACTIVE
+	# Some comment
+	SOME_UNDERSCORE
 }
 
 ```

@@ -12,6 +12,7 @@ impl FormatRule<AnyCssSelector> for FormatAnyCssSelector {
             AnyCssSelector::CssComplexSelector(node) => node.format().fmt(f),
             AnyCssSelector::CssCompoundSelector(node) => node.format().fmt(f),
             AnyCssSelector::CssMetavariable(node) => node.format().fmt(f),
+            AnyCssSelector::ScssPartialCombinatorSelector(node) => node.format().fmt(f),
         }
     }
 }

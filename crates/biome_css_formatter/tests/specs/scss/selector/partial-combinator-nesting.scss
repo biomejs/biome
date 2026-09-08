@@ -1,0 +1,4 @@
+.sidebar>/* keep at the partial boundary */{.error{color:red}}
+.toolbar/* keep before the partial combinator */>{.item{display:flex}}
+.card{+{.media{display:block}}> .existing-leading-form{color:green}}
+.navbar{&~{.container{width:100%}}}

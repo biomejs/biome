@@ -1,0 +1,124 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "a" "b">
+<svg></svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")],
+        },
+        attributes: HtmlAttributeList [
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@6..13 "version" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@13..14 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@14..19 "\"1.0\"" [] [],
+                    },
+                },
+            },
+        ],
+        end_token: PI_END@19..21 "?>" [] [],
+    },
+    directive: HtmlDirective {
+        l_angle_token: L_ANGLE@21..23 "<" [Newline("\n")] [],
+        excl_token: BANG@23..24 "!" [] [],
+        doctype_token: DOCTYPE_KW@24..32 "DOCTYPE" [] [Whitespace(" ")],
+        name_token: HTML_LITERAL@32..36 "svg" [] [Whitespace(" ")],
+        html_token: missing (optional),
+        quirk_token: HTML_LITERAL@36..43 "PUBLIC" [] [Whitespace(" ")],
+        public_id_token: HTML_STRING_LITERAL@43..47 "\"a\"" [] [Whitespace(" ")],
+        system_id_token: HTML_STRING_LITERAL@47..50 "\"b\"" [] [],
+        r_angle_token: R_ANGLE@50..51 ">" [] [],
+    },
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@51..53 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@53..56 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@56..57 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@57..58 "<" [] [],
+                slash_token: SLASH@58..59 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@59..62 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@62..63 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@63..64 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..64
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..21
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..6
+      0: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")]
+    2: HTML_ATTRIBUTE_LIST@6..19
+      0: HTML_ATTRIBUTE@6..19
+        0: HTML_ATTRIBUTE_NAME@6..13
+          0: HTML_LITERAL@6..13 "version" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@13..19
+          0: EQ@13..14 "=" [] []
+          1: HTML_STRING@14..19
+            0: HTML_STRING_LITERAL@14..19 "\"1.0\"" [] []
+    3: PI_END@19..21 "?>" [] []
+  3: HTML_DIRECTIVE@21..51
+    0: L_ANGLE@21..23 "<" [Newline("\n")] []
+    1: BANG@23..24 "!" [] []
+    2: DOCTYPE_KW@24..32 "DOCTYPE" [] [Whitespace(" ")]
+    3: HTML_LITERAL@32..36 "svg" [] [Whitespace(" ")]
+    4: (empty)
+    5: HTML_LITERAL@36..43 "PUBLIC" [] [Whitespace(" ")]
+    6: HTML_STRING_LITERAL@43..47 "\"a\"" [] [Whitespace(" ")]
+    7: HTML_STRING_LITERAL@47..50 "\"b\"" [] []
+    8: R_ANGLE@50..51 ">" [] []
+  4: HTML_ELEMENT_LIST@51..63
+    0: HTML_ELEMENT@51..63
+      0: HTML_OPENING_ELEMENT@51..57
+        0: L_ANGLE@51..53 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@53..56
+          0: SVG_KW@53..56 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@56..56
+        3: R_ANGLE@56..57 ">" [] []
+      1: HTML_ELEMENT_LIST@57..57
+      2: HTML_CLOSING_ELEMENT@57..63
+        0: L_ANGLE@57..58 "<" [] []
+        1: SLASH@58..59 "/" [] []
+        2: HTML_TAG_NAME@59..62
+          0: SVG_KW@59..62 "svg" [] []
+        3: R_ANGLE@62..63 ">" [] []
+  5: EOF@63..64 "" [Newline("\n")] []
+
+```

@@ -16,6 +16,7 @@ expression: snapshot
   <
   /
 >;
+<><p>a</p></>;
 
 ```
 
@@ -108,19 +109,61 @@ JsModule {
             },
             semicolon_token: SEMICOLON@69..70 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@70..72 "<" [Newline("\n")] [],
+                        r_angle_token: R_ANGLE@72..73 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxElement {
+                            opening_element: JsxOpeningElement {
+                                l_angle_token: L_ANGLE@73..74 "<" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@74..75 "p" [] [],
+                                },
+                                type_arguments: missing (optional),
+                                attributes: JsxAttributeList [],
+                                r_angle_token: R_ANGLE@75..76 ">" [] [],
+                            },
+                            children: JsxChildList [
+                                JsxText {
+                                    value_token: JSX_TEXT_LITERAL@76..77 "a" [] [],
+                                },
+                            ],
+                            closing_element: JsxClosingElement {
+                                l_angle_token: L_ANGLE@77..78 "<" [] [],
+                                slash_token: SLASH@78..79 "/" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@79..80 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@80..81 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: L_ANGLE@81..82 "<" [] [],
+                        slash_token: SLASH@82..83 "/" [] [],
+                        r_angle_token: R_ANGLE@83..84 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@84..85 ";" [] [],
+        },
     ],
-    eof_token: EOF@70..71 "" [Newline("\n")] [],
+    eof_token: EOF@85..86 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..71
+0: JS_MODULE@0..86
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..70
+  3: JS_MODULE_ITEM_LIST@0..85
     0: JS_EXPRESSION_STATEMENT@0..6
       0: JSX_TAG_EXPRESSION@0..5
         0: JSX_FRAGMENT@0..5
@@ -175,6 +218,35 @@ JsModule {
             1: SLASH@63..67 "/" [Newline("\n"), Whitespace("  ")] []
             2: R_ANGLE@67..69 ">" [Newline("\n")] []
       1: SEMICOLON@69..70 ";" [] []
-  4: EOF@70..71 "" [Newline("\n")] []
+    4: JS_EXPRESSION_STATEMENT@70..85
+      0: JSX_TAG_EXPRESSION@70..84
+        0: JSX_FRAGMENT@70..84
+          0: JSX_OPENING_FRAGMENT@70..73
+            0: L_ANGLE@70..72 "<" [Newline("\n")] []
+            1: R_ANGLE@72..73 ">" [] []
+          1: JSX_CHILD_LIST@73..81
+            0: JSX_ELEMENT@73..81
+              0: JSX_OPENING_ELEMENT@73..76
+                0: L_ANGLE@73..74 "<" [] []
+                1: JSX_NAME@74..75
+                  0: JSX_IDENT@74..75 "p" [] []
+                2: (empty)
+                3: JSX_ATTRIBUTE_LIST@75..75
+                4: R_ANGLE@75..76 ">" [] []
+              1: JSX_CHILD_LIST@76..77
+                0: JSX_TEXT@76..77
+                  0: JSX_TEXT_LITERAL@76..77 "a" [] []
+              2: JSX_CLOSING_ELEMENT@77..81
+                0: L_ANGLE@77..78 "<" [] []
+                1: SLASH@78..79 "/" [] []
+                2: JSX_NAME@79..80
+                  0: JSX_IDENT@79..80 "p" [] []
+                3: R_ANGLE@80..81 ">" [] []
+          2: JSX_CLOSING_FRAGMENT@81..84
+            0: L_ANGLE@81..82 "<" [] []
+            1: SLASH@82..83 "/" [] []
+            2: R_ANGLE@83..84 ">" [] []
+      1: SEMICOLON@84..85 ";" [] []
+  4: EOF@85..86 "" [Newline("\n")] []
 
 ```

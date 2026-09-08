@@ -82,5 +82,20 @@ async function* yieldStarWithAwait() {
 	yield* processData(data);
 }
 
+async function withAwaitUsing() {
+	await using resource = acquire();
+	consume(resource);
+}
+
+async function* withAwaitUsingGenerator() {
+	await using resource = acquire();
+	yield resource;
+}
+
+async function withAwaitUsingForOf() {
+	for (await using resource of resources) {
+		consume(resource);
+	}
+}
 
 ```

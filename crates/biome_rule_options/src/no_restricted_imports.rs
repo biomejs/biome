@@ -70,7 +70,7 @@ impl From<Paths> for PathOptions {
 
 impl Deserializable for Paths {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -180,7 +180,7 @@ impl From<Patterns> for PatternOptions {
 
 impl Deserializable for Patterns {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

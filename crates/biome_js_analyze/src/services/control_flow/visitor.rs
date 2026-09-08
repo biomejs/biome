@@ -55,14 +55,14 @@ macro_rules! declare_visitor {
                         // For safety, cut off the stack slices below the start
                         // of the current function in debug mode
                         #[cfg(debug_assertions)]
-                        $id: (
-                            visitor
+                        $id: {
+                            let start = visitor
                                 .$id
                                 .iter()
                                 .rposition(|(stack_index, _)| *stack_index < *index)
-                                .map_or(0, |index| (index + 1).min(visitor.$id.len().saturating_sub(1))),
-                            &mut visitor.$id,
-                        ),
+                                .map_or(0, |index| index + 1);
+                            (start, &mut visitor.$id[start..])
+                        },
                         #[cfg(not(debug_assertions))]
                         $id: &mut visitor.$id,
                     )*

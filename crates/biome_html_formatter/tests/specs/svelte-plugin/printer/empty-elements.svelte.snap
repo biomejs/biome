@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/empty-elements.svelte
+---
+
+# Input
+
+```svelte
+<span> </span>
+
+<div></div>
+
+<span
+    class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+></span>
+
+<span
+    class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+>
+</span>
+
+<div
+    class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,8 +8,7 @@
+ 
+ <span
+     class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+->
+-</span>
++> </span>
+ 
+ <div
+     class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+```
+
+# Output
+
+```svelte
+<span> </span>
+
+<div></div>
+
+<span
+    class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+></span>
+
+<span
+    class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+> </span>
+
+<div
+    class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+></div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    6:     class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+   10:     class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+   14:     class="some classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome classsome class"
+```

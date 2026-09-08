@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/noscript-adjacency/noscript.html
+---
+
+# Input
+
+```html
+<div>
+	before<noscript>noscript long long long long long long long long</noscript
+	>after
+</div>
+
+<div>before<noscript>noscript long long long long long long long long</noscript>after</div>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	before<noscript>noscript long long long long long long long long</noscript
+	>after
+</div>
+
+<div>
+	before<noscript>noscript long long long long long long long long</noscript
+	>after
+</div>
+
+```

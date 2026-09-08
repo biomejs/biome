@@ -1,0 +1,357 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+export function Component() {
+	return (
+		<>
+			<div className="w-4 h-4" />
+			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+			<div className={clsx("w-4 h-4")} />
+			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+			<div className="scale-x-50 scale-y-50 scale-z-50" />
+			<div className="content-center justify-center" />
+			<div className="!border-x !border-y" />
+			<div className="!content-center !justify-center" />
+		</>
+	);
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    2 │ 	return (
+    3 │ 		<>
+  > 4 │ 			<div className="w-4 h-4" />
+      │ 			                ^^^
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  
+  i Compressible utility used here.
+  
+    2 │ 	return (
+    3 │ 		<>
+  > 4 │ 			<div className="w-4 h-4" />
+      │ 			                    ^^^
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     2  2 │     return (
+     3  3 │       <>
+     4    │ - → → → <div·className="w-4·h-4"·/>
+        4 │ + → → → <div·className="size-4"·/>
+     5  5 │         <div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+     6  6 │         <div className={clsx("w-4 h-4")} />
+  
+
+```
+
+```
+invalid.jsx:5:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ 		<>
+    4 │ 			<div className="w-4 h-4" />
+  > 5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+      │ 			                ^^^^^^^^^^^^^^^^^^^^^
+    6 │ 			<div className={clsx("w-4 h-4")} />
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+  i Compressible utility used here.
+  
+    3 │ 		<>
+    4 │ 			<div className="w-4 h-4" />
+  > 5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+      │ 			                                      ^^^^^^^^^^^^^^^^^^^
+    6 │ 			<div className={clsx("w-4 h-4")} />
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+  i Compressible utility used here.
+  
+    3 │ 		<>
+    4 │ 			<div className="w-4 h-4" />
+  > 5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+      │ 			                                                          ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 			<div className={clsx("w-4 h-4")} />
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │       <>
+     4  4 │         <div className="w-4 h-4" />
+     5    │ - → → → <div·className="hover:overflow-hidden·hover:text-ellipsis·hover:whitespace-nowrap"·/>
+        5 │ + → → → <div·className="hover:truncate"·/>
+     6  6 │         <div className={clsx("w-4 h-4")} />
+     7  7 │         <div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+
+```
+
+```
+invalid.jsx:6:26 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │ 			<div className="w-4 h-4" />
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+  > 6 │ 			<div className={clsx("w-4 h-4")} />
+      │ 			                      ^^^
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+    8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+  
+  i Compressible utility used here.
+  
+    4 │ 			<div className="w-4 h-4" />
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+  > 6 │ 			<div className={clsx("w-4 h-4")} />
+      │ 			                          ^^^
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+    8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     4  4 │         <div className="w-4 h-4" />
+     5  5 │         <div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+     6    │ - → → → <div·className={clsx("w-4·h-4")}·/>
+        6 │ + → → → <div·className={clsx("size-4")}·/>
+     7  7 │         <div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+     8  8 │         <div className="scale-x-50 scale-y-50 scale-z-50" />
+  
+
+```
+
+```
+invalid.jsx:7:27 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  > 7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+      │ 			                       ^^^^^^^^^^^^^^^
+    8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+    9 │ 			<div className="content-center justify-center" />
+  
+  i Compressible utility used here.
+  
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  > 7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+      │ 			                                       ^^^^^^^^^^^^^
+    8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+    9 │ 			<div className="content-center justify-center" />
+  
+  i Compressible utility used here.
+  
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  > 7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+      │ 			                                                     ^^^^^^^^^^^^^^^^^
+    8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+    9 │ 			<div className="content-center justify-center" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     5  5 │         <div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+     6  6 │         <div className={clsx("w-4 h-4")} />
+     7    │ - → → → <div·className={tw.div`overflow-hidden·text-ellipsis·whitespace-nowrap`}·/>
+        7 │ + → → → <div·className={tw.div`truncate`}·/>
+     8  8 │         <div className="scale-x-50 scale-y-50 scale-z-50" />
+     9  9 │         <div className="content-center justify-center" />
+  
+
+```
+
+```
+invalid.jsx:8:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     6 │ 			<div className={clsx("w-4 h-4")} />
+     7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+   > 8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+       │ 			                ^^^^^^^^^^
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  
+  i Compressible utility used here.
+  
+     6 │ 			<div className={clsx("w-4 h-4")} />
+     7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+   > 8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+       │ 			                           ^^^^^^^^^^
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  
+  i Compressible utility used here.
+  
+     6 │ 			<div className={clsx("w-4 h-4")} />
+     7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+   > 8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+       │ 			                                      ^^^^^^^^^^
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     6  6 │         <div className={clsx("w-4 h-4")} />
+     7  7 │         <div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+     8    │ - → → → <div·className="scale-x-50·scale-y-50·scale-z-50"·/>
+        8 │ + → → → <div·className="scale-50·scale-3d"·/>
+     9  9 │         <div className="content-center justify-center" />
+    10 10 │         <div className="!border-x !border-y" />
+  
+
+```
+
+```
+invalid.jsx:9:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+     8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+   > 9 │ 			<div className="content-center justify-center" />
+       │ 			                ^^^^^^^^^^^^^^
+    10 │ 			<div className="!border-x !border-y" />
+    11 │ 			<div className="!content-center !justify-center" />
+  
+  i Compressible utility used here.
+  
+     7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+     8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+   > 9 │ 			<div className="content-center justify-center" />
+       │ 			                               ^^^^^^^^^^^^^^
+    10 │ 			<div className="!border-x !border-y" />
+    11 │ 			<div className="!content-center !justify-center" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     7  7 │         <div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+     8  8 │         <div className="scale-x-50 scale-y-50 scale-z-50" />
+     9    │ - → → → <div·className="content-center·justify-center"·/>
+        9 │ + → → → <div·className="place-content-center"·/>
+    10 10 │         <div className="!border-x !border-y" />
+    11 11 │         <div className="!content-center !justify-center" />
+  
+
+```
+
+```
+invalid.jsx:10:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+     9 │ 			<div className="content-center justify-center" />
+  > 10 │ 			<div className="!border-x !border-y" />
+       │ 			                ^^^^^^^^^
+    11 │ 			<div className="!content-center !justify-center" />
+    12 │ 		</>
+  
+  i Compressible utility used here.
+  
+     8 │ 			<div className="scale-x-50 scale-y-50 scale-z-50" />
+     9 │ 			<div className="content-center justify-center" />
+  > 10 │ 			<div className="!border-x !border-y" />
+       │ 			                          ^^^^^^^^^
+    11 │ 			<div className="!content-center !justify-center" />
+    12 │ 		</>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    10 │ → → → <div·className="!border-x·!border-y"·/>
+       │                              ------------    
+
+```
+
+```
+invalid.jsx:11:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  > 11 │ 			<div className="!content-center !justify-center" />
+       │ 			                ^^^^^^^^^^^^^^^
+    12 │ 		</>
+    13 │ 	);
+  
+  i Compressible utility used here.
+  
+     9 │ 			<div className="content-center justify-center" />
+    10 │ 			<div className="!border-x !border-y" />
+  > 11 │ 			<div className="!content-center !justify-center" />
+       │ 			                                ^^^^^^^^^^^^^^^
+    12 │ 		</>
+    13 │ 	);
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     9  9 │         <div className="content-center justify-center" />
+    10 10 │         <div className="!border-x !border-y" />
+    11    │ - → → → <div·className="!content-center·!justify-center"·/>
+       11 │ + → → → <div·className="!place-content-center"·/>
+    12 12 │       </>
+    13 13 │     );
+  
+
+```

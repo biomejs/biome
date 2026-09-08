@@ -96,7 +96,7 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
     }
 
     fn has_list_or_map_payload(&self) -> bool {
-        self.node.expression().ok().is_some_and(|expression| {
+        self.node.expression().is_ok_and(|expression| {
             expression_has_list_shape(&expression) || expression_is_map(&expression)
         })
     }
@@ -107,8 +107,7 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
             && self
                 .node
                 .expression()
-                .ok()
-                .is_some_and(|expression| expression_is_map(&expression))
+                .is_ok_and(|expression| expression_is_map(&expression))
     }
 
     /// Allows the top-level include comma around nested maps.
@@ -119,8 +118,7 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
             && self
                 .node
                 .expression()
-                .ok()
-                .is_some_and(|expression| expression_is_map(&expression))
+                .is_ok_and(|expression| expression_is_map(&expression))
     }
 
     /// Detects the outer include value in `@include mix($arg: ((a)))`.
@@ -139,8 +137,7 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
     fn has_nested_parenthesized_item(&self) -> bool {
         self.node
             .expression()
-            .ok()
-            .is_some_and(|expression| is_scss_parenthesized_expression(&expression))
+            .is_ok_and(|expression| is_scss_parenthesized_expression(&expression))
     }
 }
 

@@ -28,8 +28,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -121,7 +122,10 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@29..31 "##" [] [],
+                                    hash_token: HASH@29..30 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@30..31 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -157,7 +161,13 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@43..46 "###" [] [],
+                                    hash_token: HASH@43..44 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@44..45 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@45..46 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -193,7 +203,22 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@58..64 "######" [] [],
+                                    hash_token: HASH@58..59 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@59..60 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@60..61 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@61..62 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@62..63 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@63..64 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -294,7 +319,10 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             before: MdHashList [
                                 MdHash {
-                                    hash_token: HASH@119..121 "##" [] [],
+                                    hash_token: HASH@119..120 "#" [] [],
+                                },
+                                MdHash {
+                                    hash_token: HASH@120..121 "#" [] [],
                                 },
                             ],
                             content: MdParagraph {
@@ -321,9 +349,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..138
+0: MD_ROOT@0..138
   0: (empty)
-  1: MD_BLOCK_LIST@0..138
+  1: (empty)
+  2: MD_BLOCK_LIST@0..138
     0: MD_BULLET_LIST_ITEM@0..39
       0: MD_BULLET_LIST@0..39
         0: MD_BULLET@0..8
@@ -385,8 +414,10 @@ MdDocument {
             0: MD_HEADER@29..39
               0: MD_INDENT_TOKEN_LIST@29..29
               1: MD_HASH_LIST@29..31
-                0: MD_HASH@29..31
-                  0: HASH@29..31 "##" [] []
+                0: MD_HASH@29..30
+                  0: HASH@29..30 "#" [] []
+                1: MD_HASH@30..31
+                  0: HASH@30..31 "#" [] []
               2: MD_PARAGRAPH@31..39
                 0: MD_INLINE_ITEM_LIST@31..39
                   0: MD_TEXTUAL@31..39
@@ -408,8 +439,12 @@ MdDocument {
             0: MD_HEADER@43..54
               0: MD_INDENT_TOKEN_LIST@43..43
               1: MD_HASH_LIST@43..46
-                0: MD_HASH@43..46
-                  0: HASH@43..46 "###" [] []
+                0: MD_HASH@43..44
+                  0: HASH@43..44 "#" [] []
+                1: MD_HASH@44..45
+                  0: HASH@44..45 "#" [] []
+                2: MD_HASH@45..46
+                  0: HASH@45..46 "#" [] []
               2: MD_PARAGRAPH@46..54
                 0: MD_INLINE_ITEM_LIST@46..54
                   0: MD_TEXTUAL@46..54
@@ -431,8 +466,18 @@ MdDocument {
             0: MD_HEADER@58..72
               0: MD_INDENT_TOKEN_LIST@58..58
               1: MD_HASH_LIST@58..64
-                0: MD_HASH@58..64
-                  0: HASH@58..64 "######" [] []
+                0: MD_HASH@58..59
+                  0: HASH@58..59 "#" [] []
+                1: MD_HASH@59..60
+                  0: HASH@59..60 "#" [] []
+                2: MD_HASH@60..61
+                  0: HASH@60..61 "#" [] []
+                3: MD_HASH@61..62
+                  0: HASH@61..62 "#" [] []
+                4: MD_HASH@62..63
+                  0: HASH@62..63 "#" [] []
+                5: MD_HASH@63..64
+                  0: HASH@63..64 "#" [] []
               2: MD_PARAGRAPH@64..72
                 0: MD_INLINE_ITEM_LIST@64..72
                   0: MD_TEXTUAL@64..72
@@ -496,8 +541,10 @@ MdDocument {
             0: MD_HEADER@119..137
               0: MD_INDENT_TOKEN_LIST@119..119
               1: MD_HASH_LIST@119..121
-                0: MD_HASH@119..121
-                  0: HASH@119..121 "##" [] []
+                0: MD_HASH@119..120
+                  0: HASH@119..120 "#" [] []
+                1: MD_HASH@120..121
+                  0: HASH@120..121 "#" [] []
               2: MD_PARAGRAPH@121..137
                 0: MD_INLINE_ITEM_LIST@121..137
                   0: MD_TEXTUAL@121..137
@@ -505,6 +552,6 @@ MdDocument {
               3: MD_HASH_LIST@137..137
     10: MD_NEWLINE@137..138
       0: NEWLINE@137..138 "\n" [] []
-  2: EOF@138..138 "" [] []
+  3: EOF@138..138 "" [] []
 
 ```

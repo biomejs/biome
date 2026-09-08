@@ -29,6 +29,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@14..17 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -159,7 +160,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..14 "let Data;\n" [Newline("\n")] []
     2: FENCE@14..17 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@17..143
+  3: (empty)
+  4: HTML_ELEMENT_LIST@17..143
     0: HTML_ELEMENT@17..45
       0: HTML_OPENING_ELEMENT@17..31
         0: L_ANGLE@17..19 "<" [Newline("\n")] []
@@ -236,6 +238,6 @@ HtmlRoot {
               0: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")]
       3: SLASH@141..142 "/" [] []
       4: R_ANGLE@142..143 ">" [] []
-  4: EOF@143..144 "" [Newline("\n")] []
+  5: EOF@143..144 "" [Newline("\n")] []
 
 ```

@@ -16,8 +16,9 @@ fn main() {}
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -46,9 +47,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..42
+0: MD_ROOT@0..42
   0: (empty)
-  1: MD_BLOCK_LIST@0..42
+  1: (empty)
+  2: MD_BLOCK_LIST@0..42
     0: MD_FENCED_CODE_BLOCK@0..41
       0: MD_INDENT_TOKEN_LIST@0..0
       1: TRIPLE_TILDE@0..3 "~~~" [] []
@@ -62,6 +64,6 @@ MdDocument {
       5: TRIPLE_TILDE@38..41 "~~~" [] []
     1: MD_NEWLINE@41..42
       0: NEWLINE@41..42 "\n" [] []
-  2: EOF@42..42 "" [] []
+  3: EOF@42..42 "" [] []
 
 ```

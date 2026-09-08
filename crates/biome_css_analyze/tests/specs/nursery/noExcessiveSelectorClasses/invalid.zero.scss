@@ -1,3 +1,4 @@
 /* should generate diagnostics */
 .foo { margin: { left: 0; top: 0; }; }
 @include test { .foo {} }
+.partial > {}

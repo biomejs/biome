@@ -50,8 +50,9 @@ Escaped bracket in label: [text][label\]]
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [],
@@ -627,9 +628,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..757
+0: MD_ROOT@0..757
   0: (empty)
-  1: MD_BLOCK_LIST@0..757
+  1: (empty)
+  2: MD_BLOCK_LIST@0..757
     0: MD_LINK_REFERENCE_DEFINITION@0..46
       0: MD_INDENT_TOKEN_LIST@0..0
       1: L_BRACK@0..1 "[" [] []
@@ -1002,6 +1004,6 @@ MdDocument {
             2: R_BRACK@755..756 "]" [] []
         2: MD_TEXTUAL@756..757
           0: MD_TEXTUAL_LITERAL@756..757 "\n" [] []
-  2: EOF@757..757 "" [] []
+  3: EOF@757..757 "" [] []
 
 ```

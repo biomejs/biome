@@ -706,11 +706,16 @@ impl<L: Language> SyntaxNode<L> {
         SyntaxList::new(self)
     }
 
-    /// Whether the node contains any comments. This function checks
-    /// **all the descendants** of the current node.
+    /// Whether any token in this node's subtree has leading or trailing comments.
+    #[inline]
     pub fn has_comments_descendants(&self) -> bool {
-        self.descendants_tokens(Direction::Next)
-            .any(|tok| tok.has_trailing_comments() || tok.has_leading_comments())
+        self.raw.green().has_comments()
+    }
+
+    /// Whether any token in this node's subtree has skipped trivia.
+    #[inline]
+    pub fn has_skipped_descendants(&self) -> bool {
+        self.raw.green().has_skipped()
     }
 
     /// It checks if the current node has trailing or leading trivia

@@ -185,6 +185,15 @@ impl Rule for UseConsistentCurlyBraces {
                             );
                             Ok(AnyJsxAttributeValue::JsxExpressionAttributeValue(value))
                         }
+                        // Unreachable: `handle_attr_init_clause` never signals on a template.
+                        AnyJsxAttributeValue::JsTemplateExpression(node) => {
+                            let value = make::jsx_expression_attribute_value(
+                                make::token(T!['{']),
+                                AnyJsExpression::JsTemplateExpression(node),
+                                make::token(T!['}']),
+                            );
+                            Ok(AnyJsxAttributeValue::JsxExpressionAttributeValue(value))
+                        }
                     })
                     .ok()?;
                 mutation.replace_node(
@@ -347,7 +356,7 @@ fn handle_attr_init_clause(
                 None
             }
         }
-        AnyJsxAttributeValue::JsxString(_) => None,
+        AnyJsxAttributeValue::JsxString(_) | AnyJsxAttributeValue::JsTemplateExpression(_) => None,
     }
 }
 

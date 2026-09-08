@@ -3,14 +3,13 @@
 use JsSyntaxKind::*;
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
+    AnyJsIdentifierReference, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
     TsTypeParameterName, inner_string_text,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 
 use crate::JsDeclarationKind;
-use biome_rowan::TextSize;
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TokenText, syntax::Preorder};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, Text, TextSize, syntax::Preorder};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
@@ -173,8 +172,8 @@ pub struct SemanticEventExtractor {
 /// Allocating two bindings allows to for properly detecting type and value shadowing in inner scopes.
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
 enum BindingName {
-    Type(TokenText),
-    Value(TokenText),
+    Type(Text),
+    Value(Text),
 }
 impl BindingName {
     /// Turn a type into a value and a value into a type.
@@ -320,7 +319,9 @@ impl SemanticEventExtractor {
             }
 
             JS_REFERENCE_IDENTIFIER | JSX_REFERENCE_IDENTIFIER | JS_IDENTIFIER_ASSIGNMENT => {
-                self.enter_identifier_usage(AnyJsIdentifierUsage::unwrap_cast(node.clone()));
+                self.enter_identifier_reference(AnyJsIdentifierReference::unwrap_cast(
+                    node.clone(),
+                ));
             }
 
             JS_MODULE => {
@@ -540,7 +541,7 @@ impl SemanticEventExtractor {
         let mut hoisted_scope_id = None;
         let mut declaration_kind = JsDeclarationKind::Unknown;
         let is_exported = if let Ok(name_token) = node.name_token() {
-            let name = name_token.token_text_trimmed();
+            let name = crate::identifier_name(name_token.token_text_trimmed());
             if let Some(declaration) = node.declaration() {
                 let info = BindingInfo::new(
                     name_token.text_trimmed_range().start(),
@@ -601,8 +602,11 @@ impl SemanticEventExtractor {
                     }
                     AnyJsBindingDeclaration::TsEnumMember(_) => {
                         declaration_kind = JsDeclarationKind::Enum;
-                        // Handle quoted names.
-                        let name = inner_string_text(&name_token);
+                        let name = if name_token.kind() == JS_STRING_LITERAL {
+                            inner_string_text(&name_token).into()
+                        } else {
+                            name
+                        };
                         self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         self.push_binding(None, BindingName::Type(name), info);
                     }
@@ -752,7 +756,7 @@ impl SemanticEventExtractor {
                         declaration_kind = if imports_only_types {
                             JsDeclarationKind::ImportType
                         } else {
-                            JsDeclarationKind::from_node(node.syntax())
+                            JsDeclarationKind::Import
                         };
                         if !imports_only_types {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
@@ -807,14 +811,14 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
+    fn enter_identifier_reference(&mut self, node: AnyJsIdentifierReference) {
         let range = node.syntax().text_trimmed_range();
         let Ok(name_token) = node.value_token() else {
             return;
         };
-        let name = name_token.token_text_trimmed();
+        let name = crate::identifier_name(name_token.token_text_trimmed());
         match node {
-            AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
+            AnyJsIdentifierReference::JsReferenceIdentifier(node) => {
                 let Some(parent) = node.syntax().parent() else {
                     self.push_reference(
                         BindingName::Value(name),
@@ -913,14 +917,14 @@ impl SemanticEventExtractor {
                     }
                 }
             }
-            AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
+            AnyJsIdentifierReference::JsxReferenceIdentifier(_) => {
                 if name.text() == "this" {
                     // Ignore `this` in JSX. e.g. `<this.foo />`.
                     return;
                 }
                 self.push_reference(BindingName::Value(name), Reference::Read(range));
             }
-            AnyJsIdentifierUsage::JsIdentifierAssignment(_) => {
+            AnyJsIdentifierReference::JsIdentifierAssignment(_) => {
                 self.push_reference(BindingName::Value(name), Reference::Write(range));
             }
         }
@@ -1041,18 +1045,14 @@ impl SemanticEventExtractor {
             return None;
         }
         let store_name = self.flavor.store_reference_name(name.text())?;
-        let store_name_start = name.len() - TextSize::from(u32::try_from(store_name.len()).ok()?);
-        Some(BindingName::Value(
-            name.clone()
-                .slice(TextRange::new(store_name_start, name.len())),
-        ))
+        Some(BindingName::Value(store_name.to_string().into()))
     }
 
     fn push_infers_in_scope(&mut self) {
         let infers = mem::take(&mut self.infers);
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
-                let name = name_token.token_text_trimmed();
+                let name = crate::identifier_name(name_token.token_text_trimmed());
                 let name_range = name_token.text_trimmed_range();
                 let binding_info =
                     BindingInfo::new(name_range.start(), JsSyntaxKind::TS_INFER_TYPE);

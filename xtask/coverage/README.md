@@ -20,10 +20,12 @@ OPTIONS
                             js: will run all javascript suites; Same as "js/262";
                             ts: will run all typescript suites; Same as "ts/microsoft,ts/babel";
                             jsx: will run all jsx suites; Same as "jsx/babel";
+                            yaml: will run all YAML suites; Same as "yaml/yaml-test-suite";
                             js/262: will run https://github.com/tc39/test262/tree/main/test;
                             ts/microsoft: will run https://github.com/microsoft/Typescript/tree/main/tests/cases
                             ts/babel: will run https://github.com/babel/babel/tree/main/packages/babel-parser/test/fixtures/typescript
                             jsx/babel: will run https://github.com/babel/babel/tree/main/packages/babel-parser/test/fixtures/jsx/basic
+                            yaml/yaml-test-suite: will run YAML Test Suite parser acceptance tests (https://github.com/yaml/yaml-test-suite)
                         Default is "*".
     --filter=<file>     Filters out tests that don't match the query.
     --help              Prints this help.

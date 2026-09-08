@@ -61,7 +61,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable").same()],
+        sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable").same(), RuleSource::EslintCss("no-unmatchable-selectors").inspired()],
     }
 }
 

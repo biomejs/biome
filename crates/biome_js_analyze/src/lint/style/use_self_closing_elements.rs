@@ -162,9 +162,14 @@ impl Rule for UseSelfClosingElements {
             l_angle_token.ok()?,
             name.ok()?,
             attributes,
-            JsSyntaxToken::new_detached(T![/], &slash_token, leading_trivia, []),
             r_angle_token,
-        );
+        )
+        .with_slash_token(JsSyntaxToken::new_detached(
+            T![/],
+            &slash_token,
+            leading_trivia,
+            [],
+        ));
         if let Some(type_arguments) = type_arguments {
             self_closing_element_builder =
                 self_closing_element_builder.with_type_arguments(type_arguments);

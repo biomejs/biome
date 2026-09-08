@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/binding-get-set.svelte
+---
+
+# Input
+
+```svelte
+<input bind:value={() => value, (v) => (value = v)} />
+
+<input bind:value={get, set} />
+
+<input
+    bind:value={binding_on_a_separate_line123, binding_on_a_separate_line123}
+/>
+
+<input
+    bind:value={
+        binding_value_on_a_separate_line123, binding_value_on_a_separate_line123
+    }
+/>
+
+<input
+    bind:value={
+        () => getter_setter_each_need_own_line,
+        (v) => (getter_setter_each_need_own_line = v)
+    }
+/>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,7 +8,8 @@
+ 
+ <input
+     bind:value={
+-        binding_value_on_a_separate_line123, binding_value_on_a_separate_line123
++        binding_value_on_a_separate_line123,
++        binding_value_on_a_separate_line123
+     }
+ />
+ 
+```
+
+# Output
+
+```svelte
+<input bind:value={() => value, (v) => (value = v)} />
+
+<input bind:value={get, set} />
+
+<input
+    bind:value={binding_on_a_separate_line123, binding_on_a_separate_line123}
+/>
+
+<input
+    bind:value={
+        binding_value_on_a_separate_line123,
+        binding_value_on_a_separate_line123
+    }
+/>
+
+<input
+    bind:value={
+        () => getter_setter_each_need_own_line,
+        (v) => (getter_setter_each_need_own_line = v)
+    }
+/>
+```

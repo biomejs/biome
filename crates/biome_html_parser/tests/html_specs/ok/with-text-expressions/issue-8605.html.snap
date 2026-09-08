@@ -17,6 +17,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlDoubleTextExpression {
@@ -38,12 +39,13 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..15
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..15
     0: HTML_DOUBLE_TEXT_EXPRESSION@0..15
       0: L_DOUBLE_CURLY@0..2 "{{" [] []
       1: HTML_TEXT_EXPRESSION@2..13
         0: HTML_LITERAL@2..13 " some_form " [] []
       2: R_DOUBLE_CURLY@13..15 "}}" [] []
-  4: EOF@15..16 "" [Newline("\n")] []
+  5: EOF@15..16 "" [Newline("\n")] []
 
 ```

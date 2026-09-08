@@ -2,10 +2,10 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, JsCallArguments, JsNewOrCallExpression,
-    JsRegexLiteralExpression, global_identifier,
+    AnyJsCallArgument, AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression,
+    JsNewOrCallExpression, JsRegexLiteralExpression, global_identifier,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, declare_node_union};
 use biome_rule_options::use_named_capture_group::UseNamedCaptureGroupOptions;
 
 use crate::services::semantic::Semantic;
@@ -63,8 +63,15 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnyUseNamedCaptureGroupQuery =
+        JsCallExpression
+        | JsNewExpression
+        | JsRegexLiteralExpression
+}
+
 impl Rule for UseNamedCaptureGroup {
-    type Query = Semantic<AnyJsExpression>;
+    type Query = Semantic<AnyUseNamedCaptureGroupQuery>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
     type Options = UseNamedCaptureGroupOptions;
@@ -72,13 +79,17 @@ impl Rule for UseNamedCaptureGroup {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         match node {
-            AnyJsExpression::AnyJsLiteralExpression(
-                biome_js_syntax::AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
-            ) => run_regex_literal(regex),
-            AnyJsExpression::JsNewExpression(_) | AnyJsExpression::JsCallExpression(_) => {
-                run_regexp_constructor(node, ctx.model())
+            AnyUseNamedCaptureGroupQuery::JsRegexLiteralExpression(regex) => {
+                run_regex_literal(regex)
             }
-            _ => Default::default(),
+            AnyUseNamedCaptureGroupQuery::JsNewExpression(node) => run_regexp_constructor(
+                &JsNewOrCallExpression::from(node.clone()),
+                ctx.model(),
+            ),
+            AnyUseNamedCaptureGroupQuery::JsCallExpression(node) => run_regexp_constructor(
+                &JsNewOrCallExpression::from(node.clone()),
+                ctx.model(),
+            ),
         }
     }
 
@@ -227,13 +238,11 @@ fn run_regex_literal(node: &JsRegexLiteralExpression) -> Box<[TextRange]> {
         .collect()
 }
 
-fn run_regexp_constructor(node: &AnyJsExpression, model: &SemanticModel) -> Box<[TextRange]> {
-    let new_or_call = match node {
-        AnyJsExpression::JsNewExpression(n) => JsNewOrCallExpression::from(n.clone()),
-        AnyJsExpression::JsCallExpression(n) => JsNewOrCallExpression::from(n.clone()),
-        _ => return Default::default(),
-    };
-    let Some((callee, arguments)) = parse_regexp_node(&new_or_call) else {
+fn run_regexp_constructor(
+    node: &JsNewOrCallExpression,
+    model: &SemanticModel,
+) -> Box<[TextRange]> {
+    let Some((callee, arguments)) = parse_regexp_node(node) else {
         return Default::default();
     };
     if !is_regexp_object(&callee, model) {

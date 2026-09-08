@@ -1,9 +1,10 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, AnyVueDirective,
-    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, is_quoted, static_value::StaticValue,
+    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, HtmlString, is_quoted,
+    static_value::StaticValue,
 };
 use biome_aria::Attribute;
-use biome_rowan::{AstNodeList, TokenText};
+use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 use biome_string_case::StrOnlyExtension;
 
 /// Extracts a static value from a Vue directive's binding value.
@@ -73,6 +74,11 @@ impl AnyHtmlAttributeInitializer {
 }
 
 impl HtmlAttribute {
+    /// Returns the attribute value when its initializer is an HTML string.
+    pub fn html_string(&self) -> Option<HtmlString> {
+        self.initializer()?.value().ok()?.as_html_string().cloned()
+    }
+
     /// Extracts the value from an attribute's initializer.
     ///
     /// Returns `None` if the attribute has no initializer or the value cannot be extracted.
@@ -133,6 +139,31 @@ impl AnyHtmlAttribute {
                 _ => None,
             },
             _ => None,
+        }
+    }
+
+    pub fn range(&self) -> TextRange {
+        match self {
+            Self::AngularStructuralDirective(angular_structural_directive) => {
+                angular_structural_directive.range()
+            }
+            Self::AngularTemplateRefVariable(angular_template_ref_variable) => {
+                angular_template_ref_variable.range()
+            }
+            Self::AnyAngularBinding(any_angular_binding) => any_angular_binding.range(),
+            Self::AnyAstroDirective(any_astro_directive) => any_astro_directive.range(),
+            Self::AnySvelteDirective(any_svelte_directive) => any_svelte_directive.range(),
+            Self::AnyVueDirective(any_vue_directive) => any_vue_directive.range(),
+            Self::HtmlAttribute(html_attribute) => html_attribute.range(),
+            Self::HtmlAttributeDoubleTextExpression(html_attribute_double_text_expression) => {
+                html_attribute_double_text_expression.range()
+            }
+            Self::HtmlAttributeSingleTextExpression(html_attribute_single_text_expression) => {
+                html_attribute_single_text_expression.range()
+            }
+            Self::HtmlBogusAttribute(html_bogus_attribute) => html_bogus_attribute.range(),
+            Self::HtmlSpreadAttribute(html_spread_attribute) => html_spread_attribute.range(),
+            Self::SvelteAttachAttribute(svelte_attach_attribute) => svelte_attach_attribute.range(),
         }
     }
 

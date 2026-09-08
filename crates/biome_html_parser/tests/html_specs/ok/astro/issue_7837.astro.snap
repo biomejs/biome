@@ -38,6 +38,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@356..359 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -162,7 +163,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..356 "import { Counter } from '@/components/counter'\nimport PageLayout from '@/components/page-layout.astro'\n\n// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build\n// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.\n" [Newline("\n")] []
     2: FENCE@356..359 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@359..529
+  3: (empty)
+  4: HTML_ELEMENT_LIST@359..529
     0: HTML_ELEMENT@359..529
       0: HTML_OPENING_ELEMENT@359..372
         0: L_ANGLE@359..361 "<" [Newline("\n")] []
@@ -235,6 +237,6 @@ HtmlRoot {
         2: HTML_COMPONENT_NAME@518..528
           0: HTML_COMPONENT_LITERAL@518..528 "PageLayout" [] []
         3: R_ANGLE@528..529 ">" [] []
-  4: EOF@529..530 "" [Newline("\n")] []
+  5: EOF@529..530 "" [Newline("\n")] []
 
 ```

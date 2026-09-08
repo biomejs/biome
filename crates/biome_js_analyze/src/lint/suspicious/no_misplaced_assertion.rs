@@ -138,49 +138,35 @@ const EXCEPTION_MEMBERS_FOR_EXPECT: [&str; 10] = [
 ];
 
 impl Rule for NoMisplacedAssertion {
-    type Query = Semantic<AnyJsExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoMisplacedAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
+        let call = ctx.query();
+        let node = call.callee().ok()?;
         let model = ctx.model();
 
         if let Some(call_text) = node.to_assertion_call() {
-            let ancestor_is_test_call = {
-                node.syntax()
-                    .ancestors()
-                    .filter_map(JsCallExpression::cast)
-                    .find_map(|call_expression| {
-                        let callee = call_expression.callee().ok()?;
-                        let callee = may_extract_nested_expr(callee)?;
-                        callee.contains_it_call().then_some(true)
-                    })
-                    .unwrap_or_default()
-            };
-
-            let ancestor_is_describe_call = {
-                node.syntax()
-                    .ancestors()
-                    .filter_map(JsCallExpression::cast)
-                    .find_map(|call_expression| {
-                        let callee = call_expression.callee().ok()?;
-                        let callee = may_extract_nested_expr(callee)?;
-                        callee.contains_describe_call().then_some(true)
-                    })
-            };
             let assertion_call = node.get_callee_object_identifier()?;
 
-            if let Some(ancestor_is_describe_call) = ancestor_is_describe_call {
-                if ancestor_is_describe_call && ancestor_is_test_call {
-                    return None;
-                }
-            } else if ancestor_is_test_call {
+            if call
+                .syntax()
+                .ancestors()
+                .filter_map(JsCallExpression::cast)
+                .any(|call_expression| {
+                    call_expression
+                        .callee()
+                        .ok()
+                        .and_then(may_extract_nested_expr)
+                        .is_some_and(|callee| callee.contains_it_call())
+                })
+            {
                 return None;
             }
 
-            let is_exception = is_exception_for_expect(node)?;
+            let is_exception = is_exception_for_expect(&node)?;
             let binding = model.binding(&assertion_call);
             if let Some(binding) = binding {
                 let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;

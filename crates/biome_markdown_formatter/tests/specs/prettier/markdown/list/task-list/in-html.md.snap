@@ -26,22 +26,18 @@ info: markdown/list/task-list/in-html.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,11 @@
- <details>
+@@ -2,12 +2,10 @@
    <summary><h2>Checklist</h2></summary>
  
--- [ ] I checked for duplicate issues.
+ - [ ] I checked for duplicate issues.
 -
-+- [] I checked for duplicate issues.
  </details>
  <details>
    <summary><h2>Checklist</h2></summary>
  
--- [ ] I checked for duplicate issues.
--- [ ] I checked for duplicate issues.
+ - [ ] I checked for duplicate issues.
+ - [ ] I checked for duplicate issues.
 -
-+- [] I checked for duplicate issues.
-+- [] I checked for duplicate issues.
  </details>
 ```
 
@@ -51,12 +47,12 @@ info: markdown/list/task-list/in-html.md
 <details>
   <summary><h2>Checklist</h2></summary>
 
-- [] I checked for duplicate issues.
+- [ ] I checked for duplicate issues.
 </details>
 <details>
   <summary><h2>Checklist</h2></summary>
 
-- [] I checked for duplicate issues.
-- [] I checked for duplicate issues.
+- [ ] I checked for duplicate issues.
+- [ ] I checked for duplicate issues.
 </details>
 ```

@@ -15,8 +15,9 @@ Paragraph followed by ordered list.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -60,9 +61,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..50
+0: MD_ROOT@0..50
   0: (empty)
-  1: MD_BLOCK_LIST@0..50
+  1: (empty)
+  2: MD_BLOCK_LIST@0..50
     0: MD_PARAGRAPH@0..36
       0: MD_INLINE_ITEM_LIST@0..36
         0: MD_TEXTUAL@0..35
@@ -84,6 +86,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@39..49 "first item" [] []
                 1: MD_TEXTUAL@49..50
                   0: MD_TEXTUAL_LITERAL@49..50 "\n" [] []
-  2: EOF@50..50 "" [] []
+  3: EOF@50..50 "" [] []
 
 ```

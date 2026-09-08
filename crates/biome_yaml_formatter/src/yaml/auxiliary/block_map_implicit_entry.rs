@@ -1,7 +1,7 @@
 use super::flow_map_implicit_entry::FormatCollectionKeyEntry;
 use crate::comments::{FormatEntryDanglingComments, subtree_has_comments};
 use crate::prelude::*;
-use crate::utils::needs_space_before_colon;
+use crate::utils::{flow_scalar_has_line_break, needs_space_before_colon};
 use biome_formatter::format_args;
 use biome_formatter::write;
 use biome_yaml_syntax::{
@@ -151,7 +151,7 @@ impl Format<YamlFormatContext> for FormatEntryValue<'_> {
                     ]))]
                 )
             }
-        } else if matches!(value, AnyYamlBlockNode::YamlFlowInBlockNode(_)) {
+        } else if let AnyYamlBlockNode::YamlFlowInBlockNode(flow_in_block) = value {
             // The continuation lines of a multiline flow scalar are
             // indented past the key:
             //
@@ -159,7 +159,35 @@ impl Format<YamlFormatContext> for FormatEntryValue<'_> {
             // key: word
             //   word
             // ```
-            write!(f, [space(), indent(&value.format())])
+            //
+            // When the key and the scalar's first line together don't fit
+            // within the line width, the whole scalar moves below the key
+            // instead:
+            //
+            // ```yaml
+            // key:
+            //   word that would have overflowed the line
+            //   word
+            // ```
+            //
+            // Only a scalar that is already multiline moves; a single-line
+            // scalar stays on the key's line no matter how long. The break
+            // is inside the scalar's own token: the properties and the
+            // content of the value are joined onto one line, so the breaks
+            // in the trivia between them don't reach the output
+            let is_multiline = flow_scalar_has_line_break(flow_in_block);
+            if is_multiline {
+                let value = value.format().memoized();
+                write!(
+                    f,
+                    [best_fitting![
+                        format_args![space(), indent(&value)],
+                        format_args![indent(&format_args![hard_line_break(), value])],
+                    ]]
+                )
+            } else {
+                write!(f, [space(), indent(&value.format())])
+            }
         } else {
             write!(f, [space(), value.format()])
         }

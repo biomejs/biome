@@ -1,0 +1,116 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+[
+--- ,
+...
+]
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: YamlPropertyList [],
+                    content: YamlFlowSequence {
+                        l_brack_token: L_BRACK@0..1 "[" [] [],
+                        entries: YamlFlowSequenceEntryList [
+                            YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@1..6 "--- " [Newline("\n")] [],
+                                },
+                            },
+                            COMMA@6..7 "," [] [],
+                            YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@7..12 "...\n" [Newline("\n")] [],
+                                },
+                            },
+                        ],
+                        r_brack_token: R_BRACK@12..13 "]" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@13..13 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..14
+  0: YAML_DOCUMENT_LIST@0..13
+    0: YAML_DOCUMENT@0..13
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..13
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..13
+          0: YAML_PROPERTY_LIST@0..0
+          1: YAML_FLOW_SEQUENCE@0..13
+            0: L_BRACK@0..1 "[" [] []
+            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@1..12
+              0: YAML_FLOW_YAML_NODE@1..6
+                0: YAML_PROPERTY_LIST@1..1
+                1: YAML_PLAIN_SCALAR@1..6
+                  0: PLAIN_LITERAL@1..6 "--- " [Newline("\n")] []
+              1: COMMA@6..7 "," [] []
+              2: YAML_FLOW_YAML_NODE@7..12
+                0: YAML_PROPERTY_LIST@7..7
+                1: YAML_PLAIN_SCALAR@7..12
+                  0: PLAIN_LITERAL@7..12 "...\n" [Newline("\n")] []
+            2: R_BRACK@12..13 "]" [] []
+        2: FLOW_END@13..13 "" [] []
+      4: (empty)
+  1: EOF@13..14 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+document_markers_in_flow_sequence.yaml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Document markers are not allowed inside flow collections.
+  
+    1 │ [
+  > 2 │ --- ,
+      │ ^^^
+    3 │ ...
+    4 │ ]
+  
+  i Move this marker outside the surrounding collection.
+  
+document_markers_in_flow_sequence.yaml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Document markers are not allowed inside flow collections.
+  
+    1 │ [
+    2 │ --- ,
+  > 3 │ ...
+      │ ^^^
+    4 │ ]
+    5 │ 
+  
+  i Move this marker outside the surrounding collection.
+  
+```

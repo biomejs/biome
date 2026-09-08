@@ -148,7 +148,7 @@ info: markdown/list/followed-by-indented-things.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,101 +1,98 @@
+@@ -1,43 +1,42 @@
 -- foo
 -
 +-    foo
@@ -174,10 +174,10 @@ info: markdown/list/followed-by-indented-things.md
  ---
  
 -- foo
-+ -  foo
++-  foo
  
 -      indented code block in bullet
-+        indented code block in bullet
++       indented code block in bullet
  
  ---
  
@@ -205,27 +205,17 @@ info: markdown/list/followed-by-indented-things.md
  
  ---
  
--1.  foo
-+  1.  foo
- 
--        indented code block in numbered item
-+          indented code block in numbered item
+@@ -47,8 +46,7 @@
  
  ---
  
 -- [ ] foo
-+-    [] foo
- 
 -
++-    [ ] foo
+ 
      top level indented code block
  
- ---
- 
--- [ ] foo
-+   - [] foo
- 
--      indented code block in checkbox item
-+         indented code block in checkbox item
+@@ -60,42 +58,41 @@
  
  ---
  
@@ -248,15 +238,15 @@ info: markdown/list/followed-by-indented-things.md
 +    naive paragraph in item 1
  
  ---
- 
+-
 -- item 1
 -  - item 1-1
 -  - item 1-2
+ 
 +   -    item 1
 +        - item 1-1
 +        - item 1-2
  
--
      top level indented code block
  
  ---
@@ -295,13 +285,13 @@ info: markdown/list/followed-by-indented-things.md
      top level indented code block
  
  ---
- 
+-
 -- item 1
+ 
+-  > quote
 +   -    item 1
 +        > quote
  
--  > quote
--
 -  text
 -
 +        text
@@ -313,14 +303,14 @@ info: markdown/list/followed-by-indented-things.md
 -- item 1
 -  - item 1-1
 -  - item 1-2
+-
  
--
 -      indented code block
--
 +   -    item 1
 +        -    item 1-1
 +        -    item 1-2
  
+-
 +            indented code block
      top level indented code block
  
@@ -354,9 +344,9 @@ info: markdown/list/followed-by-indented-things.md
 
 ---
 
- -  foo
+-  foo
 
-        indented code block in bullet
+       indented code block in bullet
 
 ---
 
@@ -378,21 +368,21 @@ info: markdown/list/followed-by-indented-things.md
 
 ---
 
-  1.  foo
+1.  foo
 
-          indented code block in numbered item
+        indented code block in numbered item
 
 ---
 
--    [] foo
+-    [ ] foo
 
     top level indented code block
 
 ---
 
-   - [] foo
+- [ ] foo
 
-         indented code block in checkbox item
+      indented code block in checkbox item
 
 ---
 

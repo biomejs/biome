@@ -376,9 +376,7 @@ fn is_negative_one_literal(expression: &AnyJsExpression) -> bool {
     }
 
     unary
-        .argument()
-        .ok()
-        .is_some_and(|arg| is_number_literal_value(&arg, 1.0))
+        .argument().is_ok_and(|arg| is_number_literal_value(&arg, 1.0))
 }
 
 fn is_undefined_expression(expression: &AnyJsExpression) -> bool {

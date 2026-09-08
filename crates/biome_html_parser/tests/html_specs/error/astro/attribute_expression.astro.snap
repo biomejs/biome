@@ -28,6 +28,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@31..34 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -104,7 +105,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] []
     2: FENCE@31..34 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@34..71
+  3: (empty)
+  4: HTML_ELEMENT_LIST@34..71
     0: HTML_ELEMENT@34..71
       0: HTML_OPENING_ELEMENT@34..41
         0: L_ANGLE@34..36 "<" [Newline("\n")] []
@@ -141,7 +143,7 @@ HtmlRoot {
         2: HTML_TAG_NAME@66..70
           0: HTML_KW@66..70 "html" [] []
         3: R_ANGLE@70..71 ">" [] []
-  4: EOF@71..72 "" [Newline("\n")] []
+  5: EOF@71..72 "" [Newline("\n")] []
 
 ```
 

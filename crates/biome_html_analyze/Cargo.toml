@@ -21,6 +21,9 @@ biome_analyze_macros     = { workspace = true }
 biome_aria               = { workspace = true }
 biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }
+biome_css_parser         = { workspace = true }
+biome_css_semantic       = { workspace = true }
+biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
@@ -34,6 +37,7 @@ biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
+biome_tailwind_logic     = { workspace = true }
 biome_tailwind_parser    = { workspace = true }
 biome_tailwind_syntax    = { workspace = true }
 biome_unicode_table      = { workspace = true }
@@ -47,7 +51,7 @@ smallvec                 = { workspace = true }
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 

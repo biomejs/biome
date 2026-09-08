@@ -1,0 +1,82 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/no-tag-snippings.svelte
+---
+
+# Input
+
+```svelte
+<svelte:head>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "etc..."
+        }
+    </script>
+    {@html `<style>${getCssText()}</style>`}
+</svelte:head>
+
+<pre class="p-2">
+    {`<div>
+        <span>Hello</span>
+        <span>World</span>
+      </div>
+
+      <style lang="postcss">
+        span {
+          @apply text-red-500;
+        }
+      </style>`}
+</pre>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,8 +8,7 @@
+     {@html `<style>${getCssText()}</style>`}
+ </svelte:head>
+ 
+-<pre class="p-2">
+-    {`<div>
++<pre class="p-2">{`<div>
+         <span>Hello</span>
+         <span>World</span>
+       </div>
+@@ -18,5 +17,4 @@
+         span {
+           @apply text-red-500;
+         }
+-      </style>`}
+-</pre>
++      </style>`}</pre>
+```
+
+# Output
+
+```svelte
+<svelte:head>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "etc..."
+        }
+    </script>
+    {@html `<style>${getCssText()}</style>`}
+</svelte:head>
+
+<pre class="p-2">{`<div>
+        <span>Hello</span>
+        <span>World</span>
+      </div>
+
+      <style lang="postcss">
+        span {
+          @apply text-red-500;
+        }
+      </style>`}</pre>
+```

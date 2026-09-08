@@ -21,4 +21,8 @@ mod formatter {
     mod tsx_module {
         tests_macros::gen_tests! {"tests/specs/tsx/**/*.tsx", crate::spec_test::run, "module"}
     }
+
+    mod astro_expression {
+        tests_macros::gen_tests! {"tests/specs/astro_expr/**/*.tsx", crate::spec_test::run, "astro_expr"}
+    }
 }

@@ -13,9 +13,9 @@ use crate::syntax::FunctionCallContext;
 use super::is_at_scss_variable_modifier;
 
 pub(crate) use interpolation::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation,
-    parse_scss_interpolation_inner_expression, parse_scss_interpolation_prefix,
-    parse_scss_regular_interpolation, parse_scss_selector_interpolation,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_scss_interpolation_prefix,
+    parse_scss_interpolation_with_context, parse_scss_regular_interpolation,
+    parse_scss_selector_interpolation,
 };
 pub(crate) use list::{
     complete_empty_scss_expression, parse_required_scss_value_until, parse_scss_expression,

@@ -1,5 +1,43 @@
 use std::borrow::Cow;
 use std::char::{DecodeUtf16Error, decode_utf16};
+use std::fs;
+use std::io;
+use std::path::Path;
+use std::process::Command;
+
+/// Checks out `revision` from `repository` into `path` without fetching the
+/// repository's default branch.
+///
+/// The checkout is initialized when necessary and reused by later calls.
+/// Tracked changes in `path` are discarded, while untracked files are preserved,
+/// so callers must provide a disposable checkout directory.
+///
+/// # Errors
+///
+/// Returns an error if the directory cannot be created or a Git command fails.
+pub(crate) fn checkout_repository(repository: &str, revision: &str, path: &Path) -> io::Result<()> {
+    if !path.join(".git").exists() {
+        fs::create_dir_all(path)?;
+        run_git(path, &["init"])?;
+    }
+
+    run_git(path, &["fetch", "--depth=1", repository, revision])?;
+    run_git(path, &["reset", "--hard", "FETCH_HEAD"])?;
+
+    Ok(())
+}
+
+fn run_git(path: &Path, args: &[&str]) -> io::Result<Vec<u8>> {
+    let output = Command::new("git").args(args).current_dir(path).output()?;
+    if output.status.success() {
+        Ok(output.stdout)
+    } else {
+        Err(io::Error::other(format!(
+            "git {args:?} failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        )))
+    }
+}
 
 pub(crate) fn decode_maybe_utf16_string(
     mut content: &[u8],

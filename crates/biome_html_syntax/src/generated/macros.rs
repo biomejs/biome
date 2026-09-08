@@ -50,6 +50,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroClientDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ASTRO_CLOSING_FRAGMENT => {
+                    let $pattern = unsafe { $crate::AstroClosingFragment::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_DEFINE_DIRECTIVE => {
                     let $pattern = unsafe { $crate::AstroDefineDirective::new_unchecked(node) };
                     $body
@@ -62,12 +66,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AstroEmbeddedContent::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ASTRO_FRAGMENT => {
+                    let $pattern = unsafe { $crate::AstroFragment::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT => {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_IS_DIRECTIVE => {
                     let $pattern = unsafe { $crate::AstroIsDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_OPENING_FRAGMENT => {
+                    let $pattern = unsafe { $crate::AstroOpeningFragment::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_SERVER_DIRECTIVE => {

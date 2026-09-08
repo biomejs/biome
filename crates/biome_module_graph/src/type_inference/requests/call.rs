@@ -80,8 +80,13 @@ impl ExpectedArgumentInput {
         let arguments = self
             .arguments
             .iter()
-            .map(|argument| {
-                let ty = context.expression_type(self.module, argument.range())?;
+            .enumerate()
+            .map(|(index, argument)| {
+                let ty = if index == self.argument_index && !argument.is_spread() {
+                    InferredTypeData::Unknown
+                } else {
+                    context.expression_type(self.module, argument.range())?
+                };
                 Some(if argument.is_spread() {
                     InferredCallArgumentType::Spread(ty)
                 } else {
@@ -96,15 +101,19 @@ impl ExpectedArgumentInput {
 
 /// Returns the callable type expected for one call argument.
 ///
-/// All source arguments participate in signature selection, except that the
-/// requested argument's type is ignored. Returns `None` when the callee or any
-/// argument type is unavailable, no supported signature matches, the requested
-/// index is out of bounds, or the selected parameter is not one unambiguous
-/// callable type.
+/// Signature selection uses the types of all arguments except the requested
+/// non-spread argument. The requested argument is omitted because its expected
+/// type is the result of this request. A requested spread argument is resolved
+/// because its tuple shape determines how arguments map to parameters.
 ///
-/// In this call, `"sync"` selects the first overload. A request for argument 1
-/// returns `() => void`. A request for argument 0 returns `None` because
-/// the selected `"async"` parameter is not callable.
+/// Returns `None` when the callee or another required argument type is
+/// unavailable, no supported signature matches, the requested index is out of
+/// bounds, or the selected parameter does not have one unambiguous callable
+/// type.
+///
+/// Requesting argument 1 uses `"sync"` to select the first overload and returns
+/// `() => void`. Requesting argument 0 uses the callback to select the second
+/// overload and returns `None` because the `"async"` parameter is not callable.
 ///
 /// ```ts
 /// declare function schedule(kind: "sync", task: () => void): void;
@@ -161,10 +170,11 @@ impl<'db> TypeInferenceRequest<'db> for ExpectedCallArgumentTypeRequest {
 /// Returns the callable type expected for one constructor argument.
 ///
 /// All source arguments participate in signature selection, except that the
-/// requested argument's type is ignored. Returns `None` when the callee or any
-/// argument type is unavailable, no supported constructor matches, the
-/// requested index is out of bounds, or the selected parameter is not one
-/// unambiguous callable type.
+/// requested argument's type is ignored. A requested spread is still resolved
+/// because its tuple shape determines parameter mapping. Returns `None` when
+/// the callee or another argument type is unavailable, no supported constructor
+/// matches, the requested index is out of bounds, or the selected parameter is
+/// not one unambiguous callable type.
 ///
 /// In this construction, `"sync"` selects the first signature. A request for
 /// argument 1 returns `() => void`.

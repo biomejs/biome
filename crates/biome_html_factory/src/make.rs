@@ -16,6 +16,16 @@ pub fn html_string_literal(text: &str) -> HtmlSyntaxToken {
     )
 }
 
+/// Create a new single-quoted string literal token with no attached trivia
+pub fn html_string_literal_single_quotes(text: &str) -> HtmlSyntaxToken {
+    HtmlSyntaxToken::new_detached(
+        HtmlSyntaxKind::HTML_STRING_LITERAL,
+        &format!("'{text}'"),
+        [],
+        [],
+    )
+}
+
 /// Create a new token with the specified syntax kind and no attached trivia
 pub fn token(kind: HtmlSyntaxKind) -> HtmlSyntaxToken {
     if let Some(text) = kind.to_string() {

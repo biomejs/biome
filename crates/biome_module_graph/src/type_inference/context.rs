@@ -9,12 +9,15 @@ use biome_js_type_info::interned_types::{
 };
 use biome_rowan::TextRange;
 
+use crate::db::queries::{
+    BindingTypeInput, ExpressionTypeInput, find_member_type, find_value_member_type,
+    infer_binding_type, infer_export_type, infer_expression_function_returns_promise,
+    infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
+    resolve_callable_type,
+};
 use crate::{
-    BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, ModuleInfo, NormalizeTypeInput,
-    SymbolFromModuleInfo, find_member_type, find_value_member_type, infer_binding_type,
-    infer_call_argument_type, infer_constructor_argument_type, infer_export_type,
-    infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
-    infer_expression_is_promise, infer_expression_type, normalize_type, resolve_callable_type,
+    CallArgumentTypeInput, ModuleInfo, NormalizeTypeInput, SymbolFromModuleInfo,
+    infer_call_argument_type, infer_constructor_argument_type, normalize_type,
 };
 
 use super::{TypeInferenceClassification, TypeInferenceRequestContext};

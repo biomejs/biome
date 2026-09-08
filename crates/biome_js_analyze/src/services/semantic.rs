@@ -8,6 +8,12 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent}
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 
+/// ## Warning
+///
+/// Using this type as a [biome_analyze::Rule] `Query` is discouraged, because it enforces the inspections of an entire
+/// document, even when the document doesn't contain the nodes that needs to be inspected.
+///
+/// Prefer the use of `Semantic<Node>` to trigger the rule only for those nodes that might trigger the rule.
 pub struct SemanticServices {
     model: SemanticModel,
 }
@@ -165,7 +171,7 @@ impl QueryMatch for SemanticModelEvent {
 impl Visitor for SemanticModelVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<Self::Language>) {
         let root = match event {
             WalkEvent::Enter(node) => {
                 if node.parent().is_some() {

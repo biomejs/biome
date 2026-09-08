@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{js_directive, js_directive_list, token};
+use biome_languages::JsFileSource;
 use biome_js_syntax::{JsScript, JsSyntaxKind, JsSyntaxToken, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::use_strict_mode::UseStrictModeOptions;
@@ -53,6 +54,14 @@ impl Rule for UseStrictMode {
     type Options = UseStrictModeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_vue_event_handler()
+        {
+            return None;
+        }
+
         let node = ctx.query();
 
         if node.directives().is_empty() && node.statements().is_empty() {

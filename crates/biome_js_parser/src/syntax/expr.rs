@@ -1558,7 +1558,7 @@ pub(crate) fn is_nth_at_identifier_or_keyword(p: &mut JsParser, n: usize) -> boo
 // test_err js template_literal
 // let a = `foo ${}`
 // let b = `${a a}`
-fn parse_template_literal(
+pub(crate) fn parse_template_literal(
     p: &mut JsParser,
     marker: Marker,
     in_optional_chain: bool,

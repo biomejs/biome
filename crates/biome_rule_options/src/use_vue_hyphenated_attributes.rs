@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseVueHyphenatedAttributesOptions {
-    /// List of attribute names to ignore when checking for hyphenated attributes.
+    /// List of attribute names to ignore when checking for uppercase letters.
     pub ignore: Option<FxHashSet<String>>,
 
-    /// List of HTML tags to ignore when checking for hyphenated attributes.
+    /// List of HTML tags whose attributes should not be checked for uppercase letters.
     pub ignore_tags: Option<FxHashSet<String>>,
 }

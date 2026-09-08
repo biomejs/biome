@@ -1,0 +1,15 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: yaml_front_matter.options.json
+---
+# Input
+```md
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+
+```

@@ -38,6 +38,8 @@ expression: snapshot
   font-#{$weight}::before {
     color: orange;
   }
+
+  font:bold;
 }
 
 ```
@@ -520,22 +522,41 @@ CssRoot {
                             r_curly_token: R_CURLY@339..343 "}" [Newline("\n"), Whitespace("  ")] [],
                         },
                     },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@343..351 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@351..352 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@352..356 "bold" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@356..357 ";" [] [],
+                    },
                 ],
-                r_curly_token: R_CURLY@343..345 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@357..359 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@345..346 "" [Newline("\n")] [],
+    eof_token: EOF@359..360 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..346
+0: CSS_ROOT@0..360
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..345
-    0: CSS_QUALIFIED_RULE@0..345
+  1: CSS_ROOT_ITEM_LIST@0..359
+    0: CSS_QUALIFIED_RULE@0..359
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -545,9 +566,9 @@ CssRoot {
               0: DOT@0..1 "." [] []
               1: CSS_CUSTOM_IDENTIFIER@1..6
                 0: IDENT@1..6 "test" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@6..345
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..359
         0: L_CURLY@6..7 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@7..343
+        1: CSS_DECLARATION_OR_RULE_LIST@7..357
           0: CSS_NESTED_QUALIFIED_RULE@7..43
             0: CSS_RELATIVE_SELECTOR_LIST@7..22
               0: CSS_RELATIVE_SELECTOR@7..22
@@ -833,7 +854,19 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@338..339 ";" [] []
               2: R_CURLY@339..343 "}" [Newline("\n"), Whitespace("  ")] []
-        2: R_CURLY@343..345 "}" [Newline("\n")] []
-  2: EOF@345..346 "" [Newline("\n")] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@343..357
+            0: CSS_DECLARATION@343..356
+              0: CSS_GENERIC_PROPERTY@343..356
+                0: CSS_IDENTIFIER@343..351
+                  0: IDENT@343..351 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+                1: COLON@351..352 ":" [] []
+                2: SCSS_EXPRESSION@352..356
+                  0: SCSS_EXPRESSION_ITEM_LIST@352..356
+                    0: CSS_IDENTIFIER@352..356
+                      0: IDENT@352..356 "bold" [] []
+              1: (empty)
+            1: SEMICOLON@356..357 ";" [] []
+        2: R_CURLY@357..359 "}" [Newline("\n")] []
+  2: EOF@359..360 "" [Newline("\n")] []
 
 ```

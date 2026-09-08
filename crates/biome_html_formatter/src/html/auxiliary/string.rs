@@ -14,7 +14,10 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
             return format_removed(&value_token).fmt(f);
         }
 
-        if let Ok(value) = value_token.as_ref() {
+        if let Ok(value) = value_token.as_ref()
+            // An Astro `` `...` `` value is a live template literal, not a string.
+            && !value.text_trimmed().starts_with('`')
+        {
             let value_text = value.text_trimmed();
 
             // Rewriting the token loses the source mapping of everything

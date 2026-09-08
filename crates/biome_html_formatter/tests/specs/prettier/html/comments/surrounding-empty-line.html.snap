@@ -71,7 +71,7 @@ See console log:
 ```diff
 --- Prettier
 +++ Biome
-@@ -25,32 +25,28 @@
+@@ -25,29 +25,26 @@
      789
  
  
@@ -112,10 +112,7 @@ See console log:
 +2 --><span>b</span><!--
  3 --></span
  >
--
- 123<!---->456 123<!--x-->456
  
- <!-- A
 ```
 
 # Output
@@ -170,6 +167,7 @@ See console log:
 2 --><span>b</span><!--
 3 --></span
 >
+
 123<!---->456 123<!--x-->456
 
 <!-- A

@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/adjacent_expressions.svelte
+---
+
+# Input
+
+```svelte
+<span>
+	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+</span>
+
+<span>{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}</span>
+
+<div>
+	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+</div>
+
+<span>{first}{second}{third}</span>
+
+<span>
+	{head.median - base.median >= 0 ? "+" : "−"} {formatMs(Math.abs(head.median - base.median))}
+</span>
+
+<span>
+	{head.median - base.median >= 0 ? "+" : "−"}
+	{formatMs(Math.abs(head.median - base.median))}
+</span>
+
+<span><!-- before -->{first}<!-- between -->{second}<!-- after --></span>
+
+```
+
+
+# Formatted
+
+```svelte
+<span>
+	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+</span>
+
+<span
+	>{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}</span
+>
+
+<div>
+	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+</div>
+
+<span>{first}{second}{third}</span>
+
+<span>
+	{head.median - base.median >= 0 ? "+" : "−"}
+	{formatMs(Math.abs(head.median - base.median))}
+</span>
+
+<span>
+	{head.median - base.median >= 0 ? "+" : "−"}
+	{formatMs(Math.abs(head.median - base.median))}
+</span>
+
+<span><!-- before -->{first}<!-- between -->{second}<!-- after --></span>
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+    6: 	>{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}</span
+   10: 	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+```

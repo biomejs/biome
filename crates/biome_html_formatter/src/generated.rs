@@ -298,6 +298,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroClientDirective {
         )
     }
 }
+impl FormatRule<biome_html_syntax::AstroClosingFragment>
+    for crate::astro::auxiliary::closing_fragment::FormatAstroClosingFragment
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AstroClosingFragment,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AstroClosingFragment>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AstroClosingFragment {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AstroClosingFragment,
+        crate::astro::auxiliary::closing_fragment::FormatAstroClosingFragment,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::astro::auxiliary::closing_fragment::FormatAstroClosingFragment::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroClosingFragment {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AstroClosingFragment,
+        crate::astro::auxiliary::closing_fragment::FormatAstroClosingFragment,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::astro::auxiliary::closing_fragment::FormatAstroClosingFragment::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::AstroDefineDirective>
     for crate::astro::auxiliary::define_directive::FormatAstroDefineDirective
 {
@@ -412,6 +450,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroEmbeddedContent {
         )
     }
 }
+impl FormatRule<biome_html_syntax::AstroFragment>
+    for crate::astro::auxiliary::fragment::FormatAstroFragment
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AstroFragment,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AstroFragment>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AstroFragment {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AstroFragment,
+        crate::astro::auxiliary::fragment::FormatAstroFragment,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::astro::auxiliary::fragment::FormatAstroFragment::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroFragment {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AstroFragment,
+        crate::astro::auxiliary::fragment::FormatAstroFragment,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::astro::auxiliary::fragment::FormatAstroFragment::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::AstroFrontmatterElement>
     for crate::astro::auxiliary::frontmatter_element::FormatAstroFrontmatterElement
 {
@@ -485,6 +561,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroIsDirective {
         FormatOwnedWithRule::new(
             self,
             crate::astro::auxiliary::is_directive::FormatAstroIsDirective::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AstroOpeningFragment>
+    for crate::astro::auxiliary::opening_fragment::FormatAstroOpeningFragment
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AstroOpeningFragment,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AstroOpeningFragment>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AstroOpeningFragment {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AstroOpeningFragment,
+        crate::astro::auxiliary::opening_fragment::FormatAstroOpeningFragment,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::astro::auxiliary::opening_fragment::FormatAstroOpeningFragment::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AstroOpeningFragment {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AstroOpeningFragment,
+        crate::astro::auxiliary::opening_fragment::FormatAstroOpeningFragment,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::astro::auxiliary::opening_fragment::FormatAstroOpeningFragment::default(),
         )
     }
 }

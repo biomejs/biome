@@ -28,7 +28,7 @@ unicode-segmentation = "1.13.2"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
-criterion = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 trybuild  = "=1.0.116"
 
 [features]

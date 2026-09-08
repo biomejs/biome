@@ -1,4 +1,4 @@
-use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken};
+use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken, T};
 use biome_rowan::{AstNode, AstPtr, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
@@ -16,7 +16,11 @@ pub struct SemanticModelBuilder {
     all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
+    root_declarations: Vec<CssModelDeclarationData>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
+    at_property_rules: Vec<CssPropertyAtRuleData>,
+    at_property_by_range: FxHashMap<TextRange, usize>,
+    last_at_property_by_name: FxHashMap<TokenText, usize>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -31,8 +35,12 @@ impl SemanticModelBuilder {
             root,
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
+            root_declarations: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
+            at_property_rules: Vec::new(),
+            at_property_by_range: FxHashMap::default(),
+            last_at_property_by_name: FxHashMap::default(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
         }
@@ -47,24 +55,20 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index());
-                if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
-                    if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                    ) {
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                    } else {
-                        return Some(rule);
-                    }
+                let rule = self.all_rules.get(parent_id.index())?;
+                let typed_node = rule.node.to_node(self.root.syntax());
+                if matches!(
+                    typed_node,
+                    AnyRuleStart::CssMediaAtRule(_)
+                        | AnyRuleStart::CssScopeAtRule(_)
+                        | AnyRuleStart::CssSupportsAtRule(_)
+                ) {
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
                 } else {
-                    return None;
+                    return Some(rule);
                 }
             } else {
                 return None;
@@ -82,32 +86,28 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index());
-                if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
-                    if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                    ) {
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                    } else {
-                        if current_index == index {
-                            return Some(rule);
-                        }
-
-                        current_parent_id = iterator
-                            .next()
-                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                            .and_then(|rule| rule.parent_id);
-                        current_index += 1;
-                    }
+                let rule = self.all_rules.get(parent_id.index())?;
+                let typed_node = rule.node.to_node(self.root.syntax());
+                if matches!(
+                    typed_node,
+                    AnyRuleStart::CssMediaAtRule(_)
+                        | AnyRuleStart::CssScopeAtRule(_)
+                        | AnyRuleStart::CssSupportsAtRule(_)
+                ) {
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
                 } else {
-                    return None;
+                    if current_index == index {
+                        return Some(rule);
+                    }
+
+                    current_parent_id = iterator
+                        .next()
+                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
+                        .and_then(|rule| rule.parent_id);
+                    current_index += 1;
                 }
             } else {
                 return None;
@@ -120,7 +120,11 @@ impl SemanticModelBuilder {
             root: self.root.syntax().as_send().expect("To be a root node"),
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
+            root_declarations: self.root_declarations,
             global_custom_variables: self.global_custom_variables,
+            at_property_rules: self.at_property_rules,
+            at_property_by_range: self.at_property_by_range,
+            last_at_property_by_name: self.last_at_property_by_name,
             range_to_rule_id: self.range_to_rule_id,
         };
         SemanticModel::new(data)
@@ -227,28 +231,27 @@ impl SemanticModelBuilder {
                 let is_global_var =
                     self.is_in_root_selector && property.syntax().text_trimmed().starts_with("--");
 
-                if let Some(&current_rule_id) = self.current_rule_stack.last()
-                    && let Ok(property_name) = property.value()
-                {
+                if let Ok(property_name) = property.value() {
+                    let declaration = CssModelDeclarationData {
+                        declaration: AstPtr::new(&node),
+                        property: AstPtr::new(&property),
+                        value,
+                        property_name: property_name.clone(),
+                    };
                     if is_global_var {
                         let variable = self
                             .global_custom_variables
                             .entry(property_name.clone())
                             .or_default();
-                        variable.root = Some(CssModelDeclarationData {
-                            declaration: AstPtr::new(&node),
-                            property: AstPtr::new(&property),
-                            value: value.clone(),
-                            property_name: property_name.clone(),
-                        });
+                        variable.root = Some(declaration.clone());
                     }
-                    let current_rule = &mut self.all_rules[current_rule_id.index()];
-                    current_rule.declarations.push(CssModelDeclarationData {
-                        declaration: AstPtr::new(&node),
-                        property: AstPtr::new(&property),
-                        value,
-                        property_name,
-                    });
+                    if let Some(&current_rule_id) = self.current_rule_stack.last() {
+                        self.all_rules[current_rule_id.index()]
+                            .declarations
+                            .push(declaration);
+                    } else if self.root.as_css_declaration_snippet_root().is_some() {
+                        self.root_declarations.push(declaration);
+                    }
                 }
             }
             SemanticEvent::RootSelectorStart => {
@@ -266,17 +269,24 @@ impl SemanticModelBuilder {
             } => {
                 if let Ok(property_name) = property.value_token() {
                     let property_name = property_name.token_text_trimmed();
-                    let variable = self
-                        .global_custom_variables
-                        .entry(property_name)
+                    self.global_custom_variables
+                        .entry(property_name.clone())
                         .or_default();
-                    variable.at_property = Some(CssPropertyAtRuleData {
+                    let index = self.at_property_rules.len();
+                    let rule = CssPropertyAtRuleData {
+                        name: property_name.clone(),
                         property: AstPtr::new(&property),
                         initial_value,
                         syntax,
                         inherits,
                         range,
-                    });
+                    };
+                    let is_registration_candidate = rule.is_registration_candidate(&self.root);
+                    self.at_property_rules.push(rule);
+                    self.at_property_by_range.insert(range, index);
+                    if is_registration_candidate {
+                        self.last_at_property_by_name.insert(property_name, index);
+                    }
                 }
             }
         }
@@ -293,14 +303,19 @@ fn space_combinator() -> (CssSyntaxKind, TokenText) {
     )
 }
 
+fn is_explicit_combinator(kind: CssSyntaxKind) -> bool {
+    matches!(kind, T![>] | T![+] | T![~] | T![||])
+}
+
 /// Resolves the `current` token sequence against each parent [`Selector`],
 /// producing one [`ResolvedSelector`] per parent selector.
 ///
 /// Resolution rules (per the CSS nesting spec):
 /// - If any token in `current` is an `AMP` (`&`), every such occurrence is
 ///   replaced in-place by the full token sequence of the parent selector.
-/// - If there is no `&`, the parent token sequence is prepended and a
-///   synthetic space-literal token is inserted as the descendant combinator.
+/// - If there is no `&`, the parent token sequence is prepended. A synthetic
+///   descendant combinator is inserted unless either sequence already meets at
+///   an explicit combinator.
 ///
 /// Tokens are stored as `(CssSyntaxKind, TokenText)` pairs so that the
 /// `Display` impl can reconstruct canonical whitespace around combinators.
@@ -329,10 +344,17 @@ fn resolve_selector(current: &[CssSyntaxToken], parents: &[SelectorData]) -> Vec
                 }
                 ResolvedSelector(tokens)
             } else {
-                // Prepend parent tokens + implicit descendant combinator.
                 let mut tokens = Vec::with_capacity(parent_tokens.len() + 1 + current.len());
                 tokens.extend(parent_tokens.iter().cloned());
-                tokens.push(space_combinator());
+                let has_combinator_boundary = current
+                    .first()
+                    .is_some_and(|token| is_explicit_combinator(token.kind()))
+                    || parent_tokens
+                        .last()
+                        .is_some_and(|(kind, _)| is_explicit_combinator(*kind));
+                if !has_combinator_boundary {
+                    tokens.push(space_combinator());
+                }
                 tokens.extend(current.iter().map(|t| (t.kind(), t.token_text_trimmed())));
                 ResolvedSelector(tokens)
             }

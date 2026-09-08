@@ -26,3 +26,6 @@ new Boolean(!!x);
 const b0 = false;
 const b1 = false;
 const boolean = !Boolean(b0 && b1);
+
+// Test case for issue #11289 - should preserve parentheses
+const result = Boolean(foo ? bar : baz) ? "X" : "Y";

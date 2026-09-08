@@ -27,7 +27,11 @@ pub(crate) fn expected_flow_mapping_entry(p: &YamlParser, range: TextRange) -> P
     expected_node("flow mapping entry", range, p)
 }
 
-pub(crate) fn expected_flow_mapping_closing_quote(range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_flow_node(p: &YamlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("flow node", range, p)
+}
+
+pub(crate) fn expected_flow_mapping_closing_brace(range: TextRange) -> ParseDiagnostic {
     ParseDiagnostic::new("Expected `}`", range)
 }
 

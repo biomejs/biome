@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/each_array_hole.svelte
+---
+
+# Input
+
+```svelte
+{#each animals as [, value]}
+	<p>{value}</p>
+{/each}
+
+{#each animals as [key, , value]}
+	<p>{key}: {value}</p>
+{/each}
+
+{#each animals as [key, value]}
+	<p>{key}: {value}</p>
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{#each animals as [, value]}
+	<p>{value}</p>
+{/each}
+
+{#each animals as [key, , value]}
+	<p>{key}: {value}</p>
+{/each}
+
+{#each animals as [key, value]}
+	<p>{key}: {value}</p>
+{/each}
+
+```

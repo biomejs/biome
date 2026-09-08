@@ -38,3 +38,8 @@ new-crate             = "run -p xtask_codegen -- new-crate"
 
 [profile.release]
 lto = true
+
+# getrandom 0.3 (pulled in by boa_engine) requires an explicit backend on wasm,
+# in addition to its `wasm_js` cargo feature (enabled in biome_js_runtime).
+[target.wasm32-unknown-unknown]
+rustflags = ["--cfg", 'getrandom_backend="wasm_js"']

@@ -591,7 +591,7 @@ fn resolve<'a>(target_path: Cow<'a, str>, from_file: Cow<'a, str>) -> GritResult
     let Some(source_path) = Path::new(from_file.as_ref()).parent() else {
         return Err(GritPatternError::new(format!(
             "could not get parent directory of file name {}",
-            &from_file,
+            from_file,
         )));
     };
     let our_path = Path::new(target_path.as_ref());

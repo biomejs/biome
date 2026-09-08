@@ -996,7 +996,7 @@ fn is_unparenthesized_and_or_expression(expr: &AnyJsExpression) -> bool {
     match expr {
         AnyJsExpression::JsParenthesizedExpression(_) => false,
         AnyJsExpression::JsLogicalExpression(logical) => {
-            logical.operator().ok().is_some_and(|op| {
+            logical.operator().is_ok_and(|op| {
                 matches!(
                     op,
                     JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr
@@ -1071,7 +1071,7 @@ fn tree_contains_logical_and(node: &AnyJsLogicalOrLikeExpression) -> bool {
 }
 
 fn operand_reaches_logical_and(operand: SyntaxResult<AnyJsExpression>) -> bool {
-    operand.ok().is_some_and(|expr| {
+    operand.is_ok_and(|expr| {
         match expr.omit_parentheses() {
             AnyJsExpression::JsLogicalExpression(logical) => {
                 tree_contains_logical_and(&AnyJsLogicalOrLikeExpression::from(logical))

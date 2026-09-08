@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/template-pug.svelte
+---
+
+# Input
+
+```svelte
+<template lang="pug">
+    h1 My Title
+
+    div
+        p Hey
+        +if('foo')
+            bar
+</template>
+
+<template type="text/pug">
+    h1 My Title
+
+    div
+        p Hey
+        +if('foo')
+            bar
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,7 @@
+ <template lang="pug">
+-    h1 My Title
+-
+-    div
+-        p Hey
+-        +if('foo')
+-            bar
++    h1 My Title div p Hey +if('foo') bar
+ </template>
+ 
+ <template type="text/pug">
+-    h1 My Title
+-
+-    div
+-        p Hey
+-        +if('foo')
+-            bar
++    h1 My Title div p Hey +if('foo') bar
+ </template>
+```
+
+# Output
+
+```svelte
+<template lang="pug">
+    h1 My Title div p Hey +if('foo') bar
+</template>
+
+<template type="text/pug">
+    h1 My Title div p Hey +if('foo') bar
+</template>
+```

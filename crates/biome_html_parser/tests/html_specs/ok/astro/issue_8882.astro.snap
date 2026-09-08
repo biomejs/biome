@@ -43,6 +43,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@348..351 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -175,7 +176,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..348 "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show\n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink?\n */\nimport type { HTMLAttributes } from \"astro/types\";\ntype Props = HTMLAttributes<\"div\">;\nconst { class: className, ...rest } = Astro.props;\n" [Newline("\n")] []
     2: FENCE@348..351 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@351..530
+  3: (empty)
+  4: HTML_ELEMENT_LIST@351..530
     0: HTML_ELEMENT@351..530
       0: HTML_OPENING_ELEMENT@351..475
         0: L_ANGLE@351..354 "<" [Newline("\n"), Newline("\n")] []
@@ -252,6 +254,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@526..529
           0: DIV_KW@526..529 "div" [] []
         3: R_ANGLE@529..530 ">" [] []
-  4: EOF@530..531 "" [Newline("\n")] []
+  5: EOF@530..531 "" [Newline("\n")] []
 
 ```

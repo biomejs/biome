@@ -242,6 +242,13 @@ pub const HTML_TAG_NAMES: TokenSet<HtmlSyntaxKind> = token_set!(
     HTML_UNKNOWN_TAG
 );
 
+/// The tag-name keyword kinds of the HTML [void elements](https://html.spec.whatwg.org/#void-elements),
+/// which never have content or a closing tag.
+pub const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW, PARAM_KW,
+    SOURCE_KW, TRACK_KW, WBR_KW
+);
+
 impl HtmlSyntaxKind {
     /// Returns `true` if this kind can be the name of an [`crate::HtmlTagName`]: a
     /// known HTML/SVG tag-name keyword or the `HTML_UNKNOWN_TAG` fallback.

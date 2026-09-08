@@ -1,0 +1,139 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+nested:
+  value: |2
+   text
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@0..6 "nested" [] [],
+                                },
+                            },
+                            colon_token: COLON@6..7 ":" [] [],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlBlockMapping {
+                                    mapping_start_token: MAPPING_START@7..10 "" [Newline("\n"), Whitespace("  ")] [],
+                                    entries: YamlBlockMapEntryList [
+                                        YamlBlockMapImplicitEntry {
+                                            key: YamlFlowYamlNode {
+                                                properties: YamlPropertyList [],
+                                                content: YamlPlainScalar {
+                                                    value_token: PLAIN_LITERAL@10..15 "value" [] [],
+                                                },
+                                            },
+                                            colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
+                                            value: YamlBlockInBlockNode {
+                                                properties: YamlPropertyList [],
+                                                content: YamlLiteralScalar {
+                                                    bitwise_or_token: PIPE@17..18 "|" [] [],
+                                                    headers: YamlBlockHeaderList [
+                                                        YamlIndentationIndicator {
+                                                            indentation_indicator_token: INDENTATION_INDICATOR@18..19 "2" [] [],
+                                                        },
+                                                    ],
+                                                    content: YamlBlockContent {
+                                                        value_token: BLOCK_CONTENT_LITERAL@19..27 "\n   text" [] [],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    mapping_end_token: MAPPING_END@27..27 "" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@27..28 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@28..28 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..28
+  0: YAML_DOCUMENT_LIST@0..28
+    0: YAML_DOCUMENT@0..28
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..28
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..28
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..27
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..27
+              0: YAML_FLOW_YAML_NODE@0..6
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..6
+                  0: PLAIN_LITERAL@0..6 "nested" [] []
+              1: COLON@6..7 ":" [] []
+              2: YAML_BLOCK_IN_BLOCK_NODE@7..27
+                0: YAML_PROPERTY_LIST@7..7
+                1: YAML_BLOCK_MAPPING@7..27
+                  0: MAPPING_START@7..10 "" [Newline("\n"), Whitespace("  ")] []
+                  1: YAML_BLOCK_MAP_ENTRY_LIST@10..27
+                    0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@10..27
+                      0: YAML_FLOW_YAML_NODE@10..15
+                        0: YAML_PROPERTY_LIST@10..10
+                        1: YAML_PLAIN_SCALAR@10..15
+                          0: PLAIN_LITERAL@10..15 "value" [] []
+                      1: COLON@15..17 ":" [] [Whitespace(" ")]
+                      2: YAML_BLOCK_IN_BLOCK_NODE@17..27
+                        0: YAML_PROPERTY_LIST@17..17
+                        1: YAML_LITERAL_SCALAR@17..27
+                          0: PIPE@17..18 "|" [] []
+                          1: YAML_BLOCK_HEADER_LIST@18..19
+                            0: YAML_INDENTATION_INDICATOR@18..19
+                              0: INDENTATION_INDICATOR@18..19 "2" [] []
+                          2: YAML_BLOCK_CONTENT@19..27
+                            0: BLOCK_CONTENT_LITERAL@19..27 "\n   text" [] []
+                  2: MAPPING_END@27..27 "" [] []
+          2: MAPPING_END@27..28 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@28..28 "" [] []
+
+```
+
+## Diagnostics
+
+```
+block_scalar_insufficient_indentation.yaml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block scalar content must be indented by at least 4 spaces.
+  
+    1 │ nested:
+    2 │   value: |2
+  > 3 │    text
+      │ ^^^
+    4 │ 
+  
+```

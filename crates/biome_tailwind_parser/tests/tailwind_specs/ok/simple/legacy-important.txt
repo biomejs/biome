@@ -1,0 +1,1 @@
+!flex hover:!p-4 !-m-4 ![color:red] !bg-red-500/50 !@container/main !w-full flex! !flex

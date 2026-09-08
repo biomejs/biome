@@ -135,7 +135,5 @@ fn is_type_declaration(node: &JsCallExpression) -> bool {
 }
 
 fn is_runtime_declaration(node: &JsCallExpression) -> bool {
-    node.arguments()
-        .ok()
-        .is_some_and(|args| args.args().into_iter().next().is_some())
+    node.arguments().is_ok_and(|args| args.args().into_iter().next().is_some())
 }

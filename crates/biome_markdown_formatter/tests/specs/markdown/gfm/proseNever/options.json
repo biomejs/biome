@@ -1,0 +1,11 @@
+{
+  "markdown": {
+    "formatter": {
+      "lineWidth": 40,
+      "proseWrap": "never"
+    },
+    "parser": {
+      "gfm": true
+    }
+  }
+}

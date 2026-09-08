@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/move-options-to-top.svelte
+---
+
+# Input
+
+```svelte
+<script></script>
+
+<p>hi</p>
+
+<svelte:options immutable={true} />
+
+<p>some stuff</p>
+
+<style></style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,9 @@
+-<svelte:options immutable={true} />
+-
+ <script></script>
+ 
+ <p>hi</p>
+ 
++<svelte:options immutable={true} />
++
+ <p>some stuff</p>
+ 
+ <style></style>
+```
+
+# Output
+
+```svelte
+<script></script>
+
+<p>hi</p>
+
+<svelte:options immutable={true} />
+
+<p>some stuff</p>
+
+<style></style>
+```

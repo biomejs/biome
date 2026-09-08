@@ -39,6 +39,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@71..74 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -109,7 +110,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..71 "import { Counter } from '@/components/counter'\n\nconst show = false\n" [Newline("\n")] []
     2: FENCE@71..74 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@74..333
+  3: (empty)
+  4: HTML_ELEMENT_LIST@74..333
     0: HTML_ELEMENT@74..333
       0: HTML_OPENING_ELEMENT@74..80
         0: L_ANGLE@74..76 "<" [Newline("\n")] []
@@ -148,6 +150,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@329..332
           0: DIV_KW@329..332 "div" [] []
         3: R_ANGLE@332..333 ">" [] []
-  4: EOF@333..334 "" [Newline("\n")] []
+  5: EOF@333..334 "" [Newline("\n")] []
 
 ```

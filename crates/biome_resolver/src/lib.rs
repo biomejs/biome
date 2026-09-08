@@ -1,8 +1,8 @@
 #![deny(clippy::use_self)]
 
 mod errors;
-mod node_builtins;
 mod resolver_fs_proxy;
+mod runtime_builtins;
 
 use std::{borrow::Cow, cmp::Ordering, ops::Deref, sync::Arc};
 
@@ -12,8 +12,8 @@ use biome_package::{PackageJson, TsConfigJson};
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub use errors::*;
-pub use node_builtins::is_builtin_node_module;
 pub use resolver_fs_proxy::*;
+pub use runtime_builtins::{is_builtin_bun_module, is_builtin_node_module};
 
 /// Resolves the given `specifier` from the given `base_dir`.
 ///
@@ -38,6 +38,10 @@ pub fn resolve(
 
     if options.resolve_node_builtins && is_builtin_node_module(specifier) {
         return Err(ResolveError::NodeBuiltIn);
+    }
+
+    if options.resolve_bun_builtins && is_builtin_bun_module(specifier) {
+        return Err(ResolveError::BunBuiltIn);
     }
 
     if specifier.starts_with('/') {
@@ -226,9 +230,11 @@ fn resolve_module_with_package_json(
         DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
         DiscoverableManifest::Off => Err(ResolveError::NotFound),
     };
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
-        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
-    }) {
+    if let Some(path) = tsconfig
+        .as_ref()
+        .ok()
+        .and_then(|tsconfig| resolve_paths_mapping(specifier, tsconfig, fs, options).ok())
+    {
         return Ok(path);
     }
 
@@ -433,7 +439,6 @@ fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
 fn resolve_paths_mapping(
     specifier: &str,
     tsconfig_json: &TsConfigJson,
-    package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
@@ -444,16 +449,12 @@ fn resolve_paths_mapping(
         .ok_or(ResolveError::NotFound)?;
 
     let resolve_specifier = |specifier: &str| {
-        if is_relative_specifier(specifier) {
-            resolve_relative_path(
-                specifier,
-                &tsconfig_json.compiler_options.paths_base,
-                fs,
-                options,
-            )
-        } else {
-            resolve_dependency(specifier, package_path, fs, options)
-        }
+        resolve_relative_path(
+            specifier,
+            &tsconfig_json.compiler_options.paths_base,
+            fs,
+            options,
+        )
     };
 
     let resolve_target = |target: &str, glob_replacement: Option<&str>| match glob_replacement {
@@ -881,6 +882,16 @@ pub struct ResolveOptions<'a> {
     /// which will likely fail too, but will result in a different error.
     pub resolve_node_builtins: bool,
 
+    /// Whether Bun builtin modules should be resolved.
+    ///
+    /// Note that this setting primarily influences the kind of error returned
+    /// when attempting to resolve a Bun built-in. Built-ins cannot be
+    /// resolved to a path, so if this setting is `true`, any attempt to do so
+    /// will return an error of kind [`ResolveError::BunBuiltIn`]. If `false`,
+    /// the resolver may try to resolve the built-in as an ordinary dependency,
+    /// which will likely fail too, but will result in a different error.
+    pub resolve_bun_builtins: bool,
+
     /// If `true`, the resolver will attempt to resolve to a type definition
     /// (usually a `.d.ts` file) instead of a source path.
     ///
@@ -941,6 +952,7 @@ impl<'a> ResolveOptions<'a> {
             extension_aliases: &[],
             package_json: DiscoverableManifest::Auto,
             resolve_node_builtins: false,
+            resolve_bun_builtins: false,
             resolve_types: false,
             tsconfig: DiscoverableManifest::Auto,
             type_roots: TypeRoots::Auto,
@@ -1001,6 +1013,12 @@ impl<'a> ResolveOptions<'a> {
         self
     }
 
+    /// Sets [`Self::resolve_bun_builtins`] to `true` and returns this instance.
+    pub const fn with_resolve_bun_builtins(mut self) -> Self {
+        self.resolve_bun_builtins = true;
+        self
+    }
+
     /// Sets [`Self::resolve_types`] to `true` and returns this instance.
     pub const fn with_resolve_types(mut self) -> Self {
         self.resolve_types = true;
@@ -1028,6 +1046,7 @@ impl<'a> ResolveOptions<'a> {
             extension_aliases: self.extension_aliases,
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
+            resolve_bun_builtins: self.resolve_bun_builtins,
             resolve_types: self.resolve_types,
             tsconfig: DiscoverableManifest::Off,
             type_roots,
@@ -1043,6 +1062,7 @@ impl<'a> ResolveOptions<'a> {
             extension_aliases: &[],
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
+            resolve_bun_builtins: self.resolve_bun_builtins,
             resolve_types: self.resolve_types,
             tsconfig: DiscoverableManifest::Off,
             type_roots: self.type_roots,

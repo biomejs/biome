@@ -275,7 +275,8 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
 fn has_label_attribute_value(jsx_attribute_value: &AnyJsxAttributeValue) -> bool {
     match jsx_attribute_value {
         AnyJsxAttributeValue::AnyJsxTag(_) => false,
-        AnyJsxAttributeValue::JsxExpressionAttributeValue(_) => true,
+        AnyJsxAttributeValue::JsxExpressionAttributeValue(_)
+        | AnyJsxAttributeValue::JsTemplateExpression(_) => true,
         AnyJsxAttributeValue::JsxString(jsx_string) => !jsx_string
             .inner_string_text()
             .is_ok_and(|text| text.text().trim().is_empty()),

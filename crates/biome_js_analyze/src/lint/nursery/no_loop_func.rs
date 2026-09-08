@@ -551,9 +551,7 @@ fn is_iife(function: &AnySkippableIife) -> bool {
 
         if let Some(call) = parent.clone().cast::<JsCallExpression>() {
             return call
-                .callee()
-                .ok()
-                .is_some_and(|callee| callee.syntax() == &current);
+                .callee().is_ok_and(|callee| callee.syntax() == &current);
         }
 
         return false;

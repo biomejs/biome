@@ -8,6 +8,7 @@ impl FormatRule<AnyJsxTag> for FormatAnyJsxTag {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsxTag, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
+            AnyJsxTag::AstroImplicitFragment(node) => node.format().fmt(f),
             AnyJsxTag::JsxElement(node) => node.format().fmt(f),
             AnyJsxTag::JsxFragment(node) => node.format().fmt(f),
             AnyJsxTag::JsxSelfClosingElement(node) => node.format().fmt(f),

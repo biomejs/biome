@@ -538,7 +538,7 @@ impl NamingConventionSelection {
 pub(crate) struct Anything;
 impl Deserializable for Anything {
     fn deserialize(
-        _ctx: &mut impl biome_deserialize::DeserializationContext,
+        _ctx: &mut dyn biome_deserialize::DeserializationContext,
         _value: &impl biome_deserialize::DeserializableValue,
         _name: &str,
     ) -> Option<Self> {

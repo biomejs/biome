@@ -9,3 +9,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { EventEmitter } from "node:events";
 import * as crypto from "node:crypto";
+
+// Bun built-in modules must never be flagged.
+import Bun from "bun";
+import { dlopen } from "bun:ffi";
+import { jsc } from "bun:jsc";
+import { Database } from "bun:sqlite";
+import { test } from "bun:test";
+import { feature } from "bun:bundle";

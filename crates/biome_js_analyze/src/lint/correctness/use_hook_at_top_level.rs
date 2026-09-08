@@ -84,6 +84,240 @@ declare_lint_rule! {
     }
 }
 
+pub struct Suggestion {
+    hook_name_range: TextRange,
+    path: Vec<TextRange>,
+    kind: SuggestionKind,
+}
+
+pub enum SuggestionKind {
+    Regular,
+    EarlyReturn(TextRange),
+    Nested,
+    Recursive,
+    TopLevel,
+    ComponentOrHook,
+}
+
+#[derive(Clone)]
+pub struct FunctionCall(JsCallExpression);
+
+impl Rule for UseHookAtTopLevel {
+    type Query = FunctionCall;
+    type State = Suggestion;
+    type Signals = Option<Self::State>;
+    type Options = UseHookAtTopLevelOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let FunctionCall(call) = ctx.query();
+        let get_hook_name_range = || match call.callee() {
+            Ok(callee) => Some(AnyJsExpression::syntax(&callee).text_trimmed_range()),
+            Err(_) => None,
+        };
+
+        // Early return for any function call that's not a hook call:
+        if !is_react_hook_call(call) {
+            return None;
+        }
+
+        // Check if the hook is in the ignore list
+        if let Some(ignore) = ctx.options().ignore.as_ref()
+            && let Ok(callee) = call.callee()
+        {
+            // Extract the hook name (handles both `useHook` and `obj.useHook`)
+            let hook_name = if let Some(identifier) = callee.as_js_identifier_expression() {
+                identifier
+                    .name()
+                    .ok()
+                    .and_then(|name| name.value_token().ok())
+                    .map(|token| token.token_text_trimmed())
+            } else if let Some(member_expression) = callee.as_js_static_member_expression() {
+                member_expression
+                    .member()
+                    .ok()
+                    .and_then(|member| member.value_token().ok())
+                    .map(|token| token.token_text_trimmed())
+            } else {
+                None
+            };
+
+            if let Some(name) = hook_name
+                && ignore.contains(name.text())
+            {
+                return None;
+            }
+        }
+
+        if is_top_level_call(call) {
+            return Some(Suggestion {
+                hook_name_range: get_hook_name_range()?,
+                path: vec![call.syntax().text_range_with_trivia()],
+                kind: SuggestionKind::TopLevel,
+            });
+        }
+
+        let model = ctx.semantic_model();
+        let early_returns = ctx.early_returns_model();
+
+        let root = CallPath {
+            call: call.clone(),
+            path: vec![],
+            is_enclosed_in_component_or_hook: false,
+        };
+        let mut calls = vec![root];
+
+        while let Some(CallPath {
+            call,
+            mut path,
+            is_enclosed_in_component_or_hook,
+        }) = calls.pop()
+        {
+            let range = call.syntax().text_range_with_trivia();
+
+            if path.contains(&range) {
+                return Some(Suggestion {
+                    hook_name_range: get_hook_name_range()?,
+                    path,
+                    kind: SuggestionKind::Recursive,
+                });
+            }
+
+            path.push(range);
+
+            if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call) {
+                if is_nested_function_inside_component_or_hook(&enclosing_function) {
+                    // We cannot allow nested functions inside hooks and
+                    // components, since it would break the requirement for
+                    // hooks to be called from the top-level.
+                    return Some(Suggestion {
+                        hook_name_range: get_hook_name_range()?,
+                        path,
+                        kind: SuggestionKind::Nested,
+                    });
+                }
+
+                if let Some(early_return) = early_returns.get(&call) {
+                    return Some(Suggestion {
+                        hook_name_range: get_hook_name_range()?,
+                        path,
+                        kind: SuggestionKind::EarlyReturn(*early_return),
+                    });
+                }
+
+                let enclosed = is_enclosed_in_component_or_hook
+                    || enclosing_function.is_react_component_or_hook();
+
+                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
+                    && let Some(calls_iter) = function.all_calls(model)
+                {
+                    for call in calls_iter {
+                        calls.push(CallPath {
+                            call: call.tree(),
+                            path: path.clone(),
+                            is_enclosed_in_component_or_hook: enclosed,
+                        });
+                    }
+                }
+            } else {
+                // Avoid duplicate diagnostics if this path already passed through
+                // a component/hook. We still keep previously enqueued paths to
+                // allow recursion detection elsewhere.
+                if is_enclosed_in_component_or_hook {
+                    continue;
+                }
+                return Some(Suggestion {
+                    hook_name_range: get_hook_name_range()?,
+                    path,
+                    kind: SuggestionKind::Regular,
+                });
+            }
+        }
+
+        if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
+            !function.is_react_component_or_hook() && !function.is_function_expression()
+        }) {
+            return Some(Suggestion {
+                hook_name_range: get_hook_name_range()?,
+                path: vec![call.syntax().text_range_with_trivia()],
+                kind: SuggestionKind::ComponentOrHook,
+            });
+        }
+
+        None
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, suggestion: &Self::State) -> Option<RuleDiagnostic> {
+        let Suggestion {
+            hook_name_range,
+            path,
+            kind,
+        } = suggestion;
+
+        let message = match &kind {
+            SuggestionKind::Nested => markup! {
+                "This hook is being called from a nested function, but all hooks must be called "
+                "unconditionally from the top-level component."
+            },
+            SuggestionKind::Recursive => markup! { "This hook is being called recursively." },
+            SuggestionKind::TopLevel => markup! {
+                "This hook is being called at the module level, but all hooks must be called from "
+                "within a hook or component."
+            },
+            SuggestionKind::ComponentOrHook => markup! {
+                "This hook is being called from within a function or method that is not a hook or component."
+            },
+            _ if path.len() <= 1 => markup! {
+                "This hook is being called conditionally, but all hooks must be called in the "
+                "exact same order in every component render."
+            },
+            _ => markup! {
+                "This hook is being called indirectly and conditionally, but all hooks must be "
+                "called in the exact same order in every component render."
+            },
+        };
+
+        let mut diag = RuleDiagnostic::new(rule_category!(), hook_name_range, message);
+        for (i, range) in path.iter().skip(1).enumerate() {
+            let msg = if i == 0 {
+                markup! { "This is the call path until the hook." }
+            } else {
+                markup! {}
+            };
+
+            diag = diag.detail(range, msg);
+        }
+
+        if let SuggestionKind::EarlyReturn(range) = &kind {
+            diag = diag.detail(
+                *range,
+                markup! { "Hooks should not be called after an early return." },
+            );
+        }
+
+        diag = match kind {
+            SuggestionKind::TopLevel | SuggestionKind::ComponentOrHook => diag.note(markup! {
+                "Move the hook call into the top level of a hook or component in order to use it."
+            }),
+            _ => diag.note(markup! {
+                "For React to preserve state between calls, hooks needs to be called "
+                "unconditionally and always in the same order."
+            }),
+        };
+
+        if matches!(kind, SuggestionKind::Recursive) {
+            diag = diag.note(markup! {
+                "This means recursive calls are not allowed, because they require a condition "
+                "in order to terminate."
+            });
+        }
+
+        diag = diag.note(markup! {
+            "See https://react.dev/reference/rules/rules-of-hooks"
+        });
+        Some(diag)
+    }
+}
+
 declare_node_union! {
     pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember
 }
@@ -128,21 +362,6 @@ impl AnyJsFunctionOrMethod {
                 .map(AnyJsObjectMemberName::to_trimmed_text),
         }
     }
-}
-
-pub struct Suggestion {
-    hook_name_range: TextRange,
-    path: Vec<TextRange>,
-    kind: SuggestionKind,
-}
-
-pub enum SuggestionKind {
-    Regular,
-    EarlyReturn(TextRange),
-    Nested,
-    Recursive,
-    TopLevel,
-    ComponentOrHook,
 }
 
 /// Verifies whether the call expression is at the top level of the component,
@@ -422,9 +641,6 @@ impl Phase for FunctionCallServices {
     }
 }
 
-#[derive(Clone)]
-pub struct FunctionCall(JsCallExpression);
-
 impl QueryMatch for FunctionCall {
     fn text_range(&self) -> TextRange {
         self.0.range()
@@ -456,220 +672,4 @@ pub struct CallPath {
     call: JsCallExpression,
     is_enclosed_in_component_or_hook: bool,
     path: Vec<TextRange>,
-}
-
-impl Rule for UseHookAtTopLevel {
-    type Query = FunctionCall;
-    type State = Suggestion;
-    type Signals = Option<Self::State>;
-    type Options = UseHookAtTopLevelOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let FunctionCall(call) = ctx.query();
-        let get_hook_name_range = || match call.callee() {
-            Ok(callee) => Some(AnyJsExpression::syntax(&callee).text_trimmed_range()),
-            Err(_) => None,
-        };
-
-        // Early return for any function call that's not a hook call:
-        if !is_react_hook_call(call) {
-            return None;
-        }
-
-        // Check if the hook is in the ignore list
-        if let Some(ignore) = ctx.options().ignore.as_ref()
-            && let Ok(callee) = call.callee()
-        {
-            // Extract the hook name (handles both `useHook` and `obj.useHook`)
-            let hook_name = if let Some(identifier) = callee.as_js_identifier_expression() {
-                identifier
-                    .name()
-                    .ok()
-                    .and_then(|name| name.value_token().ok())
-                    .map(|token| token.token_text_trimmed())
-            } else if let Some(member_expression) = callee.as_js_static_member_expression() {
-                member_expression
-                    .member()
-                    .ok()
-                    .and_then(|member| member.value_token().ok())
-                    .map(|token| token.token_text_trimmed())
-            } else {
-                None
-            };
-
-            if let Some(name) = hook_name
-                && ignore.contains(name.text())
-            {
-                return None;
-            }
-        }
-
-        if is_top_level_call(call) {
-            return Some(Suggestion {
-                hook_name_range: get_hook_name_range()?,
-                path: vec![call.syntax().text_range_with_trivia()],
-                kind: SuggestionKind::TopLevel,
-            });
-        }
-
-        let model = ctx.semantic_model();
-        let early_returns = ctx.early_returns_model();
-
-        let root = CallPath {
-            call: call.clone(),
-            path: vec![],
-            is_enclosed_in_component_or_hook: false,
-        };
-        let mut calls = vec![root];
-
-        while let Some(CallPath {
-            call,
-            mut path,
-            is_enclosed_in_component_or_hook,
-        }) = calls.pop()
-        {
-            let range = call.syntax().text_range_with_trivia();
-
-            if path.contains(&range) {
-                return Some(Suggestion {
-                    hook_name_range: get_hook_name_range()?,
-                    path,
-                    kind: SuggestionKind::Recursive,
-                });
-            }
-
-            path.push(range);
-
-            if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call) {
-                if is_nested_function_inside_component_or_hook(&enclosing_function) {
-                    // We cannot allow nested functions inside hooks and
-                    // components, since it would break the requirement for
-                    // hooks to be called from the top-level.
-                    return Some(Suggestion {
-                        hook_name_range: get_hook_name_range()?,
-                        path,
-                        kind: SuggestionKind::Nested,
-                    });
-                }
-
-                if let Some(early_return) = early_returns.get(&call) {
-                    return Some(Suggestion {
-                        hook_name_range: get_hook_name_range()?,
-                        path,
-                        kind: SuggestionKind::EarlyReturn(*early_return),
-                    });
-                }
-
-                let enclosed = is_enclosed_in_component_or_hook
-                    || enclosing_function.is_react_component_or_hook();
-
-                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
-                    && let Some(calls_iter) = function.all_calls(model)
-                {
-                    for call in calls_iter {
-                        calls.push(CallPath {
-                            call: call.tree(),
-                            path: path.clone(),
-                            is_enclosed_in_component_or_hook: enclosed,
-                        });
-                    }
-                }
-            } else {
-                // Avoid duplicate diagnostics if this path already passed through
-                // a component/hook. We still keep previously enqueued paths to
-                // allow recursion detection elsewhere.
-                if is_enclosed_in_component_or_hook {
-                    continue;
-                }
-                return Some(Suggestion {
-                    hook_name_range: get_hook_name_range()?,
-                    path,
-                    kind: SuggestionKind::Regular,
-                });
-            }
-        }
-
-        if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
-            !function.is_react_component_or_hook() && !function.is_function_expression()
-        }) {
-            return Some(Suggestion {
-                hook_name_range: get_hook_name_range()?,
-                path: vec![call.syntax().text_range_with_trivia()],
-                kind: SuggestionKind::ComponentOrHook,
-            });
-        }
-
-        None
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, suggestion: &Self::State) -> Option<RuleDiagnostic> {
-        let Suggestion {
-            hook_name_range,
-            path,
-            kind,
-        } = suggestion;
-
-        let message = match &kind {
-            SuggestionKind::Nested => markup! {
-                "This hook is being called from a nested function, but all hooks must be called "
-                "unconditionally from the top-level component."
-            },
-            SuggestionKind::Recursive => markup! { "This hook is being called recursively." },
-            SuggestionKind::TopLevel => markup! {
-                "This hook is being called at the module level, but all hooks must be called from "
-                "within a hook or component."
-            },
-            SuggestionKind::ComponentOrHook => markup! {
-                "This hook is being called from within a function or method that is not a hook or component."
-            },
-            _ if path.len() <= 1 => markup! {
-                "This hook is being called conditionally, but all hooks must be called in the "
-                "exact same order in every component render."
-            },
-            _ => markup! {
-                "This hook is being called indirectly and conditionally, but all hooks must be "
-                "called in the exact same order in every component render."
-            },
-        };
-
-        let mut diag = RuleDiagnostic::new(rule_category!(), hook_name_range, message);
-        for (i, range) in path.iter().skip(1).enumerate() {
-            let msg = if i == 0 {
-                markup! { "This is the call path until the hook." }
-            } else {
-                markup! {}
-            };
-
-            diag = diag.detail(range, msg);
-        }
-
-        if let SuggestionKind::EarlyReturn(range) = &kind {
-            diag = diag.detail(
-                *range,
-                markup! { "Hooks should not be called after an early return." },
-            );
-        }
-
-        diag = match kind {
-            SuggestionKind::TopLevel | SuggestionKind::ComponentOrHook => diag.note(markup! {
-                "Move the hook call into the top level of a hook or component in order to use it."
-            }),
-            _ => diag.note(markup! {
-                "For React to preserve state between calls, hooks needs to be called "
-                "unconditionally and always in the same order."
-            }),
-        };
-
-        if matches!(kind, SuggestionKind::Recursive) {
-            diag = diag.note(markup! {
-                "This means recursive calls are not allowed, because they require a condition "
-                "in order to terminate."
-            });
-        }
-
-        diag = diag.note(markup! {
-            "See https://react.dev/reference/rules/rules-of-hooks"
-        });
-        Some(diag)
-    }
 }

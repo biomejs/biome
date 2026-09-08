@@ -1,4 +1,7 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares import media queries that can span multiple tokens.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares import media queries that can span multiple tokens."
+)]
 
 use std::collections::{HashMap, HashSet};
 
@@ -6,7 +9,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssAtRule, AnyCssRootItem, AnyCssRule, CssImportAtRule, CssRootItemList};
+use biome_css_syntax::{
+    AnyCssAtRule, AnyCssRootItem, AnyCssRule, CssImportAtRule, CssRootItemList,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rule_options::no_duplicate_at_import_rules::NoDuplicateAtImportRulesOptions;
@@ -56,7 +61,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("no-duplicate-at-import-rules").same()],
+        sources: &[RuleSource::Stylelint("no-duplicate-at-import-rules").same(), RuleSource::EslintCss("no-duplicate-imports").inspired()],
     }
 }
 
@@ -88,18 +93,16 @@ impl Rule for NoDuplicateAtImportRules {
             if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
                 // if the current import_rule has no media queries or there are no queries saved in the
                 // media_query_set, this is always a duplicate
-                if import_rule.media().to_trimmed_text().is_empty()
-                    || media_query_set.is_empty()
-                {
+                if import_rule.media().to_trimmed_text().is_empty() || media_query_set.is_empty() {
                     return Some(import_rule);
                 }
 
                 for media in import_rule.media() {
                     match media {
                         Ok(media) => {
-                            if !media_query_set.insert(
-                                media.to_trimmed_text().to_lowercase_cow().into(),
-                            ) {
+                            if !media_query_set
+                                .insert(media.to_trimmed_text().to_lowercase_cow().into())
+                            {
                                 return Some(import_rule);
                             }
                         }
@@ -111,9 +114,7 @@ impl Rule for NoDuplicateAtImportRules {
                 for media in import_rule.media() {
                     match media {
                         Ok(media) => {
-                            media_set.insert(
-                                media.to_trimmed_text().to_lowercase_cow().into(),
-                            );
+                            media_set.insert(media.to_trimmed_text().to_lowercase_cow().into());
                         }
                         _ => return None,
                     }

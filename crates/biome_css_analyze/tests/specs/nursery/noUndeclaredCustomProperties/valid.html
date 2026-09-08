@@ -1,0 +1,11 @@
+<!-- should not generate diagnostics -->
+<style>
+	.card {
+		--custom-bg: blue;
+		--escaped\2d color: green;
+	}
+</style>
+<div style="background: var(--custom-bg); content: 'var(--not-a-reference)'"></div>
+<div style="color: var(--escaped-color)"></div>
+<div style="--inline-color: red; color: var(--inline-color)"></div>
+<div style="--escaped-leading: red; color: var(\2d \2d escaped-leading)"></div>

@@ -9,9 +9,7 @@
 pub(crate) mod fs_proxy;
 
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};
-use crate::html_module_info::{
-    HtmlEmbeddedContent, HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo,
-};
+use crate::html_module_info::{HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo};
 use crate::path_info_cache::PathInfoCache;
 use crate::{
     JsModuleInfo, ModuleDiagnostic, SerializedJsModuleInfo, TypeInferenceMode,
@@ -19,8 +17,8 @@ use crate::{
 };
 use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
-use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::AnyJsRoot;
+use biome_languages::LanguageDb;
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use camino::Utf8PathBuf;
@@ -111,7 +109,7 @@ pub fn resolve_css_module(
 
     let module = visitor.visit();
     let mut dependencies = ModuleDependencies::default();
-    for (_, import) in module.0.imports.deref() {
+    for import in module.0.imports.iter() {
         if let Some(p) = import.resolved_path.as_path() {
             dependencies.insert(p.to_path_buf());
         }
@@ -120,24 +118,19 @@ pub fn resolve_css_module(
 }
 
 pub fn resolve_html_module(
-    html_root: HtmlRoot,
-    embedded_content: &[HtmlEmbeddedContent],
+    db: &dyn LanguageDb,
     path: &BiomePath,
     fs: &dyn FsWithResolverProxy,
     project_layout: &ProjectLayout,
     path_info_cache: &PathInfoCache,
-) -> (HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+) -> Option<(HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>)> {
     path_info_cache.prepopulate_directory_path_info(fs, &[path]);
 
+    let parsed_source = db.parsed_source_for_path(path)?;
     let directory = path.parent().unwrap_or(path);
     let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
-    let visitor = HtmlModuleVisitor::new(
-        html_root,
-        embedded_content,
-        path.to_path_buf(),
-        directory,
-        &fs_proxy,
-    );
+    let visitor =
+        HtmlModuleVisitor::new(db, parsed_source, path.to_path_buf(), directory, &fs_proxy);
 
     let module = visitor.visit();
     let mut dependencies = ModuleDependencies::default();
@@ -146,16 +139,12 @@ pub fn resolve_html_module(
             dependencies.insert(p.to_path_buf());
         }
     }
-    for resolved_path in module
-        .static_import_paths
-        .values()
-        .chain(module.dynamic_import_paths.values())
-    {
+    for resolved_path in module.import_paths.iter() {
         if let Some(p) = resolved_path.as_path() {
             dependencies.insert(p.to_path_buf());
         }
     }
-    (module, dependencies, Vec::new())
+    Some((module, dependencies, Vec::new()))
 }
 
 // #endregion

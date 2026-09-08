@@ -8,6 +8,8 @@ expression: snapshot
 ```jsx
 <>test</test>;
 <>test<inner> some text</inner>;
+<p>a</p>
+<div />;
 
 ```
 
@@ -88,6 +90,46 @@ JsModule {
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@46..48 ";\n" [] [],
                         },
+                        JsxElement {
+                            opening_element: JsxOpeningElement {
+                                l_angle_token: L_ANGLE@48..49 "<" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@49..50 "p" [] [],
+                                },
+                                type_arguments: missing (optional),
+                                attributes: JsxAttributeList [],
+                                r_angle_token: R_ANGLE@50..51 ">" [] [],
+                            },
+                            children: JsxChildList [
+                                JsxText {
+                                    value_token: JSX_TEXT_LITERAL@51..52 "a" [] [],
+                                },
+                            ],
+                            closing_element: JsxClosingElement {
+                                l_angle_token: L_ANGLE@52..53 "<" [] [],
+                                slash_token: SLASH@53..54 "/" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@54..55 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@55..56 ">" [] [],
+                            },
+                        },
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@56..57 "\n" [] [],
+                        },
+                        JsxSelfClosingElement {
+                            l_angle_token: L_ANGLE@57..58 "<" [] [],
+                            name: JsxName {
+                                value_token: JSX_IDENT@58..62 "div" [] [Whitespace(" ")],
+                            },
+                            type_arguments: missing (optional),
+                            attributes: JsxAttributeList [],
+                            slash_token: SLASH@62..63 "/" [] [],
+                            r_angle_token: R_ANGLE@63..64 ">" [] [],
+                        },
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@64..66 ";\n" [] [],
+                        },
                     ],
                     closing_fragment: JsxClosingFragment {
                         l_angle_token: missing (required),
@@ -99,18 +141,18 @@ JsModule {
             semicolon_token: missing (optional),
         },
     ],
-    eof_token: EOF@48..48 "" [] [],
+    eof_token: EOF@66..66 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..48
+0: JS_MODULE@0..66
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..48
+  3: JS_MODULE_ITEM_LIST@0..66
     0: JS_EXPRESSION_STATEMENT@0..14
       0: JS_BOGUS_EXPRESSION@0..13
         0: JS_BOGUS@0..13
@@ -127,13 +169,13 @@ JsModule {
               0: JSX_IDENT@8..12 "test" [] []
             3: R_ANGLE@12..13 ">" [] []
       1: SEMICOLON@13..14 ";" [] []
-    1: JS_EXPRESSION_STATEMENT@14..48
-      0: JSX_TAG_EXPRESSION@14..48
-        0: JSX_FRAGMENT@14..48
+    1: JS_EXPRESSION_STATEMENT@14..66
+      0: JSX_TAG_EXPRESSION@14..66
+        0: JSX_FRAGMENT@14..66
           0: JSX_OPENING_FRAGMENT@14..17
             0: L_ANGLE@14..16 "<" [Newline("\n")] []
             1: R_ANGLE@16..17 ">" [] []
-          1: JSX_CHILD_LIST@17..48
+          1: JSX_CHILD_LIST@17..66
             0: JSX_TEXT@17..21
               0: JSX_TEXT_LITERAL@17..21 "test" [] []
             1: JSX_ELEMENT@21..46
@@ -155,12 +197,41 @@ JsModule {
                 3: R_ANGLE@45..46 ">" [] []
             2: JSX_TEXT@46..48
               0: JSX_TEXT_LITERAL@46..48 ";\n" [] []
-          2: JSX_CLOSING_FRAGMENT@48..48
+            3: JSX_ELEMENT@48..56
+              0: JSX_OPENING_ELEMENT@48..51
+                0: L_ANGLE@48..49 "<" [] []
+                1: JSX_NAME@49..50
+                  0: JSX_IDENT@49..50 "p" [] []
+                2: (empty)
+                3: JSX_ATTRIBUTE_LIST@50..50
+                4: R_ANGLE@50..51 ">" [] []
+              1: JSX_CHILD_LIST@51..52
+                0: JSX_TEXT@51..52
+                  0: JSX_TEXT_LITERAL@51..52 "a" [] []
+              2: JSX_CLOSING_ELEMENT@52..56
+                0: L_ANGLE@52..53 "<" [] []
+                1: SLASH@53..54 "/" [] []
+                2: JSX_NAME@54..55
+                  0: JSX_IDENT@54..55 "p" [] []
+                3: R_ANGLE@55..56 ">" [] []
+            4: JSX_TEXT@56..57
+              0: JSX_TEXT_LITERAL@56..57 "\n" [] []
+            5: JSX_SELF_CLOSING_ELEMENT@57..64
+              0: L_ANGLE@57..58 "<" [] []
+              1: JSX_NAME@58..62
+                0: JSX_IDENT@58..62 "div" [] [Whitespace(" ")]
+              2: (empty)
+              3: JSX_ATTRIBUTE_LIST@62..62
+              4: SLASH@62..63 "/" [] []
+              5: R_ANGLE@63..64 ">" [] []
+            6: JSX_TEXT@64..66
+              0: JSX_TEXT_LITERAL@64..66 ";\n" [] []
+          2: JSX_CLOSING_FRAGMENT@66..66
             0: (empty)
             1: (empty)
             2: (empty)
       1: (empty)
-  4: EOF@48..48 "" [] []
+  4: EOF@66..66 "" [] []
 
 ```
 
@@ -174,36 +245,36 @@ jsx_missing_closing_fragment.jsx:1:1 parse ━━━━━━━━━━━━�
   > 1 │ <>test</test>;
       │ ^^
     2 │ <>test<inner> some text</inner>;
-    3 │ 
+    3 │ <p>a</p>
   
   i Opening fragment
   
   > 1 │ <>test</test>;
       │ ^^
     2 │ <>test<inner> some text</inner>;
-    3 │ 
+    3 │ <p>a</p>
   
   i Closing tag
   
   > 1 │ <>test</test>;
       │         ^^^^
     2 │ <>test<inner> some text</inner>;
-    3 │ 
+    3 │ <p>a</p>
   
-jsx_missing_closing_fragment.jsx:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+jsx_missing_closing_fragment.jsx:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `<` but instead the file ends
   
-    1 │ <>test</test>;
-    2 │ <>test<inner> some text</inner>;
-  > 3 │ 
+    3 │ <p>a</p>
+    4 │ <div />;
+  > 5 │ 
       │ 
   
   i the file ends here
   
-    1 │ <>test</test>;
-    2 │ <>test<inner> some text</inner>;
-  > 3 │ 
+    3 │ <p>a</p>
+    4 │ <div />;
+  > 5 │ 
       │ 
   
 ```

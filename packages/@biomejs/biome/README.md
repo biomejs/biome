@@ -113,9 +113,27 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
       <td align="center" valign="middle">
         <a href="https://depot.dev/?utm_source=biome&utm_medium=readme" target="_blank">
           <picture>
-            <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
-            <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot logo" />
+            <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/horizontal/depot-logo-horizontal-on-light-x3.png" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/horizontal/depot-logo-horizontal-on-dark-x3.png" />
+            <img src="https://depot.dev/assets/brand/horizontal/depot-logo-horizontal-on-light-x3.png" width="600" alt="Depot logo" />
+          </picture>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Gold Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://codspeed.io/?utm_source=biome&utm_medium=readme" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: light)" srcset="https://biomejs.dev/_astro/codspeed-logo-light.NPF02X9E.svg" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://biomejs.dev/_astro/codspeed-logo-dark.DqfyMRf2.svg" />
+            <img src="https://biomejs.dev/_astro/codspeed-logo-light.NPF02X9E.svg" width="300" alt="CodSpeed logo" />
           </picture>
         </a>
       </td>
@@ -133,6 +151,9 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
       </td>
       <td align="center" valign="middle">
         <a href="https://latitude.so/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/98949449?s=200&v=4" height="100" alt="Latitude logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
     </tr>
   </tbody>

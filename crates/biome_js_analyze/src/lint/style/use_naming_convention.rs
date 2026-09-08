@@ -800,7 +800,8 @@ impl Rule for UseNamingConvention {
                         suggestion: Suggestion::Match(matching.to_string().into_boxed_str()),
                     });
                 };
-                if let Some(first_capture) = capture.iter().skip(1).find_map(|x| x) {
+                {
+                    let first_capture = capture.iter().skip(1).find_map(|x| x)?;
                     name_range_start += first_capture.start();
                     let captured = first_capture.as_str();
                     is_not_trimmed = name.len() == captured.len();
@@ -809,9 +810,6 @@ impl Rule for UseNamingConvention {
                         // Empty string are always valid.
                         return None;
                     }
-                } else {
-                    // Match without any capture implies a valid case
-                    return None;
                 }
             }
             if !convention.formats.is_empty() {

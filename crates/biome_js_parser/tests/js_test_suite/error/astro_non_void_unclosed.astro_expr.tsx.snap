@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+<span>
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsxTagExpression {
+        tag: JsxElement {
+            opening_element: JsxOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: JsxName {
+                    value_token: JSX_IDENT@1..5 "span" [] [],
+                },
+                type_arguments: missing (optional),
+                attributes: JsxAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: JsxChildList [],
+            closing_element: JsxClosingElement {
+                l_angle_token: missing (required),
+                slash_token: missing (required),
+                name: missing (required),
+                r_angle_token: missing (required),
+            },
+        },
+    },
+    eof_token: EOF@6..6 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..6
+  0: JSX_TAG_EXPRESSION@0..6
+    0: JSX_ELEMENT@0..6
+      0: JSX_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: JSX_NAME@1..5
+          0: JSX_IDENT@1..5 "span" [] []
+        2: (empty)
+        3: JSX_ATTRIBUTE_LIST@5..5
+        4: R_ANGLE@5..6 ">" [] []
+      1: JSX_CHILD_LIST@6..6
+      2: JSX_CLOSING_ELEMENT@6..6
+        0: (empty)
+        1: (empty)
+        2: (empty)
+        3: (empty)
+  1: EOF@6..6 "" [] []
+
+```
+
+## Diagnostics
+
+```
+astro_non_void_unclosed.astro_expr.tsx:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instead the file ends
+  
+  > 1 │ <span>
+      │       
+  
+  i the file ends here
+  
+  > 1 │ <span>
+      │       
+  
+```

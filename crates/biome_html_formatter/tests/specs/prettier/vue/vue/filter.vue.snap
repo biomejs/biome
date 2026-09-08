@@ -22,12 +22,14 @@ info: vue/vue/filter.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,7 @@
+@@ -1,7 +1,9 @@
  <!-- vue filters are only allowed in v-bind and interpolation -->
  <template>
    <div class="allowed">
 -    {{value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird}}
-+    {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird }}
++    {{
++      value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird
++    }}
    </div>
    <div
      class="allowed"
@@ -39,7 +41,9 @@ info: vue/vue/filter.vue
 <!-- vue filters are only allowed in v-bind and interpolation -->
 <template>
   <div class="allowed">
-    {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird }}
+    {{
+      value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird
+    }}
   </div>
   <div
     class="allowed"
@@ -58,8 +62,8 @@ info: vue/vue/filter.vue
 
 # Lines exceeding max width of 80 characters
 ```
-    4:     {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird }}
-    8:     v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
-   12:     :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
-   16:     v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'
+    5:       value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird
+   10:     v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+   14:     :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+   18:     v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'
 ```

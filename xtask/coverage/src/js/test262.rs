@@ -1,6 +1,7 @@
 use crate::runner::{
     TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
+use crate::util::checkout_repository;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
@@ -9,7 +10,6 @@ use regex::Regex;
 use serde::Deserialize;
 use std::io;
 use std::path::Path;
-use std::process::Command;
 use xtask_glue::project_root;
 
 const BASE_PATH: &str = "xtask/coverage/test262/test";
@@ -159,22 +159,11 @@ impl TestSuite for Test262TestSuite {
     }
 
     fn checkout(&self) -> io::Result<()> {
-        let base_path = project_root().join(BASE_PATH);
-        let mut command = Command::new("git");
-        command
-            .arg("clone")
-            .arg("https://github.com/tc39/test262.git")
-            .arg("--depth")
-            .arg("1")
-            .arg(base_path.display().to_string());
-        command.output()?;
-        let mut command = Command::new("git");
-        command
-            .arg("reset")
-            .arg("--hard")
-            .arg("715dd1073bc060f4ee221e2e74770f5728e7b8a0");
-        command.output()?;
-        Ok(())
+        checkout_repository(
+            "https://github.com/tc39/test262.git",
+            "715dd1073bc060f4ee221e2e74770f5728e7b8a0",
+            &project_root().join(BASE_PATH),
+        )
     }
 
     fn is_test(&self, path: &Path) -> bool {

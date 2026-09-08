@@ -166,66 +166,6 @@ declare_source_rule! {
     }
 }
 
-/// Checks if an object/array spans multiple lines by examining CST trivia.
-/// For non-empty containers, checks the first token of the members/elements.
-/// For empty containers, checks the closing brace/bracket token.
-fn has_multiline_content(
-    members_first_token: Option<SyntaxToken<JsLanguage>>,
-    closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
-) -> bool {
-    members_first_token.map_or_else(
-        || {
-            closing_token
-                .is_ok_and(|token| token.has_leading_newline())
-        },
-        |token| token.has_leading_newline(),
-    )
-}
-
-/// Determines the nesting depth of a JavaScript expression for grouping purposes.
-fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
-    match value {
-        AnyJsExpression::JsObjectExpression(obj) => {
-            let members = obj.members();
-            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
-                Ordering::Greater
-            } else {
-                Ordering::Equal
-            }
-        }
-        AnyJsExpression::JsArrayExpression(array) => {
-            let elements = array.elements();
-            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
-                Ordering::Greater
-            } else {
-                Ordering::Equal
-            }
-        }
-        // Function and class expressions are treated as nested
-        AnyJsExpression::JsArrowFunctionExpression(_)
-        | AnyJsExpression::JsFunctionExpression(_)
-        | AnyJsExpression::JsClassExpression(_) => Ordering::Greater,
-        _ => Ordering::Equal,
-    }
-}
-
-/// Determines the nesting depth for an object member:
-/// - properties: based on value expression;
-/// - methods/getters/setters: treat as nested (1);
-/// - spreads/computed or unnamed: non-sortable (None).
-fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
-    match node {
-        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
-            let value = prop.value().ok()?;
-            Some(get_nesting_depth(&value))
-        }
-        AnyJsObjectMember::JsMethodObjectMember(_)
-        | AnyJsObjectMember::JsGetterObjectMember(_)
-        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
-        _ => None,
-    }
-}
-
 impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
     type State = ();
@@ -332,5 +272,65 @@ impl Rule for UseSortedKeys {
             markup! { "Sort the object properties by key." },
             mutation,
         ))
+    }
+}
+
+/// Checks if an object/array spans multiple lines by examining CST trivia.
+/// For non-empty containers, checks the first token of the members/elements.
+/// For empty containers, checks the closing brace/bracket token.
+fn has_multiline_content(
+    members_first_token: Option<SyntaxToken<JsLanguage>>,
+    closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
+) -> bool {
+    members_first_token.map_or_else(
+        || {
+            closing_token
+                .is_ok_and(|token| token.has_leading_newline())
+        },
+        |token| token.has_leading_newline(),
+    )
+}
+
+/// Determines the nesting depth of a JavaScript expression for grouping purposes.
+fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
+    match value {
+        AnyJsExpression::JsObjectExpression(obj) => {
+            let members = obj.members();
+            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        AnyJsExpression::JsArrayExpression(array) => {
+            let elements = array.elements();
+            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        // Function and class expressions are treated as nested
+        AnyJsExpression::JsArrowFunctionExpression(_)
+        | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsClassExpression(_) => Ordering::Greater,
+        _ => Ordering::Equal,
+    }
+}
+
+/// Determines the nesting depth for an object member:
+/// - properties: based on value expression;
+/// - methods/getters/setters: treat as nested (1);
+/// - spreads/computed or unnamed: non-sortable (None).
+fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
+    match node {
+        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+            let value = prop.value().ok()?;
+            Some(get_nesting_depth(&value))
+        }
+        AnyJsObjectMember::JsMethodObjectMember(_)
+        | AnyJsObjectMember::JsGetterObjectMember(_)
+        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
+        _ => None,
     }
 }

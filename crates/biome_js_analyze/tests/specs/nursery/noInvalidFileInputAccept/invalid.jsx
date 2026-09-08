@@ -1,0 +1,19 @@
+/* should generate diagnostics */
+const Invalid = () => (
+	<>
+		<input type="file" accept />
+		<input type="file" accept="" />
+		<input type="file" accept="TEXT/*" />
+		<input type="file" accept="*/plain" />
+		<input type="file" accept="image/png," />
+		<input type="file" accept="file name" />
+		<input type="file" accept="image/jpg" />
+		<input type="file" accept="image/svg" />
+		<input type="file" accept="png" />
+		<input type="file" accept=".PNG" />
+		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+		<input type="file" accept="image/png,.png" />
+		<input type="file" accept="image/png; charset=utf-8" />
+		<input {...props} type="file" accept="image/jpg" />
+	</>
+);

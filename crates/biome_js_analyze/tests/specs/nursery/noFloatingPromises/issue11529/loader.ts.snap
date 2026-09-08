@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: loader.ts
+---
+# Input
+```ts
+import type { Consumer } from "./consumer";
+
+export function load(): Promise<void> {
+	return Promise.resolve();
+}
+
+export type LoaderConsumer = Consumer;
+
+```

@@ -22,6 +22,7 @@ biome_css_syntax     = { workspace = true, optional = true }
 biome_db             = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
+biome_embeds         = { workspace = true, optional = true }
 biome_formatter      = { workspace = true }
 biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true, optional = true }
@@ -38,7 +39,6 @@ biome_project_layout = { workspace = true }
 biome_rowan          = { workspace = true, features = ["countme"] }
 biome_service        = { workspace = true, features = ["testing"] }
 biome_string_case    = { workspace = true }
-biome_workspace_db   = { workspace = true }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 json_comments        = "0.2.2"
@@ -49,14 +49,7 @@ ureq                 = { workspace = true }
 url                  = { workspace = true }
 
 [features]
-html_embeds    = [
-  "biome_service/html_embeds",
-  "biome_workspace_db/html_embeds",
-  "lang_css",
-  "lang_html",
-  "lang_js",
-  "lang_json"
-]
+html_embeds    = ["biome_service/html_embeds", "dep:biome_embeds", "lang_css", "lang_html", "lang_js", "lang_json"]
 js_embeds      = ["biome_service/js_embeds", "lang_css", "lang_graphql", "lang_js"]
 lang_css       = [
   "biome_configuration/lang_css",
@@ -85,7 +78,7 @@ lang_js        = [
 lang_json      = ["biome_configuration/lang_json", "biome_languages/lang_json", "biome_service/lang_json"]
 lang_md        = ["biome_configuration/lang_md", "biome_languages/lang_md", "biome_service/lang_md"]
 lang_yaml      = ["biome_configuration/lang_yaml", "biome_languages/lang_yaml", "biome_service/lang_yaml"]
-module_graph   = ["biome_service/module_graph", "biome_workspace_db/module_graph", "dep:biome_module_graph"]
+module_graph   = ["biome_service/module_graph", "dep:biome_embeds", "dep:biome_module_graph"]
 type_inference = ["biome_service/type_inference", "dep:biome_js_type_info", "lang_js", "module_graph"]
 
 [lints]

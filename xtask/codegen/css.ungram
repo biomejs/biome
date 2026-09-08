@@ -37,6 +37,7 @@
 SyntaxElement = SyntaxElement
 
 CssBogus = SyntaxElement*
+CssBogusDeclaration = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
@@ -71,6 +72,7 @@ CssBogusIfTestBooleanExpr = SyntaxElement*
 AnyCssRoot =
 	CssRoot
 	| CssSnippetRoot
+	| CssDeclarationSnippetRoot
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -79,6 +81,10 @@ CssRoot =
 
 CssSnippetRoot =
 	items: CssDeclarationOrRuleList
+	eof: 'EOF'
+
+CssDeclarationSnippetRoot =
+	declarations: CssDeclarationList
 	eof: 'EOF'
 
 CssRootItemList = AnyCssRootItem*
@@ -121,6 +127,7 @@ CssSelectorList = (AnyCssSelector (',' AnyCssSelector)*)
 AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
+	| ScssPartialCombinatorSelector
 	| CssBogusSelector
 	| CssMetavariable
 
@@ -132,6 +139,14 @@ CssComplexSelector =
 	left: AnyCssSelector
 	combinator: ('>' | '+' | '~' | '||' | 'css_space_literal')
 	right: AnyCssSelector
+
+// .sidebar > {}
+// ^^^^^^^^^^
+// .card { + {} }
+//         ^
+ScssPartialCombinatorSelector =
+	left: AnyCssSelector?
+	combinator: ('>' | '+' | '~')
 
 // .class {}
 // ^^^^^^^
@@ -376,6 +391,7 @@ CssRelativeSelectorList = (AnyCssRelativeSelector (',' AnyCssRelativeSelector)*)
 
 AnyCssRelativeSelector =
 	CssRelativeSelector
+	| ScssPartialCombinatorSelector
 	| CssBogusSelector
 
 // :has(> img, +dt) {}
@@ -694,6 +710,7 @@ AnyCssDeclaration =
 	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
+	| CssBogusDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -725,10 +742,14 @@ CssGenericProperty =
 AnyCssGenericPropertyValueOrExpression =
 	CssGenericComponentValueList
 	| CssCustomPropertyValue
+	| CssLegacyFilterValue
 	| ScssExpression
 
 // https://www.w3.org/TR/css-variables-1/#syntax
 CssCustomPropertyValue =
+	components: CssCustomPropertyComponentList
+
+CssLegacyFilterValue =
 	components: CssCustomPropertyComponentList
 
 CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*
@@ -2323,6 +2344,29 @@ AnyCssUrlValue =
 	| CssString
 	| ScssExpression
 	| ScssInterpolatedString
+	| ScssInterpolatedUrlValue
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedUrlValue =
+	parts: ScssInterpolatedUrlValuePartList
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedUrlValuePartList =
+	AnyScssInterpolatedUrlValuePart*
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^
+//                            ^^^^^^^^
+AnyScssInterpolatedUrlValuePart =
+	ScssUrlText
+	| ScssInterpolation
+
+// a { background: url(images/#{$name}.png); }
+//                     ^^^^^^^        ^^^^
+ScssUrlText =
+	value: 'scss_url_content_literal'
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
@@ -3161,6 +3205,7 @@ ScssInterpolatedIdentifierHyphen =
 AnyScssInterpolatedIdentifierPart =
 	CssIdentifier
 	| CssCustomIdentifier
+	| CssNumber
 	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
 

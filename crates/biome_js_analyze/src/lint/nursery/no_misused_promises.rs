@@ -276,20 +276,18 @@ fn find_misused_promise_returning_callback(
             argument_index,
             false,
         )?
-    } else if let Some(new_expression) = argument_list
+    } else {
+        let new_expression = argument_list
         .syntax()
         .ancestors()
         .skip(1)
-        .find_map(JsNewExpression::cast)
-    {
+        .find_map(JsNewExpression::cast)?;
         ctx.expected_argument_type(
             &new_expression.callee().ok()?,
             &argument_list,
             argument_index,
             true,
         )?
-    } else {
-        return None;
     };
 
     if argument_ty.function_returns_conditional() {

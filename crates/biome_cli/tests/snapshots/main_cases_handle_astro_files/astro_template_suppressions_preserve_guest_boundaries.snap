@@ -1,0 +1,74 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "a11y": { "noAccessKey": "error" },
+      "suspicious": { "noDebugger": "error" },
+      "nursery": { "noAstroSetHtmlDirective": "error" }
+    }
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+// biome-ignore lint/suspicious/noDebugger: frontmatter
+debugger;
+---
+{/* biome-ignore lint/a11y/noAccessKey: shared text */}
+<div accesskey="a"></div>
+<div title={/* biome-ignore lint/a11y/noAccessKey: shared text */}></div>
+{(() => {
+  // biome-ignore lint/suspicious/noDebugger: executable expression
+  debugger;
+  return 0;
+})()}
+<script>
+// biome-ignore lint/suspicious/noDebugger: script
+debugger;
+</script>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some warnings were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.astro:7:13 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    5 │ {/* biome-ignore lint/a11y/noAccessKey: shared text */}
+    6 │ <div accesskey="a"></div>
+  > 7 │ <div title={/* biome-ignore lint/a11y/noAccessKey: shared text */}></div>
+      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ {(() => {
+    9 │   // biome-ignore lint/suspicious/noDebugger: executable expression
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

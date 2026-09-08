@@ -208,6 +208,20 @@ pub fn astro_client_directive(
         ],
     ))
 }
+pub fn astro_closing_fragment(
+    l_angle_token: SyntaxToken,
+    slash_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> AstroClosingFragment {
+    AstroClosingFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_CLOSING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
 pub fn astro_define_directive(
     define_token: SyntaxToken,
     value: AstroDirectiveValue,
@@ -272,6 +286,20 @@ impl AstroEmbeddedContentBuilder {
         ))
     }
 }
+pub fn astro_fragment(
+    opening_fragment: AstroOpeningFragment,
+    children: HtmlElementList,
+    closing_fragment: AstroClosingFragment,
+) -> AstroFragment {
+    AstroFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_FRAGMENT,
+        [
+            Some(SyntaxElement::Node(opening_fragment.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(closing_fragment.into_syntax())),
+        ],
+    ))
+}
 pub fn astro_frontmatter_element(
     l_fence_token: SyntaxToken,
     content: AstroEmbeddedContent,
@@ -292,6 +320,18 @@ pub fn astro_is_directive(is_token: SyntaxToken, value: AstroDirectiveValue) -> 
         [
             Some(SyntaxElement::Token(is_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn astro_opening_fragment(
+    l_angle_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> AstroOpeningFragment {
+    AstroOpeningFragment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ASTRO_OPENING_FRAGMENT,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
         ],
     ))
 }
@@ -444,6 +484,7 @@ pub fn html_directive(
         excl_token,
         doctype_token,
         r_angle_token,
+        name_token: None,
         html_token: None,
         quirk_token: None,
         public_id_token: None,
@@ -455,12 +496,17 @@ pub struct HtmlDirectiveBuilder {
     excl_token: SyntaxToken,
     doctype_token: SyntaxToken,
     r_angle_token: SyntaxToken,
+    name_token: Option<SyntaxToken>,
     html_token: Option<SyntaxToken>,
     quirk_token: Option<SyntaxToken>,
     public_id_token: Option<SyntaxToken>,
     system_id_token: Option<SyntaxToken>,
 }
 impl HtmlDirectiveBuilder {
+    pub fn with_name_token(mut self, name_token: SyntaxToken) -> Self {
+        self.name_token = Some(name_token);
+        self
+    }
     pub fn with_html_token(mut self, html_token: SyntaxToken) -> Self {
         self.html_token = Some(html_token);
         self
@@ -484,6 +530,7 @@ impl HtmlDirectiveBuilder {
                 Some(SyntaxElement::Token(self.l_angle_token)),
                 Some(SyntaxElement::Token(self.excl_token)),
                 Some(SyntaxElement::Token(self.doctype_token)),
+                self.name_token.map(|token| SyntaxElement::Token(token)),
                 self.html_token.map(|token| SyntaxElement::Token(token)),
                 self.quirk_token.map(|token| SyntaxElement::Token(token)),
                 self.public_id_token
@@ -581,6 +628,7 @@ pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuild
         eof_token,
         bom_token: None,
         frontmatter: None,
+        processing_instruction: None,
         directive: None,
     }
 }
@@ -589,6 +637,7 @@ pub struct HtmlRootBuilder {
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     frontmatter: Option<AnyAstroFrontmatterElement>,
+    processing_instruction: Option<HtmlProcessingInstruction>,
     directive: Option<HtmlDirective>,
 }
 impl HtmlRootBuilder {
@@ -598,6 +647,13 @@ impl HtmlRootBuilder {
     }
     pub fn with_frontmatter(mut self, frontmatter: AnyAstroFrontmatterElement) -> Self {
         self.frontmatter = Some(frontmatter);
+        self
+    }
+    pub fn with_processing_instruction(
+        mut self,
+        processing_instruction: HtmlProcessingInstruction,
+    ) -> Self {
+        self.processing_instruction = Some(processing_instruction);
         self
     }
     pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
@@ -610,6 +666,8 @@ impl HtmlRootBuilder {
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.frontmatter
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.processing_instruction
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.directive
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -660,17 +718,35 @@ impl HtmlSelfClosingElementBuilder {
 }
 pub fn html_single_text_expression(
     l_curly_token: SyntaxToken,
-    expression: HtmlTextExpression,
     r_curly_token: SyntaxToken,
-) -> HtmlSingleTextExpression {
-    HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(expression.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
+) -> HtmlSingleTextExpressionBuilder {
+    HtmlSingleTextExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        expression: None,
+    }
+}
+pub struct HtmlSingleTextExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    expression: Option<HtmlTextExpression>,
+}
+impl HtmlSingleTextExpressionBuilder {
+    pub fn with_expression(mut self, expression: HtmlTextExpression) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+    pub fn build(self) -> HtmlSingleTextExpression {
+        HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.expression
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
 }
 pub fn html_spread_attribute(
     l_curly_token: SyntaxToken,

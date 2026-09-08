@@ -1,0 +1,119 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+~~struck~~ text
+
+~~outer ~~inner~~ text~~
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                GfmStrikethrough {
+                    l_fence_token: DOUBLE_TILDE@0..2 "~~" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..8 "struck" [] [],
+                        },
+                    ],
+                    r_fence_token: DOUBLE_TILDE@8..10 "~~" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..15 " text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@16..17 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                GfmStrikethrough {
+                    l_fence_token: DOUBLE_TILDE@17..19 "~~" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@19..25 "outer " [] [],
+                        },
+                        GfmStrikethrough {
+                            l_fence_token: DOUBLE_TILDE@25..27 "~~" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@27..32 "inner" [] [],
+                                },
+                            ],
+                            r_fence_token: DOUBLE_TILDE@32..34 "~~" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@34..39 " text" [] [],
+                        },
+                    ],
+                    r_fence_token: DOUBLE_TILDE@39..41 "~~" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@42..42 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..42
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..42
+    0: MD_PARAGRAPH@0..16
+      0: MD_INLINE_ITEM_LIST@0..16
+        0: GFM_STRIKETHROUGH@0..10
+          0: DOUBLE_TILDE@0..2 "~~" [] []
+          1: MD_INLINE_ITEM_LIST@2..8
+            0: MD_TEXTUAL@2..8
+              0: MD_TEXTUAL_LITERAL@2..8 "struck" [] []
+          2: DOUBLE_TILDE@8..10 "~~" [] []
+        1: MD_TEXTUAL@10..15
+          0: MD_TEXTUAL_LITERAL@10..15 " text" [] []
+        2: MD_TEXTUAL@15..16
+          0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
+    1: MD_NEWLINE@16..17
+      0: NEWLINE@16..17 "\n" [] []
+    2: MD_PARAGRAPH@17..42
+      0: MD_INLINE_ITEM_LIST@17..42
+        0: GFM_STRIKETHROUGH@17..41
+          0: DOUBLE_TILDE@17..19 "~~" [] []
+          1: MD_INLINE_ITEM_LIST@19..39
+            0: MD_TEXTUAL@19..25
+              0: MD_TEXTUAL_LITERAL@19..25 "outer " [] []
+            1: GFM_STRIKETHROUGH@25..34
+              0: DOUBLE_TILDE@25..27 "~~" [] []
+              1: MD_INLINE_ITEM_LIST@27..32
+                0: MD_TEXTUAL@27..32
+                  0: MD_TEXTUAL_LITERAL@27..32 "inner" [] []
+              2: DOUBLE_TILDE@32..34 "~~" [] []
+            2: MD_TEXTUAL@34..39
+              0: MD_TEXTUAL_LITERAL@34..39 " text" [] []
+          2: DOUBLE_TILDE@39..41 "~~" [] []
+        1: MD_TEXTUAL@41..42
+          0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
+  3: EOF@42..42 "" [] []
+
+```

@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsxChild, JsLanguage, JsSyntaxKind, JsSyntaxToken, JsxChildList, JsxElement,
     JsxOpeningElement, JsxSelfClosingElement, JsxText, T,
 };
-use biome_rowan::{AstNode, BatchMutation, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutation, TextRange, TriviaPieceKind};
 
 /// Creates a new [JsxText], where its content are the computed spaces from `current_element`.
 ///
@@ -130,6 +130,7 @@ impl SuppressionAction for JsSuppressionAction {
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
         suppression_reason: &str,
+        diagnostic_text_range: &TextRange,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,
@@ -137,13 +138,47 @@ impl SuppressionAction for JsSuppressionAction {
             should_insert_leading_newline,
         } = apply_suppression;
 
+        let leading_trivia: Vec<_> = token_to_apply_suppression
+            .leading_trivia()
+            .pieces()
+            .collect();
+        if let Some(comment_index) = leading_trivia.iter().position(|piece| {
+            piece.is_comments() && piece.text_range().contains_range(*diagnostic_text_range)
+        }) {
+            let comment = format!("// {suppression_text}: {suppression_reason}");
+            let indentation_start = leading_trivia[..comment_index]
+                .iter()
+                .rposition(|piece| !piece.is_whitespace())
+                .map_or(0, |index| index + 1);
+            let mut trivia: Vec<_> = leading_trivia[..comment_index]
+                .iter()
+                .map(|piece| (piece.kind(), piece.text()))
+                .collect();
+            trivia.extend([
+                (TriviaPieceKind::SingleLineComment, comment.as_str()),
+                (TriviaPieceKind::Newline, "\n"),
+            ]);
+            trivia.extend(
+                leading_trivia[indentation_start..comment_index]
+                    .iter()
+                    .map(|piece| (piece.kind(), piece.text())),
+            );
+            trivia.extend(
+                leading_trivia[comment_index..]
+                    .iter()
+                    .map(|piece| (piece.kind(), piece.text())),
+            );
+
+            let new_token = token_to_apply_suppression
+                .clone()
+                .with_leading_trivia(trivia);
+            mutation.replace_token_discard_trivia(token_to_apply_suppression, new_token);
+            return;
+        }
+
         // we check if the token that has the newline is inside a JSX element: JsxOpeningElement or JsxSelfClosingElement
-        let current_jsx_element = token_to_apply_suppression.parent().and_then(|parent| {
-            if AnyJsxElement::can_cast(parent.kind()) || JsxText::can_cast(parent.kind()) {
-                Some(parent)
-            } else {
-                None
-            }
+        let current_jsx_element = token_to_apply_suppression.parent().filter(|parent| {
+            AnyJsxElement::can_cast(parent.kind()) || JsxText::can_cast(parent.kind())
         });
 
         // When inside a JSX element, we have to apply different logics when applying suppression comments.

@@ -504,6 +504,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JSX_TAG_EXPRESSION",
         "JSX_ELEMENT",
         "JSX_FRAGMENT",
+        "ASTRO_IMPLICIT_FRAGMENT",
         "JSX_OPENING_FRAGMENT",
         "JSX_CLOSING_FRAGMENT",
         "JSX_SELF_CLOSING_ELEMENT",
@@ -533,6 +534,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_BOGUS_IMPORT_ASSERTION_ENTRY",
         "JS_BOGUS_NAMED_IMPORT_SPECIFIER",
         "JS_BOGUS_ASSIGNMENT",
+        "JS_BOGUS_VARIABLE_DECLARATION",
         "TS_BOGUS_TYPE",
     ],
 };

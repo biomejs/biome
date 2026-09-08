@@ -1,0 +1,44 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+{{ some_form }}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlContent {
+            value_token: HTML_LITERAL@0..15 "{{ some_form }}" [] [],
+        },
+    ],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..16
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..15
+    0: HTML_CONTENT@0..15
+      0: HTML_LITERAL@0..15 "{{ some_form }}" [] []
+  5: EOF@15..16 "" [Newline("\n")] []
+
+```

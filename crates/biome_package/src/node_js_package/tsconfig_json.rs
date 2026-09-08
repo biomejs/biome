@@ -173,7 +173,7 @@ pub enum ExtendsField {
 
 impl Deserializable for ExtendsField {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -215,7 +215,7 @@ impl std::ops::Deref for JsxFactoryIdentifier {
 
 impl Deserializable for JsxFactoryIdentifier {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

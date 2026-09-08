@@ -472,7 +472,7 @@ impl Diagnostic for SourceFileNotSupported {
             write!(
                 fmt,
                 "Biome doesn't support this feature for the language {}",
-                &self.file_source
+                self.file_source
             )
         } else if let Some(ext) = self.extension.as_ref() {
             write!(
@@ -483,7 +483,7 @@ impl Diagnostic for SourceFileNotSupported {
             write!(
                 fmt,
                 "Biome could not determine the language for the file {} because it doesn't have a clear extension",
-                &self.path
+                self.path
             )
         }
     }

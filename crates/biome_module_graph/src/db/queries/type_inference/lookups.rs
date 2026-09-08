@@ -5,7 +5,10 @@
 //! same local-handle resolution path, allowing callers to inspect one type
 //! without resolving every type collected for the module.
 
-use super::{BindingTypeInput, ExpressionTypeInput, LocalTypeInput};
+use super::{
+    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, LocalTypeInput,
+    LocalTypeWithImportBudgetInput,
+};
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
@@ -51,7 +54,7 @@ pub fn infer_expression_type<'db>(
             }
 
             let reference = js_info.raw_expressions.get(&expression)?.clone();
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
+            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::on_demand());
             Some(ctx.resolve(&reference))
         },
     )
@@ -79,18 +82,7 @@ pub fn infer_binding_type<'db>(
         TypeInferenceQueryKind::Lookups,
         TypeInferenceProfileOrigin::exact(module, range),
         "infer_binding_type",
-        || {
-            let ModuleInfoKind::Js(js_info) = module.kind(db) else {
-                return None;
-            };
-            if !js_info.infer_types {
-                return None;
-            }
-
-            let reference = js_info.raw_binding_types.get(&range)?.clone();
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
-            Some(ctx.resolve(&reference))
-        },
+        || infer_binding_type_impl(db, input, ImportResolution::on_demand()),
     )
 }
 
@@ -117,19 +109,81 @@ pub fn infer_local_type<'db>(
         TypeInferenceQueryKind::Lookups,
         TypeInferenceProfileOrigin::document(module),
         "infer_local_type",
-        || {
-            let ModuleInfoKind::Js(js_info) = module.kind(db) else {
-                return None;
-            };
-            let type_id = input.type_id(db);
-            if !js_info.infer_types || type_id.index() >= js_info.raw_types.len() {
-                return None;
-            }
-
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
-            Some(ctx.resolve_raw_type_id(TypeId::new(type_id.index())))
-        },
+        || infer_local_type_impl(db, input, ImportResolution::on_demand()),
     )
+}
+
+#[salsa::tracked(cycle_result=infer_binding_type_with_import_budget_cycle_result)]
+pub(crate) fn infer_binding_type_with_import_budget<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeWithImportBudgetInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let lookup = input.lookup(db);
+    let remaining = input.remaining(db);
+    infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
+}
+
+#[salsa::tracked(cycle_result=infer_local_type_with_import_budget_cycle_result)]
+pub(crate) fn infer_local_type_with_import_budget<'db>(
+    db: &'db dyn ModuleDb,
+    input: LocalTypeWithImportBudgetInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let lookup = input.lookup(db);
+    let remaining = input.remaining(db);
+    infer_local_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
+}
+
+fn infer_binding_type_impl<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeInput<'db>,
+    import_resolution: ImportResolution<'_>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let range = input.range(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_binding_types.get(&range)?.clone();
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
+    let ty = ctx.resolve(&reference);
+    // Build a declaration graph only when the selected lookup crosses an
+    // import cycle. Local and acyclic lookups stay on the ordinary tracked
+    // query path.
+    Some(if ctx.encountered_inference_cycle() {
+        ctx.resolve_root_binding(range)
+    } else {
+        ty
+    })
+}
+
+fn infer_local_type_impl<'db>(
+    db: &'db dyn ModuleDb,
+    input: LocalTypeInput<'db>,
+    import_resolution: ImportResolution<'_>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    let type_id = input.type_id(db);
+    if !js_info.infer_types || type_id.index() >= js_info.raw_types.len() {
+        return None;
+    }
+
+    let type_id = TypeId::new(type_id.index());
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
+    let ty = ctx.resolve_raw_type_id(type_id);
+    // The initial pass preserves the cheaper lookup path. A cycle activates a
+    // root retry that can distinguish an import cycle from a dependency cycle.
+    Some(if ctx.encountered_inference_cycle() {
+        ctx.resolve_root_declaration(type_id)
+    } else {
+        ty
+    })
 }
 
 // #endregion
@@ -156,6 +210,22 @@ fn infer_local_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
     _input: LocalTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_binding_type_with_import_budget_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: BindingTypeWithImportBudgetInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_local_type_with_import_budget_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: LocalTypeWithImportBudgetInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
 }

@@ -1,0 +1,24 @@
+short_multiline_stays: a multiline scalar whose first line fits
+  stays on the key's line
+single_line_stays: a single line scalar stays on the key's line even when it is far too long to fit
+overflowing_multiline_breaks: a multiline scalar whose first line does not fit within the line width
+  moves below the key as a whole
+quoted: "a multiline quoted scalar whose first line does not fit within the line width
+  also moves below the key"
+own_line_property: &anchor
+  a single line scalar joined onto the key's line with its property stays there
+own_line_property_multiline: &anchor2
+  a multiline scalar whose first line does not fit within the line width
+  moves below the key
+exact_fit:
+  deeply:
+    - name: first line is exactly eighty columns wide, so the scalar stays put
+      description: Filter Transactions by the last 4 digits of the bank account.
+        The bank account last 4 are the last 4 digits of the masked account number.
+paths:
+  /transfers:
+    get:
+      parameters:
+        - name: one level deeper, the same first line overflows and moves down
+          description: Filter Transactions by the last 4 digits of the bank account.
+            The bank account last 4 are the last 4 digits of the masked account number.

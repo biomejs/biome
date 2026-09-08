@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+const a = b; c
+
+```
+
+
+## AST
+
+```
+JsSvelteDeclarationRoot {
+    declaration: JsBogusVariableDeclaration {
+        items: [
+            CONST_KW@0..6 "const" [] [Whitespace(" ")],
+            JsVariableDeclaratorList [
+                JsVariableDeclarator {
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@6..8 "a" [] [Whitespace(" ")],
+                    },
+                    variable_annotation: missing (optional),
+                    initializer: JsInitializerClause {
+                        eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+                        expression: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@10..11 "b" [] [],
+                            },
+                        },
+                    },
+                },
+            ],
+            SEMICOLON@11..13 ";" [] [Whitespace(" ")],
+            IDENT@13..14 "c" [] [],
+        ],
+    },
+    semicolon_token: missing (optional),
+    eof_token: EOF@14..15 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_DECLARATION_ROOT@0..15
+  0: JS_BOGUS_VARIABLE_DECLARATION@0..14
+    0: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+    1: JS_VARIABLE_DECLARATOR_LIST@6..11
+      0: JS_VARIABLE_DECLARATOR@6..11
+        0: JS_IDENTIFIER_BINDING@6..8
+          0: IDENT@6..8 "a" [] [Whitespace(" ")]
+        1: (empty)
+        2: JS_INITIALIZER_CLAUSE@8..11
+          0: EQ@8..10 "=" [] [Whitespace(" ")]
+          1: JS_IDENTIFIER_EXPRESSION@10..11
+            0: JS_REFERENCE_IDENTIFIER@10..11
+              0: IDENT@10..11 "b" [] []
+    2: SEMICOLON@11..13 ";" [] [Whitespace(" ")]
+    3: IDENT@13..14 "c" [] []
+  1: (empty)
+  2: EOF@14..15 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+trailing_after_semicolon.svelte_declaration.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ const a = b; c
+      │              ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```

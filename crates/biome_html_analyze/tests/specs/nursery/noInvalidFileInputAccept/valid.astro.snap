@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+const allowedTypes = "image/png";
+---
+
+<!-- should not generate diagnostics -->
+<input type="file" accept={allowedTypes} />
+<input type={"file"} accept="image/jpg" />
+<input type="file" accept="image/jpg" accept={allowedTypes} />
+<input type="file" accept="image/jpg" {...props} />
+
+```

@@ -320,7 +320,7 @@ impl Default for IndentWidth {
 
 impl Deserializable for IndentWidth {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -422,7 +422,7 @@ impl Default for LineWidth {
 
 impl Deserializable for LineWidth {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

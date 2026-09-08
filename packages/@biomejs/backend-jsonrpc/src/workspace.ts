@@ -994,7 +994,23 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
+export interface RuleDomains {
+	astro?: RuleDomainValue;
+	drizzle?: RuleDomainValue;
+	next?: RuleDomainValue;
+	playwright?: RuleDomainValue;
+	project?: RuleDomainValue;
+	qwik?: RuleDomainValue;
+	react?: RuleDomainValue;
+	reactNative?: RuleDomainValue;
+	solid?: RuleDomainValue;
+	svelte?: RuleDomainValue;
+	tailwind?: RuleDomainValue;
+	test?: RuleDomainValue;
+	turborepo?: RuleDomainValue;
+	types?: RuleDomainValue;
+	vue?: RuleDomainValue;
+}
 export interface Rules {
 	a11y?: SeverityOrA11y;
 	complexity?: SeverityOrComplexity;
@@ -1196,24 +1212,6 @@ export type JsTrailingCommas = "all" | "es5" | "none";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JSON files.
  */
 export type JsonTrailingCommas = "none" | "all";
-/**
- * Rule domains
- */
-export type RuleDomain =
-	| "drizzle"
-	| "react"
-	| "reactNative"
-	| "test"
-	| "solid"
-	| "next"
-	| "qwik"
-	| "svelte"
-	| "vue"
-	| "project"
-	| "tailwind"
-	| "turborepo"
-	| "playwright"
-	| "types";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrA11y = GroupPlainConfiguration | A11y;
 export type SeverityOrComplexity = GroupPlainConfiguration | Complexity;
@@ -2357,10 +2355,20 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow the use of Astro's set:html directive.
+See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
+	 */
+	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
+	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
 	noBaseToString?: NoBaseToStringConfiguration;
+	/**
+	* Forbid the use of Bun builtin modules.
+See https://biomejs.dev/linter/rules/no-bun-modules 
+	 */
+	noBunModules?: NoBunModulesConfiguration;
 	/**
 	* Disallows defining React components or custom hooks inside other functions.
 See https://biomejs.dev/linter/rules/no-component-hook-factories 
@@ -2431,6 +2439,16 @@ See https://biomejs.dev/linter/rules/no-implied-eval
 See https://biomejs.dev/linter/rules/no-inline-styles 
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
+	* Disallow invalid accept values on file inputs.
+See https://biomejs.dev/linter/rules/no-invalid-file-input-accept 
+	 */
+	noInvalidFileInputAccept?: NoInvalidFileInputAcceptConfiguration;
+	/**
+	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
+See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
+	 */
+	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
 	/**
 	* Disallow specific object properties.
 See https://biomejs.dev/linter/rules/no-js-restricted-properties 
@@ -2547,6 +2565,16 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow the use of Svelte's {@html} tag.
+See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
+	 */
+	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
+	/**
+	* Disallow legacy Svelte {@const} tags.
+See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
+	 */
+	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
+	/**
 	* Disallow unnecessary $state wrapping of reactive classes.
 See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap 
 	 */
@@ -2556,6 +2584,11 @@ See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap
 See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
+	/**
+	* Disallow this outside of classes.
+See https://biomejs.dev/linter/rules/no-this-outside-of-class 
+	 */
+	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
 	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
@@ -2567,15 +2600,35 @@ See https://biomejs.dev/linter/rules/no-undeclared-classes
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
 	/**
+	* Reports custom properties used with var() that have no visible declaration.
+See https://biomejs.dev/linter/rules/no-undeclared-custom-properties 
+	 */
+	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
+	/**
+	* Disallow loop conditions whose variables are never modified in the loop.
+See https://biomejs.dev/linter/rules/no-unmodified-loop-condition 
+	 */
+	noUnmodifiedLoopCondition?: NoUnmodifiedLoopConditionConfiguration;
+	/**
 	* Disallow unnecessary template expressions.
 See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
 	 */
 	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
+	* Disallow an unsafe combination of the sandbox attribute.
+See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox 
+	 */
+	noUnsafeIframeSandbox?: NoUnsafeIframeSandboxConfiguration;
+	/**
 	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
+	/**
+	* Disallow TypeScript type assertions other than const assertions.
+See https://biomejs.dev/linter/rules/no-unsafe-type-assertion 
+	 */
+	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
@@ -2592,6 +2645,11 @@ See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	* Disallow the deprecated Vue $scopedSlots API.
+See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots 
+	 */
+	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
+	/**
 	* Disallow importing Vue compiler macros.
 See https://biomejs.dev/linter/rules/no-vue-import-compiler-macros 
 	 */
@@ -2607,6 +2665,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-on-number-values
 	 */
 	noVueVOnNumberValues?: NoVueVOnNumberValuesConfiguration;
 	/**
+	* Disallow the bitwise XOR operator where exponentiation was likely intended.
+See https://biomejs.dev/linter/rules/no-xor-as-exponentiation 
+	 */
+	noXorAsExponentiation?: NoXorAsExponentiationConfiguration;
+	/**
 	 * Enables a particular rule preset
 	 */
 	preset?: PresetConfig;
@@ -2619,6 +2682,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-on-number-values
 See https://biomejs.dev/linter/rules/use-array-some 
 	 */
 	useArraySome?: UseArraySomeConfiguration;
+	/**
+	* Require a value for Astro's client:only directive.
+See https://biomejs.dev/linter/rules/use-astro-client-only-directive-value 
+	 */
+	useAstroClientOnlyDirectiveValue?: UseAstroClientOnlyDirectiveValueConfiguration;
 	/**
 	* Enforce that await is only used on Promise values.
 See https://biomejs.dev/linter/rules/use-await-thenable 
@@ -2634,6 +2702,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
+	/**
+	* Enforce that interactive control elements have an accessible label.
+See https://biomejs.dev/linter/rules/use-control-label 
+	 */
+	useControlLabel?: UseControlLabelConfiguration;
 	/**
 	* Detects a disposable object assigned to a variable without using or await using syntax.
 See https://biomejs.dev/linter/rules/use-disposables 
@@ -2670,6 +2743,11 @@ See https://biomejs.dev/linter/rules/use-explicit-type
 	 */
 	useExplicitType?: UseExplicitTypeConfiguration;
 	/**
+	* Prefer flat Math.min() and Math.max() calls over nested calls of the same method.
+See https://biomejs.dev/linter/rules/use-flat-math-min-max 
+	 */
+	useFlatMathMinMax?: UseFlatMathMinMaxConfiguration;
+	/**
 	* Enforce the 'sandbox' attribute for 'iframe' elements.
 See https://biomejs.dev/linter/rules/use-iframe-sandbox 
 	 */
@@ -2685,15 +2763,30 @@ See https://biomejs.dev/linter/rules/use-includes
 	 */
 	useIncludes?: UseIncludesConfiguration;
 	/**
+	* Enforce style rules to be defined within a cascade layer.
+See https://biomejs.dev/linter/rules/use-layered-styles 
+	 */
+	useLayeredStyles?: UseLayeredStylesConfiguration;
+	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
 	 */
 	useMathMinMax?: UseMathMinMaxConfiguration;
 	/**
+	* Use modern Math APIs for common mathematical operations.
+See https://biomejs.dev/linter/rules/use-modern-math-apis 
+	 */
+	useModernMathApis?: UseModernMathApisConfiguration;
+	/**
 	* Enforce using named capture groups in regular expression.
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
+	* Disallow anonymous cascade layers.
+See https://biomejs.dev/linter/rules/use-named-layer 
+	 */
+	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
 	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
@@ -2715,10 +2808,20 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
+	* Validate files with React Compiler.
+See https://biomejs.dev/linter/rules/use-react-compiler 
+	 */
+	useReactCompiler?: UseReactCompilerConfiguration;
+	/**
 	* Enforce a specific function type for React function components.
 See https://biomejs.dev/linter/rules/use-react-function-component-definition 
 	 */
 	useReactFunctionComponentDefinition?: UseReactFunctionComponentDefinitionConfiguration;
+	/**
+	* Enforces naming conventions for React createContext, useId, and useRef.
+See https://biomejs.dev/linter/rules/use-react-naming-convention 
+	 */
+	useReactNamingConvention?: UseReactNamingConventionConfiguration;
 	/**
 	* Ensure that platform-specific React Native components are only imported in files named for that platform.
 See https://biomejs.dev/linter/rules/use-react-native-platform-components 
@@ -2760,6 +2863,11 @@ See https://biomejs.dev/linter/rules/use-svelte-require-each-key
 	 */
 	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
 	/**
+	* Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
+See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes 
+	 */
+	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
+	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
 	 */
@@ -2784,6 +2892,11 @@ See https://biomejs.dev/linter/rules/use-unicode-regex
 See https://biomejs.dev/linter/rules/use-vars-on-top 
 	 */
 	useVarsOnTop?: UseVarsOnTopConfiguration;
+	/**
+	* Enforce importing Vue's public entry point instead of internal Vue packages.
+See https://biomejs.dev/linter/rules/use-vue-base-import 
+	 */
+	useVueBaseImport?: UseVueBaseImportConfiguration;
 	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
@@ -3429,7 +3542,7 @@ See https://biomejs.dev/linter/rules/use-vue-define-macros-order
 	 */
 	useVueDefineMacrosOrder?: UseVueDefineMacrosOrderConfiguration;
 	/**
-	* Enforce hyphenated (kebab-case) attribute names in Vue templates.
+	* Disallow uppercase letters in Vue template attribute names.
 See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes 
 	 */
 	useVueHyphenatedAttributes?: UseVueHyphenatedAttributesConfiguration;
@@ -4655,9 +4768,15 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroSetHtmlDirectiveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroSetHtmlDirectiveOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
+export type NoBunModulesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBunModulesOptions;
 export type NoComponentHookFactoriesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoComponentHookFactoriesOptions;
@@ -4700,6 +4819,12 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidFileInputAcceptConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidFileInputAcceptOptions;
+export type NoInvalidPropertyInitValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidPropertyInitValueOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -4769,24 +4894,45 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoSvelteAtHtmlTagsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteLegacyConstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteLegacyConstOptions;
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoThisOutsideOfClassConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoThisOutsideOfClassOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
 export type NoUndeclaredClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredClassesOptions;
+export type NoUndeclaredCustomPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredCustomPropertiesOptions;
+export type NoUnmodifiedLoopConditionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnmodifiedLoopConditionOptions;
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
+export type NoUnsafeIframeSandboxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeIframeSandboxOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
+export type NoUnsafeTypeAssertionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeTypeAssertionOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -4796,6 +4942,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoVueDeprecatedScopedSlotsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedScopedSlotsOptions;
 export type NoVueImportCompilerMacrosConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueImportCompilerMacrosOptions;
@@ -4805,9 +4954,15 @@ export type NoVueRefAsOperandConfiguration =
 export type NoVueVOnNumberValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVOnNumberValuesOptions;
+export type NoXorAsExponentiationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoXorAsExponentiationOptions;
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
+export type UseAstroClientOnlyDirectiveValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
@@ -4817,6 +4972,9 @@ export type UseBaselineConfiguration =
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
+export type UseControlLabelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseControlLabelOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
@@ -4838,6 +4996,9 @@ export type UseExplicitReturnTypeConfiguration =
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
+export type UseFlatMathMinMaxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseFlatMathMinMaxOptions;
 export type UseIframeSandboxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIframeSandboxOptions;
@@ -4847,12 +5008,21 @@ export type UseImportsFirstConfiguration =
 export type UseIncludesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIncludesOptions;
+export type UseLayeredStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLayeredStylesOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
+export type UseModernMathApisConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseModernMathApisOptions;
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNamedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedLayerOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -4865,9 +5035,15 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactCompilerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactCompilerOptions;
 export type UseReactFunctionComponentDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactFunctionComponentDefinitionOptions;
+export type UseReactNamingConventionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactNamingConventionOptions;
 export type UseReactNativePlatformComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactNativePlatformComponentsOptions;
@@ -4892,6 +5068,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
+export type UseTailwindShorthandClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindShorthandClassesOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -4907,6 +5086,9 @@ export type UseUnicodeRegexConfiguration =
 export type UseVarsOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVarsOnTopOptions;
+export type UseVueBaseImportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueBaseImportOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -6505,9 +6687,17 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroSetHtmlDirectiveOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroSetHtmlDirectiveOptions;
+}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
+}
+export interface RuleWithNoBunModulesOptions {
+	level: RulePlainConfiguration;
+	options?: NoBunModulesOptions;
 }
 export interface RuleWithNoComponentHookFactoriesOptions {
 	level: RulePlainConfiguration;
@@ -6566,6 +6756,15 @@ export interface RuleWithNoInlineStylesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
+}
+export interface RuleWithNoInvalidFileInputAcceptOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInvalidFileInputAcceptOptions;
+}
+export interface RuleWithNoInvalidPropertyInitValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidPropertyInitValueOptions;
 }
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
@@ -6666,6 +6865,14 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoSvelteAtHtmlTagsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteAtHtmlTagsOptions;
+}
+export interface RuleWithNoSvelteLegacyConstOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteLegacyConstOptions;
+}
 export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6675,6 +6882,10 @@ export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
 }
+export interface RuleWithNoThisOutsideOfClassOptions {
+	level: RulePlainConfiguration;
+	options?: NoThisOutsideOfClassOptions;
+}
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
@@ -6683,14 +6894,30 @@ export interface RuleWithNoUndeclaredClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredClassesOptions;
 }
+export interface RuleWithNoUndeclaredCustomPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredCustomPropertiesOptions;
+}
+export interface RuleWithNoUnmodifiedLoopConditionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnmodifiedLoopConditionOptions;
+}
 export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryTemplateExpressionOptions;
 }
+export interface RuleWithNoUnsafeIframeSandboxOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeIframeSandboxOptions;
+}
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
+}
+export interface RuleWithNoUnsafeTypeAssertionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeTypeAssertionOptions;
 }
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
@@ -6704,6 +6931,11 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedScopedSlotsOptions;
+}
 export interface RuleWithNoVueImportCompilerMacrosOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueImportCompilerMacrosOptions;
@@ -6716,10 +6948,19 @@ export interface RuleWithNoVueVOnNumberValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVOnNumberValuesOptions;
 }
+export interface RuleWithNoXorAsExponentiationOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoXorAsExponentiationOptions;
+}
 export interface RuleWithUseArraySomeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseArraySomeOptions;
+}
+export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
+	level: RulePlainConfiguration;
+	options?: UseAstroClientOnlyDirectiveValueOptions;
 }
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
@@ -6733,6 +6974,10 @@ export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentTestItOptions;
+}
+export interface RuleWithUseControlLabelOptions {
+	level: RulePlainConfiguration;
+	options?: UseControlLabelOptions;
 }
 export interface RuleWithUseDisposablesOptions {
 	fix?: FixKind;
@@ -6766,6 +7011,11 @@ export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitTypeOptions;
 }
+export interface RuleWithUseFlatMathMinMaxOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseFlatMathMinMaxOptions;
+}
 export interface RuleWithUseIframeSandboxOptions {
 	level: RulePlainConfiguration;
 	options?: UseIframeSandboxOptions;
@@ -6779,14 +7029,27 @@ export interface RuleWithUseIncludesOptions {
 	level: RulePlainConfiguration;
 	options?: UseIncludesOptions;
 }
+export interface RuleWithUseLayeredStylesOptions {
+	level: RulePlainConfiguration;
+	options?: UseLayeredStylesOptions;
+}
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseMathMinMaxOptions;
 }
+export interface RuleWithUseModernMathApisOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseModernMathApisOptions;
+}
 export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
+}
+export interface RuleWithUseNamedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedLayerOptions;
 }
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
@@ -6806,10 +7069,18 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactCompilerOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactCompilerOptions;
+}
 export interface RuleWithUseReactFunctionComponentDefinitionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseReactFunctionComponentDefinitionOptions;
+}
+export interface RuleWithUseReactNamingConventionOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactNamingConventionOptions;
 }
 export interface RuleWithUseReactNativePlatformComponentsOptions {
 	level: RulePlainConfiguration;
@@ -6848,6 +7119,11 @@ export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
 }
+export interface RuleWithUseTailwindShorthandClassesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindShorthandClassesOptions;
+}
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
 	options?: UseTestHooksInOrderOptions;
@@ -6868,6 +7144,11 @@ export interface RuleWithUseUnicodeRegexOptions {
 export interface RuleWithUseVarsOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseVarsOnTopOptions;
+}
+export interface RuleWithUseVueBaseImportOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueBaseImportOptions;
 }
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
@@ -8310,9 +8591,11 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
+export type NoBunModulesOptions = {};
 export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
 export interface NoDrizzleDeleteWithoutWhereOptions {
@@ -8359,6 +8642,8 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidFileInputAcceptOptions = {};
+export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	* Restriction entries for object/property access.
@@ -8401,6 +8686,8 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
@@ -8426,13 +8713,18 @@ export interface NoTailwindArbitraryValueOptions {
 	 */
 	functions?: string[];
 }
+export type NoThisOutsideOfClassOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
  */
 export type NoUndeclaredClassesOptions = {};
+export type NoUndeclaredCustomPropertiesOptions = {};
+export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
+export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
+export type NoUnsafeTypeAssertionOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -8469,10 +8761,13 @@ Defaults to `false`.
 }
 export type NoUnusedClassesOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVOnNumberValuesOptions = {};
+export type NoXorAsExponentiationOptions = {};
 export type UseArraySomeOptions = {};
+export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 /**
  * Options for the `useBaseline` rule.
@@ -8522,6 +8817,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+/**
+ * Configuration for the `useControlLabel` lint rule.
+ */
+export type UseControlLabelOptions = {};
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export interface UseDomQuerySelectorOptions {
@@ -8553,14 +8852,23 @@ When `true`, only declarations (function statements and class methods) are check
 	allowedNames?: string[];
 }
 export type UseExplicitTypeOptions = {};
+export type UseFlatMathMinMaxOptions = {};
 export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
 /**
  * Options for the `useIncludes` rule.
  */
 export type UseIncludesOptions = {};
+export interface UseLayeredStylesOptions {
+	/**
+	 * Require `@import` rules to have a cascade layer. Defaults to `true`.
+	 */
+	requireImportLayers?: boolean;
+}
 export type UseMathMinMaxOptions = {};
+export type UseModernMathApisOptions = {};
 export type UseNamedCaptureGroupOptions = {};
+export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
  */
@@ -8593,12 +8901,19 @@ export interface UseNullishCoalescingOptions {
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactCompilerOptions {
+	/**
+	 * Which functions React Compiler analyzes. Defaults to `infer`.
+	 */
+	compilationMode?: CompilationMode;
+}
 export interface UseReactFunctionComponentDefinitionOptions {
 	/**
 	 * The function style to enforce for named React components.
 	 */
 	namedComponents?: ComponentDefinitionStyle;
 }
+export type UseReactNamingConventionOptions = {};
 export interface UseReactNativePlatformComponentsOptions {
 	/**
 	* A list of glob patterns to identify Android-specific files.
@@ -8627,6 +8942,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseStringStartsEndsWithOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
+export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -8656,6 +8972,7 @@ Defaults to `false`.
 }
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
+export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -9018,11 +9335,11 @@ export interface UseVueDefineMacrosOrderOptions {
 }
 export interface UseVueHyphenatedAttributesOptions {
 	/**
-	 * List of attribute names to ignore when checking for hyphenated attributes.
+	 * List of attribute names to ignore when checking for uppercase letters.
 	 */
 	ignore?: string[];
 	/**
-	 * List of HTML tags to ignore when checking for hyphenated attributes.
+	 * List of HTML tags whose attributes should not be checked for uppercase letters.
 	 */
 	ignoreTags?: string[];
 }
@@ -9364,6 +9681,10 @@ export type TestFunctionKind = "it" | "test";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
+/**
+ * Controls which functions React Compiler analyzes.
+ */
+export type CompilationMode = "infer" | "annotation" | "all";
 export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
@@ -9811,7 +10132,9 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
+	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
@@ -9828,6 +10151,8 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noInvalidFileInputAccept"
+	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
@@ -9852,26 +10177,38 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
+	| "lint/nursery/noUndeclaredCustomProperties"
+	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
+	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
+	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVOnNumberValues"
+	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/useArraySome"
+	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
+	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useDomQuerySelector"
@@ -9881,33 +10218,42 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
+	| "lint/nursery/useFlatMathMinMax"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useModernMathApis"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"
+	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteRequireEachKey"
+	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
+	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -9915,6 +10261,7 @@ export type Category =
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useVarsOnTop"
+	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueValidVFor"
@@ -10170,10 +10517,12 @@ export type Category =
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedSelectionSet"
 	| "assist/source/useSortedTypeFields"
+	| "syntax/correctness/noInvalidPropertySyntax"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
 	| "syntax/correctness/noDuplicatePrivateClassMembers"
+	| "transformations/stripTypes"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -10428,6 +10777,7 @@ For example, if inside an Astro file, a top-level return statement is allowed.
 export interface JsonFileSource {
 	allowComments: boolean;
 	allowTrailingCommas: boolean;
+	kind: JsonSourceKind;
 	variant: JsonFileVariant;
 }
 export interface CssFileSource {
@@ -10514,11 +10864,16 @@ The versions are ordered in increasing order; The newest version comes last.
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
+export type JsonSourceKind = "regular" | "biomeJson" | "packageJson";
 /**
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type CssEmbeddingKind = "None" | "Styled" | { Html: EmbeddingHtmlKind };
+export type CssEmbeddingKind =
+	| "None"
+	| "Styled"
+	| { Html: EmbeddingHtmlKind }
+	| "HtmlStyleAttribute";
 /**
  * The language of the stylesheet.
  */

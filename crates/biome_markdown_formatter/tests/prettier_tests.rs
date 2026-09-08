@@ -22,7 +22,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     let options = MdFormatOptions::default()
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default());
-    let language = language::MarkdownTestFormatLanguage::default();
+    let language = language::MarkdownTestFormatLanguage::gfm();
     let snapshot = PrettierSnapshot::new(test_file, language, MdFormatLanguage::new(options));
 
     snapshot.test()

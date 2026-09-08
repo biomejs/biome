@@ -34,17 +34,16 @@ info: vue/ts-expression/filter.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,39 +4,24 @@
- <template>
+@@ -5,38 +5,25 @@
    <div>
      <div class="allowed">
--      {{
+       {{
 -        value
 -          | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown)
 -          | anotherPipeLongJustForFun
 -          | pipeTheThird
--      }}
-+      {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird }}
++        value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+       }}
      </div>
      <div
        class="allowed"
@@ -94,7 +93,9 @@ info: vue/ts-expression/filter.vue
 <template>
   <div>
     <div class="allowed">
-      {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird }}
+      {{
+        value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+      }}
     </div>
     <div
       class="allowed"
@@ -119,8 +120,8 @@ info: vue/ts-expression/filter.vue
 
 # Lines exceeding max width of 80 characters
 ```
-    7:       {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird }}
-   12:       value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
-   18:       value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird'
-   23:       value | thisIsARealSuperLongBitwiseOr("arg1", arg2 as unknown) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird
+    8:         value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+   14:       value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+   20:       value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird'
+   25:       value | thisIsARealSuperLongBitwiseOr("arg1", arg2 as unknown) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird
 ```

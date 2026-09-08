@@ -1,14 +1,16 @@
 #![deny(clippy::use_self)]
 
 use biome_markdown_factory::MarkdownSyntaxFactory;
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
-use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
+use biome_parser::{
+    AnyParse, NodeParse, SyntaxFeature, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink,
+};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
 use syntax::parse_document;
 
+mod inline_phase;
 mod lexer;
-mod link_reference;
 mod parser;
 mod syntax;
 mod token_source;
@@ -26,10 +28,10 @@ pub use to_html::document_to_html;
 pub(crate) type MarkdownLosslessTreeSink<'source> =
     LosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
 
-/// Parse markdown source code with default options.
-pub fn parse_markdown(source: &str) -> MarkdownParse {
+/// Parse markdown source code with the given options.
+pub fn parse_markdown(source: &str, options: MarkdownParserOptions) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_markdown_with_cache(source, &mut cache, MarkdownParserOptions::default())
+    parse_markdown_with_cache(source, &mut cache, options)
 }
 
 /// Parse markdown source code with custom options and a node cache.
@@ -38,26 +40,26 @@ pub fn parse_markdown_with_cache(
     cache: &mut NodeCache,
     options: MarkdownParserOptions,
 ) -> MarkdownParse {
-    let link_definitions =
-        link_reference::collect_link_reference_definitions(source, options.clone());
-    let mut parser = MarkdownParser::new(source, options);
-    parser.set_link_reference_definitions(link_definitions);
+    let mut parser = MarkdownParser::new(source, options.clone());
 
     parse_document(&mut parser);
 
-    let (events, diagnostics, trivia, list_tightness, list_item_indents, quote_indents) =
-        parser.finish();
+    let mut output = parser.finish();
+    if !inline_phase::parse_deferred_inlines(source, &options, &mut output) {
+        output.deferred_inlines.clear();
+    }
+    debug_assert!(output.deferred_inlines.is_empty());
 
-    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &trivia, cache);
-    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &output.trivia, cache);
+    biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);
     let (green, diagnostics) = tree_sink.finish();
 
     MarkdownParse::new(
         green,
         diagnostics,
-        list_tightness,
-        list_item_indents,
-        quote_indents,
+        output.list_tightness,
+        output.list_item_indents,
+        output.quote_indents,
     )
 }
 
@@ -126,8 +128,8 @@ impl MarkdownParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> MdDocument {
-        MdDocument::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> MdRoot {
+        MdRoot::unwrap_cast(self.syntax())
     }
 }
 
@@ -136,5 +138,20 @@ impl From<MarkdownParse> for AnyParse {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
         NodeParse::new(root.as_send().unwrap(), diagnostics).into()
+    }
+}
+
+pub(crate) enum MarkdownSyntaxFeatures {
+    /// GitHub Flavored Markdown extensions.
+    Gfm,
+}
+
+impl SyntaxFeature for MarkdownSyntaxFeatures {
+    type Parser<'source> = MarkdownParser<'source>;
+
+    fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
+        match self {
+            Self::Gfm => p.options().gfm,
+        }
     }
 }

@@ -146,7 +146,7 @@ JsModule {
         },
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         VAR_KW@55..58 "var" [] [],
                         JsBogus {
@@ -310,7 +310,7 @@ JsModule {
           2: (empty)
       1: (empty)
     4: JS_BOGUS_STATEMENT@55..59
-      0: JS_BOGUS@55..58
+      0: JS_BOGUS_VARIABLE_DECLARATION@55..58
         0: VAR_KW@55..58 "var" [] []
         1: JS_BOGUS@58..58
       1: SEMICOLON@58..59 ";" [] []

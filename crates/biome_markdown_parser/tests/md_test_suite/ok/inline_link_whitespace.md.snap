@@ -30,8 +30,9 @@ Trailing whitespace before close paren:
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -251,9 +252,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..300
+0: MD_ROOT@0..300
   0: (empty)
-  1: MD_BLOCK_LIST@0..300
+  1: (empty)
+  2: MD_BLOCK_LIST@0..300
     0: MD_PARAGRAPH@0..69
       0: MD_INLINE_ITEM_LIST@0..69
         0: MD_TEXTUAL@0..40
@@ -391,6 +393,6 @@ MdDocument {
           6: R_PAREN@298..299 ")" [] []
         3: MD_TEXTUAL@299..300
           0: MD_TEXTUAL_LITERAL@299..300 "\n" [] []
-  2: EOF@300..300 "" [] []
+  3: EOF@300..300 "" [] []
 
 ```

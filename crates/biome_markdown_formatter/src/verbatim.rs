@@ -1,6 +1,6 @@
 use crate::MarkdownFormatContext;
 use biome_formatter::{
-    Buffer, Format, FormatResult,
+    Buffer, Format, FormatResult, LINE_TERMINATORS, normalize_newlines,
     prelude::{Formatter, text},
 };
 use biome_markdown_syntax::MarkdownSyntaxNode;
@@ -39,9 +39,9 @@ impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
             }
         }
 
-        // Write the original source text as-is
+        // Formatter text uses logical LF line endings; the printer applies the configured ending.
         text(
-            &self.node.to_string(),
+            &normalize_newlines(&self.node.to_string(), LINE_TERMINATORS),
             Some(self.node.text_trimmed_range().start()),
         )
         .fmt(f)

@@ -9,8 +9,8 @@ use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MdBlockList, MdBullet, MdParagraph,
-    MdQuote,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet,
+    MdParagraph, MdQuote,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -608,9 +608,9 @@ fn paragraph_has_inner_hard_line(paragraph: &MdParagraph) -> bool {
 /// Whether the list terminates its own line.
 ///
 /// This is the case when the last block of its last bullet carries the line
-/// ending: a paragraph ending with a newline, or a blank line swallowed by
-/// the bullet as [MdNewline]. Blocks that end with their last visible
-/// character, like a thematic break, leave the line terminator to the
+/// ending: a paragraph or table ending with a newline, or a blank line
+/// swallowed by the bullet as [MdNewline]. Blocks that end with their last
+/// visible character, like a thematic break, leave the line terminator to the
 /// enclosing block list.
 ///
 /// [MdNewline]: biome_markdown_syntax::MdNewline
@@ -625,6 +625,9 @@ fn list_ends_with_line_break(item: &AnyListItem) -> bool {
             Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))) => {
                 return paragraph.ends_with_newline();
             }
+            Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::GfmTable(table))) => {
+                return table_ends_with_line_break(&table);
+            }
             Some(block) => match block
                 .as_any_list_item()
                 .and_then(|nested| nested.list().iter().last())
@@ -636,4 +639,15 @@ fn list_ends_with_line_break(item: &AnyListItem) -> bool {
             None => return false,
         }
     }
+}
+
+fn table_ends_with_line_break(table: &GfmTable) -> bool {
+    table.body().iter().last().map_or_else(
+        || {
+            table
+                .delimiter()
+                .is_ok_and(|row| row.newline_token().is_some())
+        },
+        |row| row.newline_token().is_some(),
+    )
 }

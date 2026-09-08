@@ -19,6 +19,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlBogusElement {
@@ -65,7 +66,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..91
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..91
     0: HTML_BOGUS_ELEMENT@0..91
       0: HTML_BOGUS@0..91
         0: L_ANGLE@0..1 "<" [] []
@@ -82,7 +84,7 @@ HtmlRoot {
           1: HTML_BOGUS_ELEMENT@25..91
             0: ERROR_TOKEN@25..91 "\"exportAsName>\n\t<p>This is a template fragment</p>\n</ng-template>\n" [] []
       1: HTML_ELEMENT_LIST@91..91
-  4: EOF@91..91 "" [] []
+  5: EOF@91..91 "" [] []
 
 ```
 

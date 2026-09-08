@@ -10,17 +10,17 @@ use crate::{
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
     JsIfStatement, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
     JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
-    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
-    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence,
-    TsStringLiteralType, inner_string_text,
+    JsReferenceIdentifier, JsRegexLiteralExpression, JsSequenceExpression,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, JsWhileStatement,
+    OperatorPrecedence, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
     TextSize, TokenText, declare_node_union,
 };
 use core::iter;
-use std::collections::HashSet;
+use smallvec::SmallVec;
 
 const GLOBAL_THIS: &str = "globalThis";
 const UNDEFINED: &str = "undefined";
@@ -957,22 +957,21 @@ impl AnyJsExpression {
     ///
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn contains_a_test_pattern(&self) -> bool {
-        let members = CalleeNamesIterator::new(self.clone()).collect::<Vec<_>>();
-
-        let mut set = HashSet::new();
-        let has_duplicates = members.iter().any(|x| !set.insert(x));
-
-        if has_duplicates {
+        let members = CalleeNamesIterator::new(self.clone()).collect::<SmallVec<[TokenText; 5]>>();
+        if members
+            .iter()
+            .enumerate()
+            .any(|(index, current)| members.iter().skip(index + 1).any(|other| current == other))
+        {
             return false;
         }
 
-        let mut rev = members.iter().rev();
-
-        let first = rev.next().map(|t| t.text());
-        let second = rev.next().map(|t| t.text());
-        let third = rev.next().map(|t| t.text());
-        let fourth = rev.next().map(|t| t.text());
-        let fifth = rev.next().map(|t| t.text());
+        let mut members = members.iter().rev();
+        let first = members.next().map(TokenText::text);
+        let second = members.next().map(TokenText::text);
+        let third = members.next().map(TokenText::text);
+        let fourth = members.next().map(TokenText::text);
+        let fifth = members.next().map(TokenText::text);
 
         match first {
             Some("describe") => match second {
@@ -1043,7 +1042,11 @@ impl AnyJsExpression {
     ///
     /// A valid test.each pattern must:
     /// - Start with a valid test pattern (see [`contains_a_test_pattern`])
-    /// - End with `.each` or `.for`
+    /// - End with `.each`, `.for`, or `.prop`
+    ///
+    /// `.prop` is [`@fast-check/vitest`](https://github.com/dubzzz/fast-check/tree/main/packages/vitest)'s
+    /// property-based-testing counterpart to `.each`: it also takes a table
+    /// (of arbitraries) and is itself called with the test name and callback.
     ///
     /// ## Examples
     ///
@@ -1053,6 +1056,7 @@ impl AnyJsExpression {
     /// - `test.only.each`
     /// - `describe.skip.each`
     /// - `it.concurrent.each`
+    /// - `test.prop`
     ///
     /// [`contains_a_test_pattern`]:  crate::AnyJsExpression::contains_a_test_pattern
     ///
@@ -1072,7 +1076,7 @@ impl AnyJsExpression {
                     .ok()
                     .map(|token| token.token_text_trimmed())
                 {
-                    return matches!(token.text(), "each" | "for");
+                    return matches!(token.text(), "each" | "for" | "prop");
                 }
 
                 false
@@ -1103,12 +1107,10 @@ impl AnyJsExpression {
     /// [`contains_a_test_pattern`]: crate::AnyJsExpression::contains_a_test_pattern
     /// [`contains_a_test_each_pattern`]: crate::AnyJsExpression::contains_a_test_each_pattern
     pub fn contains_it_call(&self) -> bool {
-        let members = CalleeNamesIterator::new(self.clone()).collect::<Vec<_>>();
-
-        let mut rev = members.iter().rev();
-
-        let first = rev.next().map(|t| t.text());
-        let second = rev.next().map(|t| t.text());
+        let members = CalleeNamesIterator::new(self.clone()).collect::<SmallVec<[TokenText; 5]>>();
+        let mut members = members.iter().rev();
+        let first = members.next().map(TokenText::text);
+        let second = members.next().map(TokenText::text);
 
         match first {
             Some("test" | "it") => {
@@ -1386,6 +1388,29 @@ impl AnyJsExpression {
         })
         .as_ref()
         .and_then(Self::inner_expression)
+    }
+
+    /// Returns the outermost expression, ignoring any parenthesized expressions or type assertions.
+    pub fn outer_expression(&self) -> Option<Self> {
+        iter::successors(Some(self.clone()), |expression| {
+            let parent = expression.syntax().parent()?;
+
+            if !is_transparent_expression_wrapper(&parent) {
+                return None;
+            }
+
+            // Only the right-hand side determines the value of a sequence expression.
+            if parent.kind() == JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+                && !JsSequenceExpression::cast(parent.clone())
+                    .and_then(|sequence| sequence.right().ok())
+                    .is_some_and(|right| right.syntax() == expression.syntax())
+            {
+                return None;
+            }
+
+            Self::cast(parent)
+        })
+        .last()
     }
 
     pub fn is_string_literal(&self) -> bool {
@@ -2416,6 +2441,10 @@ mod test {
     #[test]
     fn doesnt_test_call_expression_with_duplicates() {
         let call_expression = extract_call_expression("test.only.only.only();");
+        assert!(!call_expression.callee().unwrap().contains_a_test_pattern());
+
+        let call_expression =
+            extract_call_expression("test.only.skip.fixme.concurrent.sequential.only();");
         assert!(!call_expression.callee().unwrap().contains_a_test_pattern());
     }
 

@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: library.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export interface Schema<T> {
+	refine(check: (value: T) => boolean): Schema<T>;
+}
+
+export declare const schema: Schema<{
+	confirmPassword: string;
+	password: string;
+}>;
+
+```

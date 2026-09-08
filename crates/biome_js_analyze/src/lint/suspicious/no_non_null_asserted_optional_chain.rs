@@ -97,9 +97,7 @@ fn contains_optional_chain(expr: &AnyJsExpression) -> bool {
         AnyJsExpression::JsComputedMemberExpression(member) => member.is_optional_chain(),
         AnyJsExpression::JsCallExpression(call) => call.is_optional_chain(),
         AnyJsExpression::JsParenthesizedExpression(paren) => paren
-            .expression()
-            .ok()
-            .is_some_and(|inner| contains_optional_chain(&inner)),
+            .expression().is_ok_and(|inner| contains_optional_chain(&inner)),
         _ => false,
     }
 }

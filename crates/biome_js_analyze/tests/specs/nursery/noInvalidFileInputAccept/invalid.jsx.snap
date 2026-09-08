@@ -1,0 +1,356 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid = () => (
+	<>
+		<input type="file" accept />
+		<input type="file" accept="" />
+		<input type="file" accept="TEXT/*" />
+		<input type="file" accept="*/plain" />
+		<input type="file" accept="image/png," />
+		<input type="file" accept="file name" />
+		<input type="file" accept="image/jpg" />
+		<input type="file" accept="image/svg" />
+		<input type="file" accept="png" />
+		<input type="file" accept=".PNG" />
+		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+		<input type="file" accept="image/png,.png" />
+		<input type="file" accept="image/png; charset=utf-8" />
+		<input {...props} type="file" accept="image/jpg" />
+	</>
+);
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:22 lint/nursery/noInvalidFileInputAccept ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file input accept attribute has no value.
+  
+    2 │ const Invalid = () => (
+    3 │ 	<>
+  > 4 │ 		<input type="file" accept />
+      │ 		                   ^^^^^^
+    5 │ 		<input type="file" accept="" />
+    6 │ 		<input type="file" accept="TEXT/*" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:29 lint/nursery/noInvalidFileInputAccept ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file input accept value is invalid.
+  
+    3 │ 	<>
+    4 │ 		<input type="file" accept />
+  > 5 │ 		<input type="file" accept="" />
+      │ 		                          ^^
+    6 │ 		<input type="file" accept="TEXT/*" />
+    7 │ 		<input type="file" accept="*/plain" />
+  
+  i Empty entries are not allowed.
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:29 lint/nursery/noInvalidFileInputAccept ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file input accept value is invalid.
+  
+    4 │ 		<input type="file" accept />
+    5 │ 		<input type="file" accept="" />
+  > 6 │ 		<input type="file" accept="TEXT/*" />
+      │ 		                          ^^^^^^^^
+    7 │ 		<input type="file" accept="*/plain" />
+    8 │ 		<input type="file" accept="image/png," />
+  
+  i Wildcard MIME types must be audio/*, image/*, or video/*.
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:29 lint/nursery/noInvalidFileInputAccept ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file input accept value is invalid.
+  
+    5 │ 		<input type="file" accept="" />
+    6 │ 		<input type="file" accept="TEXT/*" />
+  > 7 │ 		<input type="file" accept="*/plain" />
+      │ 		                          ^^^^^^^^^
+    8 │ 		<input type="file" accept="image/png," />
+    9 │ 		<input type="file" accept="file name" />
+  
+  i Wildcard MIME types must be audio/*, image/*, or video/*.
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:29 lint/nursery/noInvalidFileInputAccept ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file input accept value is invalid.
+  
+     6 │ 		<input type="file" accept="TEXT/*" />
+     7 │ 		<input type="file" accept="*/plain" />
+   > 8 │ 		<input type="file" accept="image/png," />
+       │ 		                          ^^^^^^^^^^^^
+     9 │ 		<input type="file" accept="file name" />
+    10 │ 		<input type="file" accept="image/jpg" />
+  
+  i Empty entries are not allowed.
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:29 lint/nursery/noInvalidFileInputAccept ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file input accept value is invalid.
+  
+     7 │ 		<input type="file" accept="*/plain" />
+     8 │ 		<input type="file" accept="image/png," />
+   > 9 │ 		<input type="file" accept="file name" />
+       │ 		                          ^^^^^^^^^^^
+    10 │ 		<input type="file" accept="image/jpg" />
+    11 │ 		<input type="file" accept="image/svg" />
+  
+  i File extensions must start with . and cannot contain whitespace, commas, slashes, wildcards, or template markers.
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+     8 │ 		<input type="file" accept="image/png," />
+     9 │ 		<input type="file" accept="file name" />
+  > 10 │ 		<input type="file" accept="image/jpg" />
+       │ 		                          ^^^^^^^^^^^
+    11 │ 		<input type="file" accept="image/svg" />
+    12 │ 		<input type="file" accept="png" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+     8  8 │       <input type="file" accept="image/png," />
+     9  9 │       <input type="file" accept="file name" />
+    10    │ - → → <input·type="file"·accept="image/jpg"·/>
+       10 │ + → → <input·type="file"·accept="image/jpeg"·/>
+    11 11 │       <input type="file" accept="image/svg" />
+    12 12 │       <input type="file" accept="png" />
+  
+
+```
+
+```
+invalid.jsx:11:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/svg+xml as the file input accept value.
+  
+     9 │ 		<input type="file" accept="file name" />
+    10 │ 		<input type="file" accept="image/jpg" />
+  > 11 │ 		<input type="file" accept="image/svg" />
+       │ 		                          ^^^^^^^^^^^
+    12 │ 		<input type="file" accept="png" />
+    13 │ 		<input type="file" accept=".PNG" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    11 │ → → <input·type="file"·accept="image/svg+xml"·/>
+       │                                         ++++    
+
+```
+
+```
+invalid.jsx:12:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use .png as the file input accept value.
+  
+    10 │ 		<input type="file" accept="image/jpg" />
+    11 │ 		<input type="file" accept="image/svg" />
+  > 12 │ 		<input type="file" accept="png" />
+       │ 		                          ^^^^^
+    13 │ 		<input type="file" accept=".PNG" />
+    14 │ 		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    12 │ → → <input·type="file"·accept=".png"·/>
+       │                                +       
+
+```
+
+```
+invalid.jsx:13:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use .png as the file input accept value.
+  
+    11 │ 		<input type="file" accept="image/svg" />
+    12 │ 		<input type="file" accept="png" />
+  > 13 │ 		<input type="file" accept=".PNG" />
+       │ 		                          ^^^^^^
+    14 │ 		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+    15 │ 		<input type="file" accept="image/png,.png" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    11 11 │       <input type="file" accept="image/svg" />
+    12 12 │       <input type="file" accept="png" />
+    13    │ - → → <input·type="file"·accept=".PNG"·/>
+       13 │ + → → <input·type="file"·accept=".png"·/>
+    14 14 │       <input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+    15 15 │       <input type="file" accept="image/png,.png" />
+  
+
+```
+
+```
+invalid.jsx:14:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/png, .png as the file input accept value.
+  
+    12 │ 		<input type="file" accept="png" />
+    13 │ 		<input type="file" accept=".PNG" />
+  > 14 │ 		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+       │ 		                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 		<input type="file" accept="image/png,.png" />
+    16 │ 		<input type="file" accept="image/png; charset=utf-8" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    12 12 │       <input type="file" accept="png" />
+    13 13 │       <input type="file" accept=".PNG" />
+    14    │ - → → <input·type="file"·accept="IMAGE/PNG,.PNG,·image/png"·/>
+       14 │ + → → <input·type="file"·accept="image/png,·.png"·/>
+    15 15 │       <input type="file" accept="image/png,.png" />
+    16 16 │       <input type="file" accept="image/png; charset=utf-8" />
+  
+
+```
+
+```
+invalid.jsx:15:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/png, .png as the file input accept value.
+  
+    13 │ 		<input type="file" accept=".PNG" />
+    14 │ 		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+  > 15 │ 		<input type="file" accept="image/png,.png" />
+       │ 		                          ^^^^^^^^^^^^^^^^
+    16 │ 		<input type="file" accept="image/png; charset=utf-8" />
+    17 │ 		<input {...props} type="file" accept="image/jpg" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    15 │ → → <input·type="file"·accept="image/png,·.png"·/>
+       │                                          +        
+
+```
+
+```
+invalid.jsx:16:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/png as the file input accept value.
+  
+    14 │ 		<input type="file" accept="IMAGE/PNG,.PNG, image/png" />
+    15 │ 		<input type="file" accept="image/png,.png" />
+  > 16 │ 		<input type="file" accept="image/png; charset=utf-8" />
+       │ 		                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 		<input {...props} type="file" accept="image/jpg" />
+    18 │ 	</>
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    16 │ → → <input·type="file"·accept="image/png;·charset=utf-8"·/>
+       │                                         ---------------    
+
+```
+
+```
+invalid.jsx:17:40 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    15 │ 		<input type="file" accept="image/png,.png" />
+    16 │ 		<input type="file" accept="image/png; charset=utf-8" />
+  > 17 │ 		<input {...props} type="file" accept="image/jpg" />
+       │ 		                                     ^^^^^^^^^^^
+    18 │ 	</>
+    19 │ );
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    15 15 │       <input type="file" accept="image/png,.png" />
+    16 16 │       <input type="file" accept="image/png; charset=utf-8" />
+    17    │ - → → <input·{...props}·type="file"·accept="image/jpg"·/>
+       17 │ + → → <input·{...props}·type="file"·accept="image/jpeg"·/>
+    18 18 │     </>
+    19 19 │   );
+  
+
+```

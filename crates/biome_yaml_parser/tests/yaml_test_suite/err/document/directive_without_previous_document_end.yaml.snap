@@ -1,0 +1,85 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+%YAML 1.2
+---
+%YAML 1.2
+---
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@0..9 "%YAML 1.2" [] [],
+                },
+            ],
+            dashdashdash_token: DIRECTIVE_END@9..13 "---" [Newline("\n")] [],
+            node: missing (optional),
+            dotdotdot_token: missing (optional),
+        },
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@13..23 "%YAML 1.2" [Newline("\n")] [],
+                },
+            ],
+            dashdashdash_token: DIRECTIVE_END@23..27 "---" [Newline("\n")] [],
+            node: missing (optional),
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@27..28 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..28
+  0: YAML_DOCUMENT_LIST@0..27
+    0: YAML_DOCUMENT@0..13
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..9
+        0: YAML_DIRECTIVE@0..9
+          0: DIRECTIVE_LITERAL@0..9 "%YAML 1.2" [] []
+      2: DIRECTIVE_END@9..13 "---" [Newline("\n")] []
+      3: (empty)
+      4: (empty)
+    1: YAML_DOCUMENT@13..27
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@13..23
+        0: YAML_DIRECTIVE@13..23
+          0: DIRECTIVE_LITERAL@13..23 "%YAML 1.2" [Newline("\n")] []
+      2: DIRECTIVE_END@23..27 "---" [Newline("\n")] []
+      3: (empty)
+      4: (empty)
+  1: EOF@27..28 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+directive_without_previous_document_end.yaml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `...` before YAML directives.
+  
+    1 │ %YAML 1.2
+    2 │ ---
+  > 3 │ %YAML 1.2
+      │ ^^^^^^^^^
+    4 │ ---
+    5 │ 
+  
+```

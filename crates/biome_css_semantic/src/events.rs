@@ -1,11 +1,12 @@
 use biome_css_syntax::{
     AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
-    AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector, AnyCssValue,
-    CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
-};
-use biome_property_codec::{
-    PropertySyntaxDiagnostic, PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic,
-    PropertySyntaxResult, encode,
+    AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule,
+    CssSyntaxKind::*,
+    decode_css_identifier,
+    property_syntax::{
+        PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
+    },
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -14,7 +15,9 @@ use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 use crate::{
     model::{CssProperty, CssPropertyInitialValueKind},
     semantic_model::model::Specificity,
-    specificity::{evaluate_complex_selector, evaluate_compound_selector},
+    specificity::{
+        evaluate_complex_selector, evaluate_compound_selector, evaluate_partial_combinator_selector,
+    },
 };
 
 const ROOT_SELECTOR: &str = ":root";
@@ -97,9 +100,18 @@ impl SemanticEventExtractor {
                     return;
                 };
                 node.children()
-                    .filter_map(CssRelativeSelector::cast)
-                    .filter_map(|s| s.selector().ok())
-                    .for_each(|s| self.process_selector(s));
+                    .filter_map(AnyCssRelativeSelector::cast)
+                    .for_each(|selector| match selector {
+                        AnyCssRelativeSelector::CssRelativeSelector(selector) => {
+                            if let Ok(selector) = selector.selector() {
+                                self.process_selector(selector);
+                            }
+                        }
+                        AnyCssRelativeSelector::ScssPartialCombinatorSelector(selector) => {
+                            self.process_selector(selector.into());
+                        }
+                        AnyCssRelativeSelector::CssBogusSelector(_) => {}
+                    });
             }
             CSS_DECLARATION => {
                 if matches!(node.parent().kind(), Some(CSS_SUPPORTS_FEATURE_DECLARATION)) {
@@ -129,6 +141,9 @@ impl SemanticEventExtractor {
                             let value = match generic.value() {
                                 Ok(value) => match value {
                                     AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(
+                                        value,
+                                    ) => CssPropertyInitialValueKind::from(value),
+                                    AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(
                                         value,
                                     ) => CssPropertyInitialValueKind::from(value),
                                     AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
@@ -198,6 +213,10 @@ impl SemanticEventExtractor {
                 let specificity = evaluate_compound_selector(&selector);
                 self.add_selector_event(selector.into(), specificity)
             }
+            AnyCssSelector::ScssPartialCombinatorSelector(selector) => {
+                let specificity = evaluate_partial_combinator_selector(&selector);
+                self.add_selector_event(selector.into(), specificity);
+            }
             _ => {}
         }
     }
@@ -238,12 +257,13 @@ impl SemanticEventExtractor {
                 && let Ok(prop_name) = prop.name()
             {
                 let prop_name = prop_name.to_trimmed_string();
+                let prop_name = decode_css_identifier(&prop_name);
                 if prop_name.eq_ignore_ascii_case("initial-value") {
-                    let Ok(value) = prop.value() else {
-                        continue;
-                    };
-                    initial_value = Some(match value {
+                    initial_value = prop.value().ok().map(|value| match value {
                         AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(value) => {
+                            CssPropertyInitialValueKind::from(value)
+                        }
+                        AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(value) => {
                             CssPropertyInitialValueKind::from(value)
                         }
                         AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
@@ -254,10 +274,10 @@ impl SemanticEventExtractor {
                         }
                     });
                 } else if prop_name.eq_ignore_ascii_case("syntax") {
-                    let Ok(value) = prop.value() else {
-                        continue;
+                    syntax = match prop.value() {
+                        Ok(value) => parse_property_syntax(value),
+                        Err(_) => invalid_property_syntax(prop.range()),
                     };
-                    syntax = parse_property_syntax(value);
                 } else if prop_name.eq_ignore_ascii_case("inherits") {
                     let Ok(value) = prop.value() else {
                         continue;
@@ -330,7 +350,8 @@ fn parse_property_syntax(value: AnyCssGenericPropertyValueOrExpression) -> Prope
 }
 
 fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {
-    PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(
-        PropertySyntaxParseDiagnostic::new(PropertySyntaxErrorKind::ExpectedString, range),
+    PropertySyntaxResult::Error(PropertySyntaxParseDiagnostic::new(
+        PropertySyntaxErrorKind::ExpectedString,
+        range,
     ))
 }

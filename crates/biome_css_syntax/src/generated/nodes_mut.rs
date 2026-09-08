@@ -987,6 +987,20 @@ impl CssDeclarationOrRuleBlock {
         )
     }
 }
+impl CssDeclarationSnippetRoot {
+    pub fn with_declarations(self, element: CssDeclarationList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssDeclarationWithSemicolon {
     pub fn with_declaration(self, element: CssDeclaration) -> Self {
         Self::unwrap_cast(
@@ -1862,6 +1876,14 @@ impl CssLayerReference {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssLegacyFilterValue {
+    pub fn with_components(self, element: CssCustomPropertyComponentList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -4429,6 +4451,14 @@ impl ScssInterpolatedString {
         )
     }
 }
+impl ScssInterpolatedUrlValue {
+    pub fn with_parts(self, element: ScssInterpolatedUrlValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolatedValue {
     pub fn with_items(self, element: ScssInterpolatedValuePartList) -> Self {
         Self::unwrap_cast(
@@ -4833,6 +4863,20 @@ impl ScssParenthesizedExpression {
         )
     }
 }
+impl ScssPartialCombinatorSelector {
+    pub fn with_left(self, element: Option<AnyCssSelector>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_combinator_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssPlaceholderSelector {
     pub fn with_percent_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4934,6 +4978,14 @@ impl ScssUnaryExpression {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssUrlText {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

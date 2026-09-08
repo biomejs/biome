@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+import { useId } from "react";
+
+const id = useId();
+const userId = useId();
+obj.nested.myId = useId();
+
+// Class property following the convention.
+class Field {
+	inputId = useId();
+}
+
+// The assignment target is a computed member, so no name can be resolved.
+foo[bar] = useId();
+
+// Not a call to the React API.
+const foo = useId;
+
+function useCustomId() {
+	return useId();
+}
+
+```

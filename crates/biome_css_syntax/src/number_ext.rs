@@ -1,3 +1,20 @@
+use crate::CssNumber;
+
+impl CssNumber {
+    /// Returns `true` when the number contains only an optional sign and decimal digits.
+    pub fn is_integer(&self) -> bool {
+        self.value_token().is_ok_and(|token| {
+            let value = token.text_trimmed();
+            let value = value
+                .strip_prefix('+')
+                .or_else(|| value.strip_prefix('-'))
+                .filter(|value| !value.is_empty())
+                .unwrap_or(value);
+            !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit())
+        })
+    }
+}
+
 /// Options for scanning a CSS number from source text.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Default)]
 pub struct CssNumberScanOptions {

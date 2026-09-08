@@ -20,6 +20,9 @@ impl FormatRule<AnyCssGenericPropertyValueOrExpression>
             AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(node) => {
                 node.format().fmt(f)
             }
+            AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(node) => {
+                node.format().fmt(f)
+            }
             AnyCssGenericPropertyValueOrExpression::ScssExpression(node) => node.format().fmt(f),
         }
     }

@@ -1,0 +1,286 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+interface SomeType {
+    value: string;
+}
+
+declare let myVar;
+
+const variable = myVar as SomeType;
+const literal = "value" as SomeType;
+const angleVariable = <SomeType>myVar;
+const angleLiteral = <SomeType>"value";
+
+(myVar as SomeType).value = "foo";
+(myVar as SomeType) = { value: "value" };
+(<SomeType>myVar) = { value: "value" };
+
+((myVar as unknown) as SomeType) = { value: "value" };
+([myVar as SomeType] = [{ value: "value" }]);
+
+const multilineAs = myVar as
+    SomeType;
+const multilineAngle = <
+    SomeType
+>myVar;
+
+```
+
+# Diagnostics
+```
+invalid.ts:8:24 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+     6 │ declare let myVar;
+     7 │ 
+   > 8 │ const variable = myVar as SomeType;
+       │                        ^^^^^^^^^^^
+     9 │ const literal = "value" as SomeType;
+    10 │ const angleVariable = <SomeType>myVar;
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:25 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+     8 │ const variable = myVar as SomeType;
+   > 9 │ const literal = "value" as SomeType;
+       │                         ^^^^^^^^^^^
+    10 │ const angleVariable = <SomeType>myVar;
+    11 │ const angleLiteral = <SomeType>"value";
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:23 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+     8 │ const variable = myVar as SomeType;
+     9 │ const literal = "value" as SomeType;
+  > 10 │ const angleVariable = <SomeType>myVar;
+       │                       ^^^^^^^^^^
+    11 │ const angleLiteral = <SomeType>"value";
+    12 │ 
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:22 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+     9 │ const literal = "value" as SomeType;
+    10 │ const angleVariable = <SomeType>myVar;
+  > 11 │ const angleLiteral = <SomeType>"value";
+       │                      ^^^^^^^^^^
+    12 │ 
+    13 │ (myVar as SomeType).value = "foo";
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:8 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    11 │ const angleLiteral = <SomeType>"value";
+    12 │ 
+  > 13 │ (myVar as SomeType).value = "foo";
+       │        ^^^^^^^^^^^
+    14 │ (myVar as SomeType) = { value: "value" };
+    15 │ (<SomeType>myVar) = { value: "value" };
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:8 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    13 │ (myVar as SomeType).value = "foo";
+  > 14 │ (myVar as SomeType) = { value: "value" };
+       │        ^^^^^^^^^^^
+    15 │ (<SomeType>myVar) = { value: "value" };
+    16 │ 
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:2 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    13 │ (myVar as SomeType).value = "foo";
+    14 │ (myVar as SomeType) = { value: "value" };
+  > 15 │ (<SomeType>myVar) = { value: "value" };
+       │  ^^^^^^^^^^
+    16 │ 
+    17 │ ((myVar as unknown) as SomeType) = { value: "value" };
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:9 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    15 │ (<SomeType>myVar) = { value: "value" };
+    16 │ 
+  > 17 │ ((myVar as unknown) as SomeType) = { value: "value" };
+       │         ^^^^^^^^^^
+    18 │ ([myVar as SomeType] = [{ value: "value" }]);
+    19 │ 
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:21 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    15 │ (<SomeType>myVar) = { value: "value" };
+    16 │ 
+  > 17 │ ((myVar as unknown) as SomeType) = { value: "value" };
+       │                     ^^^^^^^^^^^
+    18 │ ([myVar as SomeType] = [{ value: "value" }]);
+    19 │ 
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:9 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    17 │ ((myVar as unknown) as SomeType) = { value: "value" };
+  > 18 │ ([myVar as SomeType] = [{ value: "value" }]);
+       │         ^^^^^^^^^^^
+    19 │ 
+    20 │ const multilineAs = myVar as
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:27 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    18 │ ([myVar as SomeType] = [{ value: "value" }]);
+    19 │ 
+  > 20 │ const multilineAs = myVar as
+       │                           ^^
+  > 21 │     SomeType;
+       │     ^^^^^^^^
+    22 │ const multilineAngle = <
+    23 │     SomeType
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:24 lint/nursery/noUnsafeTypeAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid unsafe type assertions.
+  
+    20 │ const multilineAs = myVar as
+    21 │     SomeType;
+  > 22 │ const multilineAngle = <
+       │                        ^
+  > 23 │     SomeType
+  > 24 │ >myVar;
+       │ ^
+    25 │ 
+  
+  i Type assertions override the type for this expression, which can hide type errors and lead to runtime errors.
+  
+  i Use a type annotation, the satisfies operator, a type predicate, or control-flow narrowing instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

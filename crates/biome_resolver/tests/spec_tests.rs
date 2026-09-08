@@ -334,6 +334,27 @@ fn test_resolve_node_builtins() {
 }
 
 #[test]
+fn test_resolve_bun_builtins() {
+    let base_dir = get_fixtures_path("resolver_cases_3");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "bun:sqlite",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["js"],
+                resolve_bun_builtins: true,
+                ..Default::default()
+            }
+        ),
+        Err(ResolveError::BunBuiltIn)
+    );
+}
+
+#[test]
 fn test_resolve_shared_biome_config() {
     let base_dir = get_fixtures_path("resolver_cases_3");
     let fs = OsFileSystem::new(base_dir.clone());
@@ -438,6 +459,27 @@ fn test_resolve_typescript_path_aliases2() {
         ),
         Ok(Utf8PathBuf::from(format!(
             "{base_dir}/vendor/jquery/dist/index.js"
+        )))
+    );
+}
+
+#[test]
+fn test_resolve_typescript_path_alias_without_dot_prefix() {
+    let base_dir = get_fixtures_path("resolver_cases_9");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "@/styles/styles.css",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                extensions: &["css"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/src/styles/styles.css"
         )))
     );
 }

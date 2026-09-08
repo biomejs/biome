@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+
+.card {
+	background: var(--missing-background);
+	color: var(--missing-color, red);
+	border-color: v\61r(--escaped-function);
+}

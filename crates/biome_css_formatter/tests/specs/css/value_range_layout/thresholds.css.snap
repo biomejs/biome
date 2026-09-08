@@ -1,0 +1,85 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/value_range_layout/thresholds.css
+---
+
+# Input
+
+```css
+.twelve-values{font-family:family-a,family-b,family-c,family-d,family-e,family-f,
+family-g,family-h,family-i,family-j,family-k,family-l;}
+.thirteen-values{font-family:family-a,family-b,family-c,family-d,family-e,family-f,
+family-g,family-h,family-i,family-j,family-k,family-l,family-m;}
+
+.one-character-value{font-family:family-a,family-b,family-c,family-d,family-e,family-f,
+family-g,family-h,family-i,family-j,family-k,family-l,x;}
+.multibyte-character-value{font-family:family-a,family-b,family-c,family-d,family-e,family-f,
+family-g,family-h,family-i,family-j,family-k,family-l,é;}
+
+.below-width{font-family:font-a,font-b,font-c,font-d,font-e,font-f,
+font-g,font-h,font-i,font-j,font-k,font-l,font-mm;}
+.at-width{font-family:font-a,font-b,font-c,font-d,font-e,font-f,
+font-g,font-h,font-i,font-j,font-k,font-l,font-mmm;}
+.below-width-with-trivia{font-family:  font-a,  font-b,  font-c,  font-d,  font-e,  font-f,
+  font-g,  font-h,  font-i,  font-j,  font-k,  font-l, /* final family */ font-mm   ;}
+
+.slash-separated{value:value-aa value-bb value-cc value-dd value-ee value-ff /
+value-gg value-hh value-ii value-jj value-kk value-ll value-mm;}
+.space-separated{value:value-aa value-bb value-cc value-dd value-ee value-ff
+value-gg value-hh value-ii value-jj value-kk value-ll value-mm;}
+
+```
+
+
+# Formatted
+
+```css
+.twelve-values {
+	font-family:
+		family-a, family-b, family-c, family-d, family-e, family-f, family-g,
+		family-h, family-i, family-j, family-k, family-l;
+}
+.thirteen-values {
+	font-family:
+		family-a, family-b, family-c, family-d, family-e, family-f,
+		family-g, family-h, family-i, family-j, family-k, family-l, family-m;
+}
+
+.one-character-value {
+	font-family:
+		family-a, family-b, family-c, family-d, family-e, family-f, family-g,
+		family-h, family-i, family-j, family-k, family-l, x;
+}
+.multibyte-character-value {
+	font-family:
+		family-a, family-b, family-c, family-d, family-e, family-f,
+		family-g, family-h, family-i, family-j, family-k, family-l, é;
+}
+
+.below-width {
+	font-family:
+		font-a, font-b, font-c, font-d, font-e, font-f, font-g, font-h, font-i,
+		font-j, font-k, font-l, font-mm;
+}
+.at-width {
+	font-family:
+		font-a, font-b, font-c, font-d, font-e, font-f,
+		font-g, font-h, font-i, font-j, font-k, font-l, font-mmm;
+}
+.below-width-with-trivia {
+	font-family:
+		font-a, font-b, font-c, font-d, font-e, font-f, font-g, font-h, font-i,
+		font-j, font-k, font-l, /* final family */ font-mm;
+}
+
+.slash-separated {
+	value:
+		value-aa value-bb value-cc value-dd value-ee value-ff /
+		value-gg value-hh value-ii value-jj value-kk value-ll value-mm;
+}
+.space-separated {
+	value: value-aa value-bb value-cc value-dd value-ee value-ff value-gg value-hh
+		value-ii value-jj value-kk value-ll value-mm;
+}
+
+```

@@ -10,11 +10,13 @@
 //! value or instance side used for member lookup, and the unconsumed member
 //! path. Named-member traversal examines only members declared directly on the
 //! current type. A member available only from a base type is therefore
-//! indeterminate. Function-return classification has one narrower inheritance
-//! case: an interface with no call signature may follow its single base
-//! interface. Traversal visits at most 1024 distinct classification states.
-//! Unsupported expression forms, accessors, ambiguous exports, cycles, and an
-//! exhausted work limit are indeterminate.
+//! indeterminate. A pending member path may cross a non-generic concrete class
+//! created by `new` without inspecting its constructor arguments.
+//! Function-return classification has one narrower inheritance case: an
+//! interface with no call signature may follow its single base interface.
+//! Traversal visits at most 1024 distinct classification states. Unsupported
+//! expression forms, accessors, ambiguous exports, cycles, and an exhausted
+//! work limit are indeterminate.
 
 use super::{ImportResolution, ResolutionCtx, find_value_member_type_on_demand};
 use crate::db::queries::{
@@ -22,11 +24,13 @@ use crate::db::queries::{
 };
 use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
+use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
-    GlobalTypeId, ImportSymbol, Literal, RawTypeData, ScopeId, TypeId, TypeMember, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
-    interned_types::{ReturnType, TypeData as InferredTypeData},
+    GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
+    interned_types::{
+        ReturnType, TypeData as InferredTypeData, TypeSubstitution, TypeTransformResult,
+    },
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -55,6 +59,38 @@ enum MemberLookupMode {
     Value,
     /// Selects instance members when the target is a class.
     Instance,
+    /// Selects a constructed instance after consuming its value-side members.
+    Constructed { remaining: usize },
+}
+
+impl MemberLookupMode {
+    fn prepend_constructed_members(self, count: usize) -> Self {
+        match self {
+            Self::Constructed { remaining } => Self::Constructed {
+                remaining: remaining.saturating_add(count),
+            },
+            mode @ (Self::Value | Self::Instance) => mode,
+        }
+    }
+
+    fn after_member(self) -> Self {
+        match self {
+            Self::Value | Self::Instance | Self::Constructed { remaining: 0 } => Self::Value,
+            Self::Constructed { remaining } => Self::Constructed {
+                remaining: remaining - 1,
+            },
+        }
+    }
+
+    fn after_namespace_member(self) -> Option<Self> {
+        match self {
+            Self::Constructed { remaining: 0 } => None,
+            Self::Constructed { remaining } => Some(Self::Constructed {
+                remaining: remaining - 1,
+            }),
+            mode @ (Self::Value | Self::Instance) => Some(mode),
+        }
+    }
 }
 
 /// The Promise-related property requested from the current target.
@@ -110,14 +146,15 @@ struct ClassificationState {
 /// Classifies a raw expression's Promise shape without inferring all module tables.
 ///
 /// The projection follows lexical bindings, imports, exports, aliases, `this`,
-/// calls, and own named members. Unsupported expression forms remain
-/// indeterminate instead of entering complete expression inference.
+/// calls, non-generic class instances created by `new`, and own named members.
+/// Unsupported expression forms remain indeterminate instead of entering
+/// complete expression inference.
 pub(in crate::db) fn classify_expression_promise(
     db: &dyn ModuleDb,
     module: ModuleInfo,
     reference: TypeReference,
 ) -> PromiseClassification {
-    classify_expression(db, module, reference, Projection::Promise)
+    classify_expression(db, module, reference, Projection::Promise, true)
 }
 
 /// Classifies whether a raw expression is an array of Promise-like values.
@@ -126,7 +163,7 @@ pub(in crate::db) fn classify_expression_array_promise(
     module: ModuleInfo,
     reference: TypeReference,
 ) -> PromiseClassification {
-    classify_expression(db, module, reference, Projection::ArrayPromise)
+    classify_expression(db, module, reference, Projection::ArrayPromise, true)
 }
 
 /// Classifies a raw expression's function return without inferring all module tables.
@@ -140,7 +177,7 @@ pub(in crate::db) fn classify_expression_function_return(
     module: ModuleInfo,
     reference: TypeReference,
 ) -> PromiseClassification {
-    classify_expression(db, module, reference, Projection::FunctionReturn)
+    classify_expression(db, module, reference, Projection::FunctionReturn, false)
 }
 
 fn classify_expression(
@@ -148,6 +185,7 @@ fn classify_expression(
     module: ModuleInfo,
     reference: TypeReference,
     projection: Projection,
+    allow_new_instance_members: bool,
 ) -> PromiseClassification {
     use PromiseClassification::{DoesNotReturnPromise, Indeterminate, ReturnsPromise};
 
@@ -220,7 +258,7 @@ fn classify_expression(
                                     db,
                                     state.module,
                                     &js_info,
-                                    ImportResolution::OnDemand,
+                                    ImportResolution::on_demand(),
                                 );
                                 let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
                                     return Indeterminate;
@@ -256,6 +294,9 @@ fn classify_expression(
                     let Some(identifier) = qualifier_path.next() else {
                         return Indeterminate;
                     };
+                    let mode = state
+                        .mode
+                        .prepend_constructed_members(qualifier.path.len().saturating_sub(1));
                     let members: Box<[Text]> = qualifier_path
                         .cloned()
                         .chain(state.members.iter().cloned())
@@ -278,6 +319,16 @@ fn classify_expression(
                                     .map(|binding| (id, binding))
                             });
                         if let Some((binding_id, binding)) = binding {
+                            if !qualifier.type_parameters.is_empty()
+                                && matches!(
+                                    state.projection,
+                                    Projection::FunctionReturn
+                                        | Projection::ArrayFunctionReturn
+                                        | Projection::AwaitedArrayFunctionReturn
+                                )
+                            {
+                                return Indeterminate;
+                            }
                             if matches!(
                                 state.projection,
                                 Projection::FunctionReturn
@@ -301,21 +352,20 @@ fn classify_expression(
                                         resolved_path: import.resolved_path.clone(),
                                         symbol: import.symbol.clone(),
                                     },
-                                    mode: state.mode,
+                                    mode,
                                     members: members.clone(),
                                     projection: state.projection,
                                 };
                             }
-                            let Some(reference) = js_info
-                                .raw_binding_types
-                                .get(&binding.syntax().text_trimmed_range())
+                            let binding_range = binding.syntax().text_trimmed_range();
+                            let Some(reference) = js_info.raw_binding_types.get(&binding_range)
                             else {
                                 return Indeterminate;
                             };
                             break ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(reference.clone()),
-                                mode: state.mode,
+                                mode,
                                 members: members.clone(),
                                 projection: state.projection,
                             };
@@ -325,11 +375,14 @@ fn classify_expression(
                             continue;
                         }
 
+                        if matches!(mode, MemberLookupMode::Constructed { .. }) {
+                            return Indeterminate;
+                        }
                         let mut ctx = ResolutionCtx::new(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(),
                         );
                         let mut ty = ctx.resolve_qualifier(&qualifier);
                         for member in &members {
@@ -429,6 +482,25 @@ fn classify_expression(
                 let Some(raw) = js_info.raw_types.get(type_id.index()) else {
                     return Indeterminate;
                 };
+                if matches!(state.mode, MemberLookupMode::Constructed { remaining: 0 })
+                    && !(matches!(
+                        raw,
+                        RawTypeData::Class(_)
+                            | RawTypeData::Reference(_)
+                            | RawTypeData::TypeofType(_)
+                            | RawTypeData::TypeofValue(_)
+                    ) || matches!(
+                        raw,
+                        RawTypeData::TypeofExpression(expression)
+                            if matches!(
+                                expression.as_ref(),
+                                TypeofExpression::StaticMember(_)
+                                    | TypeofExpression::OptionalChainStaticMember(_)
+                            )
+                    ))
+                {
+                    return Indeterminate;
+                }
 
                 match raw {
                     RawTypeData::Function(function) => {
@@ -458,32 +530,80 @@ fn classify_expression(
                         let Some(return_ty) = function.return_type.as_type() else {
                             return DoesNotReturnPromise;
                         };
-                        let mut ctx = ResolutionCtx::new(
-                            db,
-                            state.module,
-                            &js_info,
-                            ImportResolution::OnDemand,
-                        );
-                        let ty = ctx.resolve(return_ty);
-                        let result = match state.projection {
-                            Projection::FunctionReturn => is_promise_type(db, ty),
-                            Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
+                        // Only function-return projections can follow a returned call. The next
+                        // target is the call expression itself, so map them to their equivalent
+                        // expression projections while retaining whether the result is awaited.
+                        // Other projections classify values rather than function returns; `None`
+                        // leaves them on the regular resolution path.
+                        let returned_call_projection = match state.projection {
+                            Projection::FunctionReturn => Some(Projection::Promise),
+                            Projection::ArrayFunctionReturn => Some(Projection::ArrayPromise),
                             Projection::AwaitedArrayFunctionReturn => {
-                                let Some(awaited) = ctx.resolve_await_expression(ty) else {
-                                    return Indeterminate;
-                                };
-                                is_array_of_promise_type(db, awaited)
+                                Some(Projection::AwaitedArrayPromise)
                             }
                             Projection::Promise
                             | Projection::PromiseTarget
                             | Projection::ArrayPromise
-                            | Projection::AwaitedArrayPromise => unreachable!(),
+                            | Projection::AwaitedArrayPromise => None,
                         };
-                        return match result {
-                            Some(true) => ReturnsPromise,
-                            Some(false) => DoesNotReturnPromise,
-                            None => Indeterminate,
-                        };
+                        if let Some(projection) = returned_call_projection
+                            && let Some(returned_call) =
+                                returned_call_reference(&js_info, return_ty, function.is_async)
+                        {
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(returned_call),
+                                mode: MemberLookupMode::Value,
+                                members: Box::default(),
+                                projection,
+                            }
+                        } else {
+                            let mut ctx = ResolutionCtx::new(
+                                db,
+                                state.module,
+                                &js_info,
+                                ImportResolution::on_demand(),
+                            );
+                            let ty = ctx.resolve(return_ty);
+                            let result = match state.projection {
+                                Projection::FunctionReturn => is_promise_type(db, ty),
+                                Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
+                                Projection::AwaitedArrayFunctionReturn => {
+                                    let Some(awaited) = ctx.resolve_await_expression(ty) else {
+                                        return Indeterminate;
+                                    };
+                                    is_array_of_promise_type(db, awaited)
+                                }
+                                Projection::Promise
+                                | Projection::PromiseTarget
+                                | Projection::ArrayPromise
+                                | Projection::AwaitedArrayPromise => unreachable!(),
+                            };
+                            if matches!(result, Some(false)) {
+                                for parameter in &function.type_parameters {
+                                    let parameter = ctx.resolve(parameter);
+                                    let TypeTransformResult::Transformed(substituted) = ty
+                                        .substitute_type(
+                                            db,
+                                            TypeSubstitution {
+                                                generic: parameter,
+                                                replacement: InferredTypeData::Unknown,
+                                            },
+                                        )
+                                    else {
+                                        return Indeterminate;
+                                    };
+                                    if substituted != ty {
+                                        return Indeterminate;
+                                    }
+                                }
+                            }
+                            return match result {
+                                Some(true) => ReturnsPromise,
+                                Some(false) => DoesNotReturnPromise,
+                                None => Indeterminate,
+                            };
+                        }
                     }
                     RawTypeData::Reference(reference) => ClassificationState {
                         target: ClassificationTarget::Reference(reference.clone()),
@@ -514,12 +634,17 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(expression.object.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.prepend_constructed_members(1),
                                 members: std::iter::once(expression.member.clone())
                                     .chain(state.members.iter().cloned())
                                     .collect(),
                                 projection: state.projection,
                             }
+                        }
+                        TypeofExpression::This(_)
+                            if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>
+                        {
+                            return Indeterminate;
                         }
                         TypeofExpression::This(expression) => ClassificationState {
                             module: state.module,
@@ -576,6 +701,20 @@ fn classify_expression(
                                 },
                             }
                         }
+                        TypeofExpression::New(expression)
+                            if allow_new_instance_members && !state.members.is_empty() =>
+                        {
+                            if matches!(state.mode, MemberLookupMode::Constructed { .. }) {
+                                return Indeterminate;
+                            }
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(expression.callee.clone()),
+                                mode: MemberLookupMode::Constructed { remaining: 0 },
+                                members: state.members,
+                                projection: state.projection,
+                            }
+                        }
                         TypeofExpression::Addition(_)
                         | TypeofExpression::Await(_)
                         | TypeofExpression::BitwiseNot(_)
@@ -593,6 +732,22 @@ fn classify_expression(
                         | TypeofExpression::Typeof(_)
                         | TypeofExpression::UnaryMinus(_) => return Indeterminate,
                     },
+                    RawTypeData::InstanceOf(_)
+                        if matches!(state.mode, MemberLookupMode::Constructed { .. }) =>
+                    {
+                        return Indeterminate;
+                    }
+                    RawTypeData::InstanceOf(instance)
+                        if !instance.type_parameters.is_empty()
+                            && matches!(
+                                state.projection,
+                                Projection::FunctionReturn
+                                    | Projection::ArrayFunctionReturn
+                                    | Projection::AwaitedArrayFunctionReturn
+                            ) =>
+                    {
+                        return Indeterminate;
+                    }
                     RawTypeData::InstanceOf(instance) => match state.projection {
                         Projection::FunctionReturn
                         | Projection::ArrayFunctionReturn
@@ -623,7 +778,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::OnDemand,
+                                ImportResolution::on_demand(),
                             );
                             return match is_array_of_promise_type(
                                 db,
@@ -646,7 +801,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::OnDemand,
+                                ImportResolution::on_demand(),
                             );
                             let ty = ctx.resolve_raw_type_id(type_id);
                             let Some(awaited) = ctx.resolve_await_expression(ty) else {
@@ -670,6 +825,11 @@ fn classify_expression(
                         if matches!(state.projection, Projection::PromiseTarget) {
                             return DoesNotReturnPromise;
                         }
+                        if matches!(state.mode, MemberLookupMode::Constructed { remaining: 0 })
+                            && !class.type_parameters.is_empty()
+                        {
+                            return Indeterminate;
+                        }
                         let Some((name, remaining)) = state.members.split_first() else {
                             return DoesNotReturnPromise;
                         };
@@ -683,7 +843,7 @@ fn classify_expression(
                         ClassificationState {
                             module: state.module,
                             target: ClassificationTarget::Reference(member.ty.clone()),
-                            mode: MemberLookupMode::Value,
+                            mode: state.mode.after_member(),
                             members: remaining.into(),
                             projection: state.projection,
                         }
@@ -726,7 +886,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(member.ty.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
                             }
@@ -746,7 +906,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(member.ty.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
                             }
@@ -806,7 +966,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(),
                         );
                         let target = ctx.resolve_raw_type_id(type_id);
                         let instance = InferredTypeData::instance_of(db, target, Box::default());
@@ -862,7 +1022,7 @@ fn classify_expression(
                             ClassificationState {
                                 module: state.module,
                                 target: ClassificationTarget::Reference(member.ty.clone()),
-                                mode: MemberLookupMode::Value,
+                                mode: state.mode.after_member(),
                                 members: remaining.into(),
                                 projection: state.projection,
                             }
@@ -880,20 +1040,25 @@ fn classify_expression(
                 let Some(module) = db.module_for_path(path) else {
                     return DoesNotReturnPromise;
                 };
-                let (name, members) = match symbol {
+                let (name, members, mode) = match symbol {
                     ImportSymbol::All => {
                         let Some((name, remaining)) = state.members.split_first() else {
                             return Indeterminate;
                         };
-                        (name.clone(), remaining.into())
+                        let Some(mode) = state.mode.after_namespace_member() else {
+                            return Indeterminate;
+                        };
+                        (name.clone(), remaining.into(), mode)
                     }
-                    ImportSymbol::Default => (Text::new_static("default"), state.members),
-                    ImportSymbol::Named(name) => (name, state.members),
+                    ImportSymbol::Default => {
+                        (Text::new_static("default"), state.members, state.mode)
+                    }
+                    ImportSymbol::Named(name) => (name, state.members, state.mode),
                 };
                 ClassificationState {
                     module,
                     target: ClassificationTarget::Export(name),
-                    mode: state.mode,
+                    mode,
                     members,
                     projection: state.projection,
                 }
@@ -910,7 +1075,7 @@ fn classify_expression(
                     return Indeterminate;
                 };
                 let Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) =
-                    js_info.raw_exports.get(name.text())
+                    js_info.exports.get(name.text())
                 else {
                     return Indeterminate;
                 };
@@ -930,7 +1095,9 @@ fn classify_expression(
                     }
                     JsOwnExport::Type(resolved) => ClassificationState {
                         module,
-                        target: ClassificationTarget::Reference(TypeReference::Resolved(*resolved)),
+                        target: ClassificationTarget::Reference(TypeReference::Resolved(
+                            RawTypeId::Local(*resolved),
+                        )),
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,
@@ -965,8 +1132,12 @@ fn find_own_member<'a>(
     members.iter().find(|member| {
         member.has_name(name.text())
             && mode.is_none_or(|mode| match mode {
-                MemberLookupMode::Value => member.is_static(),
-                MemberLookupMode::Instance => !member.is_static(),
+                MemberLookupMode::Value | MemberLookupMode::Constructed { remaining: 1.. } => {
+                    member.is_static()
+                }
+                MemberLookupMode::Instance | MemberLookupMode::Constructed { remaining: 0 } => {
+                    !member.is_static()
+                }
             })
     })
 }
@@ -981,4 +1152,47 @@ fn sole_call_signature(members: &[TypeMember]) -> Result<Option<&TypeMember>, ()
     } else {
         Ok(call_signature)
     }
+}
+
+fn returned_call_reference(
+    js_info: &JsModuleInfo,
+    return_ty: &TypeReference,
+    is_async: bool,
+) -> Option<TypeReference> {
+    let TypeReference::Resolved(resolved) = return_ty else {
+        return None;
+    };
+    if resolved.level() != TypeResolverLevel::Thin {
+        return None;
+    }
+    let raw = js_info.raw_types.get(resolved.id().index())?;
+
+    let (return_ty, raw) = if is_async {
+        let RawTypeData::InstanceOf(instance) = raw else {
+            return None;
+        };
+        let TypeReference::Qualifier(qualifier) = &instance.ty else {
+            return None;
+        };
+        if !qualifier.is_promise() {
+            return None;
+        }
+        let return_ty = qualifier.type_parameters.first()?;
+        let TypeReference::Resolved(resolved) = return_ty else {
+            return None;
+        };
+        if resolved.level() != TypeResolverLevel::Thin {
+            return None;
+        }
+        let raw = js_info.raw_types.get(resolved.id().index())?;
+        (return_ty, raw)
+    } else {
+        (return_ty, raw)
+    };
+    matches!(
+        raw,
+        RawTypeData::TypeofExpression(expression)
+            if matches!(expression.as_ref(), TypeofExpression::Call(_))
+    )
+    .then(|| return_ty.clone())
 }

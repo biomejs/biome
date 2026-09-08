@@ -1,7 +1,8 @@
 use super::*;
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsRoot, JsExport, JsIdentifierAssignment, JsSyntaxNode, TextRange,
-    TsConditionalType, TsDeclareStatement, TsTypeParameterName,
+    AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsExport, JsIdentifierAssignment,
+    JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement, TsTypeParameterName,
+    unescape_js_identifier,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;
@@ -31,6 +32,8 @@ pub struct SemanticModelBuilder {
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
     exported: FxHashSet<BindingId>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    unresolved_references_by_start: FxHashSet<TextSize>,
+    global_references_by_start: FxHashSet<TextSize>,
     flavor: SemanticFlavor,
     pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
 }
@@ -51,6 +54,8 @@ impl SemanticModelBuilder {
             declared_at_by_start: FxHashMap::default(),
             exported: FxHashSet::default(),
             unresolved_references: Vec::new(),
+            unresolved_references_by_start: FxHashSet::default(),
+            global_references_by_start: FxHashSet::default(),
             flavor: SemanticFlavor::default(),
             export_jsdoc_by_range: FxHashMap::default(),
         }
@@ -148,7 +153,12 @@ impl SemanticModelBuilder {
 
     #[inline]
     pub fn push_global(&mut self, name: impl Into<String>) {
-        self.globals_by_name.insert(name.into(), None);
+        let name = name.into();
+        let decoded = match unescape_js_identifier(&name) {
+            std::borrow::Cow::Borrowed(_) => None,
+            std::borrow::Cow::Owned(decoded) => Some(decoded),
+        };
+        self.globals_by_name.insert(decoded.unwrap_or(name), None);
     }
 
     #[inline]
@@ -222,11 +232,17 @@ impl SemanticModelBuilder {
                 // Handle bindings with a bogus name
                 if let Some(node) = self.binding_node_by_start.get(&range.start()) {
                     let name = if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
-                        node.ident_token().ok().map(|t| t.token_text_trimmed())
+                        node.ident_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else {
                         None
                     };
@@ -365,9 +381,15 @@ impl SemanticModelBuilder {
                 };
 
                 let node = &self.binding_node_by_start[&range.start()];
-                let unresolved_name = node.text_trimmed().to_string();
+                let unresolved_name = AnyJsIdentifierReference::cast_ref(node)
+                    .and_then(|reference| reference.value_token().ok())
+                    .map_or_else(
+                        || node.text_trimmed().to_string().into(),
+                        |token| crate::identifier_name(token.token_text_trimmed()),
+                    );
 
-                if let Some(global_name) = self.resolve_global_name(&unresolved_name) {
+                if let Some(global_name) = self.resolve_global_name(unresolved_name.text()) {
+                    self.global_references_by_start.insert(range.start());
                     if let Some(index) = self.globals_by_name[global_name] {
                         self.globals[index as usize].references.push(
                             SemanticModelGlobalReferenceData {
@@ -390,6 +412,7 @@ impl SemanticModelBuilder {
                             Some(id);
                     }
                 } else {
+                    self.unresolved_references_by_start.insert(range.start());
                     self.unresolved_references
                         .push(SemanticModelUnresolvedReference { range });
                 }
@@ -435,6 +458,8 @@ impl SemanticModelBuilder {
             declared_at_by_start: self.declared_at_by_start,
             exported: self.exported,
             unresolved_references: self.unresolved_references,
+            unresolved_references_by_start: self.unresolved_references_by_start,
+            global_references_by_start: self.global_references_by_start,
             globals: self.globals,
             export_jsdoc_by_range: self.export_jsdoc_by_range,
         };
@@ -475,8 +500,9 @@ impl SemanticModelBuilder {
         let Ok(reference_name) = identifier_assignment.name_token() else {
             return false;
         };
+        let reference_name = crate::identifier_name(reference_name.token_text_trimmed());
         self.flavor
-            .store_reference_name(reference_name.text_trimmed())
+            .store_reference_name(reference_name.text())
             .is_some()
     }
 }

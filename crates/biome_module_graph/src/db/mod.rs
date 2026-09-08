@@ -2,7 +2,8 @@
 
 use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
 pub use biome_js_type_info::TypeDb;
-use biome_js_type_info::interned_types::ModuleKey;
+use biome_js_type_info::resolved::InferredModuleKey;
+use biome_languages::LanguageDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::plumbing::{AsId, FromId};
 
@@ -35,9 +36,9 @@ pub struct ModuleGraphGeneration {
     pub value: u64,
 }
 
-/// Extends `TypeDb` with module-graph-specific lookups.
+/// Extends `TypeDb` and `LanguageDb` with module-graph-specific lookups.
 #[salsa::db]
-pub trait ModuleDb: TypeDb {
+pub trait ModuleDb: TypeDb + LanguageDb {
     /// Returns the generation used when reading modules by file path.
     ///
     /// A database that can add, remove, or change the module associated with a
@@ -121,8 +122,8 @@ pub trait ModuleDb: TypeDb {
 }
 
 /// Resolves a module key while rejecting stale module handles.
-pub fn module_for_key(db: &dyn ModuleDb, module_key: ModuleKey) -> Option<ModuleInfo> {
+pub fn module_for_key(db: &dyn ModuleDb, module_key: InferredModuleKey) -> Option<ModuleInfo> {
     let module = ModuleInfo::from_id(module_key.as_id());
     let current = db.module_for_path(module.path(db))?;
-    (ModuleKey::new(current.as_id()) == module_key).then_some(current)
+    (InferredModuleKey::new(current.as_id()) == module_key).then_some(current)
 }

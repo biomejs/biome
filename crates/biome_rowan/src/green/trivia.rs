@@ -1,5 +1,6 @@
 use crate::TriviaPiece;
 use crate::arc::{Arc, HeaderSlice, ThinArc};
+use crate::green::GreenElementFlags;
 use biome_text_size::TextSize;
 use std::fmt::Formatter;
 use std::mem::ManuallyDrop;
@@ -77,6 +78,18 @@ impl fmt::Debug for GreenTrivia {
 }
 
 impl GreenTrivia {
+    #[inline]
+    pub(crate) fn flags(&self) -> GreenElementFlags {
+        let mut flags = GreenElementFlags::default();
+        for piece in self.pieces() {
+            flags.insert(GreenElementFlags::from_trivia_kind(piece.kind()));
+            if flags.contains_all(GreenElementFlags::HAS_COMMENTS_AND_SKIPPED) {
+                break;
+            }
+        }
+        flags
+    }
+
     /// Creates a new trivia containing the passed in pieces
     pub fn new<I>(pieces: I) -> Self
     where

@@ -99,9 +99,9 @@ mod tests {
     use std::convert::Infallible;
 
     use crate::{
-        Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression, ControlFlow,
-        MetadataRegistry, Never, QueryMatcher, ServiceBag, SuppressionAction, SyntaxVisitor,
-        matcher::MatchQueryParams, registry::Phases,
+        Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression,
+        ApplySuppression, ControlFlow, MetadataRegistry, Never, QueryMatcher, ServiceBag,
+        Suppression, SuppressionAction, SyntaxVisitor, matcher::MatchQueryParams, registry::Phases,
     };
 
     #[derive(Default)]
@@ -167,6 +167,7 @@ mod tests {
                 _: ApplySuppression<Self::Language>,
                 _: &str,
                 _: &str,
+                _: &biome_rowan::TextRange,
             ) {
                 unreachable!("")
             }
@@ -185,10 +186,24 @@ mod tests {
             }
         }
 
+        struct TestSuppression;
+
+        impl Suppression for TestSuppression {
+            type Diagnostic = Infallible;
+
+            fn parse_comment<'a>(
+                &self,
+                _: &'a str,
+                _: biome_rowan::TextRange,
+            ) -> Vec<Result<AnalyzerSuppression<'a>, Infallible>> {
+                unreachable!()
+            }
+        }
+
         let mut analyzer = Analyzer::new(
             &metadata,
             &mut matcher,
-            |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
+            Box::new(TestSuppression),
             Box::new(TestAction),
             &mut emit_signal,
         );

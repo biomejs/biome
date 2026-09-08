@@ -3,6 +3,7 @@ use crate::settings::Settings;
 use crate::workspace::ScanKind;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    RuleMetadata,
 };
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_configuration::diagnostics::{
@@ -36,6 +37,10 @@ use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "lang_md")]
+use biome_markdown_analyze::METADATA as md_lint_metadata;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_resolver::{FsWithResolverProxy, ResolveOptions, is_relative_specifier, resolve};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -528,6 +533,14 @@ pub fn create_config(
 
 /// Returns the rules applied to a specific [Path], given the [Settings]
 pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules {
+    let override_indices = settings.matching_override_indices(path);
+    to_analyzer_rules_by_indices(settings, &override_indices)
+}
+
+pub(crate) fn to_analyzer_rules_by_indices(
+    settings: &Settings,
+    override_indices: &[usize],
+) -> AnalyzerRules {
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = settings.linter.rules.as_ref() {
         #[cfg(feature = "lang_js")]
@@ -539,6 +552,8 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
         #[cfg(feature = "lang_html")]
         push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_md")]
+        push_to_analyzer_rules(rules, md_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         #[cfg(feature = "lang_js")]
@@ -550,9 +565,12 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
         #[cfg(feature = "lang_html")]
         push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_md")]
+        push_to_analyzer_assist(rules, md_lint_metadata.deref(), &mut analyzer_rules);
     }
-    let overrides = &settings.override_settings;
-    overrides.override_analyzer_rules(path, analyzer_rules)
+    settings
+        .override_settings
+        .override_analyzer_rules_by_indices(override_indices, analyzer_rules)
 }
 
 pub trait ConfigurationExt {
@@ -882,26 +900,34 @@ impl<'a> ProjectScanComputer<'a> {
         }
     }
 
+    #[inline]
     fn check_rule<R, L>(&mut self)
     where
         L: Language,
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
-        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        self.check_rule_name(<R::Group as RuleGroup>::NAME, &R::METADATA);
+    }
+
+    fn check_rule_name(&mut self, group_name: &'static str, metadata: &RuleMetadata) {
+        let filter = RuleFilter::Rule(group_name, metadata.name);
 
         if !self.only.is_empty() {
             for selector in self.only.iter() {
-                if selector.match_rule::<R>() {
-                    let domains = R::METADATA.domains;
+                if selector.match_rule_name(group_name, metadata.name) {
+                    let domains = metadata.domains;
                     self.requires_project_scan |= domains.contains(&RuleDomain::Project);
                     self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
             }
-        } else if !self.skip.iter().any(|s| s.match_rule::<R>())
+        } else if !self
+            .skip
+            .iter()
+            .any(|s| s.match_rule_name(group_name, metadata.name))
             && self.enabled_rules.contains(&filter)
         {
-            let domains = R::METADATA.domains;
+            let domains = metadata.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
             self.requires_types |= domains.contains(&RuleDomain::Types);
         }
@@ -957,6 +983,17 @@ impl RegistryVisitor<HtmlLanguage> for ProjectScanComputer<'_> {
             + 'static,
     {
         self.check_rule::<R, HtmlLanguage>();
+    }
+}
+
+#[cfg(feature = "lang_md")]
+impl RegistryVisitor<MarkdownLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, MarkdownLanguage>();
     }
 }
 #[cfg(test)]

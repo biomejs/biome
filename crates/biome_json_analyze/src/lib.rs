@@ -5,23 +5,24 @@ mod lint;
 
 mod registry;
 mod services;
+mod suppression;
 mod suppression_action;
 pub mod utils;
 
 pub use crate::registry::visit_registry;
 use crate::services::config_source::ConfigSource;
+pub use crate::suppression::JsonSuppression;
 use crate::suppression_action::JsonSuppressionAction;
 pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, BatchPluginVisitor,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
+    RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::{JsonLanguage, TextRange};
+use biome_json_syntax::JsonLanguage;
 use biome_languages::JsonFileSource;
 use biome_project_layout::ProjectLayout;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -90,31 +91,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -128,7 +104,7 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        Box::new(JsonSuppression),
         Box::new(JsonSuppressionAction),
         &mut emit_signal,
     );

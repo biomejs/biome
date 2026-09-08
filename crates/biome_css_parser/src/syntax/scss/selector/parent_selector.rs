@@ -1,11 +1,13 @@
 use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
+use crate::syntax::scss::identifiers::{
+    is_at_identifier_number_part, is_nth_at_identifier_number_part, parse_identifier_number_part,
+};
 use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{parse_selector_identifier_fragment, selector_lex_context};
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_DIMENSION_VALUE, CSS_NUMBER, CSS_NUMBER_LITERAL, SCSS_PARENT_SELECTOR,
-    SCSS_PARENT_SELECTOR_SUFFIX, SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN,
+    SCSS_PARENT_SELECTOR, SCSS_PARENT_SELECTOR_SUFFIX, SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN,
     SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -110,8 +112,9 @@ fn parse_scss_parent_selector_suffix_part(p: &mut CssParser) -> ParsedSyntax {
         parse_scss_selector_interpolation(p)
     } else if is_at_scss_parent_selector_suffix_hyphen(p) {
         parse_scss_parent_selector_suffix_hyphen(p)
-    } else if is_at_scss_parent_selector_suffix_number(p) {
-        parse_scss_parent_selector_suffix_number(p)
+    } else if is_at_identifier_number_part(p) {
+        let context = selector_lex_context(p);
+        parse_identifier_number_part(p, context)
     } else {
         parse_selector_identifier_fragment(p)
     }
@@ -149,8 +152,7 @@ fn is_nth_at_scss_parent_selector_suffix_part(p: &mut CssParser, n: usize) -> bo
 fn is_nth_at_scss_parent_selector_suffix_value(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_identifier(p, n)
         || is_nth_at_scss_interpolation(p, n)
-        || p.nth_at(n, CSS_DIMENSION_VALUE)
-        || p.nth_at(n, CSS_NUMBER_LITERAL)
+        || is_nth_at_identifier_number_part(p, n)
 }
 
 /// Returns whether the current token is a raw hyphen in a parent-selector
@@ -185,31 +187,4 @@ fn parse_scss_parent_selector_suffix_hyphen(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
     p.bump_with_context(T![-], context);
     Present(m.complete(p, SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN))
-}
-
-/// Parses a numeric parent-selector suffix part.
-///
-/// Example:
-/// ```scss
-/// .button {
-///   &-100\.200 {}
-/// }
-/// ```
-#[inline]
-fn parse_scss_parent_selector_suffix_number(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_parent_selector_suffix_number(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    let context = selector_lex_context(p);
-    // `&-100\.200`: `-100` can lex as a dimension head, but the suffix
-    // owns it as a number and leaves `\.200` as the next suffix part.
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, context);
-    Present(m.complete(p, CSS_NUMBER))
-}
-
-#[inline]
-fn is_at_scss_parent_selector_suffix_number(p: &mut CssParser) -> bool {
-    p.at(CSS_DIMENSION_VALUE) || p.at(CSS_NUMBER_LITERAL)
 }

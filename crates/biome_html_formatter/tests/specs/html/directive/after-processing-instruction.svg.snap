@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: directive/after-processing-instruction.svg
+---
+
+# Input
+
+```svg
+<?xml version="1.0"?><!DOCTYPE    svg   PUBLIC   "a"   "b"><svg></svg>
+
+```
+
+
+# Formatted
+
+```svg
+<?xml version="1.0" ?>
+<!DOCTYPE svg PUBLIC "a" "b">
+<svg></svg>
+
+```

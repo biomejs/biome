@@ -38,7 +38,6 @@ export function DiagnosticsView({
 					<text fg="#00FFFF">Biome:</text>
 					{biomeDiagnostics.map((d, index) => (
 						<text
-							// biome-ignore lint/suspicious/noArrayIndexKey: auto-suppressed
 							key={index}
 							fg={d.severity === "error" ? "#FF0000" : "#FF6600"}
 						>

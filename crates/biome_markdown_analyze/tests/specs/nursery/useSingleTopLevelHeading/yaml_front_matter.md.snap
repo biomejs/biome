@@ -1,0 +1,17 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: yaml_front_matter.md
+---
+# Input
+```md
+---
+title: Front matter title
+---
+
+<!-- should not generate diagnostics -->
+
+# One
+
+# Two
+
+```

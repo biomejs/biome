@@ -48,16 +48,18 @@ VueBogusDirectiveArgument = SyntaxElement*
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
 	frontmatter: AnyAstroFrontmatterElement?
+	processing_instruction: HtmlProcessingInstruction?
 	directive: HtmlDirective?
 	html: HtmlElementList
 	eof: 'EOF'
 
-// <!DOCTYPE html>
-// ^^^^^^^^^^^^^^^
+// <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN">
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 HtmlDirective =
 	'<'
 	'!'
 	doctype: 'doctype'
+	name: 'html_literal'?
 	html: 'html'?
 	quirk: 'html_literal'?
 	public_id: 'html_string_literal'?
@@ -73,6 +75,7 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
+	| AstroFragment
 	| AnyHtmlContent
 	| HtmlCdataSection
 	| HtmlProcessingInstruction
@@ -99,9 +102,10 @@ HtmlDoubleTextExpression =
 
 // {expression}
 // ^^^^^^^^^^^^
+// The expression is absent in Astro, where `{}` renders nothing
 HtmlSingleTextExpression =
 	'{'
-	expression: HtmlTextExpression
+	expression: HtmlTextExpression?
 	'}'
 
 HtmlTextExpression = 'html_literal'
@@ -119,6 +123,21 @@ HtmlElement =
 	opening_element: HtmlOpeningElement
 	children: HtmlElementList
 	closing_element: HtmlClosingElement
+
+// <>a</>, Astro's fragment shorthand
+AstroFragment =
+	opening_fragment: AstroOpeningFragment
+	children: HtmlElementList
+	closing_fragment: AstroClosingFragment
+
+AstroOpeningFragment =
+	'<'
+	'>'
+
+AstroClosingFragment =
+	'<'
+	'/'
+	'>'
 
 
 // <a href="">

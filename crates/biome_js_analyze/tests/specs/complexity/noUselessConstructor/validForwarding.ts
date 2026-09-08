@@ -1,0 +1,73 @@
+/* should not generate diagnostics */
+import { ImportedBase } from "external";
+
+interface A { x: number }
+interface B { y: string }
+
+class Base {
+    constructor(public value: A | B) {}
+}
+
+class Narrowed extends Base {
+    constructor(value: A) {
+        super(value);
+    }
+}
+
+class SameSignature extends Base {
+    constructor(value: A | B) {
+        super(value);
+    }
+}
+
+class Unannotated extends Base {
+    constructor(value) {
+        super(value);
+    }
+}
+
+class OptionalBase {
+    constructor(public value?: A | B) {}
+}
+
+class Optional extends OptionalBase {
+    constructor(value?: A) {
+        super(value);
+    }
+}
+
+class RestBase {
+    constructor(...values: (A | B)[]) {
+        console.log(values);
+    }
+}
+
+class Rest extends RestBase {
+    constructor(...values: A[]) {
+        super(...values);
+    }
+}
+
+class Imported extends ImportedBase {
+    constructor(value: A) {
+        super(value);
+    }
+}
+
+class Unresolved extends UnknownBase {
+    constructor(foo: number) {
+        super(foo);
+    }
+}
+
+class ProtectedBase {
+    protected constructor(value: A) {
+        console.log(value);
+    }
+}
+
+class Public extends ProtectedBase {
+    constructor(value: A) {
+        super(value);
+    }
+}

@@ -25,7 +25,11 @@ info: component-frameworks/svelte-component-casing.svelte
 # Formatted
 
 ```svelte
-<script lang="ts"></script>
+<script lang="ts">
+import Button from "./Button.svelte";
+import TextInput from "./TextInput.svelte";
+import Select from "./Select.svelte";
+</script>
 
 <Button label="test button" />
 <TextInput placeholder="enter text" />

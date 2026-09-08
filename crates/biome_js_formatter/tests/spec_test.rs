@@ -1,7 +1,8 @@
 use biome_configuration::Configuration;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_languages::{
-    DocumentFileSource, JsFileSource, javascript::LanguageVariant, javascript::ModuleKind,
+    DocumentFileSource, JsFileSource, javascript::JsEmbeddingKind, javascript::LanguageVariant,
+    javascript::ModuleKind,
 };
 use camino::Utf8Path;
 
@@ -12,8 +13,16 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
         return;
     };
 
-    let mut source_type: JsFileSource = test_file.input_file().as_path().try_into().unwrap();
-    if file_type != "module" {
+    let mut source_type: JsFileSource = if file_type == "astro_expr" {
+        // Fixture text is the brace-less body of an Astro `{...}` expression.
+        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        })
+    } else {
+        test_file.input_file().as_path().try_into().unwrap()
+    };
+    if file_type == "script" {
         source_type = source_type.with_module_kind(ModuleKind::Script);
     }
     if !source_type.is_typescript() {

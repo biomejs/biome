@@ -33,6 +33,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@33..36 "---" [] [],
     },
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -157,7 +158,8 @@ HtmlRoot {
       0: HTML_LITERAL@3..33 "const hello = \"hello world\";\n" [Newline("\n")] []
     2: FENCE@33..36 "---" [] []
   2: (empty)
-  3: HTML_ELEMENT_LIST@36..140
+  3: (empty)
+  4: HTML_ELEMENT_LIST@36..140
     0: HTML_ELEMENT@36..140
       0: HTML_OPENING_ELEMENT@36..43
         0: L_ANGLE@36..38 "<" [Newline("\n")] []
@@ -232,6 +234,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@135..139
           0: HTML_KW@135..139 "html" [] []
         3: R_ANGLE@139..140 ">" [] []
-  4: EOF@140..141 "" [Newline("\n")] []
+  5: EOF@140..141 "" [Newline("\n")] []
 
 ```

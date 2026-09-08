@@ -10,7 +10,7 @@ expression: invalid.vue
 <div someAttr="x"></div>
 <div SomeAttr="x"></div>
 <div SOME_ATTR="x"></div>
-<div some_attr="x"></div>
+<Panel pt:header:dataTestId="testId" />
 
 <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
 <div v-bind:fooBar="true"></div>
@@ -60,7 +60,7 @@ invalid.vue:5:6 lint/style/useVueHyphenatedAttributes  FIXABLE  ━━━━━�
   > 5 │ <div SomeAttr="x"></div>
       │      ^^^^^^^^^^^^
     6 │ <div SOME_ATTR="x"></div>
-    7 │ <div some_attr="x"></div>
+    7 │ <Panel pt:header:dataTestId="testId" />
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
   
@@ -71,7 +71,7 @@ invalid.vue:5:6 lint/style/useVueHyphenatedAttributes  FIXABLE  ━━━━━�
      5    │ - <div·SomeAttr="x"></div>
         5 │ + <div·some-attr="x"></div>
      6  6 │   <div SOME_ATTR="x"></div>
-     7  7 │   <div some_attr="x"></div>
+     7  7 │   <Panel pt:header:dataTestId="testId" />
   
 
 ```
@@ -85,7 +85,7 @@ invalid.vue:6:6 lint/style/useVueHyphenatedAttributes  FIXABLE  ━━━━━�
     5 │ <div SomeAttr="x"></div>
   > 6 │ <div SOME_ATTR="x"></div>
       │      ^^^^^^^^^^^^^
-    7 │ <div some_attr="x"></div>
+    7 │ <Panel pt:header:dataTestId="testId" />
     8 │ 
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
@@ -96,34 +96,25 @@ invalid.vue:6:6 lint/style/useVueHyphenatedAttributes  FIXABLE  ━━━━━�
      5  5 │   <div SomeAttr="x"></div>
      6    │ - <div·SOME_ATTR="x"></div>
         6 │ + <div·some-attr="x"></div>
-     7  7 │   <div some_attr="x"></div>
+     7  7 │   <Panel pt:header:dataTestId="testId" />
      8  8 │   
   
 
 ```
 
 ```
-invalid.vue:7:6 lint/style/useVueHyphenatedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:8 lint/style/useVueHyphenatedAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Attribute some_attr should be hyphenated (kebab-case).
+  i Attribute pt:header:dataTestId should be hyphenated (kebab-case).
   
     5 │ <div SomeAttr="x"></div>
     6 │ <div SOME_ATTR="x"></div>
-  > 7 │ <div some_attr="x"></div>
-      │      ^^^^^^^^^^^^^
+  > 7 │ <Panel pt:header:dataTestId="testId" />
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
   
   i The Vue style guide recommends using hyphenated attribute (and prop) names in templates to keep them consistent.
-  
-  i Unsafe fix: Rename the attribute to some-attr.
-  
-     5  5 │   <div SomeAttr="x"></div>
-     6  6 │   <div SOME_ATTR="x"></div>
-     7    │ - <div·some_attr="x"></div>
-        7 │ + <div·some-attr="x"></div>
-     8  8 │   
-     9  9 │   <!-- Vue v-bind: long-form and shorthand with non-hyphenated names -->
   
 
 ```

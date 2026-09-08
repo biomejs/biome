@@ -1,0 +1,33 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: paragraph.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+Some text
+
+# Top-level heading
+
+```
+
+# Diagnostics
+```
+paragraph.md:2:1 lint/nursery/useTopLevelHeading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing top-level heading.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ Some text
+      │ ^^^^^^^^^
+  > 3 │ 
+      │ 
+    4 │ # Top-level heading
+    5 │ 
+  
+  i The document should start with a top-level heading (h1) so readers and tools can identify its title. Add a # Heading (or a level-1 setext heading) at the start of the document.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

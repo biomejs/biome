@@ -20,6 +20,7 @@ fn main() -> io::Result<()> {
     watch_group("lint", "nursery")?;
     watch_group("lint", "style")?;
     watch_group("lint", "suspicious")?;
+    watch_group("syntax", "correctness")?;
     Ok(())
 }
 #[doc = r" Watch a specific group directory and touch its group file when changes occur"]

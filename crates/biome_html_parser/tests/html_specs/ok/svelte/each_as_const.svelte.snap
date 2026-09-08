@@ -35,6 +35,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteEachBlock {
@@ -349,7 +350,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..311
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..311
     0: SVELTE_EACH_BLOCK@0..59
       0: SVELTE_EACH_OPENING_BLOCK@0..35
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -564,6 +566,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@303..306 "{/" [Newline("\n")] []
         1: EACH_KW@306..310 "each" [] []
         2: R_CURLY@310..311 "}" [] []
-  4: EOF@311..312 "" [Newline("\n")] []
+  5: EOF@311..312 "" [Newline("\n")] []
 
 ```

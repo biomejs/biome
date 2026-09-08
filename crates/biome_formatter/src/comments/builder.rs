@@ -62,6 +62,10 @@ where
         CommentsMap<SyntaxElementKey, SourceComment<Style::Language>>,
         FxHashSet<SyntaxElementKey>,
     ) {
+        if !root.has_comments_descendants() && !root.has_skipped_descendants() {
+            return self.builder.finish();
+        }
+
         // A root with a parent means that only a part of a document is
         // formatted (range and on-type formatting). Full documents always
         // start at a parentless root and take none of the subtree paths
@@ -778,8 +782,8 @@ mod tests {
     };
     use biome_rowan::syntax::SyntaxElementKey;
     use biome_rowan::{
-        AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments,
-        TextRange, chain_trivia_pieces,
+        AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt, SyntaxToken,
+        SyntaxTriviaPieceComments, TextRange, TriviaPiece, TriviaPieceKind, chain_trivia_pieces,
     };
     use std::cell::RefCell;
 
@@ -1235,6 +1239,29 @@ b;"#;
 
         assert_eq!(decorated.len(), 1);
         assert!(comments.leading(&root.key()).is_empty());
+    }
+
+    #[test]
+    fn skipped_trivia_without_comments_is_collected() {
+        let root = JsSyntaxNode::new_detached(
+            JsSyntaxKind::JS_MODULE,
+            [Some(
+                SyntaxToken::new_detached(
+                    JsSyntaxKind::IDENT,
+                    "?value",
+                    [TriviaPiece::new(TriviaPieceKind::Skipped, 1)],
+                    [],
+                )
+                .into(),
+            )],
+        );
+        let token = root.first_token().unwrap();
+        let style = TestCommentStyle::default();
+        let builder = CommentsBuilderVisitor::new(&style, None);
+
+        let (_, skipped) = builder.visit(&root);
+
+        assert!(skipped.contains(&token.key()));
     }
 
     fn extract_comments_from_node(

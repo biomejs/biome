@@ -9,6 +9,17 @@ use biome_unicode_table::is_js_ident;
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 
+/// Returns `literal` without its matching quote delimiters, or unchanged when it
+/// does not start and end with the same quote. An Astro `JSX_STRING_LITERAL` may
+/// be unquoted, so the quotes may be absent.
+fn strip_quotes(literal: &str) -> &str {
+    let mut characters = literal.chars();
+    match (characters.next(), characters.next_back()) {
+        (Some('"'), Some('"')) | (Some('\''), Some('\'')) => &literal[1..literal.len() - 1],
+        _ => literal,
+    }
+}
+
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum StringLiteralParentKind {
     /// Variant to track tokens that are inside an expression
@@ -147,22 +158,7 @@ impl FormatLiteralStringToken<'_> {
         let chosen_quote_byte = chosen_quote.as_byte();
         let alternate_quote_byte = alternate_quote.as_byte();
 
-        debug_assert!(
-            literal
-                .bytes()
-                .next()
-                .is_some_and(|c| c == chosen_quote_byte || c == alternate_quote_byte),
-            "string must start with a quote"
-        );
-        debug_assert!(
-            literal
-                .bytes()
-                .last()
-                .is_some_and(|c| c == chosen_quote_byte || c == alternate_quote_byte),
-            "string must end with a quote"
-        );
-
-        let quoteless = &literal[1..literal.len() - 1];
+        let quoteless = strip_quotes(literal);
         let (chosen_quote_count, alternate_quote_count) = quoteless.bytes().fold(
             (0u32, 0u32),
             |(chosen_quote_count, alternate_quote_count), current_character| {
@@ -237,6 +233,10 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 
     fn normalise_text(&mut self, file_source: SourceFileKind) -> Cow<'token, str> {
+        if self.is_unquotable_jsx_string() {
+            return Cow::Borrowed(self.get_token().text_trimmed());
+        }
+
         let str_info = self
             .token
             .compute_string_information(self.chosen_quote_style);
@@ -349,8 +349,18 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     /// Returns the string without its quotes.
     fn raw_content(&self) -> &'token str {
-        let content = self.get_token().text_trimmed();
-        &content[1..content.len() - 1]
+        strip_quotes(self.get_token().text_trimmed())
+    }
+
+    /// Returns whether the token is a `JSX_STRING_LITERAL` whose content contains
+    /// both quote kinds. JSX has no escapes, so neither quote kind can delimit
+    /// such a value.
+    fn is_unquotable_jsx_string(&self) -> bool {
+        if self.get_token().kind() != JSX_STRING_LITERAL {
+            return false;
+        }
+        let content = self.raw_content();
+        content.contains('"') && content.contains('\'')
     }
 
     fn swap_quotes(

@@ -56,20 +56,13 @@ file.html:1:18 parse ━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-file.html:2:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.html:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × This syntax is not supported in CSS.
   
     1 │ <script>function () { return "ipsum" }</script>
   > 2 │ <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
-      │                         ^
-    3 │ 
-  
-  i Expected a compound selector here.
-  
-    1 │ <script>function () { return "ipsum" }</script>
-  > 2 │ <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
-      │                         ^
+      │        ^^^^^^^^^^^^^^^^
     3 │ 
   
 

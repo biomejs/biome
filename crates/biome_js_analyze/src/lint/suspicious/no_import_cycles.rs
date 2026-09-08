@@ -4,12 +4,15 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_fs::is_node_modules_path;
 use biome_js_syntax::AnyJsImportLike;
-use biome_module_graph::{JsImportPath, JsImportPhase, JsModuleInfo};
+use biome_module_graph::{
+    JsImportPath, JsImportPhase, JsModuleInfo, ModuleGraphGeneration, js_module_sccs,
+};
 use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -171,10 +174,11 @@ impl Rule for NoImportCycles {
         let JsImportPath {
             resolved_path,
             phase,
+            ..
         } = module_info.get_import_path_by_js_node(node)?;
 
         let options = ctx.options();
-        if options.ignore_types() && *phase == JsImportPhase::Type {
+        if options.ignore_types() && node.is_static_import() && *phase == JsImportPhase::Type {
             return None;
         }
 
@@ -182,6 +186,12 @@ impl Rule for NoImportCycles {
 
         // Don't check for cycles through node_modules imports.
         if is_node_modules_path(resolved_path_path) {
+            return None;
+        }
+
+        let db = ctx.db();
+        let sccs = js_module_sccs(db, ModuleGraphGeneration::get(db));
+        if !sccs.contains_cycle_between(ctx.file_path(), resolved_path_path) {
             return None;
         }
 
@@ -252,9 +262,10 @@ fn find_cycle(
         for JsImportPath {
             resolved_path,
             phase,
+            kind,
         } in module_info.all_import_paths()
         {
-            if options.ignore_types() && phase == JsImportPhase::Type {
+            if options.ignore_types() && !kind.is_dynamic() && phase == JsImportPhase::Type {
                 continue;
             }
 
@@ -305,9 +316,4 @@ fn find_cycle(
     }
 
     None
-}
-
-/// Returns `true` if the given path is inside a `node_modules` directory.
-fn is_node_modules_path(path: &Utf8Path) -> bool {
-    path.components().any(|c| c.as_str() == "node_modules")
 }

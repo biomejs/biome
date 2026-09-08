@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/scripts-styles-text-handling.svelte
+---
+
+# Input
+
+```svelte
+<script> </script>
+
+<!-- above module script -->
+<script module></script>
+
+hello
+
+<style>
+
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,10 @@
++<script> </script>
++
+ <!-- above module script -->
+ <script module></script>
+-
+-<script>
+-</script>
+ 
+ hello
+ 
+ <style>
++
+ </style>
+```
+
+# Output
+
+```svelte
+<script> </script>
+
+<!-- above module script -->
+<script module></script>
+
+hello
+
+<style>
+
+</style>
+```

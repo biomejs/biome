@@ -1,3 +1,5 @@
+#[cfg(feature = "module_graph")]
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 #[cfg(feature = "module_graph")]
@@ -16,8 +18,6 @@ use biome_module_graph::{
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, AstSeparatedList, TextSize, TokenAtOffset, TokenText};
-#[cfg(feature = "module_graph")]
-use biome_workspace_db::WorkspaceDb;
 #[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 use std::ops::Add;
@@ -219,10 +219,7 @@ fn resolve_import_definition(
     let module_info = module_db.module_info_for_path(current_path)?;
     match module_info {
         ModuleInfoKind::Js(module_info) => {
-            let import_path = module_info
-                .static_import_paths
-                .get(specifier)
-                .or(module_info.dynamic_import_paths.get(specifier))?;
+            let import_path = module_info.import_paths.get(specifier)?;
 
             let target_path = import_path.resolved_path.as_path()?;
 
@@ -258,10 +255,7 @@ fn resolve_import_definition(
         }
         ModuleInfoKind::Css(_) => {}
         ModuleInfoKind::Html(module_info) => {
-            let resolved_path = module_info
-                .static_import_paths
-                .get(specifier)
-                .or(module_info.dynamic_import_paths.get(specifier))?;
+            let resolved_path = module_info.import_paths.get(specifier)?;
 
             let target_path = resolved_path.as_path()?;
 

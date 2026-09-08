@@ -22,6 +22,7 @@ impl AnyCssImportUrl {
                         .map(|token| token.token_text_trimmed()),
                     AnyCssUrlValue::ScssExpression(_) => None,
                     AnyCssUrlValue::ScssInterpolatedString(_) => None,
+                    AnyCssUrlValue::ScssInterpolatedUrlValue(_) => None,
                 })
             }
             Self::ScssInterpolatedString(_) => None,

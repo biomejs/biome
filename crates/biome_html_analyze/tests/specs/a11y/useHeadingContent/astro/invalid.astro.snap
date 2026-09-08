@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 120
 expression: invalid.astro
 ---
 # Input
@@ -13,6 +12,8 @@ expression: invalid.astro
 <h1 aria-hidden="true">invisible content</h1>
 <h1><span aria-hidden="true">hidden</span></h1>
 <h3></h3>
+<h1 />
+<h2 class:list={classes} />
 
 ```
 
@@ -78,7 +79,7 @@ invalid.astro:7:1 lint/a11y/useHeadingContent ━━━━━━━━━━━�
   > 7 │ <h1><span aria-hidden="true">hidden</span></h1>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <h3></h3>
-    9 │ 
+    9 │ <h1 />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -90,11 +91,45 @@ invalid.astro:8:1 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading elements.
   
-    6 │ <h1 aria-hidden="true">invisible content</h1>
-    7 │ <h1><span aria-hidden="true">hidden</span></h1>
-  > 8 │ <h3></h3>
-      │ ^^^^^^^^^
-    9 │ 
+     6 │ <h1 aria-hidden="true">invisible content</h1>
+     7 │ <h1><span aria-hidden="true">hidden</span></h1>
+   > 8 │ <h3></h3>
+       │ ^^^^^^^^^
+     9 │ <h1 />
+    10 │ <h2 class:list={classes} />
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:9:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+     7 │ <h1><span aria-hidden="true">hidden</span></h1>
+     8 │ <h3></h3>
+   > 9 │ <h1 />
+       │ ^^^^^^
+    10 │ <h2 class:list={classes} />
+    11 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:10:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+     8 │ <h3></h3>
+     9 │ <h1 />
+  > 10 │ <h2 class:list={classes} />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
   
   i All headings on a page should have content that is accessible to screen readers.
   

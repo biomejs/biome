@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTailwindArbitraryValue {
-        version: "next",
+        version: "2.5.7",
         name: "noTailwindArbitraryValue",
         language: "jsx",
         sources: &[RuleSource::EslintTailwindcss("no-arbitrary-value").same()],

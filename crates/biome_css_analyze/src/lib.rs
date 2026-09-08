@@ -3,27 +3,28 @@
 mod assist;
 mod baseline_data;
 mod fonts;
-mod keywords;
 mod lint;
 mod order;
 mod registry;
 mod services;
+mod suppression;
 mod suppression_action;
+mod syntax;
 mod utils;
 
 pub use crate::registry::visit_registry;
+pub use crate::suppression::CssSuppression;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, BatchPluginVisitor,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
+    RuleAction, RuleRegistry,
 };
-use biome_css_syntax::{CssLanguage, TextRange};
+use biome_css_syntax::CssLanguage;
 use biome_diagnostics::Error;
 use biome_languages::CssFileSource;
 use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -129,32 +130,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -168,17 +143,14 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        Box::new(CssSuppression),
         Box::new(CssSuppressionAction),
         &mut emit_signal,
     );
 
     services.insert_service(css_services.file_source);
     if let Some(semantic_model) = css_services.semantic_model {
-        services.insert_service(Arc::new(semantic_model.clone()));
-    } else {
-        let semantic_model = biome_css_semantic::semantic_model(root);
-        services.insert_service(Arc::new(semantic_model));
+        services.insert_service(semantic_model.clone());
     }
     if let Some(module_db) = css_services.module_db {
         services.insert_service(module_db);
@@ -314,7 +286,7 @@ mod tests {
     fn top_level_suppression_simple() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/suspicious/noEmptyBlock: reason
+ * biome-ignore-all lint/suspicious/noEmptyBlock: reason
 */
 
 #foo {}
@@ -324,7 +296,8 @@ mod tests {
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noEmptyBlock")]),
             ..AnalysisFilter::default()
         };
 
@@ -359,11 +332,11 @@ mod tests {
     fn top_level_suppression_multiple() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/suspicious/noEmptyBlock: reason
+ * biome-ignore-all lint/suspicious/noEmptyBlock: reason
 */
 
 /**
-* biome-ignore lint/correctness/noUnknownProperty: reason2
+ * biome-ignore-all lint/correctness/noUnknownProperty: reason2
 */
 
 
@@ -376,7 +349,11 @@ a {
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noEmptyBlock"),
+                RuleFilter::Rule("correctness", "noUnknownProperty"),
+            ]),
             ..AnalysisFilter::default()
         };
 
@@ -411,8 +388,8 @@ a {
     fn top_level_suppression_multiple2() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/suspicious/noEmptyBlock: reason
-* biome-ignore lint/correctness/noUnknownProperty: reason2
+ * biome-ignore-all lint/suspicious/noEmptyBlock: reason
+ * biome-ignore-all lint/correctness/noUnknownProperty: reason2
 */
 
 #foo {}
@@ -424,7 +401,11 @@ a {
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noEmptyBlock"),
+                RuleFilter::Rule("correctness", "noUnknownProperty"),
+            ]),
             ..AnalysisFilter::default()
         };
 
@@ -458,18 +439,16 @@ a {
     #[test]
     fn top_level_suppression_with_unused() {
         const SOURCE: &str = "
-/**
-*/
-
-#foo {}
+#foo { color: red; }
 // biome-ignore lint/suspicious/noEmptyBlock: reason
-#bar {}
+#bar { color: blue; }
         ";
 
         let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noEmptyBlock")]),
             ..AnalysisFilter::default()
         };
 

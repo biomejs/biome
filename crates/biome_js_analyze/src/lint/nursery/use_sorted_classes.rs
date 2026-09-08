@@ -4,6 +4,7 @@ mod presets;
 mod sort;
 mod sort_config;
 pub mod sort_v4;
+mod sort_v4_variants;
 mod tailwind_preset;
 mod tailwind_preset_v4;
 mod tailwind_preset_v4_types;
