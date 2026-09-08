@@ -31,6 +31,7 @@ pub trait SuppressionAction {
                 apply_suppression,
                 suppression_text,
                 suppression_reason,
+                diagnostic_text_range,
             );
         }
     }
@@ -82,6 +83,7 @@ pub trait SuppressionAction {
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
         suppression_reason: &str,
+        diagnostic_text_range: &TextRange,
     );
 
     fn apply_top_level_suppression(
