@@ -11,6 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
 use biome_rule_options::use_better_dom_traversing::UseBetterDomTraversingOptions;
+use smallvec::SmallVec;
 
 /// `Number.MAX_SAFE_INTEGER` (`2^53 - 1`). Index literals above this are not safe integers.
 const JS_MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
@@ -229,6 +230,11 @@ impl Rule for UseBetterDomTraversing {
                     return None;
                 }
                 let (root, selectors) = query_selector_chain(node)?;
+                // `element.querySelector("a b")` can match a `b` whose `a`
+                // ancestor is `element` itself. Chained calls never do that.
+                // Prefixing with `:scope` keeps the combined selector
+                // descendant-relative. `document.querySelector` already starts
+                // at the document, so it does not need `:scope`.
                 let merged_selector = if is_document_object(&root) {
                     selectors.join(" ")
                 } else {
@@ -452,7 +458,6 @@ fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
     }
 }
 
-
 fn is_props_children(collection: &JsStaticMemberExpression) -> bool {
     let Ok(object) = collection.object() else {
         return false;
@@ -519,10 +524,12 @@ fn is_followed_by_static_query_selector(call: &JsCallExpression) -> bool {
         .is_some()
 }
 
-fn query_selector_chain(call: &JsCallExpression) -> Option<(AnyJsExpression, Vec<String>)> {
+fn query_selector_chain(
+    call: &JsCallExpression,
+) -> Option<(AnyJsExpression, SmallVec<[String; 4]>)> {
     let mut current_expr = AnyJsExpression::JsCallExpression(call.clone());
     let mut raw_root = current_expr.clone();
-    let mut selectors = Vec::new();
+    let mut selectors = SmallVec::<[String; 4]>::new();
 
     loop {
         let AnyJsExpression::JsCallExpression(current) = current_expr.clone() else {
@@ -544,7 +551,7 @@ fn query_selector_chain(call: &JsCallExpression) -> Option<(AnyJsExpression, Vec
 
     if selectors.len() < 2
         || is_definitely_not_dom_node(&current_expr)
-        || expression_is_optional_chain(&current_expr)
+        || current_expr.is_optional_chain()
     {
         return None;
     }
@@ -647,15 +654,6 @@ fn is_document_object(expr: &AnyJsExpression) -> bool {
         })
         .and_then(|id| id.name().ok())
         .is_some_and(|name| name.has_name("window") || name.has_name("globalThis"))
-}
-
-fn expression_is_optional_chain(expr: &AnyJsExpression) -> bool {
-    match expr {
-        AnyJsExpression::JsCallExpression(call) => call.is_optional_chain(),
-        AnyJsExpression::JsStaticMemberExpression(member) => member.is_optional_chain(),
-        AnyJsExpression::JsComputedMemberExpression(member) => member.is_optional_chain(),
-        _ => false,
-    }
 }
 
 /// Comments on the first token's leading trivia (file-level comments) are ignored.

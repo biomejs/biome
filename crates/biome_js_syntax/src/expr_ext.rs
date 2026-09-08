@@ -1419,6 +1419,14 @@ impl AnyJsExpression {
             Self::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(_),)
         )
     }
+
+    /// Returns `true` if this expression is, or sits on, an optional chain (`?.`).
+    ///
+    /// Non-member, non-call expressions return `false`.
+    pub fn is_optional_chain(&self) -> bool {
+        AnyJsOptionalChainExpression::cast_ref(self.syntax())
+            .is_some_and(|expr| expr.is_optional_chain())
+    }
 }
 
 /// Returns `true` if this node is a transparent wrapper expression.
