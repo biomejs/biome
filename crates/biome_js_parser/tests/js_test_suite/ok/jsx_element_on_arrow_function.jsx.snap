@@ -53,7 +53,7 @@ JsModule {
                                             attributes: JsxAttributeList [],
                                             r_angle_token: R_ANGLE@20..21 ">" [] [],
                                         },
-                                        children: JsxChildList [],
+                                        elements: JsxChildList [],
                                         closing_element: JsxClosingElement {
                                             l_angle_token: L_ANGLE@21..22 "<" [] [],
                                             slash_token: SLASH@22..23 "/" [] [],
@@ -106,7 +106,7 @@ JsModule {
                                                 attributes: JsxAttributeList [],
                                                 r_angle_token: R_ANGLE@50..51 ">" [] [],
                                             },
-                                            children: JsxChildList [],
+                                            elements: JsxChildList [],
                                             closing_element: JsxClosingElement {
                                                 l_angle_token: L_ANGLE@51..52 "<" [] [],
                                                 slash_token: SLASH@52..53 "/" [] [],

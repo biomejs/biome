@@ -36,7 +36,7 @@ JsModule {
                         l_angle_token: L_ANGLE@0..1 "<" [] [],
                         r_angle_token: R_ANGLE@1..2 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_fragment: JsxClosingFragment {
                         l_angle_token: L_ANGLE@2..3 "<" [] [],
                         slash_token: SLASH@3..4 "/" [] [],
@@ -53,7 +53,7 @@ JsModule {
                         l_angle_token: L_ANGLE@6..8 "<" [Newline("\n")] [],
                         r_angle_token: R_ANGLE@8..9 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@9..13 "abcd" [] [],
                         },
@@ -74,7 +74,7 @@ JsModule {
                         l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
                         r_angle_token: R_ANGLE@19..20 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@20..34 "   whitespace\n" [] [],
                         },
@@ -95,7 +95,7 @@ JsModule {
                         l_angle_token: L_ANGLE@38..40 "<" [Newline("\n")] [],
                         r_angle_token: R_ANGLE@40..59 ">" [Newline("\n"), Whitespace("  "), Comments("/*comment */"), Newline("\n"), Whitespace("  ")] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@59..62 "\n  " [] [],
                         },
@@ -116,7 +116,7 @@ JsModule {
                         l_angle_token: L_ANGLE@70..72 "<" [Newline("\n")] [],
                         r_angle_token: R_ANGLE@72..73 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxElement {
                             opening_element: JsxOpeningElement {
                                 l_angle_token: L_ANGLE@73..74 "<" [] [],
@@ -127,7 +127,7 @@ JsModule {
                                 attributes: JsxAttributeList [],
                                 r_angle_token: R_ANGLE@75..76 ">" [] [],
                             },
-                            children: JsxChildList [
+                            elements: JsxChildList [
                                 JsxText {
                                     value_token: JSX_TEXT_LITERAL@76..77 "a" [] [],
                                 },

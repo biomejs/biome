@@ -45,7 +45,7 @@ JsExpressionTemplateRoot {
                     ],
                     r_angle_token: R_ANGLE@14..15 ">" [] [],
                 },
-                children: JsxChildList [],
+                elements: JsxChildList [],
                 closing_element: JsxClosingElement {
                     l_angle_token: L_ANGLE@15..16 "<" [] [],
                     slash_token: SLASH@16..17 "/" [] [],

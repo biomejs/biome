@@ -3,10 +3,23 @@
 export interface JsAstNode {
 	readonly kind: string;
 	readonly text: string;
+	/** The immediate parent node, including list containers. Undefined at the root.
+	 * Repeated access does not guarantee the same JavaScript object identity. */
+	readonly parent: AnyJsAstNode | undefined;
+	/** Returns a fresh array of enclosing nodes, nearest first, excluding this node
+	 * and including list containers and the root. Roots return an empty array.
+	 * Returned nodes do not have stable JavaScript object identity. */
+	ancestors(): readonly AnyJsAstNode[];
+	/** Returns a fresh array of immediate child nodes in source order, including list
+	 * containers and omitting tokens. Call children() on a list node to iterate its elements.
+	 * Nodes without child nodes return an empty array. Named list fields remain arrays.
+	 * Returned nodes do not have stable JavaScript object identity. */
+	children(): readonly AnyJsAstNode[];
 }
+export type AnyJsAstNode = JsNodeByKind[keyof JsNodeByKind];
 export interface AstroImplicitFragment extends JsAstNode {
 	readonly kind: "ASTRO_IMPLICIT_FRAGMENT";
-	readonly children: JsxChildList;
+	readonly elements: JsxChildList;
 }
 export interface JsAccessorModifier extends JsAstNode {
 	readonly kind: "JS_ACCESSOR_MODIFIER";
@@ -1031,7 +1044,7 @@ export interface JsxClosingFragment extends JsAstNode {
 export interface JsxElement extends JsAstNode {
 	readonly kind: "JSX_ELEMENT";
 	readonly openingElement: JsxOpeningElement | undefined;
-	readonly children: JsxChildList;
+	readonly elements: JsxChildList;
 	readonly closingElement: JsxClosingElement | undefined;
 }
 export interface JsxExpressionAttributeValue extends JsAstNode {
@@ -1049,7 +1062,7 @@ export interface JsxExpressionChild extends JsAstNode {
 export interface JsxFragment extends JsAstNode {
 	readonly kind: "JSX_FRAGMENT";
 	readonly openingFragment: JsxOpeningFragment | undefined;
-	readonly children: JsxChildList;
+	readonly elements: JsxChildList;
 	readonly closingFragment: JsxClosingFragment | undefined;
 }
 export interface JsxMemberName extends JsAstNode {
@@ -2598,53 +2611,213 @@ export interface JsNodeByKind {
 	readonly JS_BOGUS_STATEMENT: JsBogusStatement;
 	readonly JS_BOGUS_VARIABLE_DECLARATION: JsBogusVariableDeclaration;
 	readonly TS_BOGUS_TYPE: TsBogusType;
+	readonly JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST: JsArrayAssignmentPatternElementListNode;
+	readonly JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST: JsArrayBindingPatternElementListNode;
+	readonly JS_ARRAY_ELEMENT_LIST: JsArrayElementListNode;
+	readonly JS_CALL_ARGUMENT_LIST: JsCallArgumentListNode;
+	readonly JS_CLASS_MEMBER_LIST: JsClassMemberListNode;
+	readonly JS_CONSTRUCTOR_MODIFIER_LIST: JsConstructorModifierListNode;
+	readonly JS_CONSTRUCTOR_PARAMETER_LIST: JsConstructorParameterListNode;
+	readonly JS_DECORATOR_LIST: JsDecoratorListNode;
+	readonly JS_DIRECTIVE_LIST: JsDirectiveListNode;
+	readonly JS_EXPORT_NAMED_FROM_SPECIFIER_LIST: JsExportNamedFromSpecifierListNode;
+	readonly JS_EXPORT_NAMED_SPECIFIER_LIST: JsExportNamedSpecifierListNode;
+	readonly JS_IMPORT_ASSERTION_ENTRY_LIST: JsImportAssertionEntryListNode;
+	readonly JS_METHOD_MODIFIER_LIST: JsMethodModifierListNode;
+	readonly JS_MODULE_ITEM_LIST: JsModuleItemListNode;
+	readonly JS_NAMED_IMPORT_SPECIFIER_LIST: JsNamedImportSpecifierListNode;
+	readonly JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST: JsObjectAssignmentPatternPropertyListNode;
+	readonly JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST: JsObjectBindingPatternPropertyListNode;
+	readonly JS_OBJECT_MEMBER_LIST: JsObjectMemberListNode;
+	readonly JS_PARAMETER_LIST: JsParameterListNode;
+	readonly JS_PROPERTY_MODIFIER_LIST: JsPropertyModifierListNode;
+	readonly JS_STATEMENT_LIST: JsStatementListNode;
+	readonly JS_SWITCH_CASE_LIST: JsSwitchCaseListNode;
+	readonly JS_TEMPLATE_ELEMENT_LIST: JsTemplateElementListNode;
+	readonly JS_VARIABLE_DECLARATOR_LIST: JsVariableDeclaratorListNode;
+	readonly JSX_ATTRIBUTE_LIST: JsxAttributeListNode;
+	readonly JSX_CHILD_LIST: JsxChildListNode;
+	readonly TS_ENUM_MEMBER_LIST: TsEnumMemberListNode;
+	readonly TS_INDEX_SIGNATURE_MODIFIER_LIST: TsIndexSignatureModifierListNode;
+	readonly TS_INTERSECTION_TYPE_ELEMENT_LIST: TsIntersectionTypeElementListNode;
+	readonly TS_METHOD_SIGNATURE_MODIFIER_LIST: TsMethodSignatureModifierListNode;
+	readonly TS_PROPERTY_PARAMETER_MODIFIER_LIST: TsPropertyParameterModifierListNode;
+	readonly TS_PROPERTY_SIGNATURE_MODIFIER_LIST: TsPropertySignatureModifierListNode;
+	readonly TS_TEMPLATE_ELEMENT_LIST: TsTemplateElementListNode;
+	readonly TS_TUPLE_TYPE_ELEMENT_LIST: TsTupleTypeElementListNode;
+	readonly TS_TYPE_ARGUMENT_LIST: TsTypeArgumentListNode;
+	readonly TS_TYPE_LIST: TsTypeListNode;
+	readonly TS_TYPE_MEMBER_LIST: TsTypeMemberListNode;
+	readonly TS_TYPE_PARAMETER_LIST: TsTypeParameterListNode;
+	readonly TS_TYPE_PARAMETER_MODIFIER_LIST: TsTypeParameterModifierListNode;
+	readonly TS_UNION_TYPE_VARIANT_LIST: TsUnionTypeVariantListNode;
+}
+export interface JsArrayAssignmentPatternElementListNode extends JsAstNode {
+	readonly kind: "JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST";
 }
 export type JsArrayAssignmentPatternElementList =
 	readonly AnyJsArrayAssignmentPatternElement[];
+export interface JsArrayBindingPatternElementListNode extends JsAstNode {
+	readonly kind: "JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST";
+}
 export type JsArrayBindingPatternElementList =
 	readonly AnyJsArrayBindingPatternElement[];
+export interface JsArrayElementListNode extends JsAstNode {
+	readonly kind: "JS_ARRAY_ELEMENT_LIST";
+}
 export type JsArrayElementList = readonly AnyJsArrayElement[];
+export interface JsCallArgumentListNode extends JsAstNode {
+	readonly kind: "JS_CALL_ARGUMENT_LIST";
+}
 export type JsCallArgumentList = readonly AnyJsCallArgument[];
+export interface JsClassMemberListNode extends JsAstNode {
+	readonly kind: "JS_CLASS_MEMBER_LIST";
+}
 export type JsClassMemberList = readonly AnyJsClassMember[];
+export interface JsConstructorModifierListNode extends JsAstNode {
+	readonly kind: "JS_CONSTRUCTOR_MODIFIER_LIST";
+}
 export type JsConstructorModifierList = readonly TsAccessibilityModifier[];
+export interface JsConstructorParameterListNode extends JsAstNode {
+	readonly kind: "JS_CONSTRUCTOR_PARAMETER_LIST";
+}
 export type JsConstructorParameterList = readonly AnyJsConstructorParameter[];
+export interface JsDecoratorListNode extends JsAstNode {
+	readonly kind: "JS_DECORATOR_LIST";
+}
 export type JsDecoratorList = readonly JsDecorator[];
+export interface JsDirectiveListNode extends JsAstNode {
+	readonly kind: "JS_DIRECTIVE_LIST";
+}
 export type JsDirectiveList = readonly JsDirective[];
+export interface JsExportNamedFromSpecifierListNode extends JsAstNode {
+	readonly kind: "JS_EXPORT_NAMED_FROM_SPECIFIER_LIST";
+}
 export type JsExportNamedFromSpecifierList =
 	readonly JsExportNamedFromSpecifier[];
+export interface JsExportNamedSpecifierListNode extends JsAstNode {
+	readonly kind: "JS_EXPORT_NAMED_SPECIFIER_LIST";
+}
 export type JsExportNamedSpecifierList = readonly AnyJsExportNamedSpecifier[];
+export interface JsImportAssertionEntryListNode extends JsAstNode {
+	readonly kind: "JS_IMPORT_ASSERTION_ENTRY_LIST";
+}
 export type JsImportAssertionEntryList = readonly AnyJsImportAssertionEntry[];
+export interface JsMethodModifierListNode extends JsAstNode {
+	readonly kind: "JS_METHOD_MODIFIER_LIST";
+}
 export type JsMethodModifierList = readonly AnyJsMethodModifier[];
+export interface JsModuleItemListNode extends JsAstNode {
+	readonly kind: "JS_MODULE_ITEM_LIST";
+}
 export type JsModuleItemList = readonly AnyJsModuleItem[];
+export interface JsNamedImportSpecifierListNode extends JsAstNode {
+	readonly kind: "JS_NAMED_IMPORT_SPECIFIER_LIST";
+}
 export type JsNamedImportSpecifierList = readonly AnyJsNamedImportSpecifier[];
+export interface JsObjectAssignmentPatternPropertyListNode extends JsAstNode {
+	readonly kind: "JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST";
+}
 export type JsObjectAssignmentPatternPropertyList =
 	readonly AnyJsObjectAssignmentPatternMember[];
+export interface JsObjectBindingPatternPropertyListNode extends JsAstNode {
+	readonly kind: "JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST";
+}
 export type JsObjectBindingPatternPropertyList =
 	readonly AnyJsObjectBindingPatternMember[];
+export interface JsObjectMemberListNode extends JsAstNode {
+	readonly kind: "JS_OBJECT_MEMBER_LIST";
+}
 export type JsObjectMemberList = readonly AnyJsObjectMember[];
+export interface JsParameterListNode extends JsAstNode {
+	readonly kind: "JS_PARAMETER_LIST";
+}
 export type JsParameterList = readonly AnyJsParameter[];
+export interface JsPropertyModifierListNode extends JsAstNode {
+	readonly kind: "JS_PROPERTY_MODIFIER_LIST";
+}
 export type JsPropertyModifierList = readonly AnyJsPropertyModifier[];
+export interface JsStatementListNode extends JsAstNode {
+	readonly kind: "JS_STATEMENT_LIST";
+}
 export type JsStatementList = readonly AnyJsStatement[];
+export interface JsSwitchCaseListNode extends JsAstNode {
+	readonly kind: "JS_SWITCH_CASE_LIST";
+}
 export type JsSwitchCaseList = readonly AnyJsSwitchClause[];
+export interface JsTemplateElementListNode extends JsAstNode {
+	readonly kind: "JS_TEMPLATE_ELEMENT_LIST";
+}
 export type JsTemplateElementList = readonly AnyJsTemplateElement[];
+export interface JsVariableDeclaratorListNode extends JsAstNode {
+	readonly kind: "JS_VARIABLE_DECLARATOR_LIST";
+}
 export type JsVariableDeclaratorList = readonly JsVariableDeclarator[];
+export interface JsxAttributeListNode extends JsAstNode {
+	readonly kind: "JSX_ATTRIBUTE_LIST";
+}
 export type JsxAttributeList = readonly AnyJsxAttribute[];
+export interface JsxChildListNode extends JsAstNode {
+	readonly kind: "JSX_CHILD_LIST";
+}
 export type JsxChildList = readonly AnyJsxChild[];
+export interface TsEnumMemberListNode extends JsAstNode {
+	readonly kind: "TS_ENUM_MEMBER_LIST";
+}
 export type TsEnumMemberList = readonly TsEnumMember[];
+export interface TsIndexSignatureModifierListNode extends JsAstNode {
+	readonly kind: "TS_INDEX_SIGNATURE_MODIFIER_LIST";
+}
 export type TsIndexSignatureModifierList =
 	readonly AnyTsIndexSignatureModifier[];
+export interface TsIntersectionTypeElementListNode extends JsAstNode {
+	readonly kind: "TS_INTERSECTION_TYPE_ELEMENT_LIST";
+}
 export type TsIntersectionTypeElementList = readonly AnyTsType[];
+export interface TsMethodSignatureModifierListNode extends JsAstNode {
+	readonly kind: "TS_METHOD_SIGNATURE_MODIFIER_LIST";
+}
 export type TsMethodSignatureModifierList =
 	readonly AnyTsMethodSignatureModifier[];
+export interface TsPropertyParameterModifierListNode extends JsAstNode {
+	readonly kind: "TS_PROPERTY_PARAMETER_MODIFIER_LIST";
+}
 export type TsPropertyParameterModifierList =
 	readonly AnyTsPropertyParameterModifier[];
+export interface TsPropertySignatureModifierListNode extends JsAstNode {
+	readonly kind: "TS_PROPERTY_SIGNATURE_MODIFIER_LIST";
+}
 export type TsPropertySignatureModifierList =
 	readonly AnyTsPropertySignatureModifier[];
+export interface TsTemplateElementListNode extends JsAstNode {
+	readonly kind: "TS_TEMPLATE_ELEMENT_LIST";
+}
 export type TsTemplateElementList = readonly AnyTsTemplateElement[];
+export interface TsTupleTypeElementListNode extends JsAstNode {
+	readonly kind: "TS_TUPLE_TYPE_ELEMENT_LIST";
+}
 export type TsTupleTypeElementList = readonly AnyTsTupleTypeElement[];
+export interface TsTypeArgumentListNode extends JsAstNode {
+	readonly kind: "TS_TYPE_ARGUMENT_LIST";
+}
 export type TsTypeArgumentList = readonly AnyTsType[];
+export interface TsTypeListNode extends JsAstNode {
+	readonly kind: "TS_TYPE_LIST";
+}
 export type TsTypeList = readonly TsReferenceType[];
+export interface TsTypeMemberListNode extends JsAstNode {
+	readonly kind: "TS_TYPE_MEMBER_LIST";
+}
 export type TsTypeMemberList = readonly AnyTsTypeMember[];
+export interface TsTypeParameterListNode extends JsAstNode {
+	readonly kind: "TS_TYPE_PARAMETER_LIST";
+}
 export type TsTypeParameterList = readonly TsTypeParameter[];
+export interface TsTypeParameterModifierListNode extends JsAstNode {
+	readonly kind: "TS_TYPE_PARAMETER_MODIFIER_LIST";
+}
 export type TsTypeParameterModifierList = readonly AnyTsTypeParameterModifier[];
+export interface TsUnionTypeVariantListNode extends JsAstNode {
+	readonly kind: "TS_UNION_TYPE_VARIANT_LIST";
+}
 export type TsUnionTypeVariantList = readonly AnyTsType[];

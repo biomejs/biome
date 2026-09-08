@@ -3,6 +3,9 @@
   "name": "@biomejs/plugin-api",
   "version": "0.0.0",
   "description": "JavaScript APIs for Biome JS plugins",
+  "scripts": {
+    "test:types": "tsc --project tsconfig.json"
+  },
   "files": [
     "README.md",
     "LICENSE-APACHE",
@@ -28,7 +31,9 @@
   },
   "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
-  "devDependencies": {},
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
   "peerDependencies": {
     "@biomejs/biome": "*"
   },

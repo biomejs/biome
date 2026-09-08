@@ -16,8 +16,8 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
                     AstroImplicitFragment,
-                    ("children", |node, context| Self::wrap_node_list(
-                        node.children(),
+                    ("elements", |node, context| Self::wrap_node_list(
+                        node.elements(),
                         context
                     )),
                 );
@@ -3018,8 +3018,8 @@ impl JsAstNode {
                         node.opening_element().ok(),
                         context
                     )),
-                    ("children", |node, context| Self::wrap_node_list(
-                        node.children(),
+                    ("elements", |node, context| Self::wrap_node_list(
+                        node.elements(),
                         context
                     )),
                     ("closingElement", |node, context| Self::wrap_optional_node(
@@ -3071,8 +3071,8 @@ impl JsAstNode {
                         node.opening_fragment().ok(),
                         context
                     )),
-                    ("children", |node, context| Self::wrap_node_list(
-                        node.children(),
+                    ("elements", |node, context| Self::wrap_node_list(
+                        node.elements(),
                         context
                     )),
                     ("closingFragment", |node, context| Self::wrap_optional_node(
@@ -5715,6 +5715,60 @@ impl JsAstNode {
             "JS_BOGUS_STATEMENT" => JsSyntaxKind::JS_BOGUS_STATEMENT,
             "JS_BOGUS_VARIABLE_DECLARATION" => JsSyntaxKind::JS_BOGUS_VARIABLE_DECLARATION,
             "TS_BOGUS_TYPE" => JsSyntaxKind::TS_BOGUS_TYPE,
+            "JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST" => {
+                JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST
+            }
+            "JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST" => {
+                JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
+            }
+            "JS_ARRAY_ELEMENT_LIST" => JsSyntaxKind::JS_ARRAY_ELEMENT_LIST,
+            "JS_CALL_ARGUMENT_LIST" => JsSyntaxKind::JS_CALL_ARGUMENT_LIST,
+            "JS_CLASS_MEMBER_LIST" => JsSyntaxKind::JS_CLASS_MEMBER_LIST,
+            "JS_CONSTRUCTOR_MODIFIER_LIST" => JsSyntaxKind::JS_CONSTRUCTOR_MODIFIER_LIST,
+            "JS_CONSTRUCTOR_PARAMETER_LIST" => JsSyntaxKind::JS_CONSTRUCTOR_PARAMETER_LIST,
+            "JS_DECORATOR_LIST" => JsSyntaxKind::JS_DECORATOR_LIST,
+            "JS_DIRECTIVE_LIST" => JsSyntaxKind::JS_DIRECTIVE_LIST,
+            "JS_EXPORT_NAMED_FROM_SPECIFIER_LIST" => {
+                JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER_LIST
+            }
+            "JS_EXPORT_NAMED_SPECIFIER_LIST" => JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER_LIST,
+            "JS_IMPORT_ASSERTION_ENTRY_LIST" => JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY_LIST,
+            "JS_METHOD_MODIFIER_LIST" => JsSyntaxKind::JS_METHOD_MODIFIER_LIST,
+            "JS_MODULE_ITEM_LIST" => JsSyntaxKind::JS_MODULE_ITEM_LIST,
+            "JS_NAMED_IMPORT_SPECIFIER_LIST" => JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER_LIST,
+            "JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST" => {
+                JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST
+            }
+            "JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST" => {
+                JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
+            }
+            "JS_OBJECT_MEMBER_LIST" => JsSyntaxKind::JS_OBJECT_MEMBER_LIST,
+            "JS_PARAMETER_LIST" => JsSyntaxKind::JS_PARAMETER_LIST,
+            "JS_PROPERTY_MODIFIER_LIST" => JsSyntaxKind::JS_PROPERTY_MODIFIER_LIST,
+            "JS_STATEMENT_LIST" => JsSyntaxKind::JS_STATEMENT_LIST,
+            "JS_SWITCH_CASE_LIST" => JsSyntaxKind::JS_SWITCH_CASE_LIST,
+            "JS_TEMPLATE_ELEMENT_LIST" => JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST,
+            "JS_VARIABLE_DECLARATOR_LIST" => JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST,
+            "JSX_ATTRIBUTE_LIST" => JsSyntaxKind::JSX_ATTRIBUTE_LIST,
+            "JSX_CHILD_LIST" => JsSyntaxKind::JSX_CHILD_LIST,
+            "TS_ENUM_MEMBER_LIST" => JsSyntaxKind::TS_ENUM_MEMBER_LIST,
+            "TS_INDEX_SIGNATURE_MODIFIER_LIST" => JsSyntaxKind::TS_INDEX_SIGNATURE_MODIFIER_LIST,
+            "TS_INTERSECTION_TYPE_ELEMENT_LIST" => JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST,
+            "TS_METHOD_SIGNATURE_MODIFIER_LIST" => JsSyntaxKind::TS_METHOD_SIGNATURE_MODIFIER_LIST,
+            "TS_PROPERTY_PARAMETER_MODIFIER_LIST" => {
+                JsSyntaxKind::TS_PROPERTY_PARAMETER_MODIFIER_LIST
+            }
+            "TS_PROPERTY_SIGNATURE_MODIFIER_LIST" => {
+                JsSyntaxKind::TS_PROPERTY_SIGNATURE_MODIFIER_LIST
+            }
+            "TS_TEMPLATE_ELEMENT_LIST" => JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST,
+            "TS_TUPLE_TYPE_ELEMENT_LIST" => JsSyntaxKind::TS_TUPLE_TYPE_ELEMENT_LIST,
+            "TS_TYPE_ARGUMENT_LIST" => JsSyntaxKind::TS_TYPE_ARGUMENT_LIST,
+            "TS_TYPE_LIST" => JsSyntaxKind::TS_TYPE_LIST,
+            "TS_TYPE_MEMBER_LIST" => JsSyntaxKind::TS_TYPE_MEMBER_LIST,
+            "TS_TYPE_PARAMETER_LIST" => JsSyntaxKind::TS_TYPE_PARAMETER_LIST,
+            "TS_TYPE_PARAMETER_MODIFIER_LIST" => JsSyntaxKind::TS_TYPE_PARAMETER_MODIFIER_LIST,
+            "TS_UNION_TYPE_VARIANT_LIST" => JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST,
             _ => return None,
         })
     }

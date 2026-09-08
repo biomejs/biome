@@ -2333,7 +2333,7 @@ AnyJsxTag =
 // {cond && <a /> <b />}
 //           ^^^^^^^^^^
 AstroImplicitFragment =
-	children: JsxChildList
+	elements: JsxChildList
 
 // <a />, or <br> in Astro
 // ^^^^^      ^^^^
@@ -2347,7 +2347,7 @@ JsxSelfClosingElement =
 
 JsxElement =
 	opening_element: JsxOpeningElement
-	children: JsxChildList
+	elements: JsxChildList
 	closing_element: JsxClosingElement
 
 JsxOpeningElement =
@@ -2366,7 +2366,7 @@ JsxClosingElement =
 // <>content</>
 JsxFragment =
 	opening_fragment: JsxOpeningFragment
-	children: JsxChildList
+	elements: JsxChildList
 	closing_fragment: JsxClosingFragment
 
 JsxOpeningFragment =

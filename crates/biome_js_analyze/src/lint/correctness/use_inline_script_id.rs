@@ -134,7 +134,7 @@ impl Rule for UseInlineScriptId {
 
         let has_children = jsx_element
             .parent::<JsxElement>()
-            .is_some_and(|parent| !parent.children().is_empty());
+            .is_some_and(|parent| !parent.elements().is_empty());
         if (has_children || attribute_names.contains("dangerouslySetInnerHTML"))
             && !attribute_names.contains("id")
         {

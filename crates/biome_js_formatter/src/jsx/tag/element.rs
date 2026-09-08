@@ -109,8 +109,8 @@ impl AnyJsxTagWithChildren {
 
     fn children(&self) -> JsxChildList {
         match self {
-            Self::JsxElement(element) => element.children(),
-            Self::JsxFragment(fragment) => fragment.children(),
+            Self::JsxElement(element) => element.elements(),
+            Self::JsxFragment(fragment) => fragment.elements(),
         }
     }
 

@@ -25,7 +25,7 @@ JsExpressionTemplateRoot {
                 attributes: JsxAttributeList [],
                 r_angle_token: R_ANGLE@4..5 ">" [] [],
             },
-            children: JsxChildList [
+            elements: JsxChildList [
                 JsxSelfClosingElement {
                     l_angle_token: L_ANGLE@5..6 "<" [] [],
                     name: JsxName {

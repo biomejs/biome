@@ -35,10 +35,10 @@ impl AstroImplicitFragment {
     }
     pub fn as_fields(&self) -> AstroImplicitFragmentFields {
         AstroImplicitFragmentFields {
-            children: self.children(),
+            elements: self.elements(),
         }
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 0usize)
     }
 }
@@ -52,7 +52,7 @@ impl Serialize for AstroImplicitFragment {
 }
 #[derive(Serialize)]
 pub struct AstroImplicitFragmentFields {
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAccessorModifier {
@@ -7565,14 +7565,14 @@ impl JsxElement {
     pub fn as_fields(&self) -> JsxElementFields {
         JsxElementFields {
             opening_element: self.opening_element(),
-            children: self.children(),
+            elements: self.elements(),
             closing_element: self.closing_element(),
         }
     }
     pub fn opening_element(&self) -> SyntaxResult<JsxOpeningElement> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_element(&self) -> SyntaxResult<JsxClosingElement> {
@@ -7590,7 +7590,7 @@ impl Serialize for JsxElement {
 #[derive(Serialize)]
 pub struct JsxElementFields {
     pub opening_element: SyntaxResult<JsxOpeningElement>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_element: SyntaxResult<JsxClosingElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7700,14 +7700,14 @@ impl JsxFragment {
     pub fn as_fields(&self) -> JsxFragmentFields {
         JsxFragmentFields {
             opening_fragment: self.opening_fragment(),
-            children: self.children(),
+            elements: self.elements(),
             closing_fragment: self.closing_fragment(),
         }
     }
     pub fn opening_fragment(&self) -> SyntaxResult<JsxOpeningFragment> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_fragment(&self) -> SyntaxResult<JsxClosingFragment> {
@@ -7725,7 +7725,7 @@ impl Serialize for JsxFragment {
 #[derive(Serialize)]
 pub struct JsxFragmentFields {
     pub opening_fragment: SyntaxResult<JsxOpeningFragment>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_fragment: SyntaxResult<JsxClosingFragment>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -16769,7 +16769,7 @@ impl std::fmt::Debug for AstroImplicitFragment {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("AstroImplicitFragment")
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .finish()
         } else {
             f.debug_struct("AstroImplicitFragment").finish()
@@ -25589,7 +25589,7 @@ impl std::fmt::Debug for JsxElement {
                     "opening_element",
                     &support::DebugSyntaxResult(self.opening_element()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_element",
                     &support::DebugSyntaxResult(self.closing_element()),
@@ -25757,7 +25757,7 @@ impl std::fmt::Debug for JsxFragment {
                     "opening_fragment",
                     &support::DebugSyntaxResult(self.opening_fragment()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_fragment",
                     &support::DebugSyntaxResult(self.closing_fragment()),
