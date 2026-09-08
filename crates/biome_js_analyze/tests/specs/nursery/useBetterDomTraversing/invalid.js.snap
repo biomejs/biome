@@ -45,6 +45,8 @@ const nested = element
 	.querySelector("a")
 	.querySelector("b");
 
+element.childNodes[0].childNodes[1];
+
 ```
 
 # Diagnostics
@@ -850,6 +852,7 @@ invalid.js:38:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━�
   > 40 │ 	.querySelector("b");
        │ 	^^^^^^^^^^^^^^^^^^^
     41 │ 
+    42 │ element.childNodes[0].childNodes[1];
   
   i One .querySelector() call with a combined selector is easier to read.
   
@@ -863,6 +866,33 @@ invalid.js:38:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━�
     40    │ - → .querySelector("b");
        39 │ + → .querySelector(":scope·a·b");
     41 40 │   
+    42 41 │   element.childNodes[0].childNodes[1];
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexes .childNodes to get the first child.
+  
+    40 │ 	.querySelector("b");
+    41 │ 
+  > 42 │ element.childNodes[0].childNodes[1];
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+  
+  i A positional index is harder to read than a named first-child accessor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .firstChild instead.
+  
+    40 40 │   	.querySelector("b");
+    41 41 │   
+    42    │ - element.childNodes[0].childNodes[1];
+       42 │ + element.firstChild.childNodes[1];
+    43 43 │   
   
 
 ```

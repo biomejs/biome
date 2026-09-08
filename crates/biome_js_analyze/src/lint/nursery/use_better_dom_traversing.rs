@@ -407,7 +407,8 @@ fn parent_element_chain_root(mut expr: AnyJsExpression) -> AnyJsExpression {
 }
 
 /// `element.children[1].children[2]` and `element.childNodes[0].childNodes[0]`
-/// should only report the outer access.
+/// should only report the outer access. `element.childNodes[0].childNodes[1]`
+/// still reports the inner access because `childNodes[1]` is not a diagnostic.
 fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
     let Some(parent) = node.syntax().parent() else {
         return false;
@@ -420,25 +421,37 @@ fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
         .ok()
         .is_none_or(|object| object.syntax() != node.syntax())
         || static_member.is_optional()
-        || static_member
-            .member()
-            .ok()
-            .and_then(|name| name.as_js_name().cloned())
-            .and_then(|name| name.value_token().ok())
-            .is_none_or(|token| {
-                let name = token.text_trimmed();
-                name != "children" && name != "childNodes"
-            })
     {
+        return false;
+    }
+    let Some(collection_name) = static_member
+        .member()
+        .ok()
+        .and_then(|name| name.as_js_name().cloned())
+        .and_then(|name| name.value_token().ok())
+        .map(|token| token.text_trimmed().to_string())
+    else {
+        return false;
+    };
+    if collection_name != "children" && collection_name != "childNodes" {
         return false;
     }
     let Some(grand) = static_member.syntax().parent() else {
         return false;
     };
-    JsComputedMemberExpression::cast(grand)
-        .and_then(|outer| numeric_index(&outer))
-        .is_some()
+    let Some(outer) = JsComputedMemberExpression::cast(grand) else {
+        return false;
+    };
+    let Some(index) = numeric_index(&outer) else {
+        return false;
+    };
+    match collection_name.as_str() {
+        "children" => true,
+        "childNodes" => index == 0.0,
+        _ => false,
+    }
 }
+
 
 fn is_props_children(collection: &JsStaticMemberExpression) -> bool {
     let Ok(object) = collection.object() else {

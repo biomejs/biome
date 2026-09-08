@@ -38,3 +38,5 @@ const item = element
 const nested = element
 	.querySelector("a")
 	.querySelector("b");
+
+element.childNodes[0].childNodes[1];
