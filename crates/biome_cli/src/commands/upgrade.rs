@@ -4,7 +4,6 @@ use biome_diagnostics::{Error, StdError};
 use biome_fs::normalize_path;
 use biome_package::node_semver::Version;
 use camino::{Utf8Path, Utf8PathBuf};
-use reqwest::blocking::Client;
 use self_update::backends::github::Update;
 use std::env;
 use std::fmt;
@@ -123,9 +122,9 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         .repo_name(GITHUB_REPO_NAME)
         .bin_name(binary_name_for_self_update())
         .target(&target)
-        .identifier(&identifier)
+        .asset_identifier(&identifier)
         .current_version(VERSION)
-        .target_version_tag(&release_tag_for_version(&latest_version))
+        .release_tag(release_tag_for_version(&latest_version))
         .show_output(false)
         .show_download_progress(true)
         .no_confirm(true)
@@ -145,12 +144,12 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         })?;
 
     match status {
-        self_update::Status::UpToDate(version) => {
+        self_update::VersionStatus::UpToDate(version) => {
             session.app.console.log(markup! {
                 "Biome is already up to date at version "<Emphasis>{version}</Emphasis>"."
             });
         }
-        self_update::Status::Updated(version) => {
+        self_update::VersionStatus::Updated(version) => {
             session.app.console.log(markup! {
                 "Biome upgraded successfully to version "<Emphasis>{version}</Emphasis>"."
             });
@@ -160,31 +159,21 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
                 </Info>
             });
         }
+        _ => {}
     }
 
     Ok(())
 }
 
 fn latest_available_version() -> Result<String, CliDiagnostic> {
-    let version = Client::builder()
-        .connect_timeout(Duration::from_secs(10))
-        .timeout(Duration::from_secs(30))
-        .build()
-        .map_err(|err| {
-            CliDiagnostic::upgrade_error(
-                "Failed to create the HTTP client used to check the latest Biome version.",
-                Some(Error::from(StdError::from(err))),
-            )
-        })?
+    let config = ureq::Agent::config_builder()
+        .timeout_global(Some(Duration::from_secs(30)))
+        .timeout_connect(Some(Duration::from_secs(10)))
+        .build();
+
+    let mut response = ureq::Agent::from(config)
         .get(LATEST_VERSION_URL)
-        .send()
-        .map_err(|err| {
-            CliDiagnostic::upgrade_error(
-                "Failed to request the latest Biome version.",
-                Some(Error::from(StdError::from(err))),
-            )
-        })?
-        .error_for_status()
+        .call()
         .map_err(|err| {
             CliDiagnostic::upgrade_error(
                 "Failed to fetch the latest Biome version.",
@@ -192,7 +181,7 @@ fn latest_available_version() -> Result<String, CliDiagnostic> {
             )
         })?;
 
-    let version = version.text().map_err(|err| {
+    let version = response.body_mut().read_to_string().map_err(|err| {
         CliDiagnostic::upgrade_error(
             "Failed to read the latest Biome version response.",
             Some(Error::from(StdError::from(err))),
