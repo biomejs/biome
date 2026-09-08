@@ -9,10 +9,10 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_expression_attribute_value, jsx_tag_expression, token};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
-    AnyJsxTag, JsLanguage, JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind,
-    JsxAttributeInitializerClause, JsxChildList, JsxElement, JsxExpressionAttributeValue,
-    JsxExpressionChild, JsxFragment, JsxOpeningElement, JsxTagExpression, JsxText, T,
+    AnyJsExpression, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage,
+    JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind, JsxAttributeInitializerClause,
+    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment,
+    JsxOpeningElement, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
@@ -125,8 +125,8 @@ impl NoUselessFragmentsQuery {
 
     fn children(&self) -> JsxChildList {
         match self {
-            Self::JsxFragment(element) => element.children(),
-            Self::JsxElement(element) => element.children(),
+            Self::JsxFragment(element) => element.elements(),
+            Self::JsxElement(element) => element.elements(),
         }
     }
 }
@@ -206,7 +206,7 @@ impl Rule for NoUselessFragments {
             });
 
         let child_list = match node {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => fragment.children(),
+            NoUselessFragmentsQuery::JsxFragment(fragment) => fragment.elements(),
             NoUselessFragmentsQuery::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
                 let is_valid_react_fragment =
@@ -238,7 +238,7 @@ impl Rule for NoUselessFragments {
                     return None;
                 }
 
-                element.children()
+                element.elements()
             }
         };
 
@@ -441,9 +441,8 @@ impl Rule for NoUselessFragments {
                         // An attribute always needs a value, so `prop={<>{}</>}` can't be
                         // fixed, while `<>{}</>` on its own can simply be removed.
                         None if attribute_value.is_some() => return None,
-                        None => {
-                            mutation.remove_element(AnyJsExpression::JsxTagExpression(parent).into())
-                        }
+                        None => mutation
+                            .remove_element(AnyJsExpression::JsxTagExpression(parent).into()),
                     },
 
                     // Can't apply a code action because it would create invalid syntax.

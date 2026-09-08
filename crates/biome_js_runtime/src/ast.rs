@@ -101,6 +101,49 @@ impl JsAstNode {
         Ok(JsString::from(node.text_trimmed().to_string()).into())
     }
 
+    fn get_parent(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let Some(node) = Self::from_this(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+
+        Ok(node.parent().map_or_else(JsValue::undefined, |parent| {
+            Self::from_node(parent, context)
+        }))
+    }
+
+    fn ancestors(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let Some(node) = Self::from_this(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("AST method called with an invalid receiver")
+                .into());
+        };
+
+        let ancestors = node
+            .ancestors()
+            .skip(1)
+            .map(|ancestor| Self::from_node(ancestor, context))
+            .collect::<Vec<_>>();
+
+        Ok(JsArray::from_iter(ancestors, context).into())
+    }
+
+    fn children(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let Some(node) = Self::from_this(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("AST method called with an invalid receiver")
+                .into());
+        };
+
+        let children = node
+            .children()
+            .map(|child| Self::from_node(child, context))
+            .collect::<Vec<_>>();
+
+        Ok(JsArray::from_iter(children, context).into())
+    }
+
     fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsValue
     where
         N: AstNode<Language = JsLanguage>,
@@ -212,10 +255,23 @@ impl Class for JsAstNode {
             NativeFunction::from_fn_ptr(Self::get_kind).to_js_function(class.context().realm());
         let text =
             NativeFunction::from_fn_ptr(Self::get_text).to_js_function(class.context().realm());
+        let parent =
+            NativeFunction::from_fn_ptr(Self::get_parent).to_js_function(class.context().realm());
 
         class
             .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
-            .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE);
+            .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE)
+            .accessor(js_string!("parent"), Some(parent), None, Attribute::empty())
+            .method(
+                js_string!("ancestors"),
+                0,
+                NativeFunction::from_fn_ptr(Self::ancestors),
+            )
+            .method(
+                js_string!("children"),
+                0,
+                NativeFunction::from_fn_ptr(Self::children),
+            );
 
         if !class.context().has_data::<JsAstPrototypeCache>() {
             let _ = class.context().insert_data(JsAstPrototypeCache::default());

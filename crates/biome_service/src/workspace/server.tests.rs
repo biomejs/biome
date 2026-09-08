@@ -4555,27 +4555,36 @@ fn typescript_plugin_reports_diagnostics_through_the_workspace() {
 
     const PLUGIN_PATH: &str = "/project/plugin.ts";
     const PLUGIN_SOURCE: &str = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
-import type { AnyJsRoot, Severity } from "@biomejs/plugin-api";
+import type { Severity } from "@biomejs/plugin-api";
 
 export const noTopLevelVar = defineRule({
-    query: ast("JS_MODULE"),
-    run(root: AnyJsRoot): void {
-        for (const item of root.items) {
-            if (
-                item.kind === "JS_VARIABLE_STATEMENT" &&
-                item.declaration?.kindToken === "var"
-            ) {
-                registerDiagnostic(
-                    item,
-                    "warning" satisfies Severity,
-                    "Use let or const instead of a top-level var declaration.",
-                );
-            }
+    query: ast("JS_VARIABLE_STATEMENT"),
+    run(node): void {
+        if (
+            node.parent?.kind === "JS_MODULE_ITEM_LIST" &&
+            node.parent.parent?.kind === "JS_MODULE" &&
+            node.declaration?.kindToken === "var"
+        ) {
+            registerDiagnostic(
+                node,
+                "warning" satisfies Severity,
+                "Use let or const instead of a top-level var declaration.",
+            );
+        }
+    },
+});
+
+export const reportArguments = defineRule({
+    query: ast("JS_CALL_ARGUMENT_LIST"),
+    run(list): void {
+        registerDiagnostic(list, "warning", "Argument list.");
+        for (const arg of list.children()) {
+            registerDiagnostic(arg, "warning", `Argument: ${arg.text}`);
         }
     },
 });"#;
     const FILE_PATH: &str = "/project/file.ts";
-    const FILE_CONTENT: &str = "var foo: number = 1;\nexport const bar: string = `${foo}`;\n";
+    const FILE_CONTENT: &str = "var foo: number = 1;\nexport const bar: string = `${foo}`;\nexport function nested() {\n    var local: number = 2;\n    return local;\n}\nnested(3, 4);\n";
 
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(PLUGIN_PATH), PLUGIN_SOURCE);
@@ -4628,9 +4637,37 @@ export const noTopLevelVar = defineRule({
 
     assert_eq!(result.parse_errors, 0);
 
-    let diagnostics = format!("{:?}", result.diagnostics);
-    assert!(
-        diagnostics.contains("top-level var declaration"),
-        "Expected a diagnostic from the TypeScript plugin, got: {diagnostics}"
+    let diagnostics: Vec<_> = result
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.category() == Some(biome_diagnostics::category!("plugin")))
+        .collect();
+    assert_eq!(diagnostics.len(), 4, "{:#?}", result.diagnostics);
+    let diagnostic = diagnostics[0];
+    assert_eq!(diagnostic.severity(), Severity::Warning);
+    assert_eq!(
+        serde_json::to_value(diagnostic).unwrap()["description"],
+        "Use let or const instead of a top-level var declaration."
     );
+    assert_eq!(
+        diagnostic.location().span,
+        Some(TextRange::new(TextSize::from(0), TextSize::from(20)))
+    );
+    for (text, message) in [
+        ("3, 4", "Argument list."),
+        ("3", "Argument: 3"),
+        ("4", "Argument: 4"),
+    ] {
+        let start = FILE_CONTENT.find(text).unwrap() as u32;
+        let range = TextRange::new(
+            TextSize::from(start),
+            TextSize::from(start + text.len() as u32),
+        );
+        let diagnostic = diagnostics
+            .iter()
+            .find(|diagnostic| serde_json::to_value(diagnostic).unwrap()["description"] == message)
+            .unwrap();
+        assert_eq!(diagnostic.severity(), Severity::Warning);
+        assert_eq!(diagnostic.location().span, Some(range));
+    }
 }

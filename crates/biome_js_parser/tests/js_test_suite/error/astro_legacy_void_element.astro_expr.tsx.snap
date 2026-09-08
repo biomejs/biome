@@ -32,7 +32,7 @@ JsExpressionTemplateRoot {
                     attributes: JsxAttributeList [],
                     r_angle_token: R_ANGLE@15..16 ">" [] [],
                 },
-                children: JsxChildList [],
+                elements: JsxChildList [],
                 closing_element: JsxClosingElement {
                     l_angle_token: missing (required),
                     slash_token: missing (required),

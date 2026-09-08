@@ -57,6 +57,11 @@ jobs:
       - name: Install just
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
+      - name: Test plugin API declarations
+        run: |
+          pnpm --filter @biomejs/plugin-api i
+          pnpm --filter @biomejs/plugin-api run test:types
+
       - name: Build TypeScript code
         # We use the `*-dev` builds below because release builds take very long.
         # The main difference is that release builds run `wasm-opt`, which is

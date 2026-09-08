@@ -259,7 +259,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@324..325 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsMetavariable {
                             value_token: GRIT_METAVARIABLE@325..328 "µ_" [] [],
                         },

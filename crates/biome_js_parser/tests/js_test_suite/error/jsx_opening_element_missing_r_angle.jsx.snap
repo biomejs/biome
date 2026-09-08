@@ -26,7 +26,7 @@ JsModule {
                         l_angle_token: L_ANGLE@0..1 "<" [] [],
                         r_angle_token: R_ANGLE@1..2 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxElement {
                             opening_element: JsxOpeningElement {
                                 l_angle_token: L_ANGLE@2..3 "<" [] [],
@@ -37,7 +37,7 @@ JsModule {
                                 attributes: JsxAttributeList [],
                                 r_angle_token: missing (required),
                             },
-                            children: JsxChildList [
+                            elements: JsxChildList [
                                 JsxElement {
                                     opening_element: JsxOpeningElement {
                                         l_angle_token: L_ANGLE@8..9 "<" [] [],
@@ -48,7 +48,7 @@ JsModule {
                                         attributes: JsxAttributeList [],
                                         r_angle_token: R_ANGLE@14..15 ">" [] [],
                                     },
-                                    children: JsxChildList [
+                                    elements: JsxChildList [
                                         JsxText {
                                             value_token: JSX_TEXT_LITERAL@15..28 " some content" [] [],
                                         },

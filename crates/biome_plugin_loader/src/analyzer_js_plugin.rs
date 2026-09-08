@@ -289,11 +289,11 @@ mod tests {
                         Object.getPrototypeOf(root),
                         "items",
                     );
-                    const hasChildNodes = "childNodes" in root;
+                    const hasUnknownField = "unknownField" in root;
                     registerDiagnostic(
                         root,
                         "information",
-                        `${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "items")}|${hasChildNodes}`,
+                        `${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "items")}|${hasUnknownField}`,
                     );
                 },
             });"#,
@@ -317,6 +317,542 @@ mod tests {
             // aren't exposed
             "JS_MODULE|function|false|false"
         );
+    }
+
+    #[test]
+    fn traverses_parents_and_ancestors_of_queried_descendants() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const ancestry = defineRule({
+                query: ast("JS_EXPRESSION_STATEMENT", "JS_NUMBER_LITERAL_EXPRESSION", "JS_YIELD_ARGUMENT"),
+                run(node) {
+                    const ancestors = node.ancestors();
+                    if (!Array.isArray(ancestors)) throw new Error("Expected an array");
+                    const kinds = ancestors.map(ancestor => ancestor.kind).join(",");
+                    let parent = node.parent;
+                    for (const ancestor of ancestors) {
+                        if (parent?.kind !== ancestor.kind || parent.text !== ancestor.text) {
+                            throw new Error("Parent chain differs from ancestors");
+                        }
+                        parent = parent.parent;
+                    }
+                    if (parent !== undefined) throw new Error("Parent chain must end at the root");
+                    const fresh = node.ancestors();
+                    if (fresh === ancestors) throw new Error("Expected a fresh array");
+                    ancestors.length = 0;
+                    if (fresh.map(ancestor => ancestor.kind).join(",") !== kinds ||
+                        node.ancestors().map(ancestor => ancestor.kind).join(",") !== kinds) {
+                        throw new Error("Mutating an array changed the ancestry");
+                    }
+                    registerDiagnostic(node, "information", kinds);
+                },
+            });"#,
+            None,
+        );
+
+        for (content, kind, malformed, expected) in [
+            (
+                "{ call(); }",
+                JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                false,
+                "JS_STATEMENT_LIST,JS_BLOCK_STATEMENT,JS_MODULE_ITEM_LIST,JS_MODULE",
+            ),
+            (
+                "call(1, 2);",
+                JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION,
+                false,
+                "JS_CALL_ARGUMENT_LIST,JS_CALL_ARGUMENTS,JS_CALL_EXPRESSION,JS_EXPRESSION_STATEMENT,JS_MODULE_ITEM_LIST,JS_MODULE",
+            ),
+            (
+                "call((1));",
+                JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION,
+                false,
+                "JS_PARENTHESIZED_EXPRESSION,JS_CALL_ARGUMENT_LIST,JS_CALL_ARGUMENTS,JS_CALL_EXPRESSION,JS_EXPRESSION_STATEMENT,JS_MODULE_ITEM_LIST,JS_MODULE",
+            ),
+            (
+                "yield 10;",
+                JsSyntaxKind::JS_YIELD_ARGUMENT,
+                true,
+                "JS_BOGUS_EXPRESSION,JS_EXPRESSION_STATEMENT,JS_MODULE_ITEM_LIST,JS_MODULE",
+            ),
+        ] {
+            let parse = biome_js_parser::parse(
+                content,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            assert_eq!(parse.has_errors(), malformed, "{content}");
+            let node = parse
+                .syntax()
+                .descendants()
+                .find(|node| node.kind() == kind)
+                .unwrap();
+            let result = plugin.evaluate(node.into(), "/file.js".into());
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected a single diagnostic for {content}, got {result:?}");
+            };
+            assert_eq!(
+                PrintDescription(&entry.diagnostic).to_string(),
+                expected,
+                "{content}"
+            );
+        }
+    }
+
+    #[test]
+    fn reports_ancestor_ranges_from_child_access() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const ancestry = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {
+                    const node = root.items[0].expression.arguments.args[1].expression;
+                    registerDiagnostic(node.parent, "information", node.parent.kind);
+                    for (const ancestor of node.ancestors()) {
+                        registerDiagnostic(ancestor, "information", ancestor.kind);
+                    }
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "  call(1, (2));  ",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        assert!(!parse.has_errors());
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let expected = [
+            ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
+            ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
+            ("JS_CALL_ARGUMENT_LIST", 7, 13),
+            ("JS_CALL_ARGUMENTS", 6, 14),
+            ("JS_CALL_EXPRESSION", 2, 14),
+            ("JS_EXPRESSION_STATEMENT", 2, 15),
+            ("JS_MODULE_ITEM_LIST", 2, 15),
+            ("JS_MODULE", 2, 15),
+        ];
+        assert_eq!(result.entries.len(), expected.len(), "{result:?}");
+        for (entry, (kind, start, end)) in result.entries.iter().zip(expected) {
+            assert_eq!(PrintDescription(&entry.diagnostic).to_string(), kind);
+            assert_eq!(
+                entry.diagnostic.span(),
+                Some(TextRange::new(start.into(), end.into())),
+                "{kind}"
+            );
+        }
+    }
+
+    #[test]
+    fn roots_have_no_parent_or_ancestors() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const ancestry = defineRule({
+                query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
+                run(root) {
+                    const ancestors = root.ancestors();
+                    if (root.parent !== undefined || !Array.isArray(ancestors) || ancestors.length !== 0) {
+                        throw new Error("Expected a root without a parent or ancestors");
+                    }
+                    const fresh = root.ancestors();
+                    if (fresh === ancestors) throw new Error("Expected a fresh root array");
+                    ancestors.push(root);
+                    if (fresh.length !== 0 || root.ancestors().length !== 0) {
+                        throw new Error("Mutating an array changed the root ancestry");
+                    }
+                    const [directives, list] = root.children();
+                    const listKind = root.kind === "JS_SCRIPT" ? "JS_STATEMENT_LIST" : "JS_MODULE_ITEM_LIST";
+                    if (root.children().length !== 2 || directives.kind !== "JS_DIRECTIVE_LIST" ||
+                        directives.children().length !== 0 || list.kind !== listKind) {
+                        throw new Error("Expected root list nodes, including empty directives");
+                    }
+                    for (const child of [directives, list]) {
+                        if (Array.isArray(child) || child.parent.kind !== root.kind ||
+                            child.ancestors().map(ancestor => ancestor.kind).join(",") !== root.kind) {
+                            throw new Error("Expected the root as the list's only ancestor");
+                        }
+                    }
+                    const items = root.items ?? root.statements;
+                    const child = items[0];
+                    if (!Array.isArray(items) || child.text !== list.children()[0].text ||
+                        child.parent.kind !== listKind ||
+                        child.ancestors().map(ancestor => ancestor.kind).join(",") !== `${listKind},${root.kind}`) {
+                        throw new Error("Expected the list between the child and root");
+                    }
+                    registerDiagnostic(root, "information", root.kind);
+                },
+            });"#,
+            None,
+        );
+        for (content, source, expected) in [
+            ("let value;", JsFileSource::js_module(), "JS_MODULE"),
+            ("let value;", JsFileSource::js_script(), "JS_SCRIPT"),
+            (
+                "declare const value: number;",
+                JsFileSource::d_ts(),
+                "TS_DECLARATION_MODULE",
+            ),
+        ] {
+            let parse = biome_js_parser::parse(content, source, JsParserOptions::default());
+            assert!(!parse.has_errors(), "{content}");
+            let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected a single diagnostic for {expected}, got {result:?}");
+            };
+            assert_eq!(PrintDescription(&entry.diagnostic).to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn traversal_members_are_shared_non_enumerable_and_validate_receivers() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const ancestry = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {
+                    const child = root.items[0];
+                    const list = child.parent;
+                    for (const name of ["parent", "ancestors", "children"]) {
+                        let owner = Object.getPrototypeOf(root);
+                        while (owner && !Object.prototype.hasOwnProperty.call(owner, name)) {
+                            owner = Object.getPrototypeOf(owner);
+                        }
+                        if (!owner || !owner.isPrototypeOf(child) || !owner.isPrototypeOf(list)) {
+                            throw new Error(`${name} must belong to a shared prototype`);
+                        }
+                        const descriptor = Object.getOwnPropertyDescriptor(owner, name);
+                        const member = name === "parent" ? descriptor.get : descriptor.value;
+                        if (descriptor.enumerable || typeof member !== "function") {
+                            throw new Error(`${name} has the wrong descriptor`);
+                        }
+                        for (const node of [root, child, list]) {
+                            if (Object.prototype.hasOwnProperty.call(node, name)) {
+                                throw new Error(`${name} must not be an own property`);
+                            }
+                            for (const key in node) {
+                                if (key === name) throw new Error(`${name} must not be enumerable`);
+                            }
+                        }
+                        for (const receiver of [undefined, null, 1, "node", {}, [], Object.create(child)]) {
+                            let threw = false;
+                            try {
+                                member.call(receiver);
+                            } catch (error) {
+                                if (!(error instanceof TypeError)) throw error;
+                                threw = true;
+                            }
+                            if (!threw) throw new Error(`${name} accepted an invalid receiver`);
+                        }
+                    }
+                    registerDiagnostic(root, "information", "Traversal prototype contract holds");
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "let value;",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let [entry] = result.entries.as_slice() else {
+            panic!("expected a single diagnostic, got {result:?}");
+        };
+        assert_eq!(
+            PrintDescription(&entry.diagnostic).to_string(),
+            "Traversal prototype contract holds"
+        );
+    }
+
+    #[test]
+    fn children_return_fresh_raw_nodes_in_source_order() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const children = defineRule({
+                query: ast("JS_MODULE", "JS_BLOCK_STATEMENT", "JS_CALL_EXPRESSION", "JS_CALL_ARGUMENTS",
+                    "JS_PARENTHESIZED_EXPRESSION", "JS_NUMBER_LITERAL_EXPRESSION", "JS_EXPRESSION_STATEMENT",
+                    "JS_BOGUS_EXPRESSION", "JSX_ELEMENT", "JSX_EXPRESSION_CHILD",
+                    "JS_DIRECTIVE_LIST", "JS_MODULE_ITEM_LIST", "JS_STATEMENT_LIST", "JS_CALL_ARGUMENT_LIST", "JSX_CHILD_LIST"),
+                run(node) {
+                    const children = node.children();
+                    if (!Array.isArray(children)) throw new Error("Expected an array");
+                    const describe = nodes => nodes.map(child => `${child.kind}:${child.text}`).join("|");
+                    const description = describe(children);
+                    for (const child of children) {
+                        if (Array.isArray(child)) throw new Error("Expected a syntax node, not an array");
+                        if (child.parent?.kind !== node.kind || child.parent.text !== node.text) {
+                            throw new Error("Expected the immediate syntax parent");
+                        }
+                        if (describe(child.ancestors()) !== describe([node, ...node.ancestors()])) {
+                            throw new Error("Expected the raw ancestor chain");
+                        }
+                        if (!Array.isArray(child.children())) throw new Error("Child cannot traverse children");
+                    }
+                    if (node.kind === "JSX_ELEMENT") {
+                        if (!Array.isArray(node.elements) || children[1].kind !== "JSX_CHILD_LIST" ||
+                            describe(node.elements) !== describe(children[1].children()) ||
+                            describe([node.openingElement, children[1], node.closingElement]) !== description) {
+                            throw new Error("JSX fields must remain separate from generic children");
+                        }
+                    }
+                    const fresh = node.children();
+                    if (fresh === children) throw new Error("Expected a fresh array");
+                    children.length = 0;
+                    children.push(node);
+                    if (describe(fresh) !== description || describe(node.children()) !== description) {
+                        throw new Error("Mutating an array changed the children");
+                    }
+                    registerDiagnostic(node, "information", description);
+                },
+            });"#,
+            None,
+        );
+        for (content, kind, malformed, expected) in [
+            (
+                "\"use strict\"; \"custom\"; let a; call();",
+                JsSyntaxKind::JS_MODULE,
+                false,
+                "JS_DIRECTIVE_LIST:\"use strict\"; \"custom\";|JS_MODULE_ITEM_LIST:let a; call();",
+            ),
+            (
+                "\"use strict\"; \"custom\"; let a; call();",
+                JsSyntaxKind::JS_DIRECTIVE_LIST,
+                false,
+                "JS_DIRECTIVE:\"use strict\";|JS_DIRECTIVE:\"custom\";",
+            ),
+            (
+                "let a; call();",
+                JsSyntaxKind::JS_MODULE_ITEM_LIST,
+                false,
+                "JS_VARIABLE_STATEMENT:let a;|JS_EXPRESSION_STATEMENT:call();",
+            ),
+            (
+                "{ first(); { second(); } }",
+                JsSyntaxKind::JS_BLOCK_STATEMENT,
+                false,
+                "JS_STATEMENT_LIST:first(); { second(); }",
+            ),
+            (
+                "{ first(); { second(); } }",
+                JsSyntaxKind::JS_STATEMENT_LIST,
+                false,
+                "JS_EXPRESSION_STATEMENT:first();|JS_BLOCK_STATEMENT:{ second(); }",
+            ),
+            (
+                "call(1, (2), 3);",
+                JsSyntaxKind::JS_CALL_EXPRESSION,
+                false,
+                "JS_IDENTIFIER_EXPRESSION:call|JS_CALL_ARGUMENTS:(1, (2), 3)",
+            ),
+            (
+                "call(1, (2), 3);",
+                JsSyntaxKind::JS_CALL_ARGUMENTS,
+                false,
+                "JS_CALL_ARGUMENT_LIST:1, (2), 3",
+            ),
+            (
+                "call(1, (2), 3);",
+                JsSyntaxKind::JS_CALL_ARGUMENT_LIST,
+                false,
+                "JS_NUMBER_LITERAL_EXPRESSION:1|JS_PARENTHESIZED_EXPRESSION:(2)|JS_NUMBER_LITERAL_EXPRESSION:3",
+            ),
+            (
+                "call((2));",
+                JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION,
+                false,
+                "JS_NUMBER_LITERAL_EXPRESSION:2",
+            ),
+            (
+                "<a>hello{value}<b /></a>;",
+                JsSyntaxKind::JSX_ELEMENT,
+                false,
+                "JSX_OPENING_ELEMENT:<a>|JSX_CHILD_LIST:hello{value}<b />|JSX_CLOSING_ELEMENT:</a>",
+            ),
+            (
+                "<a>hello{value}<b /></a>;",
+                JsSyntaxKind::JSX_CHILD_LIST,
+                false,
+                "JSX_TEXT:hello|JSX_EXPRESSION_CHILD:{value}|JSX_SELF_CLOSING_ELEMENT:<b />",
+            ),
+            ("1;", JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION, false, ""),
+            (
+                "",
+                JsSyntaxKind::JS_MODULE,
+                false,
+                "JS_DIRECTIVE_LIST:|JS_MODULE_ITEM_LIST:",
+            ),
+            ("", JsSyntaxKind::JS_DIRECTIVE_LIST, false, ""),
+            ("", JsSyntaxKind::JS_MODULE_ITEM_LIST, false, ""),
+            (
+                "{}",
+                JsSyntaxKind::JS_BLOCK_STATEMENT,
+                false,
+                "JS_STATEMENT_LIST:",
+            ),
+            ("{}", JsSyntaxKind::JS_STATEMENT_LIST, false, ""),
+            (
+                "call();",
+                JsSyntaxKind::JS_CALL_ARGUMENTS,
+                false,
+                "JS_CALL_ARGUMENT_LIST:",
+            ),
+            ("call();", JsSyntaxKind::JS_CALL_ARGUMENT_LIST, false, ""),
+            (
+                "<a></a>;",
+                JsSyntaxKind::JSX_ELEMENT,
+                false,
+                "JSX_OPENING_ELEMENT:<a>|JSX_CHILD_LIST:|JSX_CLOSING_ELEMENT:</a>",
+            ),
+            ("<a></a>;", JsSyntaxKind::JSX_CHILD_LIST, false, ""),
+            ("<a>{}</a>;", JsSyntaxKind::JSX_EXPRESSION_CHILD, false, ""),
+            (
+                "yield 10;",
+                JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                true,
+                "JS_BOGUS_EXPRESSION:yield 10",
+            ),
+            (
+                "yield 10;",
+                JsSyntaxKind::JS_BOGUS_EXPRESSION,
+                true,
+                "JS_YIELD_ARGUMENT:10",
+            ),
+        ] {
+            let parse =
+                biome_js_parser::parse(content, JsFileSource::jsx(), JsParserOptions::default());
+            assert_eq!(parse.has_errors(), malformed, "{content}");
+            let node = parse
+                .syntax()
+                .descendants()
+                .find(|node| node.kind() == kind)
+                .unwrap();
+            let result = plugin.evaluate(node.into(), "/file.jsx".into());
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected a single diagnostic for {content}, got {result:?}");
+            };
+            assert_eq!(
+                PrintDescription(&entry.diagnostic).to_string(),
+                expected,
+                "{content}: {kind:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn queries_lists_and_reports_diagnostics_on_lists_and_their_children() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const children = defineRule({
+                query: ast("JS_CALL_ARGUMENT_LIST"),
+                run(list) {
+                    if (Array.isArray(list) || list.kind !== "JS_CALL_ARGUMENT_LIST" || list.text !== "1, 2" ||
+                        list.parent.kind !== "JS_CALL_ARGUMENTS" ||
+                        list.ancestors().map(node => node.kind).join(",") !==
+                            "JS_CALL_ARGUMENTS,JS_CALL_EXPRESSION,JS_EXPRESSION_STATEMENT,JS_MODULE_ITEM_LIST,JS_MODULE") {
+                        throw new Error("Expected a queryable list wrapper with ancestry");
+                    }
+                    registerDiagnostic(list, "information", list.kind);
+                    for (const child of list.children()) {
+                        if (child.parent.kind !== list.kind || child.parent.text !== list.text) {
+                            throw new Error("Expected the list as the argument's parent");
+                        }
+                        registerDiagnostic(child, "information", child.valueToken);
+                    }
+                },
+            });"#,
+            None,
+        );
+        assert_eq!(
+            plugin.query(),
+            [JsSyntaxKind::JS_CALL_ARGUMENT_LIST.to_raw()]
+        );
+        let parse = biome_js_parser::parse(
+            "call(1, 2);",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        assert!(!parse.has_errors());
+        let list = parse
+            .syntax()
+            .descendants()
+            .find(|node| plugin.query().contains(&node.kind().to_raw()))
+            .unwrap();
+        let result = plugin.evaluate(list.into(), "/file.js".into());
+        let expected = [("JS_CALL_ARGUMENT_LIST", 5, 9), ("1", 5, 6), ("2", 8, 9)];
+        assert_eq!(result.entries.len(), expected.len(), "{result:?}");
+        for (entry, (message, start, end)) in result.entries.iter().zip(expected) {
+            assert_eq!(PrintDescription(&entry.diagnostic).to_string(), message);
+            assert_eq!(
+                entry.diagnostic.span(),
+                Some(TextRange::new(start.into(), end.into())),
+                "{message}"
+            );
+        }
+    }
+
+    #[test]
+    fn reports_children_ranges_and_exposes_normal_fields() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const children = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {
+                    const items = root.children()[1];
+                    const statement = items.children()[0];
+                    const call = statement.children()[0];
+                    const args = call.children()[1];
+                    if (statement.expression.text !== call.text || call.arguments.text !== args.text) {
+                        throw new Error("Child fields differ from generic traversal");
+                    }
+                    const list = args.children()[0];
+                    const [first, wrapped] = list.children();
+                    const second = wrapped.children()[0];
+                    if (first.valueToken !== "1" || wrapped.expression.valueToken !== "2" ||
+                        second.valueToken !== "2" || !Array.isArray(args.args) || args.args.length !== 2 ||
+                        !Array.isArray(root.items) || root.items[0].text !== statement.text ||
+                        args.args[0].text !== first.text || args.args[1].text !== wrapped.text) {
+                        throw new Error("Expected normal fields on children");
+                    }
+                    for (const node of [items, statement, call, args, list, first, wrapped, second]) {
+                        registerDiagnostic(node, "information", node.kind);
+                    }
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "  call(1, (2));  ",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        assert!(!parse.has_errors());
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let expected = [
+            ("JS_MODULE_ITEM_LIST", 2, 15),
+            ("JS_EXPRESSION_STATEMENT", 2, 15),
+            ("JS_CALL_EXPRESSION", 2, 14),
+            ("JS_CALL_ARGUMENTS", 6, 14),
+            ("JS_CALL_ARGUMENT_LIST", 7, 13),
+            ("JS_NUMBER_LITERAL_EXPRESSION", 7, 8),
+            ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
+            ("JS_NUMBER_LITERAL_EXPRESSION", 11, 12),
+        ];
+        assert_eq!(result.entries.len(), expected.len(), "{result:?}");
+        for (entry, (kind, start, end)) in result.entries.iter().zip(expected) {
+            assert_eq!(PrintDescription(&entry.diagnostic).to_string(), kind);
+            assert_eq!(
+                entry.diagnostic.span(),
+                Some(TextRange::new(start.into(), end.into())),
+                "{kind}"
+            );
+        }
     }
 
     #[test]

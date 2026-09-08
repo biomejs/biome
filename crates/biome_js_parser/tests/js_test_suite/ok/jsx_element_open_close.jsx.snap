@@ -52,7 +52,7 @@ JsModule {
                                     attributes: JsxAttributeList [],
                                     r_angle_token: R_ANGLE@30..31 ">" [] [],
                                 },
-                                children: JsxChildList [],
+                                elements: JsxChildList [],
                                 closing_element: JsxClosingElement {
                                     l_angle_token: L_ANGLE@31..32 "<" [] [],
                                     slash_token: SLASH@32..33 "/" [] [],

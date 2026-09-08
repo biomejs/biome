@@ -53,7 +53,7 @@ pub(super) fn convert_jsx_element(
             )?,
         }),
         children: element
-            .children()
+            .elements()
             .into_iter()
             .map(|child| convert_jsx_child(ctx, child))
             .collect::<Result<Vec<_>>>()?,
@@ -132,7 +132,7 @@ pub(super) fn convert_jsx_fragment(
             base: ctx.base(closing.syntax().text_trimmed_range()),
         },
         children: fragment
-            .children()
+            .elements()
             .into_iter()
             .map(|child| convert_jsx_child(ctx, child))
             .collect::<Result<Vec<_>>>()?,

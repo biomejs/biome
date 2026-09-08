@@ -142,7 +142,7 @@ impl Rule for NoSvgWithoutTitle {
         // Checks if a `svg` element has a valid `title` element is in a childlist
         let jsx_element = node.parent::<JsxElement>()?;
         if let AnyJsxElement::JsxOpeningElement(_) = node {
-            let has_valid_title = has_valid_title_element(&jsx_element.children());
+            let has_valid_title = has_valid_title_element(&jsx_element.elements());
             if has_valid_title.is_some_and(|bool| bool) {
                 return None;
             }
@@ -155,7 +155,7 @@ impl Rule for NoSvgWithoutTitle {
                 .attributes()
                 .find_by_names(["aria-label", "aria-labelledby"]);
             let is_valid_a11y_attribute = aria_label.is_some()
-                || is_valid_attribute_value(aria_labelledby, &jsx_element.children())
+                || is_valid_attribute_value(aria_labelledby, &jsx_element.elements())
                     .unwrap_or(false);
             if is_valid_a11y_attribute {
                 return None;
@@ -214,6 +214,6 @@ fn has_valid_title_element(jsx_child_list: &JsxChildList) -> Option<bool> {
     if !has_title_name {
         return Some(false);
     }
-    let is_empty_child = jsx_element.children().is_empty();
+    let is_empty_child = jsx_element.elements().is_empty();
     Some(!is_empty_child)
 }

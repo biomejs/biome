@@ -4,7 +4,8 @@ use biome_js_factory::make;
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_syntax::{
     AnyJsDeclarationClause, AnyJsExportClause, AnyJsModuleItem, AnyJsObjectMemberName, AnyTsName,
-    AnyTsType, AnyTsTypeMember, JsSyntaxToken, T, TriviaPieceKind, TsReferenceType,
+    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsSyntaxToken, T, TriviaPieceKind,
+    TsReferenceType,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
@@ -37,7 +38,13 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
     let mut prototype_arms = Vec::new();
     let mut kind_name_arms = Vec::new();
 
-    for name in ast.nodes.iter().map(|node| &node.name).chain(&ast.bogus) {
+    for name in ast
+        .nodes
+        .iter()
+        .map(|node| &node.name)
+        .chain(&ast.bogus)
+        .chain(ast.lists.keys())
+    {
         let kind_name = Case::Constant.convert(name);
         let node_kind = format_ident!("{kind_name}");
         kind_name_arms.push(quote! { #kind_name => JsSyntaxKind::#node_kind });
@@ -139,6 +146,63 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
 }
 
 fn generate_typescript(ast: &AstSrc) -> String {
+    let parent = make::ts_property_signature_type_member(
+        make::js_literal_member_name(make::ident("parent")).into(),
+    )
+    .with_readonly_token(make::token(T![readonly]).with_leading_trivia([
+        (TriviaPieceKind::Newline, "\n"),
+        (
+            TriviaPieceKind::MultiLineComment,
+            "/** The immediate parent node, including list containers. Undefined at the root.\n * Repeated access does not guarantee the same JavaScript object identity. */",
+        ),
+        (TriviaPieceKind::Newline, "\n"),
+    ]))
+    .with_type_annotation(make::ts_type_annotation(
+        make::token(T![:]),
+        union_type([reference_type("AnyJsAstNode").into(), undefined_type()]),
+    ))
+    .with_separator_token_token(make::token(T![;]))
+    .build();
+    let [ancestors, children] = [
+        (
+            "ancestors",
+            "/** Returns a fresh array of enclosing nodes, nearest first, excluding this node\n * and including list containers and the root. Roots return an empty array.\n * Returned nodes do not have stable JavaScript object identity. */",
+        ),
+        (
+            "children",
+            "/** Returns a fresh array of immediate child nodes in source order, including list\n * containers and omitting tokens. Call children() on a list node to iterate its elements.\n * Nodes without child nodes return an empty array. Named list fields remain arrays.\n * Returned nodes do not have stable JavaScript object identity. */",
+        ),
+    ].map(|(name, documentation)| make::ts_method_signature_type_member(
+        make::js_literal_member_name(make::ident(name).with_leading_trivia([
+            (TriviaPieceKind::Newline, "\n"),
+            (
+                TriviaPieceKind::MultiLineComment,
+                documentation,
+            ),
+            (TriviaPieceKind::Newline, "\n"),
+        ]))
+        .into(),
+        make::js_parameters(
+            make::token(T!['(']),
+            make::js_parameter_list([], []),
+            make::token(T![')']),
+        ),
+    )
+    .with_return_type_annotation(make::ts_return_type_annotation(
+        make::token(T![:]),
+        AnyTsReturnType::AnyTsType(make::ts_type_operator_type(
+            make::token(T![readonly]),
+            make::ts_array_type(
+                reference_type("AnyJsAstNode").into(),
+                make::token(T!['[']),
+                make::token(T![']']),
+            )
+            .into(),
+        ).into()),
+    ))
+    .with_separator_token_token(make::token(T![;]))
+    .build());
+
     let mut items = vec![export_interface(
         generated_export_token(),
         "JsAstNode",
@@ -146,8 +210,27 @@ fn generate_typescript(ast: &AstSrc) -> String {
         [
             property("kind", string_type()),
             property("text", string_type()),
+            parent.into(),
+            ancestors.into(),
+            children.into(),
         ],
     )];
+
+    items.push(export_type_alias(
+        make::token(T![export]),
+        "AnyJsAstNode",
+        make::ts_indexed_access_type(
+            reference_type("JsNodeByKind").into(),
+            make::token(T!['[']),
+            make::ts_type_operator_type(
+                make::token(T![keyof]),
+                reference_type("JsNodeByKind").into(),
+            )
+            .into(),
+            make::token(T![']']),
+        )
+        .into(),
+    ));
 
     for node in &ast.nodes {
         let node_kind = Case::Constant.convert(&node.name);
@@ -202,10 +285,25 @@ fn generate_typescript(ast: &AstSrc) -> String {
             .iter()
             .map(|node| &node.name)
             .chain(&ast.bogus)
-            .map(|name| property(&Case::Constant.convert(name), reference_type(name).into())),
+            .map(|name| property(&Case::Constant.convert(name), reference_type(name).into()))
+            .chain(ast.lists.keys().map(|name| {
+                property(
+                    &Case::Constant.convert(name),
+                    reference_type(&format!("{name}Node")).into(),
+                )
+            })),
     ));
 
     for (name, list) in ast.lists() {
+        items.push(export_interface(
+            make::token(T![export]),
+            &format!("{name}Node"),
+            Some("JsAstNode"),
+            [property(
+                "kind",
+                string_literal_type(&Case::Constant.convert(name)),
+            )],
+        ));
         let array_type = make::ts_array_type(
             reference_type(&list.element_name).into(),
             make::token(T!['[']),
@@ -387,8 +485,12 @@ fn property_name(field: &Field) -> String {
     let name = Case::Camel.convert(&method_name.to_string());
 
     match (name.as_str(), field) {
-        ("kind" | "text", Field::Token { .. }) => format!("{name}Token"),
-        ("kind" | "text", Field::Node { .. }) => format!("{name}Node"),
+        ("kind" | "text" | "parent" | "ancestors" | "children", Field::Token { .. }) => {
+            format!("{name}Token")
+        }
+        ("kind" | "text" | "parent" | "ancestors" | "children", Field::Node { .. }) => {
+            format!("{name}Node")
+        }
         _ => name,
     }
 }

@@ -25,7 +25,7 @@ JsExpressionTemplateRoot {
                 attributes: JsxAttributeList [],
                 r_angle_token: R_ANGLE@16..17 ">" [] [],
             },
-            children: JsxChildList [],
+            elements: JsxChildList [],
             closing_element: JsxClosingElement {
                 l_angle_token: L_ANGLE@17..18 "<" [] [],
                 slash_token: SLASH@18..19 "/" [] [],

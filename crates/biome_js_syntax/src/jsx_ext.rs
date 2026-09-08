@@ -165,7 +165,7 @@ impl JsxOpeningElement {
     pub fn has_accessible_child(&self) -> bool {
         self.parent::<JsxElement>().is_some_and(|parent| {
             parent
-                .children()
+                .elements()
                 .into_iter()
                 .any(|child| child.is_accessible_node().unwrap_or(true))
         })
@@ -786,7 +786,7 @@ impl AnyJsxChild {
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }
             Self::JsxFragment(fragment) => fragment
-                .children()
+                .elements()
                 .into_iter()
                 .any(|child| child.is_accessible_node().unwrap_or(true)),
             _ => true,

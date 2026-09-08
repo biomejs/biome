@@ -44,7 +44,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@60..61 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@61..65 "() =" [] [],
                         },
@@ -85,7 +85,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@85..86 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@86..90 "() =" [] [],
                         },
@@ -127,7 +127,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@109..110 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@110..114 "() =" [] [],
                         },
@@ -163,7 +163,7 @@ JsModule {
                         ],
                         r_angle_token: R_ANGLE@128..129 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@129..133 "() =" [] [],
                         },

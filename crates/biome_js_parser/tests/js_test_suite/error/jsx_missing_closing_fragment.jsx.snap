@@ -59,7 +59,7 @@ JsModule {
                         l_angle_token: L_ANGLE@14..16 "<" [Newline("\n")] [],
                         r_angle_token: R_ANGLE@16..17 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@17..21 "test" [] [],
                         },
@@ -73,7 +73,7 @@ JsModule {
                                 attributes: JsxAttributeList [],
                                 r_angle_token: R_ANGLE@27..28 ">" [] [],
                             },
-                            children: JsxChildList [
+                            elements: JsxChildList [
                                 JsxText {
                                     value_token: JSX_TEXT_LITERAL@28..38 " some text" [] [],
                                 },
@@ -100,7 +100,7 @@ JsModule {
                                 attributes: JsxAttributeList [],
                                 r_angle_token: R_ANGLE@50..51 ">" [] [],
                             },
-                            children: JsxChildList [
+                            elements: JsxChildList [
                                 JsxText {
                                     value_token: JSX_TEXT_LITERAL@51..52 "a" [] [],
                                 },
