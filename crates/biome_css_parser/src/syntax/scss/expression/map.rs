@@ -132,14 +132,14 @@ fn parse_scss_map_expression_pair_list(
             Absent => Absent,
         };
 
+        let recovery_end_ts = options
+            .with_end_ts(SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET)
+            .recovery_end_ts(p);
         if pair
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(
-                    CSS_BOGUS_PROPERTY_VALUE,
-                    SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET,
-                )
-                .enable_recovery_on_line_break(),
+                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, recovery_end_ts)
+                    .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )
             .is_err()

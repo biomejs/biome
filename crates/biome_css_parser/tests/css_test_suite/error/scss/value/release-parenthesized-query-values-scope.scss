@@ -1,0 +1,3 @@
+@media (max-width: (1px)) {}
+$value: foo(1px {bad});
+.after {width:1px;}

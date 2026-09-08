@@ -27,7 +27,9 @@ impl ParseRecovery for ParameterListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_PARAMETER;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(PARAMETER_RECOVERY_TOKEN_SET) || is_at_parameter_with_context(p, self.context)
+        p.at_ts(PARAMETER_RECOVERY_TOKEN_SET)
+            || (p.state().is_in_scss_query_expression && p.at(T!['{']))
+            || is_at_parameter_with_context(p, self.context)
     }
 }
 
@@ -52,7 +54,7 @@ impl ParseSeparatedList for ParameterList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
+        p.at(T![')']) || (p.state().is_in_scss_query_expression && p.at(T!['{']))
     }
 
     fn recover(

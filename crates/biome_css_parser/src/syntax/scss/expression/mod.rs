@@ -8,6 +8,7 @@ mod regular_expression_operand;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::{Parser, TokenSet, token_set};
 
+use crate::parser::CssParser;
 use crate::syntax::FunctionCallContext;
 
 use super::is_at_scss_variable_modifier;
@@ -20,8 +21,9 @@ pub(crate) use interpolation::{
 pub(crate) use list::{
     complete_empty_scss_expression, parse_required_scss_value_until, parse_scss_expression,
     parse_scss_expression_from_head, parse_scss_expression_in_args_until,
-    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
-    parse_scss_inner_expression_in_string_until, parse_scss_optional_value_until,
+    parse_scss_expression_in_query_until, parse_scss_expression_in_variable_value_until,
+    parse_scss_expression_until, parse_scss_inner_expression_in_string_until,
+    parse_scss_optional_value_until,
 };
 pub(crate) use precedence::{SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_binary_operator};
 
@@ -131,21 +133,24 @@ impl ScssExpressionOptions {
         !self.end_ts.contains(T![,])
     }
 
-    pub(super) fn recovery_end_ts(self) -> TokenSet<CssSyntaxKind> {
-        if self.comma_separates_list() {
-            self.end_ts.union(token_set![T![,]])
+    pub(super) fn recovery_end_ts(self, p: &CssParser) -> TokenSet<CssSyntaxKind> {
+        let end_ts = if p.state().is_in_scss_query_expression {
+            self.end_ts.union(token_set![T!['{']])
         } else {
             self.end_ts
+        };
+        if self.comma_separates_list() {
+            end_ts.union(token_set![T![,]])
+        } else {
+            end_ts
         }
     }
 }
 
 #[inline]
-pub(super) fn is_at_scss_expression_end(
-    p: &mut crate::parser::CssParser,
-    options: ScssExpressionOptions,
-) -> bool {
+pub(super) fn is_at_scss_expression_end(p: &mut CssParser, options: ScssExpressionOptions) -> bool {
     p.at_ts(options.end_ts)
         || p.at(T![')'])
+        || (p.state().is_in_scss_query_expression && p.at(T!['{']))
         || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier(p))
 }

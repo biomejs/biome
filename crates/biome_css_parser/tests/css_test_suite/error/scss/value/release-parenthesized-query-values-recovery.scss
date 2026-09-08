@@ -1,0 +1,11 @@
+@media (max-width: (1px) {.card {color:red}} .after {width:1px}
+@media (max-width: ((1px)) {.card {color:red}} .after-nested {width:1px}
+@media (max-width: ((1px) {.card {color:red}} .after-inner {width:1px}
+@media (max-width: (small: 1px, {.card {color:red}} .after-map {width:1px}
+@media (max-width: (small: {.card {color:red}} .after-value {width:1px}
+@media (max-width: (1px @ {.card {color:red}} .after-sequence {width:1px}
+@media (max-width: (foo(1px {.card {color:red}} .after-call {width:1px}
+@media (max-width: (foo( {.card {color:red}} .after-empty-call {width:1px}
+@media (max-width: (foo(bar(1px {.card {color:red}} .after-nested-calls {width:1px}
+@media (max-width: (math.foo(1px {.card {color:red}} .after-qualified-call {width:1px}
+@media (max-width: (#{foo}(1px {.card {color:red}} .after-interpolated-call {width:1px}

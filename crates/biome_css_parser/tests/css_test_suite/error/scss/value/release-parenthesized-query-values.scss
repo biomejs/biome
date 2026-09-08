@@ -1,0 +1,6 @@
+$device: 768px;
+
+@media (max-width: ($device -)) {
+  .card { display: block; }
+}
+.after { width: 1px; }
