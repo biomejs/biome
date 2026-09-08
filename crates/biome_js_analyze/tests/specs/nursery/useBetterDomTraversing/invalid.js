@@ -6,6 +6,7 @@ element.children[0];
 element.children[1];
 element.children[10];
 element.children[1].children[2];
+element.childNodes[0].childNodes[0];
 element.parentElement.parentElement;
 element.parentElement.parentElement.parentElement;
 element.querySelector("a").querySelector("b");

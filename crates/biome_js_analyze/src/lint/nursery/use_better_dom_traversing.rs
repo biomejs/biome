@@ -12,6 +12,9 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
 use biome_rule_options::use_better_dom_traversing::UseBetterDomTraversingOptions;
 
+/// `Number.MAX_SAFE_INTEGER` (`2^53 - 1`). Index literals above this are not safe integers.
+const JS_MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
+
 declare_lint_rule! {
     /// Prefer modern DOM traversal APIs over positional indexes and chained walks.
     ///
@@ -239,7 +242,7 @@ impl Rule for UseBetterDomTraversing {
                     argument,
                     make_string_literal_expression(&merged_selector, ctx.preferred_quote()),
                 );
-                mutation.replace_node(inner_object, root);
+                mutation.replace_node(inner_object, root.clone());
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -337,8 +340,7 @@ fn numeric_index(node: &JsComputedMemberExpression) -> Option<f64> {
         .as_any_js_literal_expression()?
         .as_js_number_literal_expression()?;
     let value = number.as_number()?;
-    if value.is_finite() && value.fract() == 0.0 && (0.0..9_007_199_254_740_992.0).contains(&value)
-    {
+    if value.is_finite() && value.fract() == 0.0 && (0.0..=JS_MAX_SAFE_INTEGER).contains(&value) {
         Some(value)
     } else {
         None
@@ -404,7 +406,8 @@ fn parent_element_chain_root(mut expr: AnyJsExpression) -> AnyJsExpression {
     }
 }
 
-/// `element.children[1].children[2]` should only report the outer access.
+/// `element.children[1].children[2]` and `element.childNodes[0].childNodes[0]`
+/// should only report the outer access.
 fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
     let Some(parent) = node.syntax().parent() else {
         return false;
@@ -422,7 +425,10 @@ fn is_nested_indexed_children(node: &JsComputedMemberExpression) -> bool {
             .ok()
             .and_then(|name| name.as_js_name().cloned())
             .and_then(|name| name.value_token().ok())
-            .is_none_or(|token| token.text_trimmed() != "children")
+            .is_none_or(|token| {
+                let name = token.text_trimmed();
+                name != "children" && name != "childNodes"
+            })
     {
         return false;
     }
