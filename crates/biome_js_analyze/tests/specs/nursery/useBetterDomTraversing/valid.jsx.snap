@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 197
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+class Component {
+	render() {
+		return <div>{this.props.children[0]}</div>;
+	}
+}
+
+const Arrow = (props) => <div>{props.children[0]}</div>;
+
+```

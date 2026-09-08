@@ -2698,6 +2698,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
+	* Prefer modern DOM traversal APIs over positional indexes and chained walks.
+See https://biomejs.dev/linter/rules/use-better-dom-traversing 
+	 */
+	useBetterDomTraversing?: UseBetterDomTraversingConfiguration;
+	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
@@ -4969,6 +4974,9 @@ export type UseAwaitThenableConfiguration =
 export type UseBaselineConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBaselineOptions;
+export type UseBetterDomTraversingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBetterDomTraversingOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -6970,6 +6978,11 @@ export interface RuleWithUseBaselineOptions {
 	level: RulePlainConfiguration;
 	options?: UseBaselineOptions;
 }
+export interface RuleWithUseBetterDomTraversingOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseBetterDomTraversingOptions;
+}
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8802,6 +8815,7 @@ export interface UseBaselineOptions {
 	 */
 	available?: AvailabilityTarget;
 }
+export type UseBetterDomTraversingOptions = {};
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -10204,6 +10218,7 @@ export type Category =
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
+	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
