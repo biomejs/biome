@@ -7574,6 +7574,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLiContainer": {
+					"description": "Require \\<li> elements with an HTML element parent to be children of \\<ul>, \\<ol>, or \\<menu>.\nSee https://biomejs.dev/linter/rules/use-li-container",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLiContainerConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useLogicalProperties": {
 					"description": "Enforce logical properties over physical properties.\nSee https://biomejs.dev/linter/rules/use-logical-properties",
 					"anyOf": [
@@ -12632,6 +12639,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLiContainerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLiContainerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseLiteralEnumMembersOptions": {
 			"type": "object",
 			"properties": {
@@ -16773,6 +16789,16 @@
 					"type": ["boolean", "null"]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseLiContainerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLiContainerOptions" }
+			]
+		},
+		"UseLiContainerOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseLiteralEnumMembersConfiguration": {

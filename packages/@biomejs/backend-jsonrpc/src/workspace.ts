@@ -2823,6 +2823,11 @@ See https://biomejs.dev/linter/rules/use-layered-styles
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
+	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
+See https://biomejs.dev/linter/rules/use-li-container 
+	 */
+	useLiContainer?: UseLiContainerConfiguration;
+	/**
 	* Enforce logical properties over physical properties.
 See https://biomejs.dev/linter/rules/use-logical-properties 
 	 */
@@ -5114,6 +5119,9 @@ export type UseIncludesConfiguration =
 export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLayeredStylesOptions;
+export type UseLiContainerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLiContainerOptions;
 export type UseLogicalPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLogicalPropertiesOptions;
@@ -7192,6 +7200,10 @@ export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLayeredStylesOptions;
 }
+export interface RuleWithUseLiContainerOptions {
+	level: RulePlainConfiguration;
+	options?: UseLiContainerOptions;
+}
 export interface RuleWithUseLogicalPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLogicalPropertiesOptions;
@@ -9069,6 +9081,7 @@ export interface UseLayeredStylesOptions {
 	 */
 	requireImportLayers?: boolean;
 }
+export type UseLiContainerOptions = {};
 export interface UseLogicalPropertiesOptions {
 	/**
 	 * The text direction used to map physical inline properties. Defaults to `"ltr"`.
@@ -10462,6 +10475,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLayeredStyles"
+	| "lint/nursery/useLiContainer"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"

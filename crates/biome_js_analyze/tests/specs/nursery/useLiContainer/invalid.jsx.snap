@@ -1,0 +1,209 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+    <div><li>Item in a div</li><li /></div>
+    <ul><div><li>Indirect child</li></div></ul>
+    <ol><section><li /></section></ol>
+    <menu><div><li /></div></menu>
+    <dl><li>Not a description list item</li></dl>
+    <custom-list><li /></custom-list>
+    <div><li {...props} /></div>
+    <List><div><li /></div></List>
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:10 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <div><li>Item in a div</li><li /></div>
+      │          ^^^^
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <ol><section><li /></section></ol>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:32 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <div><li>Item in a div</li><li /></div>
+      │                                ^^^^^^
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <ol><section><li /></section></ol>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:14 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    2 │ <>
+    3 │     <div><li>Item in a div</li><li /></div>
+  > 4 │     <ul><div><li>Indirect child</li></div></ul>
+      │              ^^^^
+    5 │     <ol><section><li /></section></ol>
+    6 │     <menu><div><li /></div></menu>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:18 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    3 │     <div><li>Item in a div</li><li /></div>
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+  > 5 │     <ol><section><li /></section></ol>
+      │                  ^^^^^^
+    6 │     <menu><div><li /></div></menu>
+    7 │     <dl><li>Not a description list item</li></dl>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:16 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <ol><section><li /></section></ol>
+  > 6 │     <menu><div><li /></div></menu>
+      │                ^^^^^^
+    7 │     <dl><li>Not a description list item</li></dl>
+    8 │     <custom-list><li /></custom-list>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    5 │     <ol><section><li /></section></ol>
+    6 │     <menu><div><li /></div></menu>
+  > 7 │     <dl><li>Not a description list item</li></dl>
+      │         ^^^^
+    8 │     <custom-list><li /></custom-list>
+    9 │     <div><li {...props} /></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:18 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     6 │     <menu><div><li /></div></menu>
+     7 │     <dl><li>Not a description list item</li></dl>
+   > 8 │     <custom-list><li /></custom-list>
+       │                  ^^^^^^
+     9 │     <div><li {...props} /></div>
+    10 │     <List><div><li /></div></List>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:10 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     7 │     <dl><li>Not a description list item</li></dl>
+     8 │     <custom-list><li /></custom-list>
+   > 9 │     <div><li {...props} /></div>
+       │          ^^^^^^^^^^^^^^^^^
+    10 │     <List><div><li /></div></List>
+    11 │ </>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:16 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     8 │     <custom-list><li /></custom-list>
+     9 │     <div><li {...props} /></div>
+  > 10 │     <List><div><li /></div></List>
+       │                ^^^^^^
+    11 │ </>;
+    12 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

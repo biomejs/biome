@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: boundaries.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<li>Root item</li>
+<li />
+<><li>Fragment item</li><li /></>
+<div><><li>Nested fragment item</li><li /></></div>
+
+```

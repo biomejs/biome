@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: boundaries.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<li>Root item</li>
+<LI>Uppercase root item</LI>
+<li />
+
+```

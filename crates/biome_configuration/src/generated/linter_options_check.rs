@@ -2146,6 +2146,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_layered_styles::UseLayeredStylesOptions>(),
     ));
     result.push((
+        "nursery",
+        "useLiContainer",
+        TypeId::of::<biome_rule_options::use_li_container::UseLiContainerOptions>(),
+    ));
+    result.push((
         "style",
         "useLiteralEnumMembers",
         TypeId::of::<biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions>(),
