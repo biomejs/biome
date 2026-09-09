@@ -667,22 +667,22 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn type_without_undefined(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
         let ty = self.resolve_inferred_type(ty);
-        match ty {
-            InferredTypeData::Undefined => InferredTypeData::Unknown,
-            InferredTypeData::Union(union) => {
-                let types: Vec<_> = union
-                    .types(self.db)
-                    .iter()
-                    .copied()
-                    .filter(|ty| *ty != InferredTypeData::Undefined)
-                    .collect();
-                if types.is_empty() {
-                    InferredTypeData::Unknown
-                } else {
-                    InferredTypeData::union_from_types(self.db, types)
-                }
-            }
-            ty => ty,
+        if ty == InferredTypeData::Undefined {
+            return InferredTypeData::Unknown;
+        }
+        let InferredTypeData::Union(union) = ty else {
+            return ty;
+        };
+        let types: Vec<_> = union
+            .types(self.db)
+            .iter()
+            .copied()
+            .filter(|ty| *ty != InferredTypeData::Undefined)
+            .collect();
+        if types.is_empty() {
+            InferredTypeData::Unknown
+        } else {
+            InferredTypeData::union_from_types(self.db, types)
         }
     }
 
