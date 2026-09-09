@@ -16,3 +16,5 @@ allowBuilds:
 minimumReleaseAgeExclude:
   # Renovate security update: vite@7.3.5
   - vite@7.3.5
+  # Renovate security update: vitest@4.1.11
+  - vitest@4.1.11
