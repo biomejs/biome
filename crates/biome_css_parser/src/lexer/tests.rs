@@ -194,55 +194,8 @@ fn url_body_classification_emits_raw_url_value() {
 }
 
 #[test]
-fn url_body_classification_preserves_asset_alias_ranges() {
-    for scss in [false, true] {
-        for body in [
-            "@/assets/svg/for-css/check.svg",
-            "@site/static/img/showcase/gh-footer-light.svg",
-            "!PaulMaul.woff2",
-            r"@/assets/a\)b.svg",
-            r"!font\20 name.woff2",
-            r"@/icons/\é.svg",
-            "@/other.svg \t",
-            "!Other.woff2  ",
-            r"@a\ ",
-            r"!a\\\  ",
-            r"@a\\  ",
-            "@a\u{00a0}",
-            "!a\u{2003}",
-        ] {
-            for terminated in [false, true] {
-                let source = format!("url( \t{body}{}", if terminated { ")" } else { "" });
-                let source_type = if scss { CssFileSource::scss() } else { CssFileSource::css() };
-                let mut lexer = CssLexer::from_str(&source).with_source_type(source_type);
-                assert_eq!(lexer.next_token(CssLexContext::Regular), CssSyntaxKind::URL_KW);
-                assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
-                let context = url_body_lex_context(&lexer, scss);
-                let end = 6 + body.len();
-                assert!(matches!(context, CssLexContext::UrlRawValue(scan)
-                    if scan.start == 6 && scan.end == end && scan.terminated == terminated),
-                    "{source_type:?} {source:?}: {context:?}");
-                assert_eq!(lexer.next_token(context), CssSyntaxKind::WHITESPACE);
-                assert_eq!(lexer.next_token(context), CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL);
-                assert_eq!(lexer.current_range(), TextRange::new(TextSize::from(6), TextSize::from(end as u32)));
-                assert_eq!(&source[lexer.current_range()], body);
-                if terminated {
-                    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
-                    assert_eq!(&source[lexer.current_range()], ")");
-                }
-                assert_eq!(lexer.next_token(CssLexContext::Regular), EOF);
-                assert_eq!(lexer.current_range(), TextRange::empty(TextSize::from(source.len() as u32)));
-                assert_eq!(lexer.finish().len(), usize::from(!terminated));
-            }
-        }
-    }
-}
-
-#[test]
 fn scss_url_value_scanner_classifies_structured_bodies() {
     for source in [
-        "@/assets/#{$name}.svg)",
-        "!#{$name}.woff2)",
         "images/#{$name}.png)",
         "#{$base}/#{$theme}/logo.svg)",
         "fonts/#{$family}.woff2)",
