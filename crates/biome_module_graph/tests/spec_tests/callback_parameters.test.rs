@@ -213,7 +213,7 @@ fn test_optional_callback_parameter_includes_undefined() {
         source_with_declarations(
             r#"
             declare function run(callback: (input?: Context) => Promise<void>): void;
-            run(async (optional?) => {});
+            run(async (optional) => {});
         "#,
         ),
     );
@@ -238,6 +238,33 @@ fn test_optional_callback_parameter_includes_undefined() {
         .find(|ty| find_value_member_type(&db, *ty, "service").is_some())
         .expect("optional parameter must include the Context type");
     assert_has_service_returning_promise(&db, module, context);
+}
+
+#[test]
+fn test_default_initialized_callback_parameter_excludes_undefined() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        source_with_declarations(
+            r#"
+            declare const fallback: Context;
+            declare function run(callback: (input?: Context) => Promise<void>): void;
+            run(async (defaulted = fallback) => {});
+        "#,
+        ),
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    let defaulted = normalized_binding_ty(&db, module, "defaulted");
+    assert!(
+        !contains_inferred_undefined(&db, defaulted),
+        "default-initialized parameter must exclude undefined, got {defaulted:?}"
+    );
+    assert_has_service_returning_promise(&db, module, defaulted);
 }
 
 #[test]

@@ -1716,6 +1716,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 TypeofExpression::Parameter(TypeofParameterExpression {
                     function: self.take_type()?,
                     index: expression.index,
+                    has_initializer: expression.has_initializer,
                 })
             }
             TypeofExpression::Conditional(_) => {
@@ -2158,6 +2159,7 @@ pub struct TypeofCallArgumentExpression<'db> {
 pub struct TypeofParameterExpression<'db> {
     pub function: TypeData<'db>,
     pub index: u16,
+    pub has_initializer: bool,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2666,6 +2668,7 @@ fn convert_typeof_expression<'db>(
             TypeofExpression::Parameter(TypeofParameterExpression {
                 function: resolve_reference(&expression.function),
                 index: expression.index,
+                has_initializer: expression.has_initializer,
             })
         }
         raw::TypeofExpression::Conditional(expression) => {
@@ -3431,6 +3434,7 @@ mod tests {
                 TypeofExpression::Parameter(TypeofParameterExpression {
                     function: s.next(),
                     index: 1,
+                    has_initializer: true,
                 }),
             )
         });

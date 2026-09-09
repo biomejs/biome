@@ -140,7 +140,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Parameter(expression) => {
                 let function = self.resolve(&expression.function);
-                self.resolve_parameter(function, expression.index)
+                self.resolve_parameter(
+                    function,
+                    expression.index,
+                    expression.has_initializer,
+                )
             }
             RawTypeofExpression::Conditional(expression) => {
                 let test = self.resolve(&expression.test);
@@ -272,7 +276,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 expression.is_constructor,
             ),
             InferredTypeofExpression::Parameter(expression) => {
-                self.resolve_parameter(expression.function, expression.index)
+                self.resolve_parameter(
+                    expression.function,
+                    expression.index,
+                    expression.has_initializer,
+                )
             }
             InferredTypeofExpression::Conditional(expression) => self
                 .resolve_conditional_expression(
@@ -645,6 +653,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         function: InferredTypeData<'db>,
         index: u16,
+        has_initializer: bool,
     ) -> Option<InferredTypeData<'db>> {
         let function = self.resolve_inferred_type(function);
         let function = resolve_callable_function(self.db, function)?;
@@ -653,7 +662,37 @@ impl<'db> ResolutionCtx<'db, '_> {
             .iter()
             .filter(|parameter| !parameter.is_this())
             .nth(index as usize)?;
-        (!parameter.is_rest()).then(|| parameter.ty())
+        (!parameter.is_rest()).then(|| {
+            if has_initializer {
+                self.type_without_undefined(parameter.ty())
+            } else {
+                self.optional_element_type(parameter.ty(), parameter.is_optional())
+            }
+        })
+    }
+
+    fn type_without_undefined(
+        &mut self,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let ty = self.resolve_inferred_type(ty);
+        match ty {
+            InferredTypeData::Undefined => InferredTypeData::Unknown,
+            InferredTypeData::Union(union) => {
+                let types: Vec<_> = union
+                    .types(self.db)
+                    .iter()
+                    .copied()
+                    .filter(|ty| *ty != InferredTypeData::Undefined)
+                    .collect();
+                if types.is_empty() {
+                    InferredTypeData::Unknown
+                } else {
+                    InferredTypeData::union_from_types(self.db, types)
+                }
+            }
+            ty => ty,
+        }
     }
 
     fn resolve_inferred_call_expression(

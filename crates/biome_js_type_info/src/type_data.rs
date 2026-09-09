@@ -1379,6 +1379,7 @@ pub struct TypeofCallArgumentExpression {
 pub struct TypeofParameterExpression {
     pub function: TypeReference,
     pub index: u16,
+    pub has_initializer: bool,
 }
 
 /// Represents the type of a ternary expression.

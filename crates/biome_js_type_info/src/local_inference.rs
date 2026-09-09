@@ -1153,6 +1153,7 @@ impl TypeData {
         scope_id: ScopeId,
         function: &JsSyntaxNode,
         parameter_index: usize,
+        has_initializer: bool,
     ) -> Option<Self> {
         let mut argument = function.clone();
         let mut parent = argument.parent()?;
@@ -1201,6 +1202,7 @@ impl TypeData {
             TypeofParameterExpression {
                 function: expected,
                 index: parameter_index.try_into().ok()?,
+                has_initializer,
             },
         )))
     }
@@ -1229,7 +1231,13 @@ impl TypeData {
         ) {
             return None;
         }
-        Self::from_contextual_callback_parameter(collector, scope_id, &function, parameter_index)
+        Self::from_contextual_callback_parameter(
+            collector,
+            scope_id,
+            &function,
+            parameter_index,
+            param.initializer().is_some(),
+        )
     }
 
     /// Contextual type of the single unparenthesised arrow parameter, as in
@@ -1241,7 +1249,13 @@ impl TypeData {
     ) -> Option<Self> {
         match expr.parameters().ok()? {
             AnyJsArrowFunctionParameters::AnyJsBinding(_) => {
-                Self::from_contextual_callback_parameter(collector, scope_id, expr.syntax(), 0)
+                Self::from_contextual_callback_parameter(
+                    collector,
+                    scope_id,
+                    expr.syntax(),
+                    0,
+                    false,
+                )
             }
             AnyJsArrowFunctionParameters::JsParameters(_) => None,
         }
