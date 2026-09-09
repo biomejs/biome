@@ -200,9 +200,9 @@ Expression "async (value) => value + 1" => async Function {
   returns: instanceof Promise<unknown>
 }
 
-Binding value "value" => unknown
+Binding value "value" => U
 
-Expression "value" => unknown
+Expression "value" => U
 
 Expression "value + 1" => unknown
 
@@ -250,7 +250,7 @@ Expression "(value) => Promise.resolve(value + 1)" => sync Function {
   returns: instanceof Promise<unknown>
 }
 
-Binding value "value" => unknown
+Binding value "value" => U
 
 Expression "Promise" => class "Promise" {
   extends: none
@@ -270,7 +270,7 @@ Expression "Promise.resolve" => sync Function "resolve" {
 
 Expression "Promise.resolve(value + 1)" => instanceof Promise<unknown>
 
-Expression "value" => unknown
+Expression "value" => U
 
 Expression "value + 1" => unknown
 

@@ -741,6 +741,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     token(")")
                 ]]
             ),
+            Self::CallArgument(argument) => {
+                write!(f, [token("CallArgument"), space()])?;
+                if argument.is_constructor {
+                    write!(f, [token("new"), space()])?;
+                }
+                write!(
+                    f,
+                    [&format_args![
+                        &argument.callee,
+                        token("("),
+                        group(&soft_block_indent(&FmtInferredCallArgumentTypes(
+                            &argument.arguments
+                        ))),
+                        token(")"),
+                        token("["),
+                        text(&argument.index.to_string(), None),
+                        token("]"),
+                    ]]
+                )
+            }
             Self::Conditional(expr) => write!(
                 f,
                 [&group(&format_args![
@@ -842,6 +862,17 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                         &expr.arguments
                     ))),
                     token(")")
+                ]]
+            ),
+            Self::Parameter(parameter) => write!(
+                f,
+                [&format_args![
+                    token("Parameter"),
+                    space(),
+                    &parameter.function,
+                    token("["),
+                    text(&parameter.index.to_string(), None),
+                    token("]"),
                 ]]
             ),
             Self::NullishCoalescing(expr) => write!(

@@ -70,6 +70,18 @@ fn verify_type_sizes() {
     );
 
     assert_eq!(
+        std::mem::size_of::<TypeofCallArgumentExpression>(),
+        40,
+        "The size shouldn't go higher"
+    );
+
+    assert_eq!(
+        std::mem::size_of::<TypeofParameterExpression>(),
+        24,
+        "The size shouldn't go higher"
+    );
+
+    assert_eq!(
         std::mem::size_of::<TypeofDestructureExpression>(),
         40,
         "The size shouldn't go higher"

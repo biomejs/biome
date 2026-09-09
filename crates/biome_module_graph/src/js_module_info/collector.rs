@@ -3,14 +3,15 @@ use std::{borrow::Cow, sync::Arc};
 
 use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
-    AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
-    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
+    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
+    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsRestParameter,
+    JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GenericTypeParameter, RawTypeCollector, RawTypeData, RawTypeId, TypeData,
-    TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeStore,
-    UnionCollector, resolved::InferredLocalTypeId,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
+    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
+    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -531,23 +532,31 @@ impl JsModuleInfoCollector {
                     .iter()
                     .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
                     .unwrap_or_default();
-            } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
-                .and_then(|param| self.function_parameters.get(param.syntax()))
-                .or_else(|| {
-                    JsRestParameter::cast_ref(&ancestor)
-                        .and_then(|param| self.function_parameters.get(param.syntax()))
-                })
+            } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor) {
+                if let Some(ty) =
+                    self.contextual_parameter_binding_type(scope_id, &param, binding_name)
+                {
+                    return ty;
+                }
+                return self
+                    .function_parameters
+                    .get(param.syntax())
+                    .map(|param| param.binding_type(binding_name))
+                    .unwrap_or_default();
+            } else if let Some(param) = JsRestParameter::cast_ref(&ancestor) {
+                return self
+                    .function_parameters
+                    .get(param.syntax())
+                    .map(|param| param.binding_type(binding_name))
+                    .unwrap_or_default();
+            } else if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&ancestor)
+                && let Ok(AnyJsArrowFunctionParameters::AnyJsBinding(param)) = arrow.parameters()
+                && param.syntax().text_trimmed_range() == node.text_trimmed_range()
             {
-                return match param {
-                    FunctionParameter::Named(named) => named.ty.clone(),
-                    FunctionParameter::Pattern(pattern) => pattern
-                        .bindings
-                        .iter()
-                        .find_map(|binding| {
-                            (binding.name == *binding_name).then(|| binding.ty.clone())
-                        })
-                        .unwrap_or_default(),
-                };
+                // `value => value` has no `JsFormalParameter` node.
+                return TypeData::from_contextual_js_arrow_function_binding(self, scope_id, &arrow)
+                    .map(|ty| self.reference_to_owned_data(ty))
+                    .unwrap_or_default();
             } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_type_parameter(self, scope_id, &param) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
@@ -557,6 +566,30 @@ impl JsModuleInfoCollector {
         }
 
         TypeReference::unknown()
+    }
+
+    /// Binding type of an unannotated callback parameter, or `None` when the
+    /// parameter is not contextually typed.
+    fn contextual_parameter_binding_type(
+        &mut self,
+        scope_id: ScopeId,
+        param: &JsFormalParameter,
+        binding_name: &Text,
+    ) -> Option<TypeReference> {
+        let ty = TypeData::from_contextual_js_formal_parameter(self, scope_id, param)?;
+        let pattern = param.binding().ok()?;
+        let bindings = FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
+            self, scope_id, &pattern, &ty,
+        )?;
+        let ty = bindings
+            .iter()
+            .find_map(|binding| (binding.name == *binding_name).then(|| binding.ty.clone()))?;
+        if param.question_mark_token().is_some()
+            && matches!(pattern, AnyJsBindingPattern::AnyJsBinding(_))
+        {
+            return Some(RawTypeId::Local(self.optional(ty)).into());
+        }
+        Some(ty)
     }
 
     /// Widen the type of binding from its writable references.
