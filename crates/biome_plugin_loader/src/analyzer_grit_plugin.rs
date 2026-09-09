@@ -16,6 +16,7 @@ use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
 use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind, TextRange};
+use biome_text_edit::TextEdit;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
@@ -145,8 +146,10 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     .filter_map(|effect| match effect {
                         GritQueryEffect::Rewrite(rewrite) => Some(PluginActionData {
                             source_range,
-                            original_text: original_text.clone(),
-                            rewritten_text: rewrite.rewritten.content.clone(),
+                            text_edit: TextEdit::from_unicode_words(
+                                &original_text,
+                                &rewrite.rewritten.content,
+                            ),
                             message: format!("Rewrite suggested by plugin `{name}`"),
                             applicability: Applicability::MaybeIncorrect,
                         }),

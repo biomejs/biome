@@ -2,6 +2,7 @@ use biome_diagnostics::Applicability;
 use biome_rowan::{
     AnySyntaxNode, Language, RawSyntaxKind, SyntaxKindSet, SyntaxNode, TextRange, WalkEvent,
 };
+use biome_text_edit::TextEdit;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::{fmt::Debug, sync::Arc};
 
@@ -21,10 +22,8 @@ pub type AnalyzerPluginVec = Vec<Arc<Box<dyn AnalyzerPlugin>>>;
 pub struct PluginActionData {
     /// The source range this action applies to.
     pub source_range: TextRange,
-    /// The original source text that was matched.
-    pub original_text: String,
-    /// The rewritten text to replace the original.
-    pub rewritten_text: String,
+    /// Precomputed edit in the analyzed source's coordinates.
+    pub text_edit: TextEdit,
     /// A message describing the action.
     pub message: String,
     /// Whether this fix is safe or unsafe.

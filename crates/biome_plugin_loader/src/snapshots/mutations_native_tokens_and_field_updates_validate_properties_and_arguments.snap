@@ -1,0 +1,98 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/plugin-api";
+
+export const fixer = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const statement = root.items[0];
+		const call = statement.expression;
+		const args = call.arguments;
+		const list = args.children()[0];
+		const [first, second] = args.args;
+		const token = first.token("valueToken");
+
+		registerDiagnostic(
+			root,
+			"information",
+			JSON.stringify([
+				first.valueToken,
+				token.text,
+				token.kind,
+				token.parent.kind,
+				token.parent.valueToken,
+				statement.token("semicolonToken"),
+			]),
+		);
+		registerDiagnostic(
+			root,
+			"information",
+			list
+				.childrenWithTokens()
+				.map((element) => element.kind)
+				.join(","),
+		);
+		const detached = factory.token("COMMA");
+		registerDiagnostic(
+			root,
+			"information",
+			JSON.stringify([
+				detached.kind,
+				detached.text,
+				detached.parent,
+				factory.token("IDENT", "a b").text,
+				factory.token("JS_NUMBER_LITERAL", "1e").text,
+				factory.token("JSX_TEXT_LITERAL", "a{b}").text,
+			]),
+		);
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2)
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i ["1","1","JS_NUMBER_LITERAL","JS_NUMBER_LITERAL_EXPRESSION","1",null]
+  
+  > 1 │ call(1,2)
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JS_NUMBER_LITERAL_EXPRESSION,COMMA,JS_NUMBER_LITERAL_EXPRESSION
+  
+  > 1 │ call(1,2)
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i ["COMMA",",",null,"a b","1e","a{b}"]
+  
+  > 1 │ call(1,2)
+      │ ^^^^^^^^^
+```

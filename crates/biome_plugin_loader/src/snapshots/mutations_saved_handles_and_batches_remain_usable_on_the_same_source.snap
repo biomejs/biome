@@ -1,0 +1,116 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/plugin-api";
+
+let saved;
+export const savedHandles = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const first = root.items[0].expression.arguments.args[0];
+		if (saved) {
+			saved.mutation.replaceToken(
+				saved.token,
+				factory.token("JS_NUMBER_LITERAL", "9"),
+			);
+			registerDiagnostic(saved.first, "warning", "Saved batch", {
+				mutation: saved.mutation,
+				message: "Apply edit",
+				kind: "safe",
+			});
+			const mutation = createMutation(saved.first);
+			mutation.replaceNode(saved.first, saved.replacement);
+			registerDiagnostic(saved.first, "warning", "Saved anchor", {
+				mutation,
+				message: "Apply edit",
+				kind: "safe",
+			});
+		}
+		const mutation = createMutation(first);
+		mutation.removeToken(root.items[0].token("semicolonToken"));
+		saved = {
+			first,
+			mutation,
+			token: first.token("valueToken"),
+			replacement: first.withValueToken(
+				factory.token("JS_NUMBER_LITERAL", "9"),
+			),
+		};
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Saved batch
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2)
+  
+
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Saved anchor
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2);
+  
+
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Saved batch
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2)
+  
+
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Saved anchor
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2);
+```

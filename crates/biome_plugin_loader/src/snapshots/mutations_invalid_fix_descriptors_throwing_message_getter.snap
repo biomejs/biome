@@ -1,0 +1,137 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/plugin-api";
+
+export const aFailed = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const first = root.items[0].expression.arguments.args[0];
+		const preserved = createMutation(root);
+		preserved.replaceToken(
+			first.token("valueToken"),
+			factory.token("JS_NUMBER_LITERAL", "9"),
+		);
+		registerDiagnostic(root, "warning", "Before failure", {
+			mutation: preserved,
+			message: "Apply edit",
+			kind: "safe",
+		});
+		const mutation = createMutation(root);
+		registerDiagnostic(root, "warning", "Invalid descriptor", {
+			mutation,
+			get message() {
+				return factory.token("UNKNOWN");
+			},
+			kind: "safe",
+		});
+	},
+});
+export const bHealthy = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const second = root.items[0].expression.arguments.args[1];
+		const mutation = createMutation(second);
+		mutation.replaceToken(
+			second.token("valueToken"),
+			factory.token("JS_NUMBER_LITERAL", "8"),
+		);
+		registerDiagnostic(second, "warning", "Healthy fix", {
+			mutation,
+			message: "Apply edit",
+			kind: "unsafe",
+		});
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Before failure
+  
+  > 1 │ call(1,2);
+      │ ^^^^^^^^^^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2);
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule aFailed errored: TypeError: factory.token() does not support the kind "UNKNOWN". Use a name from the JsTokenKind definition, such as "IDENT" or "LET_KW".
+        at get message (/plugin.js:14:139)
+        at registerDiagnostic (native)
+        at run (/plugin.js:14:51)
+  
+
+/file.js:1:8 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Healthy fix
+  
+  > 1 │ call(1,2);
+      │        ^
+  
+  i Unsafe fix: Apply edit
+  
+  - call(1,2);
+  + call(1,8);
+  
+
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Before failure
+  
+  > 1 │ call(1,2);
+      │ ^^^^^^^^^^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2);
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule aFailed errored: TypeError: factory.token() does not support the kind "UNKNOWN". Use a name from the JsTokenKind definition, such as "IDENT" or "LET_KW".
+        at get message (/plugin.js:14:139)
+        at registerDiagnostic (native)
+        at run (/plugin.js:14:51)
+  
+
+/file.js:1:8 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Healthy fix
+  
+  > 1 │ call(1,2);
+      │        ^
+  
+  i Unsafe fix: Apply edit
+  
+  - call(1,2);
+  + call(1,8);
+```

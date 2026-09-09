@@ -5,6 +5,9 @@ mod diagnostics;
 mod plugin_cache;
 mod plugin_manifest;
 
+#[cfg(test)]
+mod test_utils;
+
 #[cfg(feature = "js_plugin")]
 mod analyzer_js_plugin;
 #[cfg(feature = "js_plugin")]
@@ -145,11 +148,12 @@ mod test {
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
 
-    fn snap_diagnostic(test_name: &str, diagnostic: Error) {
+    fn snap_diagnostic(test_name: &str, plugin_sources: &[(&str, &str)], diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
 
         // Normalize Windows paths...
         let content = content.replace('\\', "/");
+        let content = test_utils::snapshot_content(plugin_sources, &[], &content);
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
@@ -180,46 +184,55 @@ mod test {
     #[test]
     fn load_plugin_without_manifest() {
         let fs = MemoryFileSystem::default();
-        fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
+        let source = r#"`hello`"#;
+        fs.insert("/my-plugin/rules/1.grit".into(), source);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
-        snap_diagnostic("load_plugin_without_manifest", error.into());
+        snap_diagnostic(
+            "load_plugin_without_manifest",
+            &[("/my-plugin/rules/1.grit", source)],
+            error.into(),
+        );
     }
 
     #[test]
     fn load_plugin_with_wrong_version() {
         let fs = MemoryFileSystem::default();
-        fs.insert(
-            "/my-plugin/biome-manifest.jsonc".into(),
-            r#"{
+        let manifest = r#"{
     "version": 2,
     "rules": ["rules/1.grit"]
-}"#,
-        );
+}"#;
+        fs.insert("/my-plugin/biome-manifest.jsonc".into(), manifest);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
-        snap_diagnostic("load_plugin_with_wrong_version", error.into());
+        snap_diagnostic(
+            "load_plugin_with_wrong_version",
+            &[("/my-plugin/biome-manifest.jsonc", manifest)],
+            error.into(),
+        );
     }
 
     #[test]
     fn load_plugin_with_wrong_rule_extension() {
         let fs = MemoryFileSystem::default();
-        fs.insert(
-            "/my-plugin/biome-manifest.jsonc".into(),
-            r#"{
+        let manifest = r#"{
     "version": 1,
     "rules": ["rules/1.js"]
-}"#,
-        );
+}"#;
+        fs.insert("/my-plugin/biome-manifest.jsonc".into(), manifest);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
-        snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
+        snap_diagnostic(
+            "load_plugin_with_wrong_rule_extension",
+            &[("/my-plugin/biome-manifest.jsonc", manifest)],
+            error.into(),
+        );
     }
 
     #[test]

@@ -2,6 +2,39 @@
 source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
 expression: content
 ---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+export const noVar = defineRule({
+	query: ast("JS_VARIABLE_STATEMENT"),
+	run(statement) {
+		if (statement.declaration?.kindToken === "var") {
+			registerDiagnostic(statement, "warning", "Use let or const instead.");
+		}
+	},
+});
+export const noFoo = defineRule({
+	query: ast("JS_VARIABLE_STATEMENT", "JS_CALL_EXPRESSION"),
+	run(node) {
+		registerDiagnostic(node, "information", `Seen: ${node.kind}`);
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+var legacy = foo();
+```
+
+# Diagnostics
+
+```block
 /file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Seen: JS_VARIABLE_STATEMENT
@@ -24,3 +57,4 @@ expression: content
   
   > 1 │ var legacy = foo();
       │              ^^^^^
+```

@@ -4550,6 +4550,148 @@ const x = 1;
 
 #[test]
 #[cfg(feature = "js_plugin")]
+fn javascript_plugin_mutation_fixes_respect_modes_and_preserve_source() {
+    use biome_diagnostics::Applicability;
+    use biome_plugin_loader::{PluginConfiguration, Plugins};
+
+    const PLUGIN_SOURCE: &str = r#"import { createMutation, factory, registerDiagnostic, ast, defineRule } from "@biomejs/plugin-api";
+
+export const useLet = defineRule({
+    query: ast("JS_VARIABLE_DECLARATION"),
+    run(node) {
+        const kindToken = node.token("kindToken");
+        if (kindToken?.text !== "var") {
+            return;
+        }
+        const m = createMutation(node);
+        m.replaceToken(kindToken, factory.token("LET_KW"));
+        m.replaceToken(node.declarators[0].id.token("nameToken"), factory.token("IDENT", "renamed"));
+        registerDiagnostic(node, "warning", "Use a named let binding.", {
+            mutation: m,
+            message: "Use let",
+            kind: "FIX_KIND",
+        });
+    },
+});"#;
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str =
+        "const prefix = 'λ';\n/* café */\nvar /* keep */ café = '漢'; // suffix\n";
+    const FIXED_CONTENT: &str =
+        "const prefix = 'λ';\n/* café */\nlet /* keep */ renamed = '漢'; // suffix\n";
+
+    for (kind, applicability) in [
+        ("safe", Applicability::Always),
+        ("unsafe", Applicability::MaybeIncorrect),
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/plugin.js"),
+            PLUGIN_SOURCE.replace("FIX_KIND", kind),
+        );
+        fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+        let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration {
+                    plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                        "plugin.js".to_string(),
+                    )])),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let diagnostics = workspace
+            .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                only: vec![AnalyzerSelector::Plugin],
+                skip: vec![],
+                enabled_rules: vec![],
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                inline_config: None,
+            })
+            .unwrap();
+        assert_eq!(diagnostics.diagnostics.len(), 1, "{kind}: {diagnostics:?}");
+        let (diagnostic, actions) = &diagnostics.diagnostics[0];
+        assert_eq!(diagnostic.severity(), Severity::Warning);
+        assert_eq!(
+            &FILE_CONTENT[diagnostic.location().span.unwrap()],
+            "var /* keep */ café = '漢'"
+        );
+        assert_eq!(actions.len(), 1);
+        let suggestion = actions[0].suggestion.as_ref().unwrap();
+        assert_eq!(suggestion.applicability, applicability);
+        assert_eq!(suggestion.msg, biome_console::markup!("Use let").to_owned());
+        assert_eq!(
+            suggestion.suggestion.new_string(FILE_CONTENT),
+            FIXED_CONTENT
+        );
+
+        for mode in [
+            FixFileMode::SafeFixes,
+            FixFileMode::SafeAndUnsafeFixes,
+            FixFileMode::ApplySuppressions,
+        ] {
+            let result = workspace
+                .fix_file(FixFileParams {
+                    project_key,
+                    path: BiomePath::new(FILE_PATH),
+                    fix_file_mode: mode,
+                    should_format: false,
+                    only: vec![AnalyzerSelector::Plugin],
+                    skip: vec![],
+                    enabled_rules: vec![],
+                    rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
+                    suppression_reason: None,
+                    inline_config: None,
+                })
+                .unwrap();
+            let applies = mode == FixFileMode::SafeAndUnsafeFixes
+                || (mode == FixFileMode::SafeFixes && kind == "safe");
+            assert_eq!(
+                result.code,
+                if applies { FIXED_CONTENT } else { FILE_CONTENT },
+                "{kind}: {mode:?}"
+            );
+            assert_eq!(
+                result.actions.len(),
+                usize::from(applies),
+                "{kind}: {mode:?}"
+            );
+            assert_eq!(
+                result.skipped_suggested_fixes,
+                u32::from(mode == FixFileMode::SafeFixes && kind == "unsafe"),
+                "{kind}: {mode:?}"
+            );
+            assert_eq!(result.errors, 0);
+            if applies {
+                assert_eq!(
+                    result.actions[0].rule_name,
+                    Some(("plugin".into(), "anonymous".into()))
+                );
+            }
+        }
+    }
+}
+
+#[test]
+#[cfg(feature = "js_plugin")]
 fn typescript_plugin_reports_diagnostics_through_the_workspace() {
     use biome_plugin_loader::{PluginConfiguration, Plugins};
 
