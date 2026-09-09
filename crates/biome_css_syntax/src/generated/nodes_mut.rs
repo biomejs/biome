@@ -4451,6 +4451,14 @@ impl ScssInterpolatedString {
         )
     }
 }
+impl ScssInterpolatedSubSelector {
+    pub fn with_name(self, element: ScssInterpolatedIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolatedUrlValue {
     pub fn with_parts(self, element: ScssInterpolatedUrlValuePartList) -> Self {
         Self::unwrap_cast(
