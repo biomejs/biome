@@ -91,7 +91,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
+        uses: taiki-e/install-action@7b8d4719ee4aaa279bdf55df38dacb9ebfe12a6c # v2.87.6
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-deny
@@ -255,7 +255,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24.19.0
+          node-version: 24.20.0
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos
@@ -275,7 +275,7 @@ jobs:
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
