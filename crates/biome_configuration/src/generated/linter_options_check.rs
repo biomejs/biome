@@ -876,6 +876,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("a11y", "noNoninteractiveTabindex", TypeId::of::<biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions>()));
     result.push(("correctness", "noNonoctalDecimalEscape", TypeId::of::<biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions>()));
     result.push((
+        "nursery",
+        "noObsoleteTags",
+        TypeId::of::<biome_rule_options::no_obsolete_tags::NoObsoleteTagsOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noOctalEscape",
         TypeId::of::<biome_rule_options::no_octal_escape::NoOctalEscapeOptions>(),

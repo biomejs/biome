@@ -1,0 +1,25 @@
+/* should not generate diagnostics */
+<abbr title="World Wide Web">WWW</abbr>;
+<div className="centered"><span>Text</span></div>;
+<strong>Important</strong>;
+<s>No longer accurate</s>;
+<del>Deleted</del>;
+<pre><code>code</code></pre>;
+<ruby>漢<rt>kan</rt></ruby>;
+<iframe title="Content" />;
+<object data="file.pdf" />;
+<custom-font />;
+<applet-widget />;
+<unknown />;
+<Font />;
+<FONT>Text</FONT>;
+<Applet />;
+<font.Face />;
+<UI.font />;
+<UI.applet>Text</UI.applet>;
+<UI.nested.center />;
+<svg:font />;
+<html:applet>Text</html:applet>;
+<font:face />;
+<myFont />;
+<div title="<font>">{"<center>"}</div>;

@@ -2490,6 +2490,11 @@ See https://biomejs.dev/linter/rules/no-non-scalable-viewport
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
+	* Disallow obsolete HTML elements.
+See https://biomejs.dev/linter/rules/no-obsolete-tags 
+	 */
+	noObsoleteTags?: NoObsoleteTagsConfiguration;
+	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
 	 */
@@ -4854,6 +4859,9 @@ export type NoNegationInEqualityCheckConfiguration =
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
+export type NoObsoleteTagsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObsoleteTagsOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -6809,6 +6817,10 @@ export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
 }
+export interface RuleWithNoObsoleteTagsOptions {
+	level: RulePlainConfiguration;
+	options?: NoObsoleteTagsOptions;
+}
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8679,6 +8691,7 @@ export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
+export type NoObsoleteTagsOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -10176,6 +10189,7 @@ export type Category =
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNonScalableViewport"
+	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
