@@ -5,8 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{
-    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression,
-    AstroSetDirective, HtmlElement, HtmlLanguage, element_ext::AnyHtmlTagElement,
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AstroSetDirective,
+    HtmlElement, HtmlLanguage, element_ext::AnyHtmlTagElement,
 };
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, TextRange};
@@ -68,65 +68,29 @@ fn set_directive_name(directive: &AstroSetDirective) -> Option<&'static str> {
     }
 }
 
-fn is_empty_text_expression(mut source: &str) -> bool {
-    loop {
-        source = source.trim_start_matches(|c: char| c.is_whitespace() || c == '\u{feff}');
-        if source.is_empty() {
-            return true;
-        }
-
-        if let Some(rest) = source.strip_prefix("//") {
-            source = rest
-                .find(['\n', '\r', '\u{2028}', '\u{2029}'])
-                .map_or("", |index| &rest[index..]);
-        } else if let Some(rest) = source.strip_prefix("/*") {
-            source = rest.find("*/").map_or("", |index| &rest[index + 2..]);
-        } else {
-            return false;
-        }
-    }
-}
-
-fn content_source_range(content: &AnyHtmlContent) -> Option<TextRange> {
-    match content {
-        AnyHtmlContent::HtmlContent(content) => {
-            let token = content.value_token().ok()?;
-            let text = token.token_text_trimmed().trim_token();
-            (!text.is_empty()).then(|| text.source_range(token.text_range()))
-        }
-        AnyHtmlContent::HtmlEmbeddedContent(content) => {
-            let token = content.value_token().ok()?;
-            let text = token.token_text_trimmed().trim_token();
-            (!text.is_empty()).then(|| text.source_range(token.text_range()))
-        }
-        AnyHtmlContent::AnyHtmlTextExpression(
-            AnyHtmlTextExpression::HtmlSingleTextExpression(expression),
-        ) => {
-            let token = expression.expression()?.html_literal_token().ok()?;
-            (!is_empty_text_expression(token.text_trimmed())).then(|| expression.range())
-        }
-        AnyHtmlContent::AnyHtmlTextExpression(expression) => Some(expression.range()),
-    }
-}
-
 impl Rule for NoAstroConflictingSetDirectives {
     type Query = Ast<AstroSetDirective>;
-    type State = Box<[RuleState]>;
-    type Signals = Option<Self::State>;
+    type State = RuleState;
+    type Signals = Box<[Self::State]>;
     type Options = NoAstroConflictingSetDirectivesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if !ctx.source_type::<HtmlFileSource>().is_astro() {
-            return None;
+            return Box::default();
         }
 
         let directive = ctx.query();
-        set_directive_name(directive)?;
+        if set_directive_name(directive).is_none() {
+            return Box::default();
+        }
 
-        let element = directive
+        let Some(element) = directive
             .syntax()
             .ancestors()
-            .find_map(AnyHtmlTagElement::cast)?;
+            .find_map(AnyHtmlTagElement::cast)
+        else {
+            return Box::default();
+        };
         let mut conflicting_sources = Vec::new();
 
         for attribute in element.attributes().iter() {
@@ -146,13 +110,27 @@ impl Rule for NoAstroConflictingSetDirectives {
         }
 
         if let AnyHtmlTagElement::HtmlOpeningElement(opening_element) = element {
-            let element = opening_element
+            let Some(element) = opening_element
                 .syntax()
                 .parent()
-                .and_then(HtmlElement::cast)?;
-            let mut child_ranges = element.children().iter().filter_map(|child| match child {
-                AnyHtmlElement::AnyHtmlContent(content) => content_source_range(&content),
-                child => Some(child.range()),
+                .and_then(HtmlElement::cast)
+            else {
+                return Box::default();
+            };
+            let mut child_ranges = element.children().iter().filter_map(|child| match &child {
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(content)) => {
+                    let is_empty = content.value_token().is_ok_and(|token| {
+                        token.token_text_trimmed().trim_token().is_empty()
+                    });
+                    (!is_empty).then(|| child.range())
+                }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(content)) => {
+                    let is_empty = content.value_token().is_ok_and(|token| {
+                        token.token_text_trimmed().trim_token().is_empty()
+                    });
+                    (!is_empty).then(|| child.range())
+                }
+                _ => Some(child.range()),
             });
 
             if let Some(first) = child_ranges.next() {
@@ -164,7 +142,7 @@ impl Rule for NoAstroConflictingSetDirectives {
             }
         }
 
-        (!conflicting_sources.is_empty()).then(|| conflicting_sources.into_boxed_slice())
+        conflicting_sources.into_boxed_slice()
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
@@ -176,10 +154,8 @@ impl Rule for NoAstroConflictingSetDirectives {
         state: &Self::State,
         suppressions: &mut RuleSuppressions<HtmlLanguage>,
     ) {
-        for source in state.iter() {
-            if let RuleState::SetDirective(directive) = source {
-                suppressions.suppress_node(directive.syntax().clone());
-            }
+        if let RuleState::SetDirective(directive) = state {
+            suppressions.suppress_node(directive.syntax().clone());
         }
     }
 
@@ -194,25 +170,23 @@ impl Rule for NoAstroConflictingSetDirectives {
             },
         );
 
-        for source in state.iter() {
-            diagnostic = match source {
-                RuleState::SetDirective(directive) => {
-                    let name = set_directive_name(directive)?;
-                    diagnostic.detail(
-                        directive.range(),
-                        markup! {
-                            "The "<Emphasis>{name}</Emphasis>" directive defines the element content here."
-                        },
-                    )
-                }
-                RuleState::ChildContent(range) => diagnostic.detail(
-                    *range,
+        diagnostic = match state {
+            RuleState::SetDirective(directive) => {
+                let name = set_directive_name(directive)?;
+                diagnostic.detail(
+                    directive.range(),
                     markup! {
-                        "Child content defines the element content here."
+                        "The "<Emphasis>{name}</Emphasis>" directive defines the element content here."
                     },
-                ),
-            };
-        }
+                )
+            }
+            RuleState::ChildContent(range) => diagnostic.detail(
+                *range,
+                markup! {
+                    "Child content defines the element content here."
+                },
+            ),
+        };
 
         Some(diagnostic.note(markup! {
             "Choose only one content source for this element."

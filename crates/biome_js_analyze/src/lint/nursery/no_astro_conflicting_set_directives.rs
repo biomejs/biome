@@ -62,8 +62,8 @@ pub enum RuleState {
 
 impl Rule for NoAstroConflictingSetDirectives {
     type Query = Ast<JsxName>;
-    type State = Box<[RuleState]>;
-    type Signals = Option<Self::State>;
+    type State = RuleState;
+    type Signals = Box<[Self::State]>;
     type Options = NoAstroConflictingSetDirectivesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -72,16 +72,23 @@ impl Rule for NoAstroConflictingSetDirectives {
             .as_embedding_kind()
             .is_astro_template()
         {
-            return None;
+            return Box::default();
         }
 
         let name = ctx.query();
-        set_directive_name(name)?;
-        let attribute = name.syntax().parent().and_then(JsxAttribute::cast)?;
-        let element = attribute
+        if set_directive_name(name).is_none() {
+            return Box::default();
+        }
+        let Some(attribute) = name.syntax().parent().and_then(JsxAttribute::cast) else {
+            return Box::default();
+        };
+        let Some(element) = attribute
             .syntax()
             .ancestors()
-            .find_map(AnyJsxElement::cast)?;
+            .find_map(AnyJsxElement::cast)
+        else {
+            return Box::default();
+        };
         let mut conflicting_sources = Vec::new();
 
         for sibling in element.attributes().iter() {
@@ -101,18 +108,18 @@ impl Rule for NoAstroConflictingSetDirectives {
         }
 
         if let AnyJsxElement::JsxOpeningElement(opening_element) = element {
-            let element = opening_element
+            let Some(element) = opening_element
                 .syntax()
                 .parent()
-                .and_then(JsxElement::cast)?;
-            let mut child_ranges = element.children().iter().filter_map(|child| match child {
+                .and_then(JsxElement::cast)
+            else {
+                return Box::default();
+            };
+            let mut child_ranges = element.elements().iter().filter_map(|child| match child {
                 AnyJsxChild::JsxText(text) => {
                     let token = text.value_token().ok()?;
                     let text = token.token_text_trimmed().trim_token();
                     (!text.is_empty()).then(|| text.source_range(token.text_range()))
-                }
-                AnyJsxChild::JsxExpressionChild(expression) if expression.expression().is_none() => {
-                    None
                 }
                 child => Some(child.range()),
             });
@@ -126,7 +133,7 @@ impl Rule for NoAstroConflictingSetDirectives {
             }
         }
 
-        (!conflicting_sources.is_empty()).then(|| conflicting_sources.into_boxed_slice())
+        conflicting_sources.into_boxed_slice()
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
@@ -142,10 +149,8 @@ impl Rule for NoAstroConflictingSetDirectives {
         state: &Self::State,
         suppressions: &mut RuleSuppressions<JsLanguage>,
     ) {
-        for source in state.iter() {
-            if let RuleState::SetDirective(name) = source {
-                suppressions.suppress_node(name.syntax().clone());
-            }
+        if let RuleState::SetDirective(name) = state {
+            suppressions.suppress_node(name.syntax().clone());
         }
     }
 
@@ -161,26 +166,24 @@ impl Rule for NoAstroConflictingSetDirectives {
             },
         );
 
-        for source in state.iter() {
-            diagnostic = match source {
-                RuleState::SetDirective(name) => {
-                    let directive_name = set_directive_name(name)?;
-                    let attribute = name.syntax().parent().and_then(JsxAttribute::cast)?;
-                    diagnostic.detail(
-                        attribute.range(),
-                        markup! {
-                            "The "<Emphasis>{directive_name}</Emphasis>" directive defines the element content here."
-                        },
-                    )
-                }
-                RuleState::ChildContent(range) => diagnostic.detail(
-                    *range,
+        diagnostic = match state {
+            RuleState::SetDirective(name) => {
+                let directive_name = set_directive_name(name)?;
+                let attribute = name.syntax().parent().and_then(JsxAttribute::cast)?;
+                diagnostic.detail(
+                    attribute.range(),
                     markup! {
-                        "Child content defines the element content here."
+                        "The "<Emphasis>{directive_name}</Emphasis>" directive defines the element content here."
                     },
-                ),
-            };
-        }
+                )
+            }
+            RuleState::ChildContent(range) => diagnostic.detail(
+                *range,
+                markup! {
+                    "Child content defines the element content here."
+                },
+            ),
+        };
 
         Some(diagnostic.note(markup! {
             "Choose only one content source for this element."

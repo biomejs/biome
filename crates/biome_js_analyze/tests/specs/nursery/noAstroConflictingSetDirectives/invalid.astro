@@ -3,6 +3,12 @@
 <div>{items.map((item) => <span set:html={item.html}>text child</span>)}</div>
 <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
 <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
+<div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+<div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+<div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+<div>{items.map((item) => <span set:text={item.text}>{
+    // only a comment
+}</span>)}</div>
 
 <div>{show && <Component set:html="html" set:text="text" />}</div>
 <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>

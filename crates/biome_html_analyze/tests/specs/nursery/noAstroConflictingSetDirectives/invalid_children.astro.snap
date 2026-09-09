@@ -33,7 +33,7 @@ invalid_children.astro:3:6 lint/nursery/noAstroConflictingSetDirectives ━━�
     1 │ <!-- should generate diagnostics -->
     2 │ 
   > 3 │ <div set:html="html">␠text child␠</div>
-      │                       ^^^^^^^^^^
+      │                      ^^^^^^^^^^^^
     4 │ <div set:text={text}>{expression}</div>
     5 │ <div set:html={html}><span>nested element</span></div>
   

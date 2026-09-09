@@ -9,6 +9,12 @@ expression: invalid.astro
 <div>{items.map((item) => <span set:html={item.html}>text child</span>)}</div>
 <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
 <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
+<div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+<div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+<div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+<div>{items.map((item) => <span set:text={item.text}>{
+    // only a comment
+}</span>)}</div>
 
 <div>{show && <Component set:html="html" set:text="text" />}</div>
 <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
@@ -54,7 +60,7 @@ invalid.astro:4:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
   > 4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
       │                                 ^^^^^^^^^^^^^^^^^^^^
     5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
-    6 │ 
+    6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
   
   i Child content defines the element content here.
   
@@ -62,7 +68,7 @@ invalid.astro:4:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
   > 4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
       │                                                      ^^^^^^^^^^^^
     5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
-    6 │ 
+    6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
   
   i Choose only one content source for this element.
   
@@ -80,8 +86,8 @@ invalid.astro:5:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
     4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
   > 5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
       │                                 ^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+    6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+    7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
   
   i Child content defines the element content here.
   
@@ -89,8 +95,8 @@ invalid.astro:5:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
     4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
   > 5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
       │                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+    6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+    7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
   
   i Choose only one content source for this element.
   
@@ -100,59 +106,25 @@ invalid.astro:5:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
 ```
 
 ```
-invalid.astro:7:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:6:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The set:html directive conflicts with another content source.
   
+    4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
     5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
-    6 │ 
-  > 7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-      │                          ^^^^^^^^^^^^^^^
-    8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-    9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-  
-  i The set:text directive defines the element content here.
-  
-    5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
-    6 │ 
-  > 7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-      │                                          ^^^^^^^^^^^^^^^
-    8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-    9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-  
-  i Choose only one content source for this element.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.astro:8:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The set:html directive conflicts with another content source.
-  
-     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-   > 8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-       │                          ^^^^^^^^^^^^^^^
-     9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-    10 │ 
-  
-  i The set:text directive defines the element content here.
-  
-     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-   > 8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-       │                                          ^^^^^^^^^^^^^^^
-     9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-    10 │ 
+  > 6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+      │                                 ^^^^^^^^^^^^^^^^^^^^
+    7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+    8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
   
   i Child content defines the element content here.
   
-     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-   > 8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-       │                                                          ^^^^^^^^^^
-     9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-    10 │ 
+    4 │ <div>{items.map((item) => <span set:text={item.text}>{item.label}</span>)}</div>
+    5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
+  > 6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+      │                                                      ^^
+    7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+    8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
   
   i Choose only one content source for this element.
   
@@ -162,31 +134,216 @@ invalid.astro:8:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━�
 ```
 
 ```
-invalid.astro:9:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:7:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:text directive conflicts with another content source.
+  
+    5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
+    6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+  > 7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+      │                                 ^^^^^^^^^^^^^^^^^^^^
+    8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+    9 │ <div>{items.map((item) => <span set:text={item.text}>{
+  
+  i Child content defines the element content here.
+  
+    5 │ <div>{items.map((item) => <span set:html={item.html}><strong>{item.label}</strong></span>)}</div>
+    6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+  > 7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+      │                                                      ^^^^^
+    8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+    9 │ <div>{items.map((item) => <span set:text={item.text}>{
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:8:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The set:html directive conflicts with another content source.
   
-     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-     8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-   > 9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
-       │                          ^^^^^^^^^^^^
-    10 │ 
+     6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+     7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+   > 8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+       │                                 ^^^^^^^^^^^^^^^^^^^^
+     9 │ <div>{items.map((item) => <span set:text={item.text}>{
+    10 │     // only a comment
+  
+  i Child content defines the element content here.
+  
+     6 │ <div>{items.map((item) => <span set:html={item.html}>{}</span>)}</div>
+     7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+   > 8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+       │                                                      ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div>{items.map((item) => <span set:text={item.text}>{
+    10 │     // only a comment
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:9:33 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:text directive conflicts with another content source.
+  
+     7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+     8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+   > 9 │ <div>{items.map((item) => <span set:text={item.text}>{
+       │                                 ^^^^^^^^^^^^^^^^^^^^
+    10 │     // only a comment
+    11 │ }</span>)}</div>
+  
+  i Child content defines the element content here.
+  
+     7 │ <div>{items.map((item) => <span set:text={item.text}>{   }</span>)}</div>
+     8 │ <div>{items.map((item) => <span set:html={item.html}>{/* only a comment */}</span>)}</div>
+   > 9 │ <div>{items.map((item) => <span set:text={item.text}>{
+       │                                                      ^
+  > 10 │     // only a comment
+  > 11 │ }</span>)}</div>
+       │ ^
+    12 │ 
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:13:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    11 │ }</span>)}</div>
+    12 │ 
+  > 13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+       │                          ^^^^^^^^^^^^^^^
+    14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+    15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
   
   i The set:text directive defines the element content here.
   
-     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-     8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-   > 9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+    11 │ }</span>)}</div>
+    12 │ 
+  > 13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+       │                                          ^^^^^^^^^^^^^^^
+    14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+    15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:14:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+  > 14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+       │                          ^^^^^^^^^^^^^^^
+    15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+    16 │ 
+  
+  i The set:text directive defines the element content here.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+  > 14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+       │                                          ^^^^^^^^^^^^^^^
+    15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+    16 │ 
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:14:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+  > 14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+       │                          ^^^^^^^^^^^^^^^
+    15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+    16 │ 
+  
+  i Child content defines the element content here.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+  > 14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+       │                                                          ^^^^^^^^^^
+    15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+    16 │ 
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:15:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+    14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+  > 15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+       │                          ^^^^^^^^^^^^
+    16 │ 
+  
+  i The set:text directive defines the element content here.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+    14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+  > 15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
        │                                       ^^^^^^^^^^^^
-    10 │ 
+    16 │ 
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:15:26 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+    14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+  > 15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+       │                          ^^^^^^^^^^^^
+    16 │ 
   
   i The set:html directive defines the element content here.
   
-     7 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
-     8 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
-   > 9 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
+    13 │ <div>{show && <Component set:html="html" set:text="text" />}</div>
+    14 │ <div>{show && <Component set:html={html} set:text={text}>text child</Component>}</div>
+  > 15 │ <div>{show && <Component set:html={a} set:text={b} set:html={c} />}</div>
        │                                                    ^^^^^^^^^^^^
-    10 │ 
+    16 │ 
   
   i Choose only one content source for this element.
   
