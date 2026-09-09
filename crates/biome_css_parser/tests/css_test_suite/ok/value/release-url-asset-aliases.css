@@ -1,0 +1,17 @@
+.check { background-image: url(@/assets/svg/for-css/check.svg); width: 1px; }
+.footer { background-image: url(@site/static/img/showcase/gh-footer-light.svg); color: red; }
+@font-face { font-family: "!PaulMaul"; src: url(!PaulMaul.woff2) format("woff2"); font-display: swap; }
+.controls {
+  ordinary: url(image.png);
+  quoted: url("@/assets/svg/for-css/check.svg") url("@site/static/img/showcase/gh-footer-light.svg") url("!PaulMaul.woff2");
+  relative: url(//cdn.example/image.svg);
+  data: url(data:image/svg+xml;base64,AAAA);
+  fragment: url(#icon);
+  escaped: url(@/assets/a\)b.svg) url(!font\20 name.woff2) url(@/icons/\é.svg);
+  other: url(@custom/other.svg) url(!Other.woff2);
+  width: 1px;
+}
+.modifiers { background: url("image.png" format("png")); width: 1px; }
+.escaped-tail { first: url(@a\ ); second: url(!a\ ); even: url(@a\\  ); odd: url(!a\\\  ); hex: url(@a\20  ); width: 1px; }
+.unicode-tail { first: url(@a ); second: url(!a ); width: 1px; }
+.escaped-tab { background: url(@a\	); color: red; }
