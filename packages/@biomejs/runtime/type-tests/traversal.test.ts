@@ -15,7 +15,7 @@ import type {
 	JsxChildListNode,
 	JsxElement,
 	JsxFragment,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 declare const base: JsAstNode;
 declare const anyNode: AnyJsAstNode;

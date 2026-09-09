@@ -7,7 +7,7 @@ expression: content
 ## `/plugin.js`
 
 ```js
-import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
 export const useMyPlugin = defineRule({
 	query: ast("JS_MODULE"),
 	run(root) {

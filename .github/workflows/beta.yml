@@ -242,7 +242,7 @@ jobs:
       - name: Publish npm packages as beta
         run: |
           for package in packages/@biomejs/*; do
-            if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then
+            if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/runtime" ]; then
               npm publish $package --tag beta --access public
             fi
           done

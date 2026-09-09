@@ -13,7 +13,7 @@ import {
 	defineRule,
 	factory,
 	registerDiagnostic,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 export const fixer = defineRule({
 	query: ast("JS_MODULE"),

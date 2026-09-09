@@ -3,7 +3,7 @@ import {
 	ast,
 	defineRule,
 	registerDiagnostic,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 export const noTopLevelVar = defineRule({
 	query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),

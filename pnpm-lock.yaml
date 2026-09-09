@@ -109,9 +109,9 @@ importers:
 
   .:
     devDependencies:
-      '@biomejs/plugin-api':
+      '@biomejs/runtime':
         specifier: 'workspace:'
-        version: link:packages/@biomejs/plugin-api
+        version: link:packages/@biomejs/runtime
       '@changesets/changelog-github':
         specifier: 1.0.0
         version: 1.0.0
@@ -238,7 +238,7 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@24.13.3)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.3)(tsx@4.21.0)(yaml@2.9.0))
 
-  packages/@biomejs/plugin-api:
+  packages/@biomejs/runtime:
     dependencies:
       '@biomejs/biome':
         specifier: '*'

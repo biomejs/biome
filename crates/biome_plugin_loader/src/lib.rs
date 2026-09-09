@@ -252,8 +252,8 @@ mod test {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin.ts".into(),
-            r#"import { ast, defineRule } from "@biomejs/plugin-api";
-            import type { AnyJsRoot } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            import type { AnyJsRoot } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root: AnyJsRoot): void {},
@@ -273,7 +273,7 @@ mod test {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin.js".into(),
-            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {},
