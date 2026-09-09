@@ -132,12 +132,14 @@ where
 
 pub fn default_lint_options(source: &str) -> PluginOptions {
     let environment = EnvironmentConfig {
-        validate_exhaustive_effect_dependencies: ExhaustiveEffectDepsMode::All,
+        // Upstream's recommended lint preset excludes these checks. They can
+        // flag valid built-in calls and effect-local captures.
+        validate_no_capitalized_calls: None,
+        validate_exhaustive_effect_dependencies: ExhaustiveEffectDepsMode::Off,
         validate_no_set_state_in_effects: true,
         validate_no_derived_computations_in_effects: true,
         validate_no_jsx_in_try_statements: true,
         validate_static_components: true,
-        validate_no_capitalized_calls: Some(Vec::new()),
         validate_no_impure_functions_in_render: true,
         validate_no_freezing_known_mutable_functions: true,
         enable_treat_set_identifiers_as_state_setters: true,

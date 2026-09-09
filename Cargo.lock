@@ -5215,8 +5215,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_ast",
@@ -5236,8 +5236,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_ast"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5249,8 +5249,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_diagnostics"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "rustc-hash 2.1.3",
  "serde",
@@ -5258,8 +5258,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_hir"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5270,8 +5270,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_inference"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5285,8 +5285,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_lowering"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_ast",
@@ -5298,8 +5298,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_optimization"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5311,8 +5311,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_reactive_scopes"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "hmac-sha256",
  "indexmap",
@@ -5325,8 +5325,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_ssa"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5336,8 +5336,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_typeinference"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "react_compiler_diagnostics",
  "react_compiler_hir",
@@ -5347,8 +5347,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_utils"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "rustc-hash 2.1.3",
@@ -5356,8 +5356,8 @@ dependencies = [
 
 [[package]]
 name = "react_compiler_validation"
-version = "0.1.0"
-source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
+version = "0.0.1-oidc.0"
+source = "git+https://github.com/react/react?rev=6c0e1047e392da04bccb36e84c04e1d1412901d6#6c0e1047e392da04bccb36e84c04e1d1412901d6"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
