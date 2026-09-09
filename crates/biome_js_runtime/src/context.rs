@@ -61,7 +61,7 @@ impl JsExecContext {
         register_semantic(&mut ctx)?;
 
         module_loader.register_module(
-            js_string!("@biomejs/plugin-api"),
+            js_string!("@biomejs/runtime/plugin"),
             api.create_module(&mut ctx),
         );
 

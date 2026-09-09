@@ -4554,7 +4554,7 @@ fn javascript_plugin_mutation_fixes_respect_modes_and_preserve_source() {
     use biome_diagnostics::Applicability;
     use biome_plugin_loader::{PluginConfiguration, Plugins};
 
-    const PLUGIN_SOURCE: &str = r#"import { createMutation, factory, registerDiagnostic, ast, defineRule } from "@biomejs/plugin-api";
+    const PLUGIN_SOURCE: &str = r#"import { createMutation, factory, registerDiagnostic, ast, defineRule } from "@biomejs/runtime/plugin";
 
 export const useLet = defineRule({
     query: ast("JS_VARIABLE_DECLARATION"),
@@ -4696,8 +4696,8 @@ fn typescript_plugin_reports_diagnostics_through_the_workspace() {
     use biome_plugin_loader::{PluginConfiguration, Plugins};
 
     const PLUGIN_PATH: &str = "/project/plugin.ts";
-    const PLUGIN_SOURCE: &str = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
-import type { Severity } from "@biomejs/plugin-api";
+    const PLUGIN_SOURCE: &str = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+import type { Severity } from "@biomejs/runtime/plugin";
 
 export const noTopLevelVar = defineRule({
     query: ast("JS_VARIABLE_STATEMENT"),

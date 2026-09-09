@@ -20,7 +20,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@biomejs/plugin-api": "workspace:",
+    "@biomejs/runtime": "workspace:",
     "@changesets/changelog-github": "1.0.0",
     "@changesets/cli": "3.0.1",
     "@types/node": "24.13.3",

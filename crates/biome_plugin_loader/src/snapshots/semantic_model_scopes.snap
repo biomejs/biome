@@ -7,7 +7,11 @@ expression: content
 ## `/plugin.js`
 
 ```js
-import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+import {
+	defineRule,
+	semantic,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
 function describe(scope) {
 	if (!scope) return null;
 	const names = [];

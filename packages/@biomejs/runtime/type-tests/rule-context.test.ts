@@ -4,7 +4,7 @@ import {
 	type JsFileSource,
 	type JsVariableStatement,
 	type RuleContext,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 defineRule({
 	query: ast("JS_VARIABLE_STATEMENT"),

@@ -12,7 +12,7 @@ import {
 	type SemanticRuleContext,
 	type TextRange,
 	semantic,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 defineRule({
 	query: semantic("JS_REFERENCE_IDENTIFIER"),

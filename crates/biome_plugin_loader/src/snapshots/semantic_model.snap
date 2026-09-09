@@ -7,7 +7,11 @@ expression: content
 ## `/plugin.js`
 
 ```js
-import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+import {
+	defineRule,
+	semantic,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
 export const inspect = defineRule({
 	query: semantic("JS_MODULE", "TS_DECLARATION_MODULE"),
 	run(root, { model }) {

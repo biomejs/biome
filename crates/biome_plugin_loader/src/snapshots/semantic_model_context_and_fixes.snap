@@ -14,7 +14,7 @@ import {
 	factory,
 	semantic,
 	registerDiagnostic,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 export const aSyntax = defineRule({
 	query: ast("JS_REFERENCE_IDENTIFIER"),
 	run(node, context) {

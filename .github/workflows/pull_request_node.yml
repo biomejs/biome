@@ -60,8 +60,8 @@ jobs:
 
       - name: Test plugin API declarations
         run: |
-          pnpm --filter @biomejs/plugin-api i
-          pnpm --filter @biomejs/plugin-api run test:types
+          pnpm --filter @biomejs/runtime i
+          pnpm --filter @biomejs/runtime run test:types
 
       - name: Build TypeScript code
         # We use the `*-dev` builds below because release builds take very long.

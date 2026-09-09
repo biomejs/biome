@@ -25,11 +25,11 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
     let rust = generate_rust(ast)?;
     update(&rust_path, &rust, mode)?;
 
-    let types_path = project_root().join("packages/@biomejs/plugin-api/js_ast.d.ts");
+    let types_path = project_root().join("packages/@biomejs/runtime/js_ast.d.ts");
     let types = generate_typescript(ast);
     update(&types_path, &types, mode)?;
 
-    let diagnostics_path = project_root().join("packages/@biomejs/plugin-api/diagnostics.d.ts");
+    let diagnostics_path = project_root().join("packages/@biomejs/runtime/diagnostics.d.ts");
     let diagnostics = generate_diagnostics_typescript()?;
     update(&diagnostics_path, &diagnostics, mode)?;
 

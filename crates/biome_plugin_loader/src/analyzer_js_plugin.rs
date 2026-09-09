@@ -228,7 +228,7 @@ mod tests {
 
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const sourceMode = defineRule({
                 query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
                 run(root, context) {
@@ -360,7 +360,7 @@ mod tests {
     fn rule_context_is_readonly_and_retains_its_file() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             let saved;
             export const contextValues = defineRule({
                 query: ast("JS_MODULE"),
@@ -419,7 +419,7 @@ mod tests {
 
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const contextValues = defineRule({
                 query: ast("JS_VARIABLE_STATEMENT"),
                 run(node, context) {
@@ -514,7 +514,7 @@ mod tests {
     fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
         load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -560,7 +560,7 @@ mod tests {
     fn passes_the_matched_node_to_run() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -606,7 +606,7 @@ mod tests {
     fn traverses_parents_and_ancestors_of_queried_descendants() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_EXPRESSION_STATEMENT", "JS_NUMBER_LITERAL_EXPRESSION", "JS_YIELD_ARGUMENT"),
                 run(node) {
@@ -691,7 +691,7 @@ mod tests {
     fn reports_ancestor_ranges_from_child_access() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -740,7 +740,7 @@ mod tests {
     fn roots_have_no_parent_or_ancestors() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
                 run(root) {
@@ -802,7 +802,7 @@ mod tests {
     fn traversal_members_are_shared_non_enumerable_and_validate_receivers() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -868,7 +868,7 @@ mod tests {
     fn children_return_fresh_raw_nodes_in_source_order() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const children = defineRule({
                 query: ast("JS_MODULE", "JS_BLOCK_STATEMENT", "JS_CALL_EXPRESSION", "JS_CALL_ARGUMENTS",
                     "JS_PARENTHESIZED_EXPRESSION", "JS_NUMBER_LITERAL_EXPRESSION", "JS_EXPRESSION_STATEMENT",
@@ -1047,7 +1047,7 @@ mod tests {
     fn queries_lists_and_reports_diagnostics_on_lists_and_their_children() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const children = defineRule({
                 query: ast("JS_CALL_ARGUMENT_LIST"),
                 run(list) {
@@ -1104,7 +1104,7 @@ mod tests {
     fn reports_children_ranges_and_exposes_normal_fields() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const children = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -1167,7 +1167,7 @@ mod tests {
     fn queries_the_kinds_declared_by_the_rules() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
             export const rule1 = defineRule({
                 query: ast("JS_VARIABLE_STATEMENT", "JS_CALL_EXPRESSION"),
                 run(node) {},
@@ -1210,7 +1210,7 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "/plugin.js".into(),
-            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
             export const myRule = defineRule({
                 query: ast("NOT_A_KIND"),
                 run(node) {},
@@ -1230,7 +1230,7 @@ mod tests {
 
     #[test]
     fn reports_top_level_var_declarations_using_ast_fields() {
-        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const noTopLevelVar = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -1275,7 +1275,7 @@ mod tests {
     /// name of the rule that registered it.
     #[test]
     fn dispatches_nodes_to_the_matching_rules() {
-        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const noVar = defineRule({
                 query: ast("JS_VARIABLE_STATEMENT"),
                 run(statement) {
@@ -1330,8 +1330,8 @@ mod tests {
     fn evaluate_typescript_plugin() {
         let plugin = load_test_plugin_from_source(
             "/plugin.ts",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
-            import type { AnyJsRoot, Severity } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            import type { AnyJsRoot, Severity } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root: AnyJsRoot): void {
@@ -1388,7 +1388,7 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert("/foo.js".into(), "let foo;");
         fs.insert("/bar.js".into(), "let bar;");
-        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -1461,7 +1461,7 @@ mod tests {
         use biome_rowan::BatchMutation;
 
         const API: &str = r#"
-            import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/plugin-api";
+            import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/runtime/plugin";
         "#;
 
         fn evaluate(source: &str, body: &str) -> (String, PluginEvalResult) {

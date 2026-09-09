@@ -16,7 +16,7 @@ import {
 	type JsVariableDeclaration,
 	type JsVariableStatement,
 	registerDiagnostic,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 declare const node: AnyJsAstNode;
 declare const nextNode: AnyJsAstNode;

@@ -58,7 +58,7 @@ fn native_summary(model: &SemanticModel) -> Value {
 
 #[test]
 fn semantic_results_match_the_native_model() {
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const inspect = defineRule({
             query: semantic("JS_MODULE", "TS_DECLARATION_MODULE"),
             run(root, { model }) {
@@ -203,7 +203,7 @@ fn semantic_results_match_the_native_model() {
 
 #[test]
 fn semantic_rules_use_the_supplied_model_and_syntax_rules_keep_their_context() {
-    let plugin_source = r#"import { ast, createMutation, defineRule, factory, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+    let plugin_source = r#"import { ast, createMutation, defineRule, factory, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const aSyntax = defineRule({
             query: ast("JS_REFERENCE_IDENTIFIER"),
             run(node, context) {
@@ -304,7 +304,7 @@ fn semantic_rules_use_the_supplied_model_and_syntax_rules_keep_their_context() {
 
 #[test]
 fn semantic_handles_retain_their_source() {
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
         let saved;
         export const retained = defineRule({
             query: semantic("JS_MODULE"),
@@ -371,7 +371,7 @@ fn semantic_handles_retain_their_source() {
 #[test]
 fn semantic_scopes_preserve_nesting_bindings_and_hoisting() {
     // Boa parses this fixture on the test thread's stack; avoid deeply nested expressions.
-    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
         function describe(scope) {
             if (!scope) return null;
             const names = [];

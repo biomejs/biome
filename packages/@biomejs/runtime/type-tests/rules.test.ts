@@ -8,7 +8,7 @@ import {
 	type JsModule,
 	type JsVariableStatement,
 	registerDiagnostic,
-} from "@biomejs/plugin-api";
+} from "@biomejs/runtime/plugin";
 
 defineRule({
 	query: ast("JS_VARIABLE_STATEMENT"),
