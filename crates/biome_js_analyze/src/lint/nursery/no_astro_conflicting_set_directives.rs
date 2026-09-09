@@ -47,14 +47,6 @@ declare_lint_rule! {
     }
 }
 
-fn set_directive_name(name: &JsxName) -> Option<&'static str> {
-    match name.value_token().ok()?.text_trimmed() {
-        "set:html" => Some("set:html"),
-        "set:text" => Some("set:text"),
-        _ => None,
-    }
-}
-
 pub enum RuleState {
     SetDirective(JsxName),
     ChildContent(TextRange),
@@ -188,5 +180,13 @@ impl Rule for NoAstroConflictingSetDirectives {
         Some(diagnostic.note(markup! {
             "Choose only one content source for this element."
         }))
+    }
+}
+
+fn set_directive_name(name: &JsxName) -> Option<&'static str> {
+    match name.value_token().ok()?.text_trimmed() {
+        "set:html" => Some("set:html"),
+        "set:text" => Some("set:text"),
+        _ => None,
     }
 }

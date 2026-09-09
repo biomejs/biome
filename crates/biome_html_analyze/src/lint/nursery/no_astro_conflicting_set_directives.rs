@@ -57,17 +57,6 @@ pub enum RuleState {
     ChildContent(TextRange),
 }
 
-fn set_directive_name(directive: &AstroSetDirective) -> Option<&'static str> {
-    let value = directive.value().ok()?;
-    let name = value.name().ok()?.token_text_trimmed()?;
-
-    match name.text() {
-        "html" => Some("set:html"),
-        "text" => Some("set:text"),
-        _ => None,
-    }
-}
-
 impl Rule for NoAstroConflictingSetDirectives {
     type Query = Ast<AstroSetDirective>;
     type State = RuleState;
@@ -191,5 +180,16 @@ impl Rule for NoAstroConflictingSetDirectives {
         Some(diagnostic.note(markup! {
             "Choose only one content source for this element."
         }))
+    }
+}
+
+fn set_directive_name(directive: &AstroSetDirective) -> Option<&'static str> {
+    let value = directive.value().ok()?;
+    let name = value.name().ok()?.token_text_trimmed()?;
+
+    match name.text() {
+        "html" => Some("set:html"),
+        "text" => Some("set:text"),
+        _ => None,
     }
 }
