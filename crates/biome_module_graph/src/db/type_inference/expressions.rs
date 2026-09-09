@@ -140,11 +140,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Parameter(expression) => {
                 let function = self.resolve(&expression.function);
-                self.resolve_parameter(
-                    function,
-                    expression.index,
-                    expression.has_initializer,
-                )
+                self.resolve_parameter(function, expression.index, expression.has_initializer)
             }
             RawTypeofExpression::Conditional(expression) => {
                 let test = self.resolve(&expression.test);
@@ -275,13 +271,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 expression.index,
                 expression.is_constructor,
             ),
-            InferredTypeofExpression::Parameter(expression) => {
-                self.resolve_parameter(
-                    expression.function,
-                    expression.index,
-                    expression.has_initializer,
-                )
-            }
+            InferredTypeofExpression::Parameter(expression) => self.resolve_parameter(
+                expression.function,
+                expression.index,
+                expression.has_initializer,
+            ),
             InferredTypeofExpression::Conditional(expression) => self
                 .resolve_conditional_expression(
                     expression.test,
@@ -671,10 +665,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         })
     }
 
-    fn type_without_undefined(
-        &mut self,
-        ty: InferredTypeData<'db>,
-    ) -> InferredTypeData<'db> {
+    fn type_without_undefined(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
         let ty = self.resolve_inferred_type(ty);
         match ty {
             InferredTypeData::Undefined => InferredTypeData::Unknown,
