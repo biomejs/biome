@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_json_syntax::{JsonNumberValue, JsonStringValue};
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_json_unsafe_values::NoJsonUnsafeValuesOptions;
+use biome_unicode_table::{Dispatch, lookup_byte};
 
 declare_lint_rule! {
     /// Disallow unsafe JSON values that may cause interoperability issues.
@@ -186,7 +187,7 @@ static MAX_SAFE_INTEGER: i64 = 9_007_199_254_740_991;
 static MIN_SAFE_INTEGER: i64 = -9_007_199_254_740_991;
 
 fn has_non_zero_digit(s: &str) -> bool {
-    s.bytes().any(|b| b.is_ascii_digit() && b != b'0')
+    s.bytes().any(|b| lookup_byte(b) == Dispatch::DIG)
 }
 
 fn is_high_surrogate(u: &u16) -> bool {
