@@ -97,7 +97,7 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = ["biome_glob/schema", "schemars"]
+schema         = ["biome_glob/schema", "schemars"]
 # Compiles narrowing in, for the fixtures under tests/type_narrowing.
 type_narrowing = ["biome_module_graph/type_narrowing"]
 
