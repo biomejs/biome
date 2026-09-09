@@ -25,6 +25,6 @@
     "@changesets/cli": "3.0.1",
     "@types/node": "24.13.3",
     "commonmark": "0.31.2",
-    "tombi": "0.11.7"
+    "tombi": "1.5.2"
   }
 }
