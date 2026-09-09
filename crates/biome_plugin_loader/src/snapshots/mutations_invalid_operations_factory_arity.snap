@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: factory.token() received the wrong number of arguments. Pass a kind string as the first argument and, when needed, a text string as the second argument, with no additional arguments.
+  i Rule fixer errored: TypeError: factory.token() received the wrong number of arguments. Pass a kind string as the first argument and, when needed, a text string as the second argument, with no additional arguments. (/plugin.js:14:14)
         at run (/plugin.js:14:14)
 ```

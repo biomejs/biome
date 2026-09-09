@@ -83,7 +83,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: factory.token() does not support the kind "UNKNOWN". Use a name from the JsTokenKind definition, such as "IDENT" or "LET_KW".
+  i Rule aFailed errored: TypeError: factory.token() does not support the kind "UNKNOWN". Use a name from the JsTokenKind definition, such as "IDENT" or "LET_KW". (/plugin.js:14:51)
         at get message (/plugin.js:14:139)
         at registerDiagnostic (native)
         at run (/plugin.js:14:51)
@@ -117,7 +117,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: factory.token() does not support the kind "UNKNOWN". Use a name from the JsTokenKind definition, such as "IDENT" or "LET_KW".
+  i Rule aFailed errored: TypeError: factory.token() does not support the kind "UNKNOWN". Use a name from the JsTokenKind definition, such as "IDENT" or "LET_KW". (/plugin.js:14:51)
         at get message (/plugin.js:14:139)
         at registerDiagnostic (native)
         at run (/plugin.js:14:51)

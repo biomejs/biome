@@ -7,9 +7,11 @@ import type {
 	JsNodeByKind,
 	JsTokenKind,
 } from "./js_ast";
+import type { SemanticModel } from "./semantic";
 
 export * from "./diagnostics";
 export * from "./js_ast";
+export * from "./semantic";
 
 declare const queriedNode: unique symbol;
 declare const nativeMutation: unique symbol;
@@ -20,11 +22,14 @@ declare const nativeMutation: unique symbol;
  * `N` is the union of the node types matched by the query; it only exists at
  * the type level, to infer the argument type of {@link Rule#run}.
  */
-export interface AstQuery<N extends JsAstNode> {
-	readonly type: "ast";
+interface Query<N extends JsAstNode, K extends keyof ContextByQuery> {
+	readonly type: K;
 	readonly kinds: readonly (keyof JsNodeByKind)[];
 	readonly [queriedNode]?: N;
 }
+
+export type AstQuery<N extends JsAstNode> = Query<N, "ast">;
+export type SemanticQuery<N extends JsAstNode> = Query<N, "semantic">;
 
 /** File information supplied to each invocation of a rule. */
 export interface RuleContext {
@@ -33,6 +38,17 @@ export interface RuleContext {
 	/** The parsing mode of the analyzed source, including embedded snippets. */
 	readonly sourceType: JsFileSource;
 }
+
+/** File information and semantic analysis supplied to a semantic rule. */
+export interface SemanticRuleContext extends RuleContext {
+	/** Bindings and references in the original analyzed source. */
+	readonly model: SemanticModel;
+}
+
+type ContextByQuery = {
+	ast: RuleContext;
+	semantic: SemanticRuleContext;
+};
 
 /** JavaScript or TypeScript parsing settings for the analyzed source. */
 export interface JsFileSource {
@@ -75,11 +91,14 @@ export type JsEmbeddingKind =
  * A lint rule, created with {@link defineRule} and exported from the plugin
  * with `export const`. The name of the export is used as the rule name.
  */
-export interface Rule<N extends JsAstNode> {
+export interface Rule<
+	N extends JsAstNode,
+	K extends keyof ContextByQuery = "ast",
+> {
 	/**
 	 * The query selecting the nodes the rule runs on.
 	 */
-	readonly query: AstQuery<N>;
+	readonly query: Query<N, K>;
 
 	/**
 	 * Called with every node matching the query.
@@ -96,7 +115,7 @@ export interface Rule<N extends JsAstNode> {
 	 * });
 	 * ```
 	 */
-	run(node: N, context: RuleContext): void;
+	readonly run: (node: NoInfer<N>, context: NoInfer<ContextByQuery[K]>) => void;
 }
 
 /**
@@ -107,10 +126,33 @@ export function ast<K extends readonly (keyof JsNodeByKind)[]>(
 ): AstQuery<JsNodeByKind[K[number]]>;
 
 /**
+ * Matches nodes by their syntax kinds and provides a semantic model in `context`.
+ *
+ * For example, inspect every read of a declared binding:
+ * ```ts
+ * export const inspectReads = defineRule({
+ *   query: semantic("JS_IDENTIFIER_BINDING"),
+ *   run(node, context) {
+ *     const binding = context.model.asBinding(node);
+ *     for (const reference of binding?.allReads() ?? []) {
+ *       registerDiagnostic(reference.syntax(), "information", "Binding read here.");
+ *     }
+ *   },
+ * });
+ * ```
+ */
+export function semantic<K extends readonly (keyof JsNodeByKind)[]>(
+	...kinds: K
+): SemanticQuery<JsNodeByKind[K[number]]>;
+
+/**
  * Defines a lint rule. Export the returned rule with `export const` to
  * register it to the analyzer.
  */
-export function defineRule<N extends JsAstNode>(rule: Rule<N>): Rule<N>;
+export function defineRule<
+	N extends JsAstNode,
+	K extends keyof ContextByQuery = "ast",
+>(rule: Rule<N, K>): Rule<N, K>;
 
 /**
  * Collects replacements and removals for one code fix without changing the

@@ -1,0 +1,85 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+let saved;
+export const retained = defineRule({
+	query: semantic("JS_MODULE"),
+	run(root, { model }) {
+		const bindings = model.allBindings();
+		const binding = bindings[0];
+		bindings.length = 0;
+		if (saved) {
+			const node = saved.reference.syntax();
+			registerDiagnostic(
+				root,
+				"information",
+				JSON.stringify(
+					[
+						binding.syntax().text,
+						saved.model.binding(node).syntax().text,
+						saved.binding.allReads().length,
+						model.allBindings().length,
+						saved.scope.bindings().map((binding) => binding.syntax().text),
+					],
+					0,
+					2,
+				),
+			);
+			model.binding(node);
+		} else {
+			saved = {
+				model,
+				binding,
+				reference: binding.allReads()[0],
+				scope: model.globalScope(),
+			};
+		}
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+let first = 1; first;
+```
+
+## `/file.js`
+
+```js
+let second = 2; second;
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "second",
+      "first",
+      1,
+      1,
+      [
+        "first"
+      ]
+    ]
+  
+  > 1 │ let second = 2; second;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule retained errored: TypeError: The node belongs to a different source than this semantic model. Use a node from the model's original source. (/plugin.js:16:34)
+        at run (/plugin.js:16:34)
+```

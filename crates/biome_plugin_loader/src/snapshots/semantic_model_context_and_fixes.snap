@@ -1,0 +1,87 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	semantic,
+	registerDiagnostic,
+} from "@biomejs/plugin-api";
+export const aSyntax = defineRule({
+	query: ast("JS_REFERENCE_IDENTIFIER"),
+	run(node, context) {
+		registerDiagnostic(node, "information", `syntax:${"model" in context}`);
+	},
+});
+export const bSemantic = defineRule({
+	query: semantic("JS_REFERENCE_IDENTIFIER"),
+	run(node, context) {
+		const binding = context.model.binding(node);
+		const reference = binding.allReads()[0].syntax();
+		const mutation = createMutation(binding.syntax());
+		mutation.replaceToken(
+			reference.token("valueToken"),
+			factory.token("IDENT", "renamed"),
+		);
+		registerDiagnostic(
+			reference,
+			"information",
+			`semantic:${binding.syntax().text}:${binding.allReads().length}:${Reflect.set(context, "model", null)}`,
+			{ mutation, message: "Rename the reference.", kind: "unsafe" },
+		);
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+let value = 1; value;
+```
+
+# Diagnostics
+
+```block
+/file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i syntax:false
+  
+  > 1 │ let value = 1; value;
+      │                ^^^^^
+  
+
+/file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i semantic:value:1:false
+  
+  > 1 │ let value = 1; value;
+      │                ^^^^^
+  
+  i Unsafe fix: Rename the reference.
+  
+  - let·value·=·1;·value;
+  + let·value·=·1;·renamed;
+  
+
+/file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i syntax:false
+  
+  > 1 │ let value = 1; value;
+      │                ^^^^^
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule bSemantic errored: TypeError: The semantic model is unavailable. Supply a SemanticModel service when analyzing semantic plugin rules. (native)
+```

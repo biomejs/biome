@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: factory.token() requires the spelling "," for kind COMMA, but the text argument is ";". Omit the text argument or change it to ",".
+  i Rule fixer errored: TypeError: factory.token() requires the spelling "," for kind COMMA, but the text argument is ";". Omit the text argument or change it to ",". (/plugin.js:14:14)
         at run (/plugin.js:14:14)
 ```

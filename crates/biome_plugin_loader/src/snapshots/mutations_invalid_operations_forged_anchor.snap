@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: createMutation() received a value that is not a Biome node. Pass the node supplied to run() or one of its child nodes, not a token, string, or plain object.
+  i Rule fixer errored: TypeError: createMutation() received a value that is not a Biome node. Pass the node supplied to run() or one of its child nodes, not a token, string, or plain object. (/plugin.js:14:15)
         at run (/plugin.js:14:15)
 ```
