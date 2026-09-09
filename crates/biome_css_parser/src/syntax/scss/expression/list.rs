@@ -93,20 +93,6 @@ pub(crate) fn parse_scss_expression_until(
     parse_scss_expression_with_options(p, ScssExpressionOptions::value(end_ts))
 }
 
-/// Parses a query value while preserving the query's block boundary, including
-/// when a nested expression or function call is missing its closing delimiter.
-#[inline]
-pub(crate) fn parse_scss_expression_in_query_until(
-    p: &mut CssParser,
-    end_ts: TokenSet<CssSyntaxKind>,
-) -> ParsedSyntax {
-    let old_query_expression =
-        std::mem::replace(&mut p.state_mut().is_in_scss_query_expression, true);
-    let expression = parse_scss_expression_with_options(p, ScssExpressionOptions::value(end_ts));
-    p.state_mut().is_in_scss_query_expression = old_query_expression;
-    expression
-}
-
 /// Parses a SCSS expression tail after the caller has already parsed the first
 /// value node.
 ///
@@ -267,11 +253,10 @@ fn parse_scss_expression_sequence_item(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> Option<CompletedMarker> {
-    let recovery_end_ts = options.recovery_end_ts(p);
     parse_scss_expression_item(p, options)
         .or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, recovery_end_ts)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
                 .enable_recovery_on_line_break(),
             expected_scss_expression,
         )
@@ -404,11 +389,10 @@ pub(super) fn parse_scss_list_expression(
 
         progress.assert_progressing(p);
 
-        let recovery_end_ts = options.recovery_end_ts(p);
         if parse_scss_list_expression_element(p, options)
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, recovery_end_ts)
+                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
                     .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )

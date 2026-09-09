@@ -33,9 +33,9 @@ pub(crate) use expression::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, complete_empty_scss_expression, is_at_scss_binary_operator,
     is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_required_scss_value_until,
     parse_scss_expression, parse_scss_expression_from_head, parse_scss_expression_in_args_until,
-    parse_scss_expression_in_query_until, parse_scss_expression_in_variable_value_until,
-    parse_scss_expression_until, parse_scss_interpolation_with_context,
-    parse_scss_optional_value_until, parse_scss_regular_interpolation,
+    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
+    parse_scss_interpolation_with_context, parse_scss_optional_value_until,
+    parse_scss_regular_interpolation,
 };
 pub(crate) use function_name::{
     add_scss_variable_member_function_name_diagnostic, parse_scss_function_name,

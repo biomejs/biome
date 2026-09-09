@@ -41,3 +41,9 @@ $device: 768px;
 @media (min-width: (math.div($device, 2))) {
   .qualified-call { display: block; }
 }
+
+@media (width: (attr(data-width type(<length>), 1px))) {}
+
+@media (width: (url("x{y}"))) {}
+
+@media (width: (if(sass(true): 1px; else: 2px))) {}

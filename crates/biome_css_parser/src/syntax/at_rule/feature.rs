@@ -4,10 +4,9 @@ use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     is_at_scss_binary_operator, is_at_scss_interpolation, is_at_scss_variable,
-    is_nth_at_scss_interpolation, parse_scss_expression_from_head,
-    parse_scss_expression_in_query_until, parse_scss_interpolated_name,
-    parse_scss_interpolated_query_feature, parse_scss_interpolation_or_identifier,
-    parse_scss_variable,
+    is_nth_at_scss_interpolation, parse_scss_expression_from_head, parse_scss_expression_until,
+    parse_scss_interpolated_name, parse_scss_interpolated_query_feature,
+    parse_scss_interpolation_or_identifier, parse_scss_variable,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, parse_any_value,
@@ -218,8 +217,14 @@ fn parse_query_feature_value_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    if p.at(T!['(']) && CssSyntaxFeatures::Scss.is_supported(p) {
-        return parse_scss_expression_in_query_until(p, end_ts);
+    if p.at(T!['(']) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_expression_until(p, end_ts.union(token_set![T!['{']])),
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS parenthesized query values", marker.range(p))
+            },
+        );
     }
 
     let Present(head) = parse_any_query_feature_value(p) else {

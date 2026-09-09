@@ -29,10 +29,6 @@ pub(crate) struct CssParserState {
     /// speculative parse, the parser knows to retry without speculative mode, allowing proper error
     /// recovery inside the `if()` function.
     pub(crate) encountered_if_function: bool,
-
-    /// Preserves the query's opening block brace while parsing a SCSS query
-    /// value, including nested function arguments and interpolations.
-    pub(crate) is_in_scss_query_expression: bool,
 }
 
 impl CssParserState {
@@ -41,7 +37,6 @@ impl CssParserState {
             speculative_parsing: false,
             is_nesting_block: false,
             encountered_if_function: false,
-            is_in_scss_query_expression: false,
         }
     }
 }
