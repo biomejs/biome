@@ -8,7 +8,8 @@ use std::{fmt::Debug, sync::Arc};
 
 use crate::matcher::SignalRuleKey;
 use crate::{
-    PluginSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext, profiling,
+    PluginSignal, RuleCategory, RuleDiagnostic, ServiceBag, SignalEntry, Visitor, VisitorContext,
+    profiling,
 };
 
 /// Slice of analyzer plugins that can be cheaply cloned.
@@ -52,7 +53,12 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
 
     fn query(&self) -> Vec<RawSyntaxKind>;
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult;
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Utf8PathBuf,
+        services: &ServiceBag,
+    ) -> PluginEvalResult;
 
     /// Returns true if this plugin should run on the given file path.
     fn applies_to_file(&self, _path: &Utf8Path) -> bool {
@@ -179,9 +185,11 @@ where
         }
 
         let rule_timer = profiling::start_plugin_rule(self.plugin.name());
-        let eval_result = self
-            .plugin
-            .evaluate(node.clone().into(), ctx.options.file_path.clone());
+        let eval_result = self.plugin.evaluate(
+            node.clone().into(),
+            ctx.options.file_path.clone(),
+            ctx.services,
+        );
         rule_timer.stop();
 
         let signals = eval_result.entries.into_iter().map(|entry| {
@@ -316,7 +324,11 @@ where
             }
 
             let rule_timer = profiling::start_plugin_rule(plugin.name());
-            let eval_result = plugin.evaluate(node.clone().into(), ctx.options.file_path.clone());
+            let eval_result = plugin.evaluate(
+                node.clone().into(),
+                ctx.options.file_path.clone(),
+                ctx.services,
+            );
             rule_timer.stop();
 
             let signals = eval_result.entries.into_iter().map(|entry| {

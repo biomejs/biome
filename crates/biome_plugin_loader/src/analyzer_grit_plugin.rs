@@ -1,6 +1,7 @@
 use crate::{AnalyzerPlugin, PluginDiagnostic, file_matches_includes};
 use biome_analyze::{
-    PluginActionData, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+    PluginActionData, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage,
+    RuleDiagnostic, ServiceBag,
 };
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
@@ -92,7 +93,12 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         file_matches_includes(self.includes.as_deref(), path)
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Utf8PathBuf,
+        _services: &ServiceBag,
+    ) -> PluginEvalResult {
         let name = self.name();
 
         let (root, source_range, original_text) = match self.language() {
