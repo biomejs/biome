@@ -3933,6 +3933,14 @@ pub fn scss_interpolated_string(
         ],
     ))
 }
+pub fn scss_interpolated_sub_selector(
+    name: ScssInterpolatedIdentifier,
+) -> ScssInterpolatedSubSelector {
+    ScssInterpolatedSubSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_SUB_SELECTOR,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
 pub fn scss_interpolated_url_value(
     parts: ScssInterpolatedUrlValuePartList,
 ) -> ScssInterpolatedUrlValue {

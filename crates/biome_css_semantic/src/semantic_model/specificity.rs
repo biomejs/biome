@@ -132,6 +132,7 @@ fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
         AnyCssSubSelector::CssPseudoClassSelector(s) => evaluate_pseudo_selector(s),
         AnyCssSubSelector::CssPseudoElementSelector(_) => TYPE_SPECIFICITY,
         AnyCssSubSelector::CssNestedSelector(_) => ZERO_SPECIFICITY,
+        AnyCssSubSelector::ScssInterpolatedSubSelector(_) => ZERO_SPECIFICITY,
         AnyCssSubSelector::CssBogusSubSelector(_) => ZERO_SPECIFICITY,
     }
 }

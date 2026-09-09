@@ -210,7 +210,13 @@ AnyCssSubSelector =
 	| CssPseudoClassSelector
 	| CssPseudoElementSelector
 	| CssNestedSelector
+	| ScssInterpolatedSubSelector
 	| CssBogusSubSelector
+
+// [hidden]#{$suffix} {}
+//         ^^^^^^^^^^
+ScssInterpolatedSubSelector =
+	name: ScssInterpolatedIdentifier
 
 // * {}
 // ^

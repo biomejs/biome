@@ -12,8 +12,9 @@ use crate::syntax::parse_error::{
     scss_only_syntax_error,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_selector_identifier, is_nth_at_scss_interpolated_selector_identifier,
-    is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector,
+    is_at_scss_interpolated_selector_identifier, is_at_scss_interpolation,
+    is_nth_at_scss_interpolated_selector_identifier, is_nth_at_scss_placeholder_selector,
+    parse_scss_interpolated_sub_selector, parse_scss_placeholder_selector,
     parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
@@ -548,10 +549,18 @@ impl ParseNodeList for SubSelectorList {
 /// based on the current token in the CSS parser. It dispatches to specific parsing functions
 /// for class selectors, ID selectors, attribute selectors, pseudo-classes, pseudo-elements,
 /// and the nesting selector (`&`), e.g. the trailing `&` in `h1&`.
+/// In SCSS, an interpolation can follow a completed component, as in `.card[data-state]#{$suffix}`.
 #[inline]
 fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
         T![.] => parse_class_selector(p),
+        T![#] if is_at_scss_interpolation(p) => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_sub_selector,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated subselectors", marker.range(p))
+            },
+        ),
         T![#] => parse_id_selector(p),
         T!['['] => parse_attribute_selector(p),
         T![:] => parse_pseudo_class_selector(p),
