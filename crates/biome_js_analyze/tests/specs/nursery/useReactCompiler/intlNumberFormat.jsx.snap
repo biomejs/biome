@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: intlNumberFormat.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+export function MyPage() {
+    const percentageFormat = Intl.NumberFormat();
+    return <p>{percentageFormat.format(123)}</p>;
+}
+
+```

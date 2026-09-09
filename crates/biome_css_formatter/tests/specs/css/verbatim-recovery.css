@@ -1,0 +1,5 @@
+@font-face{
+/* before */9font-family:  /* inside */broken;/* after */
+font-family:Valid;
+}
+.following{color:red;}

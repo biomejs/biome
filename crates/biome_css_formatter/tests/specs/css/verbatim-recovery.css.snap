@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/verbatim-recovery.css
+---
+
+# Input
+
+```css
+@font-face{
+/* before */9font-family:  /* inside */broken;/* after */
+font-family:Valid;
+}
+.following{color:red;}
+
+```
+
+
+# Formatted
+
+```css
+@font-face {
+	/* before */ 9font-family:  /* inside */broken
+	/* after */
+	font-family: Valid;
+}
+.following {
+	color: red;
+}
+
+```
