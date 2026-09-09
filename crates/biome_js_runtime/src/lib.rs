@@ -4,6 +4,7 @@ mod generated;
 mod module_loader;
 mod mutation;
 mod plugin_api;
+mod rule_context;
 mod source;
 mod token;
 

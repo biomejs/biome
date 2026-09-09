@@ -2,10 +2,12 @@ use crate::JsModuleLoader;
 use crate::ast::JsAstNode;
 use crate::mutation::JsMutation;
 use crate::plugin_api::JsPluginApi;
+use crate::rule_context::create_rule_context;
 use crate::source::read_module_source;
 use crate::token::JsAstToken;
 use biome_analyze::PluginDiagnosticEntry;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode};
+use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
 use boa_engine::builtins::promise::PromiseState;
 use boa_engine::object::builtins::{JsArray, JsFunction};
@@ -220,5 +222,10 @@ impl JsExecContext {
         let result = function.call(this, args, &mut self.ctx);
         self.api.set_source(None);
         result
+    }
+
+    /// Creates file metadata whose values remain associated with this invocation's source.
+    pub fn create_rule_context(&mut self, path: &Utf8Path, source_type: JsFileSource) -> JsValue {
+        create_rule_context(path, source_type, &mut self.ctx)
     }
 }

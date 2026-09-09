@@ -36,7 +36,8 @@
       "!**/benches",
       "!!**/e2e-tests",
       "!!**/target",
-      "!!.cargo"
+      "!!.cargo",
+      "!!packages/@biomejs/plugin-api/type-tests"
     ]
   },
   "formatter": {

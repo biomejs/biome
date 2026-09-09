@@ -26,6 +26,51 @@ export interface AstQuery<N extends JsAstNode> {
 	readonly [queriedNode]?: N;
 }
 
+/** File information supplied to each invocation of a rule. */
+export interface RuleContext {
+	/** The analyzed file's path, as supplied by Biome. */
+	readonly filePath: string;
+	/** The parsing mode of the analyzed source, including embedded snippets. */
+	readonly sourceType: JsFileSource;
+}
+
+/** JavaScript or TypeScript parsing settings for the analyzed source. */
+export interface JsFileSource {
+	readonly language:
+		| { readonly kind: "javascript" }
+		| { readonly kind: "typescript"; readonly definitionFile: boolean };
+	/** Syntax extensions permitted in this source. */
+	readonly variant: "standard" | "standardRestricted" | "jsx";
+	readonly moduleKind: "module" | "script";
+	readonly version: "es2022" | "esNext";
+	readonly embeddingKind: JsEmbeddingKind;
+}
+
+/** The host framework and parsing mode of embedded JavaScript or TypeScript. */
+export type JsEmbeddingKind =
+	| { readonly kind: "none" }
+	| {
+			readonly kind: "astro";
+			readonly frontmatter: boolean;
+			readonly isClassAttribute: boolean;
+	  }
+	| {
+			readonly kind: "vue";
+			readonly setup: boolean;
+			readonly isSource: boolean;
+			readonly eventHandler: boolean;
+	  }
+	| {
+			readonly kind: "svelte";
+			readonly fileKind: "component" | "sourceModule";
+			readonly embeddingKind:
+				| "source"
+				| "expression"
+				| "snippetSignature"
+				| "legacyConst"
+				| "declaration";
+	  };
+
 /**
  * A lint rule, created with {@link defineRule} and exported from the plugin
  * with `export const`. The name of the export is used as the rule name.
@@ -38,8 +83,20 @@ export interface Rule<N extends JsAstNode> {
 
 	/**
 	 * Called with every node matching the query.
+	 * `context` information is read-only
+	 *
+	 * For example, inspect declarations only in TypeScript sources:
+	 * ```ts
+	 * export const myRule = defineRule({
+	 *   query: ast("JS_VARIABLE_STATEMENT"),
+	 *   run(node, context) {
+	 *     if (context.sourceType.language.kind !== "typescript") return;
+	 *     registerDiagnostic(node, "information", `Declaration in ${context.filePath}.`);
+	 *   },
+	 * });
+	 * ```
 	 */
-	run(node: N): void;
+	run(node: N, context: RuleContext): void;
 }
 
 /**

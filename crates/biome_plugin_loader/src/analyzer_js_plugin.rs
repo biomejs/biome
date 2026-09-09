@@ -7,12 +7,14 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{
     AnalyzerPlugin, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+    ServiceBag,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_glob::NormalizedGlob;
 use biome_js_runtime::{JsExecContext, JsPluginRule};
 use biome_js_syntax::JsSyntaxNode;
+use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -116,7 +118,26 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         self.kinds.clone()
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, _path: Utf8PathBuf) -> PluginEvalResult {
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Utf8PathBuf,
+        services: &ServiceBag,
+    ) -> PluginEvalResult {
+        let Some(source_type) = services.get_service::<JsFileSource>() else {
+            return PluginEvalResult {
+                entries: vec![PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!(
+                            "Could not run the plugin because the analyzed file's source type is unavailable."
+                        ),
+                    ),
+                    action: None,
+                }],
+            };
+        };
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -156,8 +177,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 
         for rule in rules.iter().filter(|rule| rule.kinds.contains(&kind)) {
             let ast = ctx.create_js_ast(node.clone());
-            let result =
-                ctx.call_function(&rule.run, &JsValue::undefined(), std::slice::from_ref(&ast));
+            let context = ctx.create_rule_context(&path, *source_type);
+            let result = ctx.call_function(&rule.run, &JsValue::undefined(), &[ast, context]);
 
             // Drain the diagnostics even on errors, so a failed rule can't leak
             // its diagnostics into the next one.
@@ -193,7 +214,249 @@ mod tests {
     use biome_fs::MemoryFileSystem;
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::JsSyntaxKind;
-    use biome_languages::JsFileSource;
+
+    fn services(source_type: JsFileSource) -> ServiceBag {
+        let mut services = ServiceBag::default();
+        services.insert_service(source_type);
+        services
+    }
+
+    #[test]
+    fn rule_context_represents_source_type() {
+        use biome_languages::javascript::{
+            JsEmbeddingKind, LanguageVersion, SvelteEmbeddingKind, SvelteFileKind,
+        };
+
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const sourceMode = defineRule({
+                query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
+                run(root, context) {
+                    const source = context.sourceType;
+                    registerDiagnostic(root, "information", JSON.stringify([
+                        source.language, source.variant, source.moduleKind,
+                        source.version, source.embeddingKind,
+                    ]));
+                },
+            });"#,
+            None,
+        );
+        for (source, expected) in [
+            (
+                JsFileSource::js_module(),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::js_script(),
+                r#"[{"kind":"javascript"},"standard","script","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::jsx(),
+                r#"[{"kind":"javascript"},"jsx","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::ts(),
+                r#"[{"kind":"typescript","definitionFile":false},"standard","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::ts_restricted(),
+                r#"[{"kind":"typescript","definitionFile":false},"standardRestricted","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::tsx(),
+                r#"[{"kind":"typescript","definitionFile":false},"jsx","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::d_ts(),
+                r#"[{"kind":"typescript","definitionFile":true},"standard","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_version(LanguageVersion::ESNext),
+                r#"[{"kind":"javascript"},"standard","module","esNext",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Astro {
+                    frontmatter: true,
+                    is_class_attribute: false,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"astro","frontmatter":true,"isClassAttribute":false}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Astro {
+                    frontmatter: false,
+                    is_class_attribute: true,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"astro","frontmatter":false,"isClassAttribute":true}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    setup: true,
+                    is_source: true,
+                    event_handler: false,
+                    allow_statements: true,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":true,"isSource":true,"eventHandler":false}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    setup: false,
+                    is_source: false,
+                    event_handler: true,
+                    allow_statements: false,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":false,"isSource":false,"eventHandler":true}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::SourceModule,
+                    embedding_kind: SvelteEmbeddingKind::Source,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"sourceModule","embeddingKind":"source"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::Expression,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"expression"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::SnippetSignature,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"snippetSignature"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::LegacyConst,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"legacyConst"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::Declaration,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"declaration"}]"#,
+            ),
+        ] {
+            let parse = biome_js_parser::parse(
+                "",
+                source.with_embedding_kind(JsEmbeddingKind::None),
+                JsParserOptions::default(),
+            );
+            let result =
+                plugin.evaluate(parse.syntax().into(), "/file.js".into(), &services(source));
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected one diagnostic for {source:?}: {result:?}");
+            };
+            assert_eq!(PrintDescription(&entry.diagnostic).to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn rule_context_is_readonly_and_retains_its_file() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            let saved;
+            export const contextValues = defineRule({
+                query: ast("JS_MODULE"),
+                run(root, context) {
+                    const objects = [context, context.sourceType,
+                        context.sourceType.language, context.sourceType.embeddingKind];
+                    const readonly = objects.every(object => Object.keys(object).every(key =>
+                        !Reflect.set(object, key, null) &&
+                        !Reflect.deleteProperty(object, key) &&
+                        !Reflect.defineProperty(object, key, { value: null })
+                    ));
+                    registerDiagnostic(root, "information", JSON.stringify([
+                        context, saved, readonly,
+                    ]));
+                    saved = context;
+                },
+            });"#,
+            None,
+        );
+        let mut previous = serde_json::Value::Null;
+        for (path, source, language) in [
+            (
+                "/src/café.js",
+                JsFileSource::js_module(),
+                serde_json::json!({"kind": "javascript"}),
+            ),
+            (
+                "relative/文件.ts",
+                JsFileSource::ts(),
+                serde_json::json!({"kind": "typescript", "definitionFile": false}),
+            ),
+        ] {
+            let parse = biome_js_parser::parse("", source, JsParserOptions::default());
+            let result = plugin.evaluate(parse.syntax().into(), path.into(), &services(source));
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected one diagnostic: {result:?}");
+            };
+            let current = serde_json::json!({
+                "filePath": path,
+                "sourceType": {
+                    "language": language, "variant": "standard", "moduleKind": "module",
+                    "version": "es2022", "embeddingKind": { "kind": "none" },
+                },
+            });
+            let actual: serde_json::Value =
+                serde_json::from_str(&PrintDescription(&entry.diagnostic).to_string()).unwrap();
+            assert_eq!(actual, serde_json::json!([current, previous, true]));
+            previous = current;
+        }
+    }
+
+    #[test]
+    fn rule_context_receives_analyzer_services_for_descendants() {
+        use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never};
+        use biome_js_analyze::JsAnalyzerServices;
+
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            export const contextValues = defineRule({
+                query: ast("JS_VARIABLE_STATEMENT"),
+                run(node, context) {
+                    registerDiagnostic(node, "information",
+                        `${context.filePath}|${context.sourceType.language.kind}|${context.sourceType.variant}`);
+                },
+            });"#,
+            None,
+        );
+        let source = JsFileSource::tsx();
+        let parse =
+            biome_js_parser::parse("let value: number;", source, JsParserOptions::default());
+        assert!(!parse.has_errors());
+        let mut options = AnalyzerOptions::default();
+        options.file_path = "/component.js".into();
+        let plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>> = vec![Arc::new(Box::new(plugin))];
+        let mut messages = Vec::new();
+        let (_, diagnostics) = biome_js_analyze::analyze(
+            &parse.tree(),
+            AnalysisFilter {
+                enabled_rules: Some(&[]),
+                ..AnalysisFilter::default()
+            },
+            &options,
+            &plugins,
+            JsAnalyzerServices::default().with_source_type(source),
+            |signal| {
+                if let Some(diagnostic) = signal.diagnostic() {
+                    messages.push(PrintDescription(&diagnostic).to_string());
+                }
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+        assert!(diagnostics.is_empty(), "{diagnostics:?}");
+        assert_eq!(messages, ["/component.js|typescript|jsx"]);
+    }
 
     /// Renders the diagnostics of a single evaluation the same way the CLI does, by attaching the
     /// path and the content of the analyzed file so the code frame can be printed.
@@ -322,7 +585,11 @@ mod tests {
             JsParserOptions::default(),
         );
 
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
 
         let [entry] = result.entries.as_slice() else {
             panic!("expected a single diagnostic, got {result:?}");
@@ -405,7 +672,11 @@ mod tests {
                 .descendants()
                 .find(|node| node.kind() == kind)
                 .unwrap();
-            let result = plugin.evaluate(node.into(), "/file.js".into());
+            let result = plugin.evaluate(
+                node.into(),
+                "/file.js".into(),
+                &services(JsFileSource::js_module()),
+            );
             let [entry] = result.entries.as_slice() else {
                 panic!("expected a single diagnostic for {content}, got {result:?}");
             };
@@ -440,7 +711,11 @@ mod tests {
             JsParserOptions::default(),
         );
         assert!(!parse.has_errors());
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let expected = [
             ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
             ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
@@ -515,7 +790,8 @@ mod tests {
         ] {
             let parse = biome_js_parser::parse(content, source, JsParserOptions::default());
             assert!(!parse.has_errors(), "{content}");
-            let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+            let result =
+                plugin.evaluate(parse.syntax().into(), "/file.js".into(), &services(source));
             let [entry] = result.entries.as_slice() else {
                 panic!("expected a single diagnostic for {expected}, got {result:?}");
             };
@@ -575,7 +851,11 @@ mod tests {
             JsFileSource::js_module(),
             JsParserOptions::default(),
         );
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let [entry] = result.entries.as_slice() else {
             panic!("expected a single diagnostic, got {result:?}");
         };
@@ -748,7 +1028,11 @@ mod tests {
                 .descendants()
                 .find(|node| node.kind() == kind)
                 .unwrap();
-            let result = plugin.evaluate(node.into(), "/file.jsx".into());
+            let result = plugin.evaluate(
+                node.into(),
+                "/file.jsx".into(),
+                &services(JsFileSource::jsx()),
+            );
             let [entry] = result.entries.as_slice() else {
                 panic!("expected a single diagnostic for {content}, got {result:?}");
             };
@@ -800,7 +1084,11 @@ mod tests {
             .descendants()
             .find(|node| plugin.query().contains(&node.kind().to_raw()))
             .unwrap();
-        let result = plugin.evaluate(list.into(), "/file.js".into());
+        let result = plugin.evaluate(
+            list.into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let expected = [("JS_CALL_ARGUMENT_LIST", 5, 9), ("1", 5, 6), ("2", 8, 9)];
         assert_eq!(result.entries.len(), expected.len(), "{result:?}");
         for (entry, (message, start, end)) in result.entries.iter().zip(expected) {
@@ -850,7 +1138,11 @@ mod tests {
             JsParserOptions::default(),
         );
         assert!(!parse.has_errors());
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let expected = [
             ("JS_MODULE_ITEM_LIST", 2, 15),
             ("JS_EXPRESSION_STATEMENT", 2, 15),
@@ -965,7 +1257,11 @@ mod tests {
         );
 
         let plugin = load_test_plugin_from_source("/plugin.js", source, None);
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
 
         snap_diagnostics(
             "reports_top_level_var_declarations_using_ast_fields",
@@ -1011,7 +1307,11 @@ mod tests {
                 render_diagnostics(
                     "/file.js",
                     content,
-                    plugin.evaluate(node.into(), "/file.js".into()),
+                    plugin.evaluate(
+                        node.into(),
+                        "/file.js".into(),
+                        &services(JsFileSource::js_module()),
+                    ),
                 )
             })
             .collect();
@@ -1047,7 +1347,11 @@ mod tests {
             JsParserOptions::default(),
         );
 
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
 
         let [entry] = result.entries.as_slice() else {
             panic!("expected a single diagnostic, got {result:?}");
@@ -1108,7 +1412,11 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), "/foo.js".into())
+                plugin.evaluate(
+                    parse.syntax().into(),
+                    "/foo.js".into(),
+                    &services(JsFileSource::js_module()),
+                )
             })
         };
 
@@ -1122,7 +1430,11 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), "/bar.js".into())
+                plugin.evaluate(
+                    parse.syntax().into(),
+                    "/bar.js".into(),
+                    &services(JsFileSource::js_module()),
+                )
             })
         };
 
@@ -1176,7 +1488,11 @@ mod tests {
                 JsParserOptions::default(),
             );
             assert!(!parse.has_errors(), "{source}");
-            let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+            let result = plugin.evaluate(
+                parse.syntax().into(),
+                "/file.js".into(),
+                &services(JsFileSource::js_module()),
+            );
             assert_eq!(parse.syntax().text_with_trivia(), source);
             (plugin_source, result)
         }
@@ -1452,7 +1768,11 @@ mod tests {
                 );
                 let mut diagnostics = String::new();
                 for _ in 0..2 {
-                    let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+                    let result = plugin.evaluate(
+                        parse.syntax().into(),
+                        "/file.js".into(),
+                        &services(JsFileSource::js_module()),
+                    );
                     let [before, failure, healthy] = result.entries.as_slice() else {
                         panic!("{descriptor}: {result:?}");
                     };
@@ -1607,7 +1927,11 @@ mod tests {
                     }});"#
                 );
                 let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
-                let result = plugin.evaluate(call.clone().into(), "/file.js".into());
+                let result = plugin.evaluate(
+                    call.clone().into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
                 let mut native = BatchMutation::new(root.clone());
                 if case == "repeated_node_removal" {
                     native.remove_element(first.clone().into());
@@ -1678,7 +2002,11 @@ mod tests {
             );
             let mut diagnostics = String::new();
             for invocation in 0..3 {
-                let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+                let result = plugin.evaluate(
+                    parse.syntax().into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
                 assert_eq!(result.entries.len(), if invocation == 0 { 0 } else { 2 });
                 if invocation > 0 {
                     for (entry, message, expected) in [
@@ -1763,7 +2091,11 @@ mod tests {
             );
             assert!(
                 plugin
-                    .evaluate(foreign.syntax().into(), "/other.js".into())
+                    .evaluate(
+                        foreign.syntax().into(),
+                        "/other.js".into(),
+                        &services(JsFileSource::js_module())
+                    )
                     .entries
                     .is_empty()
             );
@@ -1773,7 +2105,11 @@ mod tests {
                 JsFileSource::js_module(),
                 JsParserOptions::default(),
             );
-            let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+            let result = plugin.evaluate(
+                parse.syntax().into(),
+                "/file.js".into(),
+                &services(JsFileSource::js_module()),
+            );
             let [entry] = result.entries.as_slice() else {
                 panic!("expected one diagnostic: {result:?}");
             };
@@ -1828,7 +2164,11 @@ mod tests {
                 );
                 assert!(
                     plugin
-                        .evaluate(original.syntax().into(), "/file.js".into())
+                        .evaluate(
+                            original.syntax().into(),
+                            "/file.js".into(),
+                            &services(JsFileSource::js_module())
+                        )
                         .entries
                         .is_empty()
                 );
@@ -1837,7 +2177,11 @@ mod tests {
                     JsFileSource::js_module(),
                     JsParserOptions::default(),
                 );
-                let result = plugin.evaluate(foreign.syntax().into(), "/file.js".into());
+                let result = plugin.evaluate(
+                    foreign.syntax().into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
                 let [entry] = result.entries.as_slice() else {
                     panic!("{case}: {result:?}");
                 };
