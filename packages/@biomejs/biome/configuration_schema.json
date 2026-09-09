@@ -7109,7 +7109,7 @@
 					]
 				},
 				"noReturnInFinally": {
-					"description": "Disallow return statements in finally().\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
+					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
 						{ "type": "null" }

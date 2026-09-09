@@ -2565,7 +2565,7 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
-	* Disallow return statements in finally().
+	* Disallow return statements in Promise.prototype.finally() callbacks.
 See https://biomejs.dev/linter/rules/no-return-in-finally 
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
