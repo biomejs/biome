@@ -27,8 +27,8 @@ impl FormatRule<CssParameterList> for FormatCssParameterList {
         let mut is_first = true;
         let mut previous_was_keyword_argument = false;
 
-        for (element, formatted) in node.elements().zip(separated) {
-            let element_node = element.node().ok();
+        for formatted in separated {
+            let element_node = formatted.node().ok();
 
             if is_first {
                 is_first = false;
