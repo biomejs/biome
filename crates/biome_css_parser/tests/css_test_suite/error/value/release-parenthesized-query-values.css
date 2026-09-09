@@ -1,0 +1,9 @@
+@media (max-width: $device) {
+  .card { display: block; }
+}
+@media (max-width: ($device - 1px)) {
+  .card { display: block; }
+}
+@media (width >= (1px)) {}
+@container (width > (1px)) {}
+.after { width: 1px; }
