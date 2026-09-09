@@ -63,6 +63,6 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: This mutation has already been passed to registerDiagnostic(). Create a new mutation for each diagnostic, and finish adding edits before registering it.
+  i Rule fixer errored: TypeError: This mutation has already been passed to registerDiagnostic(). Create a new mutation for each diagnostic, and finish adding edits before registering it. (/plugin.js:19:40)
         at run (/plugin.js:19:40)
 ```

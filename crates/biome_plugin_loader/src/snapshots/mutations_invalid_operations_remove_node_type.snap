@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: The first argument to removeNode() must be a Biome node from the source passed to createMutation(). Read the node through its fields or traversal methods; do not pass a token, string, or plain object.
+  i Rule fixer errored: TypeError: The first argument to removeNode() must be a Biome node from the source passed to createMutation(). Read the node through its fields or traversal methods; do not pass a token, string, or plain object. (/plugin.js:14:20)
         at run (/plugin.js:14:20)
 ```

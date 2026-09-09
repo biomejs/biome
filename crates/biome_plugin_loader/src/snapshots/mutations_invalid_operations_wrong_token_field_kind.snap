@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: JsNumberLiteralExpression.withValueToken() for field valueToken received a token that does not match the allowed token choices: "js_number_literal". Pass a matching JsAstToken from node.token("valueToken") or factory.token().
+  i Rule fixer errored: TypeError: JsNumberLiteralExpression.withValueToken() for field valueToken received a token that does not match the allowed token choices: "js_number_literal". Pass a matching JsAstToken from node.token("valueToken") or factory.token(). (/plugin.js:14:21)
         at run (/plugin.js:14:21)
 ```

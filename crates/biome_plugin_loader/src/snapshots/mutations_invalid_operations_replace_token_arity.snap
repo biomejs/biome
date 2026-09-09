@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: replaceToken() requires exactly two arguments. Pass the token to replace first, then its replacement.
+  i Rule fixer errored: TypeError: replaceToken() requires exactly two arguments. Pass the token to replace first, then its replacement. (/plugin.js:14:22)
         at run (/plugin.js:14:22)
 ```

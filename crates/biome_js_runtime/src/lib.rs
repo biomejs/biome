@@ -5,6 +5,7 @@ mod module_loader;
 mod mutation;
 mod plugin_api;
 mod rule_context;
+mod semantic;
 mod source;
 mod token;
 

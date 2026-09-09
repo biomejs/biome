@@ -8,7 +8,9 @@ use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::builtins::JsArray;
 use boa_engine::object::{FunctionObjectBuilder, ObjectInitializer};
 use boa_engine::property::Attribute;
-use boa_engine::{Context, JsNativeError, JsResult, JsValue, Module, NativeFunction, js_string};
+use boa_engine::{
+    Context, JsNativeError, JsResult, JsString, JsValue, Module, NativeFunction, js_string,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -96,6 +98,14 @@ impl JsPluginApi {
         .name("ast")
         .build();
 
+        let semantic = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(Self::semantic_query),
+        )
+        .length(1)
+        .name("semantic")
+        .build();
+
         let define_rule = FunctionObjectBuilder::new(
             context.realm(),
             NativeFunction::from_fn_ptr(Self::define_rule),
@@ -123,17 +133,21 @@ impl JsPluginApi {
             &[
                 js_string!("registerDiagnostic"),
                 js_string!("ast"),
+                js_string!("semantic"),
                 js_string!("defineRule"),
                 js_string!("createMutation"),
                 js_string!("factory"),
             ],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
-                |module, (register_diagnostic, ast, define_rule, create_mutation, factory), _| {
+                |module,
+                 (register_diagnostic, ast, semantic, define_rule, create_mutation, factory),
+                 _| {
                     module.set_export(
                         &js_string!("registerDiagnostic"),
                         register_diagnostic.clone().into(),
                     )?;
                     module.set_export(&js_string!("ast"), ast.clone().into())?;
+                    module.set_export(&js_string!("semantic"), semantic.clone().into())?;
                     module.set_export(&js_string!("defineRule"), define_rule.clone().into())?;
                     module.set_export(
                         &js_string!("createMutation"),
@@ -144,6 +158,7 @@ impl JsPluginApi {
                 (
                     register_diagnostic,
                     ast,
+                    semantic,
                     define_rule,
                     create_mutation,
                     factory,
@@ -157,9 +172,21 @@ impl JsPluginApi {
 
     /// Implements `ast(...kinds)`: builds an AST query object from syntax kind names.
     fn ast_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        Self::node_query("ast", args, context)
+    }
+
+    fn semantic_query(
+        _this: &JsValue,
+        args: &[JsValue],
+        context: &mut Context,
+    ) -> JsResult<JsValue> {
+        Self::node_query("semantic", args, context)
+    }
+
+    fn node_query(query_type: &str, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
         if args.is_empty() {
             return Err(JsNativeError::typ()
-                .with_message("ast() requires at least one node kind. Pass a kind from JsNodeByKind, such as ast(\"JS_CALL_EXPRESSION\").")
+                .with_message(format!("{query_type}() requires at least one node kind. Pass a kind from JsNodeByKind, such as {query_type}(\"JS_CALL_EXPRESSION\")."))
                 .into());
         }
 
@@ -167,7 +194,7 @@ impl JsPluginApi {
         for arg in args {
             let Some(kind) = arg.as_string() else {
                 return Err(JsNativeError::typ()
-                    .with_message("ast() requires node kind names as strings. Pass names such as \"JS_CALL_EXPRESSION\", not node objects.")
+                    .with_message(format!("{query_type}() requires node kind names as strings. Pass names such as \"JS_CALL_EXPRESSION\", not node objects."))
                     .into());
             };
             if JsAstNode::syntax_kind_from_ast_name(&kind.to_std_string_lossy()).is_none() {
@@ -183,7 +210,11 @@ impl JsPluginApi {
 
         let kinds = JsArray::from_iter(kinds, context);
         let query = ObjectInitializer::new(context)
-            .property(js_string!("type"), js_string!("ast"), Attribute::ENUMERABLE)
+            .property(
+                js_string!("type"),
+                JsString::from(query_type),
+                Attribute::ENUMERABLE,
+            )
             .property(js_string!("kinds"), kinds, Attribute::ENUMERABLE)
             .build();
 
@@ -212,7 +243,7 @@ impl JsPluginApi {
         {
             return Err(JsNativeError::typ()
                 .with_message(
-                    "The rule's query property must be a query object. Set it to ast(...) with the node kinds the rule should inspect.",
+                    "The rule's query property must be a query object. Set it to ast(...) or semantic(...) with the node kinds the rule should inspect.",
                 )
                 .into());
         }

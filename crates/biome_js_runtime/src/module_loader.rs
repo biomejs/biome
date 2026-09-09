@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use boa_engine::module::{ModuleLoader, Referrer};
+use boa_engine::module::{ModuleLoader, ModuleRequest, Referrer};
 use boa_engine::{JsNativeError, JsResult, JsString, Module, Source};
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
@@ -35,10 +35,11 @@ impl ModuleLoader for JsModuleLoader {
     async fn load_imported_module(
         self: Rc<JsModuleLoader>,
         referrer: Referrer,
-        specifier: JsString,
+        request: ModuleRequest,
         context: &RefCell<&mut boa_engine::Context>,
     ) -> JsResult<Module> {
-        if let Some(module) = self.builtins.borrow().get(&specifier) {
+        let specifier = request.specifier();
+        if let Some(module) = self.builtins.borrow().get(specifier) {
             return Ok(module.clone());
         }
 

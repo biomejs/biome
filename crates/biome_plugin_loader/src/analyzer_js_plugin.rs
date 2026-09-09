@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::ops::DerefMut;
 use std::sync::Arc;
 
-use boa_engine::{JsNativeError, JsResult, JsValue};
+use boa_engine::{JsNativeError, JsResult};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{
@@ -176,9 +176,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         let mut entries = Vec::new();
 
         for rule in rules.iter().filter(|rule| rule.kinds.contains(&kind)) {
-            let ast = ctx.create_js_ast(node.clone());
-            let context = ctx.create_rule_context(&path, *source_type);
-            let result = ctx.call_function(&rule.run, &JsValue::undefined(), &[ast, context]);
+            let result = ctx.call_rule(rule, node.clone(), &path, *source_type, services);
 
             // Drain the diagnostics even on errors, so a failed rule can't leak
             // its diagnostics into the next one.
@@ -214,8 +212,9 @@ mod tests {
     use biome_fs::MemoryFileSystem;
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::JsSyntaxKind;
+    use boa_engine::JsValue;
 
-    fn services(source_type: JsFileSource) -> ServiceBag {
+    pub(super) fn services(source_type: JsFileSource) -> ServiceBag {
         let mut services = ServiceBag::default();
         services.insert_service(source_type);
         services
@@ -460,7 +459,7 @@ mod tests {
 
     /// Renders the diagnostics of a single evaluation the same way the CLI does, by attaching the
     /// path and the content of the analyzed file so the code frame can be printed.
-    fn render_diagnostics(path: &str, source: &str, result: PluginEvalResult) -> String {
+    pub(super) fn render_diagnostics(path: &str, source: &str, result: PluginEvalResult) -> String {
         result
             .entries
             .into_iter()
@@ -482,7 +481,7 @@ mod tests {
             .collect()
     }
 
-    fn snap_diagnostics(
+    pub(super) fn snap_diagnostics(
         test_name: &str,
         plugin_path: &str,
         plugin_source: &str,
@@ -501,7 +500,7 @@ mod tests {
         });
     }
 
-    fn load_test_plugin_from_source(
+    pub(super) fn load_test_plugin_from_source(
         path: &str,
         source: &str,
         includes: Option<&[NormalizedGlob]>,
@@ -1872,6 +1871,7 @@ mod tests {
                     message
                         .lines()
                         .next()
+                        .map(|line| line.rsplit_once(" (").map_or(line, |(message, _)| message))
                         .is_some_and(|line| line.ends_with('.')),
                     "{case}: {message}"
                 );
@@ -2221,3 +2221,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "semantic.tests.rs"]
+mod semantic_tests;

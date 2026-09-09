@@ -81,7 +81,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: The fix's mutation property is not a mutation object. Set it to the value returned by createMutation(node).
+  i Rule aFailed errored: TypeError: The fix's mutation property is not a mutation object. Set it to the value returned by createMutation(node). (/plugin.js:14:51)
         at run (/plugin.js:14:51)
   
 
@@ -113,7 +113,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: The fix's mutation property is not a mutation object. Set it to the value returned by createMutation(node).
+  i Rule aFailed errored: TypeError: The fix's mutation property is not a mutation object. Set it to the value returned by createMutation(node). (/plugin.js:14:51)
         at run (/plugin.js:14:51)
   
 

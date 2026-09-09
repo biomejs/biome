@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: The second argument to replaceNode() must be a Biome node. Use a node from run(), its fields, or a node field-update method; do not pass a token, string, or plain object.
+  i Rule fixer errored: TypeError: The second argument to replaceNode() must be a Biome node. Use a node from run(), its fields, or a node field-update method; do not pass a token, string, or plain object. (/plugin.js:14:21)
         at run (/plugin.js:14:21)
 ```

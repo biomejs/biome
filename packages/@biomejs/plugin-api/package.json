@@ -12,7 +12,8 @@
     "LICENSE-MIT",
     "diagnostics.d.ts",
     "index.d.ts",
-    "js_ast.d.ts"
+    "js_ast.d.ts",
+    "semantic.d.ts"
   ],
   "exports": {
     ".": {

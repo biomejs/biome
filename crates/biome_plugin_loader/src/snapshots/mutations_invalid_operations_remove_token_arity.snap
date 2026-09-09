@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: removeToken() requires exactly one argument. Pass the token to remove.
+  i Rule fixer errored: TypeError: removeToken() requires exactly one argument. Pass the token to remove. (/plugin.js:14:21)
         at run (/plugin.js:14:21)
 ```

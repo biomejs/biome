@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: createMutation() requires exactly one node. Pass the node supplied to run() or a node reached through its fields or traversal methods.
+  i Rule fixer errored: TypeError: createMutation() requires exactly one node. Pass the node supplied to run() or a node reached through its fields or traversal methods. (/plugin.js:14:15)
         at run (/plugin.js:14:15)
 ```

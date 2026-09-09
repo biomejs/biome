@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: replaceElement() was called without a mutation object. Call it on the object returned by createMutation(node).
+  i Rule fixer errored: TypeError: replaceElement() was called without a mutation object. Call it on the object returned by createMutation(node). (/plugin.js:14:29)
         at run (/plugin.js:14:29)
 ```

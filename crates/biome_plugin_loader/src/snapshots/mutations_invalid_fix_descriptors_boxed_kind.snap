@@ -81,7 +81,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: The fix.kind property must be a string. Set it to "safe" or "unsafe".
+  i Rule aFailed errored: TypeError: The fix.kind property must be a string. Set it to "safe" or "unsafe". (/plugin.js:14:51)
         at run (/plugin.js:14:51)
   
 
@@ -113,7 +113,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: The fix.kind property must be a string. Set it to "safe" or "unsafe".
+  i Rule aFailed errored: TypeError: The fix.kind property must be a string. Set it to "safe" or "unsafe". (/plugin.js:14:51)
         at run (/plugin.js:14:51)
   
 

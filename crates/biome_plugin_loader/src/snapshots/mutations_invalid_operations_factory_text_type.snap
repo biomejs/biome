@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: The text argument to factory.token() is not a string. Pass a string value, not a String object.
+  i Rule fixer errored: TypeError: The text argument to factory.token() is not a string. Pass a string value, not a String object. (/plugin.js:14:14)
         at run (/plugin.js:14:14)
 ```

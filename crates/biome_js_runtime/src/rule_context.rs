@@ -11,6 +11,7 @@ use camino::Utf8Path;
 pub(crate) fn create_rule_context(
     path: &Utf8Path,
     source_type: JsFileSource,
+    model: Option<&SemanticModel>,
     context: &mut Context,
 ) -> JsValue {
     let language = match source_type.language() {
@@ -59,15 +60,19 @@ pub(crate) fn create_rule_context(
             Attribute::ENUMERABLE,
         )
         .build();
-    ObjectInitializer::new(context)
+    let model = model.map(|model| JsSemanticModel::wrap(model.clone(), context));
+    let mut object = ObjectInitializer::new(context);
+    object
         .property(
             js_string!("filePath"),
             JsString::from(path.as_str()),
             Attribute::ENUMERABLE,
         )
-        .property(js_string!("sourceType"), source_type, Attribute::ENUMERABLE)
-        .build()
-        .into()
+        .property(js_string!("sourceType"), source_type, Attribute::ENUMERABLE);
+    if let Some(model) = model {
+        object.property(js_string!("model"), model, Attribute::ENUMERABLE);
+    }
+    object.build().into()
 }
 
 fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
@@ -148,3 +153,5 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
     }
     object.build().into()
 }
+use crate::semantic::JsSemanticModel;
+use biome_js_semantic::SemanticModel;

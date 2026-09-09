@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: JsExpressionStatement.withSemicolonToken() for field semicolonToken requires a JsAstToken, but the argument is not a Biome token. Pass a token returned by node.token("semicolonToken") or factory.token(), not a string or plain object.
+  i Rule fixer errored: TypeError: JsExpressionStatement.withSemicolonToken() for field semicolonToken requires a JsAstToken, but the argument is not a Biome token. Pass a token returned by node.token("semicolonToken") or factory.token(), not a string or plain object. (/plugin.js:14:29)
         at run (/plugin.js:14:29)
 ```

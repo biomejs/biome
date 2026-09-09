@@ -1,0 +1,1266 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { defineRule, semantic, registerDiagnostic } from "@biomejs/plugin-api";
+function describe(scope) {
+	if (!scope) return null;
+	const names = [];
+	for (const binding of scope.bindings()) {
+		names.push(binding.syntax().text);
+	}
+	return [scope.syntax().kind, names];
+}
+export const scopes = defineRule({
+	query: semantic("JS_MODULE"),
+	run(root, { model }) {
+		const scopes = model.scopes();
+		const global = model.globalScope();
+		const children = global.children();
+		children.length = 0;
+		const scopeDetails = [];
+		for (const scope of scopes) {
+			const lookup = [];
+			for (const name of [
+				"outer",
+				"value",
+				"hoisted",
+				"café",
+				"caf\\u00e9",
+				"Value",
+				"missing",
+			]) {
+				const binding = scope.getBinding(name);
+				const node = binding?.syntax();
+				lookup.push([name, node ? [node.kind, node.text] : null]);
+			}
+			const detail = {
+				scope: describe(scope),
+				global: scope.isGlobalScope(),
+				parent: describe(scope.parent()),
+				ancestors: scope.ancestors().map(describe),
+				lookup,
+			};
+			scopeDetails.push(detail);
+		}
+		const bindingDetails = [];
+		for (const binding of model.allBindings()) {
+			const references = [];
+			for (const reference of binding.allReferences()) {
+				const detail = {
+					scope: describe(reference.scope()),
+					lookup: describe(model.scope(reference.syntax())),
+				};
+				references.push(detail);
+			}
+			const detail = {
+				name: binding.syntax().text,
+				scope: describe(binding.scope()),
+				hoisted: describe(model.scopeHoistedTo(binding.syntax())),
+				references,
+			};
+			bindingDetails.push(detail);
+		}
+		const result = {
+			global: describe(global),
+			rootScope: describe(model.scope(root)),
+			children: global.children().map(describe),
+			scopes: scopeDetails,
+			bindings: bindingDetails,
+		};
+		registerDiagnostic(root, "information", JSON.stringify(result, 0, 2));
+	},
+});
+```
+
+# Input
+
+## `/scopes.js`
+
+```js
+const outer = 0; { let value = 1; function inner(param) { { var hoisted = param; let café = hoisted; café; outer; } } }
+```
+
+## `/scopes.ts`
+
+```ts
+interface Value {} const Value = 0; { type Local = Value; const café = 1; café; }
+```
+
+## `/empty.js`
+
+```js
+
+```
+
+## `/comments.js`
+
+```js
+/* scope */
+```
+
+## `/malformed.js`
+
+```js
+function broken( {
+```
+
+# Diagnostics
+
+```block
+/scopes.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "global": [
+        "JS_MODULE",
+        [
+          "outer"
+        ]
+      ],
+      "rootScope": [
+        "JS_MODULE",
+        [
+          "outer"
+        ]
+      ],
+      "children": [
+        [
+          "JS_BLOCK_STATEMENT",
+          [
+            "value",
+            "inner"
+          ]
+        ]
+      ],
+      "scopes": [
+        {
+          "scope": [
+            "JS_MODULE",
+            [
+              "outer"
+            ]
+          ],
+          "global": true,
+          "parent": null,
+          "ancestors": [
+            [
+              "JS_MODULE",
+              [
+                "outer"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "outer"
+              ]
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "value",
+              "inner"
+            ]
+          ],
+          "global": false,
+          "parent": [
+            "JS_MODULE",
+            [
+              "outer"
+            ]
+          ],
+          "ancestors": [
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "value",
+                "inner"
+              ]
+            ],
+            [
+              "JS_MODULE",
+              [
+                "outer"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "value"
+              ]
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "param"
+            ]
+          ],
+          "global": false,
+          "parent": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "value",
+              "inner"
+            ]
+          ],
+          "ancestors": [
+            [
+              "JS_FUNCTION_DECLARATION",
+              [
+                "param"
+              ]
+            ],
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "value",
+                "inner"
+              ]
+            ],
+            [
+              "JS_MODULE",
+              [
+                "outer"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "JS_FUNCTION_BODY",
+            [
+              "hoisted"
+            ]
+          ],
+          "global": false,
+          "parent": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "param"
+            ]
+          ],
+          "ancestors": [
+            [
+              "JS_FUNCTION_BODY",
+              [
+                "hoisted"
+              ]
+            ],
+            [
+              "JS_FUNCTION_DECLARATION",
+              [
+                "param"
+              ]
+            ],
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "value",
+                "inner"
+              ]
+            ],
+            [
+              "JS_MODULE",
+              [
+                "outer"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "hoisted"
+              ]
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "café"
+            ]
+          ],
+          "global": false,
+          "parent": [
+            "JS_FUNCTION_BODY",
+            [
+              "hoisted"
+            ]
+          ],
+          "ancestors": [
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "café"
+              ]
+            ],
+            [
+              "JS_FUNCTION_BODY",
+              [
+                "hoisted"
+              ]
+            ],
+            [
+              "JS_FUNCTION_DECLARATION",
+              [
+                "param"
+              ]
+            ],
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "value",
+                "inner"
+              ]
+            ],
+            [
+              "JS_MODULE",
+              [
+                "outer"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "café"
+              ]
+            ],
+            [
+              "caf\\u00e9",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "café"
+              ]
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "name": "outer",
+          "scope": [
+            "JS_MODULE",
+            [
+              "outer"
+            ]
+          ],
+          "hoisted": null,
+          "references": [
+            {
+              "scope": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ],
+              "lookup": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "value",
+              "inner"
+            ]
+          ],
+          "hoisted": null,
+          "references": []
+        },
+        {
+          "name": "inner",
+          "scope": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "param"
+            ]
+          ],
+          "hoisted": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "value",
+              "inner"
+            ]
+          ],
+          "references": []
+        },
+        {
+          "name": "param",
+          "scope": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "param"
+            ]
+          ],
+          "hoisted": null,
+          "references": [
+            {
+              "scope": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ],
+              "lookup": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hoisted",
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "café"
+            ]
+          ],
+          "hoisted": [
+            "JS_FUNCTION_BODY",
+            [
+              "hoisted"
+            ]
+          ],
+          "references": [
+            {
+              "scope": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ],
+              "lookup": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "café",
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "café"
+            ]
+          ],
+          "hoisted": null,
+          "references": [
+            {
+              "scope": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ],
+              "lookup": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "café"
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  
+  > 1 │ const outer = 0; { let value = 1; function inner(param) { { var hoisted = param; let café = hoisted; café; outer; } } }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/scopes.ts:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "global": [
+        "JS_MODULE",
+        [
+          "Value",
+          "Value"
+        ]
+      ],
+      "rootScope": [
+        "JS_MODULE",
+        [
+          "Value",
+          "Value"
+        ]
+      ],
+      "children": [
+        [
+          "TS_INTERFACE_DECLARATION",
+          []
+        ],
+        [
+          "JS_BLOCK_STATEMENT",
+          [
+            "Local",
+            "café"
+          ]
+        ]
+      ],
+      "scopes": [
+        {
+          "scope": [
+            "JS_MODULE",
+            [
+              "Value",
+              "Value"
+            ]
+          ],
+          "global": true,
+          "parent": null,
+          "ancestors": [
+            [
+              "JS_MODULE",
+              [
+                "Value",
+                "Value"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "Value"
+              ]
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "TS_INTERFACE_DECLARATION",
+            []
+          ],
+          "global": false,
+          "parent": [
+            "JS_MODULE",
+            [
+              "Value",
+              "Value"
+            ]
+          ],
+          "ancestors": [
+            [
+              "TS_INTERFACE_DECLARATION",
+              []
+            ],
+            [
+              "JS_MODULE",
+              [
+                "Value",
+                "Value"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "Local",
+              "café"
+            ]
+          ],
+          "global": false,
+          "parent": [
+            "JS_MODULE",
+            [
+              "Value",
+              "Value"
+            ]
+          ],
+          "ancestors": [
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "Local",
+                "café"
+              ]
+            ],
+            [
+              "JS_MODULE",
+              [
+                "Value",
+                "Value"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "café"
+              ]
+            ],
+            [
+              "caf\\u00e9",
+              [
+                "JS_IDENTIFIER_BINDING",
+                "café"
+              ]
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "TS_TYPE_ALIAS_DECLARATION",
+            []
+          ],
+          "global": false,
+          "parent": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "Local",
+              "café"
+            ]
+          ],
+          "ancestors": [
+            [
+              "TS_TYPE_ALIAS_DECLARATION",
+              []
+            ],
+            [
+              "JS_BLOCK_STATEMENT",
+              [
+                "Local",
+                "café"
+              ]
+            ],
+            [
+              "JS_MODULE",
+              [
+                "Value",
+                "Value"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "name": "Value",
+          "scope": [
+            "TS_INTERFACE_DECLARATION",
+            []
+          ],
+          "hoisted": [
+            "JS_MODULE",
+            [
+              "Value",
+              "Value"
+            ]
+          ],
+          "references": [
+            {
+              "scope": [
+                "TS_TYPE_ALIAS_DECLARATION",
+                []
+              ],
+              "lookup": [
+                "TS_TYPE_ALIAS_DECLARATION",
+                []
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Value",
+          "scope": [
+            "JS_MODULE",
+            [
+              "Value",
+              "Value"
+            ]
+          ],
+          "hoisted": null,
+          "references": []
+        },
+        {
+          "name": "Local",
+          "scope": [
+            "TS_TYPE_ALIAS_DECLARATION",
+            []
+          ],
+          "hoisted": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "Local",
+              "café"
+            ]
+          ],
+          "references": []
+        },
+        {
+          "name": "café",
+          "scope": [
+            "JS_BLOCK_STATEMENT",
+            [
+              "Local",
+              "café"
+            ]
+          ],
+          "hoisted": null,
+          "references": [
+            {
+              "scope": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "Local",
+                  "café"
+                ]
+              ],
+              "lookup": [
+                "JS_BLOCK_STATEMENT",
+                [
+                  "Local",
+                  "café"
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  
+  > 1 │ interface Value {} const Value = 0; { type Local = Value; const café = 1; café; }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/empty.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "global": [
+        "JS_MODULE",
+        []
+      ],
+      "rootScope": null,
+      "children": [],
+      "scopes": [
+        {
+          "scope": [
+            "JS_MODULE",
+            []
+          ],
+          "global": true,
+          "parent": null,
+          "ancestors": [
+            [
+              "JS_MODULE",
+              []
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        }
+      ],
+      "bindings": []
+    }
+  
+  > 1 │ 
+      │ 
+  
+
+/comments.js:1:12 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "global": [
+        "JS_MODULE",
+        []
+      ],
+      "rootScope": null,
+      "children": [],
+      "scopes": [
+        {
+          "scope": [
+            "JS_MODULE",
+            []
+          ],
+          "global": true,
+          "parent": null,
+          "ancestors": [
+            [
+              "JS_MODULE",
+              []
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        }
+      ],
+      "bindings": []
+    }
+  
+  > 1 │ /* scope */
+      │            
+  
+
+/malformed.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "global": [
+        "JS_FUNCTION_DECLARATION",
+        [
+          "broken"
+        ]
+      ],
+      "rootScope": [
+        "JS_FUNCTION_DECLARATION",
+        [
+          "broken"
+        ]
+      ],
+      "children": [
+        [
+          "JS_FUNCTION_DECLARATION",
+          []
+        ]
+      ],
+      "scopes": [
+        {
+          "scope": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "broken"
+            ]
+          ],
+          "global": true,
+          "parent": null,
+          "ancestors": [
+            [
+              "JS_FUNCTION_DECLARATION",
+              [
+                "broken"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        },
+        {
+          "scope": [
+            "JS_FUNCTION_DECLARATION",
+            []
+          ],
+          "global": false,
+          "parent": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "broken"
+            ]
+          ],
+          "ancestors": [
+            [
+              "JS_FUNCTION_DECLARATION",
+              []
+            ],
+            [
+              "JS_FUNCTION_DECLARATION",
+              [
+                "broken"
+              ]
+            ]
+          ],
+          "lookup": [
+            [
+              "outer",
+              null
+            ],
+            [
+              "value",
+              null
+            ],
+            [
+              "hoisted",
+              null
+            ],
+            [
+              "café",
+              null
+            ],
+            [
+              "caf\\u00e9",
+              null
+            ],
+            [
+              "Value",
+              null
+            ],
+            [
+              "missing",
+              null
+            ]
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "name": "broken",
+          "scope": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "broken"
+            ]
+          ],
+          "hoisted": [
+            "JS_FUNCTION_DECLARATION",
+            [
+              "broken"
+            ]
+          ],
+          "references": []
+        }
+      ]
+    }
+  
+  > 1 │ function broken( {
+      │ ^^^^^^^^^^^^^^^^^^
+```

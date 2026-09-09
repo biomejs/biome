@@ -43,6 +43,6 @@ call(1,2);
 ```block
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule fixer errored: TypeError: JsCallArguments.withArgs() for field args requires a JsCallArgumentListNode, but the argument is not a Biome node. Pass a matching node from a node field or node.children(), not a plain object or array.
+  i Rule fixer errored: TypeError: JsCallArguments.withArgs() for field args requires a JsCallArgumentListNode, but the argument is not a Biome node. Pass a matching node from a node field or node.children(), not a plain object or array. (/plugin.js:14:14)
         at run (/plugin.js:14:14)
 ```

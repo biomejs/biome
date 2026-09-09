@@ -77,7 +77,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: The fix argument to registerDiagnostic() is not an object. Pass an object with mutation, message, and kind properties, or omit the fix argument.
+  i Rule aFailed errored: TypeError: The fix argument to registerDiagnostic() is not an object. Pass an object with mutation, message, and kind properties, or omit the fix argument. (/plugin.js:14:51)
         at run (/plugin.js:14:51)
   
 
@@ -109,7 +109,7 @@ call(1,2);
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule aFailed errored: TypeError: The fix argument to registerDiagnostic() is not an object. Pass an object with mutation, message, and kind properties, or omit the fix argument.
+  i Rule aFailed errored: TypeError: The fix argument to registerDiagnostic() is not an object. Pass an object with mutation, message, and kind properties, or omit the fix argument. (/plugin.js:14:51)
         at run (/plugin.js:14:51)
   
 
