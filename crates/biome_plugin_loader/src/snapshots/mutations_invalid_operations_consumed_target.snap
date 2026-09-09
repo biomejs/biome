@@ -1,0 +1,68 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/plugin-api";
+
+export const fixer = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const statement = root.items[0];
+		const call = statement.expression;
+		const args = call.arguments;
+		const list = args.children()[0];
+		const [first, second] = args.args;
+		const token = first.token("valueToken");
+		const mutation = createMutation(root);
+
+		mutation.replaceToken(token, factory.token("JS_NUMBER_LITERAL", "9"));
+		registerDiagnostic(first, "warning", "Before failure", {
+			mutation,
+			message: "Apply edit",
+			kind: "safe",
+		});
+		mutation.removeNode(second);
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Before failure
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Safe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2);
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule fixer errored: TypeError: This mutation has already been passed to registerDiagnostic(). Create a new mutation for each diagnostic, and finish adding edits before registering it.
+        at run (/plugin.js:19:40)
+```

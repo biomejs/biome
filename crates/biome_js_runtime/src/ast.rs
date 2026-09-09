@@ -1,6 +1,6 @@
-use std::cell::RefCell;
-
-use boa_engine::builtins::object::OrdinaryObject;
+use crate::token::JsAstToken;
+use biome_js_syntax::{JsLanguage, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
+use biome_rowan::{AstNode, SyntaxKind, SyntaxSlot};
 use boa_engine::class::{Class, ClassBuilder};
 use boa_engine::object::builtins::JsArray;
 use boa_engine::object::{JsObject, ObjectInitializer};
@@ -9,14 +9,11 @@ use boa_engine::{
     Context, Finalize, JsData, JsNativeError, JsResult, JsString, JsValue, NativeFunction, Trace,
     js_string,
 };
+use std::cell::RefCell;
 
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
-use biome_rowan::{AstNode, SyntaxKind};
-use biome_text_size::TextRange;
-
-#[derive(Debug, JsData)]
+#[derive(Clone, Debug, JsData)]
 pub(crate) struct JsAstNode {
-    node: JsSyntaxNode,
+    pub(crate) node: JsSyntaxNode,
 }
 
 #[derive(Debug, Default, JsData)]
@@ -67,24 +64,17 @@ impl JsAstNode {
             .into()
     }
 
-    pub(crate) fn text_range(value: &JsValue) -> Option<TextRange> {
-        let object = value.as_object()?;
-        let node = object.downcast_ref::<Self>()?;
-
-        Some(node.node.text_trimmed_range())
-    }
-
-    fn from_this(this: &JsValue) -> Option<JsSyntaxNode> {
+    pub(crate) fn from_value(this: &JsValue) -> Option<Self> {
         let object = this.as_object()?;
         let node = object.downcast_ref::<Self>()?;
 
-        Some(node.node.clone())
+        Some(node.clone())
     }
 
     fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let Some(node) = Self::from_this(this) else {
+        let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
+                .with_message("Cannot read node.kind because this value is not a node. Use the node passed to run() or a node obtained by traversing it.")
                 .into());
         };
 
@@ -92,9 +82,9 @@ impl JsAstNode {
     }
 
     fn get_text(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let Some(node) = Self::from_this(this) else {
+        let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
+                .with_message("Cannot read node.text because this value is not a node. Use the node passed to run() or a node obtained by traversing it.")
                 .into());
         };
 
@@ -102,9 +92,9 @@ impl JsAstNode {
     }
 
     fn get_parent(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        let Some(node) = Self::from_this(this) else {
+        let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
+                .with_message("Cannot read node.parent because this value is not a node. Use the node passed to run() or a node obtained by traversing it.")
                 .into());
         };
 
@@ -114,9 +104,9 @@ impl JsAstNode {
     }
 
     fn ancestors(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        let Some(node) = Self::from_this(this) else {
+        let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
-                .with_message("AST method called with an invalid receiver")
+                .with_message("ancestors() was called on a value that is not a node. Call node.ancestors() on the node passed to run() or a node obtained by traversing it.")
                 .into());
         };
 
@@ -130,9 +120,9 @@ impl JsAstNode {
     }
 
     fn children(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        let Some(node) = Self::from_this(this) else {
+        let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
-                .with_message("AST method called with an invalid receiver")
+                .with_message("children() was called on a value that is not a node. Call node.children() on the node passed to run() or a node obtained by traversing it.")
                 .into());
         };
 
@@ -144,7 +134,62 @@ impl JsAstNode {
         Ok(JsArray::from_iter(children, context).into())
     }
 
-    fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsValue
+    fn token(this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let Some(Self { node }) = Self::from_value(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("token() was called on a value that is not a node. Call node.token(field) on the node passed to run() or a node obtained by traversing it.")
+                .into());
+        };
+        let [field] = args else {
+            return Err(JsNativeError::typ()
+                .with_message("node.token() received the wrong number of arguments. Pass exactly one token field name as a string, using node.token(field).")
+                .into());
+        };
+        let field = field.as_string().ok_or_else(|| {
+            JsNativeError::typ().with_message("The field argument to node.token() is not a string. Pass the token field name as a string value, not a String object.")
+        })?;
+        let field = field.to_std_string().map_err(|_| {
+            JsNativeError::typ().with_message("The field argument to node.token() contains an incomplete Unicode character. Check the string's \\u escapes and supply a token field name with complete Unicode characters.")
+        })?;
+        let kind = node.kind();
+        let (_, index) = Self::token_fields(kind)
+            .iter()
+            .find(|(name, _)| *name == field)
+            .ok_or_else(|| JsNativeError::typ().with_message(format!(
+                "node.token({field:?}) cannot find a token field named {field:?} on a node of kind {kind:?}. Check this node's plugin API type definition and pass a token field name declared for that type."
+            )))?;
+        match node.slots().nth(*index) {
+            Some(SyntaxSlot::Token(token)) => Ok(JsAstToken::from_token(token, context)),
+            Some(SyntaxSlot::Node(_)) => Err(JsNativeError::typ()
+                .with_message(format!(
+                    "node.token({field:?}) found a node where a token was expected on {kind:?}. Check the source syntax before reading this field."
+                ))
+                .into()),
+            Some(SyntaxSlot::Empty { .. }) | None => Ok(JsValue::undefined()),
+        }
+    }
+
+    fn children_with_tokens(
+        this: &JsValue,
+        _args: &[JsValue],
+        context: &mut Context,
+    ) -> JsResult<JsValue> {
+        let Some(Self { node }) = Self::from_value(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("childrenWithTokens() was called on a value that is not a node. Call node.childrenWithTokens() on the node passed to run() or a node obtained by traversing it.")
+                .into());
+        };
+        let children = node
+            .children_with_tokens()
+            .map(|child| match child {
+                JsSyntaxElement::Node(node) => Self::from_node(node, context),
+                JsSyntaxElement::Token(token) => JsAstToken::from_token(token, context),
+            })
+            .collect::<Vec<_>>();
+        Ok(JsArray::from_iter(children, context).into())
+    }
+
+    pub(crate) fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsValue
     where
         N: AstNode<Language = JsLanguage>,
     {
@@ -154,7 +199,7 @@ impl JsAstNode {
         }
     }
 
-    fn wrap_node_list<I, N>(nodes: I, context: &mut Context) -> JsValue
+    pub(crate) fn wrap_node_list<I, N>(nodes: I, context: &mut Context) -> JsValue
     where
         I: IntoIterator<Item = N>,
         N: AstNode<Language = JsLanguage>,
@@ -167,7 +212,7 @@ impl JsAstNode {
         JsArray::from_iter(nodes, context).into()
     }
 
-    fn wrap_token(token: Option<JsSyntaxToken>) -> JsValue {
+    pub(crate) fn wrap_token(token: Option<JsSyntaxToken>) -> JsValue {
         token.map_or_else(JsValue::undefined, |token| {
             JsString::from(token.text_trimmed().to_string()).into()
         })
@@ -223,7 +268,7 @@ macro_rules! register_js_ast_fields {
                 |this: &JsValue, _args: &[JsValue], js_context: &mut Context| {
                     let $context = js_context;
                     let _ = &$context;
-                    let Some(syntax) = Self::from_this(this) else {
+                    let Some(Self { node: syntax }) = Self::from_value(this) else {
                         return Ok(JsValue::undefined());
                     };
                     if syntax.kind() != $node_kind {
@@ -244,8 +289,8 @@ macro_rules! register_js_ast_fields {
     };
 }
 
-#[path = "generated/js_ast.rs"]
-mod js_ast;
+pub(crate) use cast_js_ast_node;
+pub(crate) use register_js_ast_fields;
 
 impl Class for JsAstNode {
     const NAME: &'static str = "__JsAstNode";
@@ -271,6 +316,16 @@ impl Class for JsAstNode {
                 js_string!("children"),
                 0,
                 NativeFunction::from_fn_ptr(Self::children),
+            )
+            .method(
+                js_string!("token"),
+                1,
+                NativeFunction::from_fn_ptr(Self::token),
+            )
+            .method(
+                js_string!("childrenWithTokens"),
+                0,
+                NativeFunction::from_fn_ptr(Self::children_with_tokens),
             );
 
         if !class.context().has_data::<JsAstPrototypeCache>() {
@@ -286,7 +341,7 @@ impl Class for JsAstNode {
         _context: &mut Context,
     ) -> JsResult<Self> {
         Err(JsNativeError::typ()
-            .with_message("AST nodes cannot be constructed from JavaScript")
+            .with_message("Nodes do not have a public constructor. Use the node passed to run() or a node obtained by traversing it, and create updated nodes with the field update methods defined for its type, such as withValueToken().")
             .into())
     }
 }

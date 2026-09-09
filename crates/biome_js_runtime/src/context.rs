@@ -1,6 +1,12 @@
-use std::rc::Rc;
-use std::sync::Arc;
-
+use crate::JsModuleLoader;
+use crate::ast::JsAstNode;
+use crate::mutation::JsMutation;
+use crate::plugin_api::JsPluginApi;
+use crate::source::read_module_source;
+use crate::token::JsAstToken;
+use biome_analyze::PluginDiagnosticEntry;
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode};
+use biome_resolver::FsWithResolverProxy;
 use boa_engine::builtins::promise::PromiseState;
 use boa_engine::object::builtins::{JsArray, JsFunction};
 use boa_engine::property::PropertyKey;
@@ -8,15 +14,8 @@ use boa_engine::{
     Context, JsError, JsNativeError, JsResult, JsValue, Module, NativeFunction, Source, js_string,
 };
 use camino::Utf8Path;
-
-use biome_analyze::RuleDiagnostic;
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode};
-use biome_resolver::FsWithResolverProxy;
-
-use crate::JsModuleLoader;
-use crate::ast::JsAstNode;
-use crate::plugin_api::JsPluginApi;
-use crate::source::read_module_source;
+use std::rc::Rc;
+use std::sync::Arc;
 
 #[cfg(target_arch = "wasm32")]
 struct Clock;
@@ -67,6 +66,8 @@ impl JsExecContext {
             .build()?;
 
         JsAstNode::register(&mut ctx)?;
+        JsAstToken::register(&mut ctx)?;
+        JsMutation::register(&mut ctx)?;
 
         module_loader.register_module(
             js_string!("@biomejs/plugin-api"),
@@ -77,7 +78,7 @@ impl JsExecContext {
     }
 
     #[inline]
-    pub fn pull_diagnostics(&mut self) -> Vec<RuleDiagnostic> {
+    pub fn pull_diagnostics(&mut self) -> Vec<PluginDiagnosticEntry> {
         self.api.pull_diagnostics()
     }
 
@@ -205,6 +206,8 @@ impl JsExecContext {
     /// The returned value is bound to this context: it must not outlive it, nor be passed to
     /// another [`JsExecContext`].
     pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsValue {
+        let root = node.ancestors().last().unwrap_or_else(|| node.clone());
+        self.api.set_source(Some(root));
         JsAstNode::from_node(node, &mut self.ctx)
     }
 
@@ -214,6 +217,8 @@ impl JsExecContext {
         this: &JsValue,
         args: &[JsValue],
     ) -> JsResult<JsValue> {
-        function.call(this, args, &mut self.ctx)
+        let result = function.call(this, args, &mut self.ctx);
+        self.api.set_source(None);
+        result
     }
 }

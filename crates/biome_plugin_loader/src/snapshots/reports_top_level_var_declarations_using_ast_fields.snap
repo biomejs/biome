@@ -2,9 +2,46 @@
 source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
 expression: content
 ---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+export const noTopLevelVar = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		for (const statement of root.items) {
+			if (
+				statement.kind === "JS_VARIABLE_STATEMENT" &&
+				statement.declaration?.kindToken === "var"
+			) {
+				registerDiagnostic(
+					statement,
+					"warning",
+					"Use let or const instead of a top-level var declaration.",
+				);
+			}
+		}
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+var legacy = 1; const modern = 2;
+```
+
+# Diagnostics
+
+```block
 /file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use let or const instead of a top-level var declaration.
   
   > 1 │ var legacy = 1; const modern = 2;
       │ ^^^^^^^^^^^^^^^
+```

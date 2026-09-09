@@ -945,7 +945,7 @@ impl<'a> ProcessFixAll<'a> {
         if new_text == current_text {
             return Ok(None);
         }
-        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "anonymous")))?;
         Ok(Some(new_text))
     }
 
