@@ -1,8 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
 <!-- should not generate diagnostics -->
-<div set:text={content}></div>
-<div>{content}</div>
-<div set:HTML={content}></div>
-
 {show && <span set:text={content} />}
 
 {
@@ -12,3 +14,5 @@
         </div>
     )
 }
+
+```
