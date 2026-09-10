@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseBetterDomTraversing {
-        version: "next",
+        version: "2.5.13",
         name: "useBetterDomTraversing",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("better-dom-traversing").inspired()],

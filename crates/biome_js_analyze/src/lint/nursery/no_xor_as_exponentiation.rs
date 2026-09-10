@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoXorAsExponentiation {
-        version: "next",
+        version: "2.5.13",
         name: "noXorAsExponentiation",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-xor-as-exponentiation").same()],
