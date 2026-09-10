@@ -10745,6 +10745,7 @@ export type Category =
 	| "plugin"
 	| "project"
 	| "search"
+	| "inspect"
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
