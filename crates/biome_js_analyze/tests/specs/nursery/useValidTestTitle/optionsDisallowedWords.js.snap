@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: optionsDisallowedWords.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Disallowed words present
+it('contains skip keyword', () => {});
+describe('only this test', () => {});
+
+// Partial matches should be valid (not whole words)
+it('skipped keyword is fine', () => {});
+it('lonely keyword is fine', () => {});
+
+```
+
+# Diagnostics
+```
+optionsDisallowedWords.js:3:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title contains the disallowed word skip.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Disallowed words present
+  > 3 │ it('contains skip keyword', () => {});
+      │    ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ describe('only this test', () => {});
+    5 │ 
+  
+  i Remove or replace the disallowed word.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+optionsDisallowedWords.js:4:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The describe title contains the disallowed word only.
+  
+    2 │ // Disallowed words present
+    3 │ it('contains skip keyword', () => {});
+  > 4 │ describe('only this test', () => {});
+      │          ^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Partial matches should be valid (not whole words)
+  
+  i Remove or replace the disallowed word.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

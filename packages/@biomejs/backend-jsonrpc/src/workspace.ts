@@ -2908,6 +2908,11 @@ See https://biomejs.dev/linter/rules/use-unicode-regex
 	 */
 	useUnicodeRegex?: UseUnicodeRegexConfiguration;
 	/**
+	* Enforce valid titles for unit test cases and test suites.
+See https://biomejs.dev/linter/rules/use-valid-test-title 
+	 */
+	useValidTestTitle?: UseValidTestTitleConfiguration;
+	/**
 	* Require var declarations to appear at the top of their containing scope.
 See https://biomejs.dev/linter/rules/use-vars-on-top 
 	 */
@@ -5115,6 +5120,9 @@ export type UseThisInClassMethodsConfiguration =
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
+export type UseValidTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidTestTitleOptions;
 export type UseVarsOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVarsOnTopOptions;
@@ -7190,6 +7198,11 @@ export interface RuleWithUseUnicodeRegexOptions {
 	level: RulePlainConfiguration;
 	options?: UseUnicodeRegexOptions;
 }
+export interface RuleWithUseValidTestTitleOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseValidTestTitleOptions;
+}
 export interface RuleWithUseVarsOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseVarsOnTopOptions;
@@ -9036,6 +9049,32 @@ Defaults to `false`.
 	ignoreOverrideMethods?: boolean;
 }
 export type UseUnicodeRegexOptions = {};
+export interface UseValidTestTitleOptions {
+	/**
+	 * A list of words that are disallowed in test titles.
+	 */
+	disallowedWords?: string[];
+	/**
+	 * When `true`, leading and trailing whitespace in titles will not be checked.
+	 */
+	ignoreSpaces?: boolean;
+	/**
+	 * When `true`, non-string titles in `describe` and `suite` blocks will be allowed.
+	 */
+	ignoreTypeOfDescribeName?: boolean;
+	/**
+	 * When `true`, non-string titles in `test` and `it` blocks will be allowed.
+	 */
+	ignoreTypeOfTestName?: boolean;
+	/**
+	 * Regular expressions that titles must match.
+	 */
+	mustMatch?: Regex[];
+	/**
+	 * Regular expressions that titles must not match.
+	 */
+	mustNotMatch?: Regex[];
+}
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -9762,6 +9801,7 @@ export type ComponentDefinitionStyle =
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
  */
 export type IgnoreClassesWithImplements = "none" | "all" | "public-fields";
+export type Regex = string;
 export type DeclarationStyle = "type" | "runtime";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -9789,7 +9829,6 @@ export interface DestructuringConfig {
  */
 export type UseExportTypeStyle = "auto" | "inlineType" | "separatedType";
 export type FilenameCases = FilenameCase[];
-export type Regex = string;
 /**
  * The style to apply when importing types.
  */
@@ -10333,6 +10372,7 @@ export type Category =
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"

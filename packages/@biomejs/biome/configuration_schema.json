@@ -7614,6 +7614,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useValidTestTitle": {
+					"description": "Enforce valid titles for unit test cases and test suites.\nSee https://biomejs.dev/linter/rules/use-valid-test-title",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseValidTestTitleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVarsOnTop": {
 					"description": "Require var declarations to appear at the top of their containing scope.\nSee https://biomejs.dev/linter/rules/use-vars-on-top",
 					"anyOf": [
@@ -13135,6 +13142,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseValidTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseValidTestTitleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseValidTypeofOptions": {
 			"type": "object",
 			"properties": {
@@ -17521,6 +17538,45 @@
 			]
 		},
 		"UseValidLangOptions": { "type": "object", "additionalProperties": false },
+		"UseValidTestTitleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseValidTestTitleOptions" }
+			]
+		},
+		"UseValidTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"disallowedWords": {
+					"description": "A list of words that are disallowed in test titles.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreSpaces": {
+					"description": "When `true`, leading and trailing whitespace in titles will not be checked.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreTypeOfDescribeName": {
+					"description": "When `true`, non-string titles in `describe` and `suite` blocks will be allowed.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreTypeOfTestName": {
+					"description": "When `true`, non-string titles in `test` and `it` blocks will be allowed.",
+					"type": ["boolean", "null"]
+				},
+				"mustMatch": {
+					"description": "Regular expressions that titles must match.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/Regex" }
+				},
+				"mustNotMatch": {
+					"description": "Regular expressions that titles must not match.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/Regex" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseValidTypeofConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
