@@ -1,0 +1,97 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: ts/type/type_argument_comments.ts
+---
+
+# Input
+
+```ts
+type Foo = Record<
+  // comment
+  string,
+  number
+>
+
+type Single = Array<
+  // comment
+  string
+>
+
+type Block = Record<
+  /* comment */
+  string,
+  number
+>
+
+type Between = Record<string,
+  // comment
+  number
+>
+
+type Trailing = Record<string, number // comment
+>
+
+type Inline = Record</* comment */ string, number>
+
+type Object = Array<
+  // comment
+  { value: string }
+>
+
+type Nested = Promise<Record<
+  // comment
+  string,
+  number
+>>
+
+```
+
+
+# Formatted
+
+```ts
+type Foo = Record<
+	// comment
+	string,
+	number
+>;
+
+type Single = Array<
+	// comment
+	string
+>;
+
+type Block = Record<
+	/* comment */
+	string,
+	number
+>;
+
+type Between = Record<
+	string,
+	// comment
+	number
+>;
+
+type Trailing = Record<
+	string,
+	number // comment
+>;
+
+type Inline = Record</* comment */ string, number>;
+
+type Object = Array<
+	// comment
+	{ value: string }
+>;
+
+type Nested = Promise<
+	Record<
+		// comment
+		string,
+		number
+	>
+>;
+
+```
