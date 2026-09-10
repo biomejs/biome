@@ -123,6 +123,65 @@ fn suppress_multiple_ok() {
 }
 
 #[test]
+fn suppress_multiple_rules_after_jsdoc() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("fix.js");
+    fs.insert(
+        file_path.into(),
+        br#"import { error } from "module";
+
+/**
+ * Handles errors.
+ */
+function handler(error, unused) {
+	error();
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--reason=test",
+                "--only=lint/suspicious/noShadow",
+                "--only=lint/correctness/noUnusedFunctionParameters",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(
+        buffer,
+        r#"import { error } from "module";
+
+/**
+ * Handles errors.
+ */
+// biome-ignore lint/suspicious/noShadow: test
+// biome-ignore lint/correctness/noUnusedFunctionParameters: test
+function handler(error, unused) {
+	error();
+}
+"#
+    );
+}
+
+#[test]
 fn suppress_only_ok() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

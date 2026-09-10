@@ -9114,7 +9114,7 @@ export interface NoIncrementDecrementOptions {
 export type NoInferrableTypesOptions = {};
 export interface NoJsxLiteralsOptions {
 	/**
-	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
+	 * An array of strings that won't trigger the rule. Surrounding whitespace is ignored.
 	 */
 	allowedStrings?: string[];
 	/**
