@@ -53,7 +53,11 @@ const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
 #[inline]
 pub(crate) fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     // It's an inverted logic for `is_nth_at_selector(p, 1)`.
-    if p.nth_at_ts(1, SELECTOR_LEX_SET) {
+    let next = p.nth(1);
+    // Trailing `@extend` whitespace belongs to the statement boundary.
+    let is_scss_statement_boundary =
+        token_set![T!['}'], T![@]].contains(next) && CssSyntaxFeatures::Scss.is_supported(p);
+    if SELECTOR_LEX_SET.contains(next) || is_scss_statement_boundary {
         CssLexContext::Regular
     } else {
         CssLexContext::Selector
