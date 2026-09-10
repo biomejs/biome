@@ -2,7 +2,7 @@ use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::markup;
-use biome_diagnostics::PrintGitHubDiagnostic;
+use biome_diagnostics::{PrintGitHubDiagnostic, Resource};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::io;
 
@@ -49,14 +49,23 @@ impl ReporterVisitor for GithubReporterVisitor {
         _execution: &dyn Execution,
         diagnostics_payload: &DiagnosticsPayload,
         verbose: bool,
-        _working_directory: Option<&Utf8Path>,
+        working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
-            if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
-                if !diagnostic.tags().is_verbose() {
-                    writer.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
-                } else if diagnostic.tags().is_verbose() && verbose {
-                    writer.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
+            if diagnostic.severity() >= diagnostics_payload.diagnostic_level
+                && (!diagnostic.tags().is_verbose() || verbose)
+            {
+                let file_path = match diagnostic.location().resource {
+                    Some(Resource::File(file_path)) if Utf8Path::new(file_path).is_relative() => {
+                        working_directory.map(|working_directory| working_directory.join(file_path))
+                    }
+                    _ => None,
+                };
+                let diagnostic = PrintGitHubDiagnostic(diagnostic);
+                if let Some(file_path) = file_path {
+                    writer.log(markup! {{diagnostic.with_file_path(file_path.as_str())}});
+                } else {
+                    writer.log(markup! {{diagnostic}});
                 }
             }
         }
