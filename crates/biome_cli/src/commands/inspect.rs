@@ -1,11 +1,14 @@
-mod configuration;
-mod key;
+mod config;
+mod file;
 
 use self::{
-    configuration::{ConfigurationInspector, ConfigurationKind, SourceReference, SourceScope},
-    key::ConfigurationKey,
+    config::configuration::{
+        ConfigurationInspector, ConfigurationKind, SourceReference, SourceScope,
+    },
+    config::key::ConfigurationKey,
 };
 use super::{InspectSubCommand, validate_configuration_diagnostics};
+use crate::commands::inspect::file::{InspectFile, inspect_file};
 use crate::{CliDiagnostic, CliSession, cli_options::CliOptions};
 use biome_configuration::BiomeDiagnostic;
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
@@ -37,6 +40,18 @@ pub(crate) fn inspect(
         InspectSubCommand::Config { key, path, json } => {
             ConfigInspectionCommand::new(session, cli_options, key, path, json)?.execute()
         }
+        InspectSubCommand::File {
+            ast,
+            ir,
+            semantic,
+            path,
+        } => inspect_file(InspectFile {
+            path,
+            ir,
+            semantic,
+            ast,
+            session,
+        }),
     }
 }
 

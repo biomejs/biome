@@ -11,13 +11,13 @@ use serde_json::Value;
 /// A numeric segment indexes an array only when the preceding value is an array. The same segment
 /// remains an object property when the preceding value is an object.
 #[derive(Clone)]
-pub(super) struct ConfigurationKey {
+pub(crate) struct ConfigurationKey {
     text: String,
     segments: Vec<String>,
 }
 
 impl ConfigurationKey {
-    pub(super) fn parse(text: String) -> Result<Self, CliDiagnostic> {
+    pub(crate) fn parse(text: String) -> Result<Self, CliDiagnostic> {
         let segments = text.split('.').map(str::to_string).collect::<Vec<_>>();
         if segments.is_empty() || segments.iter().any(String::is_empty) {
             return Err(CliDiagnostic::parse_error(
@@ -27,11 +27,11 @@ impl ConfigurationKey {
         Ok(Self { text, segments })
     }
 
-    pub(super) fn as_str(&self) -> &str {
+    pub(crate) fn as_str(&self) -> &str {
         &self.text
     }
 
-    pub(super) fn value_in<'a>(&self, value: &'a Value) -> Option<&'a Value> {
+    pub(crate) fn value_in<'a>(&self, value: &'a Value) -> Option<&'a Value> {
         self.value_in_prefix(value, self.segments.len())
     }
 
@@ -39,7 +39,7 @@ impl ConfigurationKey {
     ///
     /// The normalization step allows a key below a scalar group shorthand to resolve even when the
     /// serialized configuration does not contain the requested leaf.
-    pub(super) fn value_in_configuration(
+    pub(crate) fn value_in_configuration(
         &self,
         configuration: &Configuration,
     ) -> Result<Option<Value>, WorkspaceError> {
@@ -52,7 +52,7 @@ impl ConfigurationKey {
         Ok(self.rule_group_shorthand_in(&value).cloned())
     }
 
-    pub(super) fn with_prefix(&self, prefix: Option<&str>) -> Self {
+    pub(crate) fn with_prefix(&self, prefix: Option<&str>) -> Self {
         let Some(prefix) = prefix else {
             return Self {
                 text: self.text.clone(),
@@ -68,13 +68,13 @@ impl ConfigurationKey {
         Self { text, segments }
     }
 
-    pub(super) fn is_declared_in(&self, value: &Value) -> bool {
+    pub(crate) fn is_declared_in(&self, value: &Value) -> bool {
         self.value_in(value)
             .or_else(|| self.rule_group_shorthand_in(value))
             .is_some_and(|value| !value.is_null())
     }
 
-    pub(super) fn source_in_override(&self, value: &Value) -> Option<Self> {
+    pub(crate) fn source_in_override(&self, value: &Value) -> Option<Self> {
         if self.is_declared_in(value) {
             return Some(self.clone());
         }
@@ -97,7 +97,7 @@ impl ConfigurationKey {
         source.is_declared_in(value).then_some(source)
     }
 
-    pub(super) fn append_array_index_in(&self, value: &Value) -> Option<(usize, usize)> {
+    pub(crate) fn append_array_index_in(&self, value: &Value) -> Option<(usize, usize)> {
         let mut value = value;
         for (position, segment) in self.segments.iter().enumerate() {
             match value {
@@ -115,7 +115,7 @@ impl ConfigurationKey {
         None
     }
 
-    pub(super) fn array_before_index<'a>(
+    pub(crate) fn array_before_index<'a>(
         &self,
         value: &'a Value,
         index_position: usize,
@@ -125,7 +125,7 @@ impl ConfigurationKey {
             .map(Vec::as_slice)
     }
 
-    pub(super) fn with_index(&self, position: usize, index: usize) -> Self {
+    pub(crate) fn with_index(&self, position: usize, index: usize) -> Self {
         let mut segments = self.segments.clone();
         *segments
             .get_mut(position)

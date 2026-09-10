@@ -1,0 +1,51 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.md`
+
+```md
+# Header
+
+Paragraph
+
+```
+
+# Emitted Messages
+
+```block
+inspect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Below the information requested.
+  
+  CST
+  
+  0: MD_ROOT@0..20
+    0: (empty)
+    1: (empty)
+    2: MD_BLOCK_LIST@0..20
+      0: MD_HEADER@0..8
+        0: MD_INDENT_TOKEN_LIST@0..0
+        1: MD_HASH_LIST@0..1
+          0: MD_HASH@0..1
+            0: HASH@0..1 "#" [] []
+        2: MD_PARAGRAPH@1..8
+          0: MD_INLINE_ITEM_LIST@1..8
+            0: MD_TEXTUAL@1..8
+              0: MD_TEXTUAL_LITERAL@1..8 " Header" [] []
+        3: MD_HASH_LIST@8..8
+      1: MD_NEWLINE@8..9
+        0: NEWLINE@8..9 "\n" [] []
+      2: MD_NEWLINE@9..10
+        0: NEWLINE@9..10 "\n" [] []
+      3: MD_PARAGRAPH@10..20
+        0: MD_INLINE_ITEM_LIST@10..20
+          0: MD_TEXTUAL@10..19
+            0: MD_TEXTUAL_LITERAL@10..19 "Paragraph" [] []
+          1: MD_TEXTUAL@19..20
+            0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
+    3: EOF@20..20 "" [] []
+  
+  
+
+```
