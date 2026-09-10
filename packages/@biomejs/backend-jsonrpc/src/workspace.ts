@@ -2565,6 +2565,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow return statements in Promise.prototype.finally() callbacks.
+See https://biomejs.dev/linter/rules/no-return-in-finally 
+	 */
+	noReturnInFinally?: NoReturnInFinallyConfiguration;
+	/**
 	* Disallow the use of Svelte's {@html} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
 	 */
@@ -4899,6 +4904,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoReturnInFinallyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnInFinallyOptions;
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
@@ -6873,6 +6881,10 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoReturnInFinallyOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnInFinallyOptions;
+}
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
@@ -8699,6 +8711,7 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoReturnInFinallyOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -10191,6 +10204,7 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
