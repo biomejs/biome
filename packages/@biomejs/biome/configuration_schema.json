@@ -17563,16 +17563,6 @@
 				"ignoreTypeOfTestName": {
 					"description": "When `true`, non-string titles in `test` and `it` blocks will be allowed.",
 					"type": ["boolean", "null"]
-				},
-				"mustMatch": {
-					"description": "Regular expressions that titles must match.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/$defs/Regex" }
-				},
-				"mustNotMatch": {
-					"description": "Regular expressions that titles must not match.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/$defs/Regex" }
 				}
 			},
 			"additionalProperties": false

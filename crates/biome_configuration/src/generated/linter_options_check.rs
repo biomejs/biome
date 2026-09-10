@@ -2493,6 +2493,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_valid_lang::UseValidLangOptions>(),
     ));
     result.push((
+        "nursery",
+        "useValidTestTitle",
+        TypeId::of::<biome_rule_options::use_valid_test_title::UseValidTestTitleOptions>(),
+    ));
+    result.push((
         "correctness",
         "useValidTypeof",
         TypeId::of::<biome_rule_options::use_valid_typeof::UseValidTypeofOptions>(),

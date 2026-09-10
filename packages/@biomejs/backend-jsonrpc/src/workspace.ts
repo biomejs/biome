@@ -9066,14 +9066,6 @@ export interface UseValidTestTitleOptions {
 	 * When `true`, non-string titles in `test` and `it` blocks will be allowed.
 	 */
 	ignoreTypeOfTestName?: boolean;
-	/**
-	 * Regular expressions that titles must match.
-	 */
-	mustMatch?: Regex[];
-	/**
-	 * Regular expressions that titles must not match.
-	 */
-	mustNotMatch?: Regex[];
 }
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};
@@ -9801,7 +9793,6 @@ export type ComponentDefinitionStyle =
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
  */
 export type IgnoreClassesWithImplements = "none" | "all" | "public-fields";
-export type Regex = string;
 export type DeclarationStyle = "type" | "runtime";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -9829,6 +9820,7 @@ export interface DestructuringConfig {
  */
 export type UseExportTypeStyle = "auto" | "inlineType" | "separatedType";
 export type FilenameCases = FilenameCase[];
+export type Regex = string;
 /**
  * The style to apply when importing types.
  */
