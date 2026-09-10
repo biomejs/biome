@@ -1,0 +1,7 @@
+{
+  "javascript": {
+    "formatter": {
+      "operatorLinebreak": "before"
+    }
+  }
+}
