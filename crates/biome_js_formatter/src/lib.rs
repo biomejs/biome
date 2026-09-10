@@ -201,6 +201,7 @@ use biome_rowan::{AstNode, SyntaxNode};
 use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
 use crate::cst::FormatJsSyntaxNode;
+use crate::js::expressions::unary_expression::FormatJsUnaryExpression;
 use crate::syntax_rewriter::transform;
 use crate::trivia::*;
 use crate::verbatim::{format_bogus_node, format_or_verbatim, format_suppressed_node};
@@ -372,7 +373,10 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut JsFormatter) -> FormatResult<()> {
-        let needs_parentheses = self.needs_parentheses(node);
+        // The unary rule wraps commented arguments, including their leading comments.
+        // That wrapper also satisfies the argument's precedence requirements.
+        let needs_parentheses = self.needs_parentheses(node)
+            && !FormatJsUnaryExpression::can_omit_argument_parentheses(node.syntax(), f);
 
         let should_insert_space = needs_parentheses && f.options().delimiter_spacing().value();
 

@@ -69,6 +69,7 @@ use biome_js_syntax::{
 };
 
 use crate::js::expressions::static_member_expression::AnyJsStaticMemberLike;
+use crate::js::expressions::unary_expression::FormatJsUnaryExpression;
 use crate::jsx::expressions::tag_expression::FormatJsxTagExpression;
 use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
 use crate::verbatim::format_suppressed_node_skip_comments;
@@ -85,6 +86,15 @@ impl Format<JsFormatContext> for AnyJsBinaryLikeExpression {
         // Don't indent inside of conditions because conditions add their own indent and grouping.
         if is_inside_condition {
             return write!(f, [&format_once(|f| { f.join().entries(parts).finish() })]);
+        }
+
+        if FormatJsUnaryExpression::can_omit_argument_parentheses(self.syntax(), f) {
+            return write!(
+                f,
+                [group(&format_once(|f| {
+                    f.join().entries(parts).finish()
+                }))]
+            );
         }
 
         if let Some(parent) = parent.as_ref() {
