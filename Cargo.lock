@@ -1985,6 +1985,7 @@ version = "0.5.7"
 dependencies = [
  "biome_rowan",
  "caseless",
+ "codspeed-divan-compat",
 ]
 
 [[package]]
