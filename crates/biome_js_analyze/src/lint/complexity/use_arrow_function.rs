@@ -81,6 +81,11 @@ declare_lint_rule! {
     ///     return 0;
     /// }
     /// ```
+    ///
+    /// ## See Also
+    ///
+    /// - [useConsistentFunctionStyle](https://biomejs.dev/linter/rules/use-consistent-function-style)
+    ///
     pub UseArrowFunction {
         version: "1.0.0",
         name: "useArrowFunction",
