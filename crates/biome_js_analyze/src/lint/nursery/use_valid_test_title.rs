@@ -12,10 +12,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::use_valid_test_title::UseValidTestTitleOptions;
 
-use crate::{
-    frameworks::unit_tests::{get_test_block_kind, TestBlockKind},
-    JsRuleAction,
-};
+use crate::{frameworks::unit_tests::TestBlockKind, JsRuleAction};
 
 declare_lint_rule! {
     /// Enforce valid titles for unit test cases and test suites.
@@ -50,20 +47,6 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Options
-    ///
-    /// ### `ignoreSpaces`
-    ///
-    /// When `true`, leading and trailing whitespace will not be checked.
-    ///
-    /// Default: `false`
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "ignoreSpaces": true
-    ///     }
-    /// }
-    /// ```
     ///
     /// ### `disallowedWords`
     ///
@@ -102,7 +85,7 @@ impl Rule for UseValidTestTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
-        let kind = get_test_block_kind(call)?;
+        let kind = TestBlockKind::from_call_expression(call)?;
         let options = ctx.options();
 
         let arguments = call.arguments().ok()?;
@@ -137,18 +120,16 @@ impl Rule for UseValidTestTitle {
                     });
                 }
 
-                if !options.ignore_spaces() {
-                    let leading = text_str.starts_with(char::is_whitespace);
-                    let trailing = text_str.ends_with(char::is_whitespace);
-                    if leading || trailing {
-                        return Some(TitleError::AccidentalSpace {
-                            range: s.range(),
-                            kind,
-                            string_literal: Some(s.clone()),
-                            leading,
-                            trailing,
-                        });
-                    }
+                let leading = text_str.starts_with(char::is_whitespace);
+                let trailing = text_str.ends_with(char::is_whitespace);
+                if leading || trailing {
+                    return Some(TitleError::AccidentalSpace {
+                        range: s.range(),
+                        kind,
+                        string_literal: Some(s.clone()),
+                        leading,
+                        trailing,
+                    });
                 }
 
                 if let Some(word_index) =
@@ -203,18 +184,16 @@ impl Rule for UseValidTestTitle {
                         });
                     }
 
-                    if !options.ignore_spaces() {
-                        let leading = text_str.starts_with(char::is_whitespace);
-                        let trailing = text_str.ends_with(char::is_whitespace);
-                        if leading || trailing {
-                            return Some(TitleError::AccidentalSpace {
-                                range: template.range(),
-                                kind,
-                                string_literal: None,
-                                leading,
-                                trailing,
-                            });
-                        }
+                    let leading = text_str.starts_with(char::is_whitespace);
+                    let trailing = text_str.ends_with(char::is_whitespace);
+                    if leading || trailing {
+                        return Some(TitleError::AccidentalSpace {
+                            range: template.range(),
+                            kind,
+                            string_literal: None,
+                            leading,
+                            trailing,
+                        });
                     }
 
                     if let Some(word_index) =
@@ -229,32 +208,30 @@ impl Rule for UseValidTestTitle {
 
                     None
                 } else {
-                    if !options.ignore_spaces() {
-                        let first_leading = match elements.first() {
-                            Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) => {
-                                chunk
-                                    .template_chunk_token()
-                                    .is_ok_and(|t| t.text().starts_with(char::is_whitespace))
-                            }
-                            _ => false,
-                        };
-                        let last_trailing = match elements.last() {
-                            Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) => {
-                                chunk
-                                    .template_chunk_token()
-                                    .is_ok_and(|t| t.text().ends_with(char::is_whitespace))
-                            }
-                            _ => false,
-                        };
-                        if first_leading || last_trailing {
-                            return Some(TitleError::AccidentalSpace {
-                                range: template.range(),
-                                kind,
-                                string_literal: None,
-                                leading: first_leading,
-                                trailing: last_trailing,
-                            });
+                    let first_leading = match elements.first() {
+                        Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) => {
+                            chunk
+                                .template_chunk_token()
+                                .is_ok_and(|t| t.text().starts_with(char::is_whitespace))
                         }
+                        _ => false,
+                    };
+                    let last_trailing = match elements.last() {
+                        Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) => {
+                            chunk
+                                .template_chunk_token()
+                                .is_ok_and(|t| t.text().ends_with(char::is_whitespace))
+                        }
+                        _ => false,
+                    };
+                    if first_leading || last_trailing {
+                        return Some(TitleError::AccidentalSpace {
+                            range: template.range(),
+                            kind,
+                            string_literal: None,
+                            leading: first_leading,
+                            trailing: last_trailing,
+                        });
                     }
 
                     None

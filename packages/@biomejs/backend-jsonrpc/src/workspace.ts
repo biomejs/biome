@@ -9054,10 +9054,6 @@ export interface UseValidTestTitleOptions {
 	 * A list of words that are disallowed in test titles.
 	 */
 	disallowedWords?: string[];
-	/**
-	 * When `true`, leading and trailing whitespace in titles will not be checked.
-	 */
-	ignoreSpaces?: boolean;
 }
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};

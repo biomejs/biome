@@ -17551,10 +17551,6 @@
 					"description": "A list of words that are disallowed in test titles.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
-				},
-				"ignoreSpaces": {
-					"description": "When `true`, leading and trailing whitespace in titles will not be checked.",
-					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
