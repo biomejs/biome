@@ -1,0 +1,4 @@
+call_expression() where {
+    $value = "text",
+    $value <: range()
+}
