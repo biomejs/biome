@@ -34,3 +34,8 @@ describe(MyComponent, () => {});
 test.each([[1, 2]])('', () => {});
 test.each([[1, 2]])(' leading space', () => {});
 describe.each([[1, 2]])(123, () => {});
+
+// suite calls with invalid titles
+suite('', () => {});
+suite(' leading space', () => {});
+suite.each([[1, 2]])('', () => {});

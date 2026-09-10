@@ -37,6 +37,10 @@ describe(`suite for ${moduleName}`, () => {});
 // .each calls
 test.each([[1, 2]])('adds %i and %i', () => {});
 describe.each([[1, 2]])('suite %i', () => {});
+suite.each([[1, 2]])('suite %i', () => {});
+
+// Valid suite calls
+suite('valid suite title', () => {});
 
 // Spread argument (dynamic, cannot check statically)
 it(...args);
