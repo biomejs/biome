@@ -50,7 +50,6 @@ use biome_parser::{CompletedMarker, Parser, ParserProgress, SyntaxFeature, Token
 /// around combinators in CSS selectors.
 const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
     COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')'], T![!], T![;], EOF]);
-#[inline]
 pub(crate) fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     // It's an inverted logic for `is_nth_at_selector(p, 1)`.
     let next = p.nth(1);
