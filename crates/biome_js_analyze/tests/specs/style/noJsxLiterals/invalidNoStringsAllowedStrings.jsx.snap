@@ -7,8 +7,6 @@ expression: invalidNoStringsAllowedStrings.jsx
 // should generate diagnostics
 <>
 	<div>allowed</div>
-	<div>allowed   </div>
-	<div>{"allowed   "}</div>
 	<>test</>
 </>
 
@@ -24,54 +22,16 @@ class Comp1 extends Component {
 
 # Diagnostics
 ```
-invalidNoStringsAllowedStrings.jsx:4:7 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoStringsAllowedStrings.jsx:4:4 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Incorrect use of string literal detected.
   
     2 │ <>
     3 │ 	<div>allowed</div>
-  > 4 │ 	<div>allowed   </div>
-      │ 	     ^^^^^^^^^^
-    5 │ 	<div>{"allowed   "}</div>
-    6 │ 	<>test</>
-  
-  i String literals in JSX can make code harder to maintain and internationalize.
-  
-  i Consider avoiding hardcoded strings entirely.
-  
-
-```
-
-```
-invalidNoStringsAllowedStrings.jsx:5:8 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Incorrect use of string literal detected.
-  
-    3 │ 	<div>allowed</div>
-    4 │ 	<div>allowed   </div>
-  > 5 │ 	<div>{"allowed   "}</div>
-      │ 	      ^^^^^^^^^^^^
-    6 │ 	<>test</>
-    7 │ </>
-  
-  i String literals in JSX can make code harder to maintain and internationalize.
-  
-  i Consider avoiding hardcoded strings entirely.
-  
-
-```
-
-```
-invalidNoStringsAllowedStrings.jsx:6:4 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Incorrect use of string literal detected.
-  
-    4 │ 	<div>allowed   </div>
-    5 │ 	<div>{"allowed   "}</div>
-  > 6 │ 	<>test</>
+  > 4 │ 	<>test</>
       │ 	  ^^^^
-    7 │ </>
-    8 │ 
+    5 │ </>
+    6 │ 
   
   i String literals in JSX can make code harder to maintain and internationalize.
   
@@ -81,16 +41,16 @@ invalidNoStringsAllowedStrings.jsx:6:4 lint/style/noJsxLiterals ━━━━━�
 ```
 
 ```
-invalidNoStringsAllowedStrings.jsx:12:43 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoStringsAllowedStrings.jsx:10:43 lint/style/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Incorrect use of string literal detected.
   
-    10 │ class Comp1 extends Component {
-    11 │ 	render() {
-  > 12 │ 		const varObjectTest = { testKey : (<div>test</div>) };
+     8 │ class Comp1 extends Component {
+     9 │ 	render() {
+  > 10 │ 		const varObjectTest = { testKey : (<div>test</div>) };
        │ 		                                        ^^^^
-    13 │ 		return varObjectTest.testKey;
-    14 │ 	}
+    11 │ 		return varObjectTest.testKey;
+    12 │ 	}
   
   i String literals in JSX can make code harder to maintain and internationalize.
   

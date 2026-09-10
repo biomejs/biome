@@ -4636,7 +4636,7 @@
 			"type": "object",
 			"properties": {
 				"allowedStrings": {
-					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
+					"description": "An array of strings that won't trigger the rule. Surrounding whitespace is ignored.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
