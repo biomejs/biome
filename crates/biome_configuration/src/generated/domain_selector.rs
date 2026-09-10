@@ -141,6 +141,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useExpect"),
         RuleFilter::Rule("nursery", "useTestHooksInOrder"),
         RuleFilter::Rule("nursery", "useTestHooksOnTop"),
+        RuleFilter::Rule("nursery", "useValidTestTitle"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
         RuleFilter::Rule("suspicious", "noFocusedTests"),
