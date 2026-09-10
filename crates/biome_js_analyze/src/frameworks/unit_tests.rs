@@ -127,7 +127,7 @@ fn is_describe_callee(callee: &AnyJsExpression) -> bool {
             .and_then(|r| r.value_token())
             .is_ok_and(|tok| matches!(tok.text_trimmed(), "describe" | "fdescribe" | "xdescribe")),
 
-        // test.describe(...) / it.describe(...) / describe.describe(...) etc.
+        // test.describe(...) / it.describe(...) / describe.each(...) etc.
         AnyJsExpression::JsStaticMemberExpression(member) => {
             let member_is_describe = member
                 .member()
