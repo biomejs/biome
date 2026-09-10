@@ -1,6 +1,7 @@
 //! Resolves retained configuration inputs and traces effective values to their declarations.
 
-use super::{display_path, key::ConfigurationKey};
+use super::key::ConfigurationKey;
+use crate::commands::inspect::display_path;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, ConfigurationSourceEntry, OverridePattern,
 };
@@ -19,14 +20,14 @@ use std::collections::BTreeMap;
 ///
 /// The inspector borrows source text and typed configurations from `ConfigurationSource`. This
 /// keeps paths, code frames, ranges, and merge inputs tied to the same load operation.
-pub(super) struct ConfigurationInspector<'source> {
+pub(crate) struct ConfigurationInspector<'source> {
     files: InspectedConfigurationFiles<'source>,
     configuration: Configuration,
     serialized_configuration: Value,
 }
 
 impl<'source> ConfigurationInspector<'source> {
-    pub(super) fn new(source: &'source ConfigurationSource) -> Result<Self, Vec<Error>> {
+    pub(crate) fn new(source: &'source ConfigurationSource) -> Result<Self, Vec<Error>> {
         let files = InspectedConfigurationFiles::new(source)?;
         let mut configuration = source.resolve();
         configuration.extends = None;
@@ -43,19 +44,19 @@ impl<'source> ConfigurationInspector<'source> {
         })
     }
 
-    pub(super) fn serialized_configuration(&self) -> &Value {
+    pub(crate) fn serialized_configuration(&self) -> &Value {
         &self.serialized_configuration
     }
 
-    pub(super) fn configuration_paths(&self) -> impl Iterator<Item = &Utf8Path> {
+    pub(crate) fn configuration_paths(&self) -> impl Iterator<Item = &Utf8Path> {
         self.files.files.iter().map(|file| file.path)
     }
 
-    pub(super) fn has_overrides(&self) -> bool {
+    pub(crate) fn has_overrides(&self) -> bool {
         self.configuration.overrides.is_some()
     }
 
-    pub(super) fn inspect_key<'inspection>(
+    pub(crate) fn inspect_key<'inspection>(
         &'inspection self,
         key: &ConfigurationKey,
         matching_overrides: &[usize],
@@ -140,13 +141,13 @@ impl<'source> ConfigurationInspector<'source> {
 }
 
 /// The effective value of a key and the declarations that contribute to it.
-pub(super) struct KeyInspection<'source> {
-    pub(super) value: Option<Value>,
-    pub(super) sources: Vec<SourceReference<'source>>,
+pub(crate) struct KeyInspection<'source> {
+    pub(crate) value: Option<Value>,
+    pub(crate) sources: Vec<SourceReference<'source>>,
 }
 
 impl KeyInspection<'_> {
-    pub(super) fn source_json(&self) -> Option<Value> {
+    pub(crate) fn source_json(&self) -> Option<Value> {
         match self.sources.as_slice() {
             [] => None,
             [source] => Some(source.to_json()),
@@ -165,7 +166,7 @@ impl KeyInspection<'_> {
 }
 
 /// Identifies whether a declaration belongs to the root file or an extended file.
-pub(super) enum ConfigurationKind {
+pub(crate) enum ConfigurationKind {
     Root,
     Extend { specifier: Option<String> },
 }
@@ -705,22 +706,22 @@ fn serialized_array(
 
 /// Identifies whether a value comes from a base configuration or a matching override.
 #[derive(Clone, Copy)]
-pub(super) enum SourceScope {
+pub(crate) enum SourceScope {
     Base,
     Override,
 }
 
 /// A declaration that contributes to an inspected value and its diagnostic metadata.
-pub(super) struct SourceReference<'source> {
-    pub(super) path: &'source Utf8Path,
-    pub(super) source: &'source str,
-    pub(super) range: Option<TextRange>,
-    pub(super) kind: &'source ConfigurationKind,
+pub(crate) struct SourceReference<'source> {
+    pub(crate) path: &'source Utf8Path,
+    pub(crate) source: &'source str,
+    pub(crate) range: Option<TextRange>,
+    pub(crate) kind: &'source ConfigurationKind,
     declares_key: bool,
-    pub(super) scope: SourceScope,
-    pub(super) override_index: Option<usize>,
-    pub(super) includes: Option<Vec<String>>,
-    pub(super) matched_path: Option<String>,
+    pub(crate) scope: SourceScope,
+    pub(crate) override_index: Option<usize>,
+    pub(crate) includes: Option<Vec<String>>,
+    pub(crate) matched_path: Option<String>,
 }
 
 impl SourceReference<'_> {

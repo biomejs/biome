@@ -901,6 +901,7 @@ impl ServerFactory {
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
+        workspace_method!(builder, get_semantic_model);
         workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);

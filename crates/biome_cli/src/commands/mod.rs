@@ -720,6 +720,26 @@ pub enum InspectSubCommand {
         #[bpaf(positional("KEY"), optional)]
         key: Option<String>,
     },
+
+    /// Provides development information about a file. By default, it prints the CST of the file.
+    #[bpaf(command)]
+    File {
+        /// Prints the AST of the file.
+        #[bpaf(long("ast"), switch)]
+        ast: bool,
+
+        /// Prints the formatter IR, if supported.
+        #[bpaf(long("ir"), switch)]
+        ir: bool,
+
+        /// Prints the semantic information of a file, if it exists.
+        #[bpaf(long("semantic"), switch)]
+        semantic: bool,
+
+        /// Path to the file
+        #[bpaf(positional("PATH"))]
+        path: OsString,
+    },
 }
 
 impl MigrateSubCommand {

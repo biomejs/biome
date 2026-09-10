@@ -22,6 +22,7 @@ mod html;
 mod html_style_attribute;
 mod included_files;
 mod indent_script_and_style;
+mod inspect_file;
 mod javascript;
 mod json_parsing;
 mod linter_domains;

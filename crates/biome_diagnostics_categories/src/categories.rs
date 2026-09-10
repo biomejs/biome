@@ -613,6 +613,7 @@ define_categories! {
     "plugin",
     "project",
     "search",
+    "inspect",
     "internalError/io",
     "internalError/fs",
     "internalError/panic",
