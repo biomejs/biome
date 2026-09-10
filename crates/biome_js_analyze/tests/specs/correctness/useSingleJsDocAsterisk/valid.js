@@ -17,3 +17,8 @@
 /**
  Asterisk after text * *
 */
+
+/**
+ * *Italicized Text*
+ */
+const foo = "bar";
