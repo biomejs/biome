@@ -198,6 +198,122 @@ pub(crate) fn describe_body(call: &JsCallExpression) -> Option<JsStatementList> 
 
     Some(block.statements())
 }
+/// The kind of test block.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TestBlockKind {
+    Test,
+    Describe,
+    Suite,
+}
+
+impl TestBlockKind {
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            Self::Test => "test",
+            Self::Describe => "describe",
+            Self::Suite => "suite",
+        }
+    }
+}
+
+/// Returns `true` if the call expression is a `suite(...)` call.
+pub(crate) fn is_suite_call(call: &JsCallExpression) -> bool {
+    let Ok(callee) = call.callee() else {
+        return false;
+    };
+    let callee = callee.omit_parentheses();
+    match callee {
+        AnyJsExpression::JsIdentifierExpression(ident) => ident
+            .name()
+            .and_then(|r| r.value_token())
+            .is_ok_and(|tok| tok.text_trimmed() == "suite"),
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let Ok(object) = member.object() else {
+                return false;
+            };
+            let object = object.omit_parentheses();
+            if let AnyJsExpression::JsIdentifierExpression(ident) = object {
+                ident
+                    .name()
+                    .and_then(|r| r.value_token())
+                    .is_ok_and(|tok| tok.text_trimmed() == "suite")
+            } else {
+                false
+            }
+        }
+        _ => false,
+    }
+}
+
+/// Returns the test block kind if the call is an `.each(...)` call.
+pub(crate) fn is_each_call(call: &JsCallExpression) -> Option<TestBlockKind> {
+    let callee = call.callee().ok()?.omit_parentheses();
+    let AnyJsExpression::JsCallExpression(inner_call) = callee else {
+        return None;
+    };
+    let inner_callee = inner_call.callee().ok()?.omit_parentheses();
+
+    let is_suite_each = match &inner_callee {
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object_is_suite = member.object().is_ok_and(|object| {
+                let mut current = object.omit_parentheses();
+                loop {
+                    match current {
+                        AnyJsExpression::JsIdentifierExpression(ident) => {
+                            return ident
+                                .name()
+                                .and_then(|r| r.value_token())
+                                .is_ok_and(|tok| tok.text_trimmed() == "suite");
+                        }
+                        AnyJsExpression::JsStaticMemberExpression(member) => {
+                            let Ok(object) = member.object() else {
+                                return false;
+                            };
+                            current = object.omit_parentheses();
+                        }
+                        _ => return false,
+                    }
+                }
+            });
+
+            let member_is_each = matches!(
+                member.member().ok(),
+                Some(AnyJsName::JsName(name))
+                    if name
+                        .value_token()
+                        .is_ok_and(|tok| matches!(tok.text_trimmed(), "each" | "for" | "prop"))
+            );
+
+            object_is_suite && member_is_each
+        }
+        _ => false,
+    };
+
+    if is_suite_each {
+        Some(TestBlockKind::Suite)
+    } else if inner_callee.contains_a_test_each_pattern() {
+        if is_describe_call(&inner_call) || inner_callee.contains_describe_call() {
+            Some(TestBlockKind::Describe)
+        } else {
+            Some(TestBlockKind::Test)
+        }
+    } else {
+        None
+    }
+}
+
+/// Identifies the `TestBlockKind` of a call expression (`test`, `describe`, `suite`, or `.each` variants).
+pub(crate) fn get_test_block_kind(call: &JsCallExpression) -> Option<TestBlockKind> {
+    if is_describe_call(call) {
+        Some(TestBlockKind::Describe)
+    } else if is_unit_test(call) {
+        Some(TestBlockKind::Test)
+    } else if is_suite_call(call) {
+        Some(TestBlockKind::Suite)
+    } else {
+        is_each_call(call)
+    }
+}
 
 #[cfg(test)]
 mod tests {

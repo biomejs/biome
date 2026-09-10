@@ -13,7 +13,7 @@ use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::use_valid_test_title::UseValidTestTitleOptions;
 
 use crate::{
-    frameworks::unit_tests::{is_describe_call, is_unit_test},
+    frameworks::unit_tests::{get_test_block_kind, TestBlockKind},
     JsRuleAction,
 };
 
@@ -25,7 +25,6 @@ declare_lint_rule! {
     /// - Titles must not have accidental leading or trailing whitespace.
     /// - Titles must be string or template literals (unless configured otherwise).
     /// - Titles must not contain disallowed words (if configured).
-    /// - Titles must match required patterns and must not match forbidden patterns (if configured).
     ///
     /// ## Examples
     ///
@@ -100,30 +99,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### `mustNotMatch`
-    ///
-    /// An array of regular expressions that titles must not match.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "mustNotMatch": ["[0-9]+"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ### `mustMatch`
-    ///
-    /// An array of regular expressions that titles must match.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "mustMatch": ["should .*"]
-    ///     }
-    /// }
-    /// ```
-    ///
     pub UseValidTestTitle {
         version: "next",
         name: "useValidTestTitle",
@@ -137,57 +112,6 @@ declare_lint_rule! {
         domains: &[RuleDomain::Test],
         fix_kind: FixKind::Safe,
     }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum TestBlockKind {
-    Test,
-    Describe,
-    Suite,
-}
-
-impl TestBlockKind {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Test => "test",
-            Self::Describe => "describe",
-            Self::Suite => "suite",
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum TitleError {
-    EmptyTitle {
-        range: TextRange,
-        kind: TestBlockKind,
-    },
-    AccidentalSpace {
-        range: TextRange,
-        kind: TestBlockKind,
-        string_literal: Option<JsStringLiteralExpression>,
-        leading: bool,
-        trailing: bool,
-    },
-    TitleMustBeString {
-        range: TextRange,
-        kind: TestBlockKind,
-    },
-    DisallowedWord {
-        range: TextRange,
-        kind: TestBlockKind,
-        word: Box<str>,
-    },
-    MustNotMatch {
-        range: TextRange,
-        kind: TestBlockKind,
-        pattern: String,
-    },
-    MustMatch {
-        range: TextRange,
-        kind: TestBlockKind,
-        pattern: String,
-    },
 }
 
 impl Rule for UseValidTestTitle {
@@ -247,33 +171,13 @@ impl Rule for UseValidTestTitle {
                     }
                 }
 
-                if let Some(word) =
-                    find_disallowed_word(text_str, options.disallowed_words.as_deref())
+                if let Some(word_index) =
+                    find_disallowed_word_index(text_str, options.disallowed_words.as_deref())
                 {
                     return Some(TitleError::DisallowedWord {
                         range: s.range(),
                         kind,
-                        word,
-                    });
-                }
-
-                if let Some(pattern) =
-                    find_must_not_match(text_str, options.must_not_match.as_deref())
-                {
-                    return Some(TitleError::MustNotMatch {
-                        range: s.range(),
-                        kind,
-                        pattern,
-                    });
-                }
-
-                if let Some(pattern) =
-                    find_must_match_failure(text_str, options.must_match.as_deref())
-                {
-                    return Some(TitleError::MustMatch {
-                        range: s.range(),
-                        kind,
-                        pattern,
+                        word_index,
                     });
                 }
 
@@ -345,33 +249,13 @@ impl Rule for UseValidTestTitle {
                         }
                     }
 
-                    if let Some(word) =
-                        find_disallowed_word(&text_str, options.disallowed_words.as_deref())
+                    if let Some(word_index) =
+                        find_disallowed_word_index(&text_str, options.disallowed_words.as_deref())
                     {
                         return Some(TitleError::DisallowedWord {
                             range: template.range(),
                             kind,
-                            word,
-                        });
-                    }
-
-                    if let Some(pattern) =
-                        find_must_not_match(&text_str, options.must_not_match.as_deref())
-                    {
-                        return Some(TitleError::MustNotMatch {
-                            range: template.range(),
-                            kind,
-                            pattern,
-                        });
-                    }
-
-                    if let Some(pattern) =
-                        find_must_match_failure(&text_str, options.must_match.as_deref())
-                    {
-                        return Some(TitleError::MustMatch {
-                            range: template.range(),
-                            kind,
-                            pattern,
+                            word_index,
                         });
                     }
 
@@ -427,7 +311,7 @@ impl Rule for UseValidTestTitle {
         }
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
             TitleError::EmptyTitle { range, kind } => Some(
                 RuleDiagnostic::new(
@@ -480,50 +364,30 @@ impl Rule for UseValidTestTitle {
                     "Provide a string literal or template literal as the title."
                 }),
             ),
-            TitleError::DisallowedWord { range, kind, word } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    *range,
-                    markup! {
-                        "The " {kind.as_str()} " title contains the disallowed word "<Emphasis>{word.as_ref()}</Emphasis>"."
-                    },
-                )
-                .note(markup! {
-                    "Remove or replace the disallowed word."
-                }),
-            ),
-            TitleError::MustNotMatch {
+            TitleError::DisallowedWord {
                 range,
                 kind,
-                pattern,
-            } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    *range,
-                    markup! {
-                        "The " {kind.as_str()} " title matches the forbidden pattern "<Emphasis>{pattern.as_str()}</Emphasis>"."
-                    },
+                word_index,
+            } => {
+                let word = ctx
+                    .options()
+                    .disallowed_words
+                    .as_deref()
+                    .and_then(|words| words.get(*word_index))
+                    .map_or("", |w| w.as_ref());
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        *range,
+                        markup! {
+                            "The " {kind.as_str()} " title contains the disallowed word "<Emphasis>{word}</Emphasis>"."
+                        },
+                    )
+                    .note(markup! {
+                        "Remove or replace the disallowed word."
+                    }),
                 )
-                .note(markup! {
-                    "Update the title so it does not match the pattern."
-                }),
-            ),
-            TitleError::MustMatch {
-                range,
-                kind,
-                pattern,
-            } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    *range,
-                    markup! {
-                        "The " {kind.as_str()} " title does not match the required pattern "<Emphasis>{pattern.as_str()}</Emphasis>"."
-                    },
-                )
-                .note(markup! {
-                    "Update the title to match the required pattern."
-                }),
-            ),
+            }
         }
     }
 
@@ -562,150 +426,42 @@ impl Rule for UseValidTestTitle {
     }
 }
 
-fn is_suite_call(call: &JsCallExpression) -> bool {
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-    let callee = callee.omit_parentheses();
-    match callee {
-        AnyJsExpression::JsIdentifierExpression(ident) => ident
-            .name()
-            .and_then(|r| r.value_token())
-            .is_ok_and(|tok| tok.text_trimmed() == "suite"),
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let Ok(object) = member.object() else {
-                return false;
-            };
-            let object = object.omit_parentheses();
-            if let AnyJsExpression::JsIdentifierExpression(ident) = object {
-                ident
-                    .name()
-                    .and_then(|r| r.value_token())
-                    .is_ok_and(|tok| tok.text_trimmed() == "suite")
-            } else {
-                false
-            }
-        }
-        _ => false,
-    }
+#[derive(Debug, Clone)]
+pub enum TitleError {
+    EmptyTitle {
+        range: TextRange,
+        kind: TestBlockKind,
+    },
+    AccidentalSpace {
+        range: TextRange,
+        kind: TestBlockKind,
+        string_literal: Option<JsStringLiteralExpression>,
+        leading: bool,
+        trailing: bool,
+    },
+    TitleMustBeString {
+        range: TextRange,
+        kind: TestBlockKind,
+    },
+    DisallowedWord {
+        range: TextRange,
+        kind: TestBlockKind,
+        word_index: usize,
+    },
 }
 
-fn is_each_call(call: &JsCallExpression) -> Option<TestBlockKind> {
-    let callee = call.callee().ok()?.omit_parentheses();
-    let AnyJsExpression::JsCallExpression(inner_call) = callee else {
-        return None;
-    };
-    let inner_callee = inner_call.callee().ok()?.omit_parentheses();
-
-    let is_suite_each = match &inner_callee {
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let object_is_suite = member.object().is_ok_and(|object| {
-                let mut current = object.omit_parentheses();
-                loop {
-                    match current {
-                        AnyJsExpression::JsIdentifierExpression(ident) => {
-                            return ident
-                                .name()
-                                .and_then(|r| r.value_token())
-                                .is_ok_and(|tok| tok.text_trimmed() == "suite");
-                        }
-                        AnyJsExpression::JsStaticMemberExpression(member) => {
-                            let Ok(object) = member.object() else {
-                                return false;
-                            };
-                            current = object.omit_parentheses();
-                        }
-                        _ => return false,
-                    }
-                }
-            });
-
-            let member_is_each = matches!(
-                member.member().ok(),
-                Some(biome_js_syntax::AnyJsName::JsName(name))
-                    if name
-                        .value_token()
-                        .is_ok_and(|tok| matches!(tok.text_trimmed(), "each" | "for" | "prop"))
-            );
-
-            object_is_suite && member_is_each
-        }
-        _ => false,
-    };
-
-    if is_suite_each {
-        Some(TestBlockKind::Suite)
-    } else if inner_callee.contains_a_test_each_pattern() {
-        if is_describe_call(&inner_call) || inner_callee.contains_describe_call() {
-            Some(TestBlockKind::Describe)
-        } else {
-            Some(TestBlockKind::Test)
-        }
-    } else {
-        None
-    }
-}
-
-fn get_test_block_kind(call: &JsCallExpression) -> Option<TestBlockKind> {
-    if is_describe_call(call) {
-        Some(TestBlockKind::Describe)
-    } else if is_unit_test(call) {
-        Some(TestBlockKind::Test)
-    } else if is_suite_call(call) {
-        Some(TestBlockKind::Suite)
-    } else {
-        is_each_call(call)
-    }
-}
-
-fn find_disallowed_word(text: &str, words: Option<&[Box<str>]>) -> Option<Box<str>> {
+/// Matches whole words (equivalent to `\bword\b` in ESLint `valid-title`),
+/// preventing false positives like "benefit" when "fit" is disallowed.
+fn find_disallowed_word_index(text: &str, words: Option<&[Box<str>]>) -> Option<usize> {
     let words = words?;
-    let lower_text = text.to_lowercase();
-    for word in words {
-        let lower_word = word.to_lowercase();
-        if lower_word.is_empty() {
+    for (index, word) in words.iter().enumerate() {
+        if word.is_empty() {
             continue;
         }
-        for (idx, _) in lower_text.match_indices(&lower_word) {
-            let before_is_word_char = lower_text[..idx]
-                .chars()
-                .next_back()
-                .is_some_and(|c| c.is_alphanumeric() || c == '_');
-            let after_idx = idx + lower_word.len();
-            let after_is_word_char = lower_text[after_idx..]
-                .chars()
-                .next()
-                .is_some_and(|c| c.is_alphanumeric() || c == '_');
-
-            if !before_is_word_char && !after_is_word_char {
-                return Some(word.clone());
+        for token in text.split(|c: char| !c.is_alphanumeric() && c != '_') {
+            if token.eq_ignore_ascii_case(word) {
+                return Some(index);
             }
-        }
-    }
-    None
-}
-
-fn find_must_not_match(
-    text: &str,
-    patterns: Option<&[biome_rule_options::restricted_regex::RestrictedRegex]>,
-) -> Option<String> {
-    let patterns = patterns?;
-    for pattern in patterns {
-        if pattern.is_match(text) {
-            return Some(pattern.to_string());
-        }
-    }
-    None
-}
-
-fn find_must_match_failure(
-    text: &str,
-    patterns: Option<&[biome_rule_options::restricted_regex::RestrictedRegex]>,
-) -> Option<String> {
-    let patterns = patterns?;
-    for pattern in patterns {
-        if !pattern.is_match(text) {
-            return Some(pattern.to_string());
         }
     }
     None

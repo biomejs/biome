@@ -1,4 +1,3 @@
-use crate::restricted_regex::RestrictedRegex;
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 
@@ -21,14 +20,6 @@ pub struct UseValidTestTitleOptions {
     /// A list of words that are disallowed in test titles.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disallowed_words: Option<Box<[Box<str>]>>,
-
-    /// Regular expressions that titles must not match.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub must_not_match: Option<Box<[RestrictedRegex]>>,
-
-    /// Regular expressions that titles must match.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub must_match: Option<Box<[RestrictedRegex]>>,
 }
 
 impl UseValidTestTitleOptions {
