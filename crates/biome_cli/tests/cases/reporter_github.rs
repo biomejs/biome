@@ -169,6 +169,7 @@ fn reports_diagnostics_github_format_command() {
     ));
 }
 
+// Don't snapshot, fails on Windows due to path.
 #[test]
 fn reports_diagnostics_github_from_nested_directory() {
     let mut fs = TemporaryFs::new("reports_diagnostics_github_from_nested_directory");
@@ -195,12 +196,4 @@ fn reports_diagnostics_github_from_nested_directory() {
         output.contains("/packages/ui/main.ts"),
         "unexpected output: {output}"
     );
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "reports_diagnostics_github_from_nested_directory",
-        fs.create_mem(),
-        console,
-        result,
-    ));
 }
