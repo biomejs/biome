@@ -23,7 +23,7 @@ declare_lint_rule! {
  /// ```
  ///
  /// If the type is undefined, ESM module is assumed.
- /// CommonJS files (`.cjs`, or files inside a project with `"type": "commonjs"`) are in non-strict mode. 
+ /// CommonJS files (`.cjs`, or `.js` files inside a project with `"type": "commonjs"`) are in non-strict mode. 
  /// For them, the directive `"use strict"` is accepted and advised.
  ///
  /// ## Examples
