@@ -2490,6 +2490,11 @@ See https://biomejs.dev/linter/rules/no-non-scalable-viewport
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
+	* Disallow obsolete HTML elements.
+See https://biomejs.dev/linter/rules/no-obsolete-tags 
+	 */
+	noObsoleteTags?: NoObsoleteTagsConfiguration;
+	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
 	 */
@@ -2564,6 +2569,11 @@ See https://biomejs.dev/linter/rules/no-react-string-refs
 See https://biomejs.dev/linter/rules/no-restricted-dependencies 
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
+	/**
+	* Disallow return statements in Promise.prototype.finally() callbacks.
+See https://biomejs.dev/linter/rules/no-return-in-finally 
+	 */
+	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
 	* Disallow the use of Svelte's {@html} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
@@ -2702,6 +2712,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 See https://biomejs.dev/linter/rules/use-better-dom-traversing 
 	 */
 	useBetterDomTraversing?: UseBetterDomTraversingConfiguration;
+	/**
+	* Enforce consistent use of function declarations or expressions assigned to variables.
+See https://biomejs.dev/linter/rules/use-consistent-function-style 
+	 */
+	useConsistentFunctionStyle?: UseConsistentFunctionStyleConfiguration;
 	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
@@ -4854,6 +4869,9 @@ export type NoNegationInEqualityCheckConfiguration =
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
+export type NoObsoleteTagsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObsoleteTagsOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -4899,6 +4917,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoReturnInFinallyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnInFinallyOptions;
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
@@ -4977,6 +4998,9 @@ export type UseBaselineConfiguration =
 export type UseBetterDomTraversingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBetterDomTraversingOptions;
+export type UseConsistentFunctionStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentFunctionStyleOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -6809,6 +6833,10 @@ export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
 }
+export interface RuleWithNoObsoleteTagsOptions {
+	level: RulePlainConfiguration;
+	options?: NoObsoleteTagsOptions;
+}
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6872,6 +6900,10 @@ export interface RuleWithNoReactStringRefsOptions {
 export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
+}
+export interface RuleWithNoReturnInFinallyOptions {
+	level: RulePlainConfiguration;
+	options?: NoReturnInFinallyOptions;
 }
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
@@ -6982,6 +7014,10 @@ export interface RuleWithUseBetterDomTraversingOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseBetterDomTraversingOptions;
+}
+export interface RuleWithUseConsistentFunctionStyleOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentFunctionStyleOptions;
 }
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
@@ -8679,6 +8715,7 @@ export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
+export type NoObsoleteTagsOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -8699,6 +8736,7 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoReturnInFinallyOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -8816,6 +8854,19 @@ export interface UseBaselineOptions {
 	available?: AvailabilityTarget;
 }
 export type UseBetterDomTraversingOptions = {};
+/**
+ * Configures the required function style and whether declaration mode permits arrow functions.
+ */
+export interface UseConsistentFunctionStyleOptions {
+	/**
+	 * Allow arrow functions when declarations are required. Default: `false`.
+	 */
+	allowArrowFunctions?: boolean;
+	/**
+	 * The function style to enforce. Default: `"expression"`.
+	 */
+	style?: FunctionStyle;
+}
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -9063,7 +9114,7 @@ export interface NoIncrementDecrementOptions {
 export type NoInferrableTypesOptions = {};
 export interface NoJsxLiteralsOptions {
 	/**
-	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
+	 * An array of strings that won't trigger the rule. Surrounding whitespace is ignored.
 	 */
 	allowedStrings?: string[];
 	/**
@@ -9689,6 +9740,10 @@ Example: `"ensure"` or `"__defineGetter__"`.
 	 */
 export type AvailabilityTarget = AvailabilityNamed | number;
 /**
+ * The required form for function definitions: `"expression"` or `"declaration"`.
+ */
+export type FunctionStyle = "expression" | "declaration";
+/**
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
@@ -10176,6 +10231,7 @@ export type Category =
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNonScalableViewport"
+	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -10191,6 +10247,7 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
@@ -10220,6 +10277,7 @@ export type Category =
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"

@@ -876,6 +876,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("a11y", "noNoninteractiveTabindex", TypeId::of::<biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions>()));
     result.push(("correctness", "noNonoctalDecimalEscape", TypeId::of::<biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions>()));
     result.push((
+        "nursery",
+        "noObsoleteTags",
+        TypeId::of::<biome_rule_options::no_obsolete_tags::NoObsoleteTagsOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noOctalEscape",
         TypeId::of::<biome_rule_options::no_octal_escape::NoOctalEscapeOptions>(),
@@ -1091,6 +1096,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "noReturnAssign",
         TypeId::of::<biome_rule_options::no_return_assign::NoReturnAssignOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noReturnInFinally",
+        TypeId::of::<biome_rule_options::no_return_in_finally::NoReturnInFinallyOptions>(),
     ));
     result.push((
         "style",
@@ -1773,6 +1783,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useConsistentEnumValueType",
         TypeId::of::<
             biome_rule_options::use_consistent_enum_value_type::UseConsistentEnumValueTypeOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "useConsistentFunctionStyle",
+        TypeId::of::<
+            biome_rule_options::use_consistent_function_style::UseConsistentFunctionStyleOptions,
         >(),
     ));
     result.push(("style", "useConsistentGraphqlDescriptions", TypeId::of::<biome_rule_options::use_consistent_graphql_descriptions::UseConsistentGraphqlDescriptionsOptions>()));

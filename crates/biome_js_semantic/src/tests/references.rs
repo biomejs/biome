@@ -366,6 +366,11 @@ f()",
 // Imports
 assert_semantics! {
     ok_import_used_in_jsx, r#"import A/*#A*/ from 'a.js'; console.log(<A/*READ A*//>);"#,
+    ok_import_type_used_by_declared_computed_property,
+        r#"import type { mySymbol/*#SYMBOL*/ } from "./helpers";
+        class MyClass {
+            declare [mySymbol/*READ SYMBOL*/]: number;
+        }"#,
 }
 
 assert_semantics! {

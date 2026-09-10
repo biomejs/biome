@@ -1980,6 +1980,21 @@
 			},
 			"additionalProperties": false
 		},
+		"FunctionStyle": {
+			"description": "The required form for function definitions: `\"expression\"` or `\"declaration\"`.",
+			"oneOf": [
+				{
+					"description": "Require function expressions assigned to variables. This is the default.",
+					"type": "string",
+					"const": "expression"
+				},
+				{
+					"description": "Require function declarations, subject to the rule's exceptions.",
+					"type": "string",
+					"const": "declaration"
+				}
+			]
+		},
 		"Glob": { "type": "string" },
 		"GraphqlAssistConfiguration": {
 			"description": "Options that change how GraphQL assist behaves.",
@@ -4636,7 +4651,7 @@
 			"type": "object",
 			"properties": {
 				"allowedStrings": {
-					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
+					"description": "An array of strings that won't trigger the rule. Surrounding whitespace is ignored.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
@@ -4972,6 +4987,16 @@
 			]
 		},
 		"NoNonoctalDecimalEscapeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoObsoleteTagsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoObsoleteTagsOptions" }
+			]
+		},
+		"NoObsoleteTagsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5451,6 +5476,16 @@
 			]
 		},
 		"NoReturnAssignOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReturnInFinallyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReturnInFinallyOptions" }
+			]
+		},
+		"NoReturnInFinallyOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6993,6 +7028,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noObsoleteTags": {
+					"description": "Disallow obsolete HTML elements.\nSee https://biomejs.dev/linter/rules/no-obsolete-tags",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoObsoleteTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noPlaywrightElementHandle": {
 					"description": "Disallow usage of element handles (page.$() and page.$$()).\nSee https://biomejs.dev/linter/rules/no-playwright-element-handle",
 					"anyOf": [
@@ -7095,6 +7137,13 @@
 					"description": "Disallow dependencies that are known to have better alternatives.\nSee https://biomejs.dev/linter/rules/no-restricted-dependencies",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRestrictedDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReturnInFinally": {
+					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7285,6 +7334,13 @@
 					"description": "Prefer modern DOM traversal APIs over positional indexes and chained walks.\nSee https://biomejs.dev/linter/rules/use-better-dom-traversing",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseBetterDomTraversingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentFunctionStyle": {
+					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentFunctionStyleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9948,6 +10004,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoObsoleteTagsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoObsoleteTagsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoOctalEscapeOptions": {
 			"type": "object",
 			"properties": {
@@ -10346,6 +10411,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReturnAssignOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReturnInFinallyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReturnInFinallyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11705,6 +11779,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentEnumValueTypeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentFunctionStyleOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentFunctionStyleOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15562,6 +15645,27 @@
 		},
 		"UseConsistentEnumValueTypeOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentFunctionStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentFunctionStyleOptions" }
+			]
+		},
+		"UseConsistentFunctionStyleOptions": {
+			"description": "Configures the required function style and whether declaration mode permits arrow functions.",
+			"type": "object",
+			"properties": {
+				"allowArrowFunctions": {
+					"description": "Allow arrow functions when declarations are required. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"style": {
+					"description": "The function style to enforce. Default: `\"expression\"`.",
+					"anyOf": [{ "$ref": "#/$defs/FunctionStyle" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConsistentGraphqlDescriptionsConfiguration": {

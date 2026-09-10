@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: styles.js
+---
+# Input
+```js
+// should generate diagnostics
+function local() {}
+const expression = function() {};
+const arrow = () => {};
+export function exported() {}
+export const exportedExpression = function() {};
+export const exportedArrow = () => {};
+export default function() {}
+export { local, expression, arrow };
+
+
+```
+
+# Diagnostics
+```
+styles.js:2:10 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    1 │ // should generate diagnostics
+  > 2 │ function local() {}
+      │          ^^^^^
+    3 │ const expression = function() {};
+    4 │ const arrow = () => {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+styles.js:5:17 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function expressions are required here, but this is a declaration.
+  
+    3 │ const expression = function() {};
+    4 │ const arrow = () => {};
+  > 5 │ export function exported() {}
+      │                 ^^^^^^^^
+    6 │ export const exportedExpression = function() {};
+    7 │ export const exportedArrow = () => {};
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function expression assigned to a variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -374,3 +374,144 @@ const imported = <Fragment><span>Child</span></Fragment>;
         result,
     ));
 }
+
+#[test]
+fn issue_7771() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": {
+                    "level": "on",
+                    "options": {
+                        "groups": [
+                            "@app", "@app/**",
+                            "@pages", "@pages/**",
+                            "@widgets", "@widgets/**",
+                            "@features", "@features/**",
+                            "@entities", "@entities/**",
+                            "@shared", "@shared/**",
+                            ":PACKAGE:", ":ALIAS:", ":PATH:"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "plugins": [
+        "./tools/biome/plugins/fsd-depth.grit",
+        "./tools/biome/plugins/fsd-deps.grit"
+    ]
+}"#,
+    );
+    fs.insert(
+        "tools/biome/plugins/fsd-depth.grit".into(),
+        br#"engine biome(1.0)
+language js(typescript,jsx)
+
+sequential {
+    `import $what from $src` where {
+        $src <: r"^\"@(app|pages|widgets|features|entities|shared)\/[^\/]+\/.+\"$",
+        register_diagnostic(
+            span = $src,
+            message = "Only 2 level paths are allowed (e.g. @layer/name).",
+            severity = "error"
+        )
+    },
+
+    `import $src` where {
+        $src <: r"^\"@(app|pages|widgets|features|entities|shared)\/[^\/]+\/.+\"$",
+        register_diagnostic(
+            span = $src,
+            message = "Only 2 level paths are allowed (e.g. @layer/name).",
+            severity = "error"
+        )
+    }
+}"#,
+    );
+    fs.insert(
+        "tools/biome/plugins/fsd-deps.grit".into(),
+        br#"engine biome(1.0)
+language js(typescript,jsx)
+
+sequential {
+    `import $w from $src` where {
+        $filename <: r".*/pages/.*",
+        $src <: r"^\"@app(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "pages cannot import from higher layer @app.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/widgets/.*",
+        $src <: r"^\"@(pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "widgets cannot import from @pages or @app.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/features/.*",
+        $src <: r"^\"@(widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "features cannot import from @widgets, @pages, or @app.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/entities/.*",
+        $src <: r"^\"@(features|widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "entities cannot import from higher layers.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/shared/.*",
+        $src <: r"^\"@(entities|features|widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "shared cannot import from higher layers.",
+            severity = "error"
+        )
+    },
+
+    `import $src` where {
+        $filename <: r".*/shared/.*",
+        $src <: r"^\"@(entities|features|widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "shared cannot import from higher layers (side-effect import).",
+            severity = "error"
+        )
+    }
+}"#,
+    );
+    fs.insert("src/pages/a.ts".into(), br#"import "@app/foo";"#);
+
+    let _ = run_cli_with_server_workspace(fs, &mut console, Args::from(["check", "."].as_slice()));
+
+    assert!(
+        !console
+            .out_buffer
+            .iter()
+            .flat_map(|message| &message.content.0)
+            .any(|node| node.content.contains("processing panicked")),
+        "Grit plugin processing panicked: {:?}",
+        console.out_buffer
+    );
+}
