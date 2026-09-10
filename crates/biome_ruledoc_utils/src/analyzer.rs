@@ -80,6 +80,17 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
     match document_file_source {
         DocumentFileSource::Js(file_source) => {
             let (analysis_code, file_source) = match file_source.as_embedding_kind() {
+                JsEmbeddingKind::Astro { .. }
+                    if biome_service::file_handlers::AstroFileHandler::start(code).is_none() =>
+                {
+                    (
+                        code,
+                        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+                            frontmatter: false,
+                            is_class_attribute: false,
+                        }),
+                    )
+                }
                 JsEmbeddingKind::Astro { .. } => (
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
@@ -334,5 +345,28 @@ mod tests {
         let diagnostic = biome_test_utils::diagnostic_to_string("/bar.js", code, diagnostic);
         assert!(diagnostic.contains("has no export named missing"));
         assert!(!diagnostic.contains("module not found"));
+    }
+
+    #[test]
+    fn analyzes_astro_template_expression() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("astro expect_diagnostic").expect("valid code block");
+        let code = r#"<div set:html={content} />"#;
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "nursery",
+            rule: "noAstroSetHtmlDirective",
+            rule_language: "jsx",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert_eq!(writer.all_diagnostics.len(), 1);
     }
 }

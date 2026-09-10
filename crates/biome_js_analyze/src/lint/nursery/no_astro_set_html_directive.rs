@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsxAttribute, JsxName};
+use biome_js_syntax::JsxAttribute;
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions;
@@ -44,7 +44,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoAstroSetHtmlDirective {
-    type Query = Ast<JsxName>;
+    type Query = Ast<JsxAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoAstroSetHtmlDirectiveOptions;
@@ -58,22 +58,15 @@ impl Rule for NoAstroSetHtmlDirective {
             return None;
         }
 
-        let name = ctx.query();
-        (name.value_token().ok()?.text_trimmed() == "set:html").then_some(())?;
-        name.syntax().parent().and_then(JsxAttribute::cast)?;
-        Some(())
+        let name = ctx.query().name().ok()?;
+        (name.to_trimmed_text().text() == "set:html").then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let attribute = ctx
-            .query()
-            .syntax()
-            .parent()
-            .and_then(JsxAttribute::cast)?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                attribute.range(),
+                ctx.query().range(),
                 markup! {
                     "The "<Emphasis>"set:html"</Emphasis>" directive inserts unescaped HTML."
                 },
