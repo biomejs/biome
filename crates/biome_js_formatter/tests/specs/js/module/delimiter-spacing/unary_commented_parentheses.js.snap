@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/delimiter-spacing/unary_commented_parentheses.js
+---
+
+# Input
+
+```js
+!(// leading
+a || b);
+!!(// leading
+a || b);
+typeof (/* leading */ a || b);
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "delimiterSpacing": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```js
+! (
+	// leading
+	a || b
+);
+!! (
+	// leading
+	a || b
+);
+typeof (/* leading */ ( a || b ));
+
+```

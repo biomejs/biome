@@ -109,14 +109,12 @@ a
 ```js
 !(
 	// blah 1
-	(
-		foo
-		// blah 2
-		|| bar
-		|| baz
-		// blah 3
-		|| qux
-	)
+	foo
+	// blah 2
+	|| bar
+	|| baz
+	// blah 3
+	|| qux
 );
 
 foo
