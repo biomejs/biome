@@ -28,6 +28,8 @@ optionsDisallowedWords.js:3:4 lint/nursery/useValidTestTitle ━━━━━━�
     4 │ describe('only this test', () => {});
     5 │ 
   
+  i This word is disallowed by configuration to maintain consistent test titles.
+  
   i Remove or replace the disallowed word.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -46,6 +48,8 @@ optionsDisallowedWords.js:4:10 lint/nursery/useValidTestTitle ━━━━━━
       │          ^^^^^^^^^^^^^^^^
     5 │ 
     6 │ // Partial matches should be valid (not whole words)
+  
+  i This word is disallowed by configuration to maintain consistent test titles.
   
   i Remove or replace the disallowed word.
   

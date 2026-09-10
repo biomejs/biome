@@ -4,7 +4,6 @@
 describe('', () => {});
 it('', () => {});
 test('', () => {});
-suite('', () => {});
 
 // Empty template literals
 it(``, () => {});
@@ -18,7 +17,6 @@ describe();
 it(' leading space', () => {});
 it('trailing space ', () => {});
 describe('  both spaces  ', () => {});
-suite(' suite with space ', () => {});
 it(` template with space `, () => {});
 
 // Accidental space in template literal with substitutions
@@ -31,7 +29,6 @@ it(true, () => {});
 it(null, () => {});
 describe(123, () => {});
 describe(MyComponent, () => {});
-suite(MyComponent, () => {});
 
 // .each calls with invalid titles
 test.each([[1, 2]])('', () => {});

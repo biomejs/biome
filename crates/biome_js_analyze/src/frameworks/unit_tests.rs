@@ -203,7 +203,6 @@ pub(crate) fn describe_body(call: &JsCallExpression) -> Option<JsStatementList> 
 pub enum TestBlockKind {
     Test,
     Describe,
-    Suite,
 }
 
 impl TestBlockKind {
@@ -211,37 +210,7 @@ impl TestBlockKind {
         match self {
             Self::Test => "test",
             Self::Describe => "describe",
-            Self::Suite => "suite",
         }
-    }
-}
-
-/// Returns `true` if the call expression is a `suite(...)` call.
-pub(crate) fn is_suite_call(call: &JsCallExpression) -> bool {
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-    let callee = callee.omit_parentheses();
-    match callee {
-        AnyJsExpression::JsIdentifierExpression(ident) => ident
-            .name()
-            .and_then(|r| r.value_token())
-            .is_ok_and(|tok| tok.text_trimmed() == "suite"),
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let Ok(object) = member.object() else {
-                return false;
-            };
-            let object = object.omit_parentheses();
-            if let AnyJsExpression::JsIdentifierExpression(ident) = object {
-                ident
-                    .name()
-                    .and_then(|r| r.value_token())
-                    .is_ok_and(|tok| tok.text_trimmed() == "suite")
-            } else {
-                false
-            }
-        }
-        _ => false,
     }
 }
 
@@ -253,46 +222,8 @@ pub(crate) fn is_each_call(call: &JsCallExpression) -> Option<TestBlockKind> {
     };
     let inner_callee = inner_call.callee().ok()?.omit_parentheses();
 
-    let is_suite_each = match &inner_callee {
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let object_is_suite = member.object().is_ok_and(|object| {
-                let mut current = object.omit_parentheses();
-                loop {
-                    match current {
-                        AnyJsExpression::JsIdentifierExpression(ident) => {
-                            return ident
-                                .name()
-                                .and_then(|r| r.value_token())
-                                .is_ok_and(|tok| tok.text_trimmed() == "suite");
-                        }
-                        AnyJsExpression::JsStaticMemberExpression(member) => {
-                            let Ok(object) = member.object() else {
-                                return false;
-                            };
-                            current = object.omit_parentheses();
-                        }
-                        _ => return false,
-                    }
-                }
-            });
-
-            let member_is_each = matches!(
-                member.member().ok(),
-                Some(AnyJsName::JsName(name))
-                    if name
-                        .value_token()
-                        .is_ok_and(|tok| matches!(tok.text_trimmed(), "each" | "for" | "prop"))
-            );
-
-            object_is_suite && member_is_each
-        }
-        _ => false,
-    };
-
-    if is_suite_each {
-        Some(TestBlockKind::Suite)
-    } else if inner_callee.contains_a_test_each_pattern() {
-        if is_describe_call(&inner_call) || inner_callee.contains_describe_call() {
+    if inner_callee.contains_a_test_each_pattern() {
+        if contains_describe_identifier(&inner_callee) {
             Some(TestBlockKind::Describe)
         } else {
             Some(TestBlockKind::Test)
@@ -302,14 +233,39 @@ pub(crate) fn is_each_call(call: &JsCallExpression) -> Option<TestBlockKind> {
     }
 }
 
-/// Identifies the `TestBlockKind` of a call expression (`test`, `describe`, `suite`, or `.each` variants).
+fn contains_describe_identifier(callee: &AnyJsExpression) -> bool {
+    let mut current = callee.clone();
+    loop {
+        match current {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                return ident.name().and_then(|r| r.value_token()).is_ok_and(|tok| {
+                    matches!(tok.text_trimmed(), "describe" | "fdescribe" | "xdescribe")
+                });
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                if let Ok(AnyJsName::JsName(name)) = member.member()
+                    && name.value_token().is_ok_and(|tok| {
+                        matches!(tok.text_trimmed(), "describe" | "fdescribe" | "xdescribe")
+                    })
+                {
+                    return true;
+                }
+                let Ok(object) = member.object() else {
+                    return false;
+                };
+                current = object.omit_parentheses();
+            }
+            _ => return false,
+        }
+    }
+}
+
+/// Identifies the `TestBlockKind` of a call expression (`test`, `describe`, or `.each` variants).
 pub(crate) fn get_test_block_kind(call: &JsCallExpression) -> Option<TestBlockKind> {
     if is_describe_call(call) {
         Some(TestBlockKind::Describe)
     } else if is_unit_test(call) {
         Some(TestBlockKind::Test)
-    } else if is_suite_call(call) {
-        Some(TestBlockKind::Suite)
     } else {
         is_each_call(call)
     }
@@ -322,7 +278,10 @@ mod tests {
     use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, AstNodeList};
 
-    use super::{LifecycleHook, describe_body, is_describe_call, is_unit_test};
+    use super::{
+        LifecycleHook, TestBlockKind, describe_body, get_test_block_kind, is_describe_call,
+        is_unit_test,
+    };
 
     fn first_call(src: &str) -> JsCallExpression {
         let parse =
@@ -685,6 +644,26 @@ mod tests {
         assert_eq!(
             LifecycleHook::from_call_expression(&first_call("before(() => {})")),
             Some(LifecycleHook::Before)
+        );
+    }
+
+    #[test]
+    fn get_test_block_kind_describe_and_test() {
+        assert_eq!(
+            get_test_block_kind(&first_call("describe('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            get_test_block_kind(&first_call("describe.each([1, 2])('test', () => {})")),
+            Some(TestBlockKind::Describe)
+        );
+        assert_eq!(
+            get_test_block_kind(&first_call("it('test', () => {})")),
+            Some(TestBlockKind::Test)
+        );
+        assert_eq!(
+            get_test_block_kind(&first_call("test.each([1, 2])('test', () => {})")),
+            Some(TestBlockKind::Test)
         );
     }
 }

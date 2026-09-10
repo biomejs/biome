@@ -10,7 +10,6 @@ expression: invalid.js
 describe('', () => {});
 it('', () => {});
 test('', () => {});
-suite('', () => {});
 
 // Empty template literals
 it(``, () => {});
@@ -24,7 +23,6 @@ describe();
 it(' leading space', () => {});
 it('trailing space ', () => {});
 describe('  both spaces  ', () => {});
-suite(' suite with space ', () => {});
 it(` template with space `, () => {});
 
 // Accidental space in template literal with substitutions
@@ -37,7 +35,6 @@ it(true, () => {});
 it(null, () => {});
 describe(123, () => {});
 describe(MyComponent, () => {});
-suite(MyComponent, () => {});
 
 // .each calls with invalid titles
 test.each([[1, 2]])('', () => {});
@@ -50,13 +47,15 @@ describe.each([[1, 2]])(123, () => {});
 ```
 invalid.js:4:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The describe title should not be empty.
+  ! The describe title is empty.
   
     3 │ // Empty string titles
   > 4 │ describe('', () => {});
       │          ^^
     5 │ it('', () => {});
     6 │ test('', () => {});
+  
+  i A title is required to identify the describe in test reports.
   
   i Provide a descriptive title for this describe.
   
@@ -68,14 +67,16 @@ invalid.js:4:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 invalid.js:5:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not be empty.
+  ! The test title is empty.
   
     3 │ // Empty string titles
     4 │ describe('', () => {});
   > 5 │ it('', () => {});
       │    ^^
     6 │ test('', () => {});
-    7 │ suite('', () => {});
+    7 │ 
+  
+  i A title is required to identify the test in test reports.
   
   i Provide a descriptive title for this test.
   
@@ -87,14 +88,16 @@ invalid.js:5:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━�
 ```
 invalid.js:6:6 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not be empty.
+  ! The test title is empty.
   
     4 │ describe('', () => {});
     5 │ it('', () => {});
   > 6 │ test('', () => {});
       │      ^^
-    7 │ suite('', () => {});
-    8 │ 
+    7 │ 
+    8 │ // Empty template literals
+  
+  i A title is required to identify the test in test reports.
   
   i Provide a descriptive title for this test.
   
@@ -104,34 +107,17 @@ invalid.js:6:6 lint/nursery/useValidTestTitle ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:7 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The suite title should not be empty.
+  ! The test title is empty.
   
-    5 │ it('', () => {});
-    6 │ test('', () => {});
-  > 7 │ suite('', () => {});
-      │       ^^
-    8 │ 
-    9 │ // Empty template literals
-  
-  i Provide a descriptive title for this suite.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:10:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The test title should not be empty.
-  
-     9 │ // Empty template literals
-  > 10 │ it(``, () => {});
+     8 │ // Empty template literals
+   > 9 │ it(``, () => {});
        │    ^^
-    11 │ describe(``, () => {});
-    12 │ 
+    10 │ describe(``, () => {});
+    11 │ 
+  
+  i A title is required to identify the test in test reports.
   
   i Provide a descriptive title for this test.
   
@@ -141,18 +127,40 @@ invalid.js:10:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:11:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The describe title should not be empty.
+  ! The describe title is empty.
   
-     9 │ // Empty template literals
-    10 │ it(``, () => {});
-  > 11 │ describe(``, () => {});
+     8 │ // Empty template literals
+     9 │ it(``, () => {});
+  > 10 │ describe(``, () => {});
        │          ^^
-    12 │ 
-    13 │ // No arguments at all
+    11 │ 
+    12 │ // No arguments at all
+  
+  i A title is required to identify the describe in test reports.
   
   i Provide a descriptive title for this describe.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title is empty.
+  
+    12 │ // No arguments at all
+  > 13 │ it();
+       │ ^^^^
+    14 │ describe();
+    15 │ 
+  
+  i A title is required to identify the test in test reports.
+  
+  i Provide a descriptive title for this test.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -162,32 +170,16 @@ invalid.js:11:10 lint/nursery/useValidTestTitle ━━━━━━━━━━�
 ```
 invalid.js:14:1 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not be empty.
+  ! The describe title is empty.
   
-    13 │ // No arguments at all
-  > 14 │ it();
-       │ ^^^^
-    15 │ describe();
-    16 │ 
-  
-  i Provide a descriptive title for this test.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:15:1 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The describe title should not be empty.
-  
-    13 │ // No arguments at all
-    14 │ it();
-  > 15 │ describe();
+    12 │ // No arguments at all
+    13 │ it();
+  > 14 │ describe();
        │ ^^^^^^^^^^
-    16 │ 
-    17 │ // Accidental whitespace (leading / trailing)
+    15 │ 
+    16 │ // Accidental whitespace (leading / trailing)
+  
+  i A title is required to identify the describe in test reports.
   
   i Provide a descriptive title for this describe.
   
@@ -197,15 +189,17 @@ invalid.js:15:1 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:18:4 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:4 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not have leading or trailing whitespace.
+  ! The test title has leading or trailing whitespace.
   
-    17 │ // Accidental whitespace (leading / trailing)
-  > 18 │ it(' leading space', () => {});
+    16 │ // Accidental whitespace (leading / trailing)
+  > 17 │ it(' leading space', () => {});
        │    ^^^^^^^^^^^^^^^^
-    19 │ it('trailing space ', () => {});
-    20 │ describe('  both spaces  ', () => {});
+    18 │ it('trailing space ', () => {});
+    19 │ describe('  both spaces  ', () => {});
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the start of the title.
   
@@ -213,22 +207,24 @@ invalid.js:18:4 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━�
   
   i Safe fix: Trim leading and trailing whitespace from the title.
   
-    18 │ it('·leading·space',·()·=>·{});
+    17 │ it('·leading·space',·()·=>·{});
        │     -                          
 
 ```
 
 ```
-invalid.js:19:4 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:4 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not have leading or trailing whitespace.
+  ! The test title has leading or trailing whitespace.
   
-    17 │ // Accidental whitespace (leading / trailing)
-    18 │ it(' leading space', () => {});
-  > 19 │ it('trailing space ', () => {});
+    16 │ // Accidental whitespace (leading / trailing)
+    17 │ it(' leading space', () => {});
+  > 18 │ it('trailing space ', () => {});
        │    ^^^^^^^^^^^^^^^^^
-    20 │ describe('  both spaces  ', () => {});
-    21 │ suite(' suite with space ', () => {});
+    19 │ describe('  both spaces  ', () => {});
+    20 │ it(` template with space `, () => {});
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the end of the title.
   
@@ -236,22 +232,24 @@ invalid.js:19:4 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━�
   
   i Safe fix: Trim leading and trailing whitespace from the title.
   
-    19 │ it('trailing·space·',·()·=>·{});
+    18 │ it('trailing·space·',·()·=>·{});
        │                   -             
 
 ```
 
 ```
-invalid.js:20:10 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:10 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The describe title should not have leading or trailing whitespace.
+  ! The describe title has leading or trailing whitespace.
   
-    18 │ it(' leading space', () => {});
-    19 │ it('trailing space ', () => {});
-  > 20 │ describe('  both spaces  ', () => {});
+    17 │ it(' leading space', () => {});
+    18 │ it('trailing space ', () => {});
+  > 19 │ describe('  both spaces  ', () => {});
        │          ^^^^^^^^^^^^^^^^^
-    21 │ suite(' suite with space ', () => {});
-    22 │ it(` template with space `, () => {});
+    20 │ it(` template with space `, () => {});
+    21 │ 
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the start and end of the title.
   
@@ -259,45 +257,24 @@ invalid.js:20:10 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━�
   
   i Safe fix: Trim leading and trailing whitespace from the title.
   
-    20 │ describe('··both·spaces··',·()·=>·{});
+    19 │ describe('··both·spaces··',·()·=>·{});
        │           --           --             
 
 ```
 
 ```
-invalid.js:21:7 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The suite title should not have leading or trailing whitespace.
+  ! The test title has leading or trailing whitespace.
   
-    19 │ it('trailing space ', () => {});
-    20 │ describe('  both spaces  ', () => {});
-  > 21 │ suite(' suite with space ', () => {});
-       │       ^^^^^^^^^^^^^^^^^^^^
-    22 │ it(` template with space `, () => {});
-    23 │ 
-  
-  i Remove the accidental whitespace at the start and end of the title.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Trim leading and trailing whitespace from the title.
-  
-    21 │ suite('·suite·with·space·',·()·=>·{});
-       │        -                -             
-
-```
-
-```
-invalid.js:22:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The test title should not have leading or trailing whitespace.
-  
-    20 │ describe('  both spaces  ', () => {});
-    21 │ suite(' suite with space ', () => {});
-  > 22 │ it(` template with space `, () => {});
+    18 │ it('trailing space ', () => {});
+    19 │ describe('  both spaces  ', () => {});
+  > 20 │ it(` template with space `, () => {});
        │    ^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ 
-    24 │ // Accidental space in template literal with substitutions
+    21 │ 
+    22 │ // Accidental space in template literal with substitutions
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the start and end of the title.
   
@@ -307,15 +284,17 @@ invalid.js:22:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:25:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not have leading or trailing whitespace.
+  ! The test title has leading or trailing whitespace.
   
-    24 │ // Accidental space in template literal with substitutions
-  > 25 │ it(` leading substitution ${x}`, () => {});
+    22 │ // Accidental space in template literal with substitutions
+  > 23 │ it(` leading substitution ${x}`, () => {});
        │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ it(`${x} trailing substitution `, () => {});
-    27 │ 
+    24 │ it(`${x} trailing substitution `, () => {});
+    25 │ 
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the start of the title.
   
@@ -325,18 +304,61 @@ invalid.js:25:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:26:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not have leading or trailing whitespace.
+  ! The test title has leading or trailing whitespace.
   
-    24 │ // Accidental space in template literal with substitutions
-    25 │ it(` leading substitution ${x}`, () => {});
-  > 26 │ it(`${x} trailing substitution `, () => {});
+    22 │ // Accidental space in template literal with substitutions
+    23 │ it(` leading substitution ${x}`, () => {});
+  > 24 │ it(`${x} trailing substitution `, () => {});
        │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ 
-    28 │ // Non-string titles
+    25 │ 
+    26 │ // Non-string titles
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the end of the title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title is not a string.
+  
+    26 │ // Non-string titles
+  > 27 │ it(123, () => {});
+       │    ^^^
+    28 │ it(true, () => {});
+    29 │ it(null, () => {});
+  
+  i Test titles must be strings to ensure test runners and reporters can properly display them.
+  
+  i Provide a string literal or template literal as the title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title is not a string.
+  
+    26 │ // Non-string titles
+    27 │ it(123, () => {});
+  > 28 │ it(true, () => {});
+       │    ^^^^
+    29 │ it(null, () => {});
+    30 │ describe(123, () => {});
+  
+  i Test titles must be strings to ensure test runners and reporters can properly display them.
+  
+  i Provide a string literal or template literal as the title.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -346,32 +368,16 @@ invalid.js:26:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 invalid.js:29:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title must be a string.
+  ! The test title is not a string.
   
-    28 │ // Non-string titles
-  > 29 │ it(123, () => {});
-       │    ^^^
-    30 │ it(true, () => {});
-    31 │ it(null, () => {});
-  
-  i Provide a string literal or template literal as the title.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:30:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The test title must be a string.
-  
-    28 │ // Non-string titles
-    29 │ it(123, () => {});
-  > 30 │ it(true, () => {});
+    27 │ it(123, () => {});
+    28 │ it(true, () => {});
+  > 29 │ it(null, () => {});
        │    ^^^^
-    31 │ it(null, () => {});
-    32 │ describe(123, () => {});
+    30 │ describe(123, () => {});
+    31 │ describe(MyComponent, () => {});
+  
+  i Test titles must be strings to ensure test runners and reporters can properly display them.
   
   i Provide a string literal or template literal as the title.
   
@@ -381,35 +387,18 @@ invalid.js:30:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:31:4 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title must be a string.
+  ! The describe title is not a string.
   
-    29 │ it(123, () => {});
-    30 │ it(true, () => {});
-  > 31 │ it(null, () => {});
-       │    ^^^^
-    32 │ describe(123, () => {});
-    33 │ describe(MyComponent, () => {});
-  
-  i Provide a string literal or template literal as the title.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:32:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The describe title must be a string.
-  
-    30 │ it(true, () => {});
-    31 │ it(null, () => {});
-  > 32 │ describe(123, () => {});
+    28 │ it(true, () => {});
+    29 │ it(null, () => {});
+  > 30 │ describe(123, () => {});
        │          ^^^
-    33 │ describe(MyComponent, () => {});
-    34 │ suite(MyComponent, () => {});
+    31 │ describe(MyComponent, () => {});
+    32 │ 
+  
+  i Test titles must be strings to ensure test runners and reporters can properly display them.
   
   i Provide a string literal or template literal as the title.
   
@@ -419,16 +408,18 @@ invalid.js:32:10 lint/nursery/useValidTestTitle ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:33:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:10 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The describe title must be a string.
+  ! The describe title is not a string.
   
-    31 │ it(null, () => {});
-    32 │ describe(123, () => {});
-  > 33 │ describe(MyComponent, () => {});
+    29 │ it(null, () => {});
+    30 │ describe(123, () => {});
+  > 31 │ describe(MyComponent, () => {});
        │          ^^^^^^^^^^^
-    34 │ suite(MyComponent, () => {});
-    35 │ 
+    32 │ 
+    33 │ // .each calls with invalid titles
+  
+  i Test titles must be strings to ensure test runners and reporters can properly display them.
   
   i Provide a string literal or template literal as the title.
   
@@ -438,34 +429,17 @@ invalid.js:33:10 lint/nursery/useValidTestTitle ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:7 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:21 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The suite title must be a string.
+  ! The test title is empty.
   
-    32 │ describe(123, () => {});
-    33 │ describe(MyComponent, () => {});
-  > 34 │ suite(MyComponent, () => {});
-       │       ^^^^^^^^^^^
-    35 │ 
-    36 │ // .each calls with invalid titles
-  
-  i Provide a string literal or template literal as the title.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:37:21 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The test title should not be empty.
-  
-    36 │ // .each calls with invalid titles
-  > 37 │ test.each([[1, 2]])('', () => {});
+    33 │ // .each calls with invalid titles
+  > 34 │ test.each([[1, 2]])('', () => {});
        │                     ^^
-    38 │ test.each([[1, 2]])(' leading space', () => {});
-    39 │ describe.each([[1, 2]])(123, () => {});
+    35 │ test.each([[1, 2]])(' leading space', () => {});
+    36 │ describe.each([[1, 2]])(123, () => {});
+  
+  i A title is required to identify the test in test reports.
   
   i Provide a descriptive title for this test.
   
@@ -475,16 +449,18 @@ invalid.js:37:21 lint/nursery/useValidTestTitle ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:38:21 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:21 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title should not have leading or trailing whitespace.
+  ! The test title has leading or trailing whitespace.
   
-    36 │ // .each calls with invalid titles
-    37 │ test.each([[1, 2]])('', () => {});
-  > 38 │ test.each([[1, 2]])(' leading space', () => {});
+    33 │ // .each calls with invalid titles
+    34 │ test.each([[1, 2]])('', () => {});
+  > 35 │ test.each([[1, 2]])(' leading space', () => {});
        │                     ^^^^^^^^^^^^^^^^
-    39 │ describe.each([[1, 2]])(123, () => {});
-    40 │ 
+    36 │ describe.each([[1, 2]])(123, () => {});
+    37 │ 
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
   
   i Remove the accidental whitespace at the start of the title.
   
@@ -492,21 +468,23 @@ invalid.js:38:21 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━�
   
   i Safe fix: Trim leading and trailing whitespace from the title.
   
-    38 │ test.each([[1,·2]])('·leading·space',·()·=>·{});
+    35 │ test.each([[1,·2]])('·leading·space',·()·=>·{});
        │                      -                          
 
 ```
 
 ```
-invalid.js:39:25 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:25 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test title must be a string.
+  ! The describe title is not a string.
   
-    37 │ test.each([[1, 2]])('', () => {});
-    38 │ test.each([[1, 2]])(' leading space', () => {});
-  > 39 │ describe.each([[1, 2]])(123, () => {});
+    34 │ test.each([[1, 2]])('', () => {});
+    35 │ test.each([[1, 2]])(' leading space', () => {});
+  > 36 │ describe.each([[1, 2]])(123, () => {});
        │                         ^^^
-    40 │ 
+    37 │ 
+  
+  i Test titles must be strings to ensure test runners and reporters can properly display them.
   
   i Provide a string literal or template literal as the title.
   

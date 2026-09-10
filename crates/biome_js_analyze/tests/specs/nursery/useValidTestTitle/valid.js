@@ -6,10 +6,6 @@ describe('my suite', () => {
   test('should also work', () => {});
 });
 
-suite('vitest suite', () => {
-  it('runs properly', () => {});
-});
-
 // Modifiers and aliases
 describe.only('focused suite', () => {});
 describe.skip('skipped suite', () => {});

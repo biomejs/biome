@@ -1,5 +1,5 @@
 /* should not generate diagnostics */
 it(' leading space', () => {});
 describe(' trailing space ', () => {});
-suite('  both  ', () => {});
+test('  both  ', () => {});
 it(` template space `, () => {});

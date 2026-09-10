@@ -20,10 +20,10 @@ use crate::{
 declare_lint_rule! {
     /// Enforce valid titles for unit test cases and test suites.
     ///
-    /// Checks that the titles of test blocks (`describe`, `test`, `it`, `suite`) are valid:
+    /// Checks that the titles of test blocks (`describe`, `test`, `it`) are valid:
     /// - Titles must not be empty.
     /// - Titles must not have accidental leading or trailing whitespace.
-    /// - Titles must be string or template literals (unless configured otherwise).
+    /// - Titles must be string or template literals.
     /// - Titles must not contain disallowed words (if configured).
     ///
     /// ## Examples
@@ -55,6 +55,8 @@ declare_lint_rule! {
     ///
     /// When `true`, leading and trailing whitespace will not be checked.
     ///
+    /// Default: `false`
+    ///
     /// ```json,options
     /// {
     ///     "options": {
@@ -63,33 +65,11 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### `ignoreTypeOfDescribeName`
-    ///
-    /// When `true`, non-string titles in `describe` and `suite` blocks will be allowed.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "ignoreTypeOfDescribeName": true
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ### `ignoreTypeOfTestName`
-    ///
-    /// When `true`, non-string titles in `test` and `it` blocks will be allowed.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "ignoreTypeOfTestName": true
-    ///     }
-    /// }
-    /// ```
-    ///
     /// ### `disallowedWords`
     ///
     /// A list of words that are not allowed in test titles. Matching is whole-word and case-insensitive.
+    ///
+    /// Default: `[]`
     ///
     /// ```json,options
     /// {
@@ -183,22 +163,10 @@ impl Rule for UseValidTestTitle {
 
                 None
             }
-            AnyJsExpression::AnyJsLiteralExpression(lit) => {
-                let is_ignored = match kind {
-                    TestBlockKind::Describe | TestBlockKind::Suite => {
-                        options.ignore_type_of_describe_name()
-                    }
-                    TestBlockKind::Test => options.ignore_type_of_test_name(),
-                };
-                if !is_ignored {
-                    Some(TitleError::TitleMustBeString {
-                        range: lit.range(),
-                        kind,
-                    })
-                } else {
-                    None
-                }
-            }
+            AnyJsExpression::AnyJsLiteralExpression(lit) => Some(TitleError::TitleMustBeString {
+                range: lit.range(),
+                kind,
+            }),
             AnyJsExpression::JsTemplateExpression(template) => {
                 if template.tag().is_some() {
                     return None;
@@ -292,22 +260,10 @@ impl Rule for UseValidTestTitle {
                     None
                 }
             }
-            _ => {
-                let is_ignored = match kind {
-                    TestBlockKind::Describe | TestBlockKind::Suite => {
-                        options.ignore_type_of_describe_name()
-                    }
-                    TestBlockKind::Test => options.ignore_type_of_test_name(),
-                };
-                if !is_ignored {
-                    Some(TitleError::TitleMustBeString {
-                        range: expr.range(),
-                        kind,
-                    })
-                } else {
-                    None
-                }
-            }
+            _ => Some(TitleError::TitleMustBeString {
+                range: expr.range(),
+                kind,
+            }),
         }
     }
 
@@ -318,9 +274,12 @@ impl Rule for UseValidTestTitle {
                     rule_category!(),
                     *range,
                     markup! {
-                        "The " {kind.as_str()} " title should not be empty."
+                        "The " {kind.as_str()} " title is empty."
                     },
                 )
+                .note(markup! {
+                    "A title is required to identify the " {kind.as_str()} " in test reports."
+                })
                 .note(markup! {
                     "Provide a descriptive title for this " {kind.as_str()} "."
                 }),
@@ -344,9 +303,12 @@ impl Rule for UseValidTestTitle {
                         rule_category!(),
                         *range,
                         markup! {
-                            "The " {kind.as_str()} " title should not have leading or trailing whitespace."
+                            "The " {kind.as_str()} " title has leading or trailing whitespace."
                         },
                     )
+                    .note(markup! {
+                        "Accidental whitespace can cause inconsistent test output and formatting issues in reports."
+                    })
                     .note(markup! {
                         "Remove the accidental whitespace at the " {position} " of the title."
                     }),
@@ -357,9 +319,12 @@ impl Rule for UseValidTestTitle {
                     rule_category!(),
                     *range,
                     markup! {
-                        "The " {kind.as_str()} " title must be a string."
+                        "The " {kind.as_str()} " title is not a string."
                     },
                 )
+                .note(markup! {
+                    "Test titles must be strings to ensure test runners and reporters can properly display them."
+                })
                 .note(markup! {
                     "Provide a string literal or template literal as the title."
                 }),
@@ -383,6 +348,9 @@ impl Rule for UseValidTestTitle {
                             "The " {kind.as_str()} " title contains the disallowed word "<Emphasis>{word}</Emphasis>"."
                         },
                     )
+                    .note(markup! {
+                        "This word is disallowed by configuration to maintain consistent test titles."
+                    })
                     .note(markup! {
                         "Remove or replace the disallowed word."
                     }),

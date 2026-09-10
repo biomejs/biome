@@ -17555,14 +17555,6 @@
 				"ignoreSpaces": {
 					"description": "When `true`, leading and trailing whitespace in titles will not be checked.",
 					"type": ["boolean", "null"]
-				},
-				"ignoreTypeOfDescribeName": {
-					"description": "When `true`, non-string titles in `describe` and `suite` blocks will be allowed.",
-					"type": ["boolean", "null"]
-				},
-				"ignoreTypeOfTestName": {
-					"description": "When `true`, non-string titles in `test` and `it` blocks will be allowed.",
-					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false

@@ -9058,14 +9058,6 @@ export interface UseValidTestTitleOptions {
 	 * When `true`, leading and trailing whitespace in titles will not be checked.
 	 */
 	ignoreSpaces?: boolean;
-	/**
-	 * When `true`, non-string titles in `describe` and `suite` blocks will be allowed.
-	 */
-	ignoreTypeOfDescribeName?: boolean;
-	/**
-	 * When `true`, non-string titles in `test` and `it` blocks will be allowed.
-	 */
-	ignoreTypeOfTestName?: boolean;
 }
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};
