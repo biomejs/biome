@@ -1,6 +1,6 @@
 use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
-    chain_trivia_pieces, trim_trailing_trivia_pieces,
+    AstNode, AstSeparatedElement, AstSeparatedList, Direction, Language, SyntaxError, SyntaxNode,
+    SyntaxToken, chain_trivia_pieces, trim_trailing_trivia_pieces,
 };
 use std::cmp::Ordering;
 
@@ -235,30 +235,56 @@ where
 /// Counts lines in a syntax tree, used by `noExcessiveLinesPerFile`.
 ///
 /// When `skip_blank_lines` is true, counts tokens with leading newlines (excluding blank lines).
+/// When `skip_comments` is true, lines consisting only of comments are not counted.
 /// When false, counts all newline characters in leading trivia (trailing trivia is trimmed
 /// to prevent double-counting). Returns total + 1 to account for the first line.
 pub fn count_lines_in_file<L: Language>(
     node: &SyntaxNode<L>,
     is_eof_token: impl Fn(&SyntaxToken<L>) -> bool,
     skip_blank_lines: bool,
+    skip_comments: bool,
 ) -> usize {
-    let mut count = 0;
-    for descendant in node.descendants() {
-        for token in descendant.tokens() {
+    if skip_comments {
+        // Each code token occupies exactly one line. Comments are stored as
+        // leading trivia of the following token, so comment-only lines never
+        // have a token starting on them. Counting tokens that begin a new line
+        // (have a leading newline) plus the first line gives the number of
+        // lines that contain code.
+        let mut count = 0;
+        let mut first_token_seen = false;
+
+        for token in node.descendants_tokens(biome_rowan::Direction::Next) {
             if is_eof_token(&token) {
                 continue;
             }
-            if skip_blank_lines {
-                count += token.has_leading_newline() as usize;
-            } else {
-                count += token
-                    .trim_trailing_trivia()
-                    .leading_trivia()
-                    .pieces()
-                    .filter(|piece| piece.is_newline())
-                    .count();
+
+            if !first_token_seen {
+                first_token_seen = true;
+                count = 1;
+            } else if token.has_leading_newline() {
+                count += 1;
             }
         }
+        count
+    } else {
+        let mut count = 0;
+        for descendant in node.descendants() {
+            for token in descendant.tokens() {
+                if is_eof_token(&token) {
+                    continue;
+                }
+                if skip_blank_lines {
+                    count += token.has_leading_newline() as usize;
+                } else {
+                    count += token
+                        .trim_trailing_trivia()
+                        .leading_trivia()
+                        .pieces()
+                        .filter(|piece| piece.is_newline())
+                        .count();
+                }
+            }
+        }
+        count + 1
     }
-    count + 1
 }

@@ -94,6 +94,34 @@ declare_lint_rule! {
     /// .b { color: blue; }
     /// ```
     ///
+    /// ### `skipComments`
+    ///
+    /// When this option is set to `true`, lines that only contain comments are not
+    /// counted towards the maximum line limit.
+    /// This means that only lines with actual code will be counted.
+    ///
+    /// Default: `false`
+    ///
+    /// #### Examples
+    ///
+    /// The following example shows how `skipComments` can prevent a diagnostic by excluding
+    /// comment lines from the total count:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 2,
+    ///         "skipComments": true
+    ///     }
+    /// }
+    /// ```
+    /// ```css,use_options
+    /// /* this is a comment */
+    /// /* another comment */
+    /// .a { color: red; }
+    /// .b { color: blue; }
+    /// ```
+    ///
     /// ## Suppressions
     ///
     /// If you need to exceed the line limit in a specific file, you can suppress this rule
@@ -135,6 +163,7 @@ impl Rule for NoExcessiveLinesPerFile {
             node.syntax(),
             |token| token.kind() == CssSyntaxKind::EOF,
             options.skip_blank_lines(),
+            options.skip_comments(),
         );
 
         if file_lines_count > options.max_lines().get().into() {

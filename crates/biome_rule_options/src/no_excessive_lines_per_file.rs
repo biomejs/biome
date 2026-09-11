@@ -11,11 +11,17 @@ pub struct NoExcessiveLinesPerFileOptions {
     /// When this option is set to `true`, blank lines are not counted towards the maximum line limit.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub skip_blank_lines: Option<bool>,
+
+    /// When this option is set to `true`, lines that only contain comments
+    /// are not counted towards the maximum line limit.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub skip_comments: Option<bool>,
 }
 
 impl NoExcessiveLinesPerFileOptions {
     pub const DEFAULT_MAX_LINES: NonZeroU16 = NonZeroU16::new(300).unwrap();
     pub const DEFAULT_SKIP_BLANK_LINES: bool = false;
+    pub const DEFAULT_SKIP_COMMENTS: bool = false;
 
     /// Returns [`Self::max_lines`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_MAX_LINES`].
@@ -28,5 +34,11 @@ impl NoExcessiveLinesPerFileOptions {
     pub fn skip_blank_lines(&self) -> bool {
         self.skip_blank_lines
             .unwrap_or(Self::DEFAULT_SKIP_BLANK_LINES)
+    }
+
+    /// Returns [`Self::skip_comments`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_SKIP_COMMENTS`].
+    pub fn skip_comments(&self) -> bool {
+        self.skip_comments.unwrap_or(Self::DEFAULT_SKIP_COMMENTS)
     }
 }
