@@ -1310,6 +1310,7 @@ pub enum TypeofExpression {
     IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
+    Narrowed(TypeofNarrowedExpression),
     New(TypeofNewExpression),
     NullishCoalescing(TypeofNullishCoalescingExpression),
     StaticMember(TypeofStaticMemberExpression),
@@ -1383,6 +1384,62 @@ pub struct TypeofLogicalAndExpression {
 pub struct TypeofLogicalOrExpression {
     pub left: TypeReference,
     pub right: TypeReference,
+}
+
+/// Narrows the type of an expression to the subset that matches a `typeof`
+/// guard, e.g. the type of `x` inside the consequent of
+/// `if (typeof x === "function")`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofNarrowedExpression {
+    /// The type being narrowed.
+    pub ty: TypeReference,
+
+    /// The tag the `typeof` guard compared against.
+    pub tag: TypeofTag,
+}
+
+/// One of the strings the `typeof` operator may evaluate to.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum TypeofTag {
+    Bigint,
+    Boolean,
+    Function,
+    Number,
+    Object,
+    String,
+    Symbol,
+    Undefined,
+}
+
+impl TypeofTag {
+    /// Returns the tag matching the given string literal text, if any.
+    pub fn from_literal(text: &str) -> Option<Self> {
+        match text {
+            "bigint" => Some(Self::Bigint),
+            "boolean" => Some(Self::Boolean),
+            "function" => Some(Self::Function),
+            "number" => Some(Self::Number),
+            "object" => Some(Self::Object),
+            "string" => Some(Self::String),
+            "symbol" => Some(Self::Symbol),
+            "undefined" => Some(Self::Undefined),
+            _ => None,
+        }
+    }
+
+    /// Returns the string the `typeof` operator evaluates to for this tag.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Bigint => "bigint",
+            Self::Boolean => "boolean",
+            Self::Function => "function",
+            Self::Number => "number",
+            Self::Object => "object",
+            Self::String => "string",
+            Self::Symbol => "symbol",
+            Self::Undefined => "undefined",
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

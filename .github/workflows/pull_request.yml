@@ -115,6 +115,9 @@ jobs:
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os != 'depot-windows-2022-16'
         run: cargo test --workspace --features=js_plugin
+      - name: Run type narrowing tests
+        if: matrix.os == 'depot-ubuntu-24.04-arm-16'
+        run: cargo test -p biome_module_graph -p biome_js_analyze --features=type_narrowing
 
   e2e-tests:
     name: End-to-end tests

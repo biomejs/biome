@@ -542,6 +542,8 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ])]]
                 )
             }
+            // This engine does not narrow; show the type as declared.
+            Self::Narrowed(expr) => write!(f, [&expr.ty]),
             Self::New(expr) => {
                 write!(f, [&format_args![token("new"), space(), &expr.callee]])
             }

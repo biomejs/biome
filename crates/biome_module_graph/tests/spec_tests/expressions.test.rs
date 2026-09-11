@@ -11,8 +11,11 @@ fn test_infer_module_types_evaluates_typeof_operator_on_build() {
                 return "value";
             }
 
+            export class Service {}
+
             export const valueType = typeof value;
             export const functionType = typeof readValue;
+            export const classType = typeof Service;
             export const unknownType = typeof notDeclared;
         "#,
     );
@@ -36,6 +39,15 @@ fn test_infer_module_types_evaluates_typeof_operator_on_build() {
     assert!(is_inferred_string_literal(
         &db,
         inferred.resolve_type(&db, function_type_ty),
+        "function"
+    ));
+
+    // A class is a constructor function at runtime.
+    let class_type_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "classType")
+        .expect("classType binding type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, class_type_ty),
         "function"
     ));
 

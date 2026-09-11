@@ -1,0 +1,7 @@
+---
+source: crates/biome_js_type_info/src/format_inferred_type_info.rs
+expression: formatted
+---
+Narrowed(typeof == "string", unknown)
+Narrowed(typeof == "function", unknown)
+Narrowed(typeof == "undefined", unknown)
