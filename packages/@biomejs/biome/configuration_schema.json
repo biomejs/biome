@@ -1510,7 +1510,7 @@
 					]
 				},
 				"useUniqueElementIds": {
-					"description": "Prevent the usage of static string literal id attribute on elements.\nSee https://biomejs.dev/linter/rules/use-unique-element-ids",
+					"description": "Prevent the usage of static string literal id attribute on elements outside SVG contexts.\nSee https://biomejs.dev/linter/rules/use-unique-element-ids",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueElementIdsConfiguration" },
 						{ "type": "null" }

@@ -3008,6 +3008,145 @@ async fn pull_fix_all() -> Result<()> {
     Ok(())
 }
 
+async fn fix_all_edit(
+    config: &str,
+    document: &str,
+    document_uri: Uri,
+    language: &str,
+) -> Result<String> {
+    let fs = MemoryFileSystem::default();
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document(document, document_uri.clone(), language)
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: document_uri.clone(),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+        panic!("expected one fix-all action: {res:?}");
+    };
+    let edit = action.edit.as_ref().context("expected edit")?;
+    let changes = edit.changes.as_ref().context("expected changes")?;
+    let edits = changes
+        .get(&document_uri)
+        .context("expected edits for document")?;
+    let [edit] = edits.as_slice() else {
+        panic!("expected one full-document edit: {edits:?}");
+    };
+    let new_text = edit.new_text.clone();
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri: document_uri },
+            },
+        )
+        .await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(new_text)
+}
+
+#[tokio::test]
+async fn fix_all_respects_format_with_errors() -> Result<()> {
+    let config = r#"{
+        "formatter": { "formatWithErrors": false },
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "style": { "useConst": "on" }
+            }
+        }
+    }"#;
+    let new_text = fix_all_edit(
+        config,
+        "let a = 1; this is not valid javascript",
+        uri!("document.js"),
+        "javascript",
+    )
+    .await?;
+
+    assert_eq!(new_text, "const a = 1; this is not valid javascript");
+    Ok(())
+}
+
+#[tokio::test]
+async fn fix_all_does_not_format_embedded_code_with_errors() -> Result<()> {
+    let config = r#"{
+        "html": {
+            "experimentalFullSupportEnabled": true,
+            "formatter": { "enabled": true },
+            "linter": { "enabled": true }
+        },
+        "formatter": { "formatWithErrors": false },
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "style": { "useConst": "on" }
+            }
+        }
+    }"#;
+    let new_text = fix_all_edit(
+        config,
+        "<script>let a = 1; this is not valid javascript</script>",
+        uri!("document.html"),
+        "html",
+    )
+    .await?;
+
+    assert_eq!(
+        new_text,
+        "<script>const a = 1; this is not valid javascript</script>"
+    );
+    Ok(())
+}
+
 #[tokio::test]
 async fn fix_all_does_not_sort_imports_unless_requested() -> Result<()> {
     let factory = ServerFactory::default();

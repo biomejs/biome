@@ -722,6 +722,7 @@ fn lower_array_globals(
                     reject_selected_array_accessor(setter.name()?)?;
                 }
                 AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::JsMetavariable(_)
                 | AnyTsTypeMember::TsCallSignatureTypeMember(_)
                 | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
                 | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -982,6 +983,7 @@ fn validate_promise_methods(
                 reject_selected_promise_non_method(setter.name()?, location)?;
             }
             AnyTsTypeMember::JsBogusMember(_)
+            | AnyTsTypeMember::JsMetavariable(_)
             | AnyTsTypeMember::TsCallSignatureTypeMember(_)
             | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
             | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -1753,6 +1755,7 @@ fn lower_regexp_globals(
                     reject_regexp_exec_non_method(setter.name()?)?;
                 }
                 AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::JsMetavariable(_)
                 | AnyTsTypeMember::TsCallSignatureTypeMember(_)
                 | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
                 | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -2041,6 +2044,7 @@ fn validate_symbol_constructor_members(
                     reject_selected_symbol_non_property(member.name()?)?;
                 }
                 AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::JsMetavariable(_)
                 | AnyTsTypeMember::TsCallSignatureTypeMember(_)
                 | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
                 | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -2291,6 +2295,9 @@ fn lower_disposable_type_member(
         AnyTsTypeMember::JsBogusMember(_) => {
             bail!("bogus members are not supported in {}", spec.interface_name)
         }
+        AnyTsTypeMember::JsMetavariable(_) => {
+            bail!("metavariables are not supported in {}", spec.interface_name)
+        }
         AnyTsTypeMember::TsGetterSignatureTypeMember(_) => {
             bail!(
                 "getter signatures are not supported in {}",
@@ -2522,6 +2529,9 @@ fn lower_error_type_member(member: AnyTsTypeMember) -> Result<Option<LoweredType
         AnyTsTypeMember::JsBogusMember(_) => {
             bail!("bogus members are not supported in the Error global")
         }
+        AnyTsTypeMember::JsMetavariable(_) => {
+            bail!("metavariable members are not supported in the Error global")
+        }
         AnyTsTypeMember::TsGetterSignatureTypeMember(_) => {
             bail!("getter signatures are not supported in the Error global")
         }
@@ -2662,6 +2672,9 @@ fn lower_error_constructor_signatures(
                 }
                 AnyTsTypeMember::TsSetterSignatureTypeMember(_) => {
                     bail!("setter signatures are not supported in ErrorConstructor")
+                }
+                AnyTsTypeMember::JsMetavariable(_) => {
+                    bail!("metavariables are not supported in ErrorConstructor")
                 }
             }
         }

@@ -758,6 +758,11 @@ impl FormatHtmlElementList {
                         }
                     }
 
+                    HtmlChild::PreservedSegmentBreak => {
+                        child_breaks = true;
+                        write!(f, [hard_line_break()])?;
+                    }
+
                     // An empty line between children
                     HtmlChild::EmptyLine => {
                         child_breaks = true;
@@ -856,7 +861,10 @@ impl FormatHtmlElementList {
                             }
 
                             Some(
-                                HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine,
+                                HtmlChild::Whitespace
+                                | HtmlChild::Newline
+                                | HtmlChild::EmptyLine
+                                | HtmlChild::PreservedSegmentBreak,
                             ) => None,
 
                             Some(HtmlChild::Verbatim(verbatim_element)) => {

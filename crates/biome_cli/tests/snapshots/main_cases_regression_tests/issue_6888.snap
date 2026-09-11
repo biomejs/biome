@@ -1,0 +1,69 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["lodash.grit"],
+  "linter": {
+    "rules": {
+      "recommended": false
+    }
+  }
+}
+```
+
+## `lodash.grit`
+
+```grit
+language js
+
+`import $clause from "lodash-es"` where {
+    $clause <: contains `padStart`,
+    register_diagnostic(
+        span = $clause,
+        message = "Prefer native String.padStart() over the lodash version",
+        severity = "error"
+    )
+}
+
+```
+
+## `test.js`
+
+```js
+import { padStart, times } from "lodash-es";
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:8 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer native String.padStart() over the lodash version
+  
+  > 1 │ import { padStart, times } from "lodash-es";
+      │        ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

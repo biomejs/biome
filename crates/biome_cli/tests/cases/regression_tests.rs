@@ -314,6 +314,122 @@ import { ButtonLink } from "other/components";
 }
 
 #[test]
+fn issue_6888() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["lodash.grit"],
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "lodash.grit".into(),
+        br#"language js
+
+`import $clause from "lodash-es"` where {
+    $clause <: contains `padStart`,
+    register_diagnostic(
+        span = $clause,
+        message = "Prefer native String.padStart() over the lodash version",
+        severity = "error"
+    )
+}
+"#,
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        br#"import { padStart, times } from "lodash-es";
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_6888",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn issue_7363() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["interface.grit"],
+    "formatter": {
+        "enabled": false
+    },
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "interface.grit".into(),
+        br#"`interface $name { $body }` where {
+    register_diagnostic(span=$name, severity="warn", message="found interface")
+}
+"#,
+    );
+
+    let ts_file = Utf8Path::new("interface.ts");
+    fs.insert(
+        ts_file.into(),
+        br#"interface Zero {}
+
+interface Single {
+    f1: string;
+}
+
+interface Multi {
+    id: number;
+    name: string;
+    email: string;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", ts_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7363",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn issue_6782() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

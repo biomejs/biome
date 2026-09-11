@@ -2382,6 +2382,7 @@ impl TypeMember {
     ) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_) => None,
+            AnyTsTypeMember::JsMetavariable(_) => None,
             AnyTsTypeMember::TsCallSignatureTypeMember(member) => {
                 let function = Function {
                     is_async: false,

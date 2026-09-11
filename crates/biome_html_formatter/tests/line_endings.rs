@@ -54,3 +54,21 @@ fn astro_expression_follows_the_line_ending_option() {
         "<p>\r\n\t{a +\r\n  b}\r\n</p>\r\n",
     );
 }
+
+#[test]
+fn cjk_segment_break_with_carriage_return() {
+    assert_format(
+        HtmlFormatOptions::new(HtmlFileSource::html()),
+        "<div>漢\r字</div>",
+        "<div>\n\t漢\n\t字\n</div>\n",
+    );
+}
+
+#[test]
+fn cjk_segment_break_with_carriage_return_line_feed() {
+    assert_format(
+        HtmlFormatOptions::new(HtmlFileSource::html()),
+        "<div>漢\r\n字</div>",
+        "<div>\n\t漢\n\t字\n</div>\n",
+    );
+}
