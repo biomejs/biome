@@ -2270,7 +2270,7 @@ See https://biomejs.dev/linter/rules/use-single-js-doc-asterisk
 	 */
 	useSingleJsDocAsterisk?: UseSingleJsDocAsteriskConfiguration;
 	/**
-	* Prevent the usage of static string literal id attribute on elements.
+	* Prevent the usage of static string literal id attribute on elements outside SVG contexts.
 See https://biomejs.dev/linter/rules/use-unique-element-ids 
 	 */
 	useUniqueElementIds?: UseUniqueElementIdsConfiguration;
