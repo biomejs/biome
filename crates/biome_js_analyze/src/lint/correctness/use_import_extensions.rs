@@ -253,8 +253,9 @@ fn get_extensionless_import(
     let mut existing_extension = path.extension();
 
     match (resolved_path_sub_extension, existing_extension) {
-        (Some("d"), Some("js")) if resolved_extension.is_some_and(|ext| ext == "ts") => {
-            return None; // We resolved a `.d.ts` file, but imported the `.js` file: OK.
+        (Some("d"), Some("js" | "jsx")) if resolved_extension.is_some_and(|ext| ext == "ts") => {
+            // Declaration files provide types without changing the runtime import extension.
+            return None;
         }
         (Some(_), _) if path.file_name()?.starts_with(resolved_path.file_name()?) => {
             return None; // For cases like `./foo.css` -> `./foo.css.ts`
