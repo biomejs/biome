@@ -14,6 +14,27 @@ const pos = arr.indexOf(1);
 arr.indexOf(1, 2) !== -1;
 arr.indexOf(1, -1) !== -1;
 
+// lastIndexOf with fromIndex argument — semantics differ, leave alone
+arr.lastIndexOf(1, 2) !== -1;
+
+// some with a non-strict-equality callback — different semantics
+arr.some((item) => item !== 1);
+arr.some((item) => item == 1);
+arr.some((item) => item > 1);
+
+// some with more than one parameter
+arr.some((item, index) => item === index);
+
+// some whose searched value references the parameter
+arr.some((item) => item === item);
+
+// some with a callback that is not a simple comparison
+arr.some((item) => item.value === 1 && item.other);
+arr.some((item) => { const x = 1; return item === x; });
+
+// some without a callback body comparison
+arr.some(Boolean);
+
 // unrelated comparisons that happen to use indexOf result
 arr.indexOf(1) > 0;
 arr.indexOf(1) >= 1;

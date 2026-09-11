@@ -2778,7 +2778,7 @@ See https://biomejs.dev/linter/rules/use-imports-first
 	 */
 	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
-	* Prefer Array#includes() over Array#indexOf() checks.
+	* Prefer Array#includes() over Array#indexOf(), Array#lastIndexOf(), and Array#some() when checking for existence or non-existence.
 See https://biomejs.dev/linter/rules/use-includes 
 	 */
 	useIncludes?: UseIncludesConfiguration;
