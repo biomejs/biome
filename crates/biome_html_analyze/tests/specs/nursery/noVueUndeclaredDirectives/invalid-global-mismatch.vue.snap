@@ -1,0 +1,32 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-global-mismatch.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+    <div v-highlight></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-global-mismatch.vue:3:10 lint/nursery/noVueUndeclaredDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-highlight is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │     <div v-highlight></div>
+      │          ^^^^^^^^^^^
+    4 │ </template>
+    5 │ 
+  
+  i Declare vHighlight in <script setup>, register the directive in the component's directives option, or list it in the rule's globals option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

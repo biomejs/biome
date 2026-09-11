@@ -194,7 +194,9 @@ pub fn vue_directive_binding_name(directive_name: &str) -> Option<String> {
     Some(binding_name)
 }
 
-fn vue_directive_name_matches_option_name(directive_name: &str, option_name: &str) -> bool {
+/// Returns whether the template directive `directive_name` is registered under
+/// `option_name`, accepting camelCase, PascalCase, and kebab-case spellings.
+pub fn vue_directive_name_matches_option_name(directive_name: &str, option_name: &str) -> bool {
     let Some(directive_name) = directive_name.strip_prefix("v-") else {
         return false;
     };

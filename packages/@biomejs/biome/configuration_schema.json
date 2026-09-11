@@ -1201,7 +1201,7 @@
 					]
 				},
 				"noUndeclaredVariables": {
-					"description": "Prevents the usage of custom Vue directives that have not been declared.\nSee https://biomejs.dev/linter/rules/no-undeclared-variables",
+					"description": "Prevents the usage of variables that haven't been declared inside the document.\nSee https://biomejs.dev/linter/rules/no-undeclared-variables",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredVariablesConfiguration" },
 						{ "type": "null" }
@@ -6764,6 +6764,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUndeclaredDirectivesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUndeclaredDirectivesOptions" }
+			]
+		},
+		"NoVueUndeclaredDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"globals": {
+					"description": "Names of directives registered globally with `app.directive(...)`,\nsuch as `highlight` for `v-highlight`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7277,6 +7294,13 @@
 					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUndeclaredDirectives": {
+					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11459,6 +11483,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueSetupPropsReactivityLossOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUndeclaredDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUndeclaredDirectivesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

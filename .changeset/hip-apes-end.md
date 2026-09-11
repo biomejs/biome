@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#11478](https://github.com/biomejs/biome/issues/11478): [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables) now reports undeclared custom Vue directives, recognizing `<script setup>` bindings, statically resolvable `directives` options, and configured globals.
+Added the new nursery rule [`noVueUndeclaredDirectives`](https://biomejs.dev/linter/rules/no-vue-undeclared-directives/), which reports custom Vue directives that are not declared by a `<script setup>` binding, the component's `directives` option, or the rule's `globals` option. Closes [#11478](https://github.com/biomejs/biome/issues/11478).
 
 ```vue
 <template>

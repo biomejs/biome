@@ -1,6 +1,6 @@
 ---
-source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: invalid-options-key.vue
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-directives-option-key.vue
 ---
 # Input
 ```vue
@@ -22,7 +22,7 @@ export default {
 
 # Diagnostics
 ```
-invalid-options-key.vue:12:8 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-vue-directives-option-key.vue:12:8 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━
 
   × The highlight variable is undeclared.
   

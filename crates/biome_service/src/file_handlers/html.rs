@@ -430,14 +430,8 @@ impl ServiceLanguage for HtmlLanguage {
         override_indices: &[usize],
         _file_source: &super::DocumentFileSource,
     ) -> AnalyzerOptions {
-        let globals = global
-            .override_settings
-            .override_js_globals_by_indices(override_indices, &global.languages.javascript.globals)
-            .into_iter()
-            .collect();
         let configuration = AnalyzerConfiguration::default()
-            .with_rules(to_analyzer_rules_by_indices(global, override_indices))
-            .with_globals(globals);
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices));
 
         AnalyzerOptions::default().with_configuration(configuration)
     }
