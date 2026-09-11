@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 588
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "rules": {
+            "block-no-empty": true
+        },
+        "overrides": [
+            {
+                "files": ["*.scss"],
+                "rules": {
+                    "color-no-hex": true
+                }
+            }
+        ]
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{·"preset":·"none",·"suspicious":·{·"noEmptyBlock":·"error"·}·}
+       5 │ + → },
+       6 │ + → "overrides":·[
+       7 │ + → → {
+       8 │ + → → → "includes":·["*.scss"],
+       9 │ + → → → "linter":·{·"rules":·{·"style":·{·"noHexColors":·"error"·}·}·}
+      10 │ + → → }
+      11 │ + → ]
+      12 │ + }
+      13 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 Stylelint rules found
+    - 2 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (2) of your Stylelint rules are fully covered by Biome
+      - 100% (2) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

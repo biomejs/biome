@@ -8,6 +8,7 @@ mod lint;
 mod migrate;
 mod migrate_eslint;
 mod migrate_prettier;
+mod migrate_stylelint;
 mod rage;
 mod search;
 mod version;

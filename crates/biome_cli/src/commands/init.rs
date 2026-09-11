@@ -169,9 +169,10 @@ impl Display for InitDiagnostic {
      "<Italic>"biome check"</Italic>"  checks formatting, import sorting, and lint rules.
      "<Italic>"biome --help"</Italic>" displays the available commands.
 
-  "<Dim>"3."</Dim>" "<Emphasis>"Migrate from ESLint and Prettier"</Emphasis>"
-     "<Italic>"biome migrate eslint"</Italic>"   migrates your ESLint configuration to Biome.
-     "<Italic>"biome migrate prettier"</Italic>" migrates your Prettier configuration to Biome.
+  "<Dim>"3."</Dim>" "<Emphasis>"Migrate from ESLint, Stylelint and Prettier"</Emphasis>"
+     "<Italic>"biome migrate eslint"</Italic>"    migrates your ESLint configuration to Biome.
+     "<Italic>"biome migrate stylelint"</Italic>" migrates your Stylelint configuration to Biome.
+     "<Italic>"biome migrate prettier"</Italic>"  migrates your Prettier configuration to Biome.
 
   "<Dim>"4."</Dim>" "<Emphasis>"Read the documentation"</Emphasis>"
      Find guides and documentation at "<Hyperlink href="https://biomejs.dev/guides/getting-started/">"https://biomejs.dev/guides/getting-started/"</Hyperlink>"
