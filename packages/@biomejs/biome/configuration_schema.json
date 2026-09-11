@@ -4729,6 +4729,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMeaninglessVoidOperatorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMeaninglessVoidOperatorOptions" }
+			]
+		},
+		"NoMeaninglessVoidOperatorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMisleadingCharacterClassConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6952,6 +6962,13 @@
 					"description": "Disallow functions declared inside loops that capture unsafe outer variables.\nSee https://biomejs.dev/linter/rules/no-loop-func",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMeaninglessVoidOperator": {
+					"description": "Disallow void when it does not discard a call's return value or a thenable.\nSee https://biomejs.dev/linter/rules/no-meaningless-void-operator",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMeaninglessVoidOperatorConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9682,6 +9699,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMagicNumbersOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMeaninglessVoidOperatorOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMeaninglessVoidOperatorOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
