@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: overloaded.ts
+---
+# Input
+```ts
+export declare class Overloaded {
+    run(value: string): void;
+    run(value: number): number;
+}
+
+```
