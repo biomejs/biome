@@ -3890,10 +3890,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             should_format = display(&params.should_format),
         )
     )]
-    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
+    fn fix_file(&self, mut params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.clone();
-        let should_format = params.should_format;
         let documents = self.documents.pin();
         let source = &documents
             .get(path.as_path())
@@ -3903,6 +3902,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let (_, settings, query) = self
             .project_get_settings_query(&state.db, project_key, &path, params.inline_config.clone())
             .ok_or_else(WorkspaceError::no_project)?;
+        let format_with_errors = query.inline_settings().map_or_else(
+            || settings.format_with_errors_enabled_for_this_file_path(&path),
+            |settings| {
+                settings
+                    .as_ref()
+                    .format_with_errors_enabled_for_this_file_path(&path)
+            },
+        );
+        let should_format = params.should_format && (format_with_errors || !state.has_errors());
+        params.should_format = should_format;
         let settings_handle =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query);
         #[cfg(feature = "module_graph")]
