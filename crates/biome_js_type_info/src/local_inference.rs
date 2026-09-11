@@ -2471,13 +2471,22 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
+                let type_parameters = member.type_parameters();
+                // Reusing the enclosing scope lets nongeneric signatures share raw types.
+                let scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     let function = Function {
                         is_async: false,
                         type_parameters: generic_params_from_ts_type_params(
                             collector,
                             scope_id,
-                            member.type_parameters(),
+                            type_parameters,
                         ),
                         name: Some(name.clone().into()),
                         parameters: function_params_from_js_params(

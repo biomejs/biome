@@ -856,6 +856,10 @@ impl JsModuleInfoCollector {
 }
 
 impl RawTypeCollector for JsModuleInfoCollector {
+    fn scope_for_node(&self, node: &JsSyntaxNode) -> Option<ScopeId> {
+        Some(self.semantic_model.scope(node).id())
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }

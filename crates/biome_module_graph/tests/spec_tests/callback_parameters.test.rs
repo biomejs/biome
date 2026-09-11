@@ -404,3 +404,109 @@ fn test_callback_parameter_query_does_not_infer_module_types() {
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
 }
+
+#[test]
+fn test_callback_parameter_from_imported_generic_method() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/fixtures.ts".into(),
+        r#"
+        export interface Test<Args> {
+            (body: (args: Args) => void): void;
+            extend<T>(): Test<Args & T>;
+        }
+        export declare const base: Test<{}>;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { base } from "./fixtures";
+        const test = base.extend<{ service: { go(): Promise<void> } }>();
+        test(({ service }) => {});
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts", "/src/fixtures.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let service = normalized_binding_ty(&db, module, "service");
+    assert_service_returns_promise(&db, module, service);
+}
+
+#[test]
+fn test_method_type_parameter_shadows_enclosing_type_parameter() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Factory<T> {
+            create<T = string>(): T;
+            outer(): T;
+        }
+        declare const factory: Factory<number>;
+        const explicit = factory.create<boolean>();
+        const defaulted = factory.create();
+        const outer = factory.outer();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert!(is_inferred_boolean(
+        &db,
+        normalized_binding_ty(&db, module, "explicit")
+    ));
+    assert!(is_inferred_string(
+        &db,
+        normalized_binding_ty(&db, module, "defaulted")
+    ));
+    assert!(is_inferred_number(
+        &db,
+        normalized_binding_ty(&db, module, "outer")
+    ));
+}
+
+#[test]
+fn test_non_generic_method_signatures_share_return_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Factory<T> {
+            first(): T | null;
+            second(): T | null;
+        }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let return_type = |name: &str| {
+        info.raw_types
+            .iter()
+            .find_map(|ty| match ty {
+                biome_js_type_info::RawTypeData::Function(function)
+                    if function
+                        .name
+                        .as_ref()
+                        .is_some_and(|value| value.text() == name) =>
+                {
+                    Some(&function.return_type)
+                }
+                _ => None,
+            })
+            .expect("method signature must be collected")
+    };
+
+    assert_eq!(return_type("first"), return_type("second"));
+}

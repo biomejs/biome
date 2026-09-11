@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: genericMethodScope.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare const factory: { create<T>(): T };
+factory.create<Promise<void>>();
+
+interface Test<Args> {
+	(body: (args: Args) => void): void;
+	extend<T>(): Test<Args & T>;
+}
+
+declare const base: Test<{}>;
+const test = base.extend<{
+	fixture: () => Promise<void>;
+	service: { run(): Promise<void> };
+}>();
+test(({ fixture, service }) => {
+	fixture();
+	service.run();
+});
+
+```
+
+# Diagnostics
+```
+genericMethodScope.ts:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ declare const factory: { create<T>(): T };
+  > 4 │ factory.create<Promise<void>>();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ interface Test<Args> {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+genericMethodScope.ts:17:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    15 │ }>();
+    16 │ test(({ fixture, service }) => {
+  > 17 │ 	fixture();
+       │ 	^^^^^^^^^^
+    18 │ 	service.run();
+    19 │ });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+genericMethodScope.ts:18:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    16 │ test(({ fixture, service }) => {
+    17 │ 	fixture();
+  > 18 │ 	service.run();
+       │ 	^^^^^^^^^^^^^^
+    19 │ });
+    20 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
