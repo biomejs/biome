@@ -1,0 +1,20 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeRewrite
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "2:1-2:8",
+    ],
+    rewritten_files: [
+        OutputFile {
+            messages: [],
+            variables: [],
+            source_file: "tests/specs/js/rangeRewrite.js",
+            content: "first();\nsecond();\nfirst();\n",
+            byte_ranges: None,
+        },
+    ],
+    created_files: [],
+}
