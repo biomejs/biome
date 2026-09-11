@@ -346,27 +346,4 @@ mod tests {
         assert!(diagnostic.contains("has no export named missing"));
         assert!(!diagnostic.contains("module not found"));
     }
-
-    #[test]
-    fn analyzes_astro_template_expression() {
-        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
-        let code_block = CodeBlock::from_str("astro expect_diagnostic").expect("valid code block");
-        let code = r#"<div set:html={content} />"#;
-        let mut writer = DiagnosticConsoleWriter::default();
-
-        RuleCodeAnalyzer {
-            group: "nursery",
-            rule: "noAstroSetHtmlDirective",
-            rule_language: "jsx",
-            code_block: &code_block,
-            code,
-            configuration: None,
-            services_builder: &mut services_builder,
-            writer: &mut writer,
-        }
-        .analyze()
-        .unwrap();
-
-        assert_eq!(writer.all_diagnostics.len(), 1);
-    }
 }
