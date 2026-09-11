@@ -164,13 +164,6 @@ impl JsModuleInfoCollector {
             let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
             let id = self.register_type(Cow::Owned(ty));
             self.parsed_expressions.insert(range, id);
-        } else if let Some(decl) = JsForVariableDeclaration::cast_ref(node) {
-            let scope_id = self.semantic_model.scope(node).id();
-            let type_bindings =
-                TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
-                    .unwrap_or_default();
-            self.variable_declarations
-                .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
             let scope_id = self.semantic_model.scope(node).id();
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
@@ -526,7 +519,11 @@ impl JsModuleInfoCollector {
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
                 return self.reference_to_owned_data(data);
             } else if let Some(typed_bindings) = JsForVariableDeclaration::cast_ref(&ancestor)
-                .and_then(|decl| self.variable_declarations.get(decl.syntax()))
+                .and_then(|decl| {
+                    // The iterable follows the declaration in source order, so its
+                    // expressions are only cached after leaving the declaration.
+                    TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
+                })
             {
                 return typed_bindings
                     .iter()
