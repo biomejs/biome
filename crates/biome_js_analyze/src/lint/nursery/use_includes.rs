@@ -24,44 +24,44 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid1.ts
     /// const arr = [1, 2, 3];
     /// arr.indexOf(1) !== -1;
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid2.ts
     /// const arr = [1, 2, 3];
     /// arr.indexOf(1) >= 0;
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid3.ts
     /// const arr = [1, 2, 3];
     /// arr.indexOf(1) === -1;
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid4.ts
     /// const arr = [1, 2, 3];
     /// arr.lastIndexOf(1) !== -1;
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid5.ts
     /// const arr = [1, 2, 3];
     /// arr.some((item) => item === 1);
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```ts
+    /// ```ts,file=valid1.ts
     /// const arr = [1, 2, 3];
     /// arr.includes(1);
     /// ```
     ///
-    /// ```ts
+    /// ```ts,file=valid2.ts
     /// const arr = [1, 2, 3];
     /// !arr.includes(1);
     /// ```
     ///
-    /// ```ts
+    /// ```ts,file=valid3.ts
     /// const arr = [1, 2, 3];
     /// // Positional use of indexOf is fine
     /// const pos = arr.indexOf(1);
