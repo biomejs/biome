@@ -1,0 +1,90 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+```   
+code
+```
+
+```    js {metadata}    
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
+            l_fence: TRIPLE_BACKTICK@0..3 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@3..12 "\ncode\n" [Whitespace("   ")] [],
+                },
+            ],
+            r_fence_indent: MdIndentTokenList [],
+            r_fence: TRIPLE_BACKTICK@12..15 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@15..16 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@16..17 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
+            l_fence: TRIPLE_BACKTICK@17..20 "```" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..37 "js {metadata}" [Whitespace("    ")] [],
+                },
+            ],
+            content: MdInlineItemList [],
+            r_fence_indent: MdIndentTokenList [],
+            r_fence: missing (optional),
+        },
+    ],
+    eof_token: EOF@37..41 "" [Whitespace("    ")] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..41
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..37
+    0: MD_FENCED_CODE_BLOCK@0..15
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: TRIPLE_BACKTICK@0..3 "```" [] []
+      2: MD_CODE_NAME_LIST@3..3
+      3: MD_INLINE_ITEM_LIST@3..12
+        0: MD_CODE_CONTENT@3..12
+          0: MD_CODE_LITERAL@3..12 "\ncode\n" [Whitespace("   ")] []
+      4: MD_INDENT_TOKEN_LIST@12..12
+      5: TRIPLE_BACKTICK@12..15 "```" [] []
+    1: MD_NEWLINE@15..16
+      0: NEWLINE@15..16 "\n" [] []
+    2: MD_NEWLINE@16..17
+      0: NEWLINE@16..17 "\n" [] []
+    3: MD_FENCED_CODE_BLOCK@17..37
+      0: MD_INDENT_TOKEN_LIST@17..17
+      1: TRIPLE_BACKTICK@17..20 "```" [] []
+      2: MD_CODE_NAME_LIST@20..37
+        0: MD_TEXTUAL@20..37
+          0: MD_TEXTUAL_LITERAL@20..37 "js {metadata}" [Whitespace("    ")] []
+      3: MD_INLINE_ITEM_LIST@37..37
+      4: MD_INDENT_TOKEN_LIST@37..37
+      5: (empty)
+  3: EOF@37..41 "" [Whitespace("    ")] []
+
+```
