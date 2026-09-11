@@ -2,14 +2,18 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
 };
+use biome_js_semantic::{ReferencesExtensions, SemanticModel};
+use biome_js_syntax::assign_ext::AnyJsMemberAssignment;
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression, AnyJsFunctionBody,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern,
+    AnyJsAssignment, AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression,
+    AnyJsFunctionBody, AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern,
     JsArrowFunctionExpression, JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember,
-    JsFunctionBody, JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern,
-    JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
-    TsPropertyParameter,
+    JsForInStatement, JsForOfStatement, JsFunctionBody, JsIdentifierBinding,
+    JsIdentifierExpression, JsInitializerClause, JsLanguage, JsObjectAssignmentPattern,
+    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
+    JsStatementList, JsStaticInitializationBlockClassMember, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange, TsPropertyParameter,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
@@ -17,14 +21,22 @@ use biome_rowan::{
 use rustc_hash::FxHashSet;
 use std::option::Option;
 
+use super::semantic::SemanticModelBuilderVisitor;
+
 #[derive(Clone)]
 pub struct SemanticClassServices {
     pub model: SemanticClassModel,
+    semantic_model: SemanticModel,
 }
 
 impl SemanticClassServices {
     pub fn model(&self) -> &SemanticClassModel {
         &self.model
+    }
+
+    /// Returns the semantic model used to resolve class bindings and their aliases.
+    pub fn semantic_model(&self) -> &SemanticModel {
+        &self.semantic_model
     }
 }
 
@@ -32,8 +44,17 @@ impl SemanticClassServices {
 pub struct SemanticClassModel {}
 
 impl SemanticClassModel {
-    pub fn class_member_references(&self, members: &JsClassMemberList) -> ClassMemberReferences {
-        class_member_references(members)
+    /// Collects class member references, including static writes through class bindings and aliases.
+    pub fn class_member_references(
+        &self,
+        class: &AnyJsClass,
+        semantic_model: &SemanticModel,
+    ) -> ClassMemberReferences {
+        let mut references = class_member_references(&class.members());
+        references
+            .static_writes
+            .extend(collect_static_writes_from_class_name(class, semantic_model));
+        references
     }
 }
 
@@ -46,8 +67,12 @@ impl FromServices for SemanticClassServices {
         let service: &SemanticClassModel = services.get_service().ok_or_else(|| {
             ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticClassModel"])
         })?;
+        let semantic_model: &SemanticModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
         Ok(Self {
             model: service.clone(),
+            semantic_model: semantic_model.clone(),
         })
     }
 }
@@ -112,7 +137,8 @@ where
     type Language = JsLanguage;
     type Services = SemanticClassServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
         analyzer.add_visitor(Phases::Syntax, || SyntaxClassMemberReferencesVisitor {});
         analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
     }
@@ -127,27 +153,20 @@ where
 }
 
 /// Represents how a class member is accessed within the code.
-/// Variants:
-///
-/// - `Write`:
-///   The member is being assigned to or mutated.
-///   Example: `this.count = 10;`
-///   This indicates the member’s value/state changes at this point.
-///
-/// - `MeaningfulRead`:
-///   The member’s value is retrieved and used in a way that affects program logic.
-///   Example: `if (this.enabled) { ... }` or `let x = this.value + 1;`
-///   These reads influence control flow or computation.
-///
-/// - `TrivialRead`:
-///   The member is accessed, but its value is not used in a way that
-///   meaningfully affects logic.
-///   Example: `this.value;` as a standalone expression, or a read that is optimized away.
-///   This is mostly for distinguishing dead reads from truly meaningful ones.
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum AccessKind {
+    /// The member is being assigned to or mutated.
+    /// Example: `this.count = 10;`
+    /// This indicates the member’s value/state changes at this point.
     Write,
+    /// The member’s value is retrieved and used in a way that affects program logic.
+    /// Example: `if (this.enabled) { ... }` or `let x = this.value + 1;`
+    /// These reads influence control flow or computation.
     MeaningfulRead,
+    /// The member is accessed, but its value is not used in a way that
+    /// meaningfully affects logic.
+    /// Example: `this.value;` as a standalone expression, or a read that is optimized away.
+    /// This is mostly for distinguishing dead reads from truly meaningful ones.
     TrivialRead,
 }
 
@@ -160,8 +179,12 @@ pub struct ClassMemberReference {
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct ClassMemberReferences {
+    /// Reads of instance and static members.
     pub reads: FxHashSet<ClassMemberReference>,
+    /// Writes to instance members.
     pub writes: FxHashSet<ClassMemberReference>,
+    /// Writes to static members.
+    pub static_writes: FxHashSet<ClassMemberReference>,
 }
 
 declare_node_union! {
@@ -182,63 +205,206 @@ declare_node_union! {
 /// getters, setters, arrow functions assigned to properties, and constructors. It aggregates both
 /// read and write references to `this` properties across all supported member types.
 ///
-/// Returns a `ClassMemberReferences` struct containing the combined set of read and write references.
+/// Returns the combined reads and separate instance and static writes.
 fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
-    let all_references: Vec<ClassMemberReferences> = list
+    let all_references: Vec<(ClassMemberReferences, bool)> = list
         .iter()
-        .filter_map(|member| match member {
-            AnyJsClassMember::JsMethodClassMember(method) => method
-                .body()
-                .ok()
-                .and_then(|body| collect_references_from_body(method.syntax(), &body)),
-            AnyJsClassMember::JsSetterClassMember(setter) => setter
-                .body()
-                .ok()
-                .and_then(|body| collect_references_from_body(setter.syntax(), &body)),
-            AnyJsClassMember::JsGetterClassMember(getter) => getter
-                .body()
-                .ok()
-                .and_then(|body| collect_references_from_body(getter.syntax(), &body)),
-            AnyJsClassMember::JsPropertyClassMember(property) => {
-                if let Ok(expression) = property.value()?.expression() {
-                    if let Some(static_member_expression) =
-                        expression.as_js_static_member_expression()
-                    {
-                        return collect_class_property_reads_from_static_member(
-                            static_member_expression,
-                        );
+        .filter_map(|member| {
+            let is_static = is_static_class_member(&member);
+            let references = match member {
+                AnyJsClassMember::JsMethodClassMember(method) => method
+                    .body()
+                    .ok()
+                    .and_then(|body| collect_references_from_body(method.syntax(), &body)),
+                AnyJsClassMember::JsSetterClassMember(setter) => setter
+                    .body()
+                    .ok()
+                    .and_then(|body| collect_references_from_body(setter.syntax(), &body)),
+                AnyJsClassMember::JsGetterClassMember(getter) => getter
+                    .body()
+                    .ok()
+                    .and_then(|body| collect_references_from_body(getter.syntax(), &body)),
+                AnyJsClassMember::JsPropertyClassMember(property) => {
+                    if let Ok(expression) = property.value()?.expression() {
+                        if let Some(static_member_expression) =
+                            expression.as_js_static_member_expression()
+                        {
+                            collect_class_property_reads_from_static_member(
+                                static_member_expression,
+                            )
+                        } else {
+                            collect_references_from_property_initializer(&expression)
+                        }
                     } else {
-                        return collect_references_from_property_initializer(&expression);
+                        None
                     }
-                };
-                None
-            }
-            AnyJsClassMember::JsConstructorClassMember(constructor) => constructor
-                .body()
-                .ok()
-                .map(|body| collect_references_from_constructor(&body)),
-            _ => None,
+                }
+                AnyJsClassMember::JsConstructorClassMember(constructor) => constructor
+                    .body()
+                    .ok()
+                    .map(|body| collect_references_from_constructor(&body)),
+                AnyJsClassMember::JsStaticInitializationBlockClassMember(block) => {
+                    Some(collect_references_from_static_block(&block))
+                }
+                _ => None,
+            }?;
+
+            Some((references, is_static))
         })
         .collect();
 
     let mut combined_reads = FxHashSet::default();
     let mut combined_writes = FxHashSet::default();
+    let mut combined_static_writes = FxHashSet::default();
 
-    for refs in all_references {
+    for (refs, is_static) in all_references {
         combined_reads.extend(refs.reads);
-        combined_writes.extend(refs.writes);
+        if is_static {
+            combined_static_writes.extend(refs.writes);
+        } else {
+            combined_writes.extend(refs.writes);
+        }
     }
 
     ClassMemberReferences {
         reads: combined_reads,
         writes: combined_writes,
+        static_writes: combined_static_writes,
     }
 }
 
-/// Represents a function body and all `this` references (including aliases) valid within its lexical scope.
+fn is_static_class_member(member: &AnyJsClassMember) -> bool {
+    match member {
+        AnyJsClassMember::JsGetterClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsMethodClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsPropertyClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsSetterClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => true,
+        _ => false,
+    }
+}
+
+/// Collects static member writes through a class binding and direct aliases of that binding.
+///
+/// For class expressions, both the optional internal name and the containing variable are roots.
+fn collect_static_writes_from_class_name(
+    class: &AnyJsClass,
+    semantic_model: &SemanticModel,
+) -> FxHashSet<ClassMemberReference> {
+    let class_binding = class
+        .id()
+        .and_then(|id| id.as_js_identifier_binding().cloned());
+    let containing_binding = class
+        .as_js_class_expression()
+        .and_then(|class| {
+            AnyJsExpression::JsClassExpression(class.clone())
+                .outer_expression()?
+                .parent::<JsInitializerClause>()
+        })
+        .and_then(|initializer| initializer.parent::<JsVariableDeclarator>())
+        .and_then(|declarator| declarator.id().ok())
+        .and_then(|pattern| pattern.as_any_js_binding().cloned())
+        .and_then(|binding| binding.as_js_identifier_binding().cloned());
+    let mut bindings: Vec<_> = [class_binding, containing_binding]
+        .into_iter()
+        .flatten()
+        .collect();
+    let mut visited_bindings = FxHashSet::default();
+    let mut writes = FxHashSet::default();
+
+    while let Some(binding) = bindings.pop() {
+        if !visited_bindings.insert(binding.range()) {
+            continue;
+        }
+        for reference in binding.all_references(semantic_model) {
+            let reference = reference.syntax();
+            if let Some(assignment) = reference.ancestors().find_map(AnyJsMemberAssignment::cast)
+                && let Ok(object) = assignment.object()
+                && let Some(object) = object.inner_expression()
+                && object.range() == reference.text_trimmed_range()
+                && let Some(reference) =
+                    ThisPatternResolver::extract_member_reference(&assignment, AccessKind::Write)
+            {
+                writes.insert(reference);
+            }
+            if let Some(alias) = class_alias_binding(&reference, semantic_model) {
+                bindings.push(alias);
+            }
+        }
+    }
+
+    writes
+}
+
+/// Returns the identifier bound or assigned to a class reference, if the reference is being aliased.
+fn class_alias_binding(
+    reference: &JsSyntaxNode,
+    semantic_model: &SemanticModel,
+) -> Option<JsIdentifierBinding> {
+    let reference = reference.parent().and_then(JsIdentifierExpression::cast)?;
+    let expression = AnyJsExpression::JsIdentifierExpression(reference).outer_expression()?;
+    if let Some(initializer) = expression.parent::<JsInitializerClause>()
+        && initializer.expression().ok()? == expression
+    {
+        return initializer
+            .parent::<JsVariableDeclarator>()?
+            .id()
+            .ok()?
+            .as_any_js_binding()?
+            .as_js_identifier_binding()
+            .cloned();
+    }
+
+    let assignment = expression.parent::<JsAssignmentExpression>()?;
+    if assignment.right().ok()? != expression {
+        return None;
+    }
+    let left = assignment.left().ok()?;
+    let identifier = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
+    JsIdentifierBinding::cast(semantic_model.binding(identifier)?.syntax())
+}
+
+/// Defines the syntax boundary used to decide whether a `this` expression refers to the class
+/// member currently being analyzed.
+///
+/// A reference belongs to the scope while its ancestors remain inside this root without crossing
+/// a nested non-arrow function or class. Arrow functions preserve the enclosing `this` value.
 #[derive(Clone, Debug)]
-struct FunctionThisReferences {
-    scope: AnyJsFunctionBody,
+enum AnyLexicalThisScope {
+    /// A block or expression body whose class-member references are being collected.
+    Function(AnyJsFunctionBody),
+    /// A property initializer, including nested arrow functions that capture its `this` value.
+    PropertyInitializer(AnyJsExpression),
+    /// A static initialization block, where `this` and captured `this` aliases refer to the class.
+    StaticInitializationBlock(JsStaticInitializationBlockClassMember),
+}
+
+impl AnyLexicalThisScope {
+    fn syntax(&self) -> &JsSyntaxNode {
+        match self {
+            Self::Function(scope) => scope.syntax(),
+            Self::PropertyInitializer(scope) => scope.syntax(),
+            Self::StaticInitializationBlock(scope) => scope.syntax(),
+        }
+    }
+}
+
+/// Holds a lexical `this` scope and the `this` aliases valid within it.
+#[derive(Clone, Debug)]
+struct LexicalThisReferences {
+    scope: AnyLexicalThisScope,
     this_references: FxHashSet<ClassMemberReference>,
 }
 
@@ -247,7 +413,7 @@ struct FunctionThisReferences {
 struct ThisScopeVisitor<'a> {
     skipped_ranges: Vec<TextRange>,
     inherited_this_references: &'a [ClassMemberReference],
-    current_this_scopes: Vec<FunctionThisReferences>,
+    current_this_scopes: Vec<LexicalThisReferences>,
 }
 // Can not implement `Visitor` directly because it requires a new ctx that can not be created here
 impl ThisScopeVisitor<'_> {
@@ -286,8 +452,10 @@ impl ThisScopeVisitor<'_> {
                             .extend(self.inherited_this_references.iter().cloned());
                         scoped_this_references.extend(current_scope);
 
-                        self.current_this_scopes.push(FunctionThisReferences {
-                            scope: AnyJsFunctionBody::JsFunctionBody(body.clone()),
+                        self.current_this_scopes.push(LexicalThisReferences {
+                            scope: AnyLexicalThisScope::Function(
+                                AnyJsFunctionBody::JsFunctionBody(body.clone()),
+                            ),
                             this_references: scoped_this_references,
                         });
                     }
@@ -305,8 +473,10 @@ impl ThisScopeVisitor<'_> {
                     scoped_this_references.extend(self.inherited_this_references.iter().cloned());
                     scoped_this_references.extend(current_scope_aliases.clone());
 
-                    self.current_this_scopes.push(FunctionThisReferences {
-                        scope: AnyJsFunctionBody::JsFunctionBody(body.clone()),
+                    self.current_this_scopes.push(LexicalThisReferences {
+                        scope: AnyLexicalThisScope::Function(AnyJsFunctionBody::JsFunctionBody(
+                            body.clone(),
+                        )),
                         this_references: scoped_this_references,
                     });
                 }
@@ -341,8 +511,8 @@ impl ThisScopeReferences {
 
     /// Collects all `this` scope references in the function body and nested
     /// functions using `ThisScopeVisitor`, combining local and inherited ones
-    /// into a list of `FunctionThisReferences`.
-    fn collect_function_this_references(&self) -> Vec<FunctionThisReferences> {
+    /// into a list of `LexicalThisReferences`.
+    fn collect_function_this_references(&self) -> Vec<LexicalThisReferences> {
         let mut visitor = ThisScopeVisitor {
             skipped_ranges: vec![],
             current_this_scopes: vec![],
@@ -359,44 +529,72 @@ impl ThisScopeReferences {
 
     /// Collects local references of `this` in a function body.
     fn collect_local_this_references(body: &JsFunctionBody) -> Vec<ClassMemberReference> {
-        body.statements()
-            .iter()
-            .filter_map(|node| node.as_js_variable_statement().cloned())
-            .filter_map(|stmt| stmt.declaration().ok().map(|decl| decl.declarators()))
-            .flat_map(|declarators| {
-                declarators.into_iter().filter_map(|declaration| {
-                    declaration.ok().map(|declarator| declarator.as_fields())
+        Self::collect_local_this_references_from_statements(&body.statements())
+    }
+
+    /// Collects identifiers initialized or assigned directly to `this` in a statement subtree.
+    fn collect_local_this_references_from_statements(
+        statements: &JsStatementList,
+    ) -> Vec<ClassMemberReference> {
+        let mut references: Vec<_> = statements
+            .syntax()
+            .descendants()
+            .filter_map(JsVariableDeclarator::cast)
+            .filter_map(|declarator| {
+                let id = declarator.id().ok()?;
+                let expression = declarator.initializer()?.expression().ok()?;
+                matches!(
+                    expression.inner_expression()?,
+                    AnyJsExpression::JsThisExpression(_)
+                )
+                .then(|| ClassMemberReference {
+                    name: id.to_trimmed_text().clone(),
+                    range: id.syntax().text_trimmed_range(),
+                    access_kind: get_read_access_kind(&AnyCandidateForUsedInExpressionNode::from(
+                        id,
+                    )),
                 })
             })
-            .filter_map(|fields| {
-                let id = fields.id.ok()?;
-                let expr = fields.initializer?.expression().ok()?;
-                let unwrapped = &expr.omit_parentheses();
-                (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| {
-                    ClassMemberReference {
-                        name: id.to_trimmed_text().clone(),
-                        range: id.syntax().text_trimmed_range(),
-                        access_kind: get_read_access_kind(
-                            &AnyCandidateForUsedInExpressionNode::from(id),
-                        ),
+            .collect();
+        references.extend(
+            statements
+                .syntax()
+                .descendants()
+                .filter_map(JsAssignmentExpression::cast)
+                .filter_map(|assignment| {
+                    if !matches!(
+                        assignment.right().ok()?.inner_expression()?,
+                        AnyJsExpression::JsThisExpression(_)
+                    ) {
+                        return None;
                     }
-                })
-            })
-            .collect()
+                    let left = assignment.left().ok()?;
+                    let identifier = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
+                    Some(ClassMemberReference {
+                        name: identifier.to_trimmed_text(),
+                        range: identifier.range(),
+                        access_kind: AccessKind::TrivialRead,
+                    })
+                }),
+        );
+        references
     }
 }
 
 /// Checks if a given expression is a reference to `this` or any of its aliases.
 fn is_this_reference(
     js_expression: &AnyJsExpression,
-    scoped_this_references: &[FunctionThisReferences],
+    scoped_this_references: &[LexicalThisReferences],
 ) -> bool {
+    let Some(js_expression) = js_expression.inner_expression() else {
+        return false;
+    };
     if let Some(this_expr) = js_expression.as_js_this_expression() {
         let syntax = this_expr.syntax();
 
         return scoped_this_references
             .iter()
-            .any(|FunctionThisReferences { scope, .. }| {
+            .any(|LexicalThisReferences { scope, .. }| {
                 is_within_scope_without_shadowing(syntax, scope.syntax())
             });
     }
@@ -408,7 +606,7 @@ fn is_this_reference(
         let name_syntax = name.syntax();
 
         scoped_this_references.iter().any(
-            |FunctionThisReferences {
+            |LexicalThisReferences {
                  this_references,
                  scope,
              }| {
@@ -434,114 +632,13 @@ fn is_this_reference(
 struct ThisPatternResolver {}
 
 impl ThisPatternResolver {
-    /// Extracts `this` references from array assignments (e.g., `[this.#value]` or `[...this.#value]`).
-    /// Only applicable to writes.
-    fn collect_array_assignment_names(
-        array_assignment_pattern: &JsArrayAssignmentPattern,
-        scoped_this_references: &[FunctionThisReferences],
-    ) -> Vec<ClassMemberReference> {
-        array_assignment_pattern
-            .elements()
-            .iter()
-            .filter_map(|element| {
-                let element = element.clone().ok()?;
-
-                // [this.#value]
-                if let Some(pattern_element) = element.as_js_array_assignment_pattern_element() {
-                    pattern_element
-                        .pattern()
-                        .ok()?
-                        .as_any_js_assignment()
-                        .and_then(|assignment| {
-                            Self::extract_this_member_reference(
-                                assignment.as_js_static_member_assignment(),
-                                scoped_this_references,
-                                AccessKind::Write,
-                            )
-                        })
-                }
-                // [...this.#value]
-                else if let Some(rest_element) =
-                    element.as_js_array_assignment_pattern_rest_element()
-                {
-                    rest_element
-                        .pattern()
-                        .ok()?
-                        .as_any_js_assignment()
-                        .and_then(|assignment| {
-                            Self::extract_this_member_reference(
-                                assignment.as_js_static_member_assignment(),
-                                scoped_this_references,
-                                AccessKind::Write,
-                            )
-                        })
-                } else {
-                    None
-                }
-            })
-            .collect()
-    }
-
-    /// Collects assignment names from a JavaScript object assignment pattern, e.g. `{...this.#value}`.
-    /// Only applicable to writes.
-    fn collect_object_assignment_names(
-        assignment: &JsObjectAssignmentPattern,
-        scoped_this_references: &[FunctionThisReferences],
-    ) -> Vec<ClassMemberReference> {
-        assignment
-            .properties()
-            .elements()
-            .filter_map(|prop| {
-                if let Some(rest_params) = prop
-                    .node
-                    .clone()
-                    .ok()?
-                    .as_js_object_assignment_pattern_rest()
-                {
-                    return Self::extract_this_member_reference(
-                        rest_params.target().ok()?.as_js_static_member_assignment(),
-                        scoped_this_references,
-                        AccessKind::Write,
-                    );
-                }
-                if let Some(property) = prop
-                    .node
-                    .clone()
-                    .ok()?
-                    .as_js_object_assignment_pattern_property()
-                {
-                    return Self::extract_this_member_reference(
-                        property
-                            .pattern()
-                            .ok()?
-                            .as_any_js_assignment()?
-                            .as_js_static_member_assignment(),
-                        scoped_this_references,
-                        AccessKind::Write,
-                    );
-                }
-                None
-            })
-            .collect()
-    }
-
-    /// Extracts a class member reference from an assignment if it involves `this` or its aliases.
-    ///
-    /// Example:
-    /// - `this.prop = value`
-    /// - `this.#private = value`
-    /// - `self.prop = value` (where `self` is a `this` alias)
-    ///
-    /// Returns a `ClassMemberReference` containing the member name and its range.
-    fn extract_this_member_reference(
-        operand: Option<&JsStaticMemberAssignment>,
-        scoped_this_references: &[FunctionThisReferences],
+    /// Extracts a statically known member name and range from a member assignment.
+    fn extract_member_reference(
+        assignment: &AnyJsMemberAssignment,
         access_kind: AccessKind,
     ) -> Option<ClassMemberReference> {
-        operand.and_then(|assignment| {
-            if let Ok(object) = assignment.object()
-                && is_this_reference(&object, scoped_this_references)
-            {
+        match assignment {
+            AnyJsMemberAssignment::JsStaticMemberAssignment(assignment) => {
                 assignment.member().ok().and_then(|member| {
                     member
                         .as_js_name()
@@ -560,10 +657,163 @@ impl ThisPatternResolver {
                                 })
                         })
                 })
-            } else {
-                None
             }
-        })
+            AnyJsMemberAssignment::JsComputedMemberAssignment(assignment) => {
+                let member = assignment.member().ok()?.omit_parentheses();
+                let (name, range) = match member.as_static_value()? {
+                    StaticValue::EmptyString(range) => (Text::default(), range),
+                    StaticValue::Number(token) => (
+                        token.token_text_trimmed().into(),
+                        token.text_trimmed_range(),
+                    ),
+                    StaticValue::String(token) => {
+                        (inner_string_text(&token).into(), token.text_trimmed_range())
+                    }
+                    _ => return None,
+                };
+                Some(ClassMemberReference {
+                    name,
+                    range,
+                    access_kind,
+                })
+            }
+        }
+    }
+
+    /// Removes transparent assignment wrappers and returns the underlying member assignment.
+    fn to_member_assignment(assignment: &AnyJsAssignment) -> Option<AnyJsMemberAssignment> {
+        let mut assignment = assignment.clone();
+        loop {
+            assignment = match assignment {
+                AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
+                    return Some(AnyJsMemberAssignment::JsComputedMemberAssignment(
+                        assignment,
+                    ));
+                }
+                AnyJsAssignment::JsParenthesizedAssignment(assignment) => {
+                    assignment.assignment().ok()?
+                }
+                AnyJsAssignment::JsStaticMemberAssignment(assignment) => {
+                    return Some(AnyJsMemberAssignment::JsStaticMemberAssignment(assignment));
+                }
+                AnyJsAssignment::TsAsAssignment(assignment) => assignment.assignment().ok()?,
+                AnyJsAssignment::TsNonNullAssertionAssignment(assignment) => {
+                    assignment.assignment().ok()?
+                }
+                AnyJsAssignment::TsSatisfiesAssignment(assignment) => {
+                    assignment.assignment().ok()?
+                }
+                AnyJsAssignment::TsTypeAssertionAssignment(assignment) => {
+                    assignment.assignment().ok()?
+                }
+                AnyJsAssignment::JsBogusAssignment(_)
+                | AnyJsAssignment::JsIdentifierAssignment(_) => return None,
+            };
+        }
+    }
+
+    /// Extracts a member assignment whose receiver is `this` or a tracked alias of `this`.
+    fn extract_this_member_reference(
+        assignment: &AnyJsAssignment,
+        scoped_this_references: &[LexicalThisReferences],
+        access_kind: AccessKind,
+    ) -> Option<ClassMemberReference> {
+        let assignment = Self::to_member_assignment(assignment)?;
+        if let Ok(object) = assignment.object()
+            && is_this_reference(&object, scoped_this_references)
+        {
+            Self::extract_member_reference(&assignment, access_kind)
+        } else {
+            None
+        }
+    }
+
+    /// Extracts `this` references from array assignments (e.g., `[this.#value]` or `[...this.#value]`).
+    /// Only applicable to writes.
+    fn collect_array_assignment_names(
+        array_assignment_pattern: &JsArrayAssignmentPattern,
+        scoped_this_references: &[LexicalThisReferences],
+    ) -> Vec<ClassMemberReference> {
+        array_assignment_pattern
+            .elements()
+            .iter()
+            .filter_map(|element| {
+                let element = element.clone().ok()?;
+
+                // [this.#value]
+                if let Some(pattern_element) = element.as_js_array_assignment_pattern_element() {
+                    pattern_element
+                        .pattern()
+                        .ok()?
+                        .as_any_js_assignment()
+                        .and_then(|assignment| {
+                            Self::extract_this_member_reference(
+                                assignment,
+                                scoped_this_references,
+                                AccessKind::Write,
+                            )
+                        })
+                }
+                // [...this.#value]
+                else if let Some(rest_element) =
+                    element.as_js_array_assignment_pattern_rest_element()
+                {
+                    rest_element
+                        .pattern()
+                        .ok()?
+                        .as_any_js_assignment()
+                        .and_then(|assignment| {
+                            Self::extract_this_member_reference(
+                                assignment,
+                                scoped_this_references,
+                                AccessKind::Write,
+                            )
+                        })
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    /// Collects assignment names from a JavaScript object assignment pattern, e.g. `{...this.#value}`.
+    /// Only applicable to writes.
+    fn collect_object_assignment_names(
+        assignment: &JsObjectAssignmentPattern,
+        scoped_this_references: &[LexicalThisReferences],
+    ) -> Vec<ClassMemberReference> {
+        assignment
+            .properties()
+            .elements()
+            .filter_map(|prop| {
+                if let Some(rest_params) = prop
+                    .node
+                    .clone()
+                    .ok()?
+                    .as_js_object_assignment_pattern_rest()
+                {
+                    let target = rest_params.target().ok()?;
+                    return Self::extract_this_member_reference(
+                        &target,
+                        scoped_this_references,
+                        AccessKind::Write,
+                    );
+                }
+                if let Some(property) = prop
+                    .node
+                    .clone()
+                    .ok()?
+                    .as_js_object_assignment_pattern_property()
+                {
+                    return Self::extract_this_member_reference(
+                        property.pattern().ok()?.as_any_js_assignment()?,
+                        scoped_this_references,
+                        AccessKind::Write,
+                    );
+                }
+                None
+            })
+            .collect()
     }
 }
 
@@ -580,19 +830,33 @@ fn collect_references_from_body(
 
     visit_references_in_body(member, &scoped_this_references, &mut writes, &mut reads);
 
-    Some(ClassMemberReferences { reads, writes })
+    Some(ClassMemberReferences {
+        reads,
+        writes,
+        ..Default::default()
+    })
 }
 
-/// Collects references to class members from arrow functions nested in a class property initializer.
+/// Collects references to class members from a class property initializer.
 ///
-/// Arrow functions capture the class initializer's lexical `this`, while normal functions establish
-/// their own `this`, so this intentionally skips non-arrow function bodies.
+/// Arrow functions capture the initializer's lexical `this`, while normal functions establish their
+/// own `this` and are skipped.
 fn collect_references_from_property_initializer(
     expression: &AnyJsExpression,
 ) -> Option<ClassMemberReferences> {
     let mut reads = FxHashSet::default();
     let mut writes = FxHashSet::default();
     let mut skipped_ranges = vec![];
+    let initializer_scope = LexicalThisReferences {
+        scope: AnyLexicalThisScope::PropertyInitializer(expression.clone()),
+        this_references: FxHashSet::default(),
+    };
+    visit_references_in_body(
+        expression.syntax(),
+        std::slice::from_ref(&initializer_scope),
+        &mut writes,
+        &mut reads,
+    );
 
     for event in expression.syntax().preorder() {
         match event {
@@ -638,7 +902,11 @@ fn collect_references_from_property_initializer(
         }
     }
 
-    Some(ClassMemberReferences { reads, writes })
+    Some(ClassMemberReferences {
+        reads,
+        writes,
+        ..Default::default()
+    })
 }
 
 fn collect_references_from_arrow_function(
@@ -657,8 +925,8 @@ fn collect_references_from_arrow_function(
         this_references.extend(ThisScopeReferences::new(function_body).local_this_references);
     }
 
-    let current_scope = FunctionThisReferences {
-        scope: body.clone(),
+    let current_scope = LexicalThisReferences {
+        scope: AnyLexicalThisScope::Function(body.clone()),
         this_references,
     };
     visit_references_in_body(
@@ -726,7 +994,7 @@ fn collect_references_from_arrow_function(
 /// - Writes via assignments and destructuring patterns involving `this` or its aliases
 fn visit_references_in_body(
     method_body_element: &JsSyntaxNode,
-    scoped_this_references: &[FunctionThisReferences],
+    scoped_this_references: &[LexicalThisReferences],
     writes: &mut FxHashSet<ClassMemberReference>,
     reads: &mut FxHashSet<ClassMemberReference>,
 ) {
@@ -738,6 +1006,7 @@ fn visit_references_in_body(
                 handle_object_binding_pattern(&node, scoped_this_references, reads);
                 handle_static_member_expression(&node, scoped_this_references, reads);
                 handle_assignment_expression(&node, scoped_this_references, reads, writes);
+                handle_for_in_or_of_statement(&node, scoped_this_references, writes);
                 if let Some(js_update_expression) = AnyJsUpdateExpression::cast_ref(&node) {
                     handle_pre_or_post_update_expression(
                         &js_update_expression,
@@ -749,6 +1018,46 @@ fn visit_references_in_body(
             }
             WalkEvent::Leave(_) => {}
         }
+    }
+}
+
+/// Records class member writes used as `for-in` or `for-of` assignment targets.
+fn handle_for_in_or_of_statement(
+    node: &SyntaxNode<JsLanguage>,
+    scoped_this_references: &[LexicalThisReferences],
+    writes: &mut FxHashSet<ClassMemberReference>,
+) {
+    let initializer = JsForInStatement::cast_ref(node)
+        .and_then(|statement| statement.initializer().ok())
+        .or_else(|| {
+            JsForOfStatement::cast_ref(node).and_then(|statement| statement.initializer().ok())
+        });
+    let Some(pattern) =
+        initializer.and_then(|initializer| initializer.as_any_js_assignment_pattern().cloned())
+    else {
+        return;
+    };
+
+    if let Some(assignment) = pattern.as_any_js_assignment()
+        && let Some(reference) = ThisPatternResolver::extract_this_member_reference(
+            assignment,
+            scoped_this_references,
+            AccessKind::Write,
+        )
+    {
+        writes.insert(reference);
+    }
+    if let Some(array) = pattern.as_js_array_assignment_pattern() {
+        writes.extend(ThisPatternResolver::collect_array_assignment_names(
+            array,
+            scoped_this_references,
+        ));
+    }
+    if let Some(object) = pattern.as_js_object_assignment_pattern() {
+        writes.extend(ThisPatternResolver::collect_object_assignment_names(
+            object,
+            scoped_this_references,
+        ));
     }
 }
 
@@ -769,7 +1078,7 @@ fn visit_references_in_body(
 /// ```
 fn handle_object_binding_pattern(
     node: &SyntaxNode<JsLanguage>,
-    scoped_this_references: &[FunctionThisReferences],
+    scoped_this_references: &[LexicalThisReferences],
     reads: &mut FxHashSet<ClassMemberReference>,
 ) {
     if let Some(binding) = JsObjectBindingPattern::cast_ref(node)
@@ -810,7 +1119,7 @@ fn handle_object_binding_pattern(
 /// ```
 fn handle_static_member_expression(
     node: &SyntaxNode<JsLanguage>,
-    scoped_this_references: &[FunctionThisReferences],
+    scoped_this_references: &[LexicalThisReferences],
     reads: &mut FxHashSet<ClassMemberReference>,
 ) {
     if let Some(static_member) = JsStaticMemberExpression::cast_ref(node)
@@ -845,7 +1154,7 @@ fn handle_static_member_expression(
 /// ```
 fn handle_assignment_expression(
     node: &SyntaxNode<JsLanguage>,
-    scoped_this_references: &[FunctionThisReferences],
+    scoped_this_references: &[LexicalThisReferences],
     reads: &mut FxHashSet<ClassMemberReference>,
     writes: &mut FxHashSet<ClassMemberReference>,
 ) {
@@ -865,7 +1174,7 @@ fn handle_assignment_expression(
                     | JsSyntaxKind::QUESTION2EQ
             )
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
-                operand.as_js_static_member_assignment(),
+                operand,
                 scoped_this_references,
                 AccessKind::MeaningfulRead,
             )
@@ -890,9 +1199,9 @@ fn handle_assignment_expression(
             }
         }
 
-        if let Some(assignment) = left.as_any_js_assignment().cloned()
+        if let Some(assignment) = left.as_any_js_assignment()
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
-                assignment.as_js_static_member_assignment(),
+                assignment,
                 scoped_this_references,
                 AccessKind::Write,
             )
@@ -918,7 +1227,7 @@ fn handle_assignment_expression(
 /// ```
 fn handle_pre_or_post_update_expression(
     js_update_expression: &AnyJsUpdateExpression,
-    scoped_this_references: &[FunctionThisReferences],
+    scoped_this_references: &[LexicalThisReferences],
     reads: &mut FxHashSet<ClassMemberReference>,
     writes: &mut FxHashSet<ClassMemberReference>,
 ) {
@@ -929,7 +1238,7 @@ fn handle_pre_or_post_update_expression(
 
     if let Some(operand) = operand
         && let Some(name) = ThisPatternResolver::extract_this_member_reference(
-            operand.as_js_static_member_assignment(),
+            &operand,
             scoped_this_references,
             AccessKind::Write,
         )
@@ -962,7 +1271,38 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Cla
         );
     }
 
-    ClassMemberReferences { reads, writes }
+    ClassMemberReferences {
+        reads,
+        writes,
+        ..Default::default()
+    }
+}
+
+/// Collects `this`-based class member references from a static initialization block.
+fn collect_references_from_static_block(
+    block: &JsStaticInitializationBlockClassMember,
+) -> ClassMemberReferences {
+    let scope = LexicalThisReferences {
+        scope: AnyLexicalThisScope::StaticInitializationBlock(block.clone()),
+        this_references: ThisScopeReferences::collect_local_this_references_from_statements(
+            &block.statements(),
+        )
+        .into_iter()
+        .collect(),
+    };
+    let mut reads = FxHashSet::default();
+    let mut writes = FxHashSet::default();
+    visit_references_in_body(
+        block.syntax(),
+        std::slice::from_ref(&scope),
+        &mut writes,
+        &mut reads,
+    );
+    ClassMemberReferences {
+        reads,
+        writes,
+        ..Default::default()
+    }
 }
 
 /// Collects class property names read from a `this` static member expression,
@@ -988,7 +1328,11 @@ fn collect_class_property_reads_from_static_member(
         });
     }
 
-    Some(ClassMemberReferences { reads, writes })
+    Some(ClassMemberReferences {
+        reads,
+        writes,
+        ..Default::default()
+    })
 }
 
 /// Checks whether a name is within its correct scope
@@ -1003,8 +1347,13 @@ fn is_within_scope_without_shadowing(
 
         match ancestor.kind() {
             JsSyntaxKind::JS_FUNCTION_BODY
-            | JsSyntaxKind::JS_CLASS_EXPRESSION
-            | JsSyntaxKind::JS_CLASS_DECLARATION => return false,
+                if !ancestor
+                    .parent()
+                    .is_some_and(|parent| JsArrowFunctionExpression::can_cast(parent.kind())) =>
+            {
+                return false;
+            }
+            JsSyntaxKind::JS_CLASS_EXPRESSION | JsSyntaxKind::JS_CLASS_DECLARATION => return false,
             _ => {}
         }
     }

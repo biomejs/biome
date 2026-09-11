@@ -3492,7 +3492,7 @@ See https://biomejs.dev/linter/rules/use-react-function-components
 	 */
 	useReactFunctionComponents?: UseReactFunctionComponentsConfiguration;
 	/**
-	* Enforce marking members as readonly if they are never modified outside the constructor.
+	* Enforce marking instance properties as readonly if they are never modified outside the constructor, and static properties as readonly if they are never reassigned.
 See https://biomejs.dev/linter/rules/use-readonly-class-properties 
 	 */
 	useReadonlyClassProperties?: UseReadonlyClassPropertiesConfiguration;

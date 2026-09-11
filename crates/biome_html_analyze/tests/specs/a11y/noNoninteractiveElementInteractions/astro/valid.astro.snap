@@ -19,6 +19,7 @@ expression: valid.astro
 <a onclick="()=> void 0"></a>
 <area onclick="() => { }" />
 <button onclick="()=> void 0"></button>
+<dialog onkeyup="() => { }"></dialog>
 <menuitem onclick="() => { }" />
 <option onclick="()=> void 0" class="foo"></option>
 <select onclick="()=> void 0" class="foo"></select>

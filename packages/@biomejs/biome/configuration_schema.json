@@ -14305,7 +14305,7 @@
 					]
 				},
 				"useReadonlyClassProperties": {
-					"description": "Enforce marking members as readonly if they are never modified outside the constructor.\nSee https://biomejs.dev/linter/rules/use-readonly-class-properties",
+					"description": "Enforce marking instance properties as readonly if they are never modified outside the constructor, and static properties as readonly if they are never reassigned.\nSee https://biomejs.dev/linter/rules/use-readonly-class-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseReadonlyClassPropertiesConfiguration" },
 						{ "type": "null" }
