@@ -1,0 +1,61 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Choice = { kind: "left"; left: string } | { kind: "right"; right: number };
+
+export function example(s: Choice) {
+	if (s.kind === "left") {
+		delete s.kind;
+		s;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Choice "Choice" =>
+  Object {
+    prototype: No prototype
+    members: ["kind": string: left, "left": string]
+  }
+  | Object {
+    prototype: No prototype
+    members: ["kind": string: right, "right": number]
+  }
+
+Binding example "example" => sync Function "example" {
+  accepts: {
+    params: [
+      required s: instanceof Choice
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding s "s" => instanceof Choice
+
+Expression "s" => instanceof Choice
+
+Expression "s.kind" => string: left | string: right
+
+Expression "s.kind === \"left\"" => boolean
+
+Expression "\"left\"" => string: left
+
+Expression "delete s.kind" => boolean
+
+Expression "s" => instanceof Choice
+
+Expression "s.kind" => string: left | string: right
+
+Expression "s" => instanceof Choice
+```

@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use biome_rowan::{Text, TokenText};
 
 /// Returns `text` with escape sequences processed.
@@ -9,6 +11,17 @@ use biome_rowan::{Text, TokenText};
 /// This function must be called on the `inner_string_text()` of a token,
 /// meaning the outer quotes are already expected to be trimmed.
 pub fn unescape_js_string(text: TokenText) -> Text {
+    match unescape_js_string_text(text.text()) {
+        Cow::Borrowed(_) => text.into(),
+        Cow::Owned(string) => string.into(),
+    }
+}
+
+/// Returns `text` with escape sequences processed.
+///
+/// Same as [`unescape_js_string()`], for a string that is not backed by a
+/// token, such as a literal stored in type data.
+pub fn unescape_js_string_text(text: &str) -> Cow<'_, str> {
     enum State {
         // Consume characters until an escape sequence is discovered.
         Normal,
@@ -20,8 +33,8 @@ pub fn unescape_js_string(text: TokenText) -> Text {
         Hex4Digits(u8, u32),
         // `\xXX`
         HexEscape(u8, u8),
-        // `\0...`
-        LegacyOctal,
+        // Legacy octal escape (value, number of digits consumed).
+        Octal(u8, u8),
         // Skips one character.
         Skip,
     }
@@ -30,7 +43,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
         Some(index) => {
             let mut state = State::Escaped;
             let mut string = text[..index].to_string();
-            string.reserve(usize::from(text.len()) - string.len());
+            string.reserve(text.len() - string.len());
 
             let remainder = &text[(index + 1)..];
             let mut next_byte_index = 0;
@@ -79,17 +92,9 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                                 state = State::HexEscape(0, 0);
                                 continue;
                             }
-                            '0' => {
-                                if remainder
-                                    .as_bytes()
-                                    .get(next_byte_index)
-                                    .is_some_and(u8::is_ascii_digit)
-                                {
-                                    state = State::LegacyOctal;
-                                    continue;
-                                } else {
-                                    '\0'
-                                }
+                            '0'..='7' => {
+                                state = State::Octal(c as u8 - b'0', 1);
+                                continue;
                             }
                             '\r' => {
                                 if remainder.as_bytes().get(next_byte_index) == Some(&b'\n') {
@@ -148,11 +153,22 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                             state = State::HexEscape(1, value);
                         }
                     }
-                    State::LegacyOctal => {
-                        // legacy octals are not allowed in strict mode, and
-                        // so far we only use this function for modules...
-                        unimplemented!()
-                    }
+                    State::Octal(value, digits) => match c {
+                        '0'..='7'
+                            if digits < 3 && 8 * value as u32 + (c as u32 - '0' as u32) <= 255 =>
+                        {
+                            state = State::Octal(8 * value + (c as u8 - b'0'), digits + 1);
+                        }
+                        _ => {
+                            string.push(char::from(value));
+                            if c == '\\' {
+                                state = State::Escaped;
+                            } else {
+                                string.push(c);
+                                state = State::Normal;
+                            }
+                        }
+                    },
                     State::Normal if c == '\\' => state = State::Escaped,
                     State::Normal => string.push(c),
                     State::Skip => {
@@ -160,9 +176,12 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                     }
                 }
             }
-            string.into()
+            if let State::Octal(value, _) = state {
+                string.push(char::from(value));
+            }
+            Cow::Owned(string)
         }
-        None => text.into(),
+        None => Cow::Borrowed(text),
     }
 }
 
@@ -179,7 +198,12 @@ mod test {
             ("\\x41\\x42\\x43", "ABC"),
             ("\\u0041\\u0042\\u0043", "ABC"),
             ("\\u{1F600}\\u{1F601}", "😀😁"),
-            //("\\0\\07\\77", "\0\u{07}\u{3F}"), TODO: legacy octals
+            ("\\0\\07\\77", "\0\u{07}\u{3F}"),
+            ("\\01", "\u{01}"),
+            ("\\08", "\08"),
+            ("\\8\\9", "89"),
+            ("\\377\\3777", "\u{FF}\u{FF}7"),
+            ("\\400", "\u{20}0"),
             ("\\b\\f\\n\\r\\t\\v", "\x08\x0C\n\r\t\x0B"),
             ("\\\r\n\n", "\n"), // Line continuations
             ("Hello, 😀\\u{1F601}\\0", "Hello, 😀😁\0"),
@@ -190,5 +214,21 @@ mod test {
             let actual = unescape_js_string(token);
             assert_eq!(actual.text(), *expected, "failed test case: {token_text}");
         }
+    }
+
+    #[test]
+    fn test_unescape_js_string_text_borrows_when_unescaped() {
+        assert!(matches!(
+            unescape_js_string_text("hello world"),
+            Cow::Borrowed("hello world")
+        ));
+    }
+
+    #[test]
+    fn test_unescape_js_string_text_owns_when_escaped() {
+        assert!(matches!(
+            unescape_js_string_text("hello\\nworld"),
+            Cow::Owned(string) if string == "hello\nworld"
+        ));
     }
 }

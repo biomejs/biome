@@ -8,9 +8,9 @@ use biome_js_syntax::{
     JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GenericTypeParameter, RawTypeCollector, RawTypeData, RawTypeId, TypeData,
-    TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeStore,
-    UnionCollector, resolved::InferredLocalTypeId,
+    FunctionParameter, GenericTypeParameter, NarrowingInvalidationCache, RawTypeCollector,
+    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
+    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -56,6 +56,9 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, TypeId>,
+
+    /// Memoizes narrowing invalidation scans for this pass over the module.
+    narrowing_invalidation_cache: NarrowingInvalidationCache,
 
     /// Static and dynamic import paths in source order.
     import_paths: ImportPathMap<JsImportPath>,
@@ -145,6 +148,7 @@ impl JsModuleInfoCollector {
             function_parameters: FxHashMap::default(),
             variable_declarations: FxHashMap::default(),
             parsed_expressions: FxHashMap::default(),
+            narrowing_invalidation_cache: NarrowingInvalidationCache::default(),
             import_paths: ImportPathMap::default(),
             exports: Vec::new(),
             blanket_reexports: Vec::new(),
@@ -823,6 +827,14 @@ impl JsModuleInfoCollector {
 }
 
 impl RawTypeCollector for JsModuleInfoCollector {
+    fn narrowing_enabled(&self) -> bool {
+        crate::TYPE_NARROWING_ENABLED
+    }
+
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache {
+        &mut self.narrowing_invalidation_cache
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }

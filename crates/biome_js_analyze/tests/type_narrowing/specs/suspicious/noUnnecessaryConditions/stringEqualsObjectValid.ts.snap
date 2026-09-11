@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: stringEqualsObjectValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+function objectMayBeString(x: { length: number } | "") {
+	if (x === "") {
+		// The object variant may describe a string, so it stays and `x` is not
+		// always falsy.
+		if (x) {
+			x;
+		}
+	}
+}
+
+```

@@ -1,0 +1,45 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function truthiness(z: "on" | null) {
+	if (z) {
+		z;
+	}
+	if (!z) {
+		z;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding truthiness "truthiness" => sync Function "truthiness" {
+  accepts: {
+    params: [
+      required z: string: on | null
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding z "z" => string: on | null
+
+Expression "z" => string: on | null
+
+Expression "z" => string: on
+
+Expression "!z" => boolean
+
+Expression "z" => string: on | null
+
+Expression "z" => null
+```

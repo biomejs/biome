@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function alwaysTruthyAfterGuard(x: number | (() => void)) {
+	if (typeof x === "function") {
+		if (x) {
+			x();
+		}
+	}
+}
+
+// A `typeof` guard can also make the inner condition always falsy.
+function alwaysFalsyAfterGuard(x: string | undefined) {
+	if (typeof x === "undefined") {
+		if (x) {
+			x;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+typeofGuardNarrowingInvalid.ts:5:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    3 │ function alwaysTruthyAfterGuard(x: number | (() => void)) {
+    4 │ 	if (typeof x === "function") {
+  > 5 │ 		if (x) {
+      │ 		    ^
+    6 │ 			x();
+    7 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+typeofGuardNarrowingInvalid.ts:14:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    12 │ function alwaysFalsyAfterGuard(x: string | undefined) {
+    13 │ 	if (typeof x === "undefined") {
+  > 14 │ 		if (x) {
+       │ 		    ^
+    15 │ 			x;
+    16 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```

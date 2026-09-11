@@ -12,25 +12,29 @@ use biome_js_syntax::{
     AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsSwitchClause, AnyTsModuleName,
+    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
-    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
-    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsCallExpression, JsCaseClause, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsClassMemberList, JsComputedMemberAssignment, JsConstructorParameters,
+    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
+    JsGetterObjectMember, JsIdentifierAssignment, JsIdentifierBinding, JsIfStatement,
+    JsInitializerClause, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
+    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
+    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsStaticMemberAssignment,
+    JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression,
+    JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText,
+};
 use rustc_hash::FxHashMap;
 
 use crate::globals::{
@@ -41,16 +45,18 @@ use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
-    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
-    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    Interface, Intersection, Literal, MemberEqualsPredicate, Module, NamedFunctionParameter,
+    Namespace, NarrowingInvalidationKind, NarrowingPredicate, Object, Path,
+    PatternFunctionParameter, PredicateCallPredicate, PredicateReturnType, RawTypeCollector,
+    RawTypeId, ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
+    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofConditionalExpression,
+    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
+    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
+    TypeofNarrowedExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofStaticMemberExpression, TypeofTag, TypeofThisOrSuperExpression, TypeofTypeofExpression,
+    TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -559,7 +565,7 @@ impl TypeData {
             }
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
-                .map(|name| Self::from_js_reference_identifier(scope_id, &name))
+                .map(|name| Self::from_js_reference_identifier(collector, scope_id, &name))
                 .unwrap_or_default(),
             AnyJsExpression::JsImportCallExpression(_expr) => {
                 Self::reference(GLOBAL_INSTANCEOF_PROMISE_ID)
@@ -1183,12 +1189,36 @@ impl TypeData {
         }))
     }
 
-    pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
-        id.name().map_or(Self::unknown(), |name| match name.text() {
+    pub fn from_js_reference_identifier(
+        resolver: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        id: &JsReferenceIdentifier,
+    ) -> Self {
+        let Ok(name) = id.name() else {
+            return Self::unknown();
+        };
+        match name.text() {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
-            _ => Self::reference(TypeReference::from_name(scope_id, name)),
-        })
+            _ => {
+                let predicates = if resolver.narrowing_enabled() {
+                    guard_narrowing_predicates(resolver, scope_id, id)
+                } else {
+                    Vec::new()
+                };
+                // The outermost guard applies first, so it ends up deepest in
+                // the nesting.
+                let mut narrowed = Self::reference(TypeReference::from_name(scope_id, name));
+                for predicate in predicates.into_iter().rev() {
+                    let ty = resolver.reference_to_owned_data(narrowed);
+                    narrowed = Self::from(TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                        ty,
+                        predicate,
+                    }));
+                }
+                narrowed
+            }
+        }
     }
 
     pub fn from_js_unary_expression(
@@ -3276,4 +3306,530 @@ fn apply_deep_const_reference(
 #[inline]
 fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
+}
+
+/// Returns the narrowing predicates that the guards enclosing a reference
+/// establish for it, innermost first, e.g. `[Typeof(String)]` for `x` inside
+/// the consequent of `if (typeof x === "string")`, or `[Truthy]` inside the
+/// consequent of `if (x)`.
+fn guard_narrowing_predicates(
+    resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    id: &JsReferenceIdentifier,
+) -> Vec<NarrowingPredicate> {
+    let Ok(name_token) = id.name() else {
+        return Vec::new();
+    };
+    GuardAnalysis::new(resolver, scope_id, name_token).guard_predicates(id)
+}
+
+/// Finds the guards that narrow one reference.
+///
+/// `scope_id` is where the other names a guard mentions resolve: the callee
+/// of a predicate call, the class of an `instanceof`.
+struct GuardAnalysis<'a> {
+    resolver: &'a mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    name_token: TokenText,
+}
+
+impl<'a> GuardAnalysis<'a> {
+    fn new(
+        resolver: &'a mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        name_token: TokenText,
+    ) -> Self {
+        Self {
+            resolver,
+            scope_id,
+            name_token,
+        }
+    }
+
+    /// The name of the binding being narrowed.
+    fn name(&self) -> &str {
+        self.name_token.text()
+    }
+
+    /// Returns the predicates the guards enclosing `id` establish for it,
+    /// innermost first. The walk stops at the enclosing function.
+    ///
+    /// A guard whose consequent declares or assigns the name is skipped.
+    /// Every other enclosing guard counts, since the value passed all of
+    /// their tests:
+    ///
+    /// ```js
+    /// if (typeof x === "undefined") {
+    ///   if (x) {
+    ///     x; // `never`: nothing is both `undefined` and truthy
+    ///   }
+    /// }
+    /// ```
+    fn guard_predicates(&mut self, id: &JsReferenceIdentifier) -> Vec<NarrowingPredicate> {
+        let mut child = id.syntax().clone();
+        let mut found = Vec::new();
+        for ancestor in id.syntax().ancestors().skip(1) {
+            if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor) {
+                if if_stmt
+                    .consequent()
+                    .is_ok_and(|consequent| consequent.syntax() == &child)
+                    && let Some(predicate) = self.guard_predicate(&if_stmt)
+                    && !self.narrowing_invalidated_within(&child, self.name_token.clone())
+                {
+                    found.push(predicate);
+                }
+            } else if let Some(case_clause) = JsCaseClause::cast_ref(&ancestor) {
+                if case_clause.test().is_ok_and(|test| test.syntax() != &child)
+                    && let Some(predicate) = self.switch_case_predicate(&case_clause)
+                    && !self.narrowing_invalidated_within(&ancestor, self.name_token.clone())
+                {
+                    found.push(predicate);
+                }
+            } else if is_narrowing_boundary(ancestor.kind()) {
+                break;
+            }
+            child = ancestor;
+        }
+        found
+    }
+
+    /// Returns the predicate that the given `case` clause establishes for
+    /// references with the narrowed name in its statements, if any.
+    ///
+    /// Every preceding clause must end in a jump, or execution could fall
+    /// through into this one with a different value. The tests of preceding
+    /// clauses run even when their clauses are not entered, so a write in
+    /// one of them also declines narrowing:
+    ///
+    /// ```js
+    /// switch (x) {
+    ///   case (x = 5, "nope"): break; // evaluates before "a" is tested
+    ///   case "a":
+    ///     x; // not narrowed: `x` no longer holds the matched value
+    /// }
+    /// ```
+    fn switch_case_predicate(&mut self, case_clause: &JsCaseClause) -> Option<NarrowingPredicate> {
+        let test = case_clause.test().ok()?.omit_parentheses();
+        let value = string_literal_value(&test)?;
+
+        let switch_stmt = case_clause
+            .syntax()
+            .ancestors()
+            .find_map(JsSwitchStatement::cast)?;
+        let discriminant = switch_stmt.discriminant().ok()?.omit_parentheses();
+        let member = if is_reference_to(&discriminant, self.name()) {
+            None
+        } else {
+            Some(member_of_reference(&discriminant, self.name())?)
+        };
+
+        for clause in switch_stmt.cases() {
+            if clause.syntax() == case_clause.syntax() {
+                break;
+            }
+            if !clause_ends_with_jump(&clause) {
+                return None;
+            }
+            if let AnyJsSwitchClause::JsCaseClause(preceding) = &clause
+                && let Ok(preceding_test) = preceding.test()
+            {
+                if self
+                    .narrowing_invalidated_within(preceding_test.syntax(), self.name_token.clone())
+                {
+                    return None;
+                }
+                // For a member discriminant, a preceding test can also overwrite
+                // the compared member itself.
+                if member.is_some() && self.member_write_invalidated_within(preceding_test.syntax())
+                {
+                    return None;
+                }
+            }
+        }
+
+        match member {
+            None => Some(NarrowingPredicate::StringEquals(value)),
+            Some(member) => {
+                // Writing to a member of the narrowed value inside the clause
+                // could change the compared member.
+                if self.member_write_invalidated_within(case_clause.syntax()) {
+                    return None;
+                }
+                Some(NarrowingPredicate::MemberEquals(Box::new(
+                    MemberEqualsPredicate { member, value },
+                )))
+            }
+        }
+    }
+
+    /// Returns the predicate that the test of the given `if` statement
+    /// establishes for references with the narrowed name in its consequent,
+    /// if any.
+    fn guard_predicate(&mut self, if_stmt: &JsIfStatement) -> Option<NarrowingPredicate> {
+        let test = if_stmt.test().ok()?.omit_parentheses();
+        match &test {
+            // `if (x)`
+            AnyJsExpression::JsIdentifierExpression(_) => {
+                is_reference_to(&test, self.name()).then_some(NarrowingPredicate::Truthy)
+            }
+            // `if (isFoo(x))`
+            AnyJsExpression::JsCallExpression(call) => self
+                .predicate_call_guard(if_stmt, call)
+                .map(|predicate| NarrowingPredicate::PredicateCall(Box::new(predicate))),
+            // `if (x instanceof Class)`
+            AnyJsExpression::JsInstanceofExpression(instanceof) => self
+                .instanceof_guard_class(if_stmt, instanceof)
+                .map(NarrowingPredicate::InstanceOf),
+            // `if (!x)`
+            AnyJsExpression::JsUnaryExpression(unary)
+                if matches!(unary.operator(), Ok(JsUnaryOperator::LogicalNot)) =>
+            {
+                let argument = unary.argument().ok()?.omit_parentheses();
+                is_reference_to(&argument, self.name()).then_some(NarrowingPredicate::Falsy)
+            }
+            // `if (typeof x === "<tag>")`, `if (x.member === "<value>")`, or
+            // `if (x === "<value>")`
+            AnyJsExpression::JsBinaryExpression(binary) => typeof_guard_tag(binary, self.name())
+                .map(NarrowingPredicate::Typeof)
+                .or_else(|| {
+                    self.member_equals_guard(if_stmt, binary)
+                        .map(|predicate| NarrowingPredicate::MemberEquals(Box::new(predicate)))
+                })
+                .or_else(|| {
+                    string_equals_guard(binary, self.name()).map(NarrowingPredicate::StringEquals)
+                }),
+            _ => None,
+        }
+    }
+
+    /// Returns the predicate of a `<name>.<member> === "<value>"` comparison,
+    /// in either operand order, if the given binary expression is one.
+    ///
+    /// `==` is not a guard: `x.kind == "1"` also passes for the number `1`.
+    fn member_equals_guard(
+        &mut self,
+        if_stmt: &JsIfStatement,
+        binary: &JsBinaryExpression,
+    ) -> Option<MemberEqualsPredicate> {
+        if !matches!(binary.operator().ok()?, JsBinaryOperator::StrictEquality) {
+            return None;
+        }
+
+        // Writing to a member of the narrowed value inside the consequent could
+        // change the compared member.
+        if let Ok(consequent) = if_stmt.consequent()
+            && self.member_write_invalidated_within(consequent.syntax())
+        {
+            return None;
+        }
+
+        let left = binary.left().ok()?.omit_parentheses();
+        let right = binary.right().ok()?.omit_parentheses();
+        member_of_reference(&left, self.name())
+            .zip(string_literal_value(&right))
+            .or_else(|| member_of_reference(&right, self.name()).zip(string_literal_value(&left)))
+            .map(|(member, value)| MemberEqualsPredicate { member, value })
+    }
+
+    /// Returns the predicate of an `isFoo(<name>)`-style call, if the given
+    /// call passes a reference with the narrowed name as one of its
+    /// arguments. Whether the callee is a type predicate is decided during
+    /// resolution.
+    ///
+    /// A spread before the reference hides which parameter receives it, so
+    /// no predicate is returned then.
+    fn predicate_call_guard(
+        &mut self,
+        if_stmt: &JsIfStatement,
+        call: &JsCallExpression,
+    ) -> Option<PredicateCallPredicate> {
+        let callee = call.callee().ok()?.omit_parentheses();
+        let callee_name = callee
+            .as_js_identifier_expression()?
+            .name()
+            .ok()?
+            .name()
+            .ok()?;
+
+        // A same-name binding in the consequent would shadow the callee.
+        if let Ok(consequent) = if_stmt.consequent()
+            && self.narrowing_invalidated_within(consequent.syntax(), callee_name.clone())
+        {
+            return None;
+        }
+
+        let mut argument_index = None;
+        for (index, argument) in call.arguments().ok()?.args().iter().enumerate() {
+            let Ok(AnyJsCallArgument::AnyJsExpression(expression)) = argument else {
+                return None;
+            };
+            if is_reference_to(&expression.omit_parentheses(), self.name()) {
+                argument_index = Some(index);
+                break;
+            }
+        }
+
+        Some(PredicateCallPredicate {
+            callee: TypeReference::from_name(self.scope_id, callee_name),
+            argument_index: argument_index?,
+        })
+    }
+
+    /// Returns a reference to the class an `instanceof` guard over a reference
+    /// with the narrowed name checks against, if the given expression is one.
+    fn instanceof_guard_class(
+        &mut self,
+        if_stmt: &JsIfStatement,
+        instanceof: &JsInstanceofExpression,
+    ) -> Option<TypeReference> {
+        let left = instanceof.left().ok()?.omit_parentheses();
+        if !is_reference_to(&left, self.name()) {
+            return None;
+        }
+
+        let right = instanceof.right().ok()?.omit_parentheses();
+        let class_name = right
+            .as_js_identifier_expression()?
+            .name()
+            .ok()?
+            .name()
+            .ok()?;
+
+        // A same-name binding in the consequent would shadow the class.
+        if let Ok(consequent) = if_stmt.consequent()
+            && self.narrowing_invalidated_within(consequent.syntax(), class_name.clone())
+        {
+            return None;
+        }
+
+        Some(TypeReference::from_name(self.scope_id, class_name))
+    }
+
+    /// Returns whether a binding named `name_token` is declared, or the name
+    /// is assigned to, anywhere inside `node`. A write after the reference
+    /// counts too.
+    ///
+    /// Results are cached per `node` and name, since every reference in a
+    /// guarded consequent asks about the same consequent.
+    fn narrowing_invalidated_within(&mut self, node: &JsSyntaxNode, name_token: TokenText) -> bool {
+        let key = (
+            node.clone(),
+            Text::from(name_token),
+            NarrowingInvalidationKind::Binding,
+        );
+
+        if let Some(&cached) = self.resolver.narrowing_invalidation_cache().get(&key) {
+            return cached;
+        }
+
+        let name = key.1.text();
+        let invalidated = node.descendants().any(|descendant| {
+            let name_token = if let Some(binding) = JsIdentifierBinding::cast_ref(&descendant) {
+                binding.name_token()
+            } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&descendant) {
+                assignment.name_token()
+            } else {
+                return false;
+            };
+            name_token.is_ok_and(|token| token.text_trimmed() == name)
+        });
+
+        self.resolver
+            .narrowing_invalidation_cache()
+            .insert(key, invalidated);
+
+        invalidated
+    }
+
+    /// Returns whether a member of the narrowed value is written to or
+    /// deleted anywhere inside `node`: `name.member = 1`, `name[key] = 1`,
+    /// `delete name.member`. Cached like
+    /// [`Self::narrowing_invalidated_within`].
+    fn member_write_invalidated_within(&mut self, node: &JsSyntaxNode) -> bool {
+        let name = self.name_token.text();
+        let key = (
+            node.clone(),
+            Text::from(self.name_token.clone()),
+            NarrowingInvalidationKind::MemberWrite,
+        );
+
+        if let Some(&cached) = self.resolver.narrowing_invalidation_cache().get(&key) {
+            return cached;
+        }
+
+        let invalidated = node.descendants().any(|descendant| {
+            let object = match descendant.kind() {
+                JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
+                    JsStaticMemberAssignment::cast(descendant)
+                        .and_then(|assignment| assignment.object().ok())
+                }
+                JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
+                    JsComputedMemberAssignment::cast(descendant)
+                        .and_then(|assignment| assignment.object().ok())
+                }
+                JsSyntaxKind::JS_UNARY_EXPRESSION => JsUnaryExpression::cast(descendant)
+                    .filter(|unary| unary.operator() == Ok(JsUnaryOperator::Delete))
+                    .and_then(|unary| unary.argument().ok())
+                    .and_then(|argument| match argument.omit_parentheses() {
+                        AnyJsExpression::JsStaticMemberExpression(member) => member.object().ok(),
+                        AnyJsExpression::JsComputedMemberExpression(member) => member.object().ok(),
+                        _ => None,
+                    }),
+                _ => return false,
+            };
+            object
+                .map(AnyJsExpression::omit_parentheses)
+                .is_some_and(|object| is_reference_to(&object, name))
+        });
+
+        self.resolver
+            .narrowing_invalidation_cache()
+            .insert(key, invalidated);
+
+        invalidated
+    }
+}
+
+/// Returns whether the clause ends in a `break`, `continue`, `return`, or
+/// `throw`, so execution cannot fall through to the next clause. A jump
+/// nested in a block or an `if` does not count.
+fn clause_ends_with_jump(clause: &AnyJsSwitchClause) -> bool {
+    let statements = match clause {
+        AnyJsSwitchClause::JsCaseClause(clause) => clause.consequent(),
+        AnyJsSwitchClause::JsDefaultClause(clause) => clause.consequent(),
+    };
+    statements.iter().last().is_some_and(|last| {
+        matches!(
+            last.syntax().kind(),
+            JsSyntaxKind::JS_BREAK_STATEMENT
+                | JsSyntaxKind::JS_CONTINUE_STATEMENT
+                | JsSyntaxKind::JS_RETURN_STATEMENT
+                | JsSyntaxKind::JS_THROW_STATEMENT
+        )
+    })
+}
+
+/// Returns the string of a `<name> === "<value>"` comparison, in either
+/// operand order, if the given binary expression is one.
+///
+/// `==` is not a guard: `x == "1"` also passes for the number `1`.
+fn string_equals_guard(binary: &JsBinaryExpression, name: &str) -> Option<Text> {
+    if !matches!(binary.operator().ok()?, JsBinaryOperator::StrictEquality) {
+        return None;
+    }
+
+    let left = binary.left().ok()?.omit_parentheses();
+    let right = binary.right().ok()?.omit_parentheses();
+    if is_reference_to(&left, name) {
+        string_literal_value(&right)
+    } else if is_reference_to(&right, name) {
+        string_literal_value(&left)
+    } else {
+        None
+    }
+}
+
+/// Returns the member name of a `<name>.<member>` expression.
+fn member_of_reference(expr: &AnyJsExpression, name: &str) -> Option<Text> {
+    let AnyJsExpression::JsStaticMemberExpression(member_expr) = expr else {
+        return None;
+    };
+    let object = member_expr.object().ok()?.omit_parentheses();
+    if !is_reference_to(&object, name) {
+        return None;
+    }
+
+    let member = member_expr.member().ok()?;
+    Some(
+        member
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed()
+            .into(),
+    )
+}
+
+/// Returns the unescaped value of a string literal expression.
+fn string_literal_value(expr: &AnyJsExpression) -> Option<Text> {
+    let literal = expr
+        .as_any_js_literal_expression()?
+        .as_js_string_literal_expression()?;
+    unescaped_text_from_token(literal.value_token())
+}
+
+/// Returns the tag of a `typeof <name> === "<tag>"` comparison, if the given
+/// binary expression is one.
+///
+/// Handles both operand orders, and treats `==` like `===`.
+fn typeof_guard_tag(binary: &JsBinaryExpression, name: &str) -> Option<TypeofTag> {
+    if !matches!(
+        binary.operator().ok()?,
+        JsBinaryOperator::StrictEquality | JsBinaryOperator::Equality
+    ) {
+        return None;
+    }
+
+    let left = binary.left().ok()?.omit_parentheses();
+    let right = binary.right().ok()?.omit_parentheses();
+    if is_typeof_of(&left, name) {
+        typeof_tag_from_literal(&right)
+    } else if is_typeof_of(&right, name) {
+        typeof_tag_from_literal(&left)
+    } else {
+        None
+    }
+}
+
+/// Returns whether `expr` is a reference to a value with the given `name`.
+fn is_reference_to(expr: &AnyJsExpression, name: &str) -> bool {
+    expr.as_js_identifier_expression()
+        .and_then(|identifier| identifier.name().ok())
+        .and_then(|reference| reference.name().ok())
+        .is_some_and(|reference_name| reference_name.text() == name)
+}
+
+/// Returns whether `expr` is a `typeof` expression over a reference with the
+/// given `name`.
+fn is_typeof_of(expr: &AnyJsExpression, name: &str) -> bool {
+    let AnyJsExpression::JsUnaryExpression(unary) = expr else {
+        return false;
+    };
+    if !matches!(unary.operator(), Ok(JsUnaryOperator::Typeof)) {
+        return false;
+    }
+    unary
+        .argument()
+        .ok()
+        .map(AnyJsExpression::omit_parentheses)
+        .is_some_and(|argument| is_reference_to(&argument, name))
+}
+
+fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
+    let literal = expr
+        .as_any_js_literal_expression()?
+        .as_js_string_literal_expression()?;
+    TypeofTag::from_literal(literal.inner_string_text().ok()?.text())
+}
+
+/// Returns whether a node of this kind runs later than the guard around it,
+/// so the guard says nothing about the values inside: a function-like scope
+/// ([`biome_js_syntax::is_function_boundary`]) or a class property, whose
+/// initializer runs when the class is instantiated:
+///
+/// ```js
+/// if (typeof x === "number") {
+///   return class { p = x }; // `p` is initialized later, `x` may have changed
+/// }
+/// ```
+///
+/// A `static` property initializer runs with the class expression itself,
+/// but it is treated the same rather than told apart.
+fn is_narrowing_boundary(kind: JsSyntaxKind) -> bool {
+    biome_js_syntax::is_function_boundary(kind)
+        || matches!(
+            kind,
+            JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
+                | JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
+        )
 }

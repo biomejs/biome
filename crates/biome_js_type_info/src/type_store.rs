@@ -4,10 +4,11 @@ use std::{
 };
 
 use hashbrown::{HashTable, hash_table::Entry};
-use rustc_hash::FxHasher;
+use rustc_hash::{FxHashMap, FxHasher};
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
+use biome_rowan::Text;
 
 use crate::{
     RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
@@ -111,6 +112,12 @@ pub trait RawTypeCollector {
         expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData>;
 
+    /// Returns whether references are narrowed by the guards around them
+    /// while collecting types. Off unless a collector opts in.
+    fn narrowing_enabled(&self) -> bool {
+        false
+    }
+
     fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
         let TypeReference::Resolved(RawTypeId::Local(id)) = ty else {
             return None;
@@ -171,6 +178,25 @@ pub trait RawTypeCollector {
             GLOBAL_UNDEFINED_ID.into(),
         ]))))))
     }
+
+    /// Returns the cache behind the narrowing invalidation scans.
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache;
+}
+
+/// Memoizes, per node and name, whether the node invalidates narrowing of
+/// that name.
+pub type NarrowingInvalidationCache =
+    FxHashMap<(JsSyntaxNode, Text, NarrowingInvalidationKind), bool>;
+
+/// Distinguishes the scans memoized in the
+/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache).
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum NarrowingInvalidationKind {
+    /// A binding with the name is declared, or the name is assigned to,
+    /// within the node.
+    Binding,
+    /// A member of the named value is written to within the node.
+    MemberWrite,
 }
 
 #[derive(Default)]
